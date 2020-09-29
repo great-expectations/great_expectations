@@ -63,7 +63,7 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -178,7 +178,7 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -282,7 +282,7 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -557,13 +557,35 @@ Notes:
             n_bins = 10
 
         if series.dtype in ["int", "float"]:
+            if bins is not None:
+                bins = sorted(np.unique(bins))
+                if np.min(series) < bins[0]:
+                    bins = [np.min(series)] + bins
+                if np.max(series) > bins[-1]:
+                    bins = bins + [np.max(series)]
+
             if bins is None:
                 bins = np.histogram_bin_edges(series[series.notnull()], bins=n_bins)
-                # Make sure max of series is included in rightmost bin
-                bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
 
-            # Missings get digitized into bin = n_bins+1
-            return np.digitize(series, bins=bins)
+            # Make sure max of series is included in rightmost bin
+            bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
+
+            # Create labels for returned series
+            # Used in e.g. crosstab that is printed as observed value in data docs.
+            precision = int(np.log10(min(bins[1:] - bins[:-1]))) + 2
+            labels = [
+                f"[{round(lower, precision)}, {round(upper, precision)})"
+                for lower, upper in zip(bins[:-1], bins[1:])
+            ]
+            if any(np.isnan(series)):
+                # Missings get digitized into bin = n_bins+1
+                labels += ["(missing)"]
+
+            return pd.Categorical.from_codes(
+                codes=np.digitize(series, bins=bins) - 1,
+                categories=labels,
+                ordered=True,
+            )
 
         else:
             if bins is None:
@@ -577,7 +599,11 @@ Notes:
                 replace = dict()
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
-            return series.replace(to_replace=replace).fillna("(missing)")
+            return (
+                series.replace(to_replace=replace)
+                .fillna("(missing)")
+                .astype("category")
+            )
 
     ### Expectation methods ###
 

@@ -497,24 +497,22 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         params = substitute_none_for_missing(
             expectation.kwargs, ["column_A", "column_B"]
         )
-
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
 
         template_str = "Values in $column_A and $column_B must be independent."
+        rendered_string_template_content = RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
+            }
+        )
 
-        return [
-            RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
-            )
-        ]
+        return [rendered_string_template_content]
 
     @classmethod
     def expect_compound_columns_to_be_unique(
