@@ -564,22 +564,22 @@ class NotebookTemplateConfigSchema(Schema):
 
 class NotebookConfig(DictDot):
     def __init__(
-            self,
-            class_name,
-            module_name,
-            custom_templates_module,
-            header_markdown=None,
-            footer_markdown=None,
-            table_expectations_header_markdown=None,
-            column_expectations_header_markdown=None,
-            table_expectations_not_found_markdown=None,
-            column_expectations_not_found_markdown=None,
-            authoring_intro_markdown=None,
-            column_expectations_markdown=None,
-            header_code=None,
-            footer_code=None,
-            column_expectation_code=None,
-            table_expectation_code=None,
+        self,
+        class_name,
+        module_name,
+        custom_templates_module,
+        header_markdown=None,
+        footer_markdown=None,
+        table_expectations_header_markdown=None,
+        column_expectations_header_markdown=None,
+        table_expectations_not_found_markdown=None,
+        column_expectations_not_found_markdown=None,
+        authoring_intro_markdown=None,
+        column_expectations_markdown=None,
+        header_code=None,
+        footer_code=None,
+        column_expectation_code=None,
+        table_expectation_code=None,
     ):
         self.class_name = class_name
         self.module_name = module_name
