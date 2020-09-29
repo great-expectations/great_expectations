@@ -40,6 +40,13 @@ def test_expect_column_values_to_be_increasing_int_impl():
     )
     assert result == ExpectationValidationResult(success=False,)
 
+    df_dec = pd.DataFrame({"a": [5, 4, 3, 3, 2, 1]})
+    batch = Batch(data=df_dec)
+    result = expectation.validate(
+        batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
+    )
+    assert result == ExpectationValidationResult(success=False, )
+
 
 def test_spark_expect_column_values_to_be_increasing_impl():
     from pyspark.sql import SparkSession
