@@ -273,6 +273,7 @@ class DataConnector(object):
 
         partition_name: str = batch_definition.get("partition_name")
         # TODO: <Alex>If partition_name is not specified in batch_definition, then assume "latest" (or "most recent" as defined by the first element in the sorted list of partitions).</Alex>
+        # TODO: <Alex>Must accept partition_definition (and name) to be a loss-less retrieval.</Alex>
         partitions: List[Partition] = self.get_available_partitions(
             partition_name=partition_name, data_asset_name=data_asset_name
         )

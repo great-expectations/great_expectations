@@ -1,9 +1,9 @@
+from itertools import zip_longest
 from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
 
-from itertools import zip_longest
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
@@ -18,9 +18,7 @@ from ..registry import extract_metrics
 
 class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
     metric_dependencies = ("columns",)
-    success_keys = (
-        "ordered_list",
-    )
+    success_keys = ("ordered_list",)
     domain_keys = (
         "batch_id",
         "table",
@@ -41,11 +39,13 @@ class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
     }
 
     """ A Column Metric Decorator for the Column Count"""
+
     @PandasExecutionEngine.metric(
         metric_name="columns",
         metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),
         metric_value_keys=(),
         metric_dependencies=(),
+        filter_column_isnull=False,
     )
     def _pandas_columns(
         self,

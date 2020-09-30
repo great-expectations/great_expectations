@@ -38,12 +38,12 @@ class ExpectColumnDistinctValuesToBeInSet(DatasetExpectation):
     }
 
     """ A Column Map Metric Decorator for the Mode metric"""
-
     @PandasExecutionEngine.metric(
         metric_name="column.value_counts",
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
+        filter_column_isnull=True,
     )
     def _pandas_value_counts(
         self,
@@ -53,7 +53,6 @@ class ExpectColumnDistinctValuesToBeInSet(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
     ):
         """Distinct value counts metric"""
         series = execution_engine.get_domain_dataframe(

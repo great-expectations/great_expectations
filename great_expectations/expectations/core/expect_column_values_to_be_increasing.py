@@ -102,6 +102,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("strictly",),
         metric_dependencies=tuple(),
+        filter_column_isnull=True,
     )
     def _spark_column_values_increasing(
         self,

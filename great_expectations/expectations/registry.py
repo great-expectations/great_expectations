@@ -162,9 +162,10 @@ def get_metric_kwargs(
             "filter_column_isnull": metric_definition["filter_column_isnull"],
         }
         if configuration:
-            configuration_kwargs = configuration.get_runtime_kwargs(
-                runtime_configuration=runtime_configuration
-            )
+            expectation_impl = get_expectation_impl(configuration.expectation_type)
+            configuration_kwargs = expectation_impl(
+                configuration=configuration
+            ).get_runtime_kwargs(runtime_configuration=runtime_configuration)
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {

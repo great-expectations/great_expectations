@@ -44,6 +44,7 @@ class ExpectColumnDistinctValuesToContainSet(DatasetExpectation):
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
+        filter_column_isnull=True,
     )
     def _pandas_value_counts(
         self,

@@ -116,7 +116,7 @@ class PipelineDataConnector(DataConnector):
         batch_definition: dict,
         batch_spec: dict
     ) -> InMemoryBatchSpec:
-        batch_spec["in_memory_dataset"] = in_memory_dataset
+        batch_spec["dataset"] = in_memory_dataset
         batch_spec = self._execution_environment.execution_engine.process_batch_definition(
             batch_definition=batch_definition, batch_spec=batch_spec
         )
