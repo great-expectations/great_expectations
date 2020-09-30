@@ -128,10 +128,21 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
         super().validate_configuration(configuration)
 
         # Ensuring necessary parameters are present and of the proper type
+        min_val = None
+        max_val = None
+
+        # Testing that proper thresholds are in place
+        if "min_value" in configuration.kwargs:
+            min_val = configuration.kwargs["min_value"]
+
+        if "max_value" in configuration.kwargs:
+            max_val = configuration.kwargs["max_value"]
+
         try:
             assert (
                 "column" in configuration.kwargs
-            ), "'column' parameter is required for column metric expectations"
+            ), "'column' parameter is required for metric"
+            assert min_val is not None or max_val is not None,"min_value and max_value cannot both be none"
             assert (
                 "quantile_ranges" in configuration.kwargs
             ), "quantile ranges must be provided"

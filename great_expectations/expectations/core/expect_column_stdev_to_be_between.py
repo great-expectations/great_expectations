@@ -95,16 +95,20 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
+        min_val = None
+        max_val = None
+
+        if "min_value" in configuration.kwargs:
+            min_val = configuration.kwargs["min_value"]
+
+        if "max_value" in configuration.kwargs:
+            max_val = configuration.kwargs["max_value"]
+
         try:
             assert (
                 "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
+            ), "'column' parameter is required for metric"
+            assert min_val is not None or max_val is not None,"min_value and max_value cannot both be none"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True

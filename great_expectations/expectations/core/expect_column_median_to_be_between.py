@@ -142,12 +142,6 @@ class ExpectColumnMedianToBeBetween(DatasetExpectation):
             assert (
                 "column" in configuration.kwargs
             ), "'column' parameter is required for column map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -160,7 +154,7 @@ class ExpectColumnMedianToBeBetween(DatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val or max_val, "min_value and max_value cannot both be None"
+            assert min_val is not None or max_val is not None, "min_value and max_value cannot both be none"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"

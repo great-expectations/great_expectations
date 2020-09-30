@@ -156,7 +156,7 @@ class ExpectColumnSumToBeBetween(DatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val or max_val, "min_value and max_value cannot both be None"
+            assert min_val is not None or max_val is not None, "min_value and max_value cannot both be None"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"
