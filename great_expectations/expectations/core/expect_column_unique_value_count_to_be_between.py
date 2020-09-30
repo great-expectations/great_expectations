@@ -18,6 +18,58 @@ from ..registry import extract_metrics
 
 
 class ExpectColumnUniqueValueCountToBeBetween(DatasetExpectation):
+    """Expect the number of unique values to be between a minimum value and a maximum value.
+
+            expect_column_unique_value_count_to_be_between is a \
+            :func:`column_aggregate_expectation
+            <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
+
+            Args:
+                column (str): \
+                    The column name.
+                min_value (int or None): \
+                    The minimum number of unique values allowed.
+                max_value (int or None): \
+                    The maximum number of unique values allowed.
+
+            Other Parameters:
+                result_format (str or None): \
+                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                    For more detail, see :ref:`result_format <result_format>`.
+                include_config (boolean): \
+                    If True, then include the expectation config as part of the result object. \
+                    For more detail, see :ref:`include_config`.
+                catch_exceptions (boolean or None): \
+                    If True, then catch exceptions and include them as part of the result object. \
+                    For more detail, see :ref:`catch_exceptions`.
+                meta (dict or None): \
+                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                    modification. For more detail, see :ref:`meta`.
+
+            Returns:
+                An ExpectationSuiteValidationResult
+
+                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+            Notes:
+                These fields in the result object are customized for this expectation:
+                ::
+
+                    {
+                        "observed_value": (int) The number of unique values in the column
+                    }
+
+                * min_value and max_value are both inclusive.
+                * If min_value is None, then max_value is treated as an upper bound
+                * If max_value is None, then min_value is treated as a lower bound
+
+            See Also:
+                :func:`expect_column_proportion_of_unique_values_to_be_between \
+                <great_expectations.execution_engine.execution_engine.ExecutionEngine
+                .expect_column_proportion_of_unique_values_to_be_between>`
+
+            """
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.aggregate.unique_value_count",)
     success_keys = (

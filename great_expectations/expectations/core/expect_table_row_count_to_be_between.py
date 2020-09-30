@@ -18,6 +18,48 @@ from ..registry import extract_metrics
 
 
 class ExpectTableRowCountToBeBetween(DatasetExpectation):
+    """Expect the number of rows to be between two values.
+
+    expect_table_row_count_to_be_between is a :func:`expectation \
+    <great_expectations.validator.validator.Validator.expectation>`, not a
+    ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+    Keyword Args:
+        min_value (int or None): \
+            The minimum number of rows, inclusive.
+        max_value (int or None): \
+            The maximum number of rows, inclusive.
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see :ref:`meta`.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+    Notes:
+        * min_value and max_value are both inclusive.
+        * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has \
+          no minimum.
+        * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has \
+          no maximum.
+
+    See Also:
+        expect_table_row_count_to_equal
+    """
     metric_dependencies = ("rows.count",)
     success_keys = (
         "min_value",
@@ -37,8 +79,7 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
         "meta": None,
     }
 
-    """ A Map Metric Decorator for the Row Count"""
-
+    """ A Metric Decorator for the Row Count"""
     @PandasExecutionEngine.metric(
         metric_name="rows.count",
         metric_domain_keys=DatasetExpectation.domain_keys,
