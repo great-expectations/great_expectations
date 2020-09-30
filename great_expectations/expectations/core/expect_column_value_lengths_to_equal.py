@@ -98,7 +98,6 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
     ):
         """Extracts lengths of individual entries"""
         series = execution_engine.get_domain_dataframe(

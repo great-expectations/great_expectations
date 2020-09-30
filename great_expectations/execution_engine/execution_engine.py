@@ -240,6 +240,7 @@ class ExecutionEngine(MetaExecutionEngine):
         metric_value_keys: tuple,
         metric_dependencies: tuple,
         bundle_computation: bool = False,
+        filter_column_isnull: bool = True,
     ):
         """
         A decorator for declaring a metric provider
@@ -270,7 +271,7 @@ class ExecutionEngine(MetaExecutionEngine):
                     metric_domain_kwargs=metric_domain_kwargs,
                     metric_value_kwargs=metric_value_kwargs,
                     metrics=metrics,
-                    **kwargs,
+                    #**kwargs,
                 )
 
             register_metric(
@@ -281,6 +282,7 @@ class ExecutionEngine(MetaExecutionEngine):
                 metric_dependencies=metric_dependencies,
                 metric_provider=inner_func,
                 bundle_computation=bundle_computation,
+                filter_column_isnull=filter_column_isnull,
             )
             return inner_func
 

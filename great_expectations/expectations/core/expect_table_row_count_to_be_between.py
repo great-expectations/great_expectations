@@ -45,6 +45,7 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
     #     metric_domain_keys=DatasetExpectation.domain_keys,
     #     metric_value_keys=(),
     #     metric_dependencies=tuple(),
+    #     filter_column_isnull=False
     # )
     # def _pandas_row_count(
     #     self,
@@ -54,7 +55,7 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
     #     metric_value_kwargs: dict,
     #     metrics: dict,
     #     runtime_configuration: dict = None,
-    #     filter_column_isnull: bool = True,
+    #     filter_column_isnull: bool = False,
     # ):
     #     """Row Count Metric Function"""
     #     df = execution_engine.get_domain_dataframe(
