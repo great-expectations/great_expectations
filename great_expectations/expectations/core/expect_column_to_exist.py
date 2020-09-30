@@ -19,6 +19,40 @@ from ..registry import extract_metrics
 
 
 class ExpectColumnToExist(DatasetExpectation):
+    """Expect the specified column to exist.
+
+    expect_column_to_exist is a :func:`expectation \
+    <great_expectations.validator.validator.Validator.expectation>`, not a
+    ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+    Args:
+        column (str): \
+            The column name.
+
+    Other Parameters:
+        column_index (int or None): \
+            If not None, checks the order of the columns. The expectation will fail if the \
+            column is not in location column_index (zero-indexed).
+        result_format (str or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+            For more detail, see :ref:`meta`.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+    """
     metric_dependencies = ("columns",)
     success_keys = (
         "column",
@@ -45,8 +79,7 @@ class ExpectColumnToExist(DatasetExpectation):
         "meta": None,
     }
 
-    """ A Column Metric Decorator for the Column Count"""
-
+    """ A Metric Decorator for the Columns"""
     @PandasExecutionEngine.metric(
         metric_name="columns",
         metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),

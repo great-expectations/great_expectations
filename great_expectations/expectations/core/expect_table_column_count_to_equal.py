@@ -19,6 +19,40 @@ from ..registry import extract_metrics
 
 
 class ExpectTableColumnCountToEqual(DatasetExpectation):
+    """Expect the number of columns to equal a value.
+
+    expect_table_column_count_to_equal is a :func:`expectation \
+    <great_expectations.validator.validator.Validator.expectation>`, not a
+    ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+    Args:
+        value (int): \
+            The expected number of columns.
+
+    Other Parameters:
+        result_format (string or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see :ref:`meta`.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+    See Also:
+        expect_table_column_count_to_be_between
+    """
+
     metric_dependencies = ("columns.count",)
     success_keys = ("value",)
 
@@ -32,8 +66,7 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
         "meta": None,
     }
 
-    """ A Column Map Metric Decorator for the Column Count"""
-
+    """ A Metric Decorator for the Column Count"""
     @PandasExecutionEngine.metric(
         metric_name="columns.count",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
