@@ -49,11 +49,13 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
+        filter_column_isnull: bool = False,
     ):
         """Column count metric function"""
         df = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
+            domain_kwargs=metric_domain_kwargs,
+            batches=batches,
+            filter_column_isnull=False,
         )
 
         return df.shape[0]
