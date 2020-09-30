@@ -108,6 +108,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
     }
 
     """ A Column Map Metric Decorator for checking if a value is between given thresholds"""
+
     @PandasExecutionEngine.column_map_metric(
         metric_name="column_values.is_between",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
@@ -285,7 +286,9 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val is not None or max_val is not None, "min_value and max_value cannot both be None"
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be None"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"
