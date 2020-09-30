@@ -106,8 +106,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     )
     def _spark_column_values_increasing(
         self,
-        data: "pyspark.sql.DataFrame",
-        column: str,
+        column: "pyspark.sql.Column",
         metrics: dict,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,

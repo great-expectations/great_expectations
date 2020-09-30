@@ -86,17 +86,14 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
     )
     def _spark_null_map_metric(
         self,
-        data: "pyspark.sql.DataFrame",
-        column: str,
+        column: "pyspark.sql.Column",
         metrics: dict,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
         filter_column_isnull: bool = True,
     ):
-        import pyspark.sql.functions as F
-
-        return data.withColumn(column + "__success", F.col(column).isNotNull())
+        return column.isNotNull()
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
