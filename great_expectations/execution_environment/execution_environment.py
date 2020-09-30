@@ -174,6 +174,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         for data_connector in self._execution_environment_config["data_connectors"].keys():
             self.get_data_connector(name=data_connector)
 
+    # TODO: <Alex>The style and readability of this method must be improved.</Alex>
     def get_data_connector(self, name: str) -> DataConnector:
         """Get the (named) DataConnector from an ExecutionEnvironment)
 
@@ -184,8 +185,14 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         Returns:
             DataConnector (DataConnector)
         """
+        data_connector: DataConnector
         if name in self._data_connectors_cache:
-            return self._data_connectors_cache[name]
+            data_connector = self._data_connectors_cache[name]
+            if isinstance(data_connector, PipelineDataConnector):
+                data_connector.in_memory_dataset = self.in_memory_dataset
+            return data_connector
+            # TODO: <Alex>The style and readability of this method must be improved.</Alex>
+            # return self._data_connectors_cache[name]
         elif (
             "data_connectors" in self._execution_environment_config
             and name in self._execution_environment_config["data_connectors"]
@@ -200,7 +207,11 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
             data_connector_config
         )
-        data_connector: DataConnector = self._build_data_connector_from_config(
+        # TODO: <Alex>The style and readability of this method must be improved.</Alex>
+        # data_connector: DataConnector = self._build_data_connector_from_config(
+        #     name=name, config=data_connector_config
+        # )
+        data_connector = self._build_data_connector_from_config(
             name=name, config=data_connector_config
         )
         if isinstance(data_connector, PipelineDataConnector):

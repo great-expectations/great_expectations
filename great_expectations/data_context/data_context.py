@@ -1459,6 +1459,7 @@ class BaseDataContext:
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
+    # TODO: <Alex>The style and readability of this method must be improved.</Alex>
     def get_execution_environment(
         self, execution_environment_name: str = "default", runtime_environment: Union[dict, None] = None
     ) -> ExecutionEnvironment:
@@ -1472,7 +1473,14 @@ class BaseDataContext:
             execution_environment (ExecutionEnvironment)
         """
         if execution_environment_name in self._cached_execution_environments:
-            return self._cached_execution_environments[execution_environment_name]
+            execution_environment: ExecutionEnvironment = self._cached_execution_environments[
+                execution_environment_name
+            ]
+            if runtime_environment and "in_memory_dataset" in runtime_environment:
+                execution_environment.in_memory_dataset = runtime_environment["in_memory_dataset"]
+            return execution_environment
+            # TODO: <Alex>The style and readability of this method must be improved.</Alex>
+            # return self._cached_execution_environments[execution_environment_name]
         if (
             execution_environment_name
             in self._project_config_with_variables_substituted.execution_environments

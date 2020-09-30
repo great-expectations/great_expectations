@@ -639,8 +639,12 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             batch_spec = data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
-            batch_id = batch_spec.to_id()
-            in_memory_dataset = batch_spec.get("in_memory_dataset")
+            # TODO: <Alex>The next line causes TypeError: Object of type DataFrame is not JSON serializable</Alex>
+            # batch_id = batch_spec.to_id()
+            # TODO: <Alex>Next 2 lines are temporary.</Alex>
+            import uuid
+            batch_id = uuid.uuid4()
+            in_memory_dataset = batch_spec.get("dataset")
 
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(

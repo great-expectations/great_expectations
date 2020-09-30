@@ -36,8 +36,10 @@ class AssetConfig(DictDot):
         config_params=None,
         **kwargs,
     ):
-        self._partitioner = partitioner
-        self._config_params = config_params
+        if partitioner is not None:
+            self._partitioner = partitioner
+        if config_params is not None:
+            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -82,7 +84,8 @@ class SorterConfig(DictDot):
         self._class_name = class_name
         self._module_name = module_name
         self._orderby = orderby
-        self._config_params = config_params
+        if config_params is not None:
+            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -114,7 +117,11 @@ class SorterConfigSchema(Schema):
     name = fields.String(required=True)
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.execution_environment.data_connector.partitioner.sorter")
-    orderby = fields.String(missing="asc")
+    orderby = fields.String(
+        required=False,
+        missing="asc",
+        allow_none=False
+    )
 
     config_params = fields.Dict(allow_none=True)
 
@@ -140,9 +147,11 @@ class PartitionerConfig(DictDot):
     ):
         self._class_name = class_name
         self._module_name = module_name
-        self._sorters = sorters
+        if sorters is not None:
+            self._sorters = sorters
         self._allow_multipart_partitions = allow_multipart_partitions
-        self._config_params = config_params
+        if config_params is not None:
+            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -211,10 +220,14 @@ class DataConnectorConfig(DictDot):
     ):
         self._class_name = class_name
         self._module_name = module_name
-        self._partitioners = partitioners
-        self._default_partitioner = default_partitioner
-        self._assets = assets
-        self._config_params = config_params
+        if partitioners is not None:
+            self._partitioners = partitioners
+        if default_partitioner is not None:
+            self._default_partitioner = default_partitioner
+        if assets is not None:
+            self._assets = assets
+        if config_params is not None:
+            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
