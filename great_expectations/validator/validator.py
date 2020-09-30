@@ -83,9 +83,9 @@ class Validator:
             self._execution_engine._validator = self
 
             if batch:
-                if not execution_engine.batches.get(batch.to_id()):
-                    execution_engine.batches[batch.to_id()] = batch
-                execution_engine._loaded_batch_id = batch.to_id()
+                if not execution_engine.batches.get(batch.batch_spec.to_id()):
+                    execution_engine.batches[batch.batch_spec.to_id()] = batch
+                execution_engine._loaded_batch_id = batch.batch_spec.to_id()
 
         else:
             self._data_context = None
