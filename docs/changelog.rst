@@ -8,11 +8,23 @@ Develop
 -----------------
 
 * [ENHANCEMENT] Add spark support for expect_compound_columns_to_be_unique(Thanks @tscottcoombes1)!
+
+0.12.3
+-----------------
+* [ENHANCEMENT] Add expect_compound_columns_to_be_unique and clarify multicolumn uniqueness
 * [ENHANCEMENT] Add expectation expect_table_columns_to_match_set
 * [ENHANCEMENT] Checkpoint run command now prints out details on each validation #1437
-* [BUGFIX] Links to Amazon S3 are compatible with virtual host-style access and path-style access
 * [ENHANCEMENT] Slack notifications can now display links to GCS-hosted DataDocs sites
 * [ENHANCEMENT] Public base URL can be configured for Data Docs sites
+* [ENHANCEMENT] SuiteEditNotebookRenderer.add_header class now allows usage of env variables in jinja templates (thanks @mbakunze)!
+* [ENHANCEMENT] Display table for Cramer's Phi expectation in Data Docs (thanks @mlondschien)!
+* [BUGFIX] Explicitly convert keys to tuples when removing from TupleS3StoreBackend (thanks @balexander)!
+* [BUGFIX] Use more-specific s3.meta.client.exceptions with dealing with boto resource api (thanks @lcorneliussen)!
+* [BUGFIX] Links to Amazon S3 are compatible with virtual host-style access and path-style access
+* [DOCS] How to Instantiate a Data Context on a Databricks Spark Cluster
+* [DOCS] Update to Deploying Great Expectations with Google Cloud Composer
+* [MAINTENANCE] Update moto dependency to include cryptography (see #spulec/moto/3290)
+
 
 0.12.2
 -----------------
