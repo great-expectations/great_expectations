@@ -52,5 +52,8 @@ from .expect_table_column_count_to_equal import ExpectTableColumnCountToEqual
 from .expect_table_columns_to_match_ordered_list import (
     ExpectTableColumnsToMatchOrderedList,
 )
+from .expect_column_pair_values_to_be_equal import ExpectColumnPairValuesToBeEqual
+from .expect_column_pair_values_a_to_be_greater_than_b import ExpectColumnPairValuesAToBeGreaterThanB
+from .expect_column_value_ratio_to_be_between import ExpectColumnValueRatioToBeBetween
 from .expect_table_row_count_to_be_between import ExpectTableRowCountToBeBetween
 from .expect_table_row_count_to_equal import ExpectTableRowCountToEqual

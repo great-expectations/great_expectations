@@ -17,7 +17,65 @@ from ..registry import extract_metrics
 
 
 class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
+    """Expect column entries to be between a minimum value and a maximum value (inclusive).
 
+    expect_column_values_to_be_between is a \
+    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
+    .column_map_expectation>`.
+
+    Args:
+        column (str): \
+            The column name.
+        min_value (comparable type or None): The minimum value for a column entry.
+        max_value (comparable type or None): The maximum value for a column entry.
+
+    Keyword Args:
+        strict_min (boolean):
+            If True, values must be strictly larger than min_value, default=False
+        strict_max (boolean):
+            If True, values must be strictly smaller than max_value, default=False
+         allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
+            string). Otherwise, attempting such comparisons will raise an exception.
+        parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column\
+            values to datetimes before making comparisons.
+        output_strftime_format (str or None): \
+            A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
+
+        mostly (None or a float between 0 and 1): \
+            Return `"success": True` if at least mostly fraction of values match the expectation. \
+            For more detail, see :ref:`mostly`.
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see :ref:`meta`.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+    Notes:
+        * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+        * If min_value is None, then max_value is treated as an upper bound, and there is no minimum value checked.
+        * If max_value is None, then min_value is treated as a lower bound, and there is no maximum value checked.
+
+    See Also:
+        :func:`expect_column_value_lengths_to_be_between \
+        <great_expectations.execution_engine.execution_engine.ExecutionEngine
+        .expect_column_value_lengths_to_be_between>`
+
+    """
     map_metric = "column_values.is_between"
     metric_dependencies = (
         "column_values.is_between.count",
@@ -227,7 +285,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val or max_val, "min_value and max_value cannot both be None"
+            assert min_val is not None or max_val is not None, "min_value and max_value cannot both be None"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"

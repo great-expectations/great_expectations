@@ -28,6 +28,51 @@ except ImportError:
 
 
 class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
+    """Expect column entries to be strings with length equal to the provided value.
+
+    This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
+
+    expect_column_values_to_be_between is a \
+    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
+    .column_map_expectation>`.
+
+    Args:
+        column (str): \
+            The column name.
+        value (int or None): \
+            The expected value for a column entry length.
+
+    Keyword Args:
+        mostly (None or a float between 0 and 1): \
+            Return `"success": True` if at least mostly fraction of values match the expectation. \
+            For more detail, see :ref:`mostly`.
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see :ref:`meta`.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+    See Also:
+        :func:`expect_column_value_lengths_to_be_between \
+        <great_expectations.execution_engine.execution_engine.ExecutionEngine
+        .expect_column_value_lengths_to_be_between>`
+
+    """
     map_metric = "column_values.length_equals"
     metric_dependencies = (
         "column_values.length_equals.count",
@@ -83,7 +128,6 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
         return pd.DataFrame({"column_values.length_equals": length_equals})
 
     """ A metric decorator for individual value lengths"""
-
     @PandasExecutionEngine.metric(
         metric_name="column.value_lengths",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,

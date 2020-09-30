@@ -28,6 +28,55 @@ except ImportError:
 
 
 class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
+    """Expect column entries to be strings that match a given regular expression. Valid matches can be found \
+    anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
+    "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
+
+    expect_column_values_to_match_regex is a \
+    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
+    .column_map_expectation>`.
+
+    Args:
+        column (str): \
+            The column name.
+        regex (str): \
+            The regular expression the column entries should match.
+
+    Keyword Args:
+        mostly (None or a float between 0 and 1): \
+            Return `"success": True` if at least mostly fraction of values match the expectation. \
+            For more detail, see :ref:`mostly`.
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see :ref:`meta`.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+    See Also:
+        :func:`expect_column_values_to_not_match_regex \
+        <great_expectations.execution_engine.execution_engine.ExecutionEngine
+        .expect_column_values_to_not_match_regex>`
+
+        :func:`expect_column_values_to_match_regex_list \
+        <great_expectations.execution_engine.execution_engine.ExecutionEngine
+        .expect_column_values_to_match_regex_list>`
+
+    """
     map_metric = "column_values.match_regex"
     metric_dependencies = (
         "column_values.match_regex.count",
