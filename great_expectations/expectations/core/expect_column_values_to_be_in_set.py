@@ -188,8 +188,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
     )
     def _spark_in_set(
         self,
-        data: "pyspark.sql.DataFrame",
-        column: str,
+        column: "pyspark.sql.Column",
         metrics: dict,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
@@ -202,9 +201,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
 
         if value_set is None:
             # vacuously true
-            return data.withColumn(column + "__success", F.lit(True))
+            from pyspark.sql.functions import lit
 
-        return data.withColumn(column + "__success", F.col(column).isin(value_set))
+            return lit(True)
+
+        return column.isin(value_set)
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(

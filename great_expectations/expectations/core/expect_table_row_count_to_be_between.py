@@ -79,29 +79,32 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
         "meta": None,
     }
 
-    """ A Metric Decorator for the Row Count"""
-    @PandasExecutionEngine.metric(
-        metric_name="rows.count",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
-    def _pandas_row_count(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-    ):
-        """Row Count Metric Function"""
-        df = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        return df.shape[0]
+    """ A Map Metric Decorator for the Row Count"""
+    # TODO: Confirm - given that this uses the same metric as expect_table_row_count_to_equal, is it ok to have this
+    #    expectation without any metrics?
+    # @PandasExecutionEngine.metric(
+    #     metric_name="rows.count",
+    #     metric_domain_keys=DatasetExpectation.domain_keys,
+    #     metric_value_keys=(),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=False
+    # )
+    # def _pandas_row_count(
+    #     self,
+    #     batches: Dict[str, Batch],
+    #     execution_engine: PandasExecutionEngine,
+    #     metric_domain_kwargs: dict,
+    #     metric_value_kwargs: dict,
+    #     metrics: dict,
+    #     runtime_configuration: dict = None,
+    #     filter_column_isnull: bool = False,
+    # ):
+    #     """Row Count Metric Function"""
+    #     df = execution_engine.get_domain_dataframe(
+    #         domain_kwargs=metric_domain_kwargs, batches=batches
+    #     )
+    #
+    #     return df.shape[0]
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
