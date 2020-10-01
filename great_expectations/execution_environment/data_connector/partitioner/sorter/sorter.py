@@ -52,3 +52,10 @@ class Sorter(object):
             "reverse": self.reverse
         }
         return str(doc_fields_dict)
+
+    def __eq__(self, other) -> bool:
+        """Overrides the default implementation"""
+        if isinstance(other, Sorter):
+            return self.name == other.name \
+                and self.reverse == other.reverse
+        return False

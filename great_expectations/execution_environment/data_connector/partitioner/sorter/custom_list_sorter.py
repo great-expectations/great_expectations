@@ -23,8 +23,11 @@ class CustomListSorter(Sorter):
         super().__init__(name=name, orderby=orderby, config_params=config_params, **kwargs)
 
         reference_list: list = self.config_params.get("reference_list")
-        self._reference_list = self._validate_reference_list(reference_list=reference_list)
+        self._reference_list = reference_list
 
+    """
+    <WILL> not sure how this would be used. are we validating the existence of a value in the list during instantiation? 
+    
     @staticmethod
     def _validate_reference_list(partition_value: str, reference_list: List[str] = None) -> List[str]:
         # check type
@@ -39,7 +42,7 @@ class CustomListSorter(Sorter):
             raise ge_exceptions.SorterError(
                 f'Source "{partition_value}" was not found in Reference list.'
             )
-
+    """
     def get_partition_key(self, partition: Partition) -> Any:
         partition_definition: dict = partition.definition
         partition_value: Any = partition_definition[self.name]

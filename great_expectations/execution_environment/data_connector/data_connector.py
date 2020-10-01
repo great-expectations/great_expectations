@@ -142,6 +142,11 @@ class DataConnector(object):
         return self.partitions_cache.get(data_asset_name)
 
     def update_partitions_cache(self, partitions: List[Partition]):
+        if not partitions:
+            raise ge_exceptions.DataConnectorError(
+                "Partitions were not returned by Partitioner"
+            )
+
         for partition in partitions:
             data_asset_name: str = partition.data_asset_name
             cached_partitions: List[Partition] = self.get_cached_partitions(
@@ -171,6 +176,7 @@ class DataConnector(object):
         """
         if name in self._partitioners_cache:
             return self._partitioners_cache[name]
+
         elif name in self.partitioners:
             partitioner_config: dict = copy.deepcopy(
                 self.partitioners[name]
