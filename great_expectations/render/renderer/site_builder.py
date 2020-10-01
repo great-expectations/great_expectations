@@ -276,7 +276,7 @@ class SiteBuilder:
         (ExpectationSuiteIdentifier,
                             ValidationResultIdentifier). If specified,
                             rebuild HTML(or other views the data docs
-                            site renders) only forthe resources in this list.
+                            site renders) only for the resources in this list.
                             This supports incremental build of data docs sites
                             (e.g., when a new validation result is created)
                             and avoids full rebuild.
@@ -302,7 +302,7 @@ class SiteBuilder:
 
         :param resource_identifier: ExpectationSuiteIdentifier,
         ValidationResultIdentifier or any other type's identifier. The
-        argument is optional - whennot supplied, the method returns the URL of
+        argument is optional - when not supplied, the method returns the URL of
         the index page.
         :return: URL (string)
         """
