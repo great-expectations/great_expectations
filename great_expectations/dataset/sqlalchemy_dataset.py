@@ -1346,15 +1346,20 @@ WHERE
                 "ignore_row_if was set to an unexpected value: %s" % ignore_row_if
             )
 
-        count = self.engine.execute(query).fetchone()
-        if count is None:
+        unexpected_count = self.engine.execute(query).fetchone()
+
+        if unexpected_count is None:
             # This can happen when the condition filters out all rows
-            count = 0
+            unexpected_count = 0
         else:
-            count = count[0]
+            unexpected_count = unexpected_count[0]
+
+        total_count_query = sa.select([sa.func.count()]).select_from(self._table)
+        total_count = self.engine.execute(total_count_query).fetchone()[0]
+
         return {
-            "success": count == 0,
-            "result": {"observed_value": {"non_distinct_sets": count}},
+            "success": unexpected_count == 0,
+            "result": {"unexpected_percent": 100.0 * unexpected_count / total_count}
         }
 
     ###
@@ -1378,7 +1383,6 @@ WHERE
         catch_exceptions=None,
         meta=None,
     ):
-
         return sa.column(column) == None
 
     @DocInherit
