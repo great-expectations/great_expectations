@@ -83,6 +83,8 @@ except ImportError:
 
 
 def _get_dialect_type_module(dialect):
+    """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
+    with the database/database implementation. Currently checks for RedShift/BigQuery dialects"""
     if dialect is None:
         logger.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
@@ -194,6 +196,7 @@ class SqlAlchemyBatchData:
 
     @property
     def table(self):
+        """Returns a table of the data inside the sqlalchemy_execution_engine"""
         return self._table
 
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
