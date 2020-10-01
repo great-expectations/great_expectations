@@ -102,9 +102,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
             ],
             key=lambda x: len(x[0][2]),
         )
+        validator_name = self.get_validator_name()
         for (
             expectation_class_name,
-            validator_name,
+            declared_validator_name,
             metric_deps,
             validator_fn,
         ) in available_validators:
@@ -113,6 +114,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
                 expectation_class_name == self.__class__.__name__
                 and metric_deps
                 <= available_metrics  # set comparison: metric_deps is a subset of available_metrics
+                and validator_name == declared_validator_name
             ):
                 return validator_fn(
                     self,
@@ -354,6 +356,14 @@ class Expectation(ABC, metaclass=MetaExpectation):
             kwargs=recursively_convert_to_json_serializable(deepcopy(all_args)),
             meta=meta,
         )
+
+    def get_validator_name(self):
+        """
+        This is just a placeholder for more complex logic to determine the validator_name
+        Returns:
+
+        """
+        return "default"
 
 
 class DatasetExpectation(Expectation, ABC):
