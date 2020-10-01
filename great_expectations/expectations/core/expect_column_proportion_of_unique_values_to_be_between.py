@@ -18,6 +18,66 @@ from ..registry import extract_metrics
 
 
 class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
+    """Expect the proportion of unique values to be between a minimum value and a maximum value.
+
+    For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
+    values for a proportion of 0.4.
+
+    expect_column_proportion_of_unique_values_to_be_between is a \
+    :func:`column_aggregate_expectation
+    <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
+
+
+    Args:
+        column (str): \
+            The column name.
+        min_value (float or None): \
+            The minimum proportion of unique values. (Proportions are on the range 0 to 1)
+        max_value (float or None): \
+            The maximum proportion of unique values. (Proportions are on the range 0 to 1)
+        strict_min (boolean):
+            If True, the minimum proportion of unique values must be strictly larger than min_value, default=False
+        strict_max (boolean):
+            If True, the maximum proportion of unique values must be strictly smaller than max_value, default=False
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
+            For more detail, see :ref:`result_format <result_format>`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see :ref:`meta`.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+    Notes:
+        These fields in the result object are customized for this expectation:
+        ::
+
+            {
+                "observed_value": (float) The proportion of unique values in the column
+            }
+
+        * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+        * If min_value is None, then max_value is treated as an upper bound
+        * If max_value is None, then min_value is treated as a lower bound
+
+    See Also:
+        :func:`expect_column_unique_value_count_to_be_between \
+        <great_expectations.execution_engine.execution_engine.ExecutionEngine
+        .expect_column_unique_value_count_to_be_between>`
+
+    """
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.aggregate.unique_proportion",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
@@ -103,7 +163,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val or max_val, "min_value and max_value cannot both be None"
+            assert min_val is not None or max_val is not None,"min_value and max_value cannot both be none"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"

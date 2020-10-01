@@ -841,7 +841,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         column = domain_kwargs.get("column", None)
         if column:
             # Rename column so we only have to handle dot notation here
-            eval_column = self._get_eval_column_name(column)
+            # TODO: verify comprehensive nested column support
+            # eval_column = self._get_eval_column_name(column)
+            eval_column = column
             data = data.withColumn(eval_column, F.col(column))
             if filter_column_isnull:
                 data = data.filter(F.col(eval_column).isNotNull())
@@ -869,7 +871,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             metric_value_kwargs,
             filter_column_isnull=filter_column_isnull,
         ).id
-        return metrics.get(metric_key).count()
+        domain_kwargs = {
+            k: v for (k, v) in metric_domain_kwargs.items() if k != "column"
+        }
+        return metrics.get(metric_key), domain_kwargs
 
     def _column_map_values(
         self,
@@ -895,15 +900,17 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             base_metric_value_kwargs,
             filter_column_isnull=filter_column_isnull,
         ).id
-        filtered = metrics.get(metric_key)
-        column = self._get_eval_column_name(metric_domain_kwargs["column"])
+        condition = metrics.get(metric_key)
+        column = metric_domain_kwargs["column"]
+        # column = self._get_eval_column_name(metric_domain_kwargs["column"])
+        filtered = self.get_domain_dataframe(metric_domain_kwargs).filter(~condition)
         if result_format["result_format"] == "COMPLETE":
-            return list(filtered.select(F.col(column)))
+            return list(filtered.select(F.col(column)).collect())
         else:
             return list(
-                filtered.select(F.col(column)).limit(
-                    result_format["partial_unexpected_count"]
-                )
+                filtered.select(F.col(column))
+                .limit(result_format["partial_unexpected_count"])
+                .collect()
             )
 
     def _column_map_value_counts(
@@ -929,8 +936,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             base_metric_value_kwargs,
             filter_column_isnull=filter_column_isnull,
         ).id
-        filtered = metrics.get(metric_key)
-        column = self._get_eval_column_name(metric_domain_kwargs["column"])
+        condition = metrics.get(metric_key)
+        column = metric_domain_kwargs["column"]
+        # column = self._get_eval_column_name(metric_domain_kwargs["column"])
+        filtered = self.get_domain_dataframe(metric_domain_kwargs).filter(condition)
         value_counts = filtered.groupBy(F.col(column)).count()
         if result_format["result_format"] == "COMPLETE":
             return value_counts
@@ -965,7 +974,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             base_metric_value_kwargs,
             filter_column_isnull=filter_column_isnull,
         ).id
-        filtered = metrics.get(metric_key)
+        condition = metrics.get(metric_key)
+        filtered = self.get_domain_dataframe(metric_domain_kwargs).filter(condition)
         if result_format["result_format"] == "COMPLETE":
             return filtered.collect()
         else:
@@ -1004,17 +1014,22 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     metric_domain_kwargs, batches, filter_column_isnull
                 )
                 column = metric_domain_kwargs["column"]
-                eval_col = self._get_eval_column_name(column)
+                # eval_col = self._get_eval_column_name(column)
+                eval_col = column
 
-                return metric_fn(
+                metric_condition = metric_fn(
                     self,
-                    data=data,
-                    column=eval_col,
+                    column=F.col(eval_col),
                     metrics=metrics,
                     metric_domain_kwargs=metric_domain_kwargs,
                     metric_value_kwargs=metric_value_kwargs,
                     **kwargs,
                 )
+                if filter_column_isnull:
+                    expected_condition = F.col(eval_col).isNotNull() & metric_condition
+                else:
+                    expected_condition = metric_condition
+                return expected_condition
 
             register_metric(
                 metric_name=metric_name,
@@ -1033,7 +1048,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_count,
-                bundle_computation=False,
+                bundle_computation=True,
                 filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
@@ -1078,7 +1093,54 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         resolve_batch: Iterable[Tuple[MetricEdgeKey, Callable, dict]],
         metrics: Dict[Tuple, Any] = None,
     ) -> dict:
-        raise NotImplementedError
+        if metrics is None:
+            metrics = dict()
+
+        aggregates: Dict[Tuple, dict] = dict()
+        for metric_to_resolve, metric_provider, metric_provider_kwargs in resolve_batch:
+            assert (
+                metric_provider._can_be_bundled
+            ), "batch_resolve only supports metrics that support bundled computation"
+            # batch_id and table are the only determining factors for bundled metrics
+            column_condition, domain_kwargs = metric_provider(
+                self, **metric_provider_kwargs, metrics=metrics
+            )
+            if not isinstance(domain_kwargs, IDDict):
+                domain_kwargs = IDDict(domain_kwargs)
+            domain_id = domain_kwargs.to_id()
+            if domain_id not in aggregates:
+                aggregates[domain_id] = {
+                    "column_conditions": [],
+                    "ids": [],
+                    "domain_kwargs": domain_kwargs,
+                }
+            aggregates[domain_id]["column_conditions"].append(column_condition)
+            aggregates[domain_id]["ids"].append(metric_to_resolve.id)
+        for aggregate in aggregates.values():
+            df = self.get_domain_dataframe(aggregate["domain_kwargs"])
+            assert len(aggregate["column_conditions"]) == len(aggregate["ids"])
+            condition_ids = []
+            sums = []
+            for idx in range(len(aggregate["column_conditions"])):
+                column_condition = aggregate["column_conditions"][idx]
+                condition_id = str(uuid.uuid4())
+                df = df.withColumn(
+                    condition_id, F.when(column_condition, 1).otherwise(0)
+                )
+                condition_ids.append(condition_id)
+                sums.append(F.sum(condition_id))
+
+            res = df.agg(*sums).collect()
+            assert (
+                len(res) == 1
+            ), "all bundle-computed metrics must be single-value statistics"
+            assert len(aggregate["ids"]) == len(
+                res[0]
+            ), "unexpected number of metrics returned"
+            for idx, id in enumerate(aggregate["ids"]):
+                metrics[id] = res[0][idx]
+
+        return metrics
 
     def head(self, n=5):
         return self.dataframe.limit(n).toPandas()
