@@ -93,9 +93,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
         available_validators = sorted(
             [
                 (
-                    validators_key[0],
-                    validators_key[1],
-                    set(validators_key[2]),
+                    validators_key[0],  # expectation class name
+                    validators_key[1],  # validator name
+                    set(validators_key[2]),  # metric dependencies
                     validator_fn,
                 )
                 for (validators_key, validator_fn) in self._validators.items()
@@ -111,7 +111,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
             # if metric_deps <= available_metrics:
             if (
                 expectation_class_name == self.__class__.__name__
-                and metric_deps <= available_metrics
+                and metric_deps
+                <= available_metrics  # set comparison: metric_deps is a subset of available_metrics
             ):
                 return validator_fn(
                     self,
@@ -145,7 +146,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
             cls._validators[
                 (
-                    validator.__qualname__.split(".")[0],
+                    validator.__qualname__.split(".")[0],  # expectation class name
                     validator_name,
                     metric_dependencies,
                 )
