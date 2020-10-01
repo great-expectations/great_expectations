@@ -122,9 +122,10 @@ class Partitioner(object):
 
     def get_available_partitions(
         self,
-        partition_name: str = None,
         data_asset_name: str = None,
+        partition_name: str = None,
         repartition: bool = False,
+        # TODO: <Alex></Alex>
         **kwargs
     ) -> List[Partition]:
         if repartition:

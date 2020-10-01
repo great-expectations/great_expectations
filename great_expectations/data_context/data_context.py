@@ -1540,8 +1540,8 @@ class BaseDataContext:
         self,
         execution_environment_name: str,
         data_connector_name: str,
-        partition_name: str = None,
         data_asset_name: str = None,
+        partition_name: str = None,
         in_memory_dataset: Any = None,
         repartition: bool = False
     ) -> List[Partition]:
@@ -1558,8 +1558,8 @@ class BaseDataContext:
             name=data_connector_name,
         )
         available_partitions: List[Partition] = data_connector.get_available_partitions(
-            partition_name=partition_name,
             data_asset_name=data_asset_name,
+            partition_name=partition_name,
             repartition=repartition
         )
         return available_partitions

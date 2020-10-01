@@ -275,7 +275,8 @@ class DataConnector(object):
         # TODO: <Alex>If partition_name is not specified in batch_definition, then assume "latest" (or "most recent" as defined by the first element in the sorted list of partitions).</Alex>
         # TODO: <Alex>Must accept partition_definition (and name) to be a loss-less retrieval.</Alex>
         partitions: List[Partition] = self.get_available_partitions(
-            partition_name=partition_name, data_asset_name=data_asset_name
+            data_asset_name=data_asset_name,
+            partition_name=partition_name
         )
         if len(partitions) == 0:
             raise ge_exceptions.BatchSpecError(
@@ -306,23 +307,23 @@ class DataConnector(object):
 
     def get_available_partitions(
         self,
-        partition_name: str = None,
         data_asset_name: str = None,
+        partition_name: str = None,
         repartition: bool = False
     ) -> List[Partition]:
         partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
         return self._get_available_partitions(
             partitioner=partitioner,
-            partition_name=partition_name,
             data_asset_name=data_asset_name,
+            partition_name=partition_name,
             repartition=repartition
         )
 
     def _get_available_partitions(
         self,
         partitioner: Partitioner,
-        partition_name: str = None,
         data_asset_name: str = None,
+        partition_name: str = None,
         repartition: bool = False
     ) -> List[Partition]:
         raise NotImplementedError

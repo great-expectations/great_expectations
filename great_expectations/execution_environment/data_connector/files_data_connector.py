@@ -91,8 +91,8 @@ class FilesDataConnector(DataConnector):
     def _get_available_partitions(
         self,
         partitioner: Partitioner,
-        partition_name: str = None,
         data_asset_name: str = None,
+        partition_name: str = None,
         repartition: bool = None
     ) -> List[Partition]:
         paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
@@ -106,17 +106,19 @@ class FilesDataConnector(DataConnector):
             ]
             default_data_asset_name: str = data_asset_name or Partitioner.DEFAULT_DATA_ASSET_NAME
             return partitioner.get_available_partitions(
-                partition_name=partition_name,
                 data_asset_name=data_asset_name,
+                partition_name=partition_name,
                 repartition=repartition,
+                # TODO: <Alex></Alex>
                 pipeline_data_asset_name=default_data_asset_name,
                 pipeline_datasets=default_datasets
             )
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
         auto_discover_assets: bool = not data_asset_config_exists
         return partitioner.get_available_partitions(
-            partition_name=partition_name,
             data_asset_name=data_asset_name,
+            partition_name=partition_name,
+            # TODO: <Alex></Alex>
             paths=paths,
             auto_discover_assets=auto_discover_assets
         )
