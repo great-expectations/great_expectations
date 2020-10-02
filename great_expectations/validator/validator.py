@@ -30,7 +30,7 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
-from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.exceptions import GreatExpectationsError, InvalidExpectationConfigurationError
 from great_expectations.exceptions.metric_exceptions import MetricError
 from great_expectations.expectations.registry import (
     get_expectation_impl,
@@ -134,9 +134,31 @@ class Validator:
             )
 
     def validate_expectation(self, name):
-        def inst_expectation(**kwargs):
-            expectation = get_expectation_impl(name)(
-                ExpectationConfiguration(expectation_type=name, kwargs=kwargs)
+        def inst_expectation(*args, **kwargs):
+            expectation_impl = get_expectation_impl(name)
+            allowed_config_keys = expectation_impl.get_allowed_config_keys()
+            expectation_kwargs = {
+                key: val for (key, val) in kwargs.items() if key in allowed_config_keys
+            }
+            meta = None
+            for idx, arg in enumerate(args):
+                try:
+                    arg_name = expectation_impl.legacy_method_parameters[idx]
+                    if arg_name in allowed_config_keys:
+                        expectation_kwargs[arg_name] = arg
+                    elif arg_name == "meta":
+                        meta = arg
+                except IndexError:
+                    raise InvalidExpectationConfigurationError(
+                        f"Invalid positional argument: {arg}"
+                    )
+
+            expectation = expectation_impl(
+                ExpectationConfiguration(
+                    expectation_type=name,
+                    kwargs=expectation_kwargs,
+                    meta=meta
+                )
             )
 
             runtime_configuration = {
@@ -171,6 +193,7 @@ class Validator:
                     raise err
             return validation_result
 
+        inst_expectation.__name__ = name
         return inst_expectation
 
     @property
