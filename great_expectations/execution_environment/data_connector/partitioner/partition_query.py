@@ -191,10 +191,17 @@ class PartitionQuery(object):
             if self.partition_definition:
                 if not partition_definition:
                     return False
-                common_keys: set = set(self.partition_definition.keys()) & set(partition_definition.keys())
-                if not common_keys:
+                partition_definition_query_keys: set = set(self.partition_definition.keys())
+                actual_partition_definition_keys: set = set(partition_definition.keys())
+                if not partition_definition_query_keys <= actual_partition_definition_keys:
+                    raise ge_exceptions.PartitionerError(
+                        f'''Unrecognized partition_definition query key(s):
+"{str(partition_definition_query_keys - actual_partition_definition_keys)}" detected.
+                        '''
+                    )
+                if not partition_definition_query_keys:
                     return False
-                for key in common_keys:
+                for key in partition_definition_query_keys:
                     if partition_definition[key] != self.partition_definition[key]:
                         return False
             if self.data_asset_name:
