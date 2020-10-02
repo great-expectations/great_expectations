@@ -58,7 +58,7 @@ class PipelineDataConnector(DataConnector):
         repartition: bool = False
     ) -> List[Partition]:
         # TODO: <Alex>Do not forget to make it such that this is partition_name_pattern -- next to last priority...</Alex>
-        # TODO: <Alex>Clean this up -- maybe simplify the partition_spec type and not get partition_name...</Alex>
+        # TODO: <Alex>Clean this up -- maybe simplify pass the partition_query and not get partition_name...</Alex>
         partition_name: Union[str, None] = None
         if partition_query:
             partition_name = partition_query.partition_name

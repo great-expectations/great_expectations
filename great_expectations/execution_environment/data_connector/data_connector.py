@@ -165,7 +165,7 @@ class DataConnector(object):
                 ):
                     raise ge_exceptions.PartitionerError(
                         f'''Partitioner "{partitioner.name}" detected multiple data references for partition
-"{partition.partition_spec}" of data asset "{partition.data_asset_name}"; however, allow_multipart_partitions is set to
+"{partition}" of data asset "{partition.data_asset_name}"; however, allow_multipart_partitions is set to
 False.  Please consider modifying the directives, used to partition your dataset, or set allow_multipart_partitions to
 True, but be aware that unless you have a specific use case for multipart partitions, there is most likely a mismatch
 between the partitioning directives and the actual structure of data under consideration.
@@ -177,7 +177,7 @@ between the partitioning directives and the actual structure of data under consi
                 ]:
                     raise ge_exceptions.PartitionerError(
                         f'''Partitioner "{partitioner.name}" for data asset "{partition.data_asset_name}" detected
-multiple partitions, including "{partition.partition_spec}", for the same data reference -- this is illegal.
+multiple partitions, including "{partition}", for the same data reference -- this is illegal.
                         '''
                     )
                 cached_partitions.append(partition)
