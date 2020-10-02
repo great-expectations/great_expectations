@@ -8,6 +8,8 @@ Develop
 -----------------
 
 * [BUGFIX] Skip config substitution if key is "password"
+* [BUGFIX] Change default prefix for TupleStoreBackend (issue 1907)
+* [ENHANCEMENT] Add spark support for expect_compound_columns_to_be_unique(Thanks @tscottcoombes1)!
 
 0.12.3
 -----------------
