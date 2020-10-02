@@ -114,6 +114,10 @@ class PartitionQuery(object):
         self._limit = limit
 
     @property
+    def custom_filter(self) -> Callable:
+        return self._custom_filter
+
+    @property
     def partition_index(self) -> int:
         return self._partition_index
 
@@ -122,16 +126,12 @@ class PartitionQuery(object):
         return self._partition_name
 
     @property
-    def data_asset_name(self) -> str:
-        return self._data_asset_name
-
-    @property
     def partition_definition(self) -> dict:
         return self._partition_definition
 
     @property
-    def custom_filter(self) -> Callable:
-        return self._custom_filter
+    def data_asset_name(self) -> str:
+        return self._data_asset_name
 
     @property
     def limit(self) -> int:
@@ -139,11 +139,11 @@ class PartitionQuery(object):
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
+            "custom_filter": self.custom_filter,
             "partition_index": self.partition_index,
             "partition_name": self.partition_name,
-            "data_asset_name": self.data_asset_name,
             "partition_definition": self.partition_definition,
-            "custom_filter": self.custom_filter,
+            "data_asset_name": self.data_asset_name,
             "limit": self.limit
         }
         return str(doc_fields_dict)
