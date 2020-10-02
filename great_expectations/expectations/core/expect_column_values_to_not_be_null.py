@@ -67,7 +67,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.nonnull"
-    metric_dependencies = ("column_values.nonnull.count", "rows.count")
+    metric_dependencies = ("column_values.nonnull.count",)
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -170,7 +170,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
 
         if metric_vals.get("column_values.nonnull.count") > 0:
             success = metric_vals.get("column_values.nonnull.count") / metric_vals.get(
-                "rows.count"
+                "column_values.count"
             )
         else:
             # TODO: Setting this to 1 based on the notion that tests on empty columns should be vacuously true. Confirm.
@@ -180,7 +180,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
             success=success >= mostly,
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=None,
-            unexpected_count=metric_vals.get("rows.count")
+            unexpected_count=metric_vals.get("column_values.count")
             - metric_vals.get("column_values.nonnull.count"),
             unexpected_list=metric_vals.get("column_values.nonnull.unexpected_values"),
             unexpected_index_list=metric_vals.get(
