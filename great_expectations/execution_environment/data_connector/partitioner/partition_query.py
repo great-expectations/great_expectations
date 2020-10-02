@@ -38,7 +38,7 @@ def build_partition_query(
             '''
         )
     partition_index: int = partition_query_dict.get("partition_index")
-    if partition_index and not isinstance(partition_index, int):
+    if partition_index is not None and not isinstance(partition_index, int):
         raise ge_exceptions.PartitionerError(
             f'''The type of a partition_index must be an integer (Python "int").  The type given is
 "{str(type(partition_index))}", which is illegal.
@@ -164,7 +164,7 @@ class PartitionQuery(object):
                 )
             )
             return selected_partitions[:self.limit]
-        if self.partition_index:
+        if self.partition_index is not None:
             return [partitions[self.partition_index]]
         filter_function: Callable = self.best_effort_partition_matcher()
         selected_partitions: List[Partition] = list(
