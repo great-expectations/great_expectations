@@ -49,6 +49,15 @@ class ProfilerTypeMapping:
         "INTEGER",
         "integer",
         "int",
+        "int_",
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "uint8",
+        "uint16",
+        "uint32",
+        "uint64",
         "INT",
         "TINYINT",
         "BYTEINT",
@@ -67,7 +76,10 @@ class ProfilerTypeMapping:
         "NUMERIC",
         "FloatType",
         "DoubleType",
-        "float",
+        "float_",
+        "float16",
+        "float32",
+        "float64",
         "number",
     ]
     STRING_TYPE_NAMES = [
@@ -101,7 +113,7 @@ class ProfilerTypeMapping:
     ]
 
 
-class Profiler(object, metaclass=abc.ABCMeta):
+class Profiler(metaclass=abc.ABCMeta):
     """
     Profilers creates suites from various sources of truth.
 
@@ -131,7 +143,7 @@ class Profiler(object, metaclass=abc.ABCMeta):
         pass
 
 
-class DataAssetProfiler(object):
+class DataAssetProfiler:
     @classmethod
     def validate(cls, data_asset):
         return isinstance(data_asset, DataAsset)

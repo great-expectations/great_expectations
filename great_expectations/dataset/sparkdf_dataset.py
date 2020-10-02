@@ -2,6 +2,7 @@ import copy
 import inspect
 import json
 import logging
+import warnings
 from collections import OrderedDict
 from datetime import datetime
 from functools import reduce, wraps
@@ -21,26 +22,30 @@ from .pandas_dataset import PandasDataset
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import (
-        udf,
-        col,
-        lit,
-        desc,
-        stddev_samp,
-        length as length_,
-        when,
-        year,
-        count,
-        countDistinct,
-        monotonically_increasing_id,
-        isnan,
-        datediff,
-        lag,
-        expr,
-    )
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
-    from pyspark.sql import Window
+    from pyspark.sql import SQLContext, Window
+    from pyspark.sql.functions import (
+        array,
+        col,
+        count,
+        countDistinct,
+        datediff,
+        desc,
+        expr,
+        isnan,
+        lag,
+    )
+    from pyspark.sql.functions import length as length_
+    from pyspark.sql.functions import (
+        lit,
+        monotonically_increasing_id,
+        stddev_samp,
+        struct,
+        udf,
+        when,
+        year,
+    )
 except ImportError as e:
     logger.debug(str(e))
     logger.debug(
@@ -254,7 +259,7 @@ class MetaSparkDFDataset(Dataset):
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
                     "`{0}` AS `B_{0}`".format(eval_col_B),
-                    "ISNULL(`{0}`) AND ISNULL(`{1}`) AS `__null_val`".format(
+                    "ISNULL(`{}`) AND ISNULL(`{}`) AS `__null_val`".format(
                         eval_col_A, eval_col_B
                     ),
                 )
@@ -263,7 +268,7 @@ class MetaSparkDFDataset(Dataset):
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
                     "`{0}` AS `B_{0}`".format(eval_col_B),
-                    "ISNULL(`{0}`) OR ISNULL(`{1}`) AS `__null_val`".format(
+                    "ISNULL(`{}`) OR ISNULL(`{}`) AS `__null_val`".format(
                         eval_col_A, eval_col_B
                     ),
                 )
@@ -284,8 +289,8 @@ class MetaSparkDFDataset(Dataset):
             nonnull_df = boolean_mapped_null_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
 
-            col_A_df = nonnull_df.select("__row", "`A_{0}`".format(eval_col_A))
-            col_B_df = nonnull_df.select("__row", "`B_{0}`".format(eval_col_B))
+            col_A_df = nonnull_df.select("__row", "`A_{}`".format(eval_col_A))
+            col_B_df = nonnull_df.select("__row", "`B_{}`".format(eval_col_B))
 
             success_df = func(self, col_A_df, col_B_df, *args, **kwargs)
             success_count = success_df.filter("__success = True").count()
@@ -301,7 +306,7 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    (row["A_{0}".format(eval_col_A)], row["B_{0}".format(eval_col_B)],)
+                    (row["A_{}".format(eval_col_A)], row["B_{}".format(eval_col_B)],)
                     for row in unexpected_df.collect()
                 ]
 
@@ -1306,8 +1311,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             _udf = udf(parse, sparktypes.TimestampType())
             # Create new columns for comparison without replacing original values.
             (timestamp_column_A, timestamp_column_B) = (
-                "__ts_{0}".format(column_A_name),
-                "__ts_{0}".format(column_B_name),
+                "__ts_{}".format(column_A_name),
+                "__ts_{}".format(column_B_name),
             )
             temp_column_A = column_A.withColumn(timestamp_column_A, _udf(column_A_name))
             temp_column_B = column_B.withColumn(timestamp_column_B, _udf(column_B_name))
@@ -1334,10 +1339,75 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
 
     @DocInherit
-    @MetaSparkDFDataset.multicolumn_map_expectation
+    @MetaSparkDFDataset.column_pair_map_expectation
+    def expect_column_pair_values_to_be_in_set(
+        self,
+        column_A,
+        column_B,
+        value_pairs_set,  # List[List]
+        ignore_row_if="both_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        column_A_name = column_A.schema.names[1]
+        column_B_name = column_B.schema.names[1]
+
+        join_df = column_A.join(
+            column_B, column_A["__row"] == column_B["__row"], how="inner"
+        )
+
+        join_df = join_df.withColumn(
+            "combine_AB", array(col(column_A_name), col(column_B_name))
+        )
+
+        value_set_df = (
+            SQLContext(self.spark_df._sc)
+            .createDataFrame(value_pairs_set, ["col_A", "col_B"])
+            .select(array("col_A", "col_B").alias("set_AB"))
+        )
+
+        return join_df.join(
+            value_set_df, join_df["combine_AB"] == value_set_df["set_AB"], "left"
+        ).withColumn(
+            "__success", when(col("set_AB").isNull(), lit(False)).otherwise(lit(True))
+        )
+
     def expect_multicolumn_values_to_be_unique(
         self,
         column_list,  # pyspark.sql.DataFrame
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        deprecation_warning = (
+            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
+            "expect_select_column_values_to_be_unique_within_record instead."
+        )
+        warnings.warn(
+            deprecation_warning, DeprecationWarning,
+        )
+
+        return self.expect_select_column_values_to_be_unique_within_record(
+            column_list=column_list,
+            mostly=mostly,
+            ignore_row_if=ignore_row_if,
+            result_format=result_format,
+            include_config=include_config,
+            catch_exceptions=catch_exceptions,
+            meta=meta,
+        )
+
+    @DocInherit
+    @MetaSparkDFDataset.multicolumn_map_expectation
+    def expect_select_column_values_to_be_unique_within_record(
+        self,
+        column_list,  # pyspark.sql.DataFrame
+        mostly=None,
         ignore_row_if="all_values_are_missing",
         result_format=None,
         include_config=True,
@@ -1355,6 +1425,26 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         return column_list.withColumn(
             "__success", reduce(lambda a, b: a & b, conditions)
+        )
+
+    @DocInherit
+    @MetaSparkDFDataset.multicolumn_map_expectation
+    def expect_compound_columns_to_be_unique(
+        self,
+        column_list,  # pyspark.sql.DataFrame
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+
+        # Might want to throw an exception if only 1 column is passed
+        column_names = column_list.schema.names[:]
+        return column_list.withColumn(
+            "__success",
+            count(lit(1)).over(Window.partitionBy(struct(*column_names))) <= 1,
         )
 
     @DocInherit

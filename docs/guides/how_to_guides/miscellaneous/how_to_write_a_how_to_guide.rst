@@ -11,7 +11,7 @@ Steps
 
 #. Copy the :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>` to the appropriate subdirectory of ``docs/guides/how_to_guides/``, and rename it.
 #. Write a title and purpose paragraph.
-#. Decide whether you're writing a :ref:`code-heavy or process-heavy <Code-heavy vs process-heavy guides>` guide, and :ref:`adjust your formatting <Indentation, bolding, and code blocks>` appropriately.
+#. Decide whether you're writing a :ref:`code-heavy or process-heavy <code_heavy_vs_process_heavy_guides>` guide, and :ref:`adjust your formatting <indentation_bolding_and_code_blocks>` appropriately.
 #. Fill out the Prerequisites info box (see :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>`). The header of the info box says: "This how-to guide assumes you have already:". Place each prerequisite under its own bullet and phrase it using the style in the template: "done something".
 #. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate.
 
@@ -20,7 +20,7 @@ Steps
 	
 #. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
 #. Enable comments for your How-to guide, by following :ref:`these instructions <how_to_guides__miscellaneous__how_to_add_comments_to_a_page_in_documentation>`.
-#. Scan your article to make sure it follows the :ref:`Style guide`. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
+#. Scan your article to make sure it follows the :ref:`Style guide <contributing__style_guide>`. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
 #. Submit your PR!
 
 Additional Notes
@@ -49,7 +49,7 @@ With rare exceptions, How-to guides follow this structure:
 	4. Additional Notes (optional)
 	5. Additional Resources (optional)
 
-**Title**: "How to X". See the :ref:`Style guide` for specific guidance on how to phrase and format titles.
+**Title**: "How to X". See the :ref:`Style guide <contributing__style_guide>` for specific guidance on how to phrase and format titles.
 
 **Purpose paragraph**: A single, short paragraph to state the purpose of the guide, and motivate it if necessary.
 
@@ -71,12 +71,16 @@ If the user has data in Mongo and wants to configure a Datasource, no additional
 
 **Additional resources**: Additional resources, usually external (i.e. not within the Great Expectations documentation) and usually shown as a list. To avoid link rot, please use this section sparingly, and prefer links to stable, well-maintained resources.
 
+.. _code_heavy_vs_process_heavy_guides:
+
 Code-heavy vs process-heavy guides
 ##################################
 
 Broadly speaking, there are two kinds of How-to Guides: code-heavy and process-heavy. All guides are about following a specific sequence of steps. In code-heavy guides, most or all of the steps are expressed in technical syntax: code snippets, JSON or YAML objects, CLI commands, etc. In process-heavy guides, many of the steps are things that must be done manually.
 
 Most guides are code-heavy. When writing a guide that could go either way, please prefer code-heavy, since they tend to make for better replication. (This guide happens to be process-heavy, because it's about writing.)
+
+.. _indentation_bolding_and_code_blocks:
 
 Indentation, bolding, and code blocks
 #####################################
@@ -87,7 +91,7 @@ Indentation, bolding, and code blocks
 
 	- Use short, complete, imperative sentences: ("Paste the YAML snippet into your config file", "Run great_expectations init")
 	- Header text should be **bold**.
-	- Avoid `links <great_expectations.io>`_ or ``inline code`` in headers, since RST files do not support nesting them within bolded text. If your header must include text that would normally be a link or inline code, please repeat it in the body text, and use a link or code block there.
+	- Avoid `links <https://greatexpectations.io>`_ or ``inline code`` in headers, since RST files do not support nesting them within bolded text. If your header must include text that would normally be a link or inline code, please repeat it in the body text, and use a link or code block there.
 
 - Indent content within steps.
 - Any time the user needs to do something, it should be in a code block.

@@ -3,15 +3,15 @@
 How to create Expectations that span multiple Batches using Evaluation Parameters
 =================================================================================
 
-This guide will help you create Expectations that span multiple :ref:`Batches` of data using :ref:`Evaluation Parameters`. This pattern is useful for things like verifying that row counts between tables stay consistent.
+This guide will help you create Expectations that span multiple :ref:`Batches <reference__core_concepts__batches>` of data using :ref:`Evaluation Parameters <reference__core_concepts__data_context__evaluation_parameter_stores>`. This pattern is useful for things like verifying that row counts between tables stay consistent.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
-  - Configured a :ref:`Datasource <Datasources>` (or Datasources) with at least two Data Assets.
-  - Also created :ref:`Expectation Suites` for those Data Assets.
-  - Have a working :ref:`Evaluation Parameter Store`. (The default in-memory store from ``great_expectations init`` can work for this.)
-  - Have a working :ref:`Validation Operator`. (The default Validation Operator from ``great_expectations init`` can work for this.)
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+  - Configured a :ref:`Datasource <reference__core_concepts__datasources>` (or Datasources) with at least two Data Assets.
+  - Also created :ref:`Expectation Suites <reference__core_concepts__expectations__expectation_suites>` for those Data Assets.
+  - Have a working :ref:`Evaluation Parameter Store <reference__core_concepts__data_context__evaluation_parameter_stores>`. (The default in-memory store from ``great_expectations init`` can work for this.)
+  - Have a working :ref:`Validation Operator <reference__core_concepts__validation__validation_operator>`. (The default Validation Operator from ``great_expectations init`` can work for this.)
 
 Steps
 -----
@@ -29,7 +29,7 @@ In a notebook,
 
     We'll call one of these Batches the *upstream* Batch and the other the *downstream* Batch. Evaluation Parameters will allow us to use Validation Results from the upstream Batch as parameters passed into Expectations on the downstream.
     
-    It's common (but not required) for both Batches to come from the same :ref:`Datasource <Datasources>` and :ref:`BatchKwargsGenerator`.
+    It's common (but not required) for both Batches to come from the same :ref:`Datasource <reference__core_concepts__datasources>` and :ref:`BatchKwargsGenerator <reference__core_concepts__batch_kwargs_generators>`.
 
     .. code-block:: python
 
@@ -64,11 +64,11 @@ In a notebook,
             }
         )
     
-    The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an :ref:`Evaluation Parameter Store` or :ref:`Metrics Store`.
+    The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an :ref:`Evaluation Parameter Store <reference__core_concepts__data_context__evaluation_parameter_stores>` or :ref:`Metrics Store <reference__core_concepts__data_context__metrics>`.
     
     This declaration above includes two ``$PARAMETERS``. The first is the real parameter that will be used after the Expectation Suite is stored and deployed in a Validation Operator. The second parameter supports immediate evaluation in the notebook.
 
-    When executed in the notebook, this Expectation will generate an :ref:`Expectation Validation Result`. Most values will be missing, since interactive evaluation was disabled.
+    When executed in the notebook, this Expectation will generate an :ref:`Expectation Validation Result <reference__core_concepts__validation__expectation_validation_result>`. Most values will be missing, since interactive evaluation was disabled.
 
     .. code-block:: python
 
@@ -89,7 +89,7 @@ In a notebook,
 
         downstream_batch.save_expectation_suite(discard_failed_expectations=False)
 
-    This step is necessary because your ``$PARAMETER`` will only function properly when invoked within a Validation operation with multiple Batches. The simplest way to execute such an operation is through a :ref:`Validation Operator`, and Validation Operators are configured to load Expectation Suites from Expectation Stores, not memory.
+    This step is necessary because your ``$PARAMETER`` will only function properly when invoked within a Validation operation with multiple Batches. The simplest way to execute such an operation is through a :ref:`Validation Operator <reference__core_concepts__validation__validation_operator>`, and Validation Operators are configured to load Expectation Suites from Expectation Stores, not memory.
 
 #. **Execute an existing Validation Operator on your upstream and downstream batches.**
 
@@ -123,17 +123,17 @@ In a notebook,
 
     If your Evaluation Parameter was executed successfully, you'll see something like this:
 
-    .. image:: ../../images/evaluation_parameter_success.png
+    .. image:: /images/evaluation_parameter_success.png
 
     |
 
     If it encountered an error, you'll see something like this. The most common problem is a mis-specified URN name.
 
-    .. image:: ../../images/evaluation_parameter_error.png
+    .. image:: /images/evaluation_parameter_error.png
 
     .. warning::
         
-        In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the `Great Expectations discussion forum <discuss.great_expectations.io>`_ and `Slack channel <great_expectations.io/slack>`_.
+        In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the `Great Expectations discussion forum <https://discuss.great_expectations.io>`_ and `Slack channel <https://great_expectations.io/slack>`_.
 
 
 Comments

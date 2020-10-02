@@ -30,13 +30,13 @@ try:
     import sqlalchemy as sa
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
-    from sqlalchemy.sql.expression import BinaryExpression, literal
-    from sqlalchemy.sql.selectable import Select, CTE
-    from sqlalchemy.sql.operators import custom_op
-    from sqlalchemy.sql.elements import Label, WithinGroup, TextClause
-    from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
+    from sqlalchemy.sql.expression import BinaryExpression, literal
+    from sqlalchemy.sql.operators import custom_op
+    from sqlalchemy.sql.selectable import CTE, Select
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
@@ -114,7 +114,7 @@ except ImportError:
     pass
 
 
-class SqlAlchemyBatchReference(object):
+class SqlAlchemyBatchReference:
     def __init__(self, engine, table_name=None, schema=None, query=None):
         self._engine = engine
         if table_name is None and query is None:
@@ -613,7 +613,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 head_sql_str += "`" + self._table.name + "`"
             else:
                 head_sql_str += self._table.name
-            head_sql_str += " limit {0:d}".format(n)
+            head_sql_str += " limit {:d}".format(n)
 
             # Limit is unknown in mssql! Use top instead!
             if self.engine.dialect.name.lower() == "mssql":
@@ -1131,7 +1131,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             condition = max_condition
 
         query = (
-            sa.select([sa.func.count((sa.column(column)))])
+            sa.select([sa.func.count(sa.column(column))])
             .where(sa.and_(sa.column(column) != None, condition))
             .select_from(self._table)
         )

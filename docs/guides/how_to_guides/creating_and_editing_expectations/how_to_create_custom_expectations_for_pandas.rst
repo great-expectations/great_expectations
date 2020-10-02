@@ -7,7 +7,7 @@ Custom Expectations let you extend the logic for validating data to use any crit
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - Launched a generic notebook (e.g. ``jupyter notebook``, ``jupyter lab``, etc.)
     - Obtained data that can be accessed from your notebook
     - :ref:`Configured a pandas Datasource <how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource>`
@@ -35,11 +35,11 @@ Steps
 
             _data_asset_type = "MyCustomPandasDataset"
 
-    Setting the ``_data_asset_type`` is not strictly necessary, but can be helpful for tracking the lineage of instantiated Expectations and :ref:`Validation Results`.
+    Setting the ``_data_asset_type`` is not strictly necessary, but can be helpful for tracking the lineage of instantiated Expectations and :ref:`Validation Results <reference__core_concepts__validation__expectation_validation_result>`.
 
 3. **Within your new class, define Expectations using decorators from MetaPandasDataset**
 
-    ``column_map_expectations`` are Expectations that are applied to a single column, on a row-by-row basis. To learn about other Expectation types, please see :ref:`Other Expectation decorators` below.
+    ``column_map_expectations`` are Expectations that are applied to a single column, on a row-by-row basis. To learn about other Expectation types, please see :ref:`Other Expectation decorators <other_expectation_decorators>` below.
 
     The ``@MetaPandasDataset.column_map_expectation`` decorator wraps your custom function with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like ``mostly`` and ``result_format``. Your custom function can focus exclusively on the business logic of passing or failing the Expectation.
 
@@ -118,7 +118,7 @@ Steps
         my_pd_df = pd.read_csv("./data/Titanic.csv")
         my_df = MyCustomPandasDataset(my_pd_df)
 
-    Note: We're using the ``read_csv`` method to fetch data, instead of the more typical ``DataContext.get_batch``. This is for convenience: it allows us to handle the full developmentment loop for a custom Expectation within a notebook with a minimum of configuration.
+    Note: We're using the ``read_csv`` method to fetch data, instead of the more typical ``DataContext.get_batch``. This is for convenience: it allows us to handle the full development loop for a custom Expectation within a notebook with a minimum of configuration.
     
     In a moment, we'll demonstrate how to configure a Datasource to use ``MyCustomPandasDataset`` when calling ``get_batch``.
 
@@ -184,7 +184,7 @@ Steps
 
     The simplest way to do this is to create a new, single-file python module within your ``great_expectations/plugins/`` directory. Name it something like ``custom_pandas_dataset.py``. Copy the full contents of your ``MyCustomPandasDataset`` class into this file. Make sure to include any required imports, too.
 
-    When you instantiate a Data Context, Great Expectations automatically adds ``plugins/`` to the python namespace, so your class can be imported as ``custom_pandas_dataset.MyCustomPandasDataset``. For more information, please see :ref:`Plugins`.
+    When you instantiate a Data Context, Great Expectations automatically adds ``plugins/`` to the python namespace, so your class can be imported as ``custom_pandas_dataset.MyCustomPandasDataset``.
     
 #. **Configure your Datasource(s)**
 
@@ -235,7 +235,7 @@ Steps
 
     Executing this Expectation should return something like:
 
-    .. code-block:: json
+    .. code-block::
 
         {
             "result": {
@@ -262,6 +262,7 @@ Steps
 Additional notes
 ----------------
 
+.. _other_expectation_decorators:
 
 Other Expectation decorators
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

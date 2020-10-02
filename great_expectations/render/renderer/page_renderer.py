@@ -1,6 +1,7 @@
 import logging
 import os
 from collections import OrderedDict
+from typing import List
 
 from dateutil.parser import parse
 
@@ -9,6 +10,9 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
 
+from ...validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
 from ..types import (
     CollapseContent,
     RenderedDocumentContent,
@@ -52,6 +56,23 @@ class ValidationResultsPageRenderer(Renderer):
                 class_name=column_section_renderer["class_name"],
             )
         self.run_info_at_end = run_info_at_end
+
+    def render_validation_operator_result(
+        self, validation_operator_result: ValidationOperatorResult
+    ) -> List[RenderedDocumentContent]:
+        """
+        Render a ValidationOperatorResult which can have multiple ExpectationSuiteValidationResult
+
+        Args:
+            validation_operator_result: ValidationOperatorResult
+
+        Returns:
+            List[RenderedDocumentContent]
+        """
+        return [
+            self.render(validation_result)
+            for validation_result in validation_operator_result.list_validation_results()
+        ]
 
     def render(self, validation_results: ExpectationSuiteValidationResult):
         run_id = validation_results.meta["run_id"]
@@ -184,12 +205,12 @@ class ValidationResultsPageRenderer(Renderer):
         if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
             include_run_name = True
 
-        page_title = "Validations / " + expectation_suite_name
+        page_title = "Validations / " + str(expectation_suite_name)
         if data_asset_name:
-            page_title += " / " + data_asset_name
+            page_title += " / " + str(data_asset_name)
         if include_run_name:
-            page_title += " / " + run_name
-        page_title += " / " + run_time
+            page_title += " / " + str(run_name)
+        page_title += " / " + str(run_time)
 
         return RenderedDocumentContent(
             **{
@@ -209,7 +230,7 @@ class ValidationResultsPageRenderer(Renderer):
         expectation_suite_path_components = (
             [".." for _ in range(len(expectation_suite_name.split(".")) + 3)]
             + ["expectations"]
-            + expectation_suite_name.split(".")
+            + str(expectation_suite_name).split(".")
         )
         expectation_suite_path = (
             os.path.join(*expectation_suite_path_components) + ".html"
@@ -530,7 +551,7 @@ class ExpectationSuitePageRenderer(Renderer):
         return RenderedDocumentContent(
             **{
                 "renderer_type": "ExpectationSuitePageRenderer",
-                "page_title": "Expectations / " + expectation_suite_name,
+                "page_title": "Expectations / " + str(expectation_suite_name),
                 "expectation_suite_name": expectation_suite_name,
                 "utm_medium": "expectation-suite-page",
                 "sections": sections,
@@ -804,12 +825,12 @@ class ProfilingResultsPageRenderer(Renderer):
         if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
             include_run_name = True
 
-        page_title = "Profiling Results / " + expectation_suite_name
+        page_title = "Profiling Results / " + str(expectation_suite_name)
         if data_asset_name:
-            page_title += " / " + data_asset_name
+            page_title += " / " + str(data_asset_name)
         if include_run_name:
-            page_title += " / " + run_name
-        page_title += " / " + run_time
+            page_title += " / " + str(run_name)
+        page_title += " / " + str(run_time)
 
         return RenderedDocumentContent(
             **{

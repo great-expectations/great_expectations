@@ -7,7 +7,7 @@ This guide will help you add descriptive comments (or notes, here used interchan
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
     - Configured an :ref:`Expectations Suite <tutorials__getting_started__create_your_first_expectations>`.
 

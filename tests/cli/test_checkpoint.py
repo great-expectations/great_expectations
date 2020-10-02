@@ -1,8 +1,8 @@
 import os
 import shutil
 import subprocess
+from unittest import mock
 
-import mock
 import pytest
 from click.testing import CliRunner
 from ruamel.yaml import YAML
@@ -220,7 +220,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
     context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
-    with open(expected_checkpoint, "r") as f:
+    with open(expected_checkpoint) as f:
         obs_file = f.read()
 
     # This is snapshot-ish to prove that comments remain in place
@@ -235,7 +235,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
 # You can edit this file to add batches of data and expectation suites.
 #
 # For more details please see
-# https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
+# https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
 validation_operator_name: action_list_operator
 # Batches are a list of batch_kwargs paired with a list of one or more suite
 # names. A checkpoint can have one or more batches. This makes deploying
@@ -580,11 +580,12 @@ def test_checkpoint_run_on_non_existent_validation_operator(
         f"No validation operator `foo` was found in your project. Please verify this in your great_expectations.yml"
         in stdout
     )
+    usage_emits = mock_emit.call_args_list
 
     assert mock_emit.call_count == 3
-    assert mock_emit.call_args_list[0].args[0]["success"] == True
-    assert mock_emit.call_args_list[1].args[0]["success"] == False
-    assert mock_emit.call_args_list[2].args[0]["success"] == False
+    assert usage_emits[0][0][0]["success"] is True
+    assert usage_emits[1][0][0]["success"] is False
+    assert usage_emits[2][0][0]["success"] is False
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -605,7 +606,7 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "Validation Succeeded!" in stdout
+    assert "Validation succeeded!" in stdout
 
     assert mock_emit.call_count == 4
     usage_emits = mock_emit.call_args_list
@@ -647,7 +648,7 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     stdout = result.stdout
     print(stdout)
     assert result.exit_code == 1
-    assert "Validation Failed!" in stdout
+    assert "Validation failed!" in stdout
 
     assert mock_emit.call_count == 4
     usage_emits = mock_emit.call_args_list
@@ -741,7 +742,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     ]
 
     # assert the script has original contents
-    with open(script_path, "r") as f:
+    with open(script_path) as f:
         assert f.read() == "script here"
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -836,7 +837,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 0
-    assert output == "Validation Succeeded!"
+    assert output == "Validation succeeded!"
 
 
 def test_checkpoint_script_happy_path_executable_failed_validation(
@@ -887,7 +888,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 1
-    assert output == "Validation Failed!"
+    assert output == "Validation failed!"
 
 
 def _write_checkpoint_dict_to_file(bad, checkpoint_file_path):

@@ -143,7 +143,7 @@ def validation_operator_run(name, run_name, validation_config_file, suite, direc
             try:
                 with open(validation_config_file) as f:
                     validation_config = json.load(f)
-            except (IOError, json_parse_exception) as e:
+            except (OSError, json_parse_exception) as e:
                 cli_message(
                     f"Failed to process the --validation_config_file argument: <red>{e}</red>"
                 )
@@ -159,7 +159,7 @@ def validation_operator_run(name, run_name, validation_config_file, suite, direc
             )
             if validation_config_error_message is not None:
                 cli_message(
-                    "<red>The validation config in {0:s} is misconfigured: {1:s}</red>".format(
+                    "<red>The validation config in {:s} is misconfigured: {:s}</red>".format(
                         validation_config_file, validation_config_error_message
                     )
                 )
@@ -305,7 +305,7 @@ Let us help you specify the batch of data your want the validation operator to v
                         run_id=run_id,
                         evaluation_parameters=suite.evaluation_parameters,
                     )
-        except (ge_exceptions.DataContextError, IOError, SQLAlchemyError,) as e:
+        except (ge_exceptions.DataContextError, OSError, SQLAlchemyError) as e:
             cli_message("<red>{}</red>".format(e))
             send_usage_message(
                 data_context=context, event="cli.validation_operator.run", success=False
@@ -313,13 +313,13 @@ Let us help you specify the batch of data your want the validation operator to v
             sys.exit(1)
 
         if not results["success"]:
-            cli_message("Validation Failed!")
+            cli_message("Validation failed!")
             send_usage_message(
                 data_context=context, event="cli.validation_operator.run", success=True
             )
             sys.exit(1)
         else:
-            cli_message("Validation Succeeded!")
+            cli_message("Validation succeeded!")
             send_usage_message(
                 data_context=context, event="cli.validation_operator.run", success=True
             )
