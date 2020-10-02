@@ -106,6 +106,10 @@ class Validator:
             self.set_default_expectation_argument("include_config", True)
 
     def __dir__(self):
+        """
+        This custom magic method is used to enable expectation tab completion on Validator objects.
+        It also allows users to call Pandas.DataFrame methods on Validator objects
+        """
         validator_attrs = set(super().__dir__())
         class_expectation_impls = set(list_registered_expectation_implementations())
         execution_engine_expectation_impls = set([attr_name for attr_name in self.execution_engine.__dir__() if
