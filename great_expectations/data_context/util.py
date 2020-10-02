@@ -166,6 +166,7 @@ def substitute_all_config_variables(data, replace_variables_dict):
         return {
             k: substitute_all_config_variables(v, replace_variables_dict)
             for k, v in data.items()
+            if k.lower() not in {"password"}
         }
     elif isinstance(data, list):
         return [
