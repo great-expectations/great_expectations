@@ -16,11 +16,11 @@ def build_partition_query(
 ):
     if not partition_query_dict:
         return PartitionQuery(
+            custom_filter=None,
             partition_index=None,
             partition_name=None,
-            data_asset_name=None,
             partition_definition=None,
-            custom_filter=None,
+            data_asset_name=None,
             limit=None
         )
     partition_query_keys: set = set(partition_query_dict.keys())
@@ -30,6 +30,13 @@ def build_partition_query(
 "{str(partition_query_keys - PartitionQuery.RECOGNIZED_PARTITION_QUERY_KEYS)}" detected.
             '''
         )
+    custom_filter: Callable = partition_query_dict.get("custom_filter")
+    if custom_filter and not isinstance(custom_filter, Callable):
+        raise ge_exceptions.PartitionerError(
+            f'''The type of a custom_filter be a function (Python "Callable").  The type given is
+"{str(type(custom_filter))}", which is illegal.
+            '''
+        )
     partition_index: int = partition_query_dict.get("partition_index")
     if partition_index and not isinstance(partition_index, int):
         raise ge_exceptions.PartitionerError(
@@ -37,18 +44,11 @@ def build_partition_query(
 "{str(type(partition_index))}", which is illegal.
             '''
         )
-    partition_name: str = partition_query_dict.get("name")
+    partition_name: str = partition_query_dict.get("partition_name")
     if partition_name and not isinstance(partition_name, str):
         raise ge_exceptions.PartitionerError(
             f'''The type of a partition_name must be a string (Python "str").  The type given is
 "{str(type(partition_name))}", which is illegal.
-            '''
-        )
-    data_asset_name: str = partition_query_dict.get("data_asset_name")
-    if data_asset_name and not isinstance(data_asset_name, str):
-        raise ge_exceptions.PartitionerError(
-            f'''The type of a data_asset_name must be a string (Python "str").  The type given is
-"{str(type(data_asset_name))}", which is illegal.
             '''
         )
     partition_definition: dict = partition_query_dict.get("partition_definition")
@@ -61,6 +61,13 @@ def build_partition_query(
             )
         if not all([isinstance(key, str) for key in partition_definition.keys()]):
             raise ge_exceptions.PartitionerError('All partition_definition keys must strings (Python "str").')
+    data_asset_name: str = partition_query_dict.get("data_asset_name")
+    if data_asset_name and not isinstance(data_asset_name, str):
+        raise ge_exceptions.PartitionerError(
+            f'''The type of a data_asset_name must be a string (Python "str").  The type given is
+"{str(type(data_asset_name))}", which is illegal.
+            '''
+        )
     limit: int = partition_query_dict.get("limit")
     if limit and not isinstance(limit, int):
         raise ge_exceptions.PartitionerError(
@@ -70,58 +77,33 @@ def build_partition_query(
         )
     if limit is None or limit < 0:
         limit = sys.maxsize
-    custom_filter: Callable = partition_query_dict.get("custom_filter")
-    if custom_filter and not isinstance(custom_filter, Callable):
-        raise ge_exceptions.PartitionerError(
-            f'''The type of a custom_filter be a function (Python "Callable").  The type given is
-"{str(type(custom_filter))}", which is illegal.
-            '''
-        )
-    if custom_filter:
-        return PartitionQuery(
-            partition_index=None,
-            partition_name=None,
-            data_asset_name=data_asset_name,
-            partition_definition=None,
-            custom_filter=custom_filter,
-            limit=limit
-        )
-    if partition_index:
-        return PartitionQuery(
-            partition_index=partition_index,
-            partition_name=None,
-            data_asset_name=data_asset_name,
-            partition_definition=None,
-            custom_filter=None,
-            limit=limit
-        )
     return PartitionQuery(
-        partition_index=None,
+        custom_filter=custom_filter,
+        partition_index=partition_index,
         partition_name=partition_name,
-        data_asset_name=data_asset_name,
         partition_definition=partition_definition,
-        custom_filter=None,
+        data_asset_name=data_asset_name,
         limit=limit
     )
 
 
 class PartitionQuery(object):
     RECOGNIZED_PARTITION_QUERY_KEYS: set = {
+        "custom_filter",
         "partition_index",
         "partition_name",
-        "data_asset_name",
         "partition_definition",
-        "custom_filter",
+        "data_asset_name",
         "limit"
     }
 
     def __init__(
         self,
+        custom_filter: Callable = None,
         partition_index: int = None,
         partition_name: str = None,
-        data_asset_name: str = None,
         partition_definition: dict = None,
-        custom_filter: Callable = None,
+        data_asset_name: str = None,
         limit: int = None
     ):
         self._partition_index = partition_index
@@ -203,9 +185,6 @@ class PartitionQuery(object):
             data_asset_name: str,
             partition_definition: dict
         ) -> bool:
-            if self.data_asset_name:
-                if data_asset_name != self.data_asset_name:
-                    return False
             if self.partition_name:
                 if partition_name != self.partition_name:
                     return False
@@ -218,5 +197,8 @@ class PartitionQuery(object):
                 for key in common_keys:
                     if partition_definition[key] != self.partition_definition[key]:
                         return False
+            if self.data_asset_name:
+                if data_asset_name != self.data_asset_name:
+                    return False
             return True
         return match_partition_to_query_params
