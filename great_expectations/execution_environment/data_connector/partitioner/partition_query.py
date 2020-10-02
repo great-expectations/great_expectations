@@ -167,9 +167,11 @@ class PartitionQuery(object):
         return str(doc_fields_dict)
 
     def select_partitions(self, partitions: Union[List[Partition], None] = None) -> List[Partition]:
+        if partitions is None:
+            return []
         if self.custom_filter:
             filter_function: Callable = self.custom_filter
-            return list(
+            selected_partitions: List[Partition] = list(
                 filter(
                     lambda partition: filter_function(
                         name=partition.name,
@@ -179,10 +181,11 @@ class PartitionQuery(object):
                     partitions
                 )
             )
+            return selected_partitions[:self.limit]
         if self.partition_index:
             return [partitions[self.partition_index]]
         filter_function: Callable = self.best_effort_partition_matcher()
-        return list(
+        selected_partitions: List[Partition] = list(
             filter(
                 lambda partition: filter_function(
                     partition_name=partition.name,
@@ -192,6 +195,7 @@ class PartitionQuery(object):
                 partitions
             )
         )
+        return selected_partitions[:self.limit]
 
     def best_effort_partition_matcher(self) -> Callable:
         def match_partition_to_query_params(
@@ -199,15 +203,20 @@ class PartitionQuery(object):
             data_asset_name: str,
             partition_definition: dict
         ) -> bool:
-            if self.partition_definition and partition_definition == self.partition_definition \
-                    and self.partition_name and partition_name == self.partition_name \
-                    and self.data_asset_name and data_asset_name == self.data_asset_name:
-                return True
-            if self.partition_name:
-                if partition_name != self.partition_name:
-                    return False
             if self.data_asset_name:
                 if data_asset_name != self.data_asset_name:
                     return False
+            if self.partition_name:
+                if partition_name != self.partition_name:
+                    return False
+            if self.partition_definition:
+                if not partition_definition:
+                    return False
+                common_keys: set = set(self.partition_definition.keys()) & set(partition_definition.keys())
+                if not common_keys:
+                    return False
+                for key in common_keys:
+                    if partition_definition[key] != self.partition_definition[key]:
+                        return False
             return True
         return match_partition_to_query_params
