@@ -236,7 +236,7 @@ class ValidationResultsPageRenderer(Renderer):
             os.path.join(*expectation_suite_path_components) + ".html"
         )
         data_asset_name = (
-            validation_results.meta["batch_kwargs"]["data_asset_name"]
+            validation_results.meta["batch_kwargs"].get("data_asset_name")
         )
         if success:
             success = "Succeeded"

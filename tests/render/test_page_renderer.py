@@ -212,9 +212,11 @@ def test_ValidationResultsPageRenderer_render_validation_header(
         "subheader": {
             "content_block_type": "string_template",
             "string_template": {
-                "template": "${suite_title} ${expectation_suite_name}\n${status_title} ${html_success_icon} ${success}",
+                "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",
                 "params": {
                     "suite_title": "Expectation Suite:",
+                    "data_asset": "Data asset:",
+                    "data_asset_name": 'Titanic',
                     "status_title": "Status:",
                     "expectation_suite_name": "default",
                     "success": "Failed",
