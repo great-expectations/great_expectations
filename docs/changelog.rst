@@ -7,6 +7,8 @@ Changelog
 Develop
 -----------------
 
+* [BUGFIX] Skip config substitution if key is "password"
+
 0.12.3
 -----------------
 * [ENHANCEMENT] Add expect_compound_columns_to_be_unique and clarify multicolumn uniqueness
