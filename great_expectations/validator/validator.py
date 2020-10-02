@@ -151,6 +151,8 @@ class Validator:
                 key: val for (key, val) in kwargs.items() if key in allowed_config_keys
             }
             meta = None
+            # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
+            # positional arguments to expectation methods
             for idx, arg in enumerate(args):
                 try:
                     arg_name = expectation_impl.legacy_method_parameters[idx]
