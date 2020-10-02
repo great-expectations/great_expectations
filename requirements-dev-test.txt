@@ -3,7 +3,7 @@
 # To run tests for smaller subsets of infrastructure, please look at other requirements-dev-*.txt files.
 # Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
 
-black==19.10b0  # lint
+black>=19.10b0  # lint
 freezegun>=0.3.15  # all_tests
 pytest>=5.3.5,<6.0.0  # all_tests
 pytest-cov>=2.8.1  # all_tests
