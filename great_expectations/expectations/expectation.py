@@ -1,5 +1,6 @@
 import logging
 import re
+import string
 from abc import ABC, ABCMeta
 from collections import Counter
 from copy import deepcopy
@@ -96,14 +97,30 @@ class Expectation(ABC, metaclass=MetaExpectation):
         available_metrics = {metric[0] for metric in metrics.keys()}
         available_validators = sorted(
             [
-                (set(metric_deps), validator_fn)
-                for (metric_deps, validator_fn) in self._validators.items()
+                (
+                    validators_key[0],  # expectation class name
+                    validators_key[1],  # validator name
+                    set(validators_key[2]),  # metric dependencies
+                    validator_fn,
+                )
+                for (validators_key, validator_fn) in self._validators.items()
             ],
-            key=lambda x: len(x[0]),
+            key=lambda x: len(x[0][2]),
         )
-        for metric_deps, validator_fn in available_validators:
+        validator_name = self.get_validator_name()
+        for (
+            expectation_class_name,
+            declared_validator_name,
+            metric_deps,
+            validator_fn,
+        ) in available_validators:
             # if metric_deps <= available_metrics:
-            if validator_fn.__qualname__.split(".")[0] == self.__class__.__name__:
+            if (
+                expectation_class_name == self.__class__.__name__
+                and metric_deps
+                <= available_metrics  # set comparison: metric_deps is a subset of available_metrics
+                and validator_name == declared_validator_name
+            ):
                 return validator_fn(
                     self,
                     configuration,
@@ -114,26 +131,33 @@ class Expectation(ABC, metaclass=MetaExpectation):
         raise MetricError("No validator found for available metrics")
 
     @classmethod
-    def validates(cls, metric_dependencies: tuple):
+    def validates(cls, metric_dependencies: tuple, validator_name: str = "default"):
         def outer(validator: Callable):
-            if metric_dependencies in cls._validators:
-                if validator == cls._validators[metric_dependencies]:
+            validators_key = (cls.__name__, validator_name, metric_dependencies)
+            if validators_key in cls._validators:
+                if validator == cls._validators[validators_key]:
                     logger.info(
-                        f"Multiple declarations of validator with metric dag: {str(metric_dependencies)} found."
+                        f"Multiple declarations of validator with metric dag: {str(validators_key)} found."
                     )
                     return
                 else:
                     logger.warning(
-                        f"Overwriting declaration of validator with metric dag: {str(metric_dependencies)}."
+                        f"Overwriting declaration of validator with metric dag: {str(validators_key)}."
                     )
-            logger.debug(f"Registering validator: {str(metric_dependencies)}")
+            logger.debug(f"Registering validator: {str(validators_key)}")
 
             @wraps(validator)
             def inner_func(self, *args, **kwargs):
                 raw_response = validator(self, *args, **kwargs)
                 return self._build_evr(raw_response)
 
-            cls._validators[metric_dependencies] = inner_func
+            cls._validators[
+                (
+                    validator.__qualname__.split(".")[0],  # expectation class name
+                    validator_name,
+                    metric_dependencies,
+                )
+            ] = inner_func
 
             return inner_func
 
@@ -337,6 +361,14 @@ class Expectation(ABC, metaclass=MetaExpectation):
             kwargs=recursively_convert_to_json_serializable(deepcopy(all_args)),
             meta=meta,
         )
+
+    def get_validator_name(self):
+        """
+        This is just a placeholder for more complex logic to determine the validator_name
+        Returns:
+
+        """
+        return "default"
 
 
 class DatasetExpectation(Expectation, ABC):

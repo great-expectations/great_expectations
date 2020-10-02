@@ -134,6 +134,16 @@ class Validator:
             )
 
     def validate_expectation(self, name):
+        """
+        Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the expectation's
+                validate method to obtain a validation result. Also adds in the runtime configuration
+
+                        Args:
+                            name (str): The name of the Expectation being validated
+
+                        Returns:
+                            The Expectation's validation result
+        """
         def inst_expectation(*args, **kwargs):
             expectation_impl = get_expectation_impl(name)
             allowed_config_keys = expectation_impl.get_allowed_config_keys()
@@ -160,7 +170,7 @@ class Validator:
                     meta=meta
                 )
             )
-
+            """Given an implementation and a configuration for any Expectation, returns its validation result"""
             runtime_configuration = {
                 k: v
                 for k, v in kwargs.items()
@@ -198,9 +208,11 @@ class Validator:
 
     @property
     def execution_engine(self):
+        """Returns the execution engine being used by the validator at the given time"""
         return self._execution_engine
 
     def list_available_expectation_types(self):
+        """ Returns a list of all expectations available to the validator"""
         keys = dir(self)
         return [
             expectation for expectation in keys if expectation.startswith("expect_")
@@ -214,6 +226,9 @@ class Validator:
         parent_node: Union[MetricEdgeKey, None] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> None:
+        """Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
+        until all metrics have been added."""
+
         metric_kwargs = get_metric_kwargs(metric_name)
 
         expectation_impl = get_expectation_impl(configuration.expectation_type)
@@ -296,6 +311,24 @@ class Validator:
         metrics: dict = None,
         runtime_configuration: dict = None,
     ) -> List[ExpectationValidationResult]:
+        """Obtains validation dependencies for each metric using the implementation of their associated expectation,
+        then proceeds to add these dependencies to the validation graph, supply readily available metric implementations
+        to fulfill current metric requirements, and validate these metrics.
+
+                Args:
+                    batches (Dict[str, Batch]): A Dictionary of batches and their corresponding names that will be used
+                    for Expectation Validation.
+                    configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will
+                    be used to supply domain and values for metrics.
+                    execution_engine (ExecutionEngine): An Execution Engine that will be used for extraction of metrics
+                    from the registry.
+                    metrics (dict): A list of currently registered metrics in the registry
+                    runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics
+                    such as the result_format.
+
+                Returns:
+                    A list of Validations, validating that all necessary metrics are available.
+        """
         if execution_engine is None:
             if self._execution_engine:
                 execution_engine = self._execution_engine
@@ -348,6 +381,8 @@ class Validator:
         return evrs
 
     def _parse_validation_graph(self, validation_graph, metrics):
+        """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
+        validation graph (a graph structure of metric ids) edges"""
         needed_metric_ids = set()
         needed_metrics = set()
         ready_metric_ids = set()
@@ -374,6 +409,8 @@ class Validator:
         metrics: dict,
         runtime_configuration: dict = None,
     ):
+        """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
+        resolved"""
         return execution_engine.resolve_metrics(
             batches, metrics_to_resolve, metrics, runtime_configuration
         )
@@ -719,13 +756,16 @@ class Validator:
         )
 
     def set_config_value(self, key, value):
+        """Setter for config value"""
         self._validator_config[key] = value
 
     def get_config_value(self, key):
+        """Getter for config value"""
         return self._validator_config[key]
 
     @property
     def batch(self):
+        """Getter for batch"""
         if self._batch:
             return self._batch
         else:
@@ -733,6 +773,7 @@ class Validator:
 
     @property
     def batch_spec(self):
+        """Getter for batch_spec"""
         if not self.batch:
             return None
         else:
@@ -740,10 +781,12 @@ class Validator:
 
     @property
     def batch_id(self):
+        """Getter for batch id"""
         return self.batch_spec.to_id()
 
     @property
     def batch_markers(self):
+        """Getter for batch markers"""
         if not self.batch:
             return None
         else:
@@ -751,9 +794,11 @@ class Validator:
 
     @property
     def batch_definition(self):
+        """Getter for the batch definition"""
         return self.batch.batch_definition
 
     def discard_failing_expectations(self):
+        """Removes any expectations from the validator where the validation has failed"""
         res = self.validate(only_return_failures=True).results
         if any(res):
             for item in res:
@@ -784,10 +829,12 @@ class Validator:
 
     @property
     def default_expectation_args(self):
+        """A getter for default Expectation arguments"""
         return self.execution_engine.default_expectation_args
 
     def set_default_expectation_argument(self, argument, value):
-        """Set a default expectation argument for this data_asset
+        """
+        Set a default expectation argument for this data_asset
 
         Args:
             argument (string): The argument to be replaced
@@ -811,6 +858,10 @@ class Validator:
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False,
     ):
+        """
+        Returns an expectation configuration, providing an option to discard failed expectation and discard/ include'
+        different result aspects, such as exceptions and result format.
+        """
         warnings.warn(
             "get_expectations_config is deprecated, and will be removed in a future release. "
             + "Please use get_expectation_suite instead.",
@@ -1316,7 +1367,8 @@ class Validator:
         return result
 
     def get_evaluation_parameter(self, parameter_name, default_value=None):
-        """Get an evaluation parameter value that has been stored in meta.
+        """
+        Get an evaluation parameter value that has been stored in meta.
 
         Args:
             parameter_name (string): The name of the parameter to store.
@@ -1331,7 +1383,8 @@ class Validator:
             return default_value
 
     def set_evaluation_parameter(self, parameter_name, parameter_value):
-        """Provide a value to be stored in the data_asset evaluation_parameters object and used to evaluate
+        """
+        Provide a value to be stored in the data_asset evaluation_parameters object and used to evaluate
         parameterized expectations.
 
         Args:
@@ -1350,6 +1403,7 @@ class Validator:
         batch_definition=None,
         citation_date=None,
     ):
+        """Adds a citation to an existing Expectation Suite within the validator"""
         if batch_spec is None:
             batch_spec = self.batch_spec
         if batch_markers is None:
@@ -1436,11 +1490,19 @@ def _calc_validation_statistics(validation_results):
     )
 
 
-"""This is currently helping bridge APIs"""
-
-
 class BridgeValidator:
+    """This is currently helping bridge APIs"""
     def __init__(self, batch, expectation_suite, expectation_engine=None, **kwargs):
+        """Builds an expectation_engine object using an expectation suite and a batch, with the expectation engine being
+        determined either by the user or by the type of batch data (pandas dataframe, SqlAlchemy table, etc.)
+
+        Args:
+            batch (Batch): A Batch in Pandas, Spark, or SQL format
+            expectation_suite (ExpectationSuite): The Expectation Suite available to the validator within the current Data
+            Context
+            expectation_engine (ExecutionEngine): The current Execution Engine being utilized. If this is not set, it is
+            determined by the type of data within the given batch
+        """
         self.batch = batch
         self.expectation_suite = expectation_suite
 
@@ -1485,6 +1547,10 @@ class BridgeValidator:
         self.init_kwargs = kwargs
 
     def get_dataset(self):
+        """
+        Bridges between Execution Engines in providing access to the batch data. Validates that Dataset classes
+        contain proper type of data (i.e. a Pandas Dataset does not contain SqlAlchemy data)
+        """
         if issubclass(self.expectation_engine, PandasDataset):
             import pandas as pd
 
