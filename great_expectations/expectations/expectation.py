@@ -503,6 +503,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
         bundle_computation=False,
+        filter_column_isnull=False,
     )
     def _count(
         self,
@@ -512,7 +513,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
+        filter_column_isnull: bool = False,
     ):
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches

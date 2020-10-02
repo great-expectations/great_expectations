@@ -98,7 +98,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
+        filter_column_isnull: bool = False,
     ):
         return pd.DataFrame({"column_values.nonnull": ~series.isnull()})
 
