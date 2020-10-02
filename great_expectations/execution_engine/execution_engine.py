@@ -507,7 +507,7 @@ class ExecutionEngine(MetaExecutionEngine):
 
     @property
     def loaded_batch(self):
-        if not self.loaded_batch_id:
+        if self.loaded_batch_id is None:
             return None
         else:
             return self.batches.get(self.loaded_batch_id)
