@@ -37,6 +37,20 @@ class SlackRenderer(Renderer):
                 "expectation_suite_name", "__no_expectation_suite_name__"
             )
 
+            datasource_name = validation_result.meta["data_asset_name"]["datasource"]
+            generator_name = validation_result.meta["data_asset_name"]["generator"]
+            generator_asset_name = validation_result.meta["data_asset_name"][
+                "generator_asset"
+            ]
+            data_asset_name_list = []
+            if datasource_name:
+                data_asset_name_list.append(datasource_name)
+            if generator_name:
+                data_asset_name_list.append(generator_name)
+            if generator_asset_name:
+                data_asset_name_list.append(generator_asset_name)
+            data_asset_name = "/".join(data_asset_name_list)
+
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
             run_id = validation_result.meta.get("run_id", "__no_run_id__")
@@ -52,10 +66,16 @@ class SlackRenderer(Renderer):
 
             summary_text = """*Batch Validation Status*: {}
 *Expectation suite name*: `{}`
+*Data asset name*: `{}`
 *Run ID*: `{}`
 *Batch ID*: `{}`
 *Summary*: {}""".format(
-                status, expectation_suite_name, run_id, batch_id, check_details_text,
+                status,
+                expectation_suite_name,
+                data_asset_name,
+                run_id,
+                batch_id,
+                check_details_text,
             )
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message

@@ -38,7 +38,7 @@ def test_SlackRenderer_validation_results_with_datadocs():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data asset name*: `x/y/z`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
                 },
             },
             {"type": "divider"},
@@ -68,7 +68,7 @@ def test_SlackRenderer_validation_results_with_datadocs():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data asset name*: `x/y/z`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
                 },
             },
             {
@@ -105,7 +105,7 @@ def test_SlackRenderer_validation_results_with_datadocs():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data asset name*: `x/y/z`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
                 },
             },
             {
