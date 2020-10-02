@@ -375,7 +375,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def __init__(
         self,
         bucket,
-        prefix=None,
+        prefix="",
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
