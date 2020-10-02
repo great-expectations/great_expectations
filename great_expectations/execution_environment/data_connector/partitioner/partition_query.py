@@ -156,8 +156,8 @@ class PartitionQuery(object):
             selected_partitions: List[Partition] = list(
                 filter(
                     lambda partition: filter_function(
-                        name=partition.name,
                         data_asset_name=partition.data_asset_name,
+                        partition_name=partition.name,
                         partition_definition=partition.definition
                     ),
                     partitions
@@ -170,8 +170,8 @@ class PartitionQuery(object):
         selected_partitions: List[Partition] = list(
             filter(
                 lambda partition: filter_function(
-                    partition_name=partition.name,
                     data_asset_name=partition.data_asset_name,
+                    partition_name=partition.name,
                     partition_definition=partition.definition
                 ),
                 partitions
@@ -181,8 +181,8 @@ class PartitionQuery(object):
 
     def best_effort_partition_matcher(self) -> Callable:
         def match_partition_to_query_params(
-            partition_name: str,
             data_asset_name: str,
+            partition_name: str,
             partition_definition: dict
         ) -> bool:
             if self.partition_name:
