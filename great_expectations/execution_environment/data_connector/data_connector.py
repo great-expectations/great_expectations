@@ -12,10 +12,10 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition_spec import PartitionSpec
-from great_expectations.execution_environment.data_connector.partitioner.partition import (
-    Partition,
-    get_partition_spec
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.execution_environment.data_connector.partitioner.partition_query import (
+    PartitionQuery,
+    build_partition_query
 )
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.util import nested_update
@@ -54,7 +54,7 @@ class DataConnector(object):
         "execution_environment",
         "data_connector",
         "data_asset_name",
-        "partition_name",
+        "partition_query",
         "batch_spec_passthrough",
         "limit",
     }
@@ -301,18 +301,10 @@ multiple partitions, including "{partition.partition_spec}", for the same data r
 
         batch_spec_scaffold["execution_environment"] = self._execution_environment.name
 
-        # TODO: <Alex>Need to look at batch_definition and see if it has partition_index, partition_name, or partition_spec</Alex>
-        # TODO: <Alex>This should be all under auspices of partition_query dict or some way to tell when it is query function, string name, or spec dict...</Alex>
-        partition_name: str = batch_definition.get("partition_name")
-        partition_spec_config: dict = {
-            "name": partition_name
-        }
-        partition_spec: PartitionSpec = get_partition_spec(partition_spec_config=partition_spec_config)
-        # TODO: <Alex>If partition_name is not specified in batch_definition, then assume "latest" (or "most recent" as defined by the first element in the sorted list of partitions).</Alex>
-        # TODO: <Alex>Must accept partition_definition (and name) to be a loss-less retrieval.</Alex>
+        partition_query: dict = batch_definition.get("partition_query")
         partitions: List[Partition] = self.get_available_partitions(
             data_asset_name=data_asset_name,
-            partition_spec=partition_spec
+            partition_query=partition_query
         )
         if len(partitions) == 0:
             raise ge_exceptions.BatchSpecError(
@@ -344,14 +336,15 @@ multiple partitions, including "{partition.partition_spec}", for the same data r
     def get_available_partitions(
         self,
         data_asset_name: str = None,
-        partition_spec: Union[str, Dict[str, Union[str, Dict]], PartitionSpec, Callable, None] = None,
+        partition_query: Union[Dict[str, Union[int, str, Dict, Callable]], None] = None,
         repartition: bool = False
     ) -> List[Partition]:
         partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
+        partition_query_obj: PartitionQuery = build_partition_query(partition_query_dict=partition_query)
         return self._get_available_partitions(
             partitioner=partitioner,
             data_asset_name=data_asset_name,
-            partition_spec=partition_spec,
+            partition_query=partition_query_obj,
             repartition=repartition
         )
 
@@ -359,7 +352,7 @@ multiple partitions, including "{partition.partition_spec}", for the same data r
         self,
         partitioner: Partitioner,
         data_asset_name: str = None,
-        partition_spec: Union[str, Dict[str, Union[str, Dict]], PartitionSpec, Callable, None] = None,
+        partition_query: Union[PartitionQuery, None] = None,
         repartition: bool = False
     ) -> List[Partition]:
         raise NotImplementedError

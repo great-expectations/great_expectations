@@ -1,11 +1,11 @@
 from pathlib import Path
 import itertools
 import logging
-from typing import List, Dict, Union, Callable
+from typing import List, Dict, Union
 
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition_spec import PartitionSpec
+from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types import PathBatchSpec
@@ -93,7 +93,7 @@ class FilesDataConnector(DataConnector):
         self,
         partitioner: Partitioner,
         data_asset_name: str = None,
-        partition_spec: Union[str, Dict[str, Union[str, Dict]], PartitionSpec, Callable, None] = None,
+        partition_query: Union[PartitionQuery, None] = None,
         repartition: bool = None
     ) -> List[Partition]:
         paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
@@ -108,9 +108,9 @@ class FilesDataConnector(DataConnector):
             default_data_asset_name: str = data_asset_name or Partitioner.DEFAULT_DATA_ASSET_NAME
             return partitioner.get_available_partitions(
                 data_asset_name=data_asset_name,
-                partition_spec=partition_spec,
+                partition_query=partition_query,
                 repartition=repartition,
-                # TODO: <Alex></Alex>
+                # TODO: <Alex>Specific partitioner parameters below.</Alex>
                 pipeline_data_asset_name=default_data_asset_name,
                 pipeline_datasets=default_datasets
             )
@@ -118,8 +118,8 @@ class FilesDataConnector(DataConnector):
         auto_discover_assets: bool = not data_asset_config_exists
         return partitioner.get_available_partitions(
             data_asset_name=data_asset_name,
-            partition_spec=partition_spec,
-            # TODO: <Alex></Alex>
+            partition_query=partition_query,
+            # TODO: <Alex>Specific partitioner parameters below.</Alex>
             paths=paths,
             auto_discover_assets=auto_discover_assets
         )

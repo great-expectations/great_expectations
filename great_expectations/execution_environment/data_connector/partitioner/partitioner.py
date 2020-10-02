@@ -2,17 +2,14 @@
 
 import logging
 import copy
-from typing import Union, List, Dict, Callable, Iterator
+from typing import Union, List, Iterator
 from ruamel.yaml.comments import CommentedMap
 from great_expectations.data_context.types.base import (
     SorterConfig,
     sorterConfigSchema
 )
-from great_expectations.execution_environment.data_connector.partitioner.partition_spec import PartitionSpec
-from great_expectations.execution_environment.data_connector.partitioner.partition import (
-    Partition,
-    get_partition_spec
-)
+from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 from great_expectations.core.id_dict import BatchSpec
 import great_expectations.exceptions as ge_exceptions
@@ -124,13 +121,12 @@ class Partitioner(object):
             )
         return sorter
 
-    # TODO: <Alex>Add int type</Alex>
     def get_available_partitions(
         self,
         data_asset_name: str = None,
-        partition_spec: Union[str, Dict[str, Union[str, Dict]], PartitionSpec, Callable] = None,
+        partition_query: Union[PartitionQuery, None] = None,
         repartition: bool = False,
-        # TODO: <Alex></Alex>
+        # TODO: <Alex>Accommodating specific partitioner parameters below.</Alex>
         **kwargs
     ) -> List[Partition]:
         if repartition:
@@ -155,43 +151,9 @@ class Partitioner(object):
         if cached_partitions is None or len(cached_partitions) == 0:
             return []
         cached_partitions = self.get_sorted_partitions(partitions=cached_partitions)
-        if partition_spec is None:
+        if partition_query is None:
             return cached_partitions
-        # TODO: <Alex>Do check that only one of partition_index, partition_spec obj, partition_spec dict, and partition_spec callable can work at one time.</Alex>
-        # TODO: <Alex>Maybe call it partition_query or something... and then remove PartitionSpec to just have Partition?..  Maybe accept PartitionSpec in constructor like before...  Check carefully...</Alex>
-        filter_func: Callable
-        if isinstance(partition_spec, Callable):
-            filter_func = partition_spec
-            # return list(
-            #     filter(
-            #         lambda partition: filter_func(
-            #             name=partition.name,
-            #             data_asset_name=partition.data_asset_name,
-            #             partition_definition=partition.definition
-            #         ),
-            #         cached_partitions
-            #     )
-            # )
-        else:
-            partition_spec: PartitionSpec = get_partition_spec(partition_spec_config=partition_spec)
-            filter_func = self.best_effort_partition_matcher(partition_spec=partition_spec)
-        return list(
-            filter(
-                lambda partition: filter_func(
-                    name=partition.name,
-                    data_asset_name=partition.data_asset_name,
-                    partition_definition=partition.definition
-                ),
-                cached_partitions
-            )
-        )
-        # partition_spec: PartitionSpec = get_partition_spec(partition_spec_config=partition_spec)
-        # return list(
-        #     filter(
-        #         lambda partition: partition.partition_spec == partition_spec,
-        #         cached_partitions
-        #     )
-        # )
+        return partition_query.select_partitions(partitions=cached_partitions)
 
     def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
         if self.sorters and len(self.sorters) > 0:
@@ -200,22 +162,6 @@ class Partitioner(object):
                 partitions = sorter.get_sorted_partitions(partitions=partitions)
             return partitions
         return partitions
-
-    @staticmethod
-    def best_effort_partition_matcher(partition_spec: PartitionSpec) -> Callable:
-        def match_partition_to_spec(name: str, data_asset_name: str, partition_definition: dict) -> bool:
-            if partition_spec.definition and partition_definition == partition_spec.definition and \
-                    partition_spec.name and name == partition_spec.name and \
-                    partition_spec.data_asset_name and data_asset_name == partition_spec.data_asset_name:
-                return True
-            if partition_spec.name:
-                if name != partition_spec.name:
-                    return False
-            if partition_spec.data_asset_name:
-                if data_asset_name != partition_spec.data_asset_name:
-                    return False
-            return True
-        return match_partition_to_spec
 
     def _compute_partitions_for_data_asset(self, data_asset_name: str = None, **kwargs) -> List[Partition]:
         raise NotImplementedError

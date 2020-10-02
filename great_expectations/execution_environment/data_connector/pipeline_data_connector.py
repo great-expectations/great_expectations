@@ -1,8 +1,8 @@
 import logging
-from typing import Union, List, Dict, Any, Callable
+from typing import Union, List, Any
 
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition_spec import PartitionSpec
+from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types.batch_spec import InMemoryBatchSpec
@@ -54,18 +54,14 @@ class PipelineDataConnector(DataConnector):
         self,
         partitioner: Partitioner,
         data_asset_name: str = None,
-        partition_spec: Union[str, Dict[str, Union[str, Dict]], PartitionSpec, Callable, None] = None,
+        partition_query: Union[PartitionQuery, None] = None,
         repartition: bool = False
     ) -> List[Partition]:
+        # TODO: <Alex>Do not forget to make it such that this is partition_name_pattern -- next to last priority...</Alex>
         # TODO: <Alex>Clean this up -- maybe simplify the partition_spec type and not get partition_name...</Alex>
         partition_name: Union[str, None] = None
-        if partition_spec:
-            if isinstance(partition_spec, str):
-                partition_name = partition_spec
-            elif isinstance(partition_spec, dict):
-                partition_name = partition_spec["name"]
-            elif isinstance(partition_spec, PartitionSpec):
-                partition_name = partition_spec.name
+        if partition_query:
+            partition_name = partition_query.partition_name
         data_asset_directives: dict = self._get_data_asset_directives(
             data_asset_name=data_asset_name,
             partition_name=partition_name
@@ -78,9 +74,9 @@ class PipelineDataConnector(DataConnector):
         }
         return partitioner.get_available_partitions(
             data_asset_name=data_asset_name,
-            partition_spec=partition_spec,
+            partition_query=partition_query,
             repartition=repartition,
-            # TODO: <Alex></Alex>
+            # TODO: <Alex>Specific partitioner parameters below.</Alex>
             pipeline_data_asset_name=pipeline_data_asset_name,
             pipeline_datasets=[pipeline_dataset]
         )
