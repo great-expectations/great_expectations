@@ -70,6 +70,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         "catch_exceptions",
         "result_format",
     )
+
     _validators = dict()
     _post_validation_hooks = list()
 
@@ -77,6 +78,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if configuration is not None:
             self.validate_configuration(configuration)
         self._configuration = configuration
+
+    @classmethod
+    def get_allowed_config_keys(cls):
+        return cls.domain_keys + cls.success_keys + cls.runtime_keys
 
     def metrics_validate(
         self,
