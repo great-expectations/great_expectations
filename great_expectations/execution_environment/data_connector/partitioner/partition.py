@@ -28,15 +28,18 @@ class Partition(object):
 
     def __eq__(self, other):
         """Overrides the default implementation"""
-        return self.name == other.name \
-            and self.data_asset_name == other.data_asset_name \
-            and self.definition == other.definition
+        return (
+            isinstance(other, Partition) and
+            self.name == other.name and
+            self.data_asset_name == other.data_asset_name and
+            self.definition == other.definition
+        )
 
     def __hash__(self) -> int:
         return (
-                hash(self.name) ^
-                hash(self.data_asset_name) ^
-                hash(zip(self.definition.items()))
+            hash(self.name) ^
+            hash(self.data_asset_name) ^
+            hash(zip(self.definition.items()))
         )
 
     @property
