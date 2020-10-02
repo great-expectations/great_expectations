@@ -115,19 +115,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         "catch_exceptions": True,
     }
 
-    legacy_method_parameters = (
-        "column",
-        "value_set",
-        "mostly",
-        "parse_strings_as_datetimes",
-        "result_format",
-        "row_condition",
-        "condition_parser",
-        "include_config",
-        "catch_exceptions",
-        "meta",
-    )
-
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
         if configuration is None:

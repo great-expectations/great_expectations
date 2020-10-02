@@ -22,6 +22,7 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
 )
 from great_expectations.expectations.registry import register_expectation
+from great_expectations.expectations.util import legacy_method_parameters
 
 from ..core.batch import Batch
 from ..data_asset.util import (
@@ -71,6 +72,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         "catch_exceptions",
         "result_format",
     )
+    legacy_method_parameters = legacy_method_parameters
 
     _validators = dict()
     _post_validation_hooks = list()

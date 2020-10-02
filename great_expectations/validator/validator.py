@@ -159,7 +159,7 @@ class Validator:
             # positional arguments to expectation methods
             for idx, arg in enumerate(args):
                 try:
-                    arg_name = expectation_impl.legacy_method_parameters[idx]
+                    arg_name = expectation_impl.legacy_method_parameters.get(name, tuple())[idx]
                     if arg_name in allowed_config_keys:
                         expectation_kwargs[arg_name] = arg
                     elif arg_name == "meta":
