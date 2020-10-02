@@ -879,6 +879,7 @@ Notes:
         filter_column_isnull,
         **kwargs,
     ):
+        """Returns respective value counts for distinct column values"""
         data = execution_engine.get_domain_dataframe(
             metric_domain_kwargs, batches, filter_column_isnull=filter_column_isnull
         )
@@ -962,7 +963,11 @@ Notes:
         filter_column_isnull: bool = True,
     ):
         """
-        A decorator for declaring a metric provider
+        A decorator for declaring a metric provider for instances of map Expectations, registering the metric itself
+        and several specialized column map sub methods used to provide further information about the Expectation itself.
+
+        Returns:
+            A generic metric provider function to be molded by the metric instance itself.
         """
 
         def outer(metric_fn: Callable):

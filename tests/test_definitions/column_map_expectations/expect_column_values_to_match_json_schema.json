@@ -12,7 +12,7 @@
       }
     },
     "tests" : [{
-      "title" : "Basic positive test",
+      "title" : "Basic_positive_test",
       "exact_match_out" : false,
       "in": {
         "column": "x",
@@ -24,7 +24,7 @@
         "success": true
       }
     },{
-      "title" : "Positive test with a more complex schema",
+      "title" : "Positive_test_with_a_more_complex_schema",
       "exact_match_out" : false,
       "in": {
         "column": "x",
@@ -43,7 +43,7 @@
         "success": true
       }
     },{
-      "title" : "Basic negative test",
+      "title" : "Basic_negative_test",
       "exact_match_out" : false,
       "in": {
         "column": "x",

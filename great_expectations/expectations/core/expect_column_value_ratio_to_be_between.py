@@ -14,79 +14,65 @@ from ..expectation import (
     InvalidExpectationConfigurationError,
     _format_map_output,
 )
-from ..registry import extract_metrics
+from ..registry import extract_metrics, get_domain_metrics_dict_by_name
 
 
-class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
-    """Expect the proportion of unique values to be between a minimum value and a maximum value.
-
-    For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
-    values for a proportion of 0.4.
-
-    expect_column_proportion_of_unique_values_to_be_between is a \
-    :func:`column_aggregate_expectation
-    <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
-
-
-    Args:
-        column (str): \
-            The column name.
-        min_value (float or None): \
-            The minimum proportion of unique values. (Proportions are on the range 0 to 1)
-        max_value (float or None): \
-            The maximum proportion of unique values. (Proportions are on the range 0 to 1)
-        strict_min (boolean):
-            If True, the minimum proportion of unique values must be strictly larger than min_value, default=False
-        strict_max (boolean):
-            If True, the maximum proportion of unique values must be strictly smaller than max_value, default=False
-
-    Other Parameters:
-        result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
-            For more detail, see :ref:`result_format <result_format>`.
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
-        meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
-
-    Returns:
-        An ExpectationSuiteValidationResult
-
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-    Notes:
-        These fields in the result object are customized for this expectation:
-        ::
-
-            {
-                "observed_value": (float) The proportion of unique values in the column
-            }
-
-        * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
-        * If min_value is None, then max_value is treated as an upper bound
-        * If max_value is None, then min_value is treated as a lower bound
-
-    See Also:
-        :func:`expect_column_unique_value_count_to_be_between \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine
-        .expect_column_unique_value_count_to_be_between>`
-
+class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
     """
+       Expect the Ratio of a value in a Column to be between a Minimum and Maximum Threshold
+
+               expect_column_values_to_be_of_type is a :func:`dataset_expectation \
+               <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.dataset_expectation>` for
+               typed-column
+               backends,
+               and also for PandasExecutionEngine where the column dtype and provided type_ are unambiguous constraints (any
+               dtype
+               except 'object' or dtype of 'object' with type_ specified as 'object').
+
+               Parameters:
+                   column (str): \
+                       The column name of a numerical column.
+                   value (any type): \
+                        A value whose ratio is tested
+                   min_value (float or None): \
+                        The minimum threshold for the value ratio.
+                    max_value (float or None): \
+                        The maximum threshold for the value ratio.
+                    strict_min (boolean):
+                        If True, the value ratio must be strictly larger than min_value, default=False
+                    strict_max (boolean):
+                        If True, the column value ratio must be strictly smaller than max_value, default=False
+
+               Other Parameters:
+                   result_format (str or None): \
+                       Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                       For more detail, see :ref:`result_format <result_format>`.
+                   include_config (boolean): \
+                       If True, then include the Expectation config as part of the result object. \
+                       For more detail, see :ref:`include_config`.
+                   catch_exceptions (boolean or None): \
+                       If True, then catch exceptions and include them as part of the result object. \
+                       For more detail, see :ref:`catch_exceptions`.
+                   meta (dict or None): \
+                       A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                       modification. For more detail, see :ref:`meta`.
+
+               Returns:
+                   An ExpectationSuiteValidationResult
+
+                   Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+                   :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+       """
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.unique_proportion",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+    metric_dependencies = ("column.aggregate.value_ratio",)
+    success_keys = ("value", "min_value", "strict_min", "max_value", "strict_max")
 
     # Default values
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
+        "value": None,
         "min_value": None,
         "max_value": None,
         "strict_min": None,
@@ -97,16 +83,16 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Aggregate Metric Decorator for the Unique Proportion"""
+    """ A Column Map Metric Decorator for the Value ratio"""
 
     @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.unique_proportion",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
+        metric_name="column.aggregate.value_ratio",
+        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_value_keys=("value",),
+        metric_dependencies=("column_values.nonnull.count",),
         filter_column_isnull=False,
     )
-    def _pandas_unique_proportion(
+    def _pandas_value_ratio(
         self,
         batches: Dict[str, Batch],
         execution_engine: PandasExecutionEngine,
@@ -115,18 +101,26 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        """Unique Proportion Metric"""
+        """Value Ratio Metric Function, extracts nonnull count to use for obtaining the value ratio"""
+        # Column Extraction
         series = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
 
-        total_values = series.shape[0]
-        unique_values = series.value_counts().shape[0]
+        domain_metrics_lookup = get_domain_metrics_dict_by_name(
+            metrics=metrics, metric_domain_kwargs=metric_domain_kwargs
+        )
+        nonnull_count = domain_metrics_lookup["column_values.nonnull.count"]
 
-        if total_values > 0:
-            return unique_values / total_values
+        wanted_value = metric_value_kwargs["value"]
+
+        # Checking that the wanted value is indeed in the value set itself
+        if wanted_value in series.value_counts():
+            value_count = series.value_counts()[wanted_value]
         else:
-            return 0
+            value_count = 0
+
+        return value_count / nonnull_count
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -150,8 +144,8 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
         # Ensuring basic configuration parameters are properly set
         try:
             assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
+                "value" in configuration.kwargs
+            ), "A value whose ratio will be computed is required"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -166,14 +160,19 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
             # Ensuring Proper interval has been provided
             assert (
                 min_val is not None or max_val is not None
-            ), "min_value and max_value cannot both be none"
+            ), "min_value and max_value cannot both be None"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"
             assert max_val is None or isinstance(
                 max_val, (float, int)
             ), "Provided max threshold must be a number"
-
+            assert min_val is None or 0 <= min_val <= 1, (
+                "The minimum and maximum are ratios and thus must be between" "0 and 1"
+            )
+            assert max_val is None or 0 <= max_val <= 1, (
+                "The minimum and maximum are ratios and thus must be between" "0 and 1"
+            )
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -192,7 +191,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        """Validates the proportion of unique values against a minimum and maximum threshold."""
+        """Validates the given data against the set minimum and maximum value thresholds for the desired value ratio"""
         # Obtaining dependencies used to validate the expectation
         validation_dependencies = self.get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
@@ -215,7 +214,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
                 "result_format", self.default_kwarg_values.get("result_format")
             )
 
-        column_unique_prop = metric_vals.get("column.aggregate.unique_proportion")
+        value_ratio = metric_vals.get("column.aggregate.value_ratio")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
@@ -226,20 +225,20 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
         # Checking if mean lies between thresholds
         if min_value is not None:
             if strict_min:
-                above_min = column_unique_prop > min_value
+                above_min = value_ratio > min_value
             else:
-                above_min = column_unique_prop >= min_value
+                above_min = value_ratio >= min_value
         else:
             above_min = True
 
         if max_value is not None:
             if strict_max:
-                below_max = column_unique_prop < max_value
+                below_max = value_ratio < max_value
             else:
-                below_max = column_unique_prop <= max_value
+                below_max = value_ratio <= max_value
         else:
             below_max = True
 
         success = above_min and below_max
 
-        return {"success": success, "result": {"observed_value": column_unique_prop}}
+        return {"success": success, "result": {"observed_value": value_ratio}}

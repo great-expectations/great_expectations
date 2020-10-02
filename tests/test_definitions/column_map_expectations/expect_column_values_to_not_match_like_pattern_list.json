@@ -17,7 +17,7 @@
     },
     "tests" : [
     {
-      "title" : "Basic positive test",
+      "title" : "Basic_positive_test",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -31,7 +31,7 @@
       "only_for": ["sqlalchemy"]
     },
     {
-      "title" : "Positive test with multiple like_patternes",
+      "title" : "Positive_test_with_multiple_like_patternes",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -45,7 +45,7 @@
       "only_for": ["sqlalchemy"]
     },
     {
-      "title" : "Basic negative test",
+      "title" : "Basic_negative_test",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -59,7 +59,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title" : "Negative test with more string-ish strings",
+      "title" : "Negative_test_with_more_string-ish_strings",
       "exact_match_out" : false,
       "in": {
         "column": "x",
@@ -73,7 +73,7 @@
       "only_for": ["sqlalchemy"]
     },
     {
-      "title" : "Basic negative test",
+      "title" : "Basic_negative_test",
       "exact_match_out" : false,
       "in": {
         "column": "w",

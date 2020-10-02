@@ -1,7 +1,8 @@
 import logging
-from typing import List, Any
+from typing import Union, List, Any
 
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
+from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types.batch_spec import InMemoryBatchSpec
@@ -52,10 +53,15 @@ class PipelineDataConnector(DataConnector):
     def _get_available_partitions(
         self,
         partitioner: Partitioner,
-        partition_name: str = None,
         data_asset_name: str = None,
+        partition_query: Union[PartitionQuery, None] = None,
         repartition: bool = False
     ) -> List[Partition]:
+        # TODO: <Alex>Do not forget to make it such that this is partition_name_pattern -- next to last priority...</Alex>
+        # TODO: <Alex>Clean this up -- maybe simplify pass the partition_query and not get partition_name...</Alex>
+        partition_name: Union[str, None] = None
+        if partition_query:
+            partition_name = partition_query.partition_name
         data_asset_directives: dict = self._get_data_asset_directives(
             data_asset_name=data_asset_name,
             partition_name=partition_name
@@ -67,9 +73,10 @@ class PipelineDataConnector(DataConnector):
             "data_reference": self.in_memory_dataset
         }
         return partitioner.get_available_partitions(
-            partition_name=partition_name,
             data_asset_name=data_asset_name,
+            partition_query=partition_query,
             repartition=repartition,
+            # TODO: <Alex>Specific partitioner parameters below.</Alex>
             pipeline_data_asset_name=pipeline_data_asset_name,
             pipeline_datasets=[pipeline_dataset]
         )

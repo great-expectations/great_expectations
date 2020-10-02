@@ -83,6 +83,8 @@ except ImportError:
 
 
 def _get_dialect_type_module(dialect):
+    """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
+    with the database/database implementation. Currently checks for RedShift/BigQuery dialects"""
     if dialect is None:
         logger.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
@@ -109,7 +111,24 @@ def _get_dialect_type_module(dialect):
 
 
 class SqlAlchemyBatchData:
+    """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
+    and several getters used to access various properties."""
+
     def __init__(self, engine, table_name=None, schema=None, query=None):
+        """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
+        parameters have been provided. If a Query is given, also builds a temporary table for this query
+
+            Args:
+                engine (SqlAlchemyExecutionEngineExecutionEngine): \
+                    A SqlAlchemy Execution Engine that will act upon the data
+                table_name (string or None): \
+                    The name of the table that will be accessed. Either this parameter or the query parameter must be
+                    specified. Default is 'None'.
+                schema (string or None): \
+                    The name of the schema in which the databases lie
+                query (string or None): \
+                    A query string representing a domain, which will be used to create a temporary table
+            """
         self._engine = engine
         self._table_name = table_name
         self._schema = schema
@@ -190,10 +209,12 @@ class SqlAlchemyBatchData:
 
     @property
     def sql_engine_dialect(self) -> DefaultDialect:
+        """Returns the Batches' current engine dialect"""
         return self._engine.dialect
 
     @property
     def table(self):
+        """Returns a table of the data inside the sqlalchemy_execution_engine"""
         return self._table
 
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
@@ -309,6 +330,31 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         url=None,
         **kwargs,
     ):
+        """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
+        desired database. Also initializes the dialect to be used and configures usage statistics.
+
+            Args:
+                name (str): \
+                    The name of the SqlAlchemyExecutionEngine
+                credentials: \
+                    If the Execution Engine is not provided, the credentials can be used to build the Execution
+                    Engine. If the Engine is provided, it will be used instead
+                data_context (DataContext): \
+                    An object representing a Great Expectations project that can be used to access Expectation
+                    Suites and the Project Data itself
+                engine (SqlAlchemyExecutionEngine): \
+                    An Execution Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
+                    Execution Engine has already been configured and should be reused. Will override Credentials
+                    if provided.
+                connection_string (string): \
+                    If neither the engines nor the credentials have been provided, a connection string can be used
+                    to access the data. This will be overridden by both the engine and credentials if those are
+                    provided.
+                url (string): \
+                    If neither the engines, the credentials, nor the connection_string have been provided,
+                    a url can be used to access the data. This will be overridden by all other configuration
+                    options if any are provided.
+        """
         super().__init__(name=None, data_context=data_context)
         self._name = name
         if engine is not None:
@@ -380,6 +426,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
     def _build_engine(self, credentials, **kwargs) -> sa.engine.Engine:
+        """
+        Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
+        private key path.
+        """
         # Update credentials with anything passed during connection time
         drivername = credentials.pop("drivername")
         schema_name = credentials.pop("schema_name", None)
@@ -408,6 +458,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _get_sqlalchemy_key_pair_auth_url(
         self, drivername: str, credentials: dict
     ) -> Tuple[str, dict]:
+        """
+        Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
+        values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
+
+        Args:
+            drivername(str) - The name of the driver class
+            credentials(dict) - A dictionary of database credentials used to access the database
+
+        Returns:
+            a tuple consisting of a url with the serialized key-pair authentication, and a dictionary of engine kwargs.
+        """
         from cryptography.hazmat.backends import default_backend
         from cryptography.hazmat.primitives import serialization
 
@@ -574,6 +635,20 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         resolve_batch: Iterable[Tuple[MetricEdgeKey, Callable, dict]],
         metrics: Dict[Tuple, Any] = None,
     ) -> dict:
+        """For every metrics in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds a
+        bundles the metrics into one large query dictionary so that they are all executed simultaneously. Will fail if
+        bundling the metrics together is not possible.
+
+            Args:
+                resolve_batch (Iterable[Tuple[MetricEdgeKey, Callable, dict]): \
+                    A Dictionary containing a Metric's MetricEdgeKeys (its unique identifier), its metric provider function
+                    (the function that actually executes the metric), and its domain and value keyword argument dictionary.
+                metrics (Dict[Tuple, Any]): \
+                    A dictionary of metrics defined in the registry and corresponding arguments
+
+            Returns:
+                A dictionary of metric names and their corresponding now-queried values.
+        """
         if metrics is None:
             metrics = dict()
 
@@ -626,7 +701,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         filter_column_isnull,
         **kwargs,
     ):
-        """"""
+        """Returns column nonnull count for ColumnMapExpectations"""
         assert metric_name.endswith(".count")
         metric_key = MetricEdgeKey(
             metric_name[: -len(".count")],
@@ -651,7 +726,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         filter_column_isnull,
         **kwargs,
     ):
-        """"""
+        """
+        Particularly for the purpose of finding unexpected values, returns all the metric values which do not meet an
+        expected Expectation condition for ColumnMapExpectation Expectations.
+        """
+
         assert metric_name.endswith(".unexpected_values")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
@@ -688,6 +767,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         filter_column_isnull,
         **kwargs,
     ):
+        """
+        Returns value counts for all the metric values which do not meet an expected Expectation condition for instances
+        of ColumnMapExpectation.
+        """
+
         assert metric_name.endswith(".unexpected_value_counts")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
@@ -723,6 +807,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         filter_column_isnull,
         **kwargs,
     ):
+        """
+        Returns all rows of the metric values which do not meet an expected Expectation condition for instances
+        of ColumnMapExpectation.
+        """
+
         assert metric_name.endswith(".unexpected_rows")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
@@ -754,7 +843,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         filter_column_isnull: bool = True,
     ):
         """
-        A decorator for declaring a metric provider
+        A decorator for declaring a metric provider for instances of map Expectations, registering the metric itself
+        and several specialized column map sub methods used to provide further information about the Expectation itself.
+
+        Returns:
+            A generic metric provider function, which includes an expected metric condition.
         """
 
         def outer(metric_fn: Callable):

@@ -18,6 +18,57 @@ from ..registry import extract_metrics
 
 
 class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
+    """Expect the most common value to be within the designated value set
+
+            expect_column_most_common_value_to_be_in_set is a \
+            :func:`column_aggregate_expectation
+            <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
+
+            Args:
+                column (str): \
+                    The column name
+                value_set (set-like): \
+                    A list of potential values to match
+
+            Keyword Args:
+                ties_okay (boolean or None): \
+                    If True, then the expectation will still succeed if values outside the designated set are as common \
+                    (but not more common) than designated values
+
+            Other Parameters:
+                result_format (str or None): \
+                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                    For more detail, see :ref:`result_format <result_format>`.
+                include_config (boolean): \
+                    If True, then include the expectation config as part of the result object. \
+                    For more detail, see :ref:`include_config`.
+                catch_exceptions (boolean or None): \
+                    If True, then catch exceptions and include them as part of the result object. \
+                    For more detail, see :ref:`catch_exceptions`.
+                meta (dict or None): \
+                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                    modification. For more detail, see :ref:`meta`.
+
+            Returns:
+                An ExpectationSuiteValidationResult
+
+                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+            Notes:
+                These fields in the result object are customized for this expectation:
+                ::
+
+                    {
+                        "observed_value": (list) The most common values in the column
+                    }
+
+                `observed_value` contains a list of the most common values.
+                Often, this will just be a single element. But if there's a tie for most common among multiple values,
+                `observed_value` will contain a single copy of each most common value.
+
+            """
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.aggregate.mode",)
     success_keys = (

@@ -116,7 +116,10 @@ except ImportError:
 
 
 class SqlAlchemyBatchReference(object):
+    """An Object representing an access to a SqlAlchemyBatch"""
+
     def __init__(self, engine, table_name=None, schema=None, query=None):
+        """Initializing engine, table name, schema, and query"""
         self._engine = engine
         if table_name is None and query is None:
             raise ValueError("Table_name or query must be specified")
@@ -126,6 +129,7 @@ class SqlAlchemyBatchReference(object):
         self._query = query
 
     def get_init_kwargs(self):
+        """Returns all a dictionary of all initialized keyword arguments, if present"""
         if self._table_name and self._query:
             # This is allowed in BigQuery where a temporary table name must be provided *with* the
             # custom sql to execute.
@@ -444,6 +448,9 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
 
     @classmethod
     def from_execution_engine(cls, execution_engine=None):
+        """If given Execution Engine exists, builds a SqlAlchemyExecutionEngine class under the abstraction of a generic
+        Execution Engine so that it can interface with other GE aspects. Still holds table_name attribute that contains
+        given data."""
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
             return cls(
                 table_name=str(execution_engine._table.name),
@@ -465,6 +472,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
         *args,
         **kwargs,
     ):
+        """Based of Specific SQL dialect or type, builds a SqlAlchemyExecutionEngine and creates necessary tables"""
         if not datasource_name:
             raise ValueError("A datasource name is required")
 
@@ -593,9 +601,11 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
 
     @property
     def sql_engine_dialect(self) -> DefaultDialect:
+        """Returns the Specific Engine Dialect used to interact with the Database"""
         return self.engine.dialect
 
     def get_batch(self, batch_kwargs, batch_parameters=None):
+        """Based on keyword arguments and the specific dialect within them, builds and configures a batch"""
         # We need to build a batch_id to be used in the dataframe
         batch_markers = BatchMarkers(
             {
@@ -745,6 +755,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
         )
 
     def get_row_count(self, table_name=None):
+        """Queries the number of rows within a given table"""
         if table_name is None:
             table_name = self._table
         else:
@@ -753,12 +764,15 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
         return int(self.engine.execute(count_query).scalar())
 
     def get_column_count(self):
+        """Obtains the number of columns within a given tabble"""
         return len(self.columns)
 
     def get_table_columns(self) -> List[str]:
+        """Returns the specific columns in the current table"""
         return [col["name"] for col in self.columns]
 
     def get_column_nonnull_count(self, column):
+        """Returns the number of nonnull values within a given column"""
         ignore_values = [None]
         count_query = sa.select(
             [
@@ -789,11 +803,13 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
         return element_count - null_count
 
     def get_column_sum(self, column):
+        """Returns the sum of a column"""
         return self.engine.execute(
             sa.select([sa.func.sum(sa.column(column))]).select_from(self._table)
         ).scalar()
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
+        """Returns the maximum value in a column"""
         if parse_strings_as_datetimes:
             raise NotImplementedError
         return self.engine.execute(
@@ -801,6 +817,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
         ).scalar()
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
+        """Returns the minimum value in a column"""
         if parse_strings_as_datetimes:
             raise NotImplementedError
         return self.engine.execute(
@@ -808,6 +825,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
         ).scalar()
 
     def get_column_value_counts(self, column, sort="value", collate=None):
+        """Returns the counts for every distinct value in a column"""
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
 
@@ -841,11 +859,13 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
         return series
 
     def get_column_mean(self, column):
+        """Returns the mean value of a column"""
         return self.engine.execute(
             sa.select([sa.func.avg(sa.column(column))]).select_from(self._table)
         ).scalar()
 
     def get_column_unique_count(self, column):
+        """Returns the number of unique values in a column"""
         return self.engine.execute(
             sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(
                 self._table
@@ -853,6 +873,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
         ).scalar()
 
     def get_column_median(self, column):
+        """Returns the median of a column"""
         nonnull_count = self.get_column_nonnull_count(column)
         element_values = self.engine.execute(
             sa.select([sa.column(column)])
@@ -884,6 +905,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
     def get_column_quantiles(
         self, column: str, quantiles: Iterable, allow_relative_error: bool = False
     ) -> list:
+        """Given a list of quantiles intervals, responds the corresponding column value"""
         if self.sql_engine_dialect.name.lower() == "mssql":
             return self._get_column_quantiles_mssql(column=column, quantiles=quantiles)
         elif self.sql_engine_dialect.name.lower() == "bigquery":
@@ -900,6 +922,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
             )
 
     def _get_column_quantiles_mssql(self, column: str, quantiles: Iterable) -> list:
+        """A quantile method to interface with MSSQL in particular"""
         # mssql requires over(), so we add an empty over() clause
         selects: List[WithinGroup] = [
             sa.func.percentile_disc(quantile)
@@ -922,6 +945,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
             raise pe
 
     def _get_column_quantiles_bigquery(self, column: str, quantiles: Iterable) -> list:
+        """A quantile method to interface with BigQuery intervals in particular"""
         # BigQuery does not support "WITHIN", so we need a special case for it
         selects: List[WithinGroup] = [
             sa.func.percentile_disc(sa.column(column), quantile).over()
@@ -944,6 +968,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
     def _get_column_quantiles_mysql(self, column: str, quantiles: Iterable) -> list:
         # MySQL does not support "percentile_disc", so we implement it as a compound query.
         # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
+        """A quantile method to interface with MySQL intervals in particular"""
         percent_rank_query: CTE = sa.select(
             [
                 sa.column(column),
@@ -995,6 +1020,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
     def _get_column_quantiles_generic_sqlalchemy(
         self, column: str, quantiles: Iterable, allow_relative_error: bool
     ) -> list:
+        """A quantile method to interface with generic SqlAlchemy"""
         selects: List[WithinGroup] = [
             sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
             for quantile in quantiles
@@ -1042,6 +1068,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
                 )
 
     def get_column_stdev(self, column):
+        """Returns a column's Standard deviation"""
         if self.sql_engine_dialect.name.lower() == "mssql":
             # Note: "stdev_samp" is not a recognized built-in function name (but "stdev" does exist for "mssql").
             # This function is used to compute statistical standard deviation from sample data (per the reference in
@@ -1154,6 +1181,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
     def get_column_count_in_range(
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ):
+        """Returns the number of column values within a specific range"""
         if min_val is None and max_val is None:
             raise ValueError("Must specify either min or max value")
         if min_val is not None and max_val is not None and min_val > max_val:
