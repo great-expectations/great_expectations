@@ -89,6 +89,7 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
                * If max_value is None, then min_value is treated as a lower bound
 
            """
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.aggregate.max",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
@@ -168,7 +169,9 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val is not None or max_val is not None, "min_value and max_value cannot both be none"
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be none"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"

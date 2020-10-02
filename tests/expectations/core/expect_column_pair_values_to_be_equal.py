@@ -13,7 +13,8 @@ from great_expectations.execution_engine import PandasExecutionEngine
 def test_expect_column_pair_values_to_be_equal_impl():
     df = pd.DataFrame({"a": [1, 2, 3], "b": [1, 2, 3]})
     expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_pair_values_to_be_equal", kwargs={"column_A": "a", "column_B": "b"},
+        expectation_type="expect_column_pair_values_to_be_equal",
+        kwargs={"column_A": "a", "column_B": "b"},
     )
     expectation = ExpectColumnPairValuesToBeEqual(expectationConfiguration)
     batch = Batch(data=df)

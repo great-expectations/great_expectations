@@ -232,7 +232,7 @@ def pytest_generate_tests(metafunc):
                                 "spark" in test["suppress_test_for"]
                                 and batch
                                 and isinstance(
-                                    batch.execution_engine, PandasExecutionEngine
+                                    batch.execution_engine, SparkDFExecutionEngine
                                 )
                             )
                         ):

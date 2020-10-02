@@ -242,8 +242,30 @@ class ExecutionEngine(MetaExecutionEngine):
         bundle_computation: bool = False,
         filter_column_isnull: bool = True,
     ):
-        """
-        A decorator for declaring a metric provider
+        """A decorator for the metric provider, which takes in domain and value keys and uses these values to define
+        and access values needed to compute the metric (with the domain keys defining the values to be used for
+        computation
+
+        Args:
+            metric_name (str): \
+                The name of the metric to be computed
+            metric_domain_keys (tuple): \
+                A tuple of keywords that defines the domain over which the metric will be computed
+            metric_value_keys (tuple): \
+                A tuple of keywords that defines the value keys, which are provided by the user, which are necessary for
+                the computation of the metric
+            metric_dependencies (tuple): \
+                A tuple of the names of metrics upon the given metric (as defined by metric_name) is dependent on.
+                For instance, a Z-score metric would be dependent upon the Mean and Standard Deviation
+            bundle_computation (bool): \
+                Set to false by default, the bundle computation keyword defines whether computations are bundled together
+                so that they can be executed simultaneously in a lazy fashion. This does not hold meaning for Pandas operations.
+            filter_column_isnull (bool): \
+                Set to true by default, filter_column_isnull indicates whether or not null values are weeded out of the
+                domain prior to computation.
+
+        Returns:
+            A metric function that will provide specific instructions for the calculation of the metric.
         """
 
         def outer(metric_fn: Callable):
@@ -260,6 +282,8 @@ class ExecutionEngine(MetaExecutionEngine):
                 metrics: Dict[Tuple, Any],
                 **kwargs,
             ):
+                """Returns a metric function that utilizes the execution engine, batches, domain and value kwargs
+                to compute the needed metrics, with the specific instructions defined by the Registry"""
                 if _declared_name != metric_name:
                     logger.warning(
                         "using validator provider with an unrecognized metric"
@@ -271,9 +295,10 @@ class ExecutionEngine(MetaExecutionEngine):
                     metric_domain_kwargs=metric_domain_kwargs,
                     metric_value_kwargs=metric_value_kwargs,
                     metrics=metrics,
-                    #**kwargs,
+                    # **kwargs,
                 )
 
+            # The specific metric function is being returned, but first it is registered within the registry itself
             register_metric(
                 metric_name=metric_name,
                 metric_domain_keys=metric_domain_keys,
@@ -444,14 +469,17 @@ class ExecutionEngine(MetaExecutionEngine):
 
     @property
     def data_context(self):
+        """Returns the internal Data Context (An object containing the data)"""
         return self._data_context
 
     @data_context.setter
     def data_context(self, data_context):
+        """A setter for the Data Context"""
         self._data_context = data_context
 
     @property
     def _active_validation(self):
+        """Given that the active_validation property is present, returns it"""
         if not self.validator:
             raise AttributeError(
                 f"'{type(self).__name__}' object has no attribute `_active_validation` - please set "
@@ -462,6 +490,7 @@ class ExecutionEngine(MetaExecutionEngine):
 
     @_active_validation.setter
     def _active_validation(self, active_validation):
+        """A setter for the active_validation property"""
         if not self.validator:
             raise AttributeError(
                 f"'{type(self).__name__}' object cannot set `_active_validation` attribute - please "
@@ -473,6 +502,7 @@ class ExecutionEngine(MetaExecutionEngine):
 
     @property
     def _expectation_suite(self):
+        """A getter for the validator's expectation suite"""
         if not self.validator:
             raise AttributeError(
                 f"'{type(self).__name__}' object has no attribute `_expectation_suite` - please set "
@@ -483,6 +513,7 @@ class ExecutionEngine(MetaExecutionEngine):
 
     @property
     def _validator_config(self):
+        """Given that it is present, returns the configuration of the validator as defined in the Execution Engine"""
         if not self.validator:
             raise AttributeError(
                 f"'{type(self).__name__}' object has no attribute `_validator_config` - please set "
@@ -493,25 +524,29 @@ class ExecutionEngine(MetaExecutionEngine):
 
     @property
     def validator(self):
+        """A getter for the validator"""
         return self._validator
 
     @property
     def batch_spec_defaults(self):
+        """A getter for the batch spec defaults"""
         return self._batch_spec_defaults
 
     @property
     def loaded_batch_id(self):
+        """A getter for the batch id"""
         return self._loaded_batch_id
 
     @property
     def loaded_batch(self):
-        if not self.loaded_batch_id:
+        if self.loaded_batch_id is None:
             return None
         else:
             return self.batches.get(self.loaded_batch_id)
 
     @property
     def batches(self):
+        """A getter for the Execution Engine's batches"""
         return self._batches
 
     def process_batch_definition(self, batch_definition, batch_spec):
@@ -578,6 +613,25 @@ class ExecutionEngine(MetaExecutionEngine):
         metrics: Dict[Tuple, Any],
         runtime_configuration: dict = None,
     ) -> dict:
+        """A method used to 'resolve', or configure, metrics whose full configuration has not been provided. Given a
+        dictionary of metrics, any metric in the Iterable metrics_to_resolve has their configuration and provider function
+        obtained so that it can be computed. The updated list of metrics is then returned
+
+                Args:
+                    batches (Dict[str, Batch): \
+                        A Dictionary of batch names and corresponding batches
+                    metrics_to_resolve (Iterable[MetricEdgeKey]): \
+                        A list/ other iterable of MetricEdgeKeys that represent the metrics whose configurations
+                        need to be resolved
+                    metrics (float or None): \
+                        The list of the metrics and the corresponding configurations as registered within the registry
+                    runtime_configuration (dict): \
+                        A metric's runtime configuration, representing changes in result format/ other domains at runtime
+
+
+                Returns:
+                    success (boolean), percent_success (float)
+                """
         if batches is None:
             batches = self.batches
         if metrics is None:
@@ -613,6 +667,7 @@ class ExecutionEngine(MetaExecutionEngine):
 
         return metrics
 
+    # Todo: why is this not implemented?
     def batch_resolve(self, resolve_batch, metrics):
         raise NotImplementedError
 

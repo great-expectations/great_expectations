@@ -68,6 +68,7 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
     }
 
     """ A Metric Decorator for the Row Count"""
+
     @PandasExecutionEngine.metric(
         metric_name="rows.count",
         metric_domain_keys=DatasetExpectation.domain_keys,

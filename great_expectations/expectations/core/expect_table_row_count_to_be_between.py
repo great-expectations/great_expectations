@@ -60,6 +60,7 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
     See Also:
         expect_table_row_count_to_equal
     """
+
     metric_dependencies = ("rows.count",)
     success_keys = (
         "min_value",
@@ -135,7 +136,9 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val is not None or max_val is not None, "min_value and max_value cannot both be None"
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be None"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"

@@ -63,6 +63,7 @@ class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
                    Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
                    :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
        """
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.aggregate.value_ratio",)
     success_keys = ("value", "min_value", "strict_min", "max_value", "strict_max")
@@ -83,11 +84,12 @@ class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
     }
 
     """ A Column Map Metric Decorator for the Value ratio"""
+
     @PandasExecutionEngine.metric(
         metric_name="column.aggregate.value_ratio",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("value", ),
-        metric_dependencies=("column_values.nonnull.count", ),
+        metric_value_keys=("value",),
+        metric_dependencies=("column_values.nonnull.count",),
         filter_column_isnull=False,
     )
     def _pandas_value_ratio(
@@ -118,7 +120,7 @@ class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
         else:
             value_count = 0
 
-        return value_count/nonnull_count
+        return value_count / nonnull_count
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -156,17 +158,21 @@ class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val is not None or max_val is not None, "min_value and max_value cannot both be None"
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be None"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"
             assert max_val is None or isinstance(
                 max_val, (float, int)
             ), "Provided max threshold must be a number"
-            assert min_val is None or 0 <= min_val <= 1, "The minimum and maximum are ratios and thus must be between" \
-                                                         "0 and 1"
-            assert max_val is None or 0 <= max_val <= 1, "The minimum and maximum are ratios and thus must be between" \
-                                                         "0 and 1"
+            assert min_val is None or 0 <= min_val <= 1, (
+                "The minimum and maximum are ratios and thus must be between" "0 and 1"
+            )
+            assert max_val is None or 0 <= max_val <= 1, (
+                "The minimum and maximum are ratios and thus must be between" "0 and 1"
+            )
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 

@@ -723,6 +723,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @property
     def dataframe(self):
+        """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
         if not self.loaded_batch:
             raise ValueError(
                 "Batch has not been loaded - please run load_batch() to load a batch."
@@ -732,6 +733,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @staticmethod
     def guess_reader_method_from_path(path):
+        """Based on a given filepath, decides a reader method. Currently supports tsv, csv, and parquet. If none of these
+        file extensions are used, returns BatchKwargsError stating that it is unable to determine the current path.
+
+        Args:
+            path - A given file path
+
+        Returns:
+            A dictionary entry of format {'reader_method': reader_method}
+
+        """
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "csv"}
         elif path.endswith(".parquet"):
@@ -776,6 +787,17 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
 
     def process_batch_definition(self, batch_definition, batch_spec):
+        """Given that the batch definition has a limit state, transfers the limit dictionary entry from the batch_definition
+        to the batch_spec.
+
+                Args:
+                    batch_definition: The batch definition to use in configuring the batch spec's limit
+                    batch_spec: a batch_spec dictionary whose limit needs to be configured
+
+                Returns:
+                    ReaderMethod to use for the filepath
+
+                """
         limit = batch_definition.get("limit")
         if limit is not None:
             if not batch_spec.get("limit"):
@@ -850,6 +872,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return data
 
     def _get_eval_column_name(self, column):
+        """Given the name of a column (string), returns the name of the corresponding eval column"""
         return "__eval_col_" + column.replace(".", "__").replace("`", "_")
 
     def _column_map_count(
@@ -924,6 +947,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         filter_column_isnull,
         **kwargs,
     ):
+        """Returns all unique values in the column and their corresponding counts"""
         assert metric_name.endswith(".unexpected_value_counts")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
@@ -1093,6 +1117,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         resolve_batch: Iterable[Tuple[MetricEdgeKey, Callable, dict]],
         metrics: Dict[Tuple, Any] = None,
     ) -> dict:
+        """For each metric name in the given resolve_batch, finds the domain of the metric and calculates it using a
+        metric function from the given provider class.
+
+                Args:
+                    resolve_batch - A batch containing MetricEdgeKeys and their corresponding functions
+                    metrics (dict) - A dictionary containing metrics and corresponding parameters
+
+                Returns:
+                    A dictionary of the collected metrics over their respective domains
+                """
         if metrics is None:
             metrics = dict()
 
@@ -1143,21 +1177,27 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return metrics
 
     def head(self, n=5):
+        """Returns dataframe head. Default is 5"""
         return self.dataframe.limit(n).toPandas()
 
     def get_row_count(self):
+        """Returns the number of rows in a Dataframe"""
         return self.dataframe.count()
 
     def get_column_count(self):
+        """Returns the number of columns in a column"""
         return len(self.dataframe.columns)
 
     def get_table_columns(self) -> List[str]:
+        """Returns the columns in a Dataframe"""
         return self.dataframe.columns
 
     def get_column_nonnull_count(self, column):
+        """Returns the number of nonnull values in a column"""
         return self.dataframe.filter(col(column).isNotNull()).count()
 
     def get_column_mean(self, column):
+        """Returns the mean of a column"""
         # TODO need to apply this logic to other such methods?
         types = dict(self.dataframe.dtypes)
         if types[column] not in ("int", "float", "double", "bigint"):
@@ -1166,6 +1206,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return result[0] if len(result) > 0 else None
 
     def get_column_sum(self, column):
+        """Returns the sum of a column"""
         return self.dataframe.select(column).groupBy().sum().collect()[0][0]
 
     # TODO: consider getting all basic statistics in one go:
@@ -1183,6 +1224,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         pass
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
+        """Returns the maximum value in a column"""
         temp_column = self.dataframe.select(column).where(col(column).isNotNull())
         if parse_strings_as_datetimes:
             temp_column = self._apply_dateutil_parse(temp_column)
@@ -1192,6 +1234,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return result[0][0]
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
+        """Returns the minimum value in a column"""
         temp_column = self.dataframe.select(column).where(col(column).isNotNull())
         if parse_strings_as_datetimes:
             temp_column = self._apply_dateutil_parse(temp_column)
@@ -1201,6 +1244,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return result[0][0]
 
     def get_column_value_counts(self, column, sort="value", collate=None):
+        """Returns column distinct values and corresponding counts"""
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
         if collate is not None:
@@ -1226,6 +1270,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return series
 
     def get_column_unique_count(self, column):
+        """Returns all unique column values"""
         return self.dataframe.agg(countDistinct(column)).collect()[0][0]
 
     def get_column_modes(self, column):
@@ -1234,6 +1279,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return list(s[s == s.max()].index)
 
     def get_column_median(self, column):
+        """Getter function for the column median"""
         # We will get the two middle values by choosing an epsilon to add
         # to the 50th percentile such that we always get exactly the middle two values
         # (i.e. 0 < epsilon < 1 / (2 * values))
@@ -1248,6 +1294,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return np.mean(result)
 
     def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
+        """Given a set of quantile values, returns their corresponding approximations"""
         if allow_relative_error is False:
             allow_relative_error = 0.0
         if (
@@ -1263,6 +1310,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         )
 
     def get_column_stdev(self, column):
+        """Returns the standard deviation of a column"""
         return self.dataframe.select(stddev_samp(col(column))).collect()[0][0]
 
     def get_column_hist(self, column, bins):
@@ -1330,6 +1378,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     def get_column_count_in_range(
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ):
+        """Returns the number of values in a column that exist within a certain range"""
         if min_val is None and max_val is None:
             raise ValueError("Must specify either min or max value")
         if min_val is not None and max_val is not None and min_val > max_val:
@@ -1351,6 +1400,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     # Utils
     @staticmethod
     def _apply_dateutil_parse(column):
+        """Turns column values into dateutil format"""
         assert len(column.columns) == 1, "Expected DataFrame with 1 column"
         col_name = column.columns[0]
         _udf = udf(parse, sparktypes.TimestampType())

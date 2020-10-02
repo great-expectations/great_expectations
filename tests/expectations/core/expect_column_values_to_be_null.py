@@ -1,6 +1,7 @@
 import pandas as pd
 
 from great_expectations import (
+    ExpectColumnValuesToBeNull,
     ExpectColumnValuesToNotBeInSet,
     ExpectColumnValuesToNotBeNull,
 )
@@ -25,13 +26,12 @@ from great_expectations.expectations.core.expect_column_values_to_be_in_set impo
 )
 
 
-def test_expect_column_values_to_not_be_null_impl():
+def test_expect_column_values_to_be_null_impl():
     df = pd.DataFrame({"a": [1, None, None]})
     expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_not_be_null",
-        kwargs={"column": "a", "mostly": 0.1},
+        expectation_type="expect_column_values_to_be_null", kwargs={"column": "a"},
     )
-    expectation = ExpectColumnValuesToNotBeNull(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeNull(expectationConfiguration)
     batch = Batch(data=df)
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()

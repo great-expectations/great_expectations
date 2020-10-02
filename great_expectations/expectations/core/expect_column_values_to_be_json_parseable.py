@@ -71,6 +71,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapDatasetExpectation):
         .expect_column_values_to_match_json_schema>`
 
     """
+
     map_metric = "column_values.json_parsable"
     metric_dependencies = (
         "column_values.json_parsable.count",

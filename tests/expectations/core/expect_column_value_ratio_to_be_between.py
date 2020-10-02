@@ -17,7 +17,7 @@ def test_expect_column_value_ratio_to_be_between_impl():
     df = pd.DataFrame({"a": [2, 3, 4]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_ratio_to_be_between",
-        kwargs={"column": "a", "value": 2, "min_value": .4, "max_value": .5},
+        kwargs={"column": "a", "value": 2, "min_value": 0.4, "max_value": 0.5},
     )
     expectation = ExpectColumnValueRatioToBeBetween(expectationConfiguration)
     batch = Batch(data=df)

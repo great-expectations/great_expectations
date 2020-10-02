@@ -61,6 +61,7 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
     See Also:
         expect_table_column_count_to_equal
     """
+
     metric_dependencies = ("columns.count",)
     success_keys = (
         "min_value",
@@ -81,6 +82,7 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
     }
 
     """ A Metric Decorator for the Column Count"""
+
     @PandasExecutionEngine.metric(
         metric_name="columns.count",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
@@ -133,7 +135,9 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val is not None or max_val is not None, "min_value and max_value cannot both be None"
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be None"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"

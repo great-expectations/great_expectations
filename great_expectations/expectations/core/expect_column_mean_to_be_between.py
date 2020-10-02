@@ -76,6 +76,7 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
                 <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_stdev_to_be_between>`
 
             """
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.aggregate.mean",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
@@ -95,6 +96,7 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
     }
 
     """ A Column Aggregate Metric Decorator for the Mean"""
+
     @PandasExecutionEngine.metric(
         metric_name="column.aggregate.mean",
         metric_domain_keys=DatasetExpectation.domain_keys,
@@ -154,7 +156,9 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val is not None or max_val is not None, "min_value and max_value cannot both be none"
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be none"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"
