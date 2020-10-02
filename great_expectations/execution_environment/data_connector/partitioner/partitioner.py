@@ -2,13 +2,17 @@
 
 import logging
 import copy
-from typing import Union, List, Iterator
+from typing import Union, List, Dict, Callable, Iterator
 from ruamel.yaml.comments import CommentedMap
 from great_expectations.data_context.types.base import (
     SorterConfig,
     sorterConfigSchema
 )
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.execution_environment.data_connector.partitioner.partition_spec import PartitionSpec
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+    get_partition_spec
+)
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 from great_expectations.core.id_dict import BatchSpec
 import great_expectations.exceptions as ge_exceptions
@@ -120,10 +124,11 @@ class Partitioner(object):
             )
         return sorter
 
+    # TODO: <Alex>Add int type</Alex>
     def get_available_partitions(
         self,
         data_asset_name: str = None,
-        partition_name: str = None,
+        partition_spec: Union[str, Dict[str, Union[str, Dict]], PartitionSpec, Callable] = None,
         repartition: bool = False,
         # TODO: <Alex></Alex>
         **kwargs
@@ -139,17 +144,54 @@ class Partitioner(object):
                 data_asset_name=data_asset_name,
                 **kwargs
             )
-            self.data_connector.update_partitions_cache(partitions=partitions)
+            self.data_connector.update_partitions_cache(
+                partitions=partitions,
+                allow_multipart_partitions=self.allow_multipart_partitions,
+                partitioner=self
+            )
             cached_partitions = self.data_connector.get_cached_partitions(
                 data_asset_name=data_asset_name
             )
         if cached_partitions is None or len(cached_partitions) == 0:
             return []
         cached_partitions = self.get_sorted_partitions(partitions=cached_partitions)
-        return self._apply_allow_multipart_partitions_flag(
-            partitions=cached_partitions,
-            partition_name=partition_name
+        if partition_spec is None:
+            return cached_partitions
+        # TODO: <Alex>Do check that only one of partition_index, partition_spec obj, partition_spec dict, and partition_spec callable can work at one time.</Alex>
+        # TODO: <Alex>Maybe call it partition_query or something... and then remove PartitionSpec to just have Partition?..  Maybe accept PartitionSpec in constructor like before...  Check carefully...</Alex>
+        filter_func: Callable
+        if isinstance(partition_spec, Callable):
+            filter_func = partition_spec
+            # return list(
+            #     filter(
+            #         lambda partition: filter_func(
+            #             name=partition.name,
+            #             data_asset_name=partition.data_asset_name,
+            #             partition_definition=partition.definition
+            #         ),
+            #         cached_partitions
+            #     )
+            # )
+        else:
+            partition_spec: PartitionSpec = get_partition_spec(partition_spec_config=partition_spec)
+            filter_func = self.best_effort_partition_matcher(partition_spec=partition_spec)
+        return list(
+            filter(
+                lambda partition: filter_func(
+                    name=partition.name,
+                    data_asset_name=partition.data_asset_name,
+                    partition_definition=partition.definition
+                ),
+                cached_partitions
+            )
         )
+        # partition_spec: PartitionSpec = get_partition_spec(partition_spec_config=partition_spec)
+        # return list(
+        #     filter(
+        #         lambda partition: partition.partition_spec == partition_spec,
+        #         cached_partitions
+        #     )
+        # )
 
     def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
         if self.sorters and len(self.sorters) > 0:
@@ -159,45 +201,21 @@ class Partitioner(object):
             return partitions
         return partitions
 
-    def _apply_allow_multipart_partitions_flag(
-            self,
-            partitions: List[Partition],
-            partition_name: str = None
-    ) -> List[Partition]:
-        if partition_name is None:
-            for partition in partitions:
-                # noinspection PyUnusedLocal
-                res: List[Partition] = self._apply_allow_multipart_partitions_flag_to_single_partition(
-                    partitions=partitions,
-                    partition_name=partition.name
-                )
-            return partitions
-        else:
-            return self._apply_allow_multipart_partitions_flag_to_single_partition(
-                partitions=partitions,
-                partition_name=partition_name
-            )
-
-    def _apply_allow_multipart_partitions_flag_to_single_partition(
-        self,
-        partitions: List[Partition],
-        partition_name: str,
-    ) -> List[Partition]:
-        partitions: List[Partition] = list(
-            filter(
-                lambda partition: partition.name == partition_name, partitions
-            )
-        )
-        if not self.allow_multipart_partitions and len(partitions) > 1 and len(set(partitions)) == 1:
-            raise ge_exceptions.PartitionerError(
-                f'''Partitioner "{self.name}" detected multiple partitions for partition name "{partition_name}" of
-data asset "{partitions[0].data_asset_name}"; however, allow_multipart_partitions is set to False.  Please consider
-modifying the directives, used to partition your dataset, or set allow_multipart_partitions to True, but be aware that
-unless you have a specific use case for multipart partitions, there is most likely a mismatch between the partitioning
-directives and the actual structure of data under consideration.
-                '''
-            )
-        return partitions
+    @staticmethod
+    def best_effort_partition_matcher(partition_spec: PartitionSpec) -> Callable:
+        def match_partition_to_spec(name: str, data_asset_name: str, partition_definition: dict) -> bool:
+            if partition_spec.definition and partition_definition == partition_spec.definition and \
+                    partition_spec.name and name == partition_spec.name and \
+                    partition_spec.data_asset_name and data_asset_name == partition_spec.data_asset_name:
+                return True
+            if partition_spec.name:
+                if name != partition_spec.name:
+                    return False
+            if partition_spec.data_asset_name:
+                if data_asset_name != partition_spec.data_asset_name:
+                    return False
+            return True
+        return match_partition_to_spec
 
     def _compute_partitions_for_data_asset(self, data_asset_name: str = None, **kwargs) -> List[Partition]:
         raise NotImplementedError

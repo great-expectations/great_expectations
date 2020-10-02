@@ -11,7 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Callable, Union, Any
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
@@ -65,6 +65,7 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
 from great_expectations.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector.partitioner.partition_spec import PartitionSpec
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
@@ -1541,7 +1542,7 @@ class BaseDataContext:
         execution_environment_name: str,
         data_connector_name: str,
         data_asset_name: str = None,
-        partition_name: str = None,
+        partition_spec: Union[str, Dict[str, Union[str, Dict]], PartitionSpec, Callable, None] = None,
         in_memory_dataset: Any = None,
         repartition: bool = False
     ) -> List[Partition]:
@@ -1559,7 +1560,7 @@ class BaseDataContext:
         )
         available_partitions: List[Partition] = data_connector.get_available_partitions(
             data_asset_name=data_asset_name,
-            partition_name=partition_name,
+            partition_spec=partition_spec,
             repartition=repartition
         )
         return available_partitions

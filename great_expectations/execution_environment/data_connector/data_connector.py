@@ -3,8 +3,7 @@
 import copy
 import logging
 import itertools
-from typing import List
-from copy import deepcopy
+from typing import List, Dict, Union, Callable
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.data_context.types.base import (
@@ -13,7 +12,11 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.execution_environment.data_connector.partitioner.partition_spec import PartitionSpec
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+    get_partition_spec
+)
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -141,7 +144,12 @@ class DataConnector(object):
                     )
         return self.partitions_cache.get(data_asset_name)
 
-    def update_partitions_cache(self, partitions: List[Partition]):
+    def update_partitions_cache(
+        self,
+        partitions: List[Partition],
+        partitioner: Partitioner,
+        allow_multipart_partitions: bool = False
+    ):
         for partition in partitions:
             data_asset_name: str = partition.data_asset_name
             cached_partitions: List[Partition] = self.get_cached_partitions(
@@ -149,7 +157,29 @@ class DataConnector(object):
             )
             if cached_partitions is None or len(cached_partitions) == 0:
                 cached_partitions = []
-            if partition not in cached_partitions:
+            if partition in cached_partitions:
+                if not (
+                    allow_multipart_partitions or partition.source in [
+                        temp_partition.source for temp_partition in cached_partitions
+                    ]
+                ):
+                    raise ge_exceptions.PartitionerError(
+                        f'''Partitioner "{partitioner.name}" detected multiple data references for partition
+"{partition.partition_spec}" of data asset "{partition.data_asset_name}"; however, allow_multipart_partitions is set to
+False.  Please consider modifying the directives, used to partition your dataset, or set allow_multipart_partitions to
+True, but be aware that unless you have a specific use case for multipart partitions, there is most likely a mismatch
+between the partitioning directives and the actual structure of data under consideration.
+                        '''
+                    )
+            else:
+                if partition.source in [
+                    temp_partition.source for temp_partition in cached_partitions
+                ]:
+                    raise ge_exceptions.PartitionerError(
+                        f'''Partitioner "{partitioner.name}" for data asset "{partition.data_asset_name}" detected
+multiple partitions, including "{partition.partition_spec}", for the same data reference -- this is illegal.
+                        '''
+                    )
                 cached_partitions.append(partition)
             self._partitions_cache[data_asset_name] = cached_partitions
 
@@ -252,7 +282,7 @@ class DataConnector(object):
                 % str(batch_definition_keys - recognized_batch_definition_keys)
             )
 
-        batch_definition_defaults: dict = deepcopy(self.batch_definition_defaults)
+        batch_definition_defaults: dict = copy.deepcopy(self.batch_definition_defaults)
         batch_definition: dict = {
             key: value
             for key, value in batch_definition.items()
@@ -260,7 +290,7 @@ class DataConnector(object):
         }
         batch_definition: dict = nested_update(batch_definition_defaults, batch_definition)
 
-        batch_spec_defaults: dict = deepcopy(
+        batch_spec_defaults: dict = copy.deepcopy(
             self._execution_environment.execution_engine.batch_spec_defaults
         )
         batch_spec_passthrough: dict = batch_definition.get("batch_spec_passthrough", {})
@@ -271,12 +301,18 @@ class DataConnector(object):
 
         batch_spec_scaffold["execution_environment"] = self._execution_environment.name
 
+        # TODO: <Alex>Need to look at batch_definition and see if it has partition_index, partition_name, or partition_spec</Alex>
+        # TODO: <Alex>This should be all under auspices of partition_query dict or some way to tell when it is query function, string name, or spec dict...</Alex>
         partition_name: str = batch_definition.get("partition_name")
+        partition_spec_config: dict = {
+            "name": partition_name
+        }
+        partition_spec: PartitionSpec = get_partition_spec(partition_spec_config=partition_spec_config)
         # TODO: <Alex>If partition_name is not specified in batch_definition, then assume "latest" (or "most recent" as defined by the first element in the sorted list of partitions).</Alex>
         # TODO: <Alex>Must accept partition_definition (and name) to be a loss-less retrieval.</Alex>
         partitions: List[Partition] = self.get_available_partitions(
             data_asset_name=data_asset_name,
-            partition_name=partition_name
+            partition_spec=partition_spec
         )
         if len(partitions) == 0:
             raise ge_exceptions.BatchSpecError(
@@ -308,14 +344,14 @@ class DataConnector(object):
     def get_available_partitions(
         self,
         data_asset_name: str = None,
-        partition_name: str = None,
+        partition_spec: Union[str, Dict[str, Union[str, Dict]], PartitionSpec, Callable, None] = None,
         repartition: bool = False
     ) -> List[Partition]:
         partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
         return self._get_available_partitions(
             partitioner=partitioner,
             data_asset_name=data_asset_name,
-            partition_name=partition_name,
+            partition_spec=partition_spec,
             repartition=repartition
         )
 
@@ -323,7 +359,7 @@ class DataConnector(object):
         self,
         partitioner: Partitioner,
         data_asset_name: str = None,
-        partition_name: str = None,
+        partition_spec: Union[str, Dict[str, Union[str, Dict]], PartitionSpec, Callable, None] = None,
         repartition: bool = False
     ) -> List[Partition]:
         raise NotImplementedError
