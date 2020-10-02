@@ -627,6 +627,8 @@ def _format_map_output(
     if result_format["result_format"] == "BOOLEAN_ONLY":
         return return_obj
 
+    skip_missing = False
+
     if nonnull_count is None:
         missing_count = None
         skip_missing: bool = True
