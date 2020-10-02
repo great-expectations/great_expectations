@@ -623,16 +623,21 @@ def _format_map_output(
     if result_format["result_format"] == "BOOLEAN_ONLY":
         return return_obj
 
-    missing_count = element_count - nonnull_count
+    if nonnull_count is None:
+        missing_count = None
+        skip_missing: bool = True
+    else:
+        missing_count = element_count - nonnull_count
 
     if element_count > 0:
         unexpected_percent = unexpected_count / element_count * 100
-        missing_percent = missing_count / element_count * 100
 
-        if nonnull_count > 0:
-            unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
-        else:
-            unexpected_percent_nonmissing = None
+        if not skip_missing:
+            missing_percent = missing_count / element_count * 100
+            if nonnull_count > 0:
+                unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
+            else:
+                unexpected_percent_nonmissing = None
 
     else:
         missing_percent = None
@@ -641,15 +646,19 @@ def _format_map_output(
 
     return_obj["result"] = {
         "element_count": element_count,
-        "missing_count": missing_count,
-        "missing_percent": missing_percent,
         "unexpected_count": unexpected_count,
         "unexpected_percent": unexpected_percent,
-        "unexpected_percent_nonmissing": unexpected_percent_nonmissing,
         "partial_unexpected_list": unexpected_list[
             : result_format["partial_unexpected_count"]
         ],
     }
+
+    if not skip_missing:
+        return_obj["result"]["missing_count"] = missing_count
+        return_obj["result"]["missing_percent"] = missing_percent
+        return_obj["result"][
+            "unexpected_percent_nonmissing"
+        ] = unexpected_percent_nonmissing
 
     if result_format["result_format"] == "BASIC":
         return return_obj
