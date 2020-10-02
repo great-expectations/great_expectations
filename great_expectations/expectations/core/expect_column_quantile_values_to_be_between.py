@@ -108,6 +108,7 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
                <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_median_to_be_between>`
 
            """
+
     metric_dependencies = ("column.aggregate.quantiles",)
     success_keys = (
         "quantile_ranges",
@@ -142,7 +143,9 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
             assert (
                 "column" in configuration.kwargs
             ), "'column' parameter is required for metric"
-            assert min_val is not None or max_val is not None,"min_value and max_value cannot both be none"
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be none"
             assert (
                 "quantile_ranges" in configuration.kwargs
             ), "quantile ranges must be provided"

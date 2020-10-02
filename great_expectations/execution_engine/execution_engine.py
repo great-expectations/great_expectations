@@ -295,7 +295,7 @@ class ExecutionEngine(MetaExecutionEngine):
                     metric_domain_kwargs=metric_domain_kwargs,
                     metric_value_kwargs=metric_value_kwargs,
                     metrics=metrics,
-                    #**kwargs,
+                    # **kwargs,
                 )
 
             # The specific metric function is being returned, but first it is registered within the registry itself

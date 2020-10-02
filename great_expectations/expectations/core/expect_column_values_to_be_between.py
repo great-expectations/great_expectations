@@ -76,6 +76,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         .expect_column_value_lengths_to_be_between>`
 
     """
+
     map_metric = "column_values.is_between"
     metric_dependencies = (
         "column_values.is_between.count",

@@ -67,6 +67,7 @@ class ExpectColumnValuesToBeDateutilParseable(ColumnMapDatasetExpectation):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
     """
+
     map_metric = "column_values.dateutil_parsable"
     metric_dependencies = (
         "column_values.dateutil_parsable.count",

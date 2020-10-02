@@ -13,7 +13,8 @@ from great_expectations.execution_engine import PandasExecutionEngine
 def test_expect_column_pair_values_a_to_be_greater_than_b_impl():
     df = pd.DataFrame({"b": [2, 3, 4], "c": [1, 2, 3]})
     expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_pair_values_a_to_be_greater_than_b", kwargs={"column_A": "b", "column_B": "c"},
+        expectation_type="expect_column_pair_values_a_to_be_greater_than_b",
+        kwargs={"column_A": "b", "column_B": "c"},
     )
     expectation = ExpectColumnPairValuesAToBeGreaterThanB(expectationConfiguration)
     batch = Batch(data=df)

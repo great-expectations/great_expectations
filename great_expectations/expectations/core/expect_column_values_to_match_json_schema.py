@@ -73,6 +73,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
 
         The `JSON-schema docs <http://json-schema.org/>`_.
     """
+
     map_metric = "column_values.match_json_schema"
     metric_dependencies = (
         "column_values.match_json_schema.count",

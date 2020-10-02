@@ -79,6 +79,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapDatasetExpectation):
         .expect_column_values_to_not_match_regex>`
 
     """
+
     map_metric = "column_values.match_regex_list"
     metric_dependencies = (
         "column_values.match_regex_list.count",

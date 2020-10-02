@@ -70,6 +70,7 @@ class ExpectColumnUniqueValueCountToBeBetween(DatasetExpectation):
                 .expect_column_proportion_of_unique_values_to_be_between>`
 
             """
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.aggregate.unique_value_count",)
     success_keys = (
@@ -149,7 +150,9 @@ class ExpectColumnUniqueValueCountToBeBetween(DatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val is not None or max_val is not None, "min_value and max_value cannot both be None"
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be None"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"

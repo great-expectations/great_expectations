@@ -117,6 +117,7 @@ except ImportError:
 
 class SqlAlchemyBatchReference(object):
     """An Object representing an access to a SqlAlchemyBatch"""
+
     def __init__(self, engine, table_name=None, schema=None, query=None):
         """Initializing engine, table name, schema, and query"""
         self._engine = engine

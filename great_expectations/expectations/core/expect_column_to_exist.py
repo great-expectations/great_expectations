@@ -53,6 +53,7 @@ class ExpectColumnToExist(DatasetExpectation):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
     """
+
     metric_dependencies = ("columns",)
     success_keys = (
         "column",
@@ -80,6 +81,7 @@ class ExpectColumnToExist(DatasetExpectation):
     }
 
     """ A Metric Decorator for the Columns"""
+
     @PandasExecutionEngine.metric(
         metric_name="columns",
         metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),

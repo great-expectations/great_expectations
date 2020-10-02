@@ -71,6 +71,7 @@ class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
     }
 
     """ A Metric Decorator for the table columns"""
+
     @PandasExecutionEngine.metric(
         metric_name="columns",
         metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),

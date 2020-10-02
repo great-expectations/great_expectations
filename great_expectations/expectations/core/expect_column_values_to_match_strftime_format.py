@@ -67,6 +67,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapDatasetExpectation):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
     """
+
     map_metric = "column_values.match_strftime_format"
     metric_dependencies = (
         "column_values.match_strftime_format.count",

@@ -68,6 +68,7 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
                 `observed_value` will contain a single copy of each most common value.
 
             """
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.aggregate.mode",)
     success_keys = (

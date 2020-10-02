@@ -30,12 +30,16 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
-from great_expectations.exceptions import GreatExpectationsError, InvalidExpectationConfigurationError
+from great_expectations.exceptions import (
+    GreatExpectationsError,
+    InvalidExpectationConfigurationError,
+)
 from great_expectations.exceptions.metric_exceptions import MetricError
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     get_metric_dependencies,
-    get_metric_kwargs, list_registered_expectation_implementations,
+    get_metric_kwargs,
+    list_registered_expectation_implementations,
 )
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.types import ClassConfig
@@ -112,11 +116,23 @@ class Validator:
         """
         validator_attrs = set(super().__dir__())
         class_expectation_impls = set(list_registered_expectation_implementations())
-        execution_engine_expectation_impls = set([attr_name for attr_name in self.execution_engine.__dir__() if
-                                              attr_name.startswith("expect_")]) if \
-            self.execution_engine else set()
+        execution_engine_expectation_impls = (
+            set(
+                [
+                    attr_name
+                    for attr_name in self.execution_engine.__dir__()
+                    if attr_name.startswith("expect_")
+                ]
+            )
+            if self.execution_engine
+            else set()
+        )
 
-        combined_dir = validator_attrs | class_expectation_impls | execution_engine_expectation_impls
+        combined_dir = (
+            validator_attrs
+            | class_expectation_impls
+            | execution_engine_expectation_impls
+        )
 
         if type(self.execution_engine).__name__ == "PandasExecutionEngine":
             combined_dir | set(dir(pd.DataFrame))
@@ -148,6 +164,7 @@ class Validator:
                         Returns:
                             The Expectation's validation result
         """
+
         def inst_expectation(*args, **kwargs):
             expectation_impl = get_expectation_impl(name)
             allowed_config_keys = expectation_impl.get_allowed_config_keys()
@@ -159,7 +176,9 @@ class Validator:
             # positional arguments to expectation methods
             for idx, arg in enumerate(args):
                 try:
-                    arg_name = expectation_impl.legacy_method_parameters.get(name, tuple())[idx]
+                    arg_name = expectation_impl.legacy_method_parameters.get(
+                        name, tuple()
+                    )[idx]
                     if arg_name in allowed_config_keys:
                         expectation_kwargs[arg_name] = arg
                     elif arg_name == "meta":
@@ -171,9 +190,7 @@ class Validator:
 
             expectation = expectation_impl(
                 ExpectationConfiguration(
-                    expectation_type=name,
-                    kwargs=expectation_kwargs,
-                    meta=meta
+                    expectation_type=name, kwargs=expectation_kwargs, meta=meta
                 )
             )
             """Given an implementation and a configuration for any Expectation, returns its validation result"""
@@ -1498,6 +1515,7 @@ def _calc_validation_statistics(validation_results):
 
 class BridgeValidator:
     """This is currently helping bridge APIs"""
+
     def __init__(self, batch, expectation_suite, expectation_engine=None, **kwargs):
         """Builds an expectation_engine object using an expectation suite and a batch, with the expectation engine being
         determined either by the user or by the type of batch data (pandas dataframe, SqlAlchemy table, etc.)

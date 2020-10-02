@@ -113,6 +113,7 @@ def _get_dialect_type_module(dialect):
 class SqlAlchemyBatchData:
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
+
     def __init__(self, engine, table_name=None, schema=None, query=None):
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
@@ -848,6 +849,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             A generic metric provider function, which includes an expected metric condition.
         """
+
         def outer(metric_fn: Callable):
             _declared_name = metric_name
 

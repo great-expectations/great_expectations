@@ -13,10 +13,11 @@ from great_expectations.execution_engine import (
 
 from ..expectation import (
     ColumnMapDatasetExpectation,
+    DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
-    DatasetExpectation)
+)
 from ..registry import extract_metrics, get_metric_kwargs
 
 try:
@@ -59,7 +60,11 @@ class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
     """
 
     metric_dependencies = ("equal_columns",)
-    success_keys = ("column_A", "column_B",  "ignore_row_if",)
+    success_keys = (
+        "column_A",
+        "column_B",
+        "ignore_row_if",
+    )
 
     default_kwarg_values = {
         "column_A": None,
@@ -79,7 +84,10 @@ class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
         if configuration is None:
             configuration = self.configuration
         try:
-            assert "column_A" in configuration.kwargs and "column_B" in configuration.kwargs, "both columns must be provided"
+            assert (
+                "column_A" in configuration.kwargs
+                and "column_B" in configuration.kwargs
+            ), "both columns must be provided"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
@@ -92,13 +100,13 @@ class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
         filter_column_isnull=False,
     )
     def _pandas_equal_columns(
-            self,
-            batches: Dict[str, Batch],
-            execution_engine: PandasExecutionEngine,
-            metric_domain_kwargs: dict,
-            metric_value_kwargs: dict,
-            metrics: dict,
-            runtime_configuration: dict = None,
+        self,
+        batches: Dict[str, Batch],
+        execution_engine: PandasExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: dict,
+        runtime_configuration: dict = None,
     ):
         """Metric which returns all columns in a dataframe"""
         df = execution_engine.get_domain_dataframe(
@@ -108,7 +116,6 @@ class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
         column_B = df[metric_value_kwargs["column_B"]]
 
         return (column_A == column_B).any()
-
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(

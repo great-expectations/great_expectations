@@ -70,6 +70,7 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
                 <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_median_to_be_between>`
 
             """
+
     metric_dependencies = ("column.aggregate.standard_deviation",)
     success_keys = (
         "min_value",
@@ -108,7 +109,9 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
             assert (
                 "column" in configuration.kwargs
             ), "'column' parameter is required for metric"
-            assert min_val is not None or max_val is not None,"min_value and max_value cannot both be none"
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be none"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
