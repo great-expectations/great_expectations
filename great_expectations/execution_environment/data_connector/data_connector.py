@@ -302,12 +302,15 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         batch_spec_scaffold["execution_environment"] = self._execution_environment.name
 
         partition_query: dict = batch_definition.get("partition_query")
-        if "data_asset_name" in partition_query and partition_query["data_asset_name"] != data_asset_name:
-            raise ge_exceptions.BatchSpecError(
-                message=f'''Unable to build batch_spec for data asset "{data_asset_name}", because the partition query
-specifies a different data asset name ("{partition_query["data_asset_name"]}").
-                '''
-            )
+        if "data_asset_name" in partition_query:
+            if partition_query["data_asset_name"] != data_asset_name:
+                raise ge_exceptions.BatchSpecError(
+                    message=f'''Unable to build batch_spec for data asset "{data_asset_name}", because the partition
+query specifies a different data asset name ("{partition_query["data_asset_name"]}").
+                    '''
+                )
+        else:
+            partition_query["data_asset_name"] = data_asset_name
         partitions: List[Partition] = self.get_available_partitions(
             data_asset_name=data_asset_name,
             partition_query=partition_query
