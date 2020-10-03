@@ -84,14 +84,17 @@ data_connectors = {
 
 
 execution_environment = ExecutionEnvironment(
-    name="test_env", execution_engine=execution_engine, data_connectors=data_connectors)
+    name="test_env",
+    execution_engine=execution_engine,
+    data_connectors=data_connectors
+)
 
 
 test_batch_definition = {
     "execution_environment": "test_env",
     "data_connector": "my_data_connector",
     "data_asset_name": "testing_data",
- }
+}
 
 
 def test_if_this_works():
