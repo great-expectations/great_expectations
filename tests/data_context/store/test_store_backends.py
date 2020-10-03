@@ -12,6 +12,7 @@ from great_expectations.data_context.store import (
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
+    TupleAzureBlobStoreBackend,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -668,3 +669,71 @@ def test_TupleGCSStoreBackend():
         == "https://storage.googleapis.com/leakybucket"
         + f"/this_is_a_test_prefix/my_suite_name/my_run_id/{run_time_string}/my_batch_id"
     )
+
+
+def test_TupleAzureBlobStoreBackend():
+    pytest.importorskip("azure-storage-blob")
+    """
+    What does this test test and why?
+    Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
+    and assert that the store backend makes the right calls for set, get, and list.
+    """
+    connection_string = "this_is_a_test_conn_string"
+    prefix = "this_is_a_test_prefix"
+    container = "dummy-container"
+
+    my_store = TupleAzureBlobStoreBackend(
+        connection_string=connection_string, prefix=prefix, container=container
+    )
+
+    with patch(
+        "azure.storage.blob.BlobServiceClient", autospec=True
+    ) as mock_azure_blob_client:
+
+        mock_container_client = mock_azure_blob_client.get_container_client.return_value
+
+        my_store.set(("AAA",), "aaa")
+
+        mock_azure_blob_client.from_connection_string.assert_called_once()
+        mock_container_client.assert_called_once()
+        mock_container_client.upload_blob.assert_called_once_with(
+            name="AAA", data=b"aaa", encoding="utf-8"
+        )
+
+    with patch(
+        "azure.storage.blob.BlobServiceClient", autospec=True
+    ) as mock_azure_blob_client:
+
+        mock_container_client = mock_azure_blob_client.get_container_client.return_value
+
+        my_store.set(("BBB",), b"bbb")
+
+        mock_azure_blob_client.from_connection_string.assert_called_once()
+        mock_container_client.assert_called_once()
+        mock_container_client.upload_blob.assert_called_once_with(
+            name="AAA", data=b"aaa"
+        )
+
+    with patch(
+        "azure.storage.blob.BlobServiceClient", autospec=True
+    ) as mock_azure_blob_client:
+
+        mock_container_client = mock_azure_blob_client.get_container_client.return_value
+
+        my_store.get(("BBB",))
+
+        mock_azure_blob_client.from_connection_string.assert_called_once()
+        mock_container_client.assert_called_once()
+        mock_container_client.download_blob.assert_called_once_with("BBB")
+
+    with patch(
+        "azure.storage.blob.BlobServiceClient", autospec=True
+    ) as mock_azure_blob_client:
+
+        mock_container_client = mock_azure_blob_client.get_container_client.return_value
+
+        my_store.list_keys()
+
+        mock_azure_blob_client.from_connection_string.assert_called_once()
+        mock_container_client.assert_called_once()
+        mock_container_client.list_blobs.assert_called_once_with("this_is_a_prefix")

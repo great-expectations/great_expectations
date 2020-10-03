@@ -11,6 +11,7 @@ from .tuple_store_backend import (
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
+    TupleAzureBlobStoreBackend,
     TupleStoreBackend,
 )
 from .validations_store import ValidationsStore
