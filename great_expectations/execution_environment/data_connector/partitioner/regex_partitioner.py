@@ -42,13 +42,9 @@ class RegexPartitioner(Partitioner):
                 regex["group_names"] = []
         else:
             regex = {
-                "pattern": r"^((19|20)\d\d[- /.]?(0[1-9]|1[012])[- /.]?(0[1-9]|[12][0-9]|3[01])_(.*))\.csv",
+                "pattern": r"(.*)",
                 "group_names": [
                     "group_0",
-                    "group_1",
-                    "group_2",
-                    "group_3",
-                    "group_4",
                 ]
             }
         return regex
