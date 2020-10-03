@@ -302,6 +302,7 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         batch_spec_scaffold["execution_environment"] = self._execution_environment.name
 
         partition_query: dict = batch_definition.get("partition_query")
+        # TODO: <Alex>Do we show an error to the user if a mismatched data_asset_name occurs, or overwrite it in partition_query silently?</Alex>
         if "data_asset_name" in partition_query:
             if partition_query["data_asset_name"] != data_asset_name:
                 raise ge_exceptions.BatchSpecError(
