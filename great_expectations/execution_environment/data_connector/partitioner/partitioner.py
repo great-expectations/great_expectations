@@ -125,10 +125,11 @@ class Partitioner(object):
 
     def get_available_partitions(
         self,
+        # The next three (3) general parameters are for both, creating partitions and querying partitions.
         data_asset_name: str = None,
         partition_query: Union[PartitionQuery, None] = None,
         repartition: bool = False,
-        # TODO: <Alex>Accommodating specific partitioner parameters below.</Alex>
+        # The remaining parameters are passed down to the specific partitioner by its containing parent data connector.
         **kwargs
     ) -> List[Partition]:
         if repartition:

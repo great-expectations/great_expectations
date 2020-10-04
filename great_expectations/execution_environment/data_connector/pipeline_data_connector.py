@@ -74,10 +74,11 @@ class PipelineDataConnector(DataConnector):
             "data_reference": self.in_memory_dataset
         }
         return partitioner.get_available_partitions(
+            # The next three (3) general parameters are for both, creating partitions and querying partitions.
             data_asset_name=data_asset_name,
             partition_query=partition_query,
             repartition=repartition,
-            # TODO: <Alex>Specific partitioner parameters below.</Alex>
+            # The next two (2) parameters are specific for the partitioners that work under the present data connector.
             pipeline_data_asset_name=pipeline_data_asset_name,
             pipeline_datasets=[pipeline_dataset]
         )
