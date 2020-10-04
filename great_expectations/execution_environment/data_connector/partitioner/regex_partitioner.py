@@ -1,7 +1,9 @@
-import logging
 import regex as re
 from typing import List, Union
 from pathlib import Path
+
+import logging
+
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition

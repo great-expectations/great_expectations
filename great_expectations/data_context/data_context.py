@@ -1541,7 +1541,7 @@ class BaseDataContext:
         execution_environment_name: str,
         data_connector_name: str,
         data_asset_name: str = None,
-        partition_query: Union[Dict[str, Union[int, str, Dict, Callable]], None] = None,
+        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable]], None] = None,
         in_memory_dataset: Any = None,
         repartition: bool = False
     ) -> List[Partition]:

@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
+from typing import Any
+
 import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 import great_expectations.exceptions as ge_exceptions
-
 from great_expectations.util import(
     is_numeric,
     is_int
 )
-
-from typing import Any
 
 logger = logging.getLogger(__name__)
 

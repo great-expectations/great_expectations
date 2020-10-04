@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import copy
 from typing import Union, List, Iterator
 from ruamel.yaml.comments import CommentedMap
+
+import logging
+
 from great_expectations.data_context.types.base import (
     SorterConfig,
     sorterConfigSchema
 )
+
 from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
@@ -123,10 +126,11 @@ class Partitioner(object):
 
     def get_available_partitions(
         self,
+        # The next three (3) general parameters are for both, creating partitions and querying partitions.
         data_asset_name: str = None,
         partition_query: Union[PartitionQuery, None] = None,
         repartition: bool = False,
-        # TODO: <Alex>Accommodating specific partitioner parameters below.</Alex>
+        # The remaining parameters are passed down to the specific partitioner by its containing parent data connector.
         **kwargs
     ) -> List[Partition]:
         if repartition:
