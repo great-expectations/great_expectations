@@ -3,12 +3,13 @@
 import copy
 from typing import Union, List, Iterator
 from ruamel.yaml.comments import CommentedMap
+
+import logging
+
 from great_expectations.data_context.types.base import (
     SorterConfig,
     sorterConfigSchema
 )
-
-import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
