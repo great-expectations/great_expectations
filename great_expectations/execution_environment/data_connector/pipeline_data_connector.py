@@ -66,6 +66,7 @@ class PipelineDataConnector(DataConnector):
             "partition_name": pipeline_partition_name,
             "data_reference": self.in_memory_dataset
         }
+
         return partitioner.get_available_partitions(
             partition_name=partition_name,
             data_asset_name=data_asset_name,

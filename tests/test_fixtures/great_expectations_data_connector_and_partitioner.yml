@@ -50,12 +50,12 @@ validation_operators:
 validations_store_name: validations
 execution_environments:
   my_test_execution_environment:
+    class_name: ExecutionEnvironment
     execution_engine:
+      class_name: PandasExecutionEngine
       module_name: great_expectations.execution_engine
       caching: true
       batch_spec_defaults: {}
-      class_name: SparkDFExecutionEngine
-    class_name: ExecutionEnvironment
     data_connectors:
       general_pipeline_data_connector:
         module_name: great_expectations.execution_environment.data_connector
@@ -63,8 +63,7 @@ execution_environments:
         assets:
           test_asset_1:
             config_params:
-              partition_name: spark_check_dataframe
-
+              partition_name: check_dataframe
       general_filesystem_data_connector:
         module_name: great_expectations.execution_environment.data_connector
         class_name: FilesDataConnector
@@ -75,11 +74,12 @@ execution_environments:
         assets:
           test_asset_0:
             config_params:
-              glob_directive: 'alex*'
+              glob_directive: '*'
             partitioner: my_standard_partitioner
 
         partitioners:
           my_standard_partitioner:
+            class_name: RegexPartitioner
             module_name: great_expectations.execution_environment.data_connector.partitioner
             config_params:
               regex:
@@ -89,7 +89,6 @@ execution_environments:
                 - timestamp
                 - price
             allow_multipart_partitions: false
-            class_name: RegexPartitioner
             sorters:
             - orderby: asc
               class_name: LexicographicSorter

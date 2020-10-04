@@ -96,7 +96,7 @@ class RegexPartitioner(Partitioner):
 group names specified is {len(self.regex["group_names"])}.
                     '''
                 )
-            if len(self.sorters) > 0:
+            if self.sorters and len(self.sorters) > 0:
                 if any([sorter.name not in self.regex["group_names"] for sorter in self.sorters]):
                     raise ge_exceptions.PartitionerError(
                         f'''RegexPartitioner "{self.name}" specifies one or more sort keys that do not appear among

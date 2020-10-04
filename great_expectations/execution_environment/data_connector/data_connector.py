@@ -143,6 +143,9 @@ class DataConnector(object):
 
     def update_partitions_cache(self, partitions: List[Partition]):
         if not partitions:
+            # <WILL> - want to check if this is the right behavior
+            # my_files_data_connector.get_available_partitions(data_asset_name="fake")
+            # if the user looks for a data_asset_name that does not exist, then we will have no partitions, which means we will hit this error.
             raise ge_exceptions.DataConnectorError(
                 "Partitions were not returned by Partitioner"
             )

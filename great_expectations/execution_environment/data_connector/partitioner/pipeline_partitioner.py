@@ -34,8 +34,6 @@ class PipelinePartitioner(Partitioner):
         pipeline_datasets: List[Dict[str, Union[str, Any]]] = None,
     ) -> List[Partition]:
 
-        # <WILL> more error checking
-
         if pipeline_datasets is None:
             return None
 

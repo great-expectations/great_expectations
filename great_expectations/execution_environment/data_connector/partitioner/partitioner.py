@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 
 
 class Partitioner(object):
-    DEFAULT_DATA_ASSET_NAME: str = "IN_MEMORY_DATA_ASSET"
-    DEFAULT_PARTITION_NAME: str = "IN_MEMORY_PARTITION"
+    DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_DATA_ASSET"
+    DEFAULT_PARTITION_NAME: str = "DEFAULT_PARTITION"
 
     _batch_spec_type: BatchSpec = BatchSpec  #TODO : is this really needed?
     # TODO: <Alex>What makes sense to have here, or is this even needed?</Alex>
@@ -81,7 +81,7 @@ class Partitioner(object):
             return self._sorters_cache[name]
         else:
             # Will <TODO> clean up this logic
-            if self.sorters:
+            if self._sorters:
                 sorter_names: list = [sorter_config["name"] for sorter_config in self._sorters]
                 if name in sorter_names:
                     sorter_config: dict = copy.deepcopy(
@@ -146,6 +146,7 @@ class Partitioner(object):
                 data_asset_name=data_asset_name,
                 **kwargs
             )
+
             self.data_connector.update_partitions_cache(partitions=partitions)
             cached_partitions = self.data_connector.get_cached_partitions(
                 data_asset_name=data_asset_name

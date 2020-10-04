@@ -2093,15 +2093,12 @@ def data_context_with_data_connector_and_partitioner(tmp_path_factory):
     )
 
 
-    # copy data files Over
-    test_data_path = os.path.join(project_path, "my_dir")
-    data_set_dir = file_relative_path(__file__, "./test_sets/partitioner_test_sets")
-    shutil.copytree(data_set_dir, test_data_path)
+    # copy data files Over <WILL> 20201003 - commented out to simplify testing
+    #test_data_path = os.path.join(project_path, "my_dir")
+    #data_set_dir = file_relative_path(__file__, "./test_sets/partitioner_test_sets")
+    #shutil.copytree(data_set_dir, test_data_path)
 
     return ge.data_context.DataContext(context_path)
-
-
-
 
 
 @pytest.fixture

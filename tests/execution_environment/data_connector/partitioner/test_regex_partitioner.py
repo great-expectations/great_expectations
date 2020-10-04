@@ -8,8 +8,7 @@ from great_expectations.execution_environment.data_connector.partitioner.regex_p
 
 from great_expectations.exceptions import SorterError
 
-
-
+#from ..reference_list import ReferenceListForTests, ReferenceConfigsForTest
 
 try:
     from unittest import mock
@@ -17,7 +16,6 @@ except ImportError:
     import mock
 
 logger = logging.getLogger(__name__)
-
 
 sorters_config = [
                     {
@@ -43,12 +41,12 @@ sorters_config = [
                     },
                 ]
 
-
 def test_regex_partitioner_instantiation(data_context_with_data_connector_and_partitioner):
+
     # builds data_context from yml file under tests/test_fixtures/great_expectations_data_connector_and_partitioner.yml
     ge_context = data_context_with_data_connector_and_partitioner
     my_execution_environment = ge_context.get_execution_environment("my_test_execution_environment")
-    my_data_connector = my_execution_environment.get_data_connector("default_data_connector")
+    my_data_connector = my_execution_environment.get_data_connector("general_filesystem_data_connector")
 
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}}
 
@@ -62,7 +60,7 @@ def test_regex_partitioner_instantiation(data_context_with_data_connector_and_pa
     assert my_partitioner.name == "mine_all_mine"
     assert my_partitioner.data_connector == my_data_connector
 
-    # building sortesr
+    # building sorters
     price_sorter = my_partitioner.get_sorter(name="price")
     assert price_sorter.__repr__() == "{'name': 'price', 'reverse': True}"
     # cache
