@@ -1,7 +1,8 @@
 from pathlib import Path
 import itertools
-import logging
 from typing import List, Dict, Union
+
+import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner

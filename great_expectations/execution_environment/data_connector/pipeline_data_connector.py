@@ -1,5 +1,6 @@
-import logging
 from typing import Union, List, Any
+
+import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery

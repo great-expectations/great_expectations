@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import copy
-import logging
 import itertools
 from typing import List, Dict, Union, Callable
 from ruamel.yaml.comments import CommentedMap
+
+import logging
 
 from great_expectations.data_context.types.base import (
     PartitionerConfig,
@@ -302,16 +303,6 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         batch_spec_scaffold["execution_environment"] = self._execution_environment.name
 
         partition_query: dict = batch_definition.get("partition_query")
-        # TODO: <Alex>Do we show an error to the user if a mismatched data_asset_name occurs, or overwrite it in partition_query silently?</Alex>
-        if "data_asset_name" in partition_query:
-            if partition_query["data_asset_name"] != data_asset_name:
-                raise ge_exceptions.BatchSpecError(
-                    message=f'''Unable to build batch_spec for data asset "{data_asset_name}", because the partition
-query specifies a different data asset name ("{partition_query["data_asset_name"]}").
-                    '''
-                )
-        else:
-            partition_query["data_asset_name"] = data_asset_name
         partitions: List[Partition] = self.get_available_partitions(
             data_asset_name=data_asset_name,
             partition_query=partition_query
@@ -346,10 +337,13 @@ query specifies a different data asset name ("{partition_query["data_asset_name"
     def get_available_partitions(
         self,
         data_asset_name: str = None,
-        partition_query: Union[Dict[str, Union[int, str, Dict, Callable]], None] = None,
+        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable]], None] = None,
         repartition: bool = False
     ) -> List[Partition]:
         partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
+        if partition_query is None:
+            partition_query = {}
+        partition_query["data_asset_name"] = data_asset_name
         partition_query_obj: PartitionQuery = build_partition_query(partition_query_dict=partition_query)
         return self._get_available_partitions(
             partitioner=partitioner,
