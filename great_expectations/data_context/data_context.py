@@ -1092,11 +1092,9 @@ class BaseDataContext:
         in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
     ) -> Batch:
         execution_environment_name: str = batch_definition.get("execution_environment")
-        runtime_environment: Union[dict, None] = None
+        runtime_environment: dict = {}
         if in_memory_dataset is not None:
-            runtime_environment = {
-                "in_memory_dataset": in_memory_dataset,
-            }
+            runtime_environment.update({"in_memory_dataset": in_memory_dataset})
         execution_environment: ExecutionEnvironment = self.get_execution_environment(
             execution_environment_name=execution_environment_name,
             runtime_environment=runtime_environment
@@ -1112,11 +1110,9 @@ class BaseDataContext:
         in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
     ):
         execution_environment_name: str = batch_definition.get("execution_environment")
-        runtime_environment: Union[dict, None] = None
+        runtime_environment: dict = {}
         if in_memory_dataset is not None:
-            runtime_environment = {
-                "in_memory_dataset": in_memory_dataset,
-            }
+            runtime_environment.update({"in_memory_dataset": in_memory_dataset})
         execution_environment: ExecutionEnvironment = self.get_execution_environment(
             execution_environment_name=execution_environment_name,
             runtime_environment=runtime_environment
@@ -1333,12 +1329,14 @@ class BaseDataContext:
             module_name=module_name, class_name=class_name
         )
 
+        # TODO: <Alex>This is broken.  Do we need this?</Alex>
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
-        if hasattr(execution_environment_class, "build_configuration"):
-            config = execution_environment_class.build_configuration(**kwargs)
-        else:
-            config = kwargs
+        # if hasattr(execution_environment_class, "build_configuration"):
+        #     config = execution_environment_class.build_configuration(**kwargs)
+        # else:
+        #     config = kwargs
+        config = kwargs
 
         config = executionEnvironmentConfigSchema.load(config)
         self._project_config["execution_environments"][name] = config
@@ -1515,13 +1513,15 @@ class BaseDataContext:
         self,
         name: str,
         config: CommentedMap,
-        runtime_environment: dict = None
+        runtime_environment: Union[dict, None] = None
     ) -> ExecutionEnvironment:
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, ExecutionEnvironmentConfig):
             config: dict = executionEnvironmentConfigSchema.dump(config)
         config.update({"name": name})
         module_name: str = "great_expectations.execution_environment"
+        if runtime_environment is None:
+            runtime_environment = {}
         runtime_environment.update({"data_context": self})
         execution_environment: ExecutionEnvironment = instantiate_class_from_config(
             config=config,
@@ -1541,15 +1541,13 @@ class BaseDataContext:
         execution_environment_name: str,
         data_connector_name: str,
         data_asset_name: str = None,
-        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable]], None] = None,
+        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
         in_memory_dataset: Any = None,
         repartition: bool = False
     ) -> List[Partition]:
-        runtime_environment: Union[dict, None] = None
+        runtime_environment: dict = {}
         if in_memory_dataset is not None:
-            runtime_environment = {
-                "in_memory_dataset": in_memory_dataset,
-            }
+            runtime_environment.update({"in_memory_dataset": in_memory_dataset})
         execution_environment: ExecutionEnvironment = self.get_execution_environment(
             execution_environment_name=execution_environment_name,
             runtime_environment=runtime_environment

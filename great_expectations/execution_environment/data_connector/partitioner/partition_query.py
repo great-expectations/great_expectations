@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def build_partition_query(
-    partition_query_dict: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable]], None] = None
+    partition_query_dict: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None
 ):
     if not partition_query_dict:
         return PartitionQuery(
