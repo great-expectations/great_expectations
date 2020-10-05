@@ -84,7 +84,6 @@ class Partitioner(object):
         if name in self._sorters_cache:
             return self._sorters_cache[name]
         else:
-            # Will <TODO> clean up this logic
             if self._sorters:
                 sorter_names: list = [sorter_config["name"] for sorter_config in self._sorters]
                 if name in sorter_names:

@@ -37,7 +37,6 @@ class PipelinePartitioner(Partitioner):
     ) -> Union[List[Partition], None]:
         if pipeline_datasets is None:
             return None
-
         return [
             Partition(
                 name=pipeline_dataset["partition_name"],

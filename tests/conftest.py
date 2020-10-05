@@ -2645,36 +2645,6 @@ def execution_environment_files_data_connector_regex_partitioner_with_groups_wit
     return data_context
 
 
-@pytest.fixture()
-def execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_with_custom_list_data_context(
-        empty_data_context: DataContext,
-        default_base_directory: str = "data",
-        data_asset_base_directory: str = None,
-        test_file_names: list = None,
-):
-    data_context: DataContext = empty_data_context
-    execution_environment_name: str = "test_execution_environment"
-    data_context.add_execution_environment(
-        name=execution_environment_name,
-        use_group_names=True,
-        initialize=True,
-        **execution_environment_files_data_connector_regex_partitioner_config(
-            use_group_names=True,
-            use_sorters=True,
-            default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory
-        )["test_execution_environment"]
-    )
-    base_directory_names: list = [default_base_directory, data_asset_base_directory]
-    root_directory_path: str = data_context.root_directory
-    create_files_for_regex_partitioner(root_directory_path=root_directory_path, directory_paths=base_directory_names,
-                                       test_file_names=test_file_names)
-    return data_context
-
-
-
-
-
 @pytest.fixture
 def filesystem_csv(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("filesystem_csv")
