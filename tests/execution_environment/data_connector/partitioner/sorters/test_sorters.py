@@ -23,6 +23,7 @@ from great_expectations.execution_environment.data_connector.partitioner.partiti
 
 
 # <WILL> TODO: test the get_partition_key() functions for each of the sorters too
+
 def test_sorter_instantiation_base():
     # base
     my_sorter = Sorter(name="base", class_name="Sorter", orderby="asc")
@@ -96,8 +97,6 @@ def test_sorter_instantiation_custom_list():
     }}
     with pytest.raises(ge_exceptions.SorterError):
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
-
-
 
 
 def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_elements):
