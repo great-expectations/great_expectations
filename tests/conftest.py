@@ -2233,6 +2233,7 @@ def data_context_with_data_connector_and_partitioner_instantiated_from_yml(tmp_p
     """
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
+    <WILL> Check if this overlaps with DataContext instantiation function
     """
     project_path = str(tmp_path_factory.mktemp("data_context_partitioner_project"))
     context_path = os.path.join(project_path, "great_expectations")
