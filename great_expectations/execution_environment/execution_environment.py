@@ -257,7 +257,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         return data_connectors
 
     # TODO: <Alex>This needs to be reviewed...</Alex>
-    # TODO: <Alex>What is this for, and how is this used?  This looks like it is for DataSource -- do we still need it for backward compatibility?</Alex
+    # TODO: <Alex>What is this for, and how is this used?  This looks like it is for DataSource -- do we still need it for backward compatibility?</Alex>
     def get_available_data_asset_names(self, data_connector_names: list = None) -> dict:
         """
         Returns a dictionary of data_asset_names that the specified data
