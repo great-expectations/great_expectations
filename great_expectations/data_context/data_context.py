@@ -11,7 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Callable, Union, Any
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
@@ -1540,8 +1540,8 @@ class BaseDataContext:
         self,
         execution_environment_name: str,
         data_connector_name: str,
-        partition_name: str = None,
         data_asset_name: str = None,
+        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable]], None] = None,
         in_memory_dataset: Any = None,
         repartition: bool = False
     ) -> List[Partition]:
@@ -1558,8 +1558,8 @@ class BaseDataContext:
             name=data_connector_name,
         )
         available_partitions: List[Partition] = data_connector.get_available_partitions(
-            partition_name=partition_name,
             data_asset_name=data_asset_name,
+            partition_query=partition_query,
             repartition=repartition
         )
         return available_partitions

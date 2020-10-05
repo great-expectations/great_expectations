@@ -18,6 +18,66 @@ from ..registry import extract_metrics
 
 
 class ExpectColumnMinToBeBetween(DatasetExpectation):
+    """Expect the column minimum to be between an min and max value
+
+            expect_column_min_to_be_between is a \
+            :func:`column_aggregate_expectation
+                <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
+
+            Args:
+                column (str): \
+                    The column name
+                min_value (comparable type or None): \
+                    The minimal column minimum allowed.
+                max_value (comparable type or None): \
+                    The maximal column minimum allowed.
+                strict_min (boolean):
+                    If True, the minimal column minimum must be strictly larger than min_value, default=False
+                strict_max (boolean):
+                    If True, the maximal column minimum must be strictly smaller than max_value, default=False
+
+            Keyword Args:
+                parse_strings_as_datetimes (Boolean or None): \
+                    If True, parse min_value, max_values, and all non-null column values to datetimes before making \
+                    comparisons.
+                output_strftime_format (str or None): \
+                    A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
+
+            Other Parameters:
+                result_format (str or None): \
+                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
+                    For more detail, see :ref:`result_format <result_format>`.
+                include_config (boolean): \
+                    If True, then include the expectation config as part of the result object. \
+                    For more detail, see :ref:`include_config`.
+                catch_exceptions (boolean or None): \
+                    If True, then catch exceptions and include them as part of the result object. \
+                    For more detail, see :ref:`catch_exceptions`.
+                meta (dict or None): \
+                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                    modification. For more detail, see :ref:`meta`.
+
+            Returns:
+                An ExpectationSuiteValidationResult
+
+                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+            Notes:
+                These fields in the result object are customized for this expectation:
+                ::
+
+                    {
+                        "observed_value": (list) The actual column min
+                    }
+
+
+                * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+                * If min_value is None, then max_value is treated as an upper bound
+                * If max_value is None, then min_value is treated as a lower bound
+
+            """
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.aggregate.min",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
@@ -37,6 +97,7 @@ class ExpectColumnMinToBeBetween(DatasetExpectation):
     }
 
     """ A Column Map Metric Decorator for the Minimum"""
+
     @PandasExecutionEngine.metric(
         metric_name="column.aggregate.min",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
@@ -102,7 +163,9 @@ class ExpectColumnMinToBeBetween(DatasetExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert min_val or max_val, "min_value and max_value cannot both be None"
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be none"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"

@@ -193,14 +193,14 @@ def test_files_data_connector_partitioners_configured(data_context_with_data_con
          Configuration:
              - name and execution_environment and base_directory
              - partitioner, but no sorter
-         
+
          * since no sorters are configured, it will be the order in which the files exist in base_directory
-         
+
          Results :
              - data_assets = the root of each file in base_directory
              - partitions = 1 partition for each file in base_directory
                           = data_asset_name = root of file (if data_asset_name not specified, or specified data_asset_name (test_asset_0)
-         
+
      """
 
     partitioner_config = {'my_standard_regex_partitioner': {
@@ -345,4 +345,3 @@ def test_files_data_connector_partitioners_configured_sorters(data_context_with_
                   definition={'name': 'eugene', 'timestamp': '20200809', 'price': '1500'},
                   source="my_dir/eugene_20200809_1500.csv", data_asset_name="test_asset_0"),
     ]
-

@@ -1,6 +1,6 @@
 import datetime
 
-from great_expectations.core.id_dict import BatchKwargs
+from great_expectations.core.id_dict import BatchKwargs, BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot
 
@@ -29,8 +29,8 @@ class Batch(DictDot):
         self._batch_markers = batch_markers
 
         self._datasource_name = datasource_name
-        self._batch_kwargs = batch_kwargs
-        self._batch_spec = batch_spec
+        self._batch_kwargs = batch_kwargs or BatchKwargs()
+        self._batch_spec = batch_spec or BatchSpec()
         self._data = data
         self._batch_parameters = batch_parameters
         self._batch_definition = batch_definition

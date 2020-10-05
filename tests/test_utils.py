@@ -681,10 +681,10 @@ def get_test_batch(
                 elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col])
                     min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=True
+                        schema=execution_engine, negative=True
                     )
                     max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=False
+                        schema=execution_engine, negative=False
                     )
                     for api_schema_type in ["api_np", "api_cast"]:
                         min_value_api = get_sql_dialect_floating_point_infinity_value(
@@ -1235,7 +1235,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_null",
             "expect_column_values_to_be_of_type",
             "expect_column_values_to_be_in_type_list",
-            "expect_column_values_to_be_in_set",
+            # "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
             "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
@@ -1292,15 +1292,15 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_values_to_be_unique",
             # "expect_column_values_to_not_be_null",
             # "expect_column_values_to_be_null",
-            "expect_column_values_to_be_of_type",
-            "expect_column_values_to_be_in_type_list",
+            # "expect_column_values_to_be_of_type",
+            # "expect_column_values_to_be_in_type_list",
             # "expect_column_values_to_be_in_set",
             # "expect_column_values_to_not_be_in_set",
             # "expect_column_values_to_be_between",
-            "expect_column_values_to_be_increasing",
-            "expect_column_values_to_be_decreasing",
-            "expect_column_value_lengths_to_be_between",
-            "expect_column_value_lengths_to_equal",
+            # "expect_column_values_to_be_increasing",
+            # "expect_column_values_to_be_decreasing",
+            # "expect_column_value_lengths_to_be_between",
+            # "expect_column_value_lengths_to_equal",
             # "expect_column_values_to_match_regex",
             # "expect_column_values_to_not_match_regex",
             # "expect_column_values_to_match_regex_list",

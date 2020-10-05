@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import copy
-import logging
 import itertools
-from typing import List
-from copy import deepcopy
+from typing import List, Dict, Union, Callable
 from ruamel.yaml.comments import CommentedMap
+
+import logging
 
 from great_expectations.data_context.types.base import (
     PartitionerConfig,
@@ -14,6 +14,10 @@ from great_expectations.data_context.types.base import (
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.execution_environment.data_connector.partitioner.partition_query import (
+    PartitionQuery,
+    build_partition_query
+)
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -51,7 +55,7 @@ class DataConnector(object):
         "execution_environment",
         "data_connector",
         "data_asset_name",
-        "partition_name",
+        "partition_query",
         "batch_spec_passthrough",
         "limit",
     }
@@ -141,7 +145,12 @@ class DataConnector(object):
                     )
         return self.partitions_cache.get(data_asset_name)
 
-    def update_partitions_cache(self, partitions: List[Partition]):
+    def update_partitions_cache(
+        self,
+        partitions: List[Partition],
+        partitioner: Partitioner,
+        allow_multipart_partitions: bool = False
+    ):
         if not partitions:
             # <WILL> - want to check if this is the right behavior
             # my_files_data_connector.get_available_partitions(data_asset_name="fake")
@@ -149,7 +158,6 @@ class DataConnector(object):
             raise ge_exceptions.DataConnectorError(
                 "Partitions were not returned by Partitioner"
             )
-
         for partition in partitions:
             data_asset_name: str = partition.data_asset_name
             cached_partitions: List[Partition] = self.get_cached_partitions(
@@ -157,7 +165,29 @@ class DataConnector(object):
             )
             if cached_partitions is None or len(cached_partitions) == 0:
                 cached_partitions = []
-            if partition not in cached_partitions:
+            if partition in cached_partitions:
+                if not (
+                    allow_multipart_partitions or partition.source in [
+                        temp_partition.source for temp_partition in cached_partitions
+                    ]
+                ):
+                    raise ge_exceptions.PartitionerError(
+                        f'''Partitioner "{partitioner.name}" detected multiple data references for partition
+"{partition}" of data asset "{partition.data_asset_name}"; however, allow_multipart_partitions is set to
+False.  Please consider modifying the directives, used to partition your dataset, or set allow_multipart_partitions to
+True, but be aware that unless you have a specific use case for multipart partitions, there is most likely a mismatch
+between the partitioning directives and the actual structure of data under consideration.
+                        '''
+                    )
+            else:
+                if partition.source in [
+                    temp_partition.source for temp_partition in cached_partitions
+                ]:
+                    raise ge_exceptions.PartitionerError(
+                        f'''Partitioner "{partitioner.name}" for data asset "{partition.data_asset_name}" detected
+multiple partitions, including "{partition}", for the same data reference -- this is illegal.
+                        '''
+                    )
                 cached_partitions.append(partition)
             self._partitions_cache[data_asset_name] = cached_partitions
 
@@ -261,7 +291,7 @@ class DataConnector(object):
                 % str(batch_definition_keys - recognized_batch_definition_keys)
             )
 
-        batch_definition_defaults: dict = deepcopy(self.batch_definition_defaults)
+        batch_definition_defaults: dict = copy.deepcopy(self.batch_definition_defaults)
         batch_definition: dict = {
             key: value
             for key, value in batch_definition.items()
@@ -269,7 +299,7 @@ class DataConnector(object):
         }
         batch_definition: dict = nested_update(batch_definition_defaults, batch_definition)
 
-        batch_spec_defaults: dict = deepcopy(
+        batch_spec_defaults: dict = copy.deepcopy(
             self._execution_environment.execution_engine.batch_spec_defaults
         )
         batch_spec_passthrough: dict = batch_definition.get("batch_spec_passthrough", {})
@@ -280,11 +310,10 @@ class DataConnector(object):
 
         batch_spec_scaffold["execution_environment"] = self._execution_environment.name
 
-        partition_name: str = batch_definition.get("partition_name")
-        # TODO: <Alex>If partition_name is not specified in batch_definition, then assume "latest" (or "most recent" as defined by the first element in the sorted list of partitions).</Alex>
-        # TODO: <Alex>Must accept partition_definition (and name) to be a loss-less retrieval.</Alex>
+        partition_query: dict = batch_definition.get("partition_query")
         partitions: List[Partition] = self.get_available_partitions(
-            partition_name=partition_name, data_asset_name=data_asset_name
+            data_asset_name=data_asset_name,
+            partition_query=partition_query
         )
         if len(partitions) == 0:
             raise ge_exceptions.BatchSpecError(
@@ -315,23 +344,27 @@ class DataConnector(object):
 
     def get_available_partitions(
         self,
-        partition_name: str = None,
         data_asset_name: str = None,
+        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable]], None] = None,
         repartition: bool = False
     ) -> List[Partition]:
         partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
+        if partition_query is None:
+            partition_query = {}
+        partition_query["data_asset_name"] = data_asset_name
+        partition_query_obj: PartitionQuery = build_partition_query(partition_query_dict=partition_query)
         return self._get_available_partitions(
             partitioner=partitioner,
-            partition_name=partition_name,
             data_asset_name=data_asset_name,
+            partition_query=partition_query_obj,
             repartition=repartition
         )
 
     def _get_available_partitions(
         self,
         partitioner: Partitioner,
-        partition_name: str = None,
         data_asset_name: str = None,
+        partition_query: Union[PartitionQuery, None] = None,
         repartition: bool = False
     ) -> List[Partition]:
         raise NotImplementedError

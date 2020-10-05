@@ -19,6 +19,40 @@ from ..registry import extract_metrics
 
 
 class ExpectTableRowCountToEqual(DatasetExpectation):
+    """Expect the number of rows to equal a value.
+
+    expect_table_row_count_to_equal is a :func:`expectation \
+    <great_expectations.validator.validator.Validator.expectation>`, not a
+    ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+    Args:
+        value (int): \
+            The expected number of rows.
+
+    Other Parameters:
+        result_format (string or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see :ref:`meta`.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+    See Also:
+        expect_table_row_count_to_be_between
+    """
+
     metric_dependencies = ("rows.count",)
     success_keys = ("value",)
 
@@ -50,10 +84,13 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = False,
     ):
-        """Column count metric function"""
+        """Row count metric function"""
         df = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
+            domain_kwargs=metric_domain_kwargs,
+            batches=batches,
+            filter_column_isnull=False,
         )
 
         return df.shape[0]

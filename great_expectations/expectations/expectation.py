@@ -1,5 +1,6 @@
 import logging
 import re
+import string
 from abc import ABC, ABCMeta
 from collections import Counter
 from copy import deepcopy
@@ -21,6 +22,7 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
 )
 from great_expectations.expectations.registry import register_expectation
+from great_expectations.expectations.util import legacy_method_parameters
 
 from ..core.batch import Batch
 from ..data_asset.util import (
@@ -70,6 +72,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
         "catch_exceptions",
         "result_format",
     )
+    legacy_method_parameters = legacy_method_parameters
+
     _validators = dict()
     _post_validation_hooks = list()
 
@@ -77,6 +81,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if configuration is not None:
             self.validate_configuration(configuration)
         self._configuration = configuration
+
+    @classmethod
+    def get_allowed_config_keys(cls):
+        return cls.domain_keys + cls.success_keys + cls.runtime_keys
 
     def metrics_validate(
         self,
@@ -91,14 +99,30 @@ class Expectation(ABC, metaclass=MetaExpectation):
         available_metrics = {metric[0] for metric in metrics.keys()}
         available_validators = sorted(
             [
-                (set(metric_deps), validator_fn)
-                for (metric_deps, validator_fn) in self._validators.items()
+                (
+                    validators_key[0],  # expectation class name
+                    validators_key[1],  # validator name
+                    set(validators_key[2]),  # metric dependencies
+                    validator_fn,
+                )
+                for (validators_key, validator_fn) in self._validators.items()
             ],
-            key=lambda x: len(x[0]),
+            key=lambda x: len(x[0][2]),
         )
-        for metric_deps, validator_fn in available_validators:
+        validator_name = self.get_validator_name()
+        for (
+            expectation_class_name,
+            declared_validator_name,
+            metric_deps,
+            validator_fn,
+        ) in available_validators:
             # if metric_deps <= available_metrics:
-            if validator_fn.__qualname__.split(".")[0] == self.__class__.__name__:
+            if (
+                expectation_class_name == self.__class__.__name__
+                and metric_deps
+                <= available_metrics  # set comparison: metric_deps is a subset of available_metrics
+                and validator_name == declared_validator_name
+            ):
                 return validator_fn(
                     self,
                     configuration,
@@ -109,26 +133,33 @@ class Expectation(ABC, metaclass=MetaExpectation):
         raise MetricError("No validator found for available metrics")
 
     @classmethod
-    def validates(cls, metric_dependencies: tuple):
+    def validates(cls, metric_dependencies: tuple, validator_name: str = "default"):
         def outer(validator: Callable):
-            if metric_dependencies in cls._validators:
-                if validator == cls._validators[metric_dependencies]:
+            validators_key = (cls.__name__, validator_name, metric_dependencies)
+            if validators_key in cls._validators:
+                if validator == cls._validators[validators_key]:
                     logger.info(
-                        f"Multiple declarations of validator with metric dag: {str(metric_dependencies)} found."
+                        f"Multiple declarations of validator with metric dag: {str(validators_key)} found."
                     )
                     return
                 else:
                     logger.warning(
-                        f"Overwriting declaration of validator with metric dag: {str(metric_dependencies)}."
+                        f"Overwriting declaration of validator with metric dag: {str(validators_key)}."
                     )
-            logger.debug(f"Registering validator: {str(metric_dependencies)}")
+            logger.debug(f"Registering validator: {str(validators_key)}")
 
             @wraps(validator)
             def inner_func(self, *args, **kwargs):
                 raw_response = validator(self, *args, **kwargs)
                 return self._build_evr(raw_response)
 
-            cls._validators[metric_dependencies] = inner_func
+            cls._validators[
+                (
+                    validator.__qualname__.split(".")[0],  # expectation class name
+                    validator_name,
+                    metric_dependencies,
+                )
+            ] = inner_func
 
             return inner_func
 
@@ -333,6 +364,14 @@ class Expectation(ABC, metaclass=MetaExpectation):
             meta=meta,
         )
 
+    def get_validator_name(self):
+        """
+        This is just a placeholder for more complex logic to determine the validator_name
+        Returns:
+
+        """
+        return "default"
+
 
 class DatasetExpectation(Expectation, ABC):
     domain_keys = (
@@ -387,7 +426,6 @@ class DatasetExpectation(Expectation, ABC):
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
-        return df
         return df
 
     @staticmethod
@@ -464,6 +502,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
         bundle_computation=False,
+        filter_column_isnull=False,
     )
     def _count(
         self,
@@ -473,10 +512,12 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
+        filter_column_isnull: bool = False,
     ):
         df = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
+            domain_kwargs=metric_domain_kwargs,
+            batches=batches,
+            filter_column_isnull=filter_column_isnull,
         )
         return df.shape[0]
 
@@ -486,6 +527,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
         bundle_computation=True,
+        filter_column_isnull=False,
     )
     def _count(
         self,
@@ -495,7 +537,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
+        filter_column_isnull: bool = False,
     ):
         import sqlalchemy as sa
 
@@ -510,6 +552,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
         bundle_computation=False,
+        filter_column_isnull=False,
     )
     def _count(
         self,
@@ -519,7 +562,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
+        filter_column_isnull: bool = False,
     ):
         data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
         return data.count()
@@ -584,16 +627,23 @@ def _format_map_output(
     if result_format["result_format"] == "BOOLEAN_ONLY":
         return return_obj
 
-    missing_count = element_count - nonnull_count
+    skip_missing = False
+
+    if nonnull_count is None:
+        missing_count = None
+        skip_missing: bool = True
+    else:
+        missing_count = element_count - nonnull_count
 
     if element_count > 0:
         unexpected_percent = unexpected_count / element_count * 100
-        missing_percent = missing_count / element_count * 100
 
-        if nonnull_count > 0:
-            unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
-        else:
-            unexpected_percent_nonmissing = None
+        if not skip_missing:
+            missing_percent = missing_count / element_count * 100
+            if nonnull_count > 0:
+                unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
+            else:
+                unexpected_percent_nonmissing = None
 
     else:
         missing_percent = None
@@ -602,15 +652,19 @@ def _format_map_output(
 
     return_obj["result"] = {
         "element_count": element_count,
-        "missing_count": missing_count,
-        "missing_percent": missing_percent,
         "unexpected_count": unexpected_count,
         "unexpected_percent": unexpected_percent,
-        "unexpected_percent_nonmissing": unexpected_percent_nonmissing,
         "partial_unexpected_list": unexpected_list[
             : result_format["partial_unexpected_count"]
         ],
     }
+
+    if not skip_missing:
+        return_obj["result"]["missing_count"] = missing_count
+        return_obj["result"]["missing_percent"] = missing_percent
+        return_obj["result"][
+            "unexpected_percent_nonmissing"
+        ] = unexpected_percent_nonmissing
 
     if result_format["result_format"] == "BASIC":
         return return_obj

@@ -723,6 +723,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @property
     def dataframe(self):
+        """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
         if not self.loaded_batch:
             raise ValueError(
                 "Batch has not been loaded - please run load_batch() to load a batch."
@@ -732,6 +733,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @staticmethod
     def guess_reader_method_from_path(path):
+        """Based on a given filepath, decides a reader method. Currently supports tsv, csv, and parquet. If none of these
+        file extensions are used, returns BatchKwargsError stating that it is unable to determine the current path.
+
+        Args:
+            path - A given file path
+
+        Returns:
+            A dictionary entry of format {'reader_method': reader_method}
+
+        """
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "csv"}
         elif path.endswith(".parquet"):
@@ -776,6 +787,17 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
 
     def process_batch_definition(self, batch_definition, batch_spec):
+        """Given that the batch definition has a limit state, transfers the limit dictionary entry from the batch_definition
+        to the batch_spec.
+
+                Args:
+                    batch_definition: The batch definition to use in configuring the batch spec's limit
+                    batch_spec: a batch_spec dictionary whose limit needs to be configured
+
+                Returns:
+                    ReaderMethod to use for the filepath
+
+                """
         limit = batch_definition.get("limit")
         if limit is not None:
             if not batch_spec.get("limit"):
@@ -841,13 +863,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         column = domain_kwargs.get("column", None)
         if column:
             # Rename column so we only have to handle dot notation here
-            eval_column = self._get_eval_column_name(column)
+            # TODO: verify comprehensive nested column support
+            # eval_column = self._get_eval_column_name(column)
+            eval_column = column
             data = data.withColumn(eval_column, F.col(column))
             if filter_column_isnull:
                 data = data.filter(F.col(eval_column).isNotNull())
         return data
 
     def _get_eval_column_name(self, column):
+        """Given the name of a column (string), returns the name of the corresponding eval column"""
         return "__eval_col_" + column.replace(".", "__").replace("`", "_")
 
     def _column_map_count(
@@ -869,7 +894,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             metric_value_kwargs,
             filter_column_isnull=filter_column_isnull,
         ).id
-        return metrics.get(metric_key).count()
+        domain_kwargs = {
+            k: v for (k, v) in metric_domain_kwargs.items() if k != "column"
+        }
+        return metrics.get(metric_key), domain_kwargs
 
     def _column_map_values(
         self,
@@ -895,15 +923,17 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             base_metric_value_kwargs,
             filter_column_isnull=filter_column_isnull,
         ).id
-        filtered = metrics.get(metric_key)
-        column = self._get_eval_column_name(metric_domain_kwargs["column"])
+        condition = metrics.get(metric_key)
+        column = metric_domain_kwargs["column"]
+        # column = self._get_eval_column_name(metric_domain_kwargs["column"])
+        filtered = self.get_domain_dataframe(metric_domain_kwargs).filter(~condition)
         if result_format["result_format"] == "COMPLETE":
-            return list(filtered.select(F.col(column)))
+            return list(filtered.select(F.col(column)).collect())
         else:
             return list(
-                filtered.select(F.col(column)).limit(
-                    result_format["partial_unexpected_count"]
-                )
+                filtered.select(F.col(column))
+                .limit(result_format["partial_unexpected_count"])
+                .collect()
             )
 
     def _column_map_value_counts(
@@ -917,6 +947,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         filter_column_isnull,
         **kwargs,
     ):
+        """Returns all unique values in the column and their corresponding counts"""
         assert metric_name.endswith(".unexpected_value_counts")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
@@ -929,8 +960,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             base_metric_value_kwargs,
             filter_column_isnull=filter_column_isnull,
         ).id
-        filtered = metrics.get(metric_key)
-        column = self._get_eval_column_name(metric_domain_kwargs["column"])
+        condition = metrics.get(metric_key)
+        column = metric_domain_kwargs["column"]
+        # column = self._get_eval_column_name(metric_domain_kwargs["column"])
+        filtered = self.get_domain_dataframe(metric_domain_kwargs).filter(condition)
         value_counts = filtered.groupBy(F.col(column)).count()
         if result_format["result_format"] == "COMPLETE":
             return value_counts
@@ -965,7 +998,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             base_metric_value_kwargs,
             filter_column_isnull=filter_column_isnull,
         ).id
-        filtered = metrics.get(metric_key)
+        condition = metrics.get(metric_key)
+        filtered = self.get_domain_dataframe(metric_domain_kwargs).filter(condition)
         if result_format["result_format"] == "COMPLETE":
             return filtered.collect()
         else:
@@ -1004,17 +1038,22 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     metric_domain_kwargs, batches, filter_column_isnull
                 )
                 column = metric_domain_kwargs["column"]
-                eval_col = self._get_eval_column_name(column)
+                # eval_col = self._get_eval_column_name(column)
+                eval_col = column
 
-                return metric_fn(
+                metric_condition = metric_fn(
                     self,
-                    data=data,
-                    column=eval_col,
+                    column=F.col(eval_col),
                     metrics=metrics,
                     metric_domain_kwargs=metric_domain_kwargs,
                     metric_value_kwargs=metric_value_kwargs,
                     **kwargs,
                 )
+                if filter_column_isnull:
+                    expected_condition = F.col(eval_col).isNotNull() & metric_condition
+                else:
+                    expected_condition = metric_condition
+                return expected_condition
 
             register_metric(
                 metric_name=metric_name,
@@ -1033,7 +1072,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_count,
-                bundle_computation=False,
+                bundle_computation=True,
                 filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
@@ -1078,24 +1117,87 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         resolve_batch: Iterable[Tuple[MetricEdgeKey, Callable, dict]],
         metrics: Dict[Tuple, Any] = None,
     ) -> dict:
-        raise NotImplementedError
+        """For each metric name in the given resolve_batch, finds the domain of the metric and calculates it using a
+        metric function from the given provider class.
+
+                Args:
+                    resolve_batch - A batch containing MetricEdgeKeys and their corresponding functions
+                    metrics (dict) - A dictionary containing metrics and corresponding parameters
+
+                Returns:
+                    A dictionary of the collected metrics over their respective domains
+                """
+        if metrics is None:
+            metrics = dict()
+
+        aggregates: Dict[Tuple, dict] = dict()
+        for metric_to_resolve, metric_provider, metric_provider_kwargs in resolve_batch:
+            assert (
+                metric_provider._can_be_bundled
+            ), "batch_resolve only supports metrics that support bundled computation"
+            # batch_id and table are the only determining factors for bundled metrics
+            column_condition, domain_kwargs = metric_provider(
+                self, **metric_provider_kwargs, metrics=metrics
+            )
+            if not isinstance(domain_kwargs, IDDict):
+                domain_kwargs = IDDict(domain_kwargs)
+            domain_id = domain_kwargs.to_id()
+            if domain_id not in aggregates:
+                aggregates[domain_id] = {
+                    "column_conditions": [],
+                    "ids": [],
+                    "domain_kwargs": domain_kwargs,
+                }
+            aggregates[domain_id]["column_conditions"].append(column_condition)
+            aggregates[domain_id]["ids"].append(metric_to_resolve.id)
+        for aggregate in aggregates.values():
+            df = self.get_domain_dataframe(aggregate["domain_kwargs"])
+            assert len(aggregate["column_conditions"]) == len(aggregate["ids"])
+            condition_ids = []
+            sums = []
+            for idx in range(len(aggregate["column_conditions"])):
+                column_condition = aggregate["column_conditions"][idx]
+                condition_id = str(uuid.uuid4())
+                df = df.withColumn(
+                    condition_id, F.when(column_condition, 1).otherwise(0)
+                )
+                condition_ids.append(condition_id)
+                sums.append(F.sum(condition_id))
+
+            res = df.agg(*sums).collect()
+            assert (
+                len(res) == 1
+            ), "all bundle-computed metrics must be single-value statistics"
+            assert len(aggregate["ids"]) == len(
+                res[0]
+            ), "unexpected number of metrics returned"
+            for idx, id in enumerate(aggregate["ids"]):
+                metrics[id] = res[0][idx]
+
+        return metrics
 
     def head(self, n=5):
+        """Returns dataframe head. Default is 5"""
         return self.dataframe.limit(n).toPandas()
 
     def get_row_count(self):
+        """Returns the number of rows in a Dataframe"""
         return self.dataframe.count()
 
     def get_column_count(self):
+        """Returns the number of columns in a column"""
         return len(self.dataframe.columns)
 
     def get_table_columns(self) -> List[str]:
+        """Returns the columns in a Dataframe"""
         return self.dataframe.columns
 
     def get_column_nonnull_count(self, column):
+        """Returns the number of nonnull values in a column"""
         return self.dataframe.filter(col(column).isNotNull()).count()
 
     def get_column_mean(self, column):
+        """Returns the mean of a column"""
         # TODO need to apply this logic to other such methods?
         types = dict(self.dataframe.dtypes)
         if types[column] not in ("int", "float", "double", "bigint"):
@@ -1104,6 +1206,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return result[0] if len(result) > 0 else None
 
     def get_column_sum(self, column):
+        """Returns the sum of a column"""
         return self.dataframe.select(column).groupBy().sum().collect()[0][0]
 
     # TODO: consider getting all basic statistics in one go:
@@ -1121,6 +1224,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         pass
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
+        """Returns the maximum value in a column"""
         temp_column = self.dataframe.select(column).where(col(column).isNotNull())
         if parse_strings_as_datetimes:
             temp_column = self._apply_dateutil_parse(temp_column)
@@ -1130,6 +1234,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return result[0][0]
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
+        """Returns the minimum value in a column"""
         temp_column = self.dataframe.select(column).where(col(column).isNotNull())
         if parse_strings_as_datetimes:
             temp_column = self._apply_dateutil_parse(temp_column)
@@ -1139,6 +1244,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return result[0][0]
 
     def get_column_value_counts(self, column, sort="value", collate=None):
+        """Returns column distinct values and corresponding counts"""
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
         if collate is not None:
@@ -1164,6 +1270,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return series
 
     def get_column_unique_count(self, column):
+        """Returns all unique column values"""
         return self.dataframe.agg(countDistinct(column)).collect()[0][0]
 
     def get_column_modes(self, column):
@@ -1172,6 +1279,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return list(s[s == s.max()].index)
 
     def get_column_median(self, column):
+        """Getter function for the column median"""
         # We will get the two middle values by choosing an epsilon to add
         # to the 50th percentile such that we always get exactly the middle two values
         # (i.e. 0 < epsilon < 1 / (2 * values))
@@ -1186,6 +1294,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return np.mean(result)
 
     def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
+        """Given a set of quantile values, returns their corresponding approximations"""
         if allow_relative_error is False:
             allow_relative_error = 0.0
         if (
@@ -1201,6 +1310,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         )
 
     def get_column_stdev(self, column):
+        """Returns the standard deviation of a column"""
         return self.dataframe.select(stddev_samp(col(column))).collect()[0][0]
 
     def get_column_hist(self, column, bins):
@@ -1268,6 +1378,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     def get_column_count_in_range(
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ):
+        """Returns the number of values in a column that exist within a certain range"""
         if min_val is None and max_val is None:
             raise ValueError("Must specify either min or max value")
         if min_val is not None and max_val is not None and min_val > max_val:
@@ -1289,6 +1400,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     # Utils
     @staticmethod
     def _apply_dateutil_parse(column):
+        """Turns column values into dateutil format"""
         assert len(column.columns) == 1, "Expected DataFrame with 1 column"
         col_name = column.columns[0]
         _udf = udf(parse, sparktypes.TimestampType())
