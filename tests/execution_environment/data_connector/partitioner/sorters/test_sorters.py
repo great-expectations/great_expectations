@@ -71,7 +71,6 @@ def test_sorter_instantiation_custom_list():
     sorter_params: dict = {'config_params': {
         'reference_list': ['a', 'b', 'c'],
     }}
-
     my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
     assert isinstance(my_custom, CustomListSorter)
     assert my_custom.name == "custom"
