@@ -216,7 +216,6 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         """
         if name in self._partitioners_cache:
             return self._partitioners_cache[name]
-
         elif name in self.partitioners:
             partitioner_config: dict = copy.deepcopy(
                 self.partitioners[name]

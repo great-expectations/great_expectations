@@ -337,21 +337,24 @@ def execution_environment_files_data_connector_regex_partitioner_config(
     return execution_environments_config
 
 
-def create_files_for_regex_partitioner(root_directory_path: str, directory_paths: list = None):
+def create_files_for_regex_partitioner(root_directory_path: str, directory_paths: list = None, test_file_names: list = None):
     if not directory_paths:
         return
-    test_file_names: list = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ]
+
+    if not test_file_names:
+        test_file_names: list = [
+            "alex_20200809_1000.csv",
+            "eugene_20200809_1500.csv",
+            "james_20200811_1009.csv",
+            "abe_20200809_1040.csv",
+            "will_20200809_1002.csv",
+            "james_20200713_1567.csv",
+            "eugene_20201129_1900.csv",
+            "will_20200810_1001.csv",
+            "james_20200810_1003.csv",
+            "alex_20200819_1300.csv",
+        ]
+
     base_directories = []
     for dir_path in directory_paths:
         if dir_path is None:
@@ -2228,13 +2231,6 @@ def data_context_with_data_connector_and_partitioner(tmp_path_factory):
         os.path.join(fixture_dir, "great_expectations_data_connector_and_partitioner.yml"),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
-
-
-    # copy data files Over <WILL> 20201003 - commented out to simplify testing
-    #test_data_path = os.path.join(project_path, "my_dir")
-    #data_set_dir = file_relative_path(__file__, "./test_sets/partitioner_test_sets")
-    #shutil.copytree(data_set_dir, test_data_path)
-
     return ge.data_context.DataContext(context_path)
 
 
@@ -2647,6 +2643,36 @@ def execution_environment_files_data_connector_regex_partitioner_with_groups_wit
     root_directory_path: str = data_context.root_directory
     create_files_for_regex_partitioner(root_directory_path=root_directory_path, directory_paths=base_directory_names)
     return data_context
+
+
+@pytest.fixture()
+def execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_with_custom_list_data_context(
+        empty_data_context: DataContext,
+        default_base_directory: str = "data",
+        data_asset_base_directory: str = None,
+        test_file_names: list = None,
+):
+    data_context: DataContext = empty_data_context
+    execution_environment_name: str = "test_execution_environment"
+    data_context.add_execution_environment(
+        name=execution_environment_name,
+        use_group_names=True,
+        initialize=True,
+        **execution_environment_files_data_connector_regex_partitioner_config(
+            use_group_names=True,
+            use_sorters=True,
+            default_base_directory=default_base_directory,
+            data_asset_base_directory=data_asset_base_directory
+        )["test_execution_environment"]
+    )
+    base_directory_names: list = [default_base_directory, data_asset_base_directory]
+    root_directory_path: str = data_context.root_directory
+    create_files_for_regex_partitioner(root_directory_path=root_directory_path, directory_paths=base_directory_names,
+                                       test_file_names=test_file_names)
+    return data_context
+
+
+
 
 
 @pytest.fixture

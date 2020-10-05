@@ -99,8 +99,6 @@ class Partitioner(object):
                 raise ge_exceptions.SorterError(
                     f'Unable to load sorter with the name "{name}" -- no configuration found or invalid configuration.'
                 )
-
-
         sorter_config: CommentedMap = sorterConfigSchema.load(
             sorter_config
         )

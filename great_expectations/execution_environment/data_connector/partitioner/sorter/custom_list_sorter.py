@@ -12,12 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class CustomListSorter(Sorter):
-
     """
     CustomListSorter
-        - The CustomListSorter is able to sort partitions values according to a custom list. Maybe there can be a better name for this...
+        - The CustomListSorter is able to sort partitions values according to a user-provided custom list.
     """
-
     def __init__(self, name: str, orderby: str = "asc", config_params: dict = None, **kwargs):
         super().__init__(name=name, orderby=orderby, config_params=config_params, **kwargs)
         reference_list: list = self.config_params.get("reference_list")

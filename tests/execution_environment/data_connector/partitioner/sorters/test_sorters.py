@@ -5,7 +5,6 @@ try:
 except ImportError:
     import mock
 
-
 import pytest
 
 from great_expectations.exceptions import SorterError

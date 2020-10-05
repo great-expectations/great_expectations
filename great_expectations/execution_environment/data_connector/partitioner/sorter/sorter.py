@@ -52,4 +52,3 @@ class Sorter(object):
             "reverse": self.reverse
         }
         return str(doc_fields_dict)
-

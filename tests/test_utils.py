@@ -645,14 +645,13 @@ def get_test_batch(
         return PandasExecutionEngine(caching=caching).load_batch(
             in_memory_dataset=df,
             batch_definition={"data_asset_name": "test", "partition_name": table_name},
-            #batch_spec=BatchSpec(
-            #    {
-            #        "ge_load_time": datetime.datetime.now(
-            #            datetime.timezone.utc
-            #        ).strftime("%Y%m%dT%H%M%S.%fZ")
-            #    }
-            #),
-            # <WILL> Make sure this test works well with expected behavior of PandasExecutionEngine
+            batch_spec=BatchSpec(
+                {
+                    "ge_load_time": datetime.datetime.now(
+                        datetime.timezone.utc
+                    ).strftime("%Y%m%dT%H%M%S.%fZ")
+                }
+            ),
         )
 
     elif execution_engine == "sqlite":

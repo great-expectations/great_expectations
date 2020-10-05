@@ -471,14 +471,14 @@ Notes:
         )
 
     # TODO: <Alex></Alex>
-    def load_batch(self, batch_definition: dict = None, in_memory_dataset = None) -> Batch:
+    def load_batch(self, batch_definition: dict = None) -> Batch:
         """With the help of the execution environment and data connector specified within the batch definition, builds a batch spec
         and utilizes it to load a batch using the appropriate file reader and the given file path.
 
                Args:
                    batch_definition (dict): A dictionary specifying the parameters used to build the batch
                """
-        #in_memory_dataset = None
+        in_memory_dataset = None
         if not batch_definition:
             logger.info("Loading a batch without a batch_definition")
             batch_definition = {}
