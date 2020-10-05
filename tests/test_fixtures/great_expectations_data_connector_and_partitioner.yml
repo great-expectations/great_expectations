@@ -6,8 +6,8 @@ data_docs_sites:
     class_name: SiteBuilder
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: alex.dev
-      prefix: great_expectations/HTML/EXECUTION_ENVIRONMENT_ENGINE
+      bucket: test.bucket
+      prefix: great_expectations/HTML
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
       show_cta_footer: true
@@ -16,14 +16,14 @@ stores:
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: alex.dev
-      prefix: great_expectations/JSON/EXECUTION_ENVIRONMENT_ENGINE/ExpectationSuites
+      bucket: test.bucket
+      prefix: great_expectations/JSON/ExpectationSuites
   validations:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: alex.dev
-      prefix: great_expectations/JSON/EXECUTION_ENVIRONMENT_ENGINE/Validations
+      bucket: test.bucket
+      prefix: great_expectations/JSON/Validations
   evaluation_parameters:
     class_name: EvaluationParameterStore
 plugins_directory:
