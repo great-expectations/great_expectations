@@ -22,6 +22,7 @@ from great_expectations.execution_environment.data_connector.partitioner.sorter 
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 
 
+# <WILL> TODO: test the get_partition_key() functions for each of the sorters too
 def test_sorter_instantiation_base():
     # base
     my_sorter = Sorter(name="base", class_name="Sorter", orderby="asc")
