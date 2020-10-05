@@ -25,7 +25,7 @@ class CustomListSorter(Sorter):
     def _validate_reference_list(reference_list: List[str] = None) -> List[str]:
         if not (reference_list and isinstance(reference_list, list)):
             raise ge_exceptions.SorterError(
-                "CustomListSorter requires reference_list which was not provided"
+                "CustomListSorter requires reference_list which was not provided."
             )
         for item in reference_list:
             if not isinstance(item, str):
