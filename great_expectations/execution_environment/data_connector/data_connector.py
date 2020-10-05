@@ -151,6 +151,15 @@ class DataConnector(object):
         partitioner: Partitioner,
         allow_multipart_partitions: bool = False
     ):
+        if not allow_multipart_partitions and partitions and len(partitions) > len(set(partitions)):
+            raise ge_exceptions.PartitionerError(
+                f'''Partitioner "{partitioner.name}" detected multiple data references in one or more partitions for the
+given data asset; however, allow_multipart_partitions is set to False.  Please consider modifying the directives, used
+to partition your dataset, or set allow_multipart_partitions to True, but be aware that unless you have a specific use
+case for multipart partitions, there is most likely a mismatch between the partitioning directives and the actual
+structure of data under consideration.
+                '''
+            )
         for partition in partitions:
             data_asset_name: str = partition.data_asset_name
             cached_partitions: List[Partition] = self.get_cached_partitions(
