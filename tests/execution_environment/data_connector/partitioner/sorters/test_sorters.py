@@ -36,7 +36,6 @@ def test_sorter_instantiation_base():
 
 
 def test_sorter_instantiation_lexicographic():
-
     # Lexicographic
     my_lex = LexicographicSorter(name="lex", orderby="desc")
     assert isinstance(my_lex, LexicographicSorter)

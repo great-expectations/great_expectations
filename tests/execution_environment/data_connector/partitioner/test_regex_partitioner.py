@@ -1,14 +1,8 @@
-# TODO: <Alex>Will, please note that the tests in this module currently do not work properly and please delete this comment when fixed.</Alex>
 import logging
 import pytest
 
-
-# TODO: <Alex>Will: This is temporary -- just to get a crude test going.</Alex>
 from great_expectations.execution_environment.data_connector.partitioner.regex_partitioner import RegexPartitioner
-
 from great_expectations.exceptions import SorterError
-
-#from ..reference_list import ReferenceListForTests, ReferenceConfigsForTest
 
 try:
     from unittest import mock
@@ -18,28 +12,28 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 sorters_config = [
-                    {
-                        'name': 'name',
-                        'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter',
-                        'class_name': 'LexicographicSorter',
-                        'orderby': 'asc',
-                    },
-                    {
-                        'name': 'timestamp',
-                        'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter',
-                        'class_name': 'DateTimeSorter',
-                        'orderby': 'desc',
-                        'config_params': {
-                            'datetime_format': '%Y%m%d',
-                        }
-                    },
-                    {
-                        'name': 'price',
-                        'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter',
-                        'class_name': 'NumericSorter',
-                        'orderby': 'desc',
-                    },
-                ]
+    {
+        'name': 'name',
+        'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter',
+        'class_name': 'LexicographicSorter',
+        'orderby': 'asc',
+    },
+    {
+        'name': 'timestamp',
+        'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter',
+        'class_name': 'DateTimeSorter',
+        'orderby': 'desc',
+        'config_params': {
+            'datetime_format': '%Y%m%d',
+        }
+    },
+    {
+        'name': 'price',
+        'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter',
+        'class_name': 'NumericSorter',
+        'orderby': 'desc',
+    },
+]
 
 def test_regex_partitioner_instantiation(data_context_with_data_connector_and_partitioner):
 

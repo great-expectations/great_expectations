@@ -7,7 +7,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_batch_schema,
     anonymized_datasource_schema,
     cli_new_ds_choice_payload,
-    #datasource_sqlalchemy_connect_payload,
+    #datasource_sqlalchemy_connect_payload, <WILL> - Check if this is correct 20201005
     empty_payload_schema,
     init_payload_schema,
     save_or_edit_expectation_suite_payload_schema,

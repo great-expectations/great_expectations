@@ -34,8 +34,7 @@ class PipelinePartitioner(Partitioner):
         *,
         pipeline_data_asset_name: str = None,
         pipeline_datasets: List[Dict[str, Union[str, Any]]] = None,
-    ) -> List[Partition]:
-
+    ) -> Union[List[Partition], None]:
         if pipeline_datasets is None:
             return None
 
