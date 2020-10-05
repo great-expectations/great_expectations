@@ -3,6 +3,7 @@ import pytest
 import os
 import shutil
 from typing import List
+import datetime
 from pathlib import Path
 
 from great_expectations.data_context.types.base import DataContextConfig
@@ -31,14 +32,11 @@ from tests.test_utils import safe_remove
 def test_return_all_available_partitions_unsorted(
     execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
 ):
-    data_context: DataContext = \
-        execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
     execution_environment_name: str = "test_execution_environment"
     data_connector_name: str = "test_filesystem_data_connector"
-    execution_environment: ExecutionEnvironment = data_context.get_execution_environment(
-        execution_environment_name=execution_environment_name
-    )
-    data_connector: DataConnector = execution_environment.get_data_connector(name=data_connector_name)
+
+    data_context: DataContext = \
+        execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
     available_partitions: List[Partition] = data_context.get_available_partitions(
         execution_environment_name=execution_environment_name,
         data_connector_name=data_connector_name,
@@ -56,9 +54,12 @@ def test_return_all_available_partitions_unsorted(
 
     assert len(available_partitions) == 10
 
+    execution_environment: ExecutionEnvironment = data_context.get_execution_environment(
+        execution_environment_name=execution_environment_name
+    )
+    data_connector: DataConnector = execution_environment.get_data_connector(name=data_connector_name)
     # noinspection PyUnresolvedReferences
     base_directory: str = data_connector.base_directory
-
     expected_returned_partitions: List[Partition] = [
         Partition(
             name="james-20200810-1003",
@@ -128,14 +129,11 @@ def test_return_all_available_partitions_unsorted(
 def test_return_all_available_partitions_sorted(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
-    data_context: DataContext = \
-        execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
     execution_environment_name: str = "test_execution_environment"
     data_connector_name: str = "test_filesystem_data_connector"
-    execution_environment: ExecutionEnvironment = data_context.get_execution_environment(
-        execution_environment_name=execution_environment_name
-    )
-    data_connector: DataConnector = execution_environment.get_data_connector(name=data_connector_name)
+
+    data_context: DataContext = \
+        execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
     available_partitions: List[Partition] = data_context.get_available_partitions(
         execution_environment_name=execution_environment_name,
         data_connector_name=data_connector_name,
@@ -153,6 +151,10 @@ def test_return_all_available_partitions_sorted(
 
     assert len(available_partitions) == 10
 
+    execution_environment: ExecutionEnvironment = data_context.get_execution_environment(
+        execution_environment_name=execution_environment_name
+    )
+    data_connector: DataConnector = execution_environment.get_data_connector(name=data_connector_name)
     # noinspection PyUnresolvedReferences
     base_directory: str = data_connector.base_directory
 
@@ -216,6 +218,84 @@ def test_return_all_available_partitions_sorted(
             data_asset_name="james_20200713_1567",
             definition={"name": "james", "timestamp": "20200713", "price": "1567"},
             source=f"{base_directory}/james_20200713_1567.csv"
+        ),
+    ]
+
+    assert available_partitions == expected_returned_partitions
+
+
+def test_return_partitions_sorted_custom_filtered(
+    execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
+):
+    execution_environment_name: str = "test_execution_environment"
+    data_connector_name: str = "test_filesystem_data_connector"
+
+    data_context: DataContext = \
+        execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
+
+    def my_custom_partition_selector(data_asset_name: str, partition_name: str, partition_definition: dict) -> bool:
+        return \
+            partition_definition["name"] in ["abe", "james", "eugene"] \
+            and datetime.datetime.strptime(
+                partition_definition["timestamp"], "%Y%m%d"
+            ).date() > datetime.datetime(
+                2020, 7, 15
+            ).date()
+
+    available_partitions: List[Partition] = data_context.get_available_partitions(
+        execution_environment_name=execution_environment_name,
+        data_connector_name=data_connector_name,
+        data_asset_name=None,
+        partition_query={
+            "custom_filter": my_custom_partition_selector,
+            "partition_name": None,
+            "partition_definition": None,
+            "limit": None,
+            "partition_index": None,
+        },
+        in_memory_dataset=None,
+        repartition=False
+    )
+
+    assert len(available_partitions) == 5
+
+    execution_environment: ExecutionEnvironment = data_context.get_execution_environment(
+        execution_environment_name=execution_environment_name
+    )
+    data_connector: DataConnector = execution_environment.get_data_connector(name=data_connector_name)
+    # noinspection PyUnresolvedReferences
+    base_directory: str = data_connector.base_directory
+
+    expected_returned_partitions: List[Partition] = [
+        Partition(
+            name="eugene-20201129-1900",
+            data_asset_name="eugene_20201129_1900",
+            definition={"name": "eugene", "timestamp": "20201129", "price": "1900"},
+            source=f"{base_directory}/eugene_20201129_1900.csv"
+        ),
+        Partition(
+            name="james-20200811-1009",
+            data_asset_name="james_20200811_1009",
+            definition={"name": "james", "timestamp": "20200811", "price": "1009"},
+            source=f"{base_directory}/james_20200811_1009.csv"
+        ),
+        Partition(
+            name="james-20200810-1003",
+            data_asset_name="james_20200810_1003",
+            definition={"name": "james", "timestamp": "20200810", "price": "1003"},
+            source=f"{base_directory}/james_20200810_1003.csv"
+        ),
+        Partition(
+            name="eugene-20200809-1500",
+            data_asset_name="eugene_20200809_1500",
+            definition={"name": "eugene", "timestamp": "20200809", "price": "1500"},
+            source=f"{base_directory}/eugene_20200809_1500.csv"
+        ),
+        Partition(
+            name="abe-20200809-1040",
+            data_asset_name="abe_20200809_1040",
+            definition={"name": "abe", "timestamp": "20200809", "price": "1040"},
+            source=f"{base_directory}/abe_20200809_1040.csv"
         ),
     ]
 
