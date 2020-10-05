@@ -19,6 +19,8 @@ from great_expectations.execution_environment.data_connector.partitioner.sorter 
     DateTimeSorter,
 )
 
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+
 
 def test_sorter_instantiation_base():
     # base
@@ -73,3 +75,32 @@ def test_sorter_instantiation_custom_list():
     assert my_custom.name == "custom"
     assert my_custom.reverse is False
     assert my_custom.config_params['reference_list'] == ['a', 'b', 'c']
+
+    # with incorrectly configured reference list
+    sorter_params: dict = {'config_params': {
+        'reference_list': [111, 222, 333]  # this shouldn't work. the reference list should only contain strings
+    }}
+
+    with pytest.raises(SorterError):
+        my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
+
+
+def test_sorter_instantiation_custom_list(periodic_table_of_elements):
+    # CustomListSorter
+    sorter_params: dict = {'config_params': {
+        'reference_list': periodic_table_of_elements,
+    }}
+
+    my_custom = CustomListSorter(name="element", orderby="asc", **sorter_params)
+    assert my_custom.reference_list == periodic_table_of_elements
+
+    # This element exists : Hydrogen
+    test_partition = Partition(name="test", data_asset_name="fake", definition={"element": "Hydrogen"}, source="nowhere")
+    returned_partition_key = my_custom.get_partition_key(test_partition)
+    assert returned_partition_key == 0
+
+    # This element does not : Vibranium
+    test_partition = Partition(name="test", data_asset_name="fake", definition={"element": "Vibranium"}, source="nowhere")
+    with pytest.raises(SorterError):
+        my_custom.get_partition_key(test_partition)
+
