@@ -1,0 +1,108 @@
+expectations_store_name: expectations
+datasources: {}
+notebooks:
+data_docs_sites:
+  s3_site:
+    class_name: SiteBuilder
+    store_backend:
+      class_name: TupleS3StoreBackend
+      bucket: test.bucket
+      prefix: great_expectations/HTML
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+      show_cta_footer: true
+stores:
+  expectations:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: TupleS3StoreBackend
+      bucket: test.bucket
+      prefix: great_expectations/JSON/ExpectationSuites
+  validations:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: TupleS3StoreBackend
+      bucket: test.bucket
+      prefix: great_expectations/JSON/Validations
+  evaluation_parameters:
+    class_name: EvaluationParameterStore
+plugins_directory:
+config_variables_file_path:
+config_version: 2.0
+evaluation_parameter_store_name: evaluation_parameters
+anonymous_usage_statistics:
+  usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+  data_context_id: a7850955-61ba-4b8f-a6ab-2991e9bbef22
+  enabled: true
+validation_operators:
+  action_list_operator:
+    class_name: ActionListValidationOperator
+    action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
+validations_store_name: validations
+execution_environments:
+  my_test_execution_environment:
+    class_name: ExecutionEnvironment
+    execution_engine:
+      class_name: PandasExecutionEngine
+      module_name: great_expectations.execution_engine
+      caching: true
+      batch_spec_defaults: {}
+    data_connectors:
+      general_pipeline_data_connector:
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: PipelineDataConnector
+        assets:
+          test_asset_1:
+            config_params:
+              partition_name: check_dataframe
+      general_filesystem_data_connector:
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: FilesDataConnector
+        config_params:
+          base_directory: /my_dir
+          glob_directive: '*'
+
+        assets:
+          test_asset_0:
+            config_params:
+              glob_directive: '*'
+            partitioner: my_standard_partitioner
+
+        partitioners:
+          my_standard_partitioner:
+            class_name: RegexPartitioner
+            module_name: great_expectations.execution_environment.data_connector.partitioner
+            config_params:
+              regex:
+                pattern: .+\/(.+)_(.+)_(.+)\.csv
+                group_names:
+                - name
+                - timestamp
+                - price
+            allow_multipart_partitions: false
+            sorters:
+            - orderby: asc
+              class_name: LexicographicSorter
+              module_name: great_expectations.execution_environment.data_connector.partitioner.sorter
+              name: name
+            - config_params:
+                datetime_format: '%Y%m%d'
+              orderby: desc
+              class_name: DateTimeSorter
+              module_name: great_expectations.execution_environment.data_connector.partitioner.sorter
+              name: timestamp
+            - orderby: desc
+              class_name: NumericSorter
+              module_name: great_expectations.execution_environment.data_connector.partitioner.sorter
+              name: price
+
+        default_partitioner: my_standard_partitioner

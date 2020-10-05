@@ -12,34 +12,27 @@ logger = logging.getLogger(__name__)
 
 
 class CustomListSorter(Sorter):
-    r"""
+    """
     CustomListSorter
-        - The CustomListSorter is able to sort partitions values according to a custom list. Maybe there can be a better name for this...
-        - candidates:
-            - CustomSorter - too broad
-            - ReferenceListSorter - eww
-            - ...
+        - The CustomListSorter is able to sort partitions values according to a user-provided custom list.
     """
     def __init__(self, name: str, orderby: str = "asc", config_params: dict = None, **kwargs):
         super().__init__(name=name, orderby=orderby, config_params=config_params, **kwargs)
-
         reference_list: list = self.config_params.get("reference_list")
         self._reference_list = self._validate_reference_list(reference_list=reference_list)
 
     @staticmethod
-    def _validate_reference_list(partition_value: str, reference_list: List[str] = None) -> List[str]:
-        # check type
-        if not isinstance(partition_value, str):
+    def _validate_reference_list(reference_list: List[str] = None) -> List[str]:
+        if not (reference_list and isinstance(reference_list, list)):
             raise ge_exceptions.SorterError(
-                f'Source "partition_value" must have string type (actual type is "{str(type(partition_value))}").'
+                "CustomListSorter requires reference_list which was not provided."
             )
-        try:
-            reference_list.index(partition_value)
-            return reference_list
-        except ValueError:
-            raise ge_exceptions.SorterError(
-                f'Source "{partition_value}" was not found in Reference list.'
-            )
+        for item in reference_list:
+            if not isinstance(item, str):
+                raise ge_exceptions.SorterError(
+                    f"Items in reference list for CustomListSorter must have string type (actual type is `{str(type(item))}`)."
+                )
+        return reference_list
 
     def get_partition_key(self, partition: Partition) -> Any:
         partition_definition: dict = partition.definition

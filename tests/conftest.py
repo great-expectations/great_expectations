@@ -337,21 +337,24 @@ def execution_environment_files_data_connector_regex_partitioner_config(
     return execution_environments_config
 
 
-def create_files_for_regex_partitioner(root_directory_path: str, directory_paths: list = None):
+def create_files_for_regex_partitioner(root_directory_path: str, directory_paths: list = None, test_file_names: list = None):
     if not directory_paths:
         return
-    test_file_names: list = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ]
+
+    if not test_file_names:
+        test_file_names: list = [
+            "alex_20200809_1000.csv",
+            "eugene_20200809_1500.csv",
+            "james_20200811_1009.csv",
+            "abe_20200809_1040.csv",
+            "will_20200809_1002.csv",
+            "james_20200713_1567.csv",
+            "eugene_20201129_1900.csv",
+            "will_20200810_1001.csv",
+            "james_20200810_1003.csv",
+            "alex_20200819_1300.csv",
+        ]
+
     base_directories = []
     for dir_path in directory_paths:
         if dir_path is None:
@@ -406,7 +409,6 @@ def empty_expectation_suite():
         "expectations": [],
     }
     return expectation_suite
-
 
 @pytest.fixture
 def basic_expectation_suite():
@@ -2048,6 +2050,22 @@ def non_numeric_high_card_dataset(test_backend):
     }
     return get_dataset(test_backend, data, schemas=schemas)
 
+@pytest.fixture
+def periodic_table_of_elements():
+    data = ['Hydrogen', 'Helium', 'Lithium', 'Beryllium', 'Boron', 'Carbon', 'Nitrogen', 'Oxygen', 'Fluorine', 'Neon',
+     'Sodium', 'Magnesium', 'Aluminum', 'Silicon', 'Phosphorus', 'Sulfur', 'Chlorine', 'Argon', 'Potassium', 'Calcium',
+     'Scandium', 'Titanium', 'Vanadium', 'Chromium', 'Manganese', 'Iron', 'Cobalt', 'Nickel', 'Copper', 'Zinc',
+     'Gallium', 'Germanium', 'Arsenic', 'Selenium', 'Bromine', 'Krypton', 'Rubidium', 'Strontium', 'Yttrium',
+     'Zirconium', 'Niobium', 'Molybdenum', 'Technetium', 'Ruthenium', 'Rhodium', 'Palladium', 'Silver', 'Cadmium',
+     'Indium', 'Tin', 'Antimony', 'Tellurium', 'Iodine', 'Xenon', 'Cesium', 'Barium', 'Lanthanum', 'Cerium',
+     'Praseodymium', 'Neodymium', 'Promethium', 'Samarium', 'Europium', 'Gadolinium', 'Terbium', 'Dysprosium',
+     'Holmium', 'Erbium', 'Thulium', 'Ytterbium', 'Lutetium', 'Hafnium', 'Tantalum', 'Tungsten', 'Rhenium', 'Osmium',
+     'Iridium', 'Platinum', 'Gold', 'Mercury', 'Thallium', 'Lead', 'Bismuth', 'Polonium', 'Astatine', 'Radon',
+     'Francium', 'Radium', 'Actinium', 'Thorium', 'Protactinium', 'Uranium', 'Neptunium', 'Plutonium', 'Americium',
+     'Curium', 'Berkelium', 'Californium', 'Einsteinium', 'Fermium', 'Mendelevium', 'Nobelium', 'Lawrencium',
+     'Rutherfordium', 'Dubnium', 'Seaborgium', 'Bohrium', 'Hassium', 'Meitnerium', 'Darmstadtium', 'Roentgenium',
+     'Copernicium', 'Nihomium', 'Flerovium', 'Moscovium', 'Livermorium', 'Tennessine', 'Oganesson']
+    return data
 
 def dataset_sample_data(test_backend):
     # No infinities for mysql
@@ -2208,6 +2226,28 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
     return context
+
+
+@pytest.fixture()
+def data_context_with_data_connector_and_partitioner_instantiated_from_yml(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    <WILL> Check if this overlaps with DataContext instantiation function
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context_partitioner_project"))
+    context_path = os.path.join(project_path, "great_expectations")
+
+    os.makedirs(
+        os.path.join(context_path), exist_ok=True,
+    )
+    # copy YML file over
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_data_connector_and_partitioner.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    return ge.data_context.DataContext(context_path)
 
 
 @pytest.fixture
