@@ -2229,7 +2229,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 
 @pytest.fixture()
-def data_context_with_data_connector_and_partitioner(tmp_path_factory):
+def data_context_with_data_connector_and_partitioner_instantiated_from_yml(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
