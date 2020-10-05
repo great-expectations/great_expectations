@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class RegexPartitioner(Partitioner):
+    DEFAULT_GROUP_NAME_PATTERN: str = "group_"
     DEFAULT_DELIMITER: str = "-"
 
     def __init__(
@@ -88,12 +89,11 @@ class RegexPartitioner(Partitioner):
             return None
         else:
             groups: tuple = matches.groups()
-            if len(groups) != len(self.regex["group_names"]):
-                raise ge_exceptions.PartitionerError(
-                    f'''RegexPartitioner "{self.name}" matched {len(groups)} groups in "{path}", but number of match
-group names specified is {len(self.regex["group_names"])}.
-                    '''
-                )
+            group_names: list = [
+                f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
+            ]
+            for idx, group_name in enumerate(self.regex["group_names"]):
+                group_names[idx] = group_name
             if self.sorters and len(self.sorters) > 0:
                 if any([sorter.name not in self.regex["group_names"] for sorter in self.sorters]):
                     raise ge_exceptions.PartitionerError(
@@ -101,15 +101,15 @@ group names specified is {len(self.regex["group_names"])}.
 configured match group names.
                         '''
                     )
-                if len(self.regex["group_names"]) < len(self.sorters):
+                if len(group_names) < len(self.sorters):
                     raise ge_exceptions.PartitionerError(
-                        f'''RegexPartitioner "{self.name}" is configured with {len(self.regex["group_names"])} match
+                        f'''RegexPartitioner "{self.name}", configured with {len(group_names)}, matches {len(groups)}
 group names, which is fewer than number of sorters specified is {len(self.sorters)}.
                         '''
                     )
             partition_definition: dict = {}
             for idx, group_value in enumerate(groups):
-                group_name: str = self.regex["group_names"][idx]
+                group_name: str = group_names[idx]
                 partition_definition[group_name] = group_value
             partition_name: str = RegexPartitioner.DEFAULT_DELIMITER.join(partition_definition.values())
 

@@ -166,11 +166,10 @@ class DataConnector(object):
             if cached_partitions is None or len(cached_partitions) == 0:
                 cached_partitions = []
             if partition in cached_partitions:
-                if not (
-                    allow_multipart_partitions or partition.source in [
-                        temp_partition.source for temp_partition in cached_partitions
-                    ]
-                ):
+                identical_partitions: List[Partition] = [
+                    temp_partition for temp_partition in cached_partitions if temp_partition == partition
+                ]
+                if not allow_multipart_partitions and len(identical_partitions) > 1:
                     raise ge_exceptions.PartitionerError(
                         f'''Partitioner "{partitioner.name}" detected multiple data references for partition
 "{partition}" of data asset "{partition.data_asset_name}"; however, allow_multipart_partitions is set to
@@ -179,10 +178,16 @@ True, but be aware that unless you have a specific use case for multipart partit
 between the partitioning directives and the actual structure of data under consideration.
                         '''
                     )
+                specific_partition_idx: int = cached_partitions.index(partition)
+                specific_partition: Partition = cached_partitions[specific_partition_idx]
+                if partition.source != specific_partition.source:
+                    cached_partitions.remove(specific_partition)
+                    cached_partitions.append(partition)
             else:
-                if partition.source in [
-                    temp_partition.source for temp_partition in cached_partitions
-                ]:
+                partitions_with_given_data_reference: List[Partition] = [
+                    temp_partition for temp_partition in cached_partitions if temp_partition.source == partition.source
+                ]
+                if len(partitions_with_given_data_reference) > 0:
                     raise ge_exceptions.PartitionerError(
                         f'''Partitioner "{partitioner.name}" for data asset "{partition.data_asset_name}" detected
 multiple partitions, including "{partition}", for the same data reference -- this is illegal.
@@ -345,7 +350,7 @@ multiple partitions, including "{partition}", for the same data reference -- thi
     def get_available_partitions(
         self,
         data_asset_name: str = None,
-        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable]], None] = None,
+        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
         repartition: bool = False
     ) -> List[Partition]:
         partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)

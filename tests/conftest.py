@@ -231,6 +231,143 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_aws_integration)
 
 
+def execution_environment_files_data_connector_regex_partitioner_config(
+    use_group_names: bool = False,
+    use_sorters: bool = False,
+    default_base_directory = "data",
+    data_asset_base_directory = None,
+):
+    if not use_group_names and use_sorters:
+        raise ValueError("The presently available data_connector and partitioner tests match sorters with group names.")
+
+    group_names: Union[list, None]
+    if use_group_names:
+        group_names = [
+            "name",
+            "timestamp",
+            "price"
+        ]
+    else:
+        group_names = None
+
+    sorters: Union[list, None]
+    if use_sorters:
+        sorters = [
+            # {
+            #     "name": "name",
+            #     "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            #     "class_name": "LexicographicSorter",
+            #     "orderby": "asc",
+            # },
+            {
+                "name": "timestamp",
+                "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+                "class_name": "DateTimeSorter",
+                "orderby": "desc",
+                "config_params": {
+                    "datetime_format": "%Y%m%d",
+                }
+            },
+            {
+                "name": "price",
+                "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+                "class_name": "NumericSorter",
+                "orderby": "desc",
+            },
+        ]
+    else:
+        sorters = None
+
+    execution_environments_config: dict = {
+        "test_execution_environment": {
+            "class_name": "ExecutionEnvironment",
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "class_name": "PandasExecutionEngine",
+                "caching": True,
+                "batch_spec_defaults": {}
+            },
+            "data_connectors": {
+                "test_pipeline_data_connector": {
+                    "module_name": "great_expectations.execution_environment.data_connector",
+                    "class_name": "PipelineDataConnector",
+                    "assets": {
+                        "test_asset_1": {
+                            "config_params": {
+                                "partition_name": "spark_check_dataframe",
+                            },
+                        }
+                    }
+                },
+                "test_filesystem_data_connector": {
+                    "module_name": "great_expectations.execution_environment.data_connector",
+                    "class_name": "FilesDataConnector",
+                    "config_params": {
+                        "base_directory": default_base_directory,
+                        "glob_directive": "*",
+                    },
+                    "partitioners": {
+                        "test_regex_partitioner": {
+                            "module_name": "great_expectations.execution_environment.data_connector.partitioner",
+                            "class_name": "RegexPartitioner",
+                            "config_params": {
+                                "regex": {
+                                    "pattern": r".+\/(.+)_(.+)_(.+)\.csv",
+                                    "group_names": group_names
+                                },
+                            },
+                            "allow_multipart_partitions": False,
+                            "sorters": sorters
+                        }
+                    },
+                    "default_partitioner": "test_regex_partitioner",
+                    "assets": {
+                        "test_asset_0": {
+                            "config_params": {
+                                "glob_directive": "alex*",
+                            },
+                            "partitioner": "test_regex_partitioner",
+                            "base_directory": data_asset_base_directory
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return execution_environments_config
+
+
+def create_files_for_regex_partitioner(root_directory_path: str, directory_paths: list = None):
+    if not directory_paths:
+        return
+    test_file_names: list = [
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ]
+    base_directories = []
+    for dir_path in directory_paths:
+        if dir_path is None:
+            base_directories.append(dir_path)
+        else:
+            data_dir_path = os.path.join(root_directory_path, dir_path)
+            os.makedirs(data_dir_path, exist_ok=True)
+            base_dir = str(data_dir_path)
+            # Put test files into the directories.
+            for file_name in test_file_names:
+                file_path = os.path.join(base_dir, file_name)
+                with open(file_path, "w") as fp:
+                    fp.writelines([f'The name of this file is: "{file_path}".\n'])
+            base_directories.append(base_dir)
+
+
 @pytest.fixture(autouse=True)
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
@@ -2461,6 +2598,55 @@ def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
         },
     )
     return empty_data_context
+
+
+@pytest.fixture()
+def execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context(
+    empty_data_context: DataContext,
+    default_base_directory: str = "data",
+    data_asset_base_directory: str = None
+):
+    data_context: DataContext = empty_data_context
+    execution_environment_name: str = "test_execution_environment"
+    data_context.add_execution_environment(
+        name=execution_environment_name,
+        initialize=True,
+        **execution_environment_files_data_connector_regex_partitioner_config(
+            use_group_names=False,
+            use_sorters=False,
+            default_base_directory=default_base_directory,
+            data_asset_base_directory=data_asset_base_directory
+        )["test_execution_environment"]
+    )
+    base_directory_names: list = [default_base_directory, data_asset_base_directory]
+    root_directory_path: str = data_context.root_directory
+    create_files_for_regex_partitioner(root_directory_path=root_directory_path, directory_paths=base_directory_names)
+    return data_context
+
+
+@pytest.fixture()
+def execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context(
+    empty_data_context: DataContext,
+    default_base_directory: str = "data",
+    data_asset_base_directory: str = None
+):
+    data_context: DataContext = empty_data_context
+    execution_environment_name: str = "test_execution_environment"
+    data_context.add_execution_environment(
+        name=execution_environment_name,
+        use_group_names=True,
+        initialize=True,
+        **execution_environment_files_data_connector_regex_partitioner_config(
+            use_group_names=True,
+            use_sorters=True,
+            default_base_directory=default_base_directory,
+            data_asset_base_directory=data_asset_base_directory
+        )["test_execution_environment"]
+    )
+    base_directory_names: list = [default_base_directory, data_asset_base_directory]
+    root_directory_path: str = data_context.root_directory
+    create_files_for_regex_partitioner(root_directory_path=root_directory_path, directory_paths=base_directory_names)
+    return data_context
 
 
 @pytest.fixture
