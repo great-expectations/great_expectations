@@ -84,6 +84,20 @@ def test_sorter_instantiation_custom_list():
     with pytest.raises(SorterError):
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
 
+    sorter_params: dict = {'config_params': {
+        'reference_list': None
+    }}
+    with pytest.raises(SorterError):
+        my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
+
+    sorter_params: dict = {'config_params': {
+        'reference_list': 1 # not a list
+    }}
+    with pytest.raises(SorterError):
+        my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
+
+
+
 
 def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_elements):
     # CustomListSorter

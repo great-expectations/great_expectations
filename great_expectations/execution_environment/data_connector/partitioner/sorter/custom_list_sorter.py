@@ -23,10 +23,14 @@ class CustomListSorter(Sorter):
 
     @staticmethod
     def _validate_reference_list(reference_list: List[str] = None) -> List[str]:
+        if not (reference_list and isinstance(reference_list, list)):
+            raise ge_exceptions.SorterError(
+                "CustomListSorter requires reference_list which was not provided"
+            )
         for item in reference_list:
             if not isinstance(item, str):
                 raise ge_exceptions.SorterError(
-                    f"Items in reference list for CustomListSorter must have string type (actual type is {str(type(item))})"
+                    f"Items in reference list for CustomListSorter must have string type (actual type is `{str(type(item))}`)."
                 )
         return reference_list
 
