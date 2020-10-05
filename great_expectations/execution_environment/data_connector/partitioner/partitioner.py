@@ -152,6 +152,8 @@ class Partitioner(object):
                 data_asset_name=data_asset_name,
                 **kwargs
             )
+            if not partitions or len(partitions) == 0:
+                partitions = []
             self.data_connector.update_partitions_cache(
                 partitions=partitions,
                 allow_multipart_partitions=self.allow_multipart_partitions,

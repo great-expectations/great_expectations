@@ -151,13 +151,6 @@ class DataConnector(object):
         partitioner: Partitioner,
         allow_multipart_partitions: bool = False
     ):
-        if not partitions:
-            # <WILL> - want to check if this is the right behavior
-            # my_files_data_connector.get_available_partitions(data_asset_name="fake")
-            # if the user looks for a data_asset_name that does not exist, then we will have no partitions, which means we will hit this error.
-            raise ge_exceptions.DataConnectorError(
-                "Partitions were not returned by Partitioner"
-
         if not allow_multipart_partitions and partitions and len(partitions) > len(set(partitions)):
             raise ge_exceptions.PartitionerError(
                 f'''Partitioner "{partitioner.name}" detected multiple data references in one or more partitions for the
