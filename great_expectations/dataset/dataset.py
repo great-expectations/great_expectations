@@ -1,5 +1,5 @@
 import inspect
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import lru_cache, wraps
 from itertools import zip_longest
 from numbers import Number
@@ -3656,6 +3656,42 @@ class Dataset(MetaDataset):
                 column_max = str(column_max)
 
         return {"success": success, "result": {"observed_value": column_max}}
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_max_to_be_within_hours(self, column, hours):
+        """Expect the column max time to be within a specified number of hours to now
+
+        expect_column_max_to_be_within_hours is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
+
+        Args:
+            column (str): \
+                The column name
+            hours (int): \
+                The minimum number of hours between now and the maximum column time.
+
+        Returns:
+            An ExpectationSuiteValidationResult
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            * hours is inclusive, so a difference of 1 hour between now and the maximum column value \
+            with a specified hours argument of 1 will succeed.
+
+        """
+        column_max = self.get_column_max(column, False)
+
+        if column_max is None:
+            success = False
+        else:
+            dt_min = datetime.today() - timedelta(hours=hours)
+            success = column_max >= dt_min
+
+        return {"success": success, "result": {"observed_value": column_max}}
+
 
     ###
     #
