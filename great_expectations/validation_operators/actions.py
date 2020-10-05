@@ -258,6 +258,9 @@ PagerdutyAlertAction sends a pagerduty event
                 }
             })
 
+            return {"pagerduty_alert_result": "success"}
+        return {"pagerduty_alert_result": "none sent"}
+
 
 class StoreValidationResultAction(ValidationAction):
     """
