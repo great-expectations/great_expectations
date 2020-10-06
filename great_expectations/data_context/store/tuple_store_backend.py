@@ -650,11 +650,28 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.project = project
         self._public_urls = public_urls
 
+    def _build_gcs_object_key(self, key):
+        if self.platform_specific_separator:
+            if self.prefix:
+                gcs_object_key = os.path.join(
+                    self.prefix, self._convert_key_to_filepath(key)
+                )
+            else:
+                gcs_object_key = self._convert_key_to_filepath(key)
+        else:
+            if self.prefix:
+                gcs_object_key = "/".join(
+                    (self.prefix, self._convert_key_to_filepath(key))
+                )
+            else:
+                gcs_object_key = self._convert_key_to_filepath(key)
+        return gcs_object_key
+
     def _move(self, source_key, dest_key, **kwargs):
         pass
 
     def _get(self, key):
-        gcs_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
+        gcs_object_key = self._build_gcs_object_key(key)
 
         from google.cloud import storage
 
@@ -671,7 +688,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def _set(
         self, key, value, content_encoding="utf-8", content_type="application/json"
     ):
-        gcs_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
+        gcs_object_key = self._build_gcs_object_key(key)
 
         from google.cloud import storage
 
