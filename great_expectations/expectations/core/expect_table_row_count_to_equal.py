@@ -53,7 +53,7 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         expect_table_row_count_to_be_between
     """
 
-    metric_dependencies = ("rows.count",)
+    metric_dependencies = ("column_values.count",)
     success_keys = ("value",)
 
     default_kwarg_values = {
@@ -67,33 +67,33 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         "meta": None,
     }
 
-    """ A Metric Decorator for the Row Count"""
-
-    @PandasExecutionEngine.metric(
-        metric_name="rows.count",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
-    def _pandas_row_count(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = False,
-    ):
-        """Row count metric function"""
-        df = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs,
-            batches=batches,
-            filter_column_isnull=False,
-        )
-
-        return df.shape[0]
+    # """ A Metric Decorator for the Row Count"""
+    #
+    # @PandasExecutionEngine.metric(
+    #     metric_name="rows.count",
+    #     metric_domain_keys=DatasetExpectation.domain_keys,
+    #     metric_value_keys=(),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=False,
+    # )
+    # def _pandas_row_count(
+    #     self,
+    #     batches: Dict[str, Batch],
+    #     execution_engine: PandasExecutionEngine,
+    #     metric_domain_kwargs: dict,
+    #     metric_value_kwargs: dict,
+    #     metrics: dict,
+    #     runtime_configuration: dict = None,
+    #     filter_column_isnull: bool = False,
+    # ):
+    #     """Row count metric function"""
+    #     df = execution_engine.get_domain_dataframe(
+    #         domain_kwargs=metric_domain_kwargs,
+    #         batches=batches,
+    #         filter_column_isnull=False,
+    #     )
+    #
+    #     return df.shape[0]
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -112,17 +112,13 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         if configuration is None:
             configuration = self.configuration
 
-        # Ensuring that a proper value has been provided
-        try:
-            assert (
-                "value" in configuration.kwargs
-            ), "An expected row count must be provided"
-            assert isinstance(
-                configuration.kwargs["value"], int
-            ), "Provided threshold must be an integer"
+        value = configuration.kwargs.get("value")
+        if value is None:
+            raise ValueError("An expected row count must be provided")
 
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+        if not isinstance(value, int):
+            raise ValueError("Provided row count must be an integer")
+
         return True
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
@@ -155,7 +151,7 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
             result_format = configuration.kwargs.get(
                 "result_format", self.default_kwarg_values.get("result_format")
             )
-        row_count = metric_vals.get("rows.count")
+        row_count = metric_vals.get("column_values.count")
 
         # Obtaining components needed for validation
         value = self.get_success_kwargs(configuration).get("value")

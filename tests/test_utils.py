@@ -1335,6 +1335,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+            "expect_compound_columns_to_be_unique",
         ]
     return False
 
@@ -1435,9 +1436,14 @@ def evaluate_json_test_cfe(batch, expectation_type, test):
         raise ValueError("Invalid test configuration detected: 'out' is required.")
 
     kwargs = copy.deepcopy(test["in"])
-    kwargs["result_format"] = "COMPLETE"
-    kwargs["include_config"] = False
-    result = getattr(validator, expectation_type)(**kwargs)
+
+    if isinstance(test["in"], list):
+        result = getattr(validator, expectation_type)(*kwargs)
+    # As well as keyword arguments
+    else:
+        kwargs["result_format"] = "COMPLETE"
+        kwargs["include_config"] = False
+        result = getattr(validator, expectation_type)(**kwargs)
 
     check_json_test_result(test=test, result=result, data_asset=batch.data)
 

@@ -151,7 +151,7 @@ class ExpectColumnMinToBeBetween(DatasetExpectation):
                     mostly, (int, float)
                 ), "'mostly' parameter must be an integer or float"
                 assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
-        except AssertionError as e:
+        except ValueError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
         # Validating that Minimum and Maximum values are of the proper format and type
@@ -161,20 +161,16 @@ class ExpectColumnMinToBeBetween(DatasetExpectation):
         if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
 
-        try:
-            # Ensuring Proper interval has been provided
-            assert (
-                min_val is not None or max_val is not None
-            ), "min_value and max_value cannot both be none"
-            assert min_val is None or isinstance(
-                min_val, (float, int)
-            ), "Provided min threshold must be a number"
-            assert max_val is None or isinstance(
-                max_val, (float, int)
-            ), "Provided max threshold must be a number"
+        if min_val is None and max_val is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+        if min_val:
+            if not isinstance(min_val, (float, int)):
+                raise ValueError("Provided min threshold must be a number")
+
+        if max_val:
+            if not isinstance(max_val, (float, int)):
+                raise ValueError("Provided max threshold must be a number")
 
         if min_val is not None and max_val is not None and min_val > max_val:
             raise InvalidExpectationConfigurationError(

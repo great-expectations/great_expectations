@@ -61,7 +61,7 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
         expect_table_row_count_to_equal
     """
 
-    metric_dependencies = ("rows.count",)
+    metric_dependencies = ("column_values.count",)
     success_keys = (
         "min_value",
         "max_value",
@@ -135,24 +135,15 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
             max_val = configuration.kwargs["max_value"]
 
         try:
-            # Ensuring Proper interval has been provided
-            assert (
-                min_val is not None or max_val is not None
-            ), "min_value and max_value cannot both be None"
-            assert min_val is None or isinstance(
-                min_val, (float, int)
-            ), "Provided min threshold must be a number"
-            assert max_val is None or isinstance(
-                max_val, (float, int)
-            ), "Provided max threshold must be a number"
+            if min_val is not None:
+                if not float(min_val).is_integer():
+                    raise ValueError("min_value must be integer")
+            if max_val is not None:
+                if not float(max_val).is_integer():
+                    raise ValueError("max_value must be integer")
 
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-        if min_val is not None and max_val is not None and min_val > max_val:
-            raise InvalidExpectationConfigurationError(
-                "Minimum Threshold cannot be larger than Maximum Threshold"
-            )
+        except ValueError:
+            raise ValueError("min_value and max_value must be integers")
 
         return True
 
@@ -187,7 +178,7 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
                 "result_format", self.default_kwarg_values.get("result_format")
             )
 
-        row_count = metric_vals.get("rows.count")
+        row_count = metric_vals.get("column_values.count")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
