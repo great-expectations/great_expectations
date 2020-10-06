@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from IPython import get_ipython
 
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.core.run_identifier import RunIdentifier
 
 logger = logging.getLogger(__name__)
 
@@ -137,6 +138,9 @@ def convert_to_json_serializable(data):
             )
         return float(data)
 
+    elif isinstance(data, RunIdentifier):
+        return data.to_json_dict()
+
     else:
         raise TypeError(
             "%s is of type %s which cannot be serialized."
@@ -232,6 +236,9 @@ def ensure_json_serializable(data):
         return ensure_json_serializable(data.to_dict(orient="records"))
 
     elif isinstance(data, decimal.Decimal):
+        return
+
+    elif isinstance(data, RunIdentifier):
         return
 
     else:
