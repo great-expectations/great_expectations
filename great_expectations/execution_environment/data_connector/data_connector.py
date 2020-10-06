@@ -27,6 +27,9 @@ logger = logging.getLogger(__name__)
 
 
 class DataConnector(object):
+    DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_DATA_ASSET"
+    DEFAULT_PARTITION_NAME: str = "DEFAULT_PARTITION"
+
     r"""
     DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
     can use to get individual batches of data. They add flexibility in how to obtain data
@@ -48,9 +51,7 @@ class DataConnector(object):
     external data version control system.
     """
     _default_reader_options: dict = {}
-    # TODO: <Alex>Is this needed?</Alex>
-    _batch_spec_type: BatchSpec = BatchSpec
-    # TODO: <Alex>Check these carefully -- remove the wrong ones.</Alex>
+
     recognized_batch_definition_keys: set = {
         "execution_environment",
         "data_connector",
@@ -109,6 +110,10 @@ class DataConnector(object):
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def execution_environment(self):
+        return self._execution_environment
 
     @property
     def partitioners(self) -> dict:
@@ -182,12 +187,12 @@ between the partitioning directives and the actual structure of data under consi
                     )
                 specific_partition_idx: int = cached_partitions.index(partition)
                 specific_partition: Partition = cached_partitions[specific_partition_idx]
-                if partition.source != specific_partition.source:
+                if partition.data_reference != specific_partition.data_reference:
                     cached_partitions.remove(specific_partition)
                     cached_partitions.append(partition)
             else:
                 partitions_with_given_data_reference: List[Partition] = [
-                    temp_partition for temp_partition in cached_partitions if temp_partition.source == partition.source
+                    temp_partition for temp_partition in cached_partitions if temp_partition.data_reference == partition.data_reference
                 ]
                 if len(partitions_with_given_data_reference) > 0:
                     raise ge_exceptions.PartitionerError(
@@ -277,8 +282,7 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         return partitioner
 
     def get_config(self) -> dict:
-        # TODO: <Alex>Do we want to make ExecutionEnvironment._execution_environment_config["data_connectors"] or some convenience method publicly accessible to avoid PyCharm warnings?</Alex>
-        conf: dict = self._execution_environment._execution_environment_config["data_connectors"][self.name]
+        conf: dict = self.execution_environment.config["data_connectors"][self.name]
         conf.update(self._data_connector_config)
         return conf
 
@@ -311,10 +315,11 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         batch_spec_passthrough: dict = batch_definition.get("batch_spec_passthrough", {})
         batch_spec_scaffold: dict = nested_update(batch_spec_defaults, batch_spec_passthrough)
 
+        batch_spec_scaffold["execution_environment"] = self.execution_environment.name
+        batch_spec_scaffold["data_connector"] = self.name
+
         data_asset_name: str = batch_definition.get("data_asset_name")
         batch_spec_scaffold["data_asset_name"] = data_asset_name
-
-        batch_spec_scaffold["execution_environment"] = self._execution_environment.name
 
         partition_query: dict = batch_definition.get("partition_query")
         partitions: List[Partition] = self.get_available_partitions(

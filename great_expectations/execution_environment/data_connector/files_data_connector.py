@@ -28,7 +28,6 @@ KNOWN_EXTENSIONS = [
 ]
 
 
-# TODO: <Alex>Do "reader_options" and "reader_method" need to be in Configuration?</Alex>
 class FilesDataConnector(DataConnector):
     def __init__(
         self,
@@ -44,7 +43,6 @@ class FilesDataConnector(DataConnector):
         reader_method: str = None,
         **kwargs
     ):
-        # TODO: <Alex>Does "known_extensions" need to be in Configuration?</Alex>
         logger.debug("Constructing FilesDataConnector {!r}".format(name))
         super().__init__(
             name=name,
@@ -99,7 +97,7 @@ class FilesDataConnector(DataConnector):
     ) -> List[Partition]:
         paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
         if isinstance(partitioner, NoOpPartitioner):
-            default_data_asset_name: str = data_asset_name or Partitioner.DEFAULT_DATA_ASSET_NAME
+            default_data_asset_name: str = data_asset_name or self.DEFAULT_DATA_ASSET_NAME
             default_datasets: List[Dict[str, str]] = [
                 {
                     "partition_name": Path(path).stem,
@@ -130,10 +128,10 @@ class FilesDataConnector(DataConnector):
     def _normalize_directory_path(self, dir_path: str) -> str:
         # If directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
-        if Path(dir_path).is_absolute() or self._execution_environment.data_context is None:
+        if Path(dir_path).is_absolute() or self.execution_environment.data_context is None:
             return dir_path
         else:
-            return Path(self._execution_environment.data_context.root_directory).joinpath(dir_path)
+            return Path(self.execution_environment.data_context.root_directory).joinpath(dir_path)
 
     def _get_file_paths_for_data_asset(self, data_asset_name: str = None) -> list:
         """
@@ -229,12 +227,7 @@ class FilesDataConnector(DataConnector):
             batch_spec
         """
         # TODO: <Alex>If the list has multiple elements, we are using the first one (TBD/TODO multifile config / multibatch)</Alex>
-        path: str = str(partitions[0].source)
-        return self._build_batch_spec_from_path(path=path, batch_definition=batch_definition, batch_spec=batch_spec)
-
-    def _build_batch_spec_from_path(self, path: str, batch_definition: dict, batch_spec: dict) -> PathBatchSpec:
-        batch_spec["path"] = path
-        batch_spec = self._execution_environment.execution_engine.process_batch_definition(
-            batch_definition=batch_definition, batch_spec=batch_spec
-        )
+        if not batch_spec.get("path"):
+            path: str = str(partitions[0].data_reference)
+            batch_spec["path"] = path
         return PathBatchSpec(batch_spec)

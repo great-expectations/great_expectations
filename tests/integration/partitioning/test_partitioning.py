@@ -43,61 +43,61 @@ def test_return_all_available_partitions_unsorted(
             name="james-20200810-1003",
             data_asset_name="james_20200810_1003",
             definition={"group_0": "james", "group_1": "20200810", "group_2": "1003"},
-            source=f"{base_directory}/james_20200810_1003.csv"
+            data_reference=f"{base_directory}/james_20200810_1003.csv"
         ),
         Partition(
             name="abe-20200809-1040",
             data_asset_name="abe_20200809_1040",
             definition={"group_0": "abe", "group_1": "20200809", "group_2": "1040"},
-            source=f"{base_directory}/abe_20200809_1040.csv"
+            data_reference=f"{base_directory}/abe_20200809_1040.csv"
         ),
         Partition(
             name="eugene-20200809-1500",
             data_asset_name="eugene_20200809_1500",
             definition={"group_0": "eugene", "group_1": "20200809", "group_2": "1500"},
-            source=f"{base_directory}/eugene_20200809_1500.csv"
+            data_reference=f"{base_directory}/eugene_20200809_1500.csv"
         ),
         Partition(
             name="alex-20200819-1300",
             data_asset_name="alex_20200819_1300",
             definition={"group_0": "alex", "group_1": "20200819", "group_2": "1300"},
-            source=f"{base_directory}/alex_20200819_1300.csv"
+            data_reference=f"{base_directory}/alex_20200819_1300.csv"
         ),
          Partition(
              name="alex-20200809-1000",
              data_asset_name="alex_20200809_1000",
              definition={"group_0": "alex", "group_1": "20200809", "group_2": "1000"},
-             source=f"{base_directory}/alex_20200809_1000.csv"
+             data_reference=f"{base_directory}/alex_20200809_1000.csv"
          ),
         Partition(
             name="will-20200810-1001",
             data_asset_name="will_20200810_1001",
             definition={"group_0": "will", "group_1": "20200810", "group_2": "1001"},
-            source=f"{base_directory}/will_20200810_1001.csv"
+            data_reference=f"{base_directory}/will_20200810_1001.csv"
         ),
         Partition(
             name="eugene-20201129-1900",
             data_asset_name="eugene_20201129_1900",
             definition={"group_0": "eugene", "group_1": "20201129", "group_2": "1900"},
-            source=f"{base_directory}/eugene_20201129_1900.csv"
+            data_reference=f"{base_directory}/eugene_20201129_1900.csv"
         ),
         Partition(
             name="will-20200809-1002",
             data_asset_name="will_20200809_1002",
             definition={"group_0": "will", "group_1": "20200809", "group_2": "1002"},
-            source=f"{base_directory}/will_20200809_1002.csv"
+            data_reference=f"{base_directory}/will_20200809_1002.csv"
         ),
          Partition(
              name="james-20200811-1009",
              data_asset_name="james_20200811_1009",
              definition={"group_0": "james", "group_1": "20200811", "group_2": "1009"},
-             source=f"{base_directory}/james_20200811_1009.csv"
+             data_reference=f"{base_directory}/james_20200811_1009.csv"
          ),
          Partition(
              name="james-20200713-1567",
              data_asset_name="james_20200713_1567",
              definition={"group_0": "james", "group_1": "20200713", "group_2": "1567"},
-             source=f"{base_directory}/james_20200713_1567.csv"
+             data_reference=f"{base_directory}/james_20200713_1567.csv"
          ),
     ]
 
@@ -141,61 +141,61 @@ def test_return_all_available_partitions_sorted(
             name="eugene-20201129-1900",
             data_asset_name="eugene_20201129_1900",
             definition={"name": "eugene", "timestamp": "20201129", "price": "1900"},
-            source=f"{base_directory}/eugene_20201129_1900.csv"
+            data_reference=f"{base_directory}/eugene_20201129_1900.csv"
         ),
         Partition(
             name="alex-20200819-1300",
             data_asset_name="alex_20200819_1300",
             definition={"name": "alex", "timestamp": "20200819", "price": "1300"},
-            source=f"{base_directory}/alex_20200819_1300.csv"
+            data_reference=f"{base_directory}/alex_20200819_1300.csv"
         ),
         Partition(
             name="james-20200811-1009",
             data_asset_name="james_20200811_1009",
             definition={"name": "james", "timestamp": "20200811", "price": "1009"},
-            source=f"{base_directory}/james_20200811_1009.csv"
+            data_reference=f"{base_directory}/james_20200811_1009.csv"
         ),
         Partition(
             name="james-20200810-1003",
             data_asset_name="james_20200810_1003",
             definition={"name": "james", "timestamp": "20200810", "price": "1003"},
-            source=f"{base_directory}/james_20200810_1003.csv"
+            data_reference=f"{base_directory}/james_20200810_1003.csv"
         ),
         Partition(
             name="will-20200810-1001",
             data_asset_name="will_20200810_1001",
             definition={"name": "will", "timestamp": "20200810", "price": "1001"},
-            source=f"{base_directory}/will_20200810_1001.csv"
+            data_reference=f"{base_directory}/will_20200810_1001.csv"
         ),
         Partition(
             name="eugene-20200809-1500",
             data_asset_name="eugene_20200809_1500",
             definition={"name": "eugene", "timestamp": "20200809", "price": "1500"},
-            source=f"{base_directory}/eugene_20200809_1500.csv"
+            data_reference=f"{base_directory}/eugene_20200809_1500.csv"
         ),
         Partition(
             name="abe-20200809-1040",
             data_asset_name="abe_20200809_1040",
             definition={"name": "abe", "timestamp": "20200809", "price": "1040"},
-            source=f"{base_directory}/abe_20200809_1040.csv"
+            data_reference=f"{base_directory}/abe_20200809_1040.csv"
         ),
         Partition(
             name="will-20200809-1002",
             data_asset_name="will_20200809_1002",
             definition={"name": "will", "timestamp": "20200809", "price": "1002"},
-            source=f"{base_directory}/will_20200809_1002.csv"
+            data_reference=f"{base_directory}/will_20200809_1002.csv"
         ),
         Partition(
             name="alex-20200809-1000",
             data_asset_name="alex_20200809_1000",
             definition={"name": "alex", "timestamp": "20200809", "price": "1000"},
-            source=f"{base_directory}/alex_20200809_1000.csv"
+            data_reference=f"{base_directory}/alex_20200809_1000.csv"
         ),
         Partition(
             name="james-20200713-1567",
             data_asset_name="james_20200713_1567",
             definition={"name": "james", "timestamp": "20200713", "price": "1567"},
-            source=f"{base_directory}/james_20200713_1567.csv"
+            data_reference=f"{base_directory}/james_20200713_1567.csv"
         ),
     ]
 
@@ -250,31 +250,31 @@ def test_return_partitions_sorted_filtered_by_custom_filter(
             name="eugene-20201129-1900",
             data_asset_name="eugene_20201129_1900",
             definition={"name": "eugene", "timestamp": "20201129", "price": "1900"},
-            source=f"{base_directory}/eugene_20201129_1900.csv"
+            data_reference=f"{base_directory}/eugene_20201129_1900.csv"
         ),
         Partition(
             name="james-20200811-1009",
             data_asset_name="james_20200811_1009",
             definition={"name": "james", "timestamp": "20200811", "price": "1009"},
-            source=f"{base_directory}/james_20200811_1009.csv"
+            data_reference=f"{base_directory}/james_20200811_1009.csv"
         ),
         Partition(
             name="james-20200810-1003",
             data_asset_name="james_20200810_1003",
             definition={"name": "james", "timestamp": "20200810", "price": "1003"},
-            source=f"{base_directory}/james_20200810_1003.csv"
+            data_reference=f"{base_directory}/james_20200810_1003.csv"
         ),
         Partition(
             name="eugene-20200809-1500",
             data_asset_name="eugene_20200809_1500",
             definition={"name": "eugene", "timestamp": "20200809", "price": "1500"},
-            source=f"{base_directory}/eugene_20200809_1500.csv"
+            data_reference=f"{base_directory}/eugene_20200809_1500.csv"
         ),
         Partition(
             name="abe-20200809-1040",
             data_asset_name="abe_20200809_1040",
             definition={"name": "abe", "timestamp": "20200809", "price": "1040"},
-            source=f"{base_directory}/abe_20200809_1040.csv"
+            data_reference=f"{base_directory}/abe_20200809_1040.csv"
         ),
     ]
 
@@ -332,25 +332,25 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit(
             name="eugene-20201129-1900",
             data_asset_name="eugene_20201129_1900",
             definition={"name": "eugene", "timestamp": "20201129", "price": "1900"},
-            source=f"{base_directory}/eugene_20201129_1900.csv"
+            data_reference=f"{base_directory}/eugene_20201129_1900.csv"
         ),
         Partition(
             name="james-20200811-1009",
             data_asset_name="james_20200811_1009",
             definition={"name": "james", "timestamp": "20200811", "price": "1009"},
-            source=f"{base_directory}/james_20200811_1009.csv"
+            data_reference=f"{base_directory}/james_20200811_1009.csv"
         ),
         Partition(
             name="james-20200810-1003",
             data_asset_name="james_20200810_1003",
             definition={"name": "james", "timestamp": "20200810", "price": "1003"},
-            source=f"{base_directory}/james_20200810_1003.csv"
+            data_reference=f"{base_directory}/james_20200810_1003.csv"
         ),
         Partition(
             name="eugene-20200809-1500",
             data_asset_name="eugene_20200809_1500",
             definition={"name": "eugene", "timestamp": "20200809", "price": "1500"},
-            source=f"{base_directory}/eugene_20200809_1500.csv"
+            data_reference=f"{base_directory}/eugene_20200809_1500.csv"
         ),
     ]
 
@@ -398,7 +398,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_inde
             name="eugene-20201129-1900",
             data_asset_name="eugene_20201129_1900",
             definition={"name": "eugene", "timestamp": "20201129", "price": "1900"},
-            source=f"{base_directory}/eugene_20201129_1900.csv"
+            data_reference=f"{base_directory}/eugene_20201129_1900.csv"
         ),
     ]
 
@@ -446,7 +446,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_inde
             name="eugene-20200809-1500",
             data_asset_name="eugene_20200809_1500",
             definition={"name": "eugene", "timestamp": "20200809", "price": "1500"},
-            source=f"{base_directory}/eugene_20200809_1500.csv"
+            data_reference=f"{base_directory}/eugene_20200809_1500.csv"
         ),
     ]
 
@@ -494,13 +494,13 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slic
             name="james-20200811-1009",
             data_asset_name="james_20200811_1009",
             definition={"name": "james", "timestamp": "20200811", "price": "1009"},
-            source=f"{base_directory}/james_20200811_1009.csv"
+            data_reference=f"{base_directory}/james_20200811_1009.csv"
         ),
         Partition(
             name="james-20200810-1003",
             data_asset_name="james_20200810_1003",
             definition={"name": "james", "timestamp": "20200810", "price": "1003"},
-            source=f"{base_directory}/james_20200810_1003.csv"
+            data_reference=f"{base_directory}/james_20200810_1003.csv"
         ),
     ]
 
@@ -548,13 +548,13 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slic
             name="eugene-20201129-1900",
             data_asset_name="eugene_20201129_1900",
             definition={"name": "eugene", "timestamp": "20201129", "price": "1900"},
-            source=f"{base_directory}/eugene_20201129_1900.csv"
+            data_reference=f"{base_directory}/eugene_20201129_1900.csv"
         ),
         Partition(
             name="eugene-20200809-1500",
             data_asset_name="eugene_20200809_1500",
             definition={"name": "eugene", "timestamp": "20200809", "price": "1500"},
-            source=f"{base_directory}/eugene_20200809_1500.csv"
+            data_reference=f"{base_directory}/eugene_20200809_1500.csv"
         ),
     ]
 
@@ -602,13 +602,13 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slic
             name="eugene-20200809-1500",
             data_asset_name="eugene_20200809_1500",
             definition={"name": "eugene", "timestamp": "20200809", "price": "1500"},
-            source=f"{base_directory}/eugene_20200809_1500.csv"
+            data_reference=f"{base_directory}/eugene_20200809_1500.csv"
         ),
         Partition(
             name="abe-20200809-1040",
             data_asset_name="abe_20200809_1040",
             definition={"name": "abe", "timestamp": "20200809", "price": "1040"},
-            source=f"{base_directory}/abe_20200809_1040.csv"
+            data_reference=f"{base_directory}/abe_20200809_1040.csv"
         ),
     ]
 
@@ -656,13 +656,13 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slic
             name="eugene-20200809-1500",
             data_asset_name="eugene_20200809_1500",
             definition={"name": "eugene", "timestamp": "20200809", "price": "1500"},
-            source=f"{base_directory}/eugene_20200809_1500.csv"
+            data_reference=f"{base_directory}/eugene_20200809_1500.csv"
         ),
         Partition(
             name="abe-20200809-1040",
             data_asset_name="abe_20200809_1040",
             definition={"name": "abe", "timestamp": "20200809", "price": "1040"},
-            source=f"{base_directory}/abe_20200809_1040.csv"
+            data_reference=f"{base_directory}/abe_20200809_1040.csv"
         ),
     ]
 
@@ -707,7 +707,7 @@ def test_return_partitions_sorted_for_specific_data_asset_name(
             name="abe-20200809-1040",
             data_asset_name="abe_20200809_1040",
             definition={"name": "abe", "timestamp": "20200809", "price": "1040"},
-            source=f"{base_directory}/abe_20200809_1040.csv"
+            data_reference=f"{base_directory}/abe_20200809_1040.csv"
         ),
     ]
 
@@ -752,7 +752,7 @@ def test_return_partitions_sorted_queried_by_partition_name(
             name="alex-20200819-1300",
             data_asset_name="alex_20200819_1300",
             definition={"name": "alex", "timestamp": "20200819", "price": "1300"},
-            source=f"{base_directory}/alex_20200819_1300.csv"
+            data_reference=f"{base_directory}/alex_20200819_1300.csv"
         ),
     ]
 
@@ -797,25 +797,25 @@ def test_return_partitions_sorted_queried_by_partition_definition_dict_1_key(
             name="eugene-20200809-1500",
             data_asset_name="eugene_20200809_1500",
             definition={"name": "eugene", "timestamp": "20200809", "price": "1500"},
-            source=f"{base_directory}/eugene_20200809_1500.csv"
+            data_reference=f"{base_directory}/eugene_20200809_1500.csv"
         ),
         Partition(
             name="abe-20200809-1040",
             data_asset_name="abe_20200809_1040",
             definition={"name": "abe", "timestamp": "20200809", "price": "1040"},
-            source=f"{base_directory}/abe_20200809_1040.csv"
+            data_reference=f"{base_directory}/abe_20200809_1040.csv"
         ),
         Partition(
             name="will-20200809-1002",
             data_asset_name="will_20200809_1002",
             definition={"name": "will", "timestamp": "20200809", "price": "1002"},
-            source=f"{base_directory}/will_20200809_1002.csv"
+            data_reference=f"{base_directory}/will_20200809_1002.csv"
         ),
         Partition(
             name="alex-20200809-1000",
             data_asset_name="alex_20200809_1000",
             definition={"name": "alex", "timestamp": "20200809", "price": "1000"},
-            source=f"{base_directory}/alex_20200809_1000.csv"
+            data_reference=f"{base_directory}/alex_20200809_1000.csv"
         ),
     ]
 
@@ -860,7 +860,7 @@ def test_return_partitions_sorted_queried_by_partition_definition_dict_2_keys(
             name="will-20200809-1002",
             data_asset_name="will_20200809_1002",
             definition={"name": "will", "timestamp": "20200809", "price": "1002"},
-            source=f"{base_directory}/will_20200809_1002.csv"
+            data_reference=f"{base_directory}/will_20200809_1002.csv"
         ),
     ]
 
@@ -905,7 +905,7 @@ def test_return_partitions_sorted_queried_by_partition_definition_dict_1_key_wit
             name="james-20200811-1009",
             data_asset_name="james_20200811_1009",
             definition={"name": "james", "timestamp": "20200811", "price": "1009"},
-            source=f"{base_directory}/james_20200811_1009.csv"
+            data_reference=f"{base_directory}/james_20200811_1009.csv"
         ),
     ]
 

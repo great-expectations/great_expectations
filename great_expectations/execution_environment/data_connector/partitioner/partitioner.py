@@ -14,7 +14,6 @@ from great_expectations.data_context.types.base import (
 from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
-from great_expectations.core.id_dict import BatchSpec
 import great_expectations.exceptions as ge_exceptions
 
 from great_expectations.data_context.util import (
@@ -25,15 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 class Partitioner(object):
-    DEFAULT_DATA_ASSET_NAME: str = "IN_MEMORY_DATA_ASSET"
-    DEFAULT_PARTITION_NAME: str = "IN_MEMORY_PARTITION"
-
-    _batch_spec_type: BatchSpec = BatchSpec  #TODO : is this really needed?
-    # TODO: <Alex>What makes sense to have here, or is this even needed?</Alex>
-    recognized_batch_definition_keys: set = {
-        "sorters"
-    }
-
     def __init__(
         self,
         name: str,

@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class PipelineDataConnector(DataConnector):
+    DEFAULT_DATA_ASSET_NAME: str = "IN_MEMORY_DATA_ASSET"
+    DEFAULT_PARTITION_NAME: str = "IN_MEMORY_PARTITION"
+
     def __init__(
         self,
         name: str,
@@ -58,7 +61,7 @@ class PipelineDataConnector(DataConnector):
         partition_query: Union[PartitionQuery, None] = None,
         repartition: bool = False
     ) -> List[Partition]:
-        # TODO: <Alex>Do not forget to make it such that this is partition_name_pattern -- next to last priority...</Alex>
+        # TODO: <Alex>Do not forget to make it such that this is partition_name_pattern to allow multiple dataframes -- next to last priority...</Alex>
         # TODO: <Alex>Clean this up -- maybe simplify pass the partition_query and not get partition_name...</Alex>
         partition_name: Union[str, None] = None
         if partition_query:
@@ -84,7 +87,7 @@ class PipelineDataConnector(DataConnector):
         )
 
     def _get_data_asset_directives(self, data_asset_name: str, partition_name: str) -> dict:
-        partition_name = partition_name or Partitioner.DEFAULT_PARTITION_NAME
+        partition_name = partition_name or self.DEFAULT_PARTITION_NAME
         if (
             data_asset_name
             and self.assets
@@ -94,7 +97,7 @@ class PipelineDataConnector(DataConnector):
         ):
             partition_name = self.assets[data_asset_name]["config_params"].get("partition_name", partition_name)
         elif not data_asset_name:
-            data_asset_name = Partitioner.DEFAULT_DATA_ASSET_NAME
+            data_asset_name = self.DEFAULT_DATA_ASSET_NAME
         return {"data_asset_name": data_asset_name, "partition_name": partition_name}
 
     def build_batch_spec_from_partitions(
@@ -112,21 +115,7 @@ class PipelineDataConnector(DataConnector):
             batch_spec
         """
         # TODO: <Alex>If the list has multiple elements, we are using the first one (TBD/TODO multifile config / multibatch)</Alex>
-        in_memory_dataset: Any = partitions[0].source
-        return self._build_batch_spec_from_in_memory_dataset(
-            in_memory_dataset=in_memory_dataset,
-            batch_definition=batch_definition,
-            batch_spec=batch_spec
-        )
-
-    def _build_batch_spec_from_in_memory_dataset(
-        self,
-        in_memory_dataset: Any,
-        batch_definition: dict,
-        batch_spec: dict
-    ) -> InMemoryBatchSpec:
-        batch_spec["dataset"] = in_memory_dataset
-        batch_spec = self._execution_environment.execution_engine.process_batch_definition(
-            batch_definition=batch_definition, batch_spec=batch_spec
-        )
+        if not batch_spec.get("dataset"):
+            in_memory_dataset: Any = partitions[0].data_reference
+            batch_spec["dataset"] = in_memory_dataset
         return InMemoryBatchSpec(batch_spec)

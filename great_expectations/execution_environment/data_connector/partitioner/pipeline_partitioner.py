@@ -38,9 +38,9 @@ class PipelinePartitioner(Partitioner):
         return [
             Partition(
                 name=pipeline_dataset["partition_name"],
+                data_asset_name=data_asset_name or pipeline_data_asset_name,
                 definition={pipeline_dataset["partition_name"]: pipeline_dataset["data_reference"]},
-                source=pipeline_dataset["data_reference"],
-                data_asset_name=data_asset_name or pipeline_data_asset_name
+                data_reference=pipeline_dataset["data_reference"]
             )
             for pipeline_dataset in pipeline_datasets
         ]

@@ -8,11 +8,17 @@ logger = logging.getLogger(__name__)
 
 
 class Partition(object):
-    def __init__(self, name: str = None, data_asset_name: str = None, definition: dict = None, source: Any = None):
+    def __init__(
+        self,
+        name: str = None,
+        data_asset_name: str = None,
+        definition: dict = None,
+        data_reference: Any = None
+    ):
         self._name = name
         self._data_asset_name = data_asset_name
         self._definition = definition
-        self._source = source
+        self._data_reference = data_reference
 
     @property
     def name(self) -> str:
@@ -26,6 +32,10 @@ class Partition(object):
     def definition(self) -> dict:
         return self._definition
 
+    @property
+    def data_reference(self) -> Any:
+        return self._data_reference
+
     def __eq__(self, other):
         """Overrides the default implementation"""
         return (
@@ -36,21 +46,17 @@ class Partition(object):
         )
 
     def __hash__(self) -> int:
-        return (
-            hash(self.name) ^
-            hash(self.data_asset_name) ^
-            hash(zip(self.definition.items()))
-        )
-
-    @property
-    def source(self) -> Any:
-        return self._source
+        """Overrides the default implementation"""
+        _result_hash: int = hash(self.name) ^ hash(self.data_asset_name)
+        for key, value in self.definition.items():
+            _result_hash = _result_hash ^ hash(key) ^ hash(value)
+        return _result_hash
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "name": self.name,
             "data_asset_name": self.data_asset_name,
             "definition": self.definition,
-            "source": self.source
+            "data_reference": self.data_reference
         }
         return str(doc_fields_dict)
