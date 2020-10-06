@@ -102,77 +102,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.are_unique",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
-    def _pandas_column_values_are_unique(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        return pd.DataFrame(
-            {"column_values.are_unique": ~series.duplicated(keep=False)}
-        )
-
-    # @SqlAlchemyExecutionEngine.column_map_metric(
-    #     metric_name="column_values.are_unique",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-    #     metric_value_keys=("value_set",),
-    #     metric_dependencies=tuple(),
-    # )
-    # def _sqlalchemy_are_unique(
-    #     self,
-    #     column: sa.column,
-    #     metrics: dict,
-    #     metric_domain_kwargs: dict,
-    #     metric_value_kwargs: dict,
-    #     runtime_configuration: dict = None,
-    #     filter_column_isnull: bool = True,
-
-    # ):
-    #     value_set = metric_value_kwargs["value_set"]
-    #
-    #     if value_set is None:
-    #         # vacuously true
-    #         return True
-    #
-    #     return column.in_(tuple(value_set))
-    #
-    # @SparkDFExecutionEngine.column_map_metric(
-    #     metric_name="column_values.are_unique",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-    #     metric_value_keys=("value_set",),
-    #     metric_dependencies=tuple(),
-    # )
-    # def _spark_are_unique(
-    #     self,
-    #     data: "pyspark.sql.DataFrame",
-    #     column: str,
-    #     metrics: dict,
-    #     metric_domain_kwargs: dict,
-    #     metric_value_kwargs: dict,
-    #     runtime_configuration: dict = None,
-    #     filter_column_isnull: bool = True,
-    # ):
-    #     import pyspark.sql.functions as F
-    #
-    #     value_set = metric_value_kwargs["value_set"]
-    #
-    #     if value_set is None:
-    #         # vacuously true
-    #         return data.withColumn(column + "__success", F.lit(True))
-    #
-    #     return data.withColumn(column + "__success", F.col(column).isin(value_set))
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

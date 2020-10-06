@@ -85,13 +85,13 @@ class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
 
     """ A Column Map Metric Decorator for the Value ratio"""
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.value_ratio",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("value",),
-        metric_dependencies=("column_values.nonnull.count",),
-        filter_column_isnull=False,
-    )
+    # @PandasExecutionEngine.metric(
+    #        metric_name="column.aggregate.value_ratio",
+    #        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #        metric_value_keys=("value",),
+    #        metric_dependencies=("column_values.nonnull.count",),
+    #        filter_column_isnull=False,
+    #    )
     def _pandas_value_ratio(
         self,
         batches: Dict[str, Batch],
@@ -183,7 +183,7 @@ class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
 
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

@@ -90,29 +90,6 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
 
     """ A Column Map Metric Decorator for the Mode metric"""
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.mode",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
-    def _pandas_mode(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-    ):
-        """Mode Metric Function"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        return series.mode().values
-
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
@@ -127,7 +104,7 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

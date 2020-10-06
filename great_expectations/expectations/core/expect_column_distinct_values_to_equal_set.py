@@ -39,13 +39,13 @@ class ExpectColumnDistinctValuesToEqualSet(DatasetExpectation):
 
     """ A Column Map Metric Decorator for the Mode metric"""
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.value_counts",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
+    # @PandasExecutionEngine.metric(
+    #        metric_name="column.value_counts",
+    #        metric_domain_keys=DatasetExpectation.domain_keys,
+    #        metric_value_keys=(),
+    #        metric_dependencies=tuple(),
+    #        filter_column_isnull=True,
+    #    )
     def _pandas_value_counts(
         self,
         batches: Dict[str, Batch],
@@ -76,7 +76,7 @@ class ExpectColumnDistinctValuesToEqualSet(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

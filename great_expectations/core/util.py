@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def nested_update(d, u):
+    """update d with items from u, recursively and joining elements"""
     for k, v in u.items():
         if isinstance(v, Mapping):
             d[k] = nested_update(d.get(k, {}), v)
@@ -175,7 +176,7 @@ def ensure_json_serializable(data):
     except ValueError:
         pass
 
-    if isinstance(data, (string_types, integer_types, float, bool)):
+    if isinstance(data, ((str,), (int,), float, bool)):
         # No problem to encode json
         return
 

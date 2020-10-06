@@ -102,12 +102,12 @@ class ExpectColumnPairValuesAToBeGreaterThanB(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.metric(
-        metric_name="column_a_greater_than_b",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("column_A", "column_B"),
-        metric_dependencies=tuple(),
-    )
+    # @PandasExecutionEngine.metric(
+    #     metric_name="column_a_greater_than_b",
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=("column_A", "column_B"),
+    #     metric_dependencies=tuple(),
+    # )
     def _pandas_column_a_greater_than_b(
         self,
         batches: Dict[str, Batch],
@@ -160,7 +160,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(DatasetExpectation):
         else:
             return temp_column_A > temp_column_B
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

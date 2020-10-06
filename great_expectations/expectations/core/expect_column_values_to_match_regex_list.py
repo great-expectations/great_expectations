@@ -115,40 +115,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapDatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.match_regex_list",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("regex_list", "match_on"),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
-    def _pandas_column_values_match_regex_list(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        regex_list = metric_value_kwargs["regex_list"]
-        match_on = metric_value_kwargs.get("match_on", "any")
-
-        regex_matches = []
-        for regex in regex_list:
-            regex_matches.append(series.astype(str).str.contains(regex))
-        regex_match_df = pd.concat(regex_matches, axis=1, ignore_index=True)
-
-        if match_on == "any":
-            result = regex_match_df.any(axis="columns")
-        elif match_on == "all":
-            result = regex_match_df.all(axis="columns")
-        else:
-            raise ValueError("match_on must be either 'any' or 'all'")
-
-        return pd.DataFrame({"column_values.match_regex_list": result})
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

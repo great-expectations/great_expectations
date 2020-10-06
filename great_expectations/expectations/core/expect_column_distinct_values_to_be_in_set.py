@@ -112,31 +112,6 @@ class ExpectColumnDistinctValuesToBeInSet(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Mode metric"""
-
-    @PandasExecutionEngine.metric(
-        metric_name="column.value_counts",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
-    def _pandas_value_counts(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-    ):
-        """Distinct value counts metric"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        return series.value_counts()
-
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
@@ -151,8 +126,7 @@ class ExpectColumnDistinctValuesToBeInSet(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
+    def validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: dict,

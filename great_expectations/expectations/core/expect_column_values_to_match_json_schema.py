@@ -98,13 +98,13 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
 
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.match_json_schema",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("json_schema",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
+    # @PandasExecutionEngine.column_map_metric(
+    #     metric_name="column_values.match_json_schema",
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=("json_schema",),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=True,
+    # )
     def _pandas_column_values_match_json_schema(
         self,
         series: pd.Series,
@@ -183,7 +183,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
     #
     #     return data.withColumn(column + "__success", F.col(column).isin(json))
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

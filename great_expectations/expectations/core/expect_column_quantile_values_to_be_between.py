@@ -176,33 +176,7 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
             )
         return True
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.quantiles",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=("quantile_ranges",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
-    def _pandas_quantiles(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-    ):
-
-        """Quantile Function"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-        quantile_ranges = metric_value_kwargs["quantile_ranges"]
-        return series.quantile(
-            tuple(quantile_ranges["quantiles"],), interpolation="nearest"
-        ).tolist()
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

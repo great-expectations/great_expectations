@@ -92,13 +92,13 @@ class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.metric(
-        metric_name="equal_columns",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("column_A", "column_B"),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
+    # @PandasExecutionEngine.metric(
+    #        metric_name="equal_columns",
+    #        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #        metric_value_keys=("column_A", "column_B"),
+    #        metric_dependencies=tuple(),
+    #        filter_column_isnull=False,
+    #    )
     def _pandas_equal_columns(
         self,
         batches: Dict[str, Batch],
@@ -117,7 +117,7 @@ class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
 
         return (column_A == column_B).any()
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

@@ -80,13 +80,13 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
             configuration = self.configuration
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name=map_metric,
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
+    # @PandasExecutionEngine.column_map_metric(
+    #     metric_name=map_metric,
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=tuple(),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=False,
+    # )
     # TODO: shouldn't this be null count?
     def _null_count(
         self,
@@ -99,13 +99,13 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
     ):
         return pd.DataFrame({"column_values.null": series.isnull()})
 
-    @SqlAlchemyExecutionEngine.column_map_metric(
-        metric_name=map_metric,
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
+    # @SqlAlchemyExecutionEngine.column_map_metric(
+    #     metric_name=map_metric,
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=tuple(),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=False,
+    # )
     def _sqlalchemy_null_map_metric(
         self,
         column,
@@ -119,12 +119,12 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
 
         return column.is_(None)
 
-    @SparkDFExecutionEngine.column_map_metric(
-        metric_name=map_metric,
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-    )
+    # @SparkDFExecutionEngine.column_map_metric(
+    #     metric_name=map_metric,
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=tuple(),
+    #     metric_dependencies=tuple(),
+    # )
     def _spark_null_map_metric(
         self,
         column: "pyspark.sql.Column",
@@ -136,7 +136,7 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
     ):
         return column.isNull()
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

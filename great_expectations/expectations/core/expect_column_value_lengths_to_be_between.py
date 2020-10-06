@@ -108,7 +108,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
             assert configuration.kwargs.get(
                 "min_value"
             ) is not None or configuration.kwargs.get(
-                "max_value" is not None
+                "max_value" != None
             ), "min_value and max_value cannot both be None"
             if configuration.kwargs.get("min_value"):
                 assert float(
@@ -122,13 +122,13 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.value_length_between",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
+    # @PandasExecutionEngine.column_map_metric(
+    #     metric_name="column_values.value_length_between",
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=True,
+    # )
     def _pandas_value_length_between(
         self,
         series: pd.Series,
@@ -175,13 +175,13 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
 
         return pd.DataFrame({"column_values.value_length_between": metric_series})
 
-    @SqlAlchemyExecutionEngine.column_map_metric(
-        metric_name="column_values.value_length_between",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
+    # @SqlAlchemyExecutionEngine.column_map_metric(
+    #     metric_name="column_values.value_length_between",
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=True,
+    # )
     def _sqlalchemy_value_length_between(
         self,
         column: sa.column,
@@ -228,7 +228,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
             else:
                 return sa.func.length(column) >= min_value
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

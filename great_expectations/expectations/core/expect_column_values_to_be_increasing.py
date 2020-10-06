@@ -122,40 +122,14 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         return super().validate_configuration(configuration)
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.increasing",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("strictly",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
-    def _pandas_column_values_increasing(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        strictly = metric_value_kwargs["strictly"]
+    # @PandasExecutionEngine.column_map_metric(
+    #     metric_name="column_values.increasing",
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=("strictly",),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=True,
+    # )
 
-        series_diff = series.diff()
-        # The first element is null, so it gets a bye and is always treated as True
-        series_diff[series_diff.isnull()] = 1
-
-        if strictly:
-            return pd.DataFrame({"column_values.increasing": series_diff > 0})
-        else:
-            return pd.DataFrame({"column_values.increasing": series_diff >= 0})
-
-    @SparkDFExecutionEngine.column_map_metric(
-        metric_name="column_values.increasing",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("strictly",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
     def _spark_column_values_increasing(
         self,
         column: "pyspark.sql.Column",
@@ -206,7 +180,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
                 when(col("diff") >= 0, lit(True)).otherwise(lit(False)),
             )
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

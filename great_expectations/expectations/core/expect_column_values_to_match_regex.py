@@ -110,78 +110,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.match_regex",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("regex",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
-    def _pandas_column_values_match_regex(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        regex = metric_value_kwargs["regex"]
-
-        return pd.DataFrame(
-            {"column_values.match_regex": series.astype(str).str.contains(regex)}
-        )
-
-    # @SqlAlchemyExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_regex",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-    #     metric_value_keys=("regex",),
-    #     metric_dependencies=tuple(),
-    # )
-    # def _sqlalchemy_match_regex(
-    #     self,
-    #     column: sa.column,
-    #     regex: str,
-    #     runtime_configuration: dict = None,
-    #     filter_column_isnull: bool = True,
-    # ):
-    #     regex_expression = execution_engine._get_dialect_regex_expression(column, regex)
-    #     if regex_expression is None:
-    #         logger.warning(
-    #             "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
-    #         )
-    #         raise NotImplementedError
-    #
-    #     return regex_expression
-    #     if regex is None:
-    #         # vacuously true
-    #         return True
-    #
-    #     return column.in_(tuple(regex))
-    #
-    # @SparkDFExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_regex",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-    #     metric_value_keys=("regex",),
-    #     metric_dependencies=tuple(),
-    # )
-    # def _spark_match_regex(
-    #     self,
-    #     data: "pyspark.sql.DataFrame",
-    #     column: str,
-    #     regex: str,
-    #     runtime_configuration: dict = None,
-    #     filter_column_isnull: bool = True,
-    # ):
-    #     import pyspark.sql.functions as F
-    #
-    #     if regex is None:
-    #         # vacuously true
-    #         return data.withColumn(column + "__success", F.lit(True))
-    #
-    #     return data.withColumn(column + "__success", F.col(column).isin(regex))
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,
