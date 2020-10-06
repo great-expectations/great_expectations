@@ -88,6 +88,19 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         batch: Batch = self.execution_engine.load_batch(batch_spec=batch_spec)
         return batch
 
+    def build_batch_spec(self, data_connector_name: str, batch_definition: dict) -> BatchSpec:
+        """Builds batch_spec using the provided data_connector and batch_definition.
+
+        Args:
+            data_connector_name (str): the name of the data_connector to use to build batch_spec
+            batch_definition (dict): dict specifying batch - used to generate a batch_spec
+
+        Returns:
+            BatchSpec
+        """
+        data_connector: DataConnector = self.get_data_connector(name=data_connector_name)
+        return data_connector.build_batch_spec(batch_definition=batch_definition)
+
     def get_validator(
         self,
         batch_definition: dict,
@@ -273,16 +286,3 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
                 data_connector_name
             ] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
-
-    def build_batch_spec(self, data_connector_name: str, batch_definition: dict) -> BatchSpec:
-        """Builds batch_spec using the provided data_connector and batch_definition.
-
-        Args:
-            data_connector_name (str): the name of the data_connector to use to build batch_spec
-            batch_definition (dict): dict specifying batch - used to generate a batch_spec
-
-        Returns:
-            BatchSpec
-        """
-        data_connector: DataConnector = self.get_data_connector(name=data_connector_name)
-        return data_connector.build_batch_spec(batch_definition=batch_definition)
