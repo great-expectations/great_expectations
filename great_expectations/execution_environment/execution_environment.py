@@ -70,8 +70,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         batch_definition: dict
     ) -> Batch:
         if not batch_definition:
-            logger.info("loading a batch without a batch_definition")
-            batch_definition = {}
+            raise ge_exceptions.BatchDefinitionError(message="Batch definition is empty.")
 
         data_connector_name: str = batch_definition.get("data_connector")
         if not data_connector_name:
