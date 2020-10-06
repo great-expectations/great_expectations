@@ -242,7 +242,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         Returns a dictionary of data_asset_names that the specified data
         connector can provide. Note that some data_connectors may not be
         capable of describing specific named data assets, and some (such as
-        filesystem glob data_connectors) require the user to configure
+        files_data_connectors) require the user to configure
         data asset names.
 
         Args:

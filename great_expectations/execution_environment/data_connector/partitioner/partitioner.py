@@ -74,11 +74,16 @@ class Partitioner(object):
         if name in self._sorters_cache:
             return self._sorters_cache[name]
         else:
-            sorter_names: list = [sorter_config["name"] for sorter_config in self._sorters]
-            if name in sorter_names:
-                sorter_config: dict = copy.deepcopy(
-                    self._sorters[sorter_names.index(name)]
-                )
+            if self._sorters:
+                sorter_names: list = [sorter_config["name"] for sorter_config in self._sorters]
+                if name in sorter_names:
+                    sorter_config: dict = copy.deepcopy(
+                        self._sorters[sorter_names.index(name)]
+                    )
+                else:
+                    raise ge_exceptions.SorterError(
+                        f'Unable to load sorter with the name "{name}" -- no configuration found or invalid configuration.'
+                    )
             else:
                 raise ge_exceptions.SorterError(
                     f'Unable to load sorter with the name "{name}" -- no configuration found or invalid configuration.'
@@ -134,6 +139,8 @@ class Partitioner(object):
                 data_asset_name=data_asset_name,
                 **kwargs
             )
+            if not partitions or len(partitions) == 0:
+                partitions = []
             self.data_connector.update_partitions_cache(
                 partitions=partitions,
                 allow_multipart_partitions=self.allow_multipart_partitions,

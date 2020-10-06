@@ -5,6 +5,10 @@ try:
 except ImportError:
     import mock
 
+import pytest
+
+import great_expectations.exceptions as ge_exceptions
+
 logger = logging.getLogger(__name__)
 
 from great_expectations.execution_environment.data_connector.partitioner.sorter import (
@@ -15,8 +19,12 @@ from great_expectations.execution_environment.data_connector.partitioner.sorter 
     DateTimeSorter,
 )
 
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 
-def test_sorter_instantiation_simple():
+
+# <WILL> TODO: test the get_partition_key() functions for each of the sorters too
+
+def test_sorter_instantiation_base():
     # base
     my_sorter = Sorter(name="base", class_name="Sorter", orderby="asc")
     assert isinstance(my_sorter, Sorter)
@@ -25,12 +33,20 @@ def test_sorter_instantiation_simple():
     # defaults
     assert my_sorter.reverse is False
 
+    # with fake orderby
+    with pytest.raises(ge_exceptions.SorterError):
+        my_sorter = Sorter(name="base", class_name="Sorter", orderby="fake")
+
+
+def test_sorter_instantiation_lexicographic():
     # Lexicographic
     my_lex = LexicographicSorter(name="lex", orderby="desc")
     assert isinstance(my_lex, LexicographicSorter)
     assert my_lex.name == "lex"
     assert my_lex.reverse is True
 
+
+def test_sorter_instantiation_datetime():
     sorter_params: dict = {'config_params': {
         'datetime_format': '%Y%m%d',
     }}
@@ -41,12 +57,16 @@ def test_sorter_instantiation_simple():
     assert my_dt.reverse is True
     assert my_dt.config_params["datetime_format"] == '%Y%m%d'
 
+
+def test_sorter_instantiation_numeric():
     # NumericSorter
     my_num = NumericSorter(name="num", orderby="asc")
     assert isinstance(my_num, NumericSorter)
     assert my_num.name == "num"
     assert my_num.reverse is False
 
+
+def test_sorter_instantiation_custom_list():
     # CustomListSorter
     sorter_params: dict = {'config_params': {
         'reference_list': ['a', 'b', 'c'],
@@ -57,6 +77,43 @@ def test_sorter_instantiation_simple():
     assert my_custom.reverse is False
     assert my_custom.config_params['reference_list'] == ['a', 'b', 'c']
 
-def test_sorter_instantiation_by_classname_config():
-    # <WILL> this is where the additional ways of instantiating the sorters will be tested (maybe through config)
-    pass
+    # with incorrectly configured reference list
+    sorter_params: dict = {'config_params': {
+        'reference_list': [111, 222, 333]  # this shouldn't work. the reference list should only contain strings
+    }}
+
+    with pytest.raises(ge_exceptions.SorterError):
+        my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
+
+    sorter_params: dict = {'config_params': {
+        'reference_list': None
+    }}
+    with pytest.raises(ge_exceptions.SorterError):
+        my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
+
+    sorter_params: dict = {'config_params': {
+        'reference_list': 1 # not a list
+    }}
+    with pytest.raises(ge_exceptions.SorterError):
+        my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
+
+
+def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_elements):
+    # CustomListSorter
+    sorter_params: dict = {'config_params': {
+        'reference_list': periodic_table_of_elements,
+    }}
+
+    my_custom = CustomListSorter(name="element", orderby="asc", **sorter_params)
+    assert my_custom.reference_list == periodic_table_of_elements
+
+    # This element exists : Hydrogen
+    test_partition = Partition(name="test", data_asset_name="fake", definition={"element": "Hydrogen"}, source="nowhere")
+    returned_partition_key = my_custom.get_partition_key(test_partition)
+    assert returned_partition_key == 0
+
+    # This element does not : Vibranium
+    test_partition = Partition(name="test", data_asset_name="fake", definition={"element": "Vibranium"}, source="nowhere")
+    with pytest.raises(ge_exceptions.SorterError):
+        my_custom.get_partition_key(test_partition)
+
