@@ -7,7 +7,10 @@ The only requirement from an action is for it to have a take_action method.
 import logging
 import warnings
 
-import pypd
+try:
+    import pypd
+except ImportError:
+    pypd = None
 
 from great_expectations.data_context.util import instantiate_class_from_config
 
@@ -207,6 +210,10 @@ PagerdutyAlertAction sends a pagerduty event
             notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
         """
         super().__init__(data_context)
+        if not pypd:
+            raise DataContextError(
+                "ModuleNotFoundError: No module named 'pypd'"
+            )
         self.api_key = api_key
         assert api_key, "No Pagerduty api_key found in action config."
         self.routing_key = routing_key
