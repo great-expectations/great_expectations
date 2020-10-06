@@ -383,6 +383,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         platform_specific_separator=False,
         fixed_length_key=False,
         base_public_path=None,
+        endpoint_url=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -402,6 +403,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
             # whether the rest of the key is built with platform-specific separators or not
             prefix = prefix.strip("/")
         self.prefix = prefix
+        if endpoint_url:
+            self.endpoint_url = endpoint_url
 
     def _build_s3_object_key(self, key):
         if self.platform_specific_separator:
@@ -423,7 +426,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def _get(self, key):
         import boto3
 
-        s3 = boto3.client("s3")
+        s3 = boto3.client("s3", endpoint_url=self.endpoint_url)
 
         s3_object_key = self._build_s3_object_key(key)
 
@@ -445,7 +448,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     ):
         import boto3
 
-        s3 = boto3.resource("s3")
+        s3 = boto3.resource("s3", endpoint_url=self.endpoint_url)
 
         s3_object_key = self._build_s3_object_key(key)
 
@@ -468,7 +471,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def _move(self, source_key, dest_key, **kwargs):
         import boto3
 
-        s3 = boto3.resource("s3")
+        s3 = boto3.resource("s3", endpoint_url = self.endpoint_url)
 
         source_filepath = self._convert_key_to_filepath(source_key)
         if not source_filepath.startswith(self.prefix):
@@ -488,7 +491,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         import boto3
 
-        s3 = boto3.client("s3")
+        s3 = boto3.client("s3", endpoint_url=self.endpoint_url)
 
         if self.prefix:
             s3_objects = s3.list_objects_v2(Bucket=self.bucket, Prefix=self.prefix)
@@ -534,7 +537,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def get_url_for_key(self, key, protocol=None):
         import boto3
 
-        location = boto3.client("s3").get_bucket_location(Bucket=self.bucket)[
+        location = boto3.client("s3", endpoint_url=self.endpoint_url).get_bucket_location(Bucket=self.bucket)[
             "LocationConstraint"
         ]
         if location is None:
@@ -543,7 +546,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             location = "s3-" + location
         s3_key = self._convert_key_to_filepath(key)
 
-        location = boto3.client("s3").get_bucket_location(Bucket=self.bucket)[
+        location = boto3.client("s3", endpoint_url=self.endpoint_url).get_bucket_location(Bucket=self.bucket)[
             "LocationConstraint"
         ]
         if location is None:
