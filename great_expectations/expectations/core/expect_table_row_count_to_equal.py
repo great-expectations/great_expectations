@@ -112,17 +112,13 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         if configuration is None:
             configuration = self.configuration
 
-        # Ensuring that a proper value has been provided
-        try:
-            assert (
-                "value" in configuration.kwargs
-            ), "An expected row count must be provided"
-            assert isinstance(
-                configuration.kwargs["value"], int
-            ), "Provided threshold must be an integer"
+        value = configuration.kwargs.get("value")
+        if value is None:
+            raise ValueError("An expected row count must be provided")
 
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+        if not isinstance(value, int):
+            raise ValueError("Provided row count must be an integer")
+
         return True
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
