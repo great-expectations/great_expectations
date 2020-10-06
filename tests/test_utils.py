@@ -1435,9 +1435,14 @@ def evaluate_json_test_cfe(batch, expectation_type, test):
         raise ValueError("Invalid test configuration detected: 'out' is required.")
 
     kwargs = copy.deepcopy(test["in"])
-    kwargs["result_format"] = "COMPLETE"
-    kwargs["include_config"] = False
-    result = getattr(validator, expectation_type)(**kwargs)
+
+    if isinstance(test["in"], list):
+        result = getattr(validator, expectation_type)(*kwargs)
+    # As well as keyword arguments
+    else:
+        kwargs["result_format"] = "COMPLETE"
+        kwargs["include_config"] = False
+        result = getattr(validator, expectation_type)(**kwargs)
 
     check_json_test_result(test=test, result=result, data_asset=batch.data)
 
