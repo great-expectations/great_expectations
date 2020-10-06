@@ -264,6 +264,12 @@ class BatchKwargsError(DataContextError):
         super().__init__(self.message)
 
 
+class BatchDefinitionError(DataContextError):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
 class BatchSpecError(DataContextError):
     def __init__(self, message):
         self.message = message

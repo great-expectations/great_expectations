@@ -204,9 +204,6 @@ class ExecutionEngine(MetaExecutionEngine):
         else:
             self._metric_cache = NoOpDict()
 
-        data_context = kwargs.pop("data_context", None)
-        self._data_context = data_context
-
         batch_spec_defaults = kwargs.pop("batch_spec_defaults", {})
         batch_spec_defaults_keys = set(batch_spec_defaults.keys())
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
@@ -466,16 +463,6 @@ class ExecutionEngine(MetaExecutionEngine):
             percent_success = None
 
         return success, percent_success
-
-    @property
-    def data_context(self):
-        """Returns the internal Data Context (An object containing the data)"""
-        return self._data_context
-
-    @data_context.setter
-    def data_context(self, data_context):
-        """A setter for the Data Context"""
-        self._data_context = data_context
 
     @property
     def _active_validation(self):

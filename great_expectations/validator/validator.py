@@ -61,6 +61,7 @@ class Validator:
         profiler=None,
         expectation_suite=None,
         expectation_suite_name=None,
+        data_context=None,
         execution_engine=None,
         batch=None,
         **kwargs,
@@ -80,10 +81,10 @@ class Validator:
         """
 
         self._batch = batch
+        self._data_context = data_context
         self._execution_engine = execution_engine
 
         if execution_engine:
-            self._data_context = execution_engine.data_context
             self._execution_engine._validator = self
 
             if batch:

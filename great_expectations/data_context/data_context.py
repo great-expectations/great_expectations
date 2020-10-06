@@ -898,6 +898,7 @@ class BaseDataContext:
 
         return data_asset_names
 
+    # TODO: <Alex>Does this commented code and the "TODO" below still need to be here?</Alex>
     # # TODO: deprecate "datasource" in favor of "execution_environment"
     # def get_available_data_asset_names(
     #     self,
@@ -1065,28 +1066,28 @@ class BaseDataContext:
         )
         return batch_kwargs
 
-    def build_batch_spec(self, execution_environment: str, data_connector: str, batch_definition: dict) -> BatchSpec:
-        """Builds batch_spec using the provided execution_environment, data_connector, and batch_definition.
+    # TODO: <Alex>Do we need this method here?</Alex>
+    # def build_batch_spec(self, execution_environment: str, data_connector: str, batch_definition: dict) -> BatchSpec:
+    #     """Builds batch_spec using the provided execution_environment, data_connector, and batch_definition.
+    #
+    #     Args:
+    #         execution_environment (str): the name of the execution_environment for which to build batch_kwargs
+    #         data_connector (str): the name of the data_connector to use to build batch_spec
+    #         batch_definition (dict): dict specifying batch - used to generate a batch_spec
+    #
+    #     Returns:
+    #         BatchSpec
+    #     """
+    #     execution_environment: ExecutionEnvironment = self.get_execution_environment(
+    #         execution_environment_name=execution_environment
+    #     )
+    #     batch_spec: BatchSpec = execution_environment.build_batch_spec(
+    #         data_connector_name=data_connector, batch_definition=batch_definition
+    #     )
+    #     return batch_spec
 
-        Args:
-            execution_environment (str): the name of the execution_environment for which to build batch_kwargs
-            data_connector (str): the name of the data_connector to use to build batch_spec
-            batch_definition (dict): dict specifying batch - used to generate a batch_spec
-
-        Returns:
-            BatchSpec
-
-        """
-        execution_environment_obj: ExecutionEnvironment = self.get_execution_environment(
-            execution_environment_name=execution_environment
-        )
-        batch_spec: BatchSpec = execution_environment_obj.build_batch_spec(
-            data_connector_name=data_connector, batch_definition=batch_definition
-        )
-        return batch_spec
-
-    # WIP new get_batch
-    def _get_batch(
+    # new get_batch
+    def get_batch_from_new_style_datasource(
         self,
         batch_definition: dict,
         in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
@@ -1107,7 +1108,7 @@ class BaseDataContext:
         self,
         batch_definition,
         expectation_suite_name: Union[str, ExpectationSuite],
-        in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
+        in_memory_dataset: Any = None,
     ):
         execution_environment_name: str = batch_definition.get("execution_environment")
         runtime_environment: dict = {}
@@ -1329,14 +1330,12 @@ class BaseDataContext:
             module_name=module_name, class_name=class_name
         )
 
-        # TODO: <Alex>This is broken.  Do we need this?</Alex>
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
-        # if hasattr(execution_environment_class, "build_configuration"):
-        #     config = execution_environment_class.build_configuration(**kwargs)
-        # else:
-        #     config = kwargs
-        config = kwargs
+        if hasattr(execution_environment_class, "build_configuration"):
+            config = execution_environment_class.build_configuration(**kwargs)
+        else:
+            config = kwargs
 
         config = executionEnvironmentConfigSchema.load(config)
         self._project_config["execution_environments"][name] = config
@@ -1497,8 +1496,6 @@ class BaseDataContext:
         execution_environment_config: CommentedMap = executionEnvironmentConfigSchema.load(
             execution_environment_config
         )
-        if runtime_environment is None:
-            runtime_environment = {}
         execution_environment: ExecutionEnvironment = self._build_execution_environment_from_config(
             name=execution_environment_name,
             config=execution_environment_config,
@@ -1507,6 +1504,8 @@ class BaseDataContext:
         self._cached_execution_environments[
             execution_environment_name
         ] = execution_environment
+        if runtime_environment and "in_memory_dataset" in runtime_environment:
+            execution_environment.in_memory_dataset = runtime_environment["in_memory_dataset"]
         return execution_environment
 
     def _build_execution_environment_from_config(
@@ -1684,7 +1683,6 @@ class BaseDataContext:
         else:
             self._stores[self.expectations_store_name].remove_key(key)
             return True
-        return False
 
     def get_expectation_suite(self, expectation_suite_name):
         """Get a named expectation suite for the provided data_asset_name.

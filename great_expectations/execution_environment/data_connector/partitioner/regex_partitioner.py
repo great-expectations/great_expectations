@@ -115,7 +115,7 @@ group names, which is fewer than number of sorters specified is {len(self.sorter
 
         return Partition(
             name=partition_name,
+            data_asset_name=data_asset_name,
             definition=partition_definition,
-            source=path,
-            data_asset_name=data_asset_name
+            data_reference=path
         )

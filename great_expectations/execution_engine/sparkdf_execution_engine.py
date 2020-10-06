@@ -5,8 +5,7 @@ import json
 import logging
 from collections import OrderedDict
 from functools import reduce, wraps
-from io import StringIO
-from typing import Any, Callable, Dict, Iterable, List, Tuple
+from typing import Union, Any, Callable, Dict, Iterable, List, Tuple
 
 import jsonschema
 import numpy as np
@@ -15,16 +14,31 @@ from dateutil.parser import parse
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
-from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
+from great_expectations.execution_environment.types import (
+    InMemoryBatchSpec,
+    PathBatchSpec,
+    S3BatchSpec
+)
 from great_expectations.validator.validator import Validator
 
 from ..core.batch import Batch, BatchMarkers
+from ..core.id_dict import BatchSpec, IDDict
 from ..exceptions import BatchKwargsError, BatchSpecError, ValidationError
 from ..expectations.registry import register_metric
 from ..validator.validation_graph import MetricEdgeKey
 from .execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
+
+# TODO: <Alex>The various PySpark imports appearing below must be cleaned up to avoid multiple imports of the same modules/functions.</Alex>
+try:
+    from pyspark.sql import DataFrame, SparkSession
+except ImportError:
+    SparkSession = None
+    # TODO: review logging more detail here
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency for support."
+    )
 
 try:
     import pyspark.sql.functions as F
@@ -615,36 +629,32 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     def __init__(self, *args, **kwargs):
         # Creation of the Spark DataFrame is done outside this class
         self._persist = kwargs.pop("persist", True)
+
+        self._spark_config = kwargs.pop("spark_config ", {})
+        try:
+            builder = SparkSession.builder
+            app_name: Union[str, None] = self._spark_config.pop("spark.app.name", None)
+            if app_name:
+                builder.appName(app_name)
+            for k, v in self._spark_config.items():
+                builder.config(k, v)
+            self.spark = builder.getOrCreate()
+        except AttributeError:
+            logger.error(
+                "Unable to load spark context; install optional spark dependency for support."
+            )
+            self.spark = None
+
         super().__init__(*args, **kwargs)
 
-    def load_batch(self, batch_definition: dict = None) -> Batch:
-        in_memory_dataset = None
-        # We need to build a batch_markers to be used in the dataframe
-        if not batch_definition:
-            logger.info("loading a batch without a batch_definition")
-            batch_definition = {}
-        else:
-            execution_environment_name = batch_definition.get("execution_environment")
-            if not self._data_context:
-                raise ValueError("Cannot use a batch definition without a data context")
-            execution_environment = self._data_context.get_execution_environment(
-                execution_environment_name
-            )
-            data_connector_name = batch_definition.get("data_connector")
-            assert data_connector_name, "Batch definition must specify a data_connector"
-
-            data_connector = execution_environment.get_data_connector(
-                data_connector_name
-            )
-            batch_spec = data_connector.build_batch_spec(
-                batch_definition=batch_definition
-            )
-            # TODO: <Alex>The next line causes TypeError: Object of type DataFrame is not JSON serializable</Alex>
-            # batch_id = batch_spec.to_id()
-            # TODO: <Alex>Next 2 lines are temporary.</Alex>
-            import uuid
-            batch_id = uuid.uuid4()
-            in_memory_dataset = batch_spec.get("dataset")
+    def load_batch(self, batch_spec: BatchSpec = None) -> Batch:
+        """
+        Utilizes the provided batch spec to load a batch using the appropriate file reader and the given file path.
+        :arg batch_spec the parameters used to build the batch
+        :returns Batch
+        """
+        batch_spec._id_ignore_keys = {"dataset"}
+        batch_id = batch_spec.to_id()
 
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(
@@ -655,64 +665,56 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             }
         )
 
-        if in_memory_dataset is not None:
-            # TODO: <Alex>There should be no need to specify "partition_name" -- None implies "latest" (first in sorted order).</Alex>
-            # if batch_definition.get("data_asset_name") and batch_definition.get("partition_name"):
-            if batch_definition.get("data_asset_name"):
-                df = in_memory_dataset
-            else:
-                raise ValueError(
-                    # "To pass an in_memory_dataset, you must also pass a data_asset_name and partition_name"
-                    "To pass an in_memory_dataset, you must also a data_asset_name as well."
-                )
+        if isinstance(batch_spec, InMemoryBatchSpec):
+            # We do not want to store the actual dataframe in batch_spec (mark that this is SparkDFRef instead).
+            in_memory_dataset = batch_spec.pop("dataset")
+            batch_spec["SparkInMemoryDF"] = True
+            if in_memory_dataset is not None:
+                if batch_spec.get("data_asset_name"):
+                    df = in_memory_dataset
+                else:
+                    raise ValueError("To pass an in_memory_dataset, you must also a data_asset_name as well.")
         else:
-            # TODO: <Alex>PyCharm says that data_connector may be referenced before assigment.</Alex>
-            if data_connector.get_config().get("class_name") == "DataConnector":
-                raise ValueError(
-                    "No in_memory_dataset found. To use a data_connector with class DataConnector, please ensure that "
-                    "you are passing a dataset to load_batch()"
-                )
-
-            # We will use and manipulate reader_options along the way
-            reader_options = batch_spec.get("reader_options", {})
-
+            reader = self.spark.read
+            reader_method = batch_spec.get("reader_method")
+            reader_options = batch_spec.get("reader_options") or {}
+            for option in reader_options.items():
+                reader = reader.option(*option)
             if isinstance(batch_spec, PathBatchSpec):
                 path = batch_spec["path"]
-                reader_method = batch_spec.get("reader_method")
-                reader_fn = self._get_reader_fn(reader_method, path)
-                df = reader_fn(path, **reader_options)
+                reader_fn = self._get_reader_fn(reader, reader_method, path)
+                df = reader_fn(path)
             elif isinstance(batch_spec, S3BatchSpec):
-                url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
-                reader_method = batch_spec.get("reader_method")
-                reader_fn = self._get_reader_fn(reader_method, url.key)
-                df = reader_fn(
-                    StringIO(
-                        s3_object["Body"]
-                        .read()
-                        .decode(s3_object.get("ContentEncoding", "utf-8"))
-                    ),
-                    **reader_options,
-                )
+                # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
+                # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
+                # url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
+                # reader_fn = self._get_reader_fn(reader, reader_method, url.key)
+                # df = reader_fn(
+                #     StringIO(
+                #         s3_object["Body"]
+                #         .read()
+                #         .decode(s3_object.get("ContentEncoding", "utf-8"))
+                #     ),
+                #     **reader_options,
+                # )
+                pass
             else:
                 raise BatchSpecError(
-                    "Invalid batch_spec: path, s3, or df is required for a PandasDatasource"
+                    "Invalid batch_spec: file path, s3 path, or df is required for a SparkDFExecutionEngine to operate."
                 )
 
-        limit = batch_definition.get("limit") or batch_spec.get("limit")
+        limit = batch_spec.get("limit")
         if limit:
             df = df.limit(limit)
 
         if self._persist:
             df.persist()
 
-        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_definition != batch_definition:
+        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_spec != batch_spec:
             batch = Batch(
-                execution_engine=self,
-                batch_spec=batch_spec,
                 data=df,
-                batch_definition=batch_definition,
+                batch_spec=batch_spec,
                 batch_markers=batch_markers,
-                data_context=self._data_context,
             )
             self.batches[batch_id] = batch
         else:
@@ -789,15 +791,12 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     def process_batch_definition(self, batch_definition, batch_spec):
         """Given that the batch definition has a limit state, transfers the limit dictionary entry from the batch_definition
         to the batch_spec.
-
-                Args:
-                    batch_definition: The batch definition to use in configuring the batch spec's limit
-                    batch_spec: a batch_spec dictionary whose limit needs to be configured
-
-                Returns:
-                    ReaderMethod to use for the filepath
-
-                """
+        Args:
+            batch_definition: The batch definition to use in configuring the batch spec's limit
+            batch_spec: a batch_spec dictionary whose limit needs to be configured
+        Returns:
+            ReaderMethod to use for the filepath
+        """
         limit = batch_definition.get("limit")
         if limit is not None:
             if not batch_spec.get("limit"):
