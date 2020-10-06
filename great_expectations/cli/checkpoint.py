@@ -1,49 +1,4 @@
-import os
-import sys
-
-import click
-from ruamel.yaml import YAML
-
-from great_expectations import DataContext
-from great_expectations.cli import toolkit
-from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.util import cli_message, cli_message_list
-from great_expectations.core import ExpectationSuite
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import DataContextError
-from great_expectations.util import lint_code
-from great_expectations.validation_operators.types.validation_operator_result import ValidationOperatorResult
-
-try:
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
-    SQLAlchemyError = RuntimeError
-
-
-try:
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
-    SQLAlchemyError = RuntimeError
-
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-
-
-@click.group(short_help="Checkpoint operations")
-def checkpoint():
-    """
-Checkpoint operations
-
-A checkpoint is a bundle of one or more batches of data with one or more
-Expectation Suites.
-
-A checkpoint can be as simple as one batch of data paired with one
-Expectation Suite.
-
-A checkpoint can be as complex as many batches of data across different
-datasources paired with one or more Expectation Suites each.
-
+"""
 --ge-feature-maturity-info--
 
     id: checkpoint_notebook
@@ -152,6 +107,53 @@ datasources paired with one or more Expectation Suites each.
         bug_risk: Low
 
 --ge-feature-maturity-info--
+"""
+
+import os
+import sys
+
+import click
+from ruamel.yaml import YAML
+
+from great_expectations import DataContext
+from great_expectations.cli import toolkit
+from great_expectations.cli.mark import Mark as mark
+from great_expectations.cli.util import cli_message, cli_message_list
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.exceptions import DataContextError
+from great_expectations.util import lint_code
+from great_expectations.validation_operators.types.validation_operator_result import ValidationOperatorResult
+
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    SQLAlchemyError = RuntimeError
+
+
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    SQLAlchemyError = RuntimeError
+
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+
+
+@click.group(short_help="Checkpoint operations")
+def checkpoint():
+    """
+Checkpoint operations
+
+A checkpoint is a bundle of one or more batches of data with one or more
+Expectation Suites.
+
+A checkpoint can be as simple as one batch of data paired with one
+Expectation Suite.
+
+A checkpoint can be as complex as many batches of data across different
+datasources paired with one or more Expectation Suites each.
     """
     pass
 
