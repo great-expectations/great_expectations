@@ -126,6 +126,7 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
 
 ## Overview
 ### **Expectation Suite:** **basic.warning**
+**Data asset:** **None**
 **Status:**  **Failed**
 
 
@@ -293,6 +294,7 @@ Powered by [Great Expectations](https://greatexpectations.io/)
 
 ## Overview
 ### **Expectation Suite:** **basic.warning**
+**Data asset:** **None**
 **Status:**  **Failed**
 
 
@@ -498,6 +500,7 @@ def test_render_section_page_with_fixture_data_multiple_validations(
 
 ## Overview
 ### **Expectation Suite:** **basic.warning**
+**Dataasset:** **None**
 **Status:**  **Failed**
 
 
@@ -665,6 +668,7 @@ Powered by [Great Expectations](https://greatexpectations.io/)
 
 ## Overview
 ### **Expectation Suite:** **basic.warning**
+**Dataasset:** **None**
 **Status:**  **Failed**
 
 
