@@ -247,3 +247,9 @@ def test_substitute_env_var_in_config_variable_file(
         ]["reader_options"]["password"]
         == "dont$replaceme"
     )
+    assert (
+        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
+            "mygenerator"
+        ]["password"]
+        == "dont$replace$me$please$$$$thanks"
+    )

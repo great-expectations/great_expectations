@@ -165,8 +165,9 @@ def substitute_all_config_variables(data, replace_variables_dict):
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {
             k: substitute_all_config_variables(v, replace_variables_dict)
-            for k, v in data.items()
             if k.lower() not in {"password"}
+            else v
+            for k, v in data.items()
         }
     elif isinstance(data, list):
         return [
