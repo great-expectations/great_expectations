@@ -37,22 +37,10 @@ class SlackRenderer(Renderer):
                 "expectation_suite_name", "__no_expectation_suite_name__"
             )
 
-            if "data_asset_name" in validation_result.meta:
-                datasource_name = validation_result.meta["data_asset_name"][
-                    "datasource"
-                ]
-                generator_name = validation_result.meta["data_asset_name"]["generator"]
-                generator_asset_name = validation_result.meta["data_asset_name"][
-                    "generator_asset"
-                ]
-                data_asset_name_list = []
-                if datasource_name:
-                    data_asset_name_list.append(datasource_name)
-                if generator_name:
-                    data_asset_name_list.append(generator_name)
-                if generator_asset_name:
-                    data_asset_name_list.append(generator_asset_name)
-                data_asset_name = "/".join(data_asset_name_list)
+            if "batch_kwargs" in validation_result.meta:
+                data_asset_name = validation_result.meta["batch_kwargs"].get(
+                    "data_asset_name", "__no_data_asset_name__"
+                )
             else:
                 data_asset_name = "__no_data_asset_name__"
 
