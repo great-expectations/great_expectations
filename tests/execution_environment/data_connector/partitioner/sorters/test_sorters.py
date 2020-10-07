@@ -1,16 +1,5 @@
-import logging
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
 import pytest
-
 import great_expectations.exceptions as ge_exceptions
-
-logger = logging.getLogger(__name__)
-
 from great_expectations.execution_environment.data_connector.partitioner.sorter import (
     Sorter,
     LexicographicSorter,
@@ -18,21 +7,16 @@ from great_expectations.execution_environment.data_connector.partitioner.sorter 
     CustomListSorter,
     DateTimeSorter,
 )
-
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 
-
-# <WILL> TODO: test the get_partition_key() functions for each of the sorters too
 
 def test_sorter_instantiation_base():
     # base
     my_sorter = Sorter(name="base", class_name="Sorter", orderby="asc")
     assert isinstance(my_sorter, Sorter)
     assert my_sorter.name == "base"
-
     # defaults
     assert my_sorter.reverse is False
-
     # with fake orderby
     with pytest.raises(ge_exceptions.SorterError):
         my_sorter = Sorter(name="base", class_name="Sorter", orderby="fake")
@@ -76,21 +60,17 @@ def test_sorter_instantiation_custom_list():
     assert my_custom.name == "custom"
     assert my_custom.reverse is False
     assert my_custom.config_params['reference_list'] == ['a', 'b', 'c']
-
     # with incorrectly configured reference list
     sorter_params: dict = {'config_params': {
         'reference_list': [111, 222, 333]  # this shouldn't work. the reference list should only contain strings
     }}
-
     with pytest.raises(ge_exceptions.SorterError):
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
-
     sorter_params: dict = {'config_params': {
         'reference_list': None
     }}
     with pytest.raises(ge_exceptions.SorterError):
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
-
     sorter_params: dict = {'config_params': {
         'reference_list': 1 # not a list
     }}
@@ -103,15 +83,12 @@ def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_
     sorter_params: dict = {'config_params': {
         'reference_list': periodic_table_of_elements,
     }}
-
     my_custom = CustomListSorter(name="element", orderby="asc", **sorter_params)
     assert my_custom.reference_list == periodic_table_of_elements
-
     # This element exists : Hydrogen
     test_partition = Partition(name="test", data_asset_name="fake", definition={"element": "Hydrogen"}, data_reference="nowhere")
     returned_partition_key = my_custom.get_partition_key(test_partition)
     assert returned_partition_key == 0
-
     # This element does not : Vibranium
     test_partition = Partition(name="test", data_asset_name="fake", definition={"element": "Vibranium"}, data_reference="nowhere")
     with pytest.raises(ge_exceptions.SorterError):

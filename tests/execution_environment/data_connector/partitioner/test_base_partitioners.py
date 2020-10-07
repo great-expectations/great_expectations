@@ -3,33 +3,29 @@ import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner import Partitioner
 from great_expectations.marshmallow__shade.exceptions import ValidationError
-
-# just to keep these straight?
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+
 
 def test_base_partitioner():
     temp_data_connector = DataConnector(name="test")
     test_partitioner = Partitioner(name="test_base_partitioner", data_connector=temp_data_connector)
-
     # properties
     assert test_partitioner.name == "test_base_partitioner"
     assert test_partitioner.data_connector == temp_data_connector
     assert test_partitioner.sorters == None
     assert test_partitioner.allow_multipart_partitions == False
     assert test_partitioner.config_params == None
-
     # no sorters
     with pytest.raises(ge_exceptions.SorterError):
         test_partitioner.get_sorter("i_dont_exist")
 
+
 def test_base_partitioner_with_sorter():
     temp_data_connector = DataConnector(name="test")
-
     # test sorter config
     price_sorter_config = [
         {'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter', 'orderby': 'desc',
          'class_name': 'NumericSorter', 'name': 'price'}]
-
     test_partitioner_with_sorter = Partitioner(name="test_base_partitioner", data_connector=temp_data_connector,
                                                sorters=price_sorter_config)
     # configured sorter exists
@@ -40,7 +36,6 @@ def test_base_partitioner_with_sorter():
     # no sorters by name of i_dont_exist
     with pytest.raises(ge_exceptions.SorterError):
         test_partitioner_with_sorter.get_sorter("i_dont_exist")
-
 
 
 def test_base_partitioner_with_bad_sorter_config():
@@ -67,7 +62,6 @@ def test_base_partitioner_with_bad_sorter_config():
 
 def test_base_partitioner_get_available_partitions():
     temp_data_connector = DataConnector(name="test")
-
     # test sorter config
     price_sorter_config = [{'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter', 'orderby': 'desc',
      'class_name': 'NumericSorter', 'name': 'price'}]
@@ -81,7 +75,6 @@ def test_base_partitioner_get_available_partitions():
         test_partitioner_with_sorter.get_available_partitions(repartition=True)
 
 
-
 def test_base_partitioner_get_sorted_partitions_with_no_sorter():
     test_partition1 = Partition(name="test", data_asset_name="fake", definition={"name": "hello"}, data_reference="nowhere")
     test_partition2 = Partition(name="test_2", data_asset_name="fake", definition={"name": "world"}, data_reference="nowhere")
@@ -92,20 +85,15 @@ def test_base_partitioner_get_sorted_partitions_with_no_sorter():
                                                     partitions=[test_partition1, test_partition2])
 
 
-
 def test_base_partitioner_get_sorted_partitions_with_sorter():
-
     test_partition1 = Partition(name="test", data_asset_name="fake", definition={"name": "hello"}, data_reference="nowhere")
     test_partition2 = Partition(name="test_2", data_asset_name="fake", definition={"name": "world"}, data_reference="nowhere")
-
     temp_data_connector = DataConnector(name="test")
-
     # test sorter config
     price_sorter_config = [
         {'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter', 'orderby': 'desc',
          'class_name': 'LexicographicSorter', 'name': 'name'}]
     test_partitioner_with_sorter = Partitioner(name="test_base_partitioner", data_connector=temp_data_connector,
                                                sorters=price_sorter_config)
-
     assert [test_partition2, test_partition1] == test_partitioner_with_sorter.get_sorted_partitions(
                                                     partitions=[test_partition1, test_partition2])

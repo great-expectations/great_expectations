@@ -16,7 +16,6 @@ def test_partition():
     test_partition3 = Partition(name="i_am_different", data_asset_name="fake", definition={"name": "hello"}, data_reference="nowhere")
     assert test_partition1 == test_partition2
     assert test_partition1 != test_partition3
-
     # test __hash__()
     assert test_partition.__hash__() == test_partition.__hash__()
     assert test_partition1.__hash__() == test_partition2.__hash__()

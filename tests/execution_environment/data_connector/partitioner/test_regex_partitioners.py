@@ -10,36 +10,44 @@ from great_expectations.execution_environment.data_connector.partitioner import(
 def test_regex_partitioner_instantiation():
     data_connector = DataConnector(name="test")
     partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector)
-
     # defaults
     assert partitioner.name == "test_regex_partitioner"
     assert partitioner.data_connector == data_connector
     assert partitioner.sorters == None
     assert partitioner.allow_multipart_partitions == False
     assert partitioner.config_params == None
-
     # without regex configured, you will get a default pattern
     assert partitioner.regex == {"pattern": r"(.*)", "group_names": ["group_0"]}
 
 
-def test_regex_partitioner_bad_regex_config():
+def test_regex_partitioner_regex_not_dict():
     data_connector = DataConnector(name="test")
     # bad regex configuration
     config_params = {"regex": 'i_am_not_a_dictionary'}
     partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector, config_params=config_params)
-    # if regex is not a dict, then you will get default configuration <WILL> should there be a more informative message
+    # if regex is not a dict, then you will get default configuration
+    # <WILL> should there be a more informative message
     assert partitioner.regex == {"pattern": r"(.*)", "group_names": ["group_0"]}
 
+
+def test_regex_partitioner_regex_missing_pattern():
+    data_connector = DataConnector(name="test")
     # missing pattern
     config_params = {"regex": {"not pattern": "not pattern either"}}
     with pytest.raises(AssertionError):
         RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector, config_params=config_params)
 
+
+def test_regex_partitioner_regex_no_groups_named():
+    data_connector = DataConnector(name="test")
     # adding pattern (no groups named)
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv"}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector, config_params=config_params)
     assert regex_partitioner.regex == {'pattern': '.+\\/(.+)_(.+)_(.+)\\.csv', 'group_names': []}
 
+
+def test_regex_partitioner_regex_groups_named():
+    data_connector = DataConnector(name="test")
     # adding pattern with named groups
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector,
@@ -47,7 +55,7 @@ def test_regex_partitioner_bad_regex_config():
     assert regex_partitioner.regex == {'pattern': '.+\\/(.+)_(.+)_(.+)\\.csv', 'group_names': ['name', 'timestamp', 'price']}
 
 
-def test_regex_partitioner_compute_partitions_for_data_asset_nothing_configured():
+def test_regex_partitioner_compute_partitions_for_data_asset_with_no_configuration():
     data_connector = DataConnector(name="test")
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector,
@@ -76,7 +84,6 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector,
                                          config_params=config_params)
-
     batch_paths_simple: list = [
         "my_dir/alex_20200809_1000.csv",
         "my_dir/eugene_20200809_1500.csv",
@@ -98,7 +105,32 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
     ]
 
 
-def test_regex_partitioner_compute_partitions_auto_discover_assets_false():
+def test_regex_partitioner_compute_partitions_auto_discover_assets_false_no_data_asset_name():
+    data_connector = DataConnector(name="test")
+    config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
+    regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector,
+                                         config_params=config_params)
+    batch_paths_simple: list = [
+        "my_dir/alex_20200809_1000.csv",
+        "my_dir/eugene_20200809_1500.csv",
+        "my_dir/abe_20200809_1040.csv",
+    ]
+    # <WILL> Should this be a default value?
+    partitions = regex_partitioner.get_available_partitions(paths=batch_paths_simple, auto_discover_assets=False)
+    assert partitions == [
+        Partition(name='alex-20200809-1000',
+                  definition={'name': 'alex', 'timestamp': '20200809', 'price': '1000'},
+                  data_reference="my_dir/alex_20200809_1000.csv", data_asset_name=None),
+        Partition(name='eugene-20200809-1500',
+                  definition={'name': 'eugene', 'timestamp': '20200809', 'price': '1500'},
+                  data_reference="my_dir/eugene_20200809_1500.csv", data_asset_name=None),
+        Partition(name='abe-20200809-1040',
+                  definition={'name': 'abe', 'timestamp': '20200809', 'price': '1040'},
+                  data_reference="my_dir/abe_20200809_1040.csv", data_asset_name=None),
+    ]
+
+
+def test_regex_partitioner_compute_partitions_auto_discover_assets_false_data_asset_name_included():
     data_connector = DataConnector(name="test")
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector,
