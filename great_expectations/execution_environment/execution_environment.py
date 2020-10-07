@@ -33,7 +33,6 @@ class ExecutionEnvironment(object):
         execution_engine=None,
         data_connectors=None,
         in_memory_dataset: Any = None,
-        data_context=None,
         **kwargs
     ):
         """
@@ -62,7 +61,6 @@ class ExecutionEnvironment(object):
 
         self._build_data_connectors()
 
-        self._data_context = data_context
 
     def get_batch(
         self,
@@ -75,7 +73,7 @@ class ExecutionEnvironment(object):
         if not data_connector_name:
             raise ge_exceptions.BatchDefinitionError(message="Batch definition must specify a data_connector.")
 
-        batch_spec: BatchSpec = self.build_batch_spec(
+        batch_spec: BatchSpec = self._build_batch_spec(
             data_connector_name=data_connector_name,
             batch_definition=batch_definition
         )
@@ -87,7 +85,7 @@ class ExecutionEnvironment(object):
         batch: Batch = self.execution_engine.load_batch(batch_spec=batch_spec)
         return batch
 
-    def build_batch_spec(self, data_connector_name: str, batch_definition: dict) -> BatchSpec:
+    def _build_batch_spec(self, data_connector_name: str, batch_definition: dict) -> BatchSpec:
         """Builds batch_spec using the provided data_connector and batch_definition.
 
         Args:
@@ -99,33 +97,6 @@ class ExecutionEnvironment(object):
         """
         data_connector: DataConnector = self.get_data_connector(name=data_connector_name)
         return data_connector.build_batch_spec(batch_definition=batch_definition)
-
-    def get_validator(
-        self,
-        batch_definition: dict,
-        expectation_suite_name: Union[str, ExpectationSuite],
-    ):
-        # noinspection PyUnusedLocal
-        batch: Batch = self.get_batch(batch_definition=batch_definition)
-        return Validator(
-            data_context=self.data_context,
-            execution_engine=self.execution_engine,
-            expectation_suite_name=expectation_suite_name,
-        )
-
-    @classmethod
-    def from_configuration(cls, **kwargs):
-        """
-        Build a new datasource from a configuration dictionary.
-
-        Args:
-            **kwargs: configuration key-value pairs
-
-        Returns:
-            datasource (Datasource): the newly-created datasource
-
-        """
-        return cls(**kwargs)
 
     @property
     def name(self):
@@ -147,10 +118,6 @@ class ExecutionEnvironment(object):
         self._in_memory_dataset = in_memory_dataset
 
     @property
-    def data_context(self):
-        return self._data_context
-
-    @property
     def config(self):
         return copy.deepcopy(self._execution_environment_config)
 
@@ -164,6 +131,7 @@ class ExecutionEnvironment(object):
         for data_connector in self._execution_environment_config["data_connectors"].keys():
             self.get_data_connector(name=data_connector)
 
+    # TODO Abe 10/6/2020: Should this be an internal method?
     # TODO: <Alex>The style and readability of this method must be improved.</Alex>
     def get_data_connector(self, name: str) -> DataConnector:
         """Get the (named) DataConnector from an ExecutionEnvironment)
@@ -230,6 +198,7 @@ class ExecutionEnvironment(object):
             )
         return data_connector
 
+    # TODO Abe 10/6/2020: Should this be an internal method?
     def list_data_connectors(self) -> List[dict]:
         """List currently-configured DataConnector for this ExecutionEnvironment.
 
