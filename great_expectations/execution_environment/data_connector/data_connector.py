@@ -52,6 +52,7 @@ class DataConnector(object):
     """
     _default_reader_options: dict = {}
 
+    #NOTE Abe 20201011 : This looks like a type defintion for BatchSpec, not a property of DataConnector
     recognized_batch_definition_keys: set = {
         "execution_environment",
         "data_connector",
@@ -64,7 +65,7 @@ class DataConnector(object):
     def __init__(
         self,
         name: str,
-        execution_environment,
+        # execution_environment,
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,
@@ -93,12 +94,12 @@ class DataConnector(object):
             for key, value in batch_definition_defaults.items()
             if key in self.recognized_batch_definition_keys
         }
-        if execution_environment is None:
-            raise ge_exceptions.DataConnectorError(
-                "execution environment must be provided for a DataConnector"
-            )
+        # if execution_environment is None:
+        #     raise ge_exceptions.DataConnectorError(
+        #         "execution environment must be provided for a DataConnector"
+        #     )
 
-        self._execution_environment = execution_environment
+        # self._execution_environment = execution_environment
         self._partitioners = partitioners or {}
         self._default_partitioner = default_partitioner
         self._assets = assets
@@ -111,9 +112,9 @@ class DataConnector(object):
     def name(self) -> str:
         return self._name
 
-    @property
-    def execution_environment(self):
-        return self._execution_environment
+    # @property
+    # def execution_environment(self):
+    #     return self._execution_environment
 
     @property
     def partitioners(self) -> dict:
@@ -281,10 +282,10 @@ multiple partitions, including "{partition}", for the same data reference -- thi
             partitioner = self.get_partitioner(name=partitioner_name)
         return partitioner
 
-    def get_config(self) -> dict:
-        conf: dict = self.execution_environment.config["data_connectors"][self.name]
-        conf.update(self._data_connector_config)
-        return conf
+    # def get_config(self) -> dict:
+    #     conf: dict = self.execution_environment.config["data_connectors"][self.name]
+    #     conf.update(self._data_connector_config)
+    #     return conf
 
     def build_batch_spec(self, batch_definition: dict) -> BatchSpec:
         if "data_asset_name" not in batch_definition:
@@ -293,7 +294,7 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         batch_definition_keys: set = set(batch_definition.keys())
         recognized_batch_definition_keys: set = (
             self.recognized_batch_definition_keys
-            | self._execution_environment.execution_engine.recognized_batch_definition_keys
+            | self._execution_engine.recognized_batch_definition_keys
         )
         if not batch_definition_keys <= recognized_batch_definition_keys:
             logger.warning(
