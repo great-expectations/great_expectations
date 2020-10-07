@@ -23,9 +23,8 @@ logger = logging.getLogger(__name__)
 
 class ExecutionEnvironment(object):
     """
-An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
+    An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
     """
-
     recognized_batch_parameters: set = {"limit"}
 
     def __init__(
