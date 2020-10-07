@@ -855,10 +855,13 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
     def list_keys(self):
         key_list = []
+
         for obj in self._get_container_client().list_blobs(
             name_starts_with=self.prefix
         ):
             az_blob_key = os.path.relpath(obj.name)
+            if az_blob_key.startswith(self.prefix + "/"):
+                az_blob_key = az_blob_key[len(self.prefix) + 1 :]
             if self.filepath_prefix and not az_blob_key.startswith(
                 self.filepath_prefix
             ):
@@ -868,8 +871,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             ):
                 continue
             key = self._convert_filepath_to_key(az_blob_key)
-            if key:
-                key_list.append(key)
+
+            key_list.append(key)
         return key_list
 
     def get_url_for_key(self, key, protocol=None):
