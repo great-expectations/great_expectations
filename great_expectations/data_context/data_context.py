@@ -315,14 +315,6 @@ class BaseDataContext:
             1. follow a clear key-value pattern, and
             2. are usually edited programmatically, using the Context
 
-        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
-        As of 9/21/2019, the following Stores had not yet been implemented
-            * great_expectations.yml
-            * expectations
-            * data documentation
-            * config_variables
-            * anything accessed via write_resource
-
         Note that stores do NOT manage plugins.
         """
 
