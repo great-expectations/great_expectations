@@ -111,6 +111,7 @@ class Partitioner(object):
                 "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter"
             },
         )
+        # <WILL> we will likely not get this far without throwing an exception in the `instantiate_class_from_config` method
         if not sorter:
             raise ge_exceptions.ClassInstantiationError(
                 module_name="great_expectations.execution_environment.data_connector.partitioner.sorter",
