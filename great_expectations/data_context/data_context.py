@@ -1066,26 +1066,6 @@ class BaseDataContext:
         )
         return batch_kwargs
 
-    # TODO: <Alex>Do we need this method here?</Alex>
-    # def build_batch_spec(self, execution_environment: str, data_connector: str, batch_definition: dict) -> BatchSpec:
-    #     """Builds batch_spec using the provided execution_environment, data_connector, and batch_definition.
-    #
-    #     Args:
-    #         execution_environment (str): the name of the execution_environment for which to build batch_kwargs
-    #         data_connector (str): the name of the data_connector to use to build batch_spec
-    #         batch_definition (dict): dict specifying batch - used to generate a batch_spec
-    #
-    #     Returns:
-    #         BatchSpec
-    #     """
-    #     execution_environment: ExecutionEnvironment = self.get_execution_environment(
-    #         execution_environment_name=execution_environment
-    #     )
-    #     batch_spec: BatchSpec = execution_environment.build_batch_spec(
-    #         data_connector_name=data_connector, batch_definition=batch_definition
-    #     )
-    #     return batch_spec
-
     # new get_batch
     def get_batch_from_new_style_datasource(
         self,
