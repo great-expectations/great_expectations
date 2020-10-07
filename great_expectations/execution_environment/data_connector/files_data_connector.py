@@ -43,7 +43,7 @@ class FilesDataConnector(DataConnector):
         reader_method: str = None,
         **kwargs
     ):
-        logger.debug("Constructing FilesDataConnector {!r}".format(name))
+        logger.debug(f'Constructing FilesDataConnector "{name}".')
         super().__init__(
             name=name,
             execution_environment=execution_environment,

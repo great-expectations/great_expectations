@@ -49,7 +49,7 @@ class Partition(object):
         """Overrides the default implementation"""
         _result_hash: int = hash(self.name) ^ hash(self.data_asset_name)
         for key, value in self.definition.items():
-            _result_hash = _result_hash ^ hash(key) ^ hash(value)
+            _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
         return _result_hash
 
     def __repr__(self) -> str:

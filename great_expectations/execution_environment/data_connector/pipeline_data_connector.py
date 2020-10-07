@@ -27,7 +27,7 @@ class PipelineDataConnector(DataConnector):
         in_memory_dataset: Any = None,
         **kwargs
     ):
-        logger.debug("Constructing PipelineDataConnector {!r}".format(name))
+        logger.debug(f'Constructing PipelineDataConnector "{name}".')
         super().__init__(
             name=name,
             execution_environment=execution_environment,
