@@ -39,3 +39,24 @@ data_connector:
     
     """, Loader=yaml.FullLoader)
     )
+
+def test_get_batch():
+    pass
+
+def test_get_batch_with_caching():
+    pass
+
+def test_get_batch_with_pipeline_style_batch_definition():
+    pass
+
+def test_get_available_data_asset_names():
+    pass
+
+def test_get_available_data_asset_names_with_caching():
+    pass
+
+def test_get_available_partitions_with_caching():
+    pass
+
+def test_get_available_data_asset_names_with_caching():
+    pass
