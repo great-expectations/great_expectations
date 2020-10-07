@@ -32,7 +32,6 @@ class FilesDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
-        execution_environment,
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,
@@ -41,12 +40,12 @@ class FilesDataConnector(DataConnector):
         known_extensions: list = None,
         reader_options: dict = None,
         reader_method: str = None,
+        data_context_root_directory: str = None,
         **kwargs
     ):
         logger.debug(f'Constructing FilesDataConnector "{name}".')
         super().__init__(
             name=name,
-            execution_environment=execution_environment,
             partitioners=partitioners,
             default_partitioner=default_partitioner,
             assets=assets,
@@ -64,8 +63,8 @@ class FilesDataConnector(DataConnector):
         self._reader_options = reader_options
 
         self._reader_method = reader_method
-
         self._base_directory = self.config_params["base_directory"]
+        self._data_context_root_directory = data_context_root_directory
 
     @property
     def reader_options(self):
@@ -128,10 +127,10 @@ class FilesDataConnector(DataConnector):
     def _normalize_directory_path(self, dir_path: str) -> str:
         # If directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
-        if Path(dir_path).is_absolute() or self.execution_environment.data_context is None:
+        if Path(dir_path).is_absolute() or self._data_context_root_directory is None:
             return dir_path
         else:
-            return Path(self.execution_environment.data_context.root_directory).joinpath(dir_path)
+            return Path(self._data_context_root_directory).joinpath(dir_path)
 
     def _get_file_paths_for_data_asset(self, data_asset_name: str = None) -> list:
         """

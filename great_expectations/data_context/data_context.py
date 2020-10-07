@@ -1090,18 +1090,20 @@ class BaseDataContext:
         expectation_suite_name: Union[str, ExpectationSuite],
         in_memory_dataset: Any = None,
     ):
-        execution_environment_name: str = batch_definition.get("execution_environment")
-        runtime_environment: dict = {}
-        if in_memory_dataset is not None:
-            runtime_environment.update({"in_memory_dataset": in_memory_dataset})
-        execution_environment: ExecutionEnvironment = self.get_execution_environment(
-            execution_environment_name=execution_environment_name,
-            runtime_environment=runtime_environment
-        )
-        return execution_environment.get_validator(
-            batch_definition=batch_definition,
-            expectation_suite_name=expectation_suite_name
-        )
+        # execution_environment_name: str = batch_definition.get("execution_environment")
+        # runtime_environment: dict = {}
+        # if in_memory_dataset is not None:
+        #     runtime_environment.update({"in_memory_dataset": in_memory_dataset})
+        # execution_environment: ExecutionEnvironment = self.get_execution_environment(
+        #     execution_environment_name=execution_environment_name,
+        #     runtime_environment=runtime_environment
+        # )
+        # return execution_environment.get_validator(
+        #     batch_definition=batch_definition,
+        #     expectation_suite_name=expectation_suite_name
+        # )
+        # TODO?
+        raise NotImplementedError
 
     def get_batch(
         self,

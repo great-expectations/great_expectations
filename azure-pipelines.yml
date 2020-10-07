@@ -1,6 +1,8 @@
 trigger:
   - develop
   - main
+  - feature_dev_wip/partitioners
+  - feature/batch_spec
 
 resources:
   containers:
