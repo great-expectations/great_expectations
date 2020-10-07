@@ -7,6 +7,9 @@ Changelog
 Develop
 -----------------
 
+* [BUGFIX] Change default prefix for TupleStoreBackend (issue 1907)
+* [ENHANCEMENT] Add spark support for expect_compound_columns_to_be_unique(Thanks @tscottcoombes1)!
+* [BUGFIX] Duplicate s3 approach for GCS for building object keys
 
 0.12.3
 -----------------
