@@ -108,12 +108,12 @@ def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_
     assert my_custom.reference_list == periodic_table_of_elements
 
     # This element exists : Hydrogen
-    test_partition = Partition(name="test", data_asset_name="fake", definition={"element": "Hydrogen"}, source="nowhere")
+    test_partition = Partition(name="test", data_asset_name="fake", definition={"element": "Hydrogen"}, data_reference="nowhere")
     returned_partition_key = my_custom.get_partition_key(test_partition)
     assert returned_partition_key == 0
 
     # This element does not : Vibranium
-    test_partition = Partition(name="test", data_asset_name="fake", definition={"element": "Vibranium"}, source="nowhere")
+    test_partition = Partition(name="test", data_asset_name="fake", definition={"element": "Vibranium"}, data_reference="nowhere")
     with pytest.raises(ge_exceptions.SorterError):
         my_custom.get_partition_key(test_partition)
 

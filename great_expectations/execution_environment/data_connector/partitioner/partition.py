@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from typing import Any
 
 import logging
@@ -46,15 +44,6 @@ class Partition(object):
         )
 
     def __hash__(self) -> int:
-        _result_hash: int = hash(self.name) ^ hash(self.data_asset_name)
-        for key, value in self.definition.items():
-            _result_hash = _result_hash ^ hash(key) ^ hash(value)
-        return _result_hash
-
-
-    @property
-    def source(self) -> Any:
-        return self._source
         """Overrides the default implementation"""
         _result_hash: int = hash(self.name) ^ hash(self.data_asset_name)
         for key, value in self.definition.items():

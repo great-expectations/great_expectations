@@ -272,8 +272,6 @@ def execution_environment_pipeline_data_connector_pipeline_partitioner_config(
     return execution_environments_config
 
 
-
-
 def execution_environment_files_data_connector_regex_partitioner_config(
     use_group_names: bool = False,
     use_sorters: bool = False,
