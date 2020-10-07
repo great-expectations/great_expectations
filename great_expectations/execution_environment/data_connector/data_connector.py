@@ -54,7 +54,7 @@ class DataConnector(object):
 
     #NOTE Abe 20201011 : This looks like a type defintion for BatchSpec, not a property of DataConnector
     recognized_batch_definition_keys: set = {
-        "execution_environment",
+        # "execution_environment",
         "data_connector",
         "data_asset_name",
         "partition_query",
