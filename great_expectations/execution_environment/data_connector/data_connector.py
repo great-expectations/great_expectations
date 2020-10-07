@@ -54,7 +54,6 @@ class DataConnector(object):
 
     #NOTE Abe 20201011 : This looks like a type defintion for BatchSpec, not a property of DataConnector
     recognized_batch_definition_keys: set = {
-        # "execution_environment",
         "data_connector",
         "data_asset_name",
         "partition_query",
@@ -65,7 +64,6 @@ class DataConnector(object):
     def __init__(
         self,
         name: str,
-        # execution_environment,
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,
@@ -94,12 +92,7 @@ class DataConnector(object):
             for key, value in batch_definition_defaults.items()
             if key in self.recognized_batch_definition_keys
         }
-        # if execution_environment is None:
-        #     raise ge_exceptions.DataConnectorError(
-        #         "execution environment must be provided for a DataConnector"
-        #     )
 
-        # self._execution_environment = execution_environment
         self._partitioners = partitioners or {}
         self._default_partitioner = default_partitioner
         self._assets = assets
@@ -111,10 +104,6 @@ class DataConnector(object):
     @property
     def name(self) -> str:
         return self._name
-
-    # @property
-    # def execution_environment(self):
-    #     return self._execution_environment
 
     @property
     def partitioners(self) -> dict:

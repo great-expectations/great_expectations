@@ -32,7 +32,6 @@ class FilesDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
-        # execution_environment,
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,
@@ -47,7 +46,6 @@ class FilesDataConnector(DataConnector):
         logger.debug("Constructing FilesDataConnector {!r}".format(name))
         super().__init__(
             name=name,
-            # execution_environment=execution_environment,
             partitioners=partitioners,
             default_partitioner=default_partitioner,
             assets=assets,
