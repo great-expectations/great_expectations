@@ -1,4 +1,5 @@
 import logging
+import random
 
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -93,3 +94,52 @@ class Store:
         if self._use_fixed_length_key:
             return self._store_backend.has_key(key.to_fixed_length_tuple())
         return self._store_backend.has_key(key.to_tuple())
+
+    def test(self):
+        return_obj = {}
+
+        print("Checking for existing keys...")
+        return_obj["keys"] = self.list_keys()
+        return_obj["len_keys"] = len(return_obj["keys"])
+        len_keys = return_obj["len_keys"]
+
+        if return_obj["len_keys"]==0:
+            print(f"\t{len_keys} keys found")
+        else:
+            print(f"\t{len_keys} keys found:")
+            for key in return_obj["keys"][:10]:
+                print("\t\t"+str(key) )
+        if len_keys>10:
+            print("\t\t...")
+        
+        print()
+
+        test_key, test_value = self._get_test_key_value_pair()
+
+        print(f"Attempting to add a new test key: {test_key}...")
+        self.set(
+            key=test_key,
+            value=test_value
+        )
+        print("\tTest key successfully added.")
+        print()
+
+        print(f"Attempting to retrieve the test value associated with key: {test_key}...")
+        test_value = self.get(
+            key=test_key,
+        )
+        print("\tTest value successfully retreived.")
+        print()
+
+        print(f"Cleaning up test key and value: {test_key}...")
+        test_value = self.remove_key(
+            # key=self.key_to_tuple(test_key),
+            key=self.key_to_tuple(test_key),
+        )
+        print("\tTest key and value successfully removed.")
+        print()
+
+        return return_obj
+
+    def _get_test_key_value_pair(self):
+        raise NotImplementedError

@@ -1,4 +1,7 @@
+import random
+
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
@@ -139,3 +142,11 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
 
     def deserialize(self, key, value):
         return self._expectationSuiteSchema.loads(value)
+
+    def _get_test_key_value_pair(self):
+        test_key_name = "test-key-"+"".join([random.choice(list("0123456789ABCDEF")) for i in range(20)])
+
+        return (
+            self._key_class(test_key_name),
+            ExpectationSuite(test_key_name)
+        )
