@@ -35,7 +35,7 @@
         }
       },
       {
-      "title" : "Positive test, exact min and max",
+      "title" : "positive_test__exact_min_and_max",
       "exact_match_out" : false,
       "in": {
         "column": "dist1",

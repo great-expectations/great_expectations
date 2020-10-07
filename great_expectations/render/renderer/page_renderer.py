@@ -235,6 +235,9 @@ class ValidationResultsPageRenderer(Renderer):
         expectation_suite_path = (
             os.path.join(*expectation_suite_path_components) + ".html"
         )
+        data_asset_name = (
+            validation_results.meta["batch_kwargs"].get("data_asset_name")
+        )
         if success:
             success = "Succeeded"
             html_success_icon = (
@@ -262,9 +265,11 @@ class ValidationResultsPageRenderer(Renderer):
                     **{
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "${suite_title} ${expectation_suite_name}\n${status_title} ${html_success_icon} ${success}",
+                            "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",
                             "params": {
                                 "suite_title": "Expectation Suite:",
+                                "data_asset": "Data asset:",
+                                "data_asset_name": data_asset_name,
                                 "status_title": "Status:",
                                 "expectation_suite_name": expectation_suite_name,
                                 "success": success,
