@@ -27,10 +27,8 @@ Develop
 * [DOCS] Update to Deploying Great Expectations with Google Cloud Composer
 * [MAINTENANCE] Update moto dependency to include cryptography (see #spulec/moto/3290)
 
-
 0.12.2
 -----------------
-
 * [ENHANCEMENT] Update schema for anonymized expectation types to avoid large key domain
 * [ENHANCEMENT] BaseProfiler type mapping expanded to include more pandas and numpy dtypes
 * [BUGFIX] Allow for pandas reader option inference with parquet and Excel (thanks @dlachasse)!
