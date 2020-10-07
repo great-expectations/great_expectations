@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] Add TupleAzureBlobStoreBackend
 
 0.12.4
 -----------------
