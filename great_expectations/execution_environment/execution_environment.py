@@ -2,17 +2,15 @@
 
 import copy
 import logging
-from typing import Union, List, Any
+from typing import List, Any
 
 from great_expectations.data_context.types.base import (
     DataConnectorConfig,
     dataConnectorConfigSchema
 )
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import instantiate_class_from_config
 from ruamel.yaml.comments import CommentedMap
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.validator.validator import Validator
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.pipeline_data_connector import PipelineDataConnector
 from great_expectations.execution_environment.types import BatchSpec
@@ -33,6 +31,7 @@ class ExecutionEnvironment(object):
         execution_engine=None,
         data_connectors=None,
         in_memory_dataset: Any = None,
+        data_context_root_directory: str = None,
         **kwargs
     ):
         """
@@ -59,8 +58,9 @@ class ExecutionEnvironment(object):
 
         self._in_memory_dataset = in_memory_dataset
 
-        self._build_data_connectors()
+        self._data_context_root_directory = data_context_root_directory
 
+        self._build_data_connectors()
 
     def get_batch(
         self,
@@ -118,6 +118,14 @@ class ExecutionEnvironment(object):
         self._in_memory_dataset = in_memory_dataset
 
     @property
+    def data_context_root_directory(self) -> str:
+        return self._data_context_root_directory
+
+    @data_context_root_directory.setter
+    def data_context_root_directory(self, data_context_root_directory: str):
+        self._data_context_root_directory = data_context_root_directory
+
+    @property
     def config(self):
         return copy.deepcopy(self._execution_environment_config)
 
@@ -148,6 +156,8 @@ class ExecutionEnvironment(object):
             data_connector = self._data_connectors_cache[name]
             if isinstance(data_connector, PipelineDataConnector):
                 data_connector.in_memory_dataset = self.in_memory_dataset
+            data_connector.execution_engine = self.execution_engine
+            data_connector.data_context_root_directory = self.data_context_root_directory
             return data_connector
             # TODO: <Alex>The style and readability of this method must be improved.</Alex>
             # return self._data_connectors_cache[name]
@@ -174,6 +184,8 @@ class ExecutionEnvironment(object):
         )
         if isinstance(data_connector, PipelineDataConnector):
             data_connector.in_memory_dataset = self.in_memory_dataset
+        data_connector.execution_engine = self.execution_engine
+        data_connector.data_context_root_directory = self.data_context_root_directory
         self._data_connectors_cache[name] = data_connector
         return data_connector
 

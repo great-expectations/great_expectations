@@ -1457,6 +1457,7 @@ class BaseDataContext:
             ]
             if runtime_environment and "in_memory_dataset" in runtime_environment:
                 execution_environment.in_memory_dataset = runtime_environment["in_memory_dataset"]
+            execution_environment.data_context_root_directory = self.root_directory
             return execution_environment
             # TODO: <Alex>The style and readability of this method must be improved.</Alex>
             # return self._cached_execution_environments[execution_environment_name]
@@ -1488,6 +1489,7 @@ class BaseDataContext:
         ] = execution_environment
         if runtime_environment and "in_memory_dataset" in runtime_environment:
             execution_environment.in_memory_dataset = runtime_environment["in_memory_dataset"]
+        execution_environment.data_context_root_directory = self.root_directory
         return execution_environment
 
     def _build_execution_environment_from_config(

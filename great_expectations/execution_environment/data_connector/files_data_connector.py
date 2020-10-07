@@ -4,6 +4,7 @@ from typing import List, Dict, Union
 
 import logging
 
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
@@ -40,6 +41,7 @@ class FilesDataConnector(DataConnector):
         known_extensions: list = None,
         reader_options: dict = None,
         reader_method: str = None,
+        execution_engine: ExecutionEngine = None,
         data_context_root_directory: str = None,
         **kwargs
     ):
@@ -51,6 +53,8 @@ class FilesDataConnector(DataConnector):
             assets=assets,
             config_params=config_params,
             batch_definition_defaults=batch_definition_defaults,
+            execution_engine=execution_engine,
+            data_context_root_directory=data_context_root_directory,
             **kwargs
         )
 
@@ -64,7 +68,6 @@ class FilesDataConnector(DataConnector):
 
         self._reader_method = reader_method
         self._base_directory = self.config_params["base_directory"]
-        self._data_context_root_directory = data_context_root_directory
 
     @property
     def reader_options(self):
@@ -127,10 +130,10 @@ class FilesDataConnector(DataConnector):
     def _normalize_directory_path(self, dir_path: str) -> str:
         # If directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
-        if Path(dir_path).is_absolute() or self._data_context_root_directory is None:
+        if Path(dir_path).is_absolute() or self.data_context_root_directory is None:
             return dir_path
         else:
-            return Path(self._data_context_root_directory).joinpath(dir_path)
+            return Path(self.data_context_root_directory).joinpath(dir_path)
 
     def _get_file_paths_for_data_asset(self, data_asset_name: str = None) -> list:
         """
