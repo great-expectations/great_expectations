@@ -43,3 +43,16 @@ store_backend:
     class_name: TupleFilesystemStoreBackend
     base_directory: {tmp_dir}
 """)
+
+
+def test_empty_store(empty_data_context):
+
+    my_expectation_store = empty_data_context.test_yaml_config(
+        yaml_config="""
+class_name: ValidationsStore
+store_backend:
+
+    module_name: "great_expectations.data_context.store.store_backend"
+    class_name: InMemoryStoreBackend
+""")
+

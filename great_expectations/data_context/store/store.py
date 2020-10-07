@@ -95,49 +95,57 @@ class Store:
             return self._store_backend.has_key(key.to_fixed_length_tuple())
         return self._store_backend.has_key(key.to_tuple())
 
-    def test(self):
+    def test(self, pretty_print):
         return_obj = {}
 
-        print("Checking for existing keys...")
+        if pretty_print:
+            print("Checking for existing keys...")
+
         return_obj["keys"] = self.list_keys()
         return_obj["len_keys"] = len(return_obj["keys"])
         len_keys = return_obj["len_keys"]
 
-        if return_obj["len_keys"]==0:
-            print(f"\t{len_keys} keys found")
-        else:
-            print(f"\t{len_keys} keys found:")
-            for key in return_obj["keys"][:10]:
-                print("\t\t"+str(key) )
-        if len_keys>10:
-            print("\t\t...")
-        
-        print()
+        if pretty_print:
+            if return_obj["len_keys"]==0:
+                print(f"\t{len_keys} keys found")
+            else:
+                print(f"\t{len_keys} keys found:")
+                for key in return_obj["keys"][:10]:
+                    print("\t\t"+str(key) )
+            if len_keys>10:
+                print("\t\t...")    
+            print()
 
         test_key, test_value = self._get_test_key_value_pair()
 
-        print(f"Attempting to add a new test key: {test_key}...")
+        if pretty_print:
+            print(f"Attempting to add a new test key: {test_key}...")
         self.set(
             key=test_key,
             value=test_value
         )
-        print("\tTest key successfully added.")
-        print()
+        if pretty_print:
+            print("\tTest key successfully added.")
+            print()
 
-        print(f"Attempting to retrieve the test value associated with key: {test_key}...")
+        if pretty_print:
+            print(f"Attempting to retrieve the test value associated with key: {test_key}...")
         test_value = self.get(
             key=test_key,
         )
-        print("\tTest value successfully retreived.")
-        print()
+        if pretty_print:
+            print("\tTest value successfully retreived.")
+            print()
 
-        print(f"Cleaning up test key and value: {test_key}...")
+        if pretty_print:
+            print(f"Cleaning up test key and value: {test_key}...")
         test_value = self.remove_key(
             # key=self.key_to_tuple(test_key),
             key=self.key_to_tuple(test_key),
         )
-        print("\tTest key and value successfully removed.")
-        print()
+        if pretty_print:
+            print("\tTest key and value successfully removed.")
+            print()
 
         return return_obj
 

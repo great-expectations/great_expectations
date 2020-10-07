@@ -502,8 +502,11 @@ class BaseDataContext:
     def test_yaml_config(
         self,
         yaml_config: str,
+        pretty_print=True,
+        return_mode="instantiated_class",
     ):
-        print("Attempting to instantiate class from config...")
+        if pretty_print:
+            print("Attempting to instantiate class from config...")
         instantiated_class = instantiate_class_from_config(
             yaml.load(yaml_config),
             runtime_environment={},
@@ -511,13 +514,21 @@ class BaseDataContext:
                 "module_name": "great_expectations.data_context.store.expectations_store"
             }
         )
-        
-        print(f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}")
-        print()
 
-        instantiated_class.test()
+        if pretty_print:        
+            print(f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}")
+            print()
+
+        return_object = instantiated_class.test(pretty_print)
         
-        return instantiated_class
+        if return_mode == "instantiated_class":
+            return instantiated_class
+        
+        elif return_mode == "return_object":
+            return return_object
+
+        else:
+            raise ValueError(f"Unknown return_mode: {return_mode}.")
 
 
     def _normalize_absolute_or_relative_path(self, path):
