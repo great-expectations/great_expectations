@@ -230,47 +230,6 @@ def pytest_collection_modifyitems(config, items):
         if "aws_integration" in item.keywords:
             item.add_marker(skip_aws_integration)
 
-def execution_environment_pipeline_data_connector_pipeline_partitioner_config(
-):
-    # test dataframe
-    d = {'col1': [1, 2], 'col2': [3, 4]}
-    test_df = pd.DataFrame(data=d)
-
-    # <WILL> : make sure this works
-    execution_environments_config: dict = {
-        "test_execution_environment": {
-            "class_name": "ExecutionEnvironment",
-            "execution_engine": {
-                "module_name": "great_expectations.execution_engine",
-                "class_name": "PandasExecutionEngine",
-                "caching": True,
-                "batch_spec_defaults": {}
-            },
-            "data_connectors": {
-                "test_pipeline_data_connector": {
-                    'module_name': 'great_expectations.execution_environment.data_connector',
-                    'class_name': 'PipelineDataConnector',
-                    "partitioners": {
-                        'my_standard_pipeline_partitioner': {
-                        'module_name': 'great_expectations.execution_environment.data_connector.partitioner',
-                        'class_name': 'PipelinePartitioner',
-                        'allow_multipart_partitions': False,
-                        'sorters': [],
-                        'config_params': {}
-                        },
-                    },
-                    'default_partitioner': 'my_standard_pipeline_partitioner',
-                    'assets': {
-                        'test_asset_0': {
-                            'config_params': {}
-                            },
-                    },
-                }
-            }
-        }
-    }
-    return execution_environments_config
-
 
 def execution_environment_files_data_connector_regex_partitioner_config(
     use_group_names: bool = False,
@@ -2269,28 +2228,6 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     return context
 
 
-@pytest.fixture()
-def data_context_with_data_connector_and_partitioner_instantiated_from_yml(tmp_path_factory):
-    """
-    This data_context is *manually* created to have the config we want, vs
-    created with DataContext.create()
-    <WILL> Check if this overlaps with DataContext instantiation function
-    """
-    project_path = str(tmp_path_factory.mktemp("data_context_partitioner_project"))
-    context_path = os.path.join(project_path, "great_expectations")
-
-    os.makedirs(
-        os.path.join(context_path), exist_ok=True,
-    )
-    # copy YML file over
-    fixture_dir = file_relative_path(__file__, "./test_fixtures")
-    shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_data_connector_and_partitioner.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-    return ge.data_context.DataContext(context_path)
-
-
 @pytest.fixture
 def titanic_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
@@ -2701,22 +2638,6 @@ def execution_environment_files_data_connector_regex_partitioner_with_groups_wit
     create_files_for_regex_partitioner(root_directory_path=root_directory_path, directory_paths=base_directory_names)
     return data_context
 
-
-
-@pytest.fixture()
-def execution_environment_pipeline_data_connector_pipeline_partitioner_data_context(
-    empty_data_context: DataContext,
-):
-    data_context: DataContext = empty_data_context
-    execution_environment_name: str = "test_execution_environment"
-    data_context.add_execution_environment(
-        name=execution_environment_name,
-        use_group_names=False,
-        initialize=True,
-        **execution_environment_pipeline_data_connector_pipeline_partitioner_config(
-        )["test_execution_environment"]
-    )
-    return data_context
 
 
 @pytest.fixture
