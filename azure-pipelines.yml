@@ -1,7 +1,8 @@
 trigger:
   - develop
   - main
-  - cleanup/drop_datacontext_build_batch_spec
+  - feature_dev_wip/partitioners
+  - feature/batch_spec
 
 resources:
   containers:
