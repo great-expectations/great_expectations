@@ -325,8 +325,6 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         batch_spec_passthrough: dict = batch_definition.get("batch_spec_passthrough", {})
         batch_spec_scaffold: dict = nested_update(batch_spec_defaults, batch_spec_passthrough)
 
-        batch_spec_scaffold["data_connector"] = self.name
-
         data_asset_name: str = batch_definition.get("data_asset_name")
         batch_spec_scaffold["data_asset_name"] = data_asset_name
 
