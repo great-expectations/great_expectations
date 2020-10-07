@@ -71,7 +71,6 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
-from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.batch import Batch
 
 try:
@@ -1361,6 +1360,7 @@ class BaseDataContext:
         )
         return generator
 
+    # TODO: <Alex>Can this be deleted?</Alex>
     # def add_data_connector(
     #     self, execution_environment_name, data_connector_name, class_name, **kwargs
     # ):
@@ -1438,9 +1438,10 @@ class BaseDataContext:
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
-    # TODO: <Alex>The style and readability of this method must be improved.</Alex>
     def get_execution_environment(
-        self, execution_environment_name: str = "default", runtime_environment: Union[dict, None] = None
+        self,
+        execution_environment_name: str = "default",
+        runtime_environment: Union[dict, None] = None
     ) -> ExecutionEnvironment:
         """Get the named execution_environment
 
@@ -1452,15 +1453,7 @@ class BaseDataContext:
             execution_environment (ExecutionEnvironment)
         """
         if execution_environment_name in self._cached_execution_environments:
-            execution_environment: ExecutionEnvironment = self._cached_execution_environments[
-                execution_environment_name
-            ]
-            if runtime_environment and "in_memory_dataset" in runtime_environment:
-                execution_environment.in_memory_dataset = runtime_environment["in_memory_dataset"]
-            execution_environment.data_context_root_directory = self.root_directory
-            return execution_environment
-            # TODO: <Alex>The style and readability of this method must be improved.</Alex>
-            # return self._cached_execution_environments[execution_environment_name]
+            return self._cached_execution_environments[execution_environment_name]
         if (
             execution_environment_name
             in self._project_config_with_variables_substituted.execution_environments
@@ -1487,9 +1480,6 @@ class BaseDataContext:
         self._cached_execution_environments[
             execution_environment_name
         ] = execution_environment
-        if runtime_environment and "in_memory_dataset" in runtime_environment:
-            execution_environment.in_memory_dataset = runtime_environment["in_memory_dataset"]
-        execution_environment.data_context_root_directory = self.root_directory
         return execution_environment
 
     def _build_execution_environment_from_config(
@@ -1501,11 +1491,11 @@ class BaseDataContext:
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, ExecutionEnvironmentConfig):
             config: dict = executionEnvironmentConfigSchema.dump(config)
-        config.update({"name": name})
         module_name: str = "great_expectations.execution_environment"
         if runtime_environment is None:
             runtime_environment = {}
-        runtime_environment.update({"data_context": self})
+        runtime_environment.update({"name": name})
+        runtime_environment.update({"data_context_root_directory": self.root_directory})
         execution_environment: ExecutionEnvironment = instantiate_class_from_config(
             config=config,
             runtime_environment=runtime_environment,

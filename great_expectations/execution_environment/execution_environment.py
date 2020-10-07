@@ -12,7 +12,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from ruamel.yaml.comments import CommentedMap
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.data_connector.pipeline_data_connector import PipelineDataConnector
 from great_expectations.execution_environment.types import BatchSpec
 from great_expectations.core.batch import Batch
 
@@ -110,22 +109,6 @@ class ExecutionEnvironment(object):
         return self._execution_engine
 
     @property
-    def in_memory_dataset(self) -> Any:
-        return self._in_memory_dataset
-
-    @in_memory_dataset.setter
-    def in_memory_dataset(self, in_memory_dataset: Any):
-        self._in_memory_dataset = in_memory_dataset
-
-    @property
-    def data_context_root_directory(self) -> str:
-        return self._data_context_root_directory
-
-    @data_context_root_directory.setter
-    def data_context_root_directory(self, data_context_root_directory: str):
-        self._data_context_root_directory = data_context_root_directory
-
-    @property
     def config(self):
         return copy.deepcopy(self._execution_environment_config)
 
@@ -140,7 +123,6 @@ class ExecutionEnvironment(object):
             self.get_data_connector(name=data_connector)
 
     # TODO Abe 10/6/2020: Should this be an internal method?
-    # TODO: <Alex>The style and readability of this method must be improved.</Alex>
     def get_data_connector(self, name: str) -> DataConnector:
         """Get the (named) DataConnector from an ExecutionEnvironment)
 
@@ -153,14 +135,7 @@ class ExecutionEnvironment(object):
         """
         data_connector: DataConnector
         if name in self._data_connectors_cache:
-            data_connector = self._data_connectors_cache[name]
-            if isinstance(data_connector, PipelineDataConnector):
-                data_connector.in_memory_dataset = self.in_memory_dataset
-            data_connector.execution_engine = self.execution_engine
-            data_connector.data_context_root_directory = self.data_context_root_directory
-            return data_connector
-            # TODO: <Alex>The style and readability of this method must be improved.</Alex>
-            # return self._data_connectors_cache[name]
+            return self._data_connectors_cache[name]
         elif (
             "data_connectors" in self._execution_environment_config
             and name in self._execution_environment_config["data_connectors"]
@@ -175,28 +150,30 @@ class ExecutionEnvironment(object):
         data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
             data_connector_config
         )
-        # TODO: <Alex>The style and readability of this method must be improved.</Alex>
-        # data_connector: DataConnector = self._build_data_connector_from_config(
-        #     name=name, config=data_connector_config
-        # )
-        data_connector = self._build_data_connector_from_config(
+        data_connector: DataConnector = self._build_data_connector_from_config(
             name=name, config=data_connector_config
         )
-        if isinstance(data_connector, PipelineDataConnector):
-            data_connector.in_memory_dataset = self.in_memory_dataset
-        data_connector.execution_engine = self.execution_engine
-        data_connector.data_context_root_directory = self.data_context_root_directory
         self._data_connectors_cache[name] = data_connector
         return data_connector
 
-    def _build_data_connector_from_config(self, name: str, config: CommentedMap) -> DataConnector:
+    def _build_data_connector_from_config(
+        self,
+        name: str,
+        config: CommentedMap,
+    ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DataConnectorConfig):
             config: dict = dataConnectorConfigSchema.dump(config)
-        config.update({"name": name})
         module_name: str = "great_expectations.execution_environment.data_connector.data_connector"
-        runtime_environment: dict = {"execution_environment": self}
+        runtime_environment: dict = {
+            "name": name,
+            "data_context_root_directory": self._data_context_root_directory
+        }
+        if self._in_memory_dataset is not None:
+            runtime_environment.update({"in_memory_dataset": self._in_memory_dataset})
+        if self._execution_engine is not None:
+            runtime_environment.update({"execution_engine": self._execution_engine})
         data_connector: DataConnector = instantiate_class_from_config(
             config=config,
             runtime_environment=runtime_environment,

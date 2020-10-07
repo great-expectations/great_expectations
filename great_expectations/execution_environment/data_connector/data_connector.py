@@ -136,22 +136,6 @@ class DataConnector(object):
     def partitions_cache(self) -> dict:
         return self._partitions_cache
 
-    @property
-    def execution_engine(self) -> ExecutionEngine:
-        return self._execution_engine
-
-    @execution_engine.setter
-    def execution_engine(self, execution_engine: ExecutionEngine):
-        self._execution_engine = execution_engine
-
-    @property
-    def data_context_root_directory(self) -> str:
-        return self._data_context_root_directory
-
-    @data_context_root_directory.setter
-    def data_context_root_directory(self, data_context_root_directory: str):
-        self._data_context_root_directory = data_context_root_directory
-
     def get_cached_partitions(self, data_asset_name: str = None) -> List[Partition]:
         if data_asset_name is None:
             return list(
@@ -320,7 +304,7 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         batch_definition: dict = nested_update(batch_definition_defaults, batch_definition)
 
         batch_spec_defaults: dict = copy.deepcopy(
-            self.execution_engine.batch_spec_defaults
+            self._execution_engine.batch_spec_defaults
         )
         batch_spec_passthrough: dict = batch_definition.get("batch_spec_passthrough", {})
         batch_spec_scaffold: dict = nested_update(batch_spec_defaults, batch_spec_passthrough)
