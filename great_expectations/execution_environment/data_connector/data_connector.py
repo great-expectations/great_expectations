@@ -11,6 +11,7 @@ from great_expectations.data_context.types.base import (
     PartitionerConfig,
     partitionerConfigSchema
 )
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
@@ -54,6 +55,7 @@ class DataConnector(object):
 
     #NOTE Abe 20201011 : This looks like a type defintion for BatchSpec, not a property of DataConnector
     recognized_batch_definition_keys: set = {
+        "execution_environment",
         "data_connector",
         "data_asset_name",
         "partition_query",
@@ -69,6 +71,8 @@ class DataConnector(object):
         assets: dict = None,
         config_params: dict = None,
         batch_definition_defaults: dict = None,
+        execution_engine: ExecutionEngine = None,
+        data_context_root_directory: str = None,
         **kwargs
     ):
         self._name = name
@@ -100,6 +104,9 @@ class DataConnector(object):
 
         self._partitioners_cache: dict = {}
         self._partitions_cache: dict = {}
+
+        self._execution_engine = execution_engine
+        self._data_context_root_directory = data_context_root_directory
 
     @property
     def name(self) -> str:
@@ -271,6 +278,7 @@ multiple partitions, including "{partition}", for the same data reference -- thi
             partitioner = self.get_partitioner(name=partitioner_name)
         return partitioner
 
+    # TODO: <Alex>Delete if not used.</Alex>
     # def get_config(self) -> dict:
     #     conf: dict = self.execution_environment.config["data_connectors"][self.name]
     #     conf.update(self._data_connector_config)
@@ -281,32 +289,25 @@ multiple partitions, including "{partition}", for the same data reference -- thi
             raise ge_exceptions.BatchSpecError("Batch definition must have a data_asset_name.")
 
         batch_definition_keys: set = set(batch_definition.keys())
-        recognized_batch_definition_keys: set = (
-            self.recognized_batch_definition_keys
-            | self._execution_engine.recognized_batch_definition_keys
-        )
-        if not batch_definition_keys <= recognized_batch_definition_keys:
+        if not batch_definition_keys <= self.recognized_batch_definition_keys:
             logger.warning(
                 "Unrecognized batch_definition key(s): %s"
-                % str(batch_definition_keys - recognized_batch_definition_keys)
+                % str(batch_definition_keys - self.recognized_batch_definition_keys)
             )
 
         batch_definition_defaults: dict = copy.deepcopy(self.batch_definition_defaults)
         batch_definition: dict = {
             key: value
             for key, value in batch_definition.items()
-            if key in recognized_batch_definition_keys
+            if key in self.recognized_batch_definition_keys
         }
         batch_definition: dict = nested_update(batch_definition_defaults, batch_definition)
 
         batch_spec_defaults: dict = copy.deepcopy(
-            self._execution_environment.execution_engine.batch_spec_defaults
+            self._execution_engine.batch_spec_defaults
         )
         batch_spec_passthrough: dict = batch_definition.get("batch_spec_passthrough", {})
         batch_spec_scaffold: dict = nested_update(batch_spec_defaults, batch_spec_passthrough)
-
-        batch_spec_scaffold["execution_environment"] = self.execution_environment.name
-        batch_spec_scaffold["data_connector"] = self.name
 
         data_asset_name: str = batch_definition.get("data_asset_name")
         batch_spec_scaffold["data_asset_name"] = data_asset_name

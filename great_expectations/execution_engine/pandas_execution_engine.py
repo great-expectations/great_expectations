@@ -30,7 +30,6 @@ from great_expectations.validator.validator import Validator
 
 from ..core.batch import Batch, BatchMarkers
 from ..core.id_dict import BatchSpec
-from ..datasource.pandas_datasource import HASH_THRESHOLD
 from ..exceptions import BatchSpecError, ValidationError
 from ..exceptions.metric_exceptions import MetricError
 from ..execution_environment.util import hash_pandas_dataframe
@@ -38,6 +37,8 @@ from ..validator.validation_graph import MetricEdgeKey
 from .execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
+
+HASH_THRESHOLD = 1e9
 
 
 class MetaPandasExecutionEngine(ExecutionEngine):
