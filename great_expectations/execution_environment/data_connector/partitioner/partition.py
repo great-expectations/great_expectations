@@ -36,6 +36,10 @@ class Partition(object):
     def data_reference(self) -> Any:
         return self._data_reference
 
+    @data_reference.setter
+    def data_reference(self, data_reference: Any):
+        self._data_reference = data_reference
+
     def __eq__(self, other):
         """Overrides the default implementation"""
         return (

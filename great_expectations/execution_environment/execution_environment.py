@@ -2,7 +2,7 @@
 
 import copy
 import logging
-from typing import List, Any
+from typing import Union, List, Dict, Callable, Any
 
 from great_expectations.data_context.types.base import (
     DataConnectorConfig,
@@ -12,6 +12,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from ruamel.yaml.comments import CommentedMap
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.types import BatchSpec
 from great_expectations.core.batch import Batch
 
@@ -31,7 +32,6 @@ class ExecutionEnvironment(object):
         data_connectors=None,
         in_memory_dataset: Any = None,
         data_context_root_directory: str = None,
-        **kwargs
     ):
         """
         Build a new ExecutionEnvironment.
@@ -45,9 +45,9 @@ class ExecutionEnvironment(object):
         self._execution_engine = instantiate_class_from_config(
             config=execution_engine, runtime_environment={},
         )
-        self._execution_environment_config = kwargs
-
-        self._execution_environment_config["execution_engine"] = execution_engine
+        self._execution_environment_config = {
+            "execution_engine": execution_engine
+        }
 
         if data_connectors is None:
             data_connectors = {}
@@ -60,6 +60,23 @@ class ExecutionEnvironment(object):
         self._data_context_root_directory = data_context_root_directory
 
         self._build_data_connectors()
+
+    def get_available_partitions(
+        self,
+        data_connector_name: str,
+        data_asset_name: str = None,
+        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+        repartition: bool = False
+    ) -> List[Partition]:
+        data_connector: DataConnector = self.get_data_connector(
+            name=data_connector_name
+        )
+        available_partitions: List[Partition] = data_connector.get_available_partitions(
+            data_asset_name=data_asset_name,
+            partition_query=partition_query,
+            repartition=repartition
+        )
+        return available_partitions
 
     def get_batch(
         self,
@@ -119,8 +136,9 @@ class ExecutionEnvironment(object):
         Returns:
             None
         """
-        for data_connector in self._execution_environment_config["data_connectors"].keys():
-            self.get_data_connector(name=data_connector)
+        if "data_connectors" in self._execution_environment_config:
+            for data_connector in self._execution_environment_config["data_connectors"].keys():
+                self.get_data_connector(name=data_connector)
 
     # TODO Abe 10/6/2020: Should this be an internal method?
     def get_data_connector(self, name: str) -> DataConnector:
@@ -204,8 +222,6 @@ class ExecutionEnvironment(object):
 
         return data_connectors
 
-    # TODO: <Alex>This needs to be reviewed...</Alex>
-    # TODO: <Alex>What is this for, and how is this used?  This looks like it is for DataSource -- do we still need it for backward compatibility?</Alex>
     def get_available_data_asset_names(self, data_connector_names: list = None) -> dict:
         """
         Returns a dictionary of data_asset_names that the specified data
@@ -227,7 +243,6 @@ class ExecutionEnvironment(object):
                   }
                   ...
                 }
-
         """
         available_data_asset_names: dict = {}
         if data_connector_names is None:
@@ -239,7 +254,5 @@ class ExecutionEnvironment(object):
 
         for data_connector_name in data_connector_names:
             data_connector = self.get_data_connector(name=data_connector_name)
-            available_data_asset_names[
-                data_connector_name
-            ] = data_connector.get_available_data_asset_names()
+            available_data_asset_names[data_connector_name] = data_connector.get_available_data_asset_names()
         return available_data_asset_names

@@ -72,7 +72,7 @@ class RegexPartitioner(Partitioner):
         self,
         data_asset_name: str = None,
         *,
-        paths: list = [],
+        paths: list = None,
         auto_discover_assets: bool = False
     ) -> List[Partition]:
         if not paths or len(paths) == 0:
