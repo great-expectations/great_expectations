@@ -50,15 +50,14 @@ class ExecutionEnvironment(object):
         self._execution_environment_config["execution_engine"] = execution_engine
         self._execution_environment_config["data_connectors"] = data_connectors
 
-        # if data_connectors is None:
-        #     data_connectors = {}
-        self._data_connectors_cache = {}
-        self._build_data_connectors()
-
         self._in_memory_dataset = in_memory_dataset
 
         self._data_context_root_directory = data_context_root_directory
 
+        # if data_connectors is None:
+        #     data_connectors = {}
+        self._data_connectors_cache = {}
+        self._build_data_connectors()
 
     def get_batch(
         self,
@@ -245,9 +244,27 @@ class ExecutionEnvironment(object):
 
     def test(self, pretty_print=True):
         
-        print(f"Execution engine: {self._execution_engine}")
+        return_object = {}
 
-        asset_names = self.get_available_data_asset_names()
-        len_asset_names = len(asset_names)
-        print(asset_names)
-        print(len_asset_names)
+        if pretty_print:
+            print(f"Execution engine: {self._execution_engine.__class__.__name__}")
+
+        if pretty_print:
+            print(f"Data connectors:")
+
+        for data_connector in self.list_data_connectors():
+            if pretty_print:
+                print("\t"+data_connector["name"], ":", data_connector["class_name"])
+                print()
+
+            asset_names = self.get_available_data_asset_names(data_connector["name"])
+            len_asset_names = len(asset_names)
+
+            if pretty_print:
+                print(f"\tAvailable data_asset_names ({min(len_asset_names, 10)} of {len_asset_names}):")
+            
+            for asset_name in asset_names[data_connector["name"]]:
+                if pretty_print:
+                    print(f"\t\t{asset_name}")
+
+        return return_object
