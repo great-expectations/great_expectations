@@ -520,8 +520,15 @@ class BaseDataContext:
             instantiated_class = self._build_store_from_config("my_temp_store", config)
 
         elif class_name in ["ExecutionEnvironment"]:
-            print(f"\tInstantiating as a Store, since class_name is {class_name}")
-            instantiated_class = self._build_store_from_config("my_temp_store", config)
+            print(f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}")
+            instantiated_class = instantiate_class_from_config(
+                config,
+                runtime_environment={},
+                config_defaults={
+                    "name" : "my_temp_execution_environment",
+                    "module_name": "great_expectations.execution_environment",
+                }
+            )
 
         else:
             print("\tNo matching class found. Attempting to instantiate class from the raw config...")

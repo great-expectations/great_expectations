@@ -243,3 +243,10 @@ class ExecutionEnvironment(object):
                 data_connector_name
             ] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
+
+    def test(self, pretty_print=True):
+        
+        asset_names = self.get_available_data_asset_names()
+        len_asset_names = len(asset_names)
+        print(asset_names)
+        print(len_asset_names)
