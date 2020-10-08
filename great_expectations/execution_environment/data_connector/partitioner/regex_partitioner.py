@@ -40,6 +40,7 @@ class RegexPartitioner(Partitioner):
     def _process_regex_config(self) -> dict:
         regex: dict = self.config_params.get("regex")
         if regex and isinstance(regex, dict):
+            # TODO: <Alex>Raise exception (assert is for tests).</Alex>
             assert "pattern" in regex.keys(), "Regex configuration requires pattern to be specified."
             if not ("group_names" in regex.keys() and isinstance(regex["group_names"], list)):
                 regex["group_names"] = []
@@ -63,6 +64,7 @@ class RegexPartitioner(Partitioner):
         paths: list = [],
         auto_discover_assets: bool = False
     ) -> List[Partition]:
+        # TODO: <Alex>Fix mutable paths</Alex>
         if not paths or len(paths) == 0:
             return []
         partitions: List[Partition] = []

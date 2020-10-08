@@ -112,7 +112,38 @@ def test_get_batch_with_caching():
 
 
 def test_get_batch_with_pipeline_style_batch_definition():
-    pass
+    test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    execution_environment_name: str = "test_execution_environment"
+    execution_environment: ExecutionEnvironment = ExecutionEnvironment(
+        name=execution_environment_name,
+        **execution_environment_files_data_connector_regex_partitioner_config(
+            use_group_names=False,
+            use_sorters=False,
+            default_base_directory=None,
+            data_asset_base_directory=None
+        )[execution_environment_name],
+        in_memory_dataset=test_df,
+        data_context_root_directory=None
+    )
+    data_connector_name: str = "test_pipeline_data_connector"
+    data_asset_name: str = "test_asset_0"
+
+    batch_definition: dict = {
+        "execution_environment": execution_environment_name,
+        "data_connector": data_connector_name,
+        "data_asset_name": data_asset_name,
+        "partition_query": None,
+        "limit": None,
+    }
+    batch: Batch = execution_environment.get_batch(
+        batch_definition=batch_definition
+    )
+    assert batch.batch_spec is not None
+    assert batch.batch_spec["data_asset_name"] == data_asset_name
+    assert isinstance(batch.data, pd.DataFrame)
+    assert batch.data.shape == (2, 2)
+    assert batch.data["col2"].values[1] == 4
 
 
 def test_get_available_data_asset_names():
