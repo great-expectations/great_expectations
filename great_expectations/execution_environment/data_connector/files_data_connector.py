@@ -86,9 +86,23 @@ class FilesDataConnector(DataConnector):
         return self._normalize_directory_path(dir_path=self._base_directory)
 
     def get_available_data_asset_names(self) -> list:
+        available_data_asset_names: list = []
         if self.assets:
-            return list(self.assets.keys())
-        return [Path(path).stem for path in self._get_file_paths_for_data_asset(data_asset_name=None)]
+            available_data_asset_names.append(list(self.assets.keys()))
+        available_data_asset_names.append(
+            [Path(path).stem for path in self._get_file_paths_for_data_asset(data_asset_name=None)]
+        )
+        return list(
+            set(
+                list(
+                    itertools.chain.from_iterable(
+                        [
+                            element for element in available_data_asset_names
+                        ]
+                    )
+                )
+            )
+        )
 
     def _get_available_partitions(
         self,

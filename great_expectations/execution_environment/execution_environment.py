@@ -204,8 +204,6 @@ class ExecutionEnvironment(object):
 
         return data_connectors
 
-    # TODO: <Alex>This needs to be reviewed...</Alex>
-    # TODO: <Alex>What is this for, and how is this used?  This looks like it is for DataSource -- do we still need it for backward compatibility?</Alex>
     def get_available_data_asset_names(self, data_connector_names: list = None) -> dict:
         """
         Returns a dictionary of data_asset_names that the specified data
@@ -227,7 +225,6 @@ class ExecutionEnvironment(object):
                   }
                   ...
                 }
-
         """
         available_data_asset_names: dict = {}
         if data_connector_names is None:
@@ -239,7 +236,5 @@ class ExecutionEnvironment(object):
 
         for data_connector_name in data_connector_names:
             data_connector = self.get_data_connector(name=data_connector_name)
-            available_data_asset_names[
-                data_connector_name
-            ] = data_connector.get_available_data_asset_names()
+            available_data_asset_names[data_connector_name] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
