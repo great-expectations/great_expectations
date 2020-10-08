@@ -1,6 +1,7 @@
 trigger:
   - develop
   - main
+  - 0.*-develop
 
 resources:
   containers:
