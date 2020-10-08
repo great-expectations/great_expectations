@@ -286,7 +286,7 @@ class BaseDataContext:
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
-    def _build_store(self, store_name, store_config):
+    def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
         try:
             new_store = instantiate_class_from_config(
@@ -319,7 +319,7 @@ class BaseDataContext:
         """
 
         for store_name, store_config in store_configs.items():
-            self._build_store(store_name, store_config)
+            self._build_store_from_config(store_name, store_config)
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
@@ -451,7 +451,7 @@ class BaseDataContext:
         """
 
         self._project_config["stores"][store_name] = store_config
-        return self._build_store(store_name, store_config)
+        return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
         self, validation_operator_name, validation_operator_config
@@ -496,15 +496,40 @@ class BaseDataContext:
         pretty_print=True,
         return_mode="instantiated_class",
     ):
+        """ Convenience method for testing yaml configs for Datasources, Checkpoints, and Stores
+        """
         if pretty_print:
             print("Attempting to instantiate class from config...")
-        instantiated_class = instantiate_class_from_config(
-            yaml.load(yaml_config),
-            runtime_environment={},
-            config_defaults={
-                "module_name": "great_expectations.data_context.store.expectations_store"
-            }
-        )
+
+        config = yaml.load(yaml_config)
+
+        if "class_name" in config:
+            class_name = config["class_name"]
+        else:
+            class_name = None
+ 
+        if class_name in [
+            "ExpectationsStore",
+            "ValidationsStore",
+            "HtmlSiteStore",
+            "EvaluationParameterStore",
+            "MetricStore",
+            "SqlAlchemyQueryStore",
+        ]:
+            print(f"\tInstantiating as a Store, since class_name is {class_name}")
+            instantiated_class = self._build_store_from_config("my_temp_store", config)
+
+        elif class_name in ["ExecutionEnvironment"]:
+            print(f"\tInstantiating as a Store, since class_name is {class_name}")
+            instantiated_class = self._build_store_from_config("my_temp_store", config)
+
+        else:
+            print("\tNo matching class found. Attempting to instantiate class from the raw config...")
+            instantiated_class = instantiate_class_from_config(
+                config,
+                runtime_environment={},
+                config_defaults={}
+            )
 
         if pretty_print:        
             print(f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}")
@@ -1309,6 +1334,7 @@ class BaseDataContext:
 
         return datasource
 
+    # TODO: This uses the old style for class instantiation. We should rebuild it to use the new style.
     # TODO: update usage statistics
     # @usage_statistics_enabled_method(
     #     event_name="data_context.add_execution_environment",

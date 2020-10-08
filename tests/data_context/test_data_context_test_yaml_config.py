@@ -6,6 +6,7 @@ def test_empty_store(empty_data_context):
 
     my_expectation_store = empty_data_context.test_yaml_config(
         yaml_config="""
+module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
 store_backend:
 
@@ -13,12 +14,15 @@ store_backend:
     class_name: InMemoryStoreBackend
 """)
 
+    # assert False
+
 
 def test_config_with_yaml_error(empty_data_context):
 
     with pytest.raises(Exception):
         my_expectation_store = empty_data_context.test_yaml_config(
             yaml_config="""
+module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
 store_backend:
     module_name: "great_expectations.data_context.store.store_backend"
@@ -36,6 +40,7 @@ def test_filesystem_store(empty_data_context):
 
     my_expectation_store = empty_data_context.test_yaml_config(
         yaml_config=f"""
+module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
 store_backend:
 
@@ -45,7 +50,18 @@ store_backend:
 """)
 
 
-def test_empty_store(empty_data_context):
+def test_empty_store2(empty_data_context):
+
+    my_expectation_store = empty_data_context.test_yaml_config(
+        yaml_config="""
+class_name: ValidationsStore
+store_backend:
+
+    module_name: "great_expectations.data_context.store.store_backend"
+    class_name: InMemoryStoreBackend
+""")
+
+def test_empty_store2(empty_data_context):
 
     my_expectation_store = empty_data_context.test_yaml_config(
         yaml_config="""
