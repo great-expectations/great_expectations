@@ -20,7 +20,7 @@
       }
     },
     "tests" : [{
-      "title" : "Basic_positive_test",
+      "title" : "basic_positive_test",
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
@@ -32,7 +32,7 @@
         "success": true
       }
     },{
-      "title" : "Basic_positive_test_with_missing_values_and_ignore_row_if__either_value_is_missing",
+      "title" : "basic_positive_test_with_missing_values_and_ignore_row_if__either_value_is_missing",
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
@@ -45,7 +45,7 @@
         "success": true
       }
     },{
-      "title" : "Test_ties",
+      "title" : "test_ties",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
@@ -64,7 +64,7 @@
         "success": false
       }
     },{
-      "title" : "Test_ties_with_or_equal",
+      "title" : "test_ties_with_or_equal",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
@@ -78,7 +78,7 @@
         "success": true
       }
     },{
-      "title" : "Test_parse_strings_as_datetimes_and_mostly",
+      "title" : "test_parse_strings_as_datetimes_and_mostly",
       "exact_match_out" : false,
       "in": {
         "column_A": "a",
