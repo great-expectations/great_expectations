@@ -8,6 +8,7 @@ from typing import Union, List
 # import yaml
 
 from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.batch import Batch
 from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import (
@@ -270,6 +271,51 @@ def test_get_available_data_asset_names(tmp_path_factory):
 
 def test_get_available_data_asset_names_with_caching():
     pass
+
+
+def test_get_available_partitions(tmp_path_factory):
+    base_dir_path = str(tmp_path_factory.mktemp("project_dirs"))
+    project_dir_path = os.path.join(base_dir_path, "project_path")
+    os.mkdir(project_dir_path)
+
+    os.makedirs(os.path.join(project_dir_path, "data"), exist_ok=True)
+    os.makedirs(os.path.join(project_dir_path, "data/test_files"), exist_ok=True)
+
+    default_base_directory: str = "data/test_files"
+    data_asset_base_directory: Union[str, None] = None
+
+    base_directory_names: list = [default_base_directory, data_asset_base_directory]
+    create_files_for_regex_partitioner(root_directory_path=project_dir_path, directory_paths=base_directory_names)
+
+    execution_environment_name: str = "test_execution_environment"
+    execution_environment: ExecutionEnvironment = ExecutionEnvironment(
+        name=execution_environment_name,
+        **execution_environment_files_data_connector_regex_partitioner_config(
+            use_group_names=False,
+            use_sorters=False,
+            default_base_directory=default_base_directory,
+            data_asset_base_directory=data_asset_base_directory
+        )[execution_environment_name],
+        in_memory_dataset=None,
+        data_context_root_directory=project_dir_path
+    )
+
+    data_connector_name: str = "test_filesystem_data_connector"
+
+    available_partitions: List[Partition] = execution_environment.get_available_partitions(
+        data_connector_name=data_connector_name,
+        data_asset_name=None,
+        partition_query={
+            "custom_filter": None,
+            "partition_name": None,
+            "partition_definition": None,
+            "limit": None,
+            "partition_index": None,
+        },
+        repartition=False
+    )
+
+    assert len(available_partitions) == 10
 
 
 def test_get_available_partitions_with_caching():

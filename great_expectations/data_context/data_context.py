@@ -1525,10 +1525,8 @@ class BaseDataContext:
             execution_environment_name=execution_environment_name,
             runtime_environment=runtime_environment
         )
-        data_connector: DataConnector = execution_environment.get_data_connector(
-            name=data_connector_name,
-        )
-        available_partitions: List[Partition] = data_connector.get_available_partitions(
+        available_partitions: List[Partition] = execution_environment.get_available_partitions(
+            data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             partition_query=partition_query,
             repartition=repartition
