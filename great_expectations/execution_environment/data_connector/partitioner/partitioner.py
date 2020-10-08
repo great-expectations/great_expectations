@@ -151,12 +151,12 @@ class Partitioner(object):
             )
         if cached_partitions is None or len(cached_partitions) == 0:
             return []
-        cached_partitions = self.get_sorted_partitions(partitions=cached_partitions)
+        cached_partitions = self._get_sorted_partitions(partitions=cached_partitions)
         if partition_query is None:
             return cached_partitions
         return partition_query.select_partitions(partitions=cached_partitions)
 
-    def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
+    def _get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
         if self.sorters and len(self.sorters) > 0:
             sorters: Iterator[Sorter] = reversed(self.sorters)
             for sorter in sorters:

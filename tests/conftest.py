@@ -2228,28 +2228,6 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     return context
 
 
-@pytest.fixture()
-def data_context_with_data_connector_and_partitioner_instantiated_from_yml(tmp_path_factory):
-    """
-    This data_context is *manually* created to have the config we want, vs
-    created with DataContext.create()
-    <WILL> Check if this overlaps with DataContext instantiation function
-    """
-    project_path = str(tmp_path_factory.mktemp("data_context_partitioner_project"))
-    context_path = os.path.join(project_path, "great_expectations")
-
-    os.makedirs(
-        os.path.join(context_path), exist_ok=True,
-    )
-    # copy YML file over
-    fixture_dir = file_relative_path(__file__, "./test_fixtures")
-    shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_data_connector_and_partitioner.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-    return ge.data_context.DataContext(context_path)
-
-
 @pytest.fixture
 def titanic_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
