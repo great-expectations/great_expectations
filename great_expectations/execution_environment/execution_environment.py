@@ -32,7 +32,6 @@ class ExecutionEnvironment(object):
         data_connectors=None,
         in_memory_dataset: Any = None,
         data_context_root_directory: str = None,
-        **kwargs
     ):
         """
         Build a new ExecutionEnvironment.
@@ -46,9 +45,9 @@ class ExecutionEnvironment(object):
         self._execution_engine = instantiate_class_from_config(
             config=execution_engine, runtime_environment={},
         )
-        self._execution_environment_config = kwargs
-
-        self._execution_environment_config["execution_engine"] = execution_engine
+        self._execution_environment_config = {
+            "execution_engine": execution_engine
+        }
 
         if data_connectors is None:
             data_connectors = {}

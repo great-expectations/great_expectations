@@ -74,14 +74,16 @@ def test_get_batch(tmp_path_factory):
     data_asset_base_directory: Union[str, None] = None
 
     execution_environment_name: str = "test_execution_environment"
+    execution_environment_config: dict = execution_environment_files_data_connector_regex_partitioner_config(
+        use_group_names=False,
+        use_sorters=False,
+        default_base_directory=default_base_directory,
+        data_asset_base_directory=data_asset_base_directory
+    )[execution_environment_name]
+    execution_environment_config.pop("class_name")
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
-        **execution_environment_files_data_connector_regex_partitioner_config(
-            use_group_names=False,
-            use_sorters=False,
-            default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory
-        )[execution_environment_name],
+        **execution_environment_config,
         in_memory_dataset=None,
         data_context_root_directory=project_dir_path
     )
@@ -119,14 +121,16 @@ def test_get_batch_with_pipeline_style_batch_definition():
     test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     execution_environment_name: str = "test_execution_environment"
+    execution_environment_config: dict = execution_environment_files_data_connector_regex_partitioner_config(
+        use_group_names=False,
+        use_sorters=False,
+        default_base_directory=None,
+        data_asset_base_directory=None
+    )[execution_environment_name]
+    execution_environment_config.pop("class_name")
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
-        **execution_environment_files_data_connector_regex_partitioner_config(
-            use_group_names=False,
-            use_sorters=False,
-            default_base_directory=None,
-            data_asset_base_directory=None
-        )[execution_environment_name],
+        **execution_environment_config,
         in_memory_dataset=test_df,
         data_context_root_directory=None
     )
@@ -165,14 +169,16 @@ def test_get_available_data_asset_names(tmp_path_factory):
     create_files_for_regex_partitioner(root_directory_path=project_dir_path, directory_paths=base_directory_names)
 
     execution_environment_name: str = "test_execution_environment"
+    execution_environment_config: dict = execution_environment_files_data_connector_regex_partitioner_config(
+        use_group_names=False,
+        use_sorters=False,
+        default_base_directory=default_base_directory,
+        data_asset_base_directory=data_asset_base_directory
+    )[execution_environment_name]
+    execution_environment_config.pop("class_name")
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
-        **execution_environment_files_data_connector_regex_partitioner_config(
-            use_group_names=False,
-            use_sorters=False,
-            default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory
-        )[execution_environment_name],
+        **execution_environment_config,
         in_memory_dataset=None,
         data_context_root_directory=project_dir_path
     )
@@ -288,14 +294,16 @@ def test_get_available_partitions(tmp_path_factory):
     create_files_for_regex_partitioner(root_directory_path=project_dir_path, directory_paths=base_directory_names)
 
     execution_environment_name: str = "test_execution_environment"
+    execution_environment_config: dict = execution_environment_files_data_connector_regex_partitioner_config(
+        use_group_names=False,
+        use_sorters=False,
+        default_base_directory=default_base_directory,
+        data_asset_base_directory=data_asset_base_directory
+    )[execution_environment_name]
+    execution_environment_config.pop("class_name")
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
-        **execution_environment_files_data_connector_regex_partitioner_config(
-            use_group_names=False,
-            use_sorters=False,
-            default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory
-        )[execution_environment_name],
+        **execution_environment_config,
         in_memory_dataset=None,
         data_context_root_directory=project_dir_path
     )

@@ -77,8 +77,6 @@ class DataConnector(object):
     ):
         self._name = name
 
-        self._data_connector_config = kwargs
-
         # TODO: <Alex>Is this needed?  Where do these batch_definition_come_from and what are the values?</Alex>
         batch_definition_defaults = batch_definition_defaults or {}
         batch_definition_defaults_keys = set(batch_definition_defaults.keys())
@@ -277,12 +275,6 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         else:
             partitioner = self.get_partitioner(name=partitioner_name)
         return partitioner
-
-    # TODO: <Alex>Delete if not used.</Alex>
-    # def get_config(self) -> dict:
-    #     conf: dict = self.execution_environment.config["data_connectors"][self.name]
-    #     conf.update(self._data_connector_config)
-    #     return conf
 
     def build_batch_spec(self, batch_definition: dict) -> BatchSpec:
         if "data_asset_name" not in batch_definition:
