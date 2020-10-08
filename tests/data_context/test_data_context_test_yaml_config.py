@@ -156,5 +156,3 @@ data_connectors:
 """, return_mode="return_object")
     
     print(return_obj)
-
-    # assert False

@@ -242,6 +242,14 @@ class ExecutionEnvironment(object):
             ] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
 
+    # TODO Abe 20201007: This is a super-rough version of this method, implemented to keep test_yaml_config unblocked. We'll need to test and document it.
+    def get_available_partitions(self, data_connector_name, data_asset_name):
+        data_connector = self.get_data_connector(data_connector_name)
+        partitions = data_connector.get_available_partitions(
+            data_asset_name,
+        )
+        return partitions
+
     def test(self, pretty_print=True):
         
         return_object = {}
@@ -264,7 +272,10 @@ class ExecutionEnvironment(object):
                 print(f"\tAvailable data_asset_names ({min(len_asset_names, 10)} of {len_asset_names}):")
             
             for asset_name in asset_names[data_connector["name"]]:
+                partitions = self.get_available_partitions(data_connector["name"], asset_name)
+                len_partitions = len(partitions)
+                partition_names = [partition.name for partition in partitions]
                 if pretty_print:
-                    print(f"\t\t{asset_name}")
+                    print(f"\t\t{asset_name} ({min(len_partitions, 10)} of {len_partitions}):", partition_names[:10])
 
         return return_object
