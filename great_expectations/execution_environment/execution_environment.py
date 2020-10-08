@@ -31,7 +31,7 @@ class ExecutionEnvironment(object):
         data_connectors=None,
         in_memory_dataset: Any = None,
         data_context_root_directory: str = None,
-        **kwargs
+        # **kwargs
     ):
         """
         Build a new ExecutionEnvironment.
@@ -45,21 +45,20 @@ class ExecutionEnvironment(object):
         self._execution_engine = instantiate_class_from_config(
             config=execution_engine, runtime_environment={},
         )
-        self._execution_environment_config = kwargs
 
+        self._execution_environment_config = {}
         self._execution_environment_config["execution_engine"] = execution_engine
-
-        if data_connectors is None:
-            data_connectors = {}
         self._execution_environment_config["data_connectors"] = data_connectors
 
+        # if data_connectors is None:
+        #     data_connectors = {}
         self._data_connectors_cache = {}
+        self._build_data_connectors()
 
         self._in_memory_dataset = in_memory_dataset
 
         self._data_context_root_directory = data_context_root_directory
 
-        self._build_data_connectors()
 
     def get_batch(
         self,
@@ -246,6 +245,8 @@ class ExecutionEnvironment(object):
 
     def test(self, pretty_print=True):
         
+        print(f"Execution engine: {self._execution_engine}")
+
         asset_names = self.get_available_data_asset_names()
         len_asset_names = len(asset_names)
         print(asset_names)

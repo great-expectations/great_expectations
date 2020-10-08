@@ -102,7 +102,7 @@ execution_engine:
         reader_options:
         header: 0
 
-data_connector:
+data_connectors:
     subdir:
         module_name: great_expectations.execution_environment.data_connector.files_data_connector
         class_name: FilesDataConnector
