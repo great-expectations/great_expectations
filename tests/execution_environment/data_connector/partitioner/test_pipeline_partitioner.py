@@ -17,6 +17,8 @@ def test_pipeline_partitioner():
     # no sorters
     with pytest.raises(ge_exceptions.SorterError):
         test_partitioner.get_sorter("i_dont_exist")
+
+    # no pipeline_datasets configured, so no partitions returned
     returned_partitions = test_partitioner.get_available_partitions(pipeline_data_asset_name="test_asset_0",
                                                                       pipeline_datasets=None)
     assert returned_partitions == []
@@ -28,9 +30,9 @@ def test_pipeline_partitioner_single_df():
     # test df
     d = {'col1': [1, 2], 'col2': [3, 4]}
     test_df = pd.DataFrame(data=d)
-    pipeline_dataset = [{"partition_name": "partition_1", "data_reference": test_df}]
+    pipeline_datasets = [{"partition_name": "partition_1", "data_reference": test_df}]
     returned_partitions = test_partitioner.get_available_partitions(pipeline_data_asset_name="test_asset_0",
-                                                                    pipeline_datasets=pipeline_dataset)
+                                                                    pipeline_datasets=pipeline_datasets)
     partition_to_compare = Partition(name="partition_1", data_asset_name="test_asset_0", definition={"partition_1": test_df}, data_reference=test_df)
     assert returned_partitions == [partition_to_compare]
 

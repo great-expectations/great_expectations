@@ -20,21 +20,19 @@ def test_regex_partitioner_instantiation():
     assert partitioner.regex == {"pattern": r"(.*)", "group_names": ["group_0"]}
 
 
-def test_regex_partitioner_regex_not_dict():
+def test_regex_partitioner_regex_is_not_a_dict():
     data_connector = DataConnector(name="test")
-    # bad regex configuration
-    config_params = {"regex": 'i_am_not_a_dictionary'}
-    partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector, config_params=config_params)
-    # if regex is not a dict, then you will get default configuration
-    # <WILL> should there be a more informative message
-    assert partitioner.regex == {"pattern": r"(.*)", "group_names": ["group_0"]}
+    config_params = {"regex": "i_am_not_a_dictionary"}
+
+    with pytest.raises(ge_exceptions.PartitionerError):
+        partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector, config_params=config_params)
 
 
 def test_regex_partitioner_regex_missing_pattern():
     data_connector = DataConnector(name="test")
     # missing pattern
     config_params = {"regex": {"not pattern": "not pattern either"}}
-    with pytest.raises(AssertionError):
+    with pytest.raises(ge_exceptions.PartitionerError):
         RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector, config_params=config_params)
 
 
@@ -43,7 +41,7 @@ def test_regex_partitioner_regex_no_groups_named():
     # adding pattern (no groups named)
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv"}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector, config_params=config_params)
-    assert regex_partitioner.regex == {'pattern': '.+\\/(.+)_(.+)_(.+)\\.csv', 'group_names': []}
+    assert regex_partitioner.regex == {'pattern': r'.+\/(.+)_(.+)_(.+)\.csv', 'group_names': []}
 
 
 def test_regex_partitioner_regex_groups_named():
@@ -52,31 +50,103 @@ def test_regex_partitioner_regex_groups_named():
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector,
                                          config_params=config_params)
-    assert regex_partitioner.regex == {'pattern': '.+\\/(.+)_(.+)_(.+)\\.csv', 'group_names': ['name', 'timestamp', 'price']}
+    assert regex_partitioner.regex == {'pattern': r'.+\/(.+)_(.+)_(.+)\.csv', 'group_names': ['name', 'timestamp', 'price']}
 
 
-def test_regex_partitioner_compute_partitions_for_data_asset_with_no_configuration():
+def test_regex_partitioner_get_available_partitions_with_no_params():
     data_connector = DataConnector(name="test")
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector,
                                          config_params=config_params)
-    # Nothing configured
+    # No file paths, nothing comes back
     assert regex_partitioner.get_available_partitions() == []
 
 
-def test_regex_partitioner_bad_regex():
+def test_regex_partitioner_regex_does_not_match_paths():
     data_connector = DataConnector(name="test")
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector,
                                          config_params=config_params)
-    batch_paths_simple: list = [
+    paths: list = [
         "my_dir/hi.csv",
         "my_dir/i_wont.csv",
         "my_dir/work.csv",
     ]
     # Nothing configured
-    partitions = regex_partitioner.get_available_partitions(paths=batch_paths_simple, data_asset_name="test_asset_0")
+    partitions = regex_partitioner.get_available_partitions(paths=paths, data_asset_name="test_asset_0")
     assert partitions == []
+
+
+def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_no_data_asset_name():
+    data_connector = DataConnector(name="test")
+    regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector)
+    paths: list = [
+        "alex_20200809_1000.csv",
+        "eugene_20200810_1500.csv",
+        "abe_20200831_1040.csv",
+    ]
+    # auto_discover_assets is set to True, which means the data_asset_name will come from the filename
+    # no sorters configured
+    partitions = regex_partitioner.get_available_partitions(paths=paths)
+    assert partitions == [
+        Partition(name="alex_20200809_1000.csv",
+                  definition={"group_0": "alex_20200809_1000.csv"},
+                  data_reference="alex_20200809_1000.csv", data_asset_name=None),
+        Partition(name="eugene_20200810_1500.csv",
+                  definition={"group_0": "eugene_20200810_1500.csv"},
+                  data_reference="eugene_20200810_1500.csv", data_asset_name=None),
+        Partition(name="abe_20200831_1040.csv",
+                  definition={"group_0": "abe_20200831_1040.csv"},
+                  data_reference="abe_20200831_1040.csv", data_asset_name=None),
+    ]
+
+
+def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_autodiscover_assets():
+    data_connector = DataConnector(name="test")
+    regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector)
+    paths: list = [
+        "alex_20200809_1000.csv",
+        "eugene_20200810_1500.csv",
+        "abe_20200831_1040.csv",
+    ]
+    # auto_discover_assets is set to True, which means the data_asset_name will come from the filename
+    # no sorters configured
+    partitions = regex_partitioner.get_available_partitions(paths=paths, auto_discover_assets=True)
+    assert partitions == [
+        Partition(name="alex_20200809_1000.csv",
+                  definition={"group_0": "alex_20200809_1000.csv"},
+                  data_reference="alex_20200809_1000.csv", data_asset_name="alex_20200809_1000"),
+        Partition(name="eugene_20200810_1500.csv",
+                  definition={"group_0": "eugene_20200810_1500.csv"},
+                  data_reference="eugene_20200810_1500.csv", data_asset_name="eugene_20200810_1500"),
+        Partition(name="abe_20200831_1040.csv",
+                  definition={"group_0": "abe_20200831_1040.csv"},
+                  data_reference="abe_20200831_1040.csv", data_asset_name="abe_20200831_1040"),
+    ]
+
+
+def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_data_asset_name_configured():
+    data_connector = DataConnector(name="test")
+    regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector)
+    paths: list = [
+        "alex_20200809_1000.csv",
+        "eugene_20200810_1500.csv",
+        "abe_20200831_1040.csv",
+    ]
+    # auto_discover_assets is set to True, which means the data_asset_name will come from the filename
+    # no sorters configured
+    partitions = regex_partitioner.get_available_partitions(paths=paths, data_asset_name="test_asset_0")
+    assert partitions == [
+        Partition(name="alex_20200809_1000.csv",
+                  definition={"group_0": "alex_20200809_1000.csv"},
+                  data_reference="alex_20200809_1000.csv", data_asset_name="test_asset_0"),
+        Partition(name="eugene_20200810_1500.csv",
+                  definition={"group_0": "eugene_20200810_1500.csv"},
+                  data_reference="eugene_20200810_1500.csv", data_asset_name="test_asset_0"),
+        Partition(name="abe_20200831_1040.csv",
+                  definition={"group_0": "abe_20200831_1040.csv"},
+                  data_reference="abe_20200831_1040.csv", data_asset_name="test_asset_0"),
+    ]
 
 
 def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
@@ -84,24 +154,24 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector,
                                          config_params=config_params)
-    batch_paths_simple: list = [
+    paths: list = [
         "my_dir/alex_20200809_1000.csv",
-        "my_dir/eugene_20200809_1500.csv",
-        "my_dir/abe_20200809_1040.csv",
+        "my_dir/eugene_20200810_1500.csv",
+        "my_dir/abe_20200831_1040.csv",
     ]
     # auto_discover_assets is set to True, which means the data_asset_name will come from the filename
     # no sorters configured
-    partitions = regex_partitioner.get_available_partitions(paths=batch_paths_simple, auto_discover_assets=True)
+    partitions = regex_partitioner.get_available_partitions(paths=paths, auto_discover_assets=True)
     assert partitions == [
         Partition(name='alex-20200809-1000',
                   definition={'name': 'alex', 'timestamp': '20200809', 'price': '1000'},
                   data_reference="my_dir/alex_20200809_1000.csv", data_asset_name="alex_20200809_1000"),
-        Partition(name='eugene-20200809-1500',
-                  definition={'name': 'eugene', 'timestamp': '20200809', 'price': '1500'},
-                  data_reference="my_dir/eugene_20200809_1500.csv", data_asset_name="eugene_20200809_1500"),
-        Partition(name='abe-20200809-1040',
-                  definition={'name': 'abe', 'timestamp': '20200809', 'price': '1040'},
-                  data_reference="my_dir/abe_20200809_1040.csv", data_asset_name="abe_20200809_1040"),
+        Partition(name='eugene-20200810-1500',
+                  definition={'name': 'eugene', 'timestamp': '20200810', 'price': '1500'},
+                  data_reference="my_dir/eugene_20200810_1500.csv", data_asset_name="eugene_20200810_1500"),
+        Partition(name='abe-20200831-1040',
+                  definition={'name': 'abe', 'timestamp': '20200831', 'price': '1040'},
+                  data_reference="my_dir/abe_20200831_1040.csv", data_asset_name="abe_20200831_1040"),
     ]
 
 
@@ -110,23 +180,22 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_false_no_data
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector,
                                          config_params=config_params)
-    batch_paths_simple: list = [
+    paths: list = [
         "my_dir/alex_20200809_1000.csv",
-        "my_dir/eugene_20200809_1500.csv",
-        "my_dir/abe_20200809_1040.csv",
+        "my_dir/eugene_20200810_1500.csv",
+        "my_dir/abe_20200831_1040.csv",
     ]
-    # <WILL> Should this be a default value?
-    partitions = regex_partitioner.get_available_partitions(paths=batch_paths_simple, auto_discover_assets=False)
+    partitions = regex_partitioner.get_available_partitions(paths=paths, auto_discover_assets=False)
     assert partitions == [
         Partition(name='alex-20200809-1000',
                   definition={'name': 'alex', 'timestamp': '20200809', 'price': '1000'},
                   data_reference="my_dir/alex_20200809_1000.csv", data_asset_name=None),
-        Partition(name='eugene-20200809-1500',
-                  definition={'name': 'eugene', 'timestamp': '20200809', 'price': '1500'},
-                  data_reference="my_dir/eugene_20200809_1500.csv", data_asset_name=None),
-        Partition(name='abe-20200809-1040',
-                  definition={'name': 'abe', 'timestamp': '20200809', 'price': '1040'},
-                  data_reference="my_dir/abe_20200809_1040.csv", data_asset_name=None),
+        Partition(name='eugene-20200810-1500',
+                  definition={'name': 'eugene', 'timestamp': '20200810', 'price': '1500'},
+                  data_reference="my_dir/eugene_20200810_1500.csv", data_asset_name=None),
+        Partition(name='abe-20200831-1040',
+                  definition={'name': 'abe', 'timestamp': '20200831', 'price': '1040'},
+                  data_reference="my_dir/abe_20200831_1040.csv", data_asset_name=None),
     ]
 
 
@@ -135,24 +204,24 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_false_data_as
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector,
                                          config_params=config_params)
-    batch_paths_simple: list = [
+    paths: list = [
         "my_dir/alex_20200809_1000.csv",
-        "my_dir/eugene_20200809_1500.csv",
-        "my_dir/abe_20200809_1040.csv",
+        "my_dir/eugene_20200810_1500.csv",
+        "my_dir/abe_20200831_1040.csv",
     ]
     # auto_discover_assets is set to True, which means the data_asset_name will come from the filename
     # no sorters configured
-    partitions = regex_partitioner.get_available_partitions(paths=batch_paths_simple, data_asset_name="test_asset_0")
+    partitions = regex_partitioner.get_available_partitions(paths=paths, data_asset_name="test_asset_0")
     assert partitions == [
         Partition(name='alex-20200809-1000',
                   definition={'name': 'alex', 'timestamp': '20200809', 'price': '1000'},
                   data_reference="my_dir/alex_20200809_1000.csv", data_asset_name="test_asset_0"),
-        Partition(name='eugene-20200809-1500',
-                  definition={'name': 'eugene', 'timestamp': '20200809', 'price': '1500'},
-                  data_reference="my_dir/eugene_20200809_1500.csv", data_asset_name="test_asset_0"),
-        Partition(name='abe-20200809-1040',
-                  definition={'name': 'abe', 'timestamp': '20200809', 'price': '1040'},
-                  data_reference="my_dir/abe_20200809_1040.csv", data_asset_name="test_asset_0"),
+        Partition(name='eugene-20200810-1500',
+                  definition={'name': 'eugene', 'timestamp': '20200810', 'price': '1500'},
+                  data_reference="my_dir/eugene_20200810_1500.csv", data_asset_name="test_asset_0"),
+        Partition(name='abe-20200831-1040',
+                  definition={'name': 'abe', 'timestamp': '20200831', 'price': '1040'},
+                  data_reference="my_dir/abe_20200831_1040.csv", data_asset_name="test_asset_0"),
     ]
 
 
@@ -185,28 +254,27 @@ def test_regex_partitioner_compute_partitions_adding_sorters():
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector, sorters=sorters,
                                          config_params=config_params)
-    batch_paths_simple: list = [
+    paths: list = [
         "my_dir/alex_20200809_1000.csv",
-        "my_dir/eugene_20200809_1500.csv",
-        "my_dir/abe_20200809_1040.csv",
+        "my_dir/eugene_20200810_1500.csv",
+        "my_dir/abe_20200831_1040.csv",
     ]
 
-    partitions = regex_partitioner.get_available_partitions(paths=batch_paths_simple, data_asset_name="test_asset_0")
+    partitions = regex_partitioner.get_available_partitions(paths=paths, data_asset_name="test_asset_0")
     assert partitions == [
-        Partition(name='abe-20200809-1040',
-                  definition={'name': 'abe', 'timestamp': '20200809', 'price': '1040'},
-                  data_reference="my_dir/abe_20200809_1040.csv", data_asset_name="test_asset_0"),
+        Partition(name='abe-20200831-1040',
+                  definition={'name': 'abe', 'timestamp': '20200831', 'price': '1040'},
+                  data_reference="my_dir/abe_20200831_1040.csv", data_asset_name="test_asset_0"),
         Partition(name='alex-20200809-1000',
                   definition={'name': 'alex', 'timestamp': '20200809', 'price': '1000'},
                   data_reference="my_dir/alex_20200809_1000.csv", data_asset_name="test_asset_0"),
-        Partition(name='eugene-20200809-1500',
-                  definition={'name': 'eugene', 'timestamp': '20200809', 'price': '1500'},
-                  data_reference="my_dir/eugene_20200809_1500.csv", data_asset_name="test_asset_0"),
+        Partition(name='eugene-20200810-1500',
+                  definition={'name': 'eugene', 'timestamp': '20200810', 'price': '1500'},
+                  data_reference="my_dir/eugene_20200810_1500.csv", data_asset_name="test_asset_0"),
     ]
 
 
-
-def test_regex_partitioner_compute_partitions_sorters_and_groups_do_not_match():
+def test_regex_partitioner_compute_partitions_sorters_and_groups_names_do_not_match():
     data_connector = DataConnector(name="test")
     sorters = [
                 {
@@ -235,13 +303,13 @@ def test_regex_partitioner_compute_partitions_sorters_and_groups_do_not_match():
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'not_price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector, sorters=sorters,
                                          config_params=config_params)
-    batch_paths_simple: list = [
+    paths: list = [
         "my_dir/alex_20200809_1000.csv",
-        "my_dir/eugene_20200809_1500.csv",
-        "my_dir/abe_20200809_1040.csv",
+        "my_dir/eugene_20200810_1500.csv",
+        "my_dir/abe_20200831_1040.csv",
     ]
     with pytest.raises(ge_exceptions.PartitionerError):
-        regex_partitioner.get_available_partitions(paths=batch_paths_simple, data_asset_name="test_asset_0")
+        regex_partitioner.get_available_partitions(paths=paths, data_asset_name="test_asset_0")
 
 
 def test_regex_partitioner_compute_partitions_sorters_too_many_sorters():
@@ -275,14 +343,15 @@ def test_regex_partitioner_compute_partitions_sorters_too_many_sorters():
                     'orderby': 'desc',
                 },
             ]
-    # the group named price -> not_price
+
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ['name', 'timestamp', 'price']}}
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector, sorters=sorters,
                                          config_params=config_params)
-    batch_paths_simple: list = [
+    paths: list = [
         "my_dir/alex_20200809_1000.csv",
-        "my_dir/eugene_20200809_1500.csv",
-        "my_dir/abe_20200809_1040.csv",
+        "my_dir/eugene_20200810_1500.csv",
+        "my_dir/abe_20200831_1040.csv",
     ]
     with pytest.raises(ge_exceptions.PartitionerError):
-        regex_partitioner.get_available_partitions(paths=batch_paths_simple, data_asset_name="test_asset_0")
+        regex_partitioner.get_available_partitions(paths=paths, data_asset_name="test_asset_0")
+

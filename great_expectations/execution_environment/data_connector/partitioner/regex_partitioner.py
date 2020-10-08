@@ -41,14 +41,21 @@ class RegexPartitioner(Partitioner):
         regex: Union[dict, None]
         if self.config_params:
             regex = self.config_params.get("regex")
-        else:
-            regex = None
-
-        if regex and isinstance(regex, dict):
-            assert "pattern" in regex.keys(), "Regex configuration requires pattern to be specified."
+            # check if dictionary
+            if not isinstance(regex, dict):
+                raise ge_exceptions.PartitionerError(
+                    f'''RegexPartitioner "{self.name}" requires a regex pattern configured as a dictionary. 
+                    It is currently of type "{type(regex)}. Please check your configuration.''')
+            # check if correct key exists
+            if not ("pattern" in regex.keys()):
+                raise ge_exceptions.PartitionerError(
+                    f'''RegexPartitioner "{self.name}" requires a regex pattern to be specified in its configuration.
+                    ''')
+            # check if group_names exists in regex config, if not add empty list
             if not ("group_names" in regex.keys() and isinstance(regex["group_names"], list)):
                 regex["group_names"] = []
         else:
+            # if no configuration exists at all, set defaults
             regex = {
                 "pattern": r"(.*)",
                 "group_names": [
@@ -85,10 +92,6 @@ class RegexPartitioner(Partitioner):
         return partitions
 
     def _find_partitions_for_path(self, path: str, data_asset_name: str = None) -> Union[Partition, None]:
-        # <WILL> may never get here because of line 51
-        if self.regex is None:
-            raise ge_exceptions.PartitionerError("Regex configuration is not specified.")
-
         matches: Union[re.Match, None] = re.match(self.regex["pattern"], path)
         if matches is None:
             logger.warning(f'No match found for path: "{path}".')

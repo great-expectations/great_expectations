@@ -2639,7 +2639,6 @@ def execution_environment_files_data_connector_regex_partitioner_with_groups_wit
     return data_context
 
 
-
 @pytest.fixture
 def filesystem_csv(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("filesystem_csv")
