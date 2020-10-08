@@ -207,13 +207,10 @@ between the partitioning directives and the actual structure of data under consi
                         '''
                     )
                 # Attempt to update the data_reference property with that provided as part of the submitted partition.
-                try:
-                    specific_partition_idx: int = cached_partitions.index(partition)
-                    specific_partition: Partition = cached_partitions[specific_partition_idx]
-                    if specific_partition.data_reference != partition.data_reference:
-                        specific_partition.data_reference = partition.data_reference
-                except ValueError:
-                    pass
+                specific_partition_idx: int = cached_partitions.index(partition)
+                specific_partition: Partition = cached_partitions[specific_partition_idx]
+                if specific_partition.data_reference != partition.data_reference:
+                    specific_partition.data_reference = partition.data_reference
             else:
                 # Prevent the same data_reference property value to be represented by multiple partitions.
                 partitions_with_given_data_reference: List[Partition] = [
