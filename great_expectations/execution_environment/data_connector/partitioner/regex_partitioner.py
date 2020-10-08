@@ -38,12 +38,13 @@ class RegexPartitioner(Partitioner):
         self._regex = self._process_regex_config()
 
     def _process_regex_config(self) -> dict:
+        regex: Union[dict, None]
         if self.config_params:
-            regex: dict = self.config_params.get("regex")
+            regex = self.config_params.get("regex")
         else:
             regex = None
+
         if regex and isinstance(regex, dict):
-            # <WILL> if regex is empty dictionary, then this test isn't run?
             assert "pattern" in regex.keys(), "Regex configuration requires pattern to be specified."
             if not ("group_names" in regex.keys() and isinstance(regex["group_names"], list)):
                 regex["group_names"] = []
