@@ -36,6 +36,22 @@
             }
           }
         },{
+          "title": "Positive, irrelevant treat_as_null",
+          "exact_match_out": true,
+          "in": {
+            "column": "all_null",
+	    "treat_as_null": [5, "d"]
+          },
+          "out": {
+            "success": true,
+            "result": {
+              "element_count": 4,
+              "unexpected_count": 0,
+              "unexpected_percent": 0.0,
+              "partial_unexpected_list": []
+            }
+	  }
+        },{
           "title": "Negative, no missing values",
           "exact_match_out": false,
           "in": {
@@ -45,6 +61,18 @@
             "success": false,
             "unexpected_list": ["a", "b", "c", "d"],
             "unexpected_index_list": [0, 1, 2, 3]
+          }
+        },{
+          "title": "Negative, treat_as_null",
+          "exact_match_out": false,
+          "in": {
+            "column": "no_null",
+	    "treat_as_null": ["a"]
+          },
+          "out": {
+            "success": false,
+            "unexpected_list": ["b", "c", "d"],
+            "unexpected_index_list": [1, 2, 3]
           }
         },{
           "title": "Positive, mostly",
@@ -59,6 +87,19 @@
             "unexpected_index_list": [3]
           }
         },{
+          "title": "Positive, mostly with treat_as_null",
+          "exact_match_out": false,
+          "in": {
+            "column": "two_null",
+            "treat_as_null": [5]
+            "mostly": 0.75
+          },
+          "out": {
+            "success": true,
+            "unexpected_list": [6],
+            "unexpected_index_list": [3]
+          }
+        },{
           "title": "Negative, mostly",
           "exact_match_out": false,
           "in": {
@@ -68,6 +109,19 @@
           "out": {
             "success": false,
             "unexpected_list": [5],
+            "unexpected_index_list": [3]
+          }
+        },{
+          "title": "Negative, mostly with treat_as_null",
+          "exact_match_out": false,
+          "in": {
+            "column": "no_null",
+	    "treat_as_null": ["a", "b", "d"]
+            "mostly": 0.8
+          },
+          "out": {
+            "success": false,
+            "unexpected_list": ["c"],
             "unexpected_index_list": [3]
           }
         },{

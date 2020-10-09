@@ -36,6 +36,22 @@
             }
           }
         },{
+          "title": "Positive, irrelevant treat_as_null",
+          "exact_match_out": true,
+          "in": {
+            "column": "no_null",
+	    "treat_as_null": [5, "d"]
+          },
+          "out": {
+            "success": true,
+            "result": {
+              "element_count": 4,
+              "unexpected_count": 0,
+              "unexpected_percent": 0.0,
+              "partial_unexpected_list": []
+            }
+	  }
+        },{
           "title": "Negative, all missing values",
           "exact_match_out": false,
           "in": {
@@ -46,6 +62,18 @@
             "success": false,
             "unexpected_list": [null, null, null, null],
             "unexpected_index_list": [0,1, 2, 3]
+          }
+        },{
+          "title": "Negative, treat_as_null",
+          "exact_match_out": false,
+          "in": {
+            "column": "no_null",
+	    "treat_as_null": ["a", "d"]
+          },
+          "out": {
+            "success": false,
+            "unexpected_list": ["a", "d"],
+            "unexpected_index_list": [0, 3]
           }
         },{
           "title": "Positive, mostly",
@@ -59,6 +87,19 @@
             "success": true,
             "unexpected_list": [null],
             "unexpected_index_list": [2]
+          }
+        },{
+          "title": "Positive, mostly with treat_as_null",
+          "exact_match_out": false,
+          "in": {
+            "column": "two_null",
+            "treat_as_null": [5]
+            "mostly": 0.25
+          },
+          "out": {
+            "success": true,
+            "unexpected_list": [null, null, 5],
+            "unexpected_index_list": [0, 1, 2]
           }
         },{
           "title": "Negative, no mostly, one missing",
