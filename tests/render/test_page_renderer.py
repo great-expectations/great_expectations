@@ -519,15 +519,15 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
     import pprint
 
     pprint.pprint(rendered_validation_results["sections"])
-    with open(
-        file_relative_path(
-            __file__,
-            "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_end_nc.json",
-        ),
-        "w",
-    ) as f:
-        json.dump(rendered_validation_results, f, indent=2)
-    # pprint.pprint(ValidationResultsPageRenderer_render_with_run_info_at_end)
+    # with open(
+    #     file_relative_path(
+    #         __file__,
+    #         "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_end_nc.json",
+    #     ),
+    #     "w",
+    # ) as f:
+    #     json.dump(rendered_validation_results, f, indent=2)
+    pprint.pprint(ValidationResultsPageRenderer_render_with_run_info_at_end)
     assert (
         rendered_validation_results
         == ValidationResultsPageRenderer_render_with_run_info_at_end
@@ -545,14 +545,14 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
         titanic_profiled_evrs_1
     ).to_json_dict()
     # print(rendered_validation_results)
-    with open(
-        file_relative_path(
-            __file__,
-            "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start_nc.json",
-        ),
-        "w",
-    ) as f:
-        json.dump(rendered_validation_results, f, indent=2)
+    # with open(
+    #     file_relative_path(
+    #         __file__,
+    #         "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start_nc.json",
+    #     ),
+    #     "w",
+    # ) as f:
+    #     json.dump(rendered_validation_results, f, indent=2)
 
     assert (
         rendered_validation_results
