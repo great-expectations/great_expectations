@@ -264,10 +264,15 @@ class BatchKwargsError(DataContextError):
         super().__init__(self.message)
 
 
-class BatchSpecError(DataContextError):
-    def __init__(self, message, batch_spec=None):
+class BatchDefinitionError(DataContextError):
+    def __init__(self, message):
         self.message = message
-        self.batch_spec = batch_spec
+        super().__init__(self.message)
+
+
+class BatchSpecError(DataContextError):
+    def __init__(self, message):
+        self.message = message
         super().__init__(self.message)
 
 
@@ -285,3 +290,21 @@ class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
 
 class InvalidConfigValueTypeError(DataContextError):
     pass
+
+
+class DataConnectorError(DataContextError):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+class PartitionerError(DataContextError):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+class SorterError(DataContextError):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)

@@ -2,140 +2,117 @@
 
 import copy
 import logging
-import warnings
-from typing import Union
+from typing import Union, List, Dict, Callable, Any
 
-from ruamel.yaml import YAML
-
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    load_class,
-    verify_dynamic_loading_support,
+from great_expectations.data_context.types.base import (
+    DataConnectorConfig,
+    dataConnectorConfigSchema
 )
-from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.types import ClassConfig
-from great_expectations.validator.validator import Validator
+from great_expectations.data_context.util import instantiate_class_from_config
+from ruamel.yaml.comments import CommentedMap
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.execution_environment.types import BatchSpec
+from great_expectations.core.batch import Batch
 
 logger = logging.getLogger(__name__)
-yaml = YAML()
-yaml.default_flow_style = False
 
 
 class ExecutionEnvironment(object):
     """
-An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
+    An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
     """
-
-    recognized_batch_parameters = {"limit"}
+    recognized_batch_parameters: set = {"limit"}
 
     def __init__(
         self,
-        name,
-        data_context=None,
+        name: str,
         execution_engine=None,
         data_connectors=None,
-        **kwargs
+        in_memory_dataset: Any = None,
+        data_context_root_directory: str = None,
     ):
         """
         Build a new ExecutionEnvironment.
 
         Args:
             name: the name for the datasource
-            data_context: data context to which to connect
-            execution_engine (ClassConfig): the type of DataAsset to produce
+            execution_engine (ClassConfig): the type of compute engine to produce
             data_connectors: DataConnectors to add to the datasource
         """
-        self._data_context = data_context
         self._name = name
         self._execution_engine = instantiate_class_from_config(
             config=execution_engine, runtime_environment={},
         )
-        self._execution_engine._data_context = (
-            data_context  # do this here because data_context not in DataAsset
-        )
-        # __init__ argspec, so not added when provided in runtime_environment above
-        self._execution_environment_config = kwargs
-        self._data_connectors = {}
+        self._execution_environment_config = {
+            "execution_engine": execution_engine
+        }
 
-        self._execution_environment_config["execution_engine"] = execution_engine
-        if data_connectors is not None:
-            self._execution_environment_config["data_connectors"] = data_connectors
+        if data_connectors is None:
+            data_connectors = {}
+        self._execution_environment_config["data_connectors"] = data_connectors
+
+        self._data_connectors_cache = {}
+
+        self._in_memory_dataset = in_memory_dataset
+
+        self._data_context_root_directory = data_context_root_directory
+
         self._build_data_connectors()
+
+    def get_available_partitions(
+        self,
+        data_connector_name: str,
+        data_asset_name: str = None,
+        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+        repartition: bool = False
+    ) -> List[Partition]:
+        data_connector: DataConnector = self.get_data_connector(
+            name=data_connector_name
+        )
+        available_partitions: List[Partition] = data_connector.get_available_partitions(
+            data_asset_name=data_asset_name,
+            partition_query=partition_query,
+            repartition=repartition
+        )
+        return available_partitions
 
     def get_batch(
         self,
-        batch_definition: dict,
-        in_memory_dataset: any = None,  # TODO: should this be any to accommodate the different engines?
-    ):
-        # TODO: <Alex>To delete datasources or keep for backward compatibility?</Alex>
-        self.execution_engine.load_batch(
-            batch_definition=batch_definition, in_memory_dataset=in_memory_dataset
-        )
-        return self.execution_engine.loaded_batch
+        batch_definition: dict
+    ) -> Batch:
+        if not batch_definition:
+            raise ge_exceptions.BatchDefinitionError(message="Batch definition is empty.")
 
-    def get_validator(
-        self,
-        batch_definition: dict,
-        expectation_suite_name: Union[str, ExpectationSuite],
-        in_memory_dataset: any = None,  # TODO: should this be any to accommodate the different engines?
-    ):
-        self.execution_engine.load_batch(
-            batch_definition=batch_definition, in_memory_dataset=in_memory_dataset
+        data_connector_name: str = batch_definition.get("data_connector")
+        if not data_connector_name:
+            raise ge_exceptions.BatchDefinitionError(message="Batch definition must specify a data_connector.")
+
+        batch_spec: BatchSpec = self._build_batch_spec(
+            data_connector_name=data_connector_name,
+            batch_definition=batch_definition
         )
-        return Validator(
-            execution_engine=self.execution_engine,
-            expectation_suite_name=expectation_suite_name,
+        batch_spec = self.execution_engine.process_batch_definition(
+            batch_definition=batch_definition,
+            batch_spec=batch_spec
         )
 
-    @classmethod
-    def from_configuration(cls, **kwargs):
-        """
-        Build a new datasource from a configuration dictionary.
+        batch: Batch = self.execution_engine.load_batch(batch_spec=batch_spec)
+        return batch
+
+    def _build_batch_spec(self, data_connector_name: str, batch_definition: dict) -> BatchSpec:
+        """Builds batch_spec using the provided data_connector and batch_definition.
 
         Args:
-            **kwargs: configuration key-value pairs
+            data_connector_name (str): the name of the data_connector to use to build batch_spec
+            batch_definition (dict): dict specifying batch - used to generate a batch_spec
 
         Returns:
-            datasource (Datasource): the newly-created datasource
-
+            BatchSpec
         """
-        return cls(**kwargs)
-
-    @classmethod
-    def build_configuration(
-        cls,
-        class_name,
-        module_name="great_expectations.datasource",  # TODO: should this live in a new directory?
-        execution_engine=None,
-        data_connectors=None,
-        **kwargs
-    ):
-        """
-        Build a full configuration object for an execution environment, potentially including DataConnectors with
-        defaults.
-
-        Args:
-            class_name: The name of the class for which to build the config
-            module_name: The name of the module in which the datasource class is located
-            execution_engine: A ClassConfig dictionary
-            data_connectors: DataConnector configuration dictionary
-            **kwargs: Additional kwargs to be part of the datasource constructor's initialization
-
-        Returns:
-            A complete ExecutionEnvironment configuration.
-
-        """
-        verify_dynamic_loading_support(module_name=module_name)
-        class_ = load_class(class_name=class_name, module_name=module_name)
-        configuration = class_.build_configuration(
-            execution_engine=execution_engine, data_connectors=data_connectors, **kwargs
-        )
-        return configuration
-
-    @property
-    def execution_engine(self):
-        return self._execution_engine
+        data_connector: DataConnector = self.get_data_connector(name=data_connector_name)
+        return data_connector.build_batch_spec(batch_definition=batch_definition)
 
     @property
     def name(self):
@@ -145,15 +122,12 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         return self._name
 
     @property
-    def config(self):
-        return copy.deepcopy(self._execution_environment_config)
+    def execution_engine(self):
+        return self._execution_engine
 
     @property
-    def data_context(self):
-        """
-        Property for attached DataContext
-        """
-        return self._data_context
+    def config(self):
+        return copy.deepcopy(self._execution_environment_config)
 
     def _build_data_connectors(self):
         """
@@ -162,87 +136,83 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         Returns:
             None
         """
-        try:
-            for data_connector in self._execution_environment_config[
-                "data_connectors"
-            ].keys():
-                self.get_data_connector(data_connector)
-        except KeyError:
-            pass
+        if "data_connectors" in self._execution_environment_config:
+            for data_connector in self._execution_environment_config["data_connectors"].keys():
+                self.get_data_connector(name=data_connector)
 
-    # def add_data_connector(self, name, class_name, **kwargs):
-    #     """Add a DataConnector to the ExecutionEnvironment.
-    #
-    #     Args:
-    #         name (str): the name of the new DataConnector to add
-    #         class_name: class of the DataConnector to add
-    #         kwargs: additional keyword arguments will be passed directly to the new DataConnector's constructor
-    #
-    #     Returns:
-    #          DataConnector (DataConnector)
-    #     """
-    #     kwargs["class_name"] = class_name
-    #     data_connector = self._build_data_connector(**kwargs)
-    #     if "data_connectors" not in self._execution_environment_config:
-    #         self._execution_environment_config["data_connectors"] = dict()
-    #     self._execution_environment_config["data_connectors"][name] = kwargs
-    #
-    #     return data_connector
-
-    def _build_data_connector(self, **kwargs):
-        """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
-        data_connector = instantiate_class_from_config(
-            config=kwargs,
-            runtime_environment={"execution_environment": self},
-            config_defaults={
-                "module_name": "great_expectations.execution_environment.data_connector"  # TODO: confirm directory
-                # location
-            },
-        )
-        if not data_connector:
-            raise ClassInstantiationError(
-                module_name="great_expectations.execution_environment.data_connector",
-                package_name=None,
-                class_name=kwargs["class_name"],
-            )
-
-        return data_connector
-
-    def get_data_connector(self, name):
+    # TODO Abe 10/6/2020: Should this be an internal method?
+    def get_data_connector(self, name: str) -> DataConnector:
         """Get the (named) DataConnector from an ExecutionEnvironment)
 
         Args:
-            name (str): name of DataConnector #  TODO: Should there be a default value?
+            name (str): name of DataConnector
+            runtime_environment (dict):
 
         Returns:
             DataConnector (DataConnector)
         """
-        if name in self._data_connectors:
-            return self._data_connectors[name]
+        data_connector: DataConnector
+        if name in self._data_connectors_cache:
+            return self._data_connectors_cache[name]
         elif (
             "data_connectors" in self._execution_environment_config
             and name in self._execution_environment_config["data_connectors"]
         ):
-            data_connector_config = copy.deepcopy(
+            data_connector_config: dict = copy.deepcopy(
                 self._execution_environment_config["data_connectors"][name]
             )
         else:
-            raise ValueError(
-                "Unable to load data connector %s -- no configuration found or invalid configuration."
-                % name
+            raise ge_exceptions.DataConnectorError(
+                f'Unable to load data connector "{name}" -- no configuration found or invalid configuration.'
             )
-        data_connector_config.update({"name": name})
-        data_connector = self._build_data_connector(**data_connector_config)
-        self._data_connectors[name] = data_connector
+        data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
+            data_connector_config
+        )
+        data_connector: DataConnector = self._build_data_connector_from_config(
+            name=name, config=data_connector_config
+        )
+        self._data_connectors_cache[name] = data_connector
         return data_connector
 
-    def list_data_connectors(self):
+    def _build_data_connector_from_config(
+        self,
+        name: str,
+        config: CommentedMap,
+    ) -> DataConnector:
+        """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
+        # We convert from the type back to a dictionary for purposes of instantiation
+        if isinstance(config, DataConnectorConfig):
+            config: dict = dataConnectorConfigSchema.dump(config)
+        module_name: str = "great_expectations.execution_environment.data_connector.data_connector"
+        runtime_environment: dict = {
+            "name": name,
+            "data_context_root_directory": self._data_context_root_directory
+        }
+        if self._in_memory_dataset is not None:
+            runtime_environment.update({"in_memory_dataset": self._in_memory_dataset})
+        if self._execution_engine is not None:
+            runtime_environment.update({"execution_engine": self._execution_engine})
+        data_connector: DataConnector = instantiate_class_from_config(
+            config=config,
+            runtime_environment=runtime_environment,
+            config_defaults={"module_name": module_name},
+        )
+        if not data_connector:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name="great_expectations.execution_environment.data_connector.data_connector",
+                package_name=None,
+                class_name=config["class_name"],
+            )
+        return data_connector
+
+    # TODO Abe 10/6/2020: Should this be an internal method?
+    def list_data_connectors(self) -> List[dict]:
         """List currently-configured DataConnector for this ExecutionEnvironment.
 
         Returns:
             List(dict): each dictionary includes "name" and "type" keys
         """
-        data_connectors = []
+        data_connectors: List[dict] = []
 
         if "data_connectors" in self._execution_environment_config:
             for key, value in self._execution_environment_config[
@@ -252,12 +222,12 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
 
         return data_connectors
 
-    def get_available_data_asset_names(self, data_connector_names=None):
+    def get_available_data_asset_names(self, data_connector_names: list = None) -> dict:
         """
         Returns a dictionary of data_asset_names that the specified data
         connector can provide. Note that some data_connectors may not be
         capable of describing specific named data assets, and some (such as
-        filesystem glob data_connectors) require the user to configure
+        files_data_connectors) require the user to configure
         data asset names.
 
         Args:
@@ -273,9 +243,8 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
                   }
                   ...
                 }
-
         """
-        available_data_asset_names = {}
+        available_data_asset_names: dict = {}
         if data_connector_names is None:
             data_connector_names = [
                 data_connector["name"] for data_connector in self.list_data_connectors()
@@ -284,12 +253,6 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             data_connector_names = [data_connector_names]
 
         for data_connector_name in data_connector_names:
-            data_connector = self.get_data_connector(data_connector_name)
-            available_data_asset_names[
-                data_connector_name
-            ] = data_connector.get_available_data_asset_names()
+            data_connector = self.get_data_connector(name=data_connector_name)
+            available_data_asset_names[data_connector_name] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
-
-    def build_batch_spec(self, data_connector, batch_definition):
-        generator_obj = self.get_data_connector(data_connector)
-        return generator_obj.build_batch_spec(batch_definition=batch_definition)

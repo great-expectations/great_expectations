@@ -204,9 +204,6 @@ class ExecutionEngine(MetaExecutionEngine):
         else:
             self._metric_cache = NoOpDict()
 
-        data_context = kwargs.pop("data_context", None)
-        self._data_context = data_context
-
         batch_spec_defaults = kwargs.pop("batch_spec_defaults", {})
         batch_spec_defaults_keys = set(batch_spec_defaults.keys())
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
@@ -313,7 +310,6 @@ class ExecutionEngine(MetaExecutionEngine):
 
         return outer
 
-    # TODO: <Alex></Alex>
     ###
     #
     # Output generation
@@ -428,7 +424,6 @@ class ExecutionEngine(MetaExecutionEngine):
             "Unknown result_format {}.".format(result_format["result_format"])
         )
 
-    # TODO: <Alex></Alex>
     @staticmethod
     def _calc_map_expectation_success(success_count, nonnull_count, mostly):
         """Calculate success and percent_success for column_map_expectations
@@ -468,16 +463,6 @@ class ExecutionEngine(MetaExecutionEngine):
             percent_success = None
 
         return success, percent_success
-
-    @property
-    def data_context(self):
-        """Returns the internal Data Context (An object containing the data)"""
-        return self._data_context
-
-    @data_context.setter
-    def data_context(self, data_context):
-        """A setter for the Data Context"""
-        self._data_context = data_context
 
     @property
     def _active_validation(self):
@@ -563,12 +548,11 @@ class ExecutionEngine(MetaExecutionEngine):
         """
         raise NotImplementedError
 
-    def load_batch(self, batch_definition, in_memory_dataset=None):
+    def load_batch(self, batch_definition):
         """
         Load a Batch specified by the batch_definition.
 
         :param batch_definition:
-        :param in_memory_dataset:
         :return:
         """
         raise NotImplementedError
@@ -716,11 +700,11 @@ class ExecutionEngine(MetaExecutionEngine):
         raise NotImplementedError
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_unique_count(self, column):
@@ -732,7 +716,7 @@ class ExecutionEngine(MetaExecutionEngine):
         raise NotImplementedError
 
     def get_column_median(self, column):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_quantiles(

@@ -1,314 +1,249 @@
-import datetime
-import glob
-import logging
-import os
-import re
-import warnings
+from pathlib import Path
+import itertools
+from typing import List, Dict, Union
 
-from great_expectations.exceptions import BatchKwargsError
-from great_expectations.execution_environment.data_connector.data_connector import (
-    DataConnector,
-)
-from great_expectations.execution_environment.types import PathBatchKwargs
+import logging
+
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
+from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
+from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.types import PathBatchSpec
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
 
+KNOWN_EXTENSIONS = [
+    ".csv",
+    ".tsv",
+    ".parquet",
+    ".xls",
+    ".xlsx",
+    ".json",
+    ".csv.gz",
+    ".tsv.gz",
+    ".feather",
+]
+
+
 class FilesDataConnector(DataConnector):
-    r"""FilesDataConnector processes files in a directory according to glob patterns to produce batches of data.
-
-    A more interesting asset_params might look like the following::
-
-        daily_logs:
-          glob: daily_logs/*.csv
-          partition_regex: daily_logs/((19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01]))_(.*)\.csv
-
-
-    The "glob" key ensures that every csv file in the daily_logs directory is considered a batch for this data asset.
-    The "partition_regex" key ensures that files whose basename begins with a date (with components hyphen, space,
-    forward slash, period, or null separated) will be identified by a partition_id equal to just the date portion of
-    their name.
-
-    A fully configured FilesDataConnector in yml might look like the following::
-        my_datasource:
-          class_name: PandasDatasource
-          batch_kwargs_generators:
-            my_generator:
-              class_name: GlobReaderBatchKwargsGenerator
-              base_directory: /var/log
-              reader_options:
-                sep: %
-                header: 0
-              reader_method: csv
-              asset_params:
-                wifi_logs:
-                  glob: wifi*.log
-                  partition_regex: wifi-((0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])-20\d\d).*\.log
-                  reader_method: csv
-    """
-    recognized_batch_parameters = {
-        "data_asset_name",
-        "partition_id",
-        "reader_method",
-        "reader_options",
-        "limit",
-    }
-
     def __init__(
         self,
-        name="default",
-        execution_environment=None,
-        base_directory="/data",
-        reader_options=None,
-        asset_param=None,
-        reader_method=None,
+        name: str,
+        partitioners: dict = None,
+        default_partitioner: str = None,
+        assets: dict = None,
+        config_params: dict = None,
+        batch_definition_defaults: dict = None,
+        known_extensions: list = None,
+        reader_options: dict = None,
+        reader_method: str = None,
+        execution_engine: ExecutionEngine = None,
+        data_context_root_directory: str = None,
+        **kwargs
     ):
-        logger.debug("Constructing FilesDataConnector {!r}".format(name))
-        super().__init__(name, execution_environment=execution_environment)
+        logger.debug(f'Constructing FilesDataConnector "{name}".')
+        super().__init__(
+            name=name,
+            partitioners=partitioners,
+            default_partitioner=default_partitioner,
+            assets=assets,
+            config_params=config_params,
+            batch_definition_defaults=batch_definition_defaults,
+            execution_engine=execution_engine,
+            data_context_root_directory=data_context_root_directory,
+            **kwargs
+        )
+
+        if known_extensions is None:
+            known_extensions = KNOWN_EXTENSIONS
+        self._known_extensions = known_extensions
 
         if reader_options is None:
-            reader_options = {}
-
-        if asset_param is None:
-            asset_param = {
-                "default": {
-                    "partition_regex": r"^((19|20)\d\d[- /.]?(0[1-9]|1[012])[- /.]?(0[1-9]|[12][0-9]|3[01])_(.*))\.csv",
-                    "match_group_id": 1,
-                    "reader_method": "read_csv",
-                }
-            }
-
-        self._base_directory = base_directory
+            reader_options = self._default_reader_options
         self._reader_options = reader_options
-        self._asset_param = asset_param
+
         self._reader_method = reader_method
+        self._base_directory = self.config_params["base_directory"]
 
     @property
     def reader_options(self):
         return self._reader_options
 
     @property
-    def asset_param(self):
-        return self._asset_param
-
-    @property
     def reader_method(self):
         return self._reader_method
 
     @property
+    def known_extensions(self):
+        return self._known_extensions
+
+    @property
     def base_directory(self):
-        # If base directory is a relative path, interpret it as relative to the data context's
-        # context root directory (parent directory of great_expectation dir)
-        if (
-            os.path.isabs(self._base_directory)
-            or self._execution_environment.data_context is None
-        ):
-            return self._base_directory
-        else:
-            return os.path.join(
-                self._execution_environment.data_context.root_directory,
-                self._base_directory,
-            )
+        return self._normalize_directory_path(dir_path=self._base_directory)
 
-    def get_available_data_asset_names(self):
-        """
-        Data Asset names are relative to the base directory
-        :return:
-        """
-        # if not os.path.isdir(self.base_directory):
-        #    return {"names": [(asset, "path") for asset in known_assets]}
-        available_data_asset_names = {}
-        for data_asset_name in self.asset_param.keys():
-            known_assets = []
-            batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
-            if len(batch_paths) > 0 and data_asset_name not in known_assets:
-                for path in batch_paths:
-                    known_assets.append(path)
-            available_data_asset_names[data_asset_name] = known_assets
-
-        return available_data_asset_names
-
-    def get_regex(self, data_asset_name=None):
-        files_config = self._get_data_asset_config(data_asset_name=data_asset_name)
-        batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
-
-        partitions = [
-            self._get_regex(path, files_config)
-            for path in batch_paths
-            if self._get_regex(path, files_config) is not None
-        ]
-        return partitions
-
-    def _get_regex(self, path, files_config):
-        partition_regex = self._base_directory + files_config["partition_regex"]
-        return partition_regex
-
-    def get_available_partitions(self, data_asset_name=None):
-        files_config = self._get_data_asset_config(data_asset_name=data_asset_name)
-        batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
-
-        partitions = [
-            self._partitioner(path, files_config)
-            for path in batch_paths
-            if self._partitioner(path, files_config) is not None
-        ]
-        return partitions
-
-    def get_available_partition_ids(self, data_asset_name=None):
-        partitions = self.get_available_partitions(data_asset_name)
-        partition_ids = []
-        for partition in partitions:
-            partition_ids.append(partition["partition_id"])
-        return partition_ids
-
-    def get_available_partition_definitions(self, data_asset_name=None):
-        partitions = self.get_available_partitions(data_asset_name)
-        # return partitions
-        partition_definitions = []
-        for partition in partitions:
-            partition_definitions.append(partition["partition_definition"])
-        return partition_definitions
-
-    def _partitioner(self, path, files_config):
-        partitions = {}
-
-        # if not configured then we return the default.
-        if "partition_regex" not in files_config:
-            # logger.warning("no partition_regex configuration found for path: %s" % path)
-            # partitions = {
-            #    "partition_definition": {},
-            #    "partition_id": (
-            #                datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ") + "__unmatched")}
-            # return (partitions)
-            return None
-        else:
-            # TODO: check if this is really dangerous, because it seems that way
-            partition_regex = self._base_directory + files_config["partition_regex"]
-            matches = re.match(partition_regex, path)
-            if matches is None:
-                logger.warning("No match found for path: %s" % path)
-                return None
-            else:
-                # need to check that matches length is the same as partition_param
-                if "partition_param" in files_config:
-                    partition_params = files_config["partition_param"]
-
-                    try:
-                        _ = matches[
-                            len(partition_params)
-                        ]  # check validitiy of partition params and whether the regex was configured correctly
-
-                    except:
-                        logger.warning(
-                            "The number of matches not match the delimiter. See if your partitions are defined correctly"
-                        )
-                        print("please check regex")  # TODO: Beef up this error message
-
-                    # NOTE : matches begin with the full regex match at index=0 and then each matching group
-                    # and then each subsequent match in following indices.
-                    # this is why partition_definition_inner_dict is loaded with partition_params[i] as key
-                    # and matches[i+1] as value
-                    partition_definition_inner_dict = {}
-                    for i in range(len(partition_params)):
-                        partition_definition_inner_dict[partition_params[i]] = matches[
-                            i + 1
+    def get_available_data_asset_names(self) -> list:
+        available_data_asset_names: list = []
+        if self.assets:
+            available_data_asset_names.append(list(self.assets.keys()))
+        available_data_asset_names.append(
+            [Path(path).stem for path in self._get_file_paths_for_data_asset(data_asset_name=None)]
+        )
+        return list(
+            set(
+                list(
+                    itertools.chain.from_iterable(
+                        [
+                            element for element in available_data_asset_names
                         ]
-                    partitions["partition_definition"] = partition_definition_inner_dict
+                    )
+                )
+            )
+        )
 
-                if "partition_delimiter" in files_config:
-                    delim = files_config["partition_delimiter"]
-                else:
-                    delim = "-"
+    def _get_available_partitions(
+        self,
+        partitioner: Partitioner,
+        data_asset_name: str = None,
+        partition_query: Union[PartitionQuery, None] = None,
+        repartition: bool = None
+    ) -> List[Partition]:
+        paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
+        if isinstance(partitioner, NoOpPartitioner):
+            default_data_asset_name: str = data_asset_name or self.DEFAULT_DATA_ASSET_NAME
+            default_datasets: List[Dict[str, str]] = [
+                {
+                    "partition_name": Path(path).stem,
+                    "data_reference": path
+                }
+                for path in paths
+            ]
+            return partitioner.get_available_partitions(
+                # The next three (3) general parameters are for both, creating partitions and querying partitions.
+                data_asset_name=data_asset_name,
+                partition_query=partition_query,
+                repartition=repartition,
+                # The next two (2) parameters are specific for the NoOp partitioner under the present data connector.
+                pipeline_data_asset_name=default_data_asset_name,
+                pipeline_datasets=default_datasets
+            )
+        data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
+        auto_discover_assets: bool = not data_asset_config_exists
+        return partitioner.get_available_partitions(
+            # The next three (3) general parameters are for both, creating partitions and querying partitions.
+            data_asset_name=data_asset_name,
+            partition_query=partition_query,
+            # The next two (2) parameters are specific for the partitioners that work under the present data connector.
+            paths=paths,
+            auto_discover_assets=auto_discover_assets
+        )
 
-                # process partition_definition into partition id
-                partition_id = []
-                for key in partitions["partition_definition"].keys():
-                    partition_id.append(str(partitions["partition_definition"][key]))
-                partition_id = delim.join(partition_id)
-                partitions["partition_id"] = partition_id
+    def _normalize_directory_path(self, dir_path: str) -> str:
+        # If directory is a relative path, interpret it as relative to the data context's
+        # context root directory (parent directory of great_expectation dir)
+        if Path(dir_path).is_absolute() or self._data_context_root_directory is None:
+            return dir_path
+        else:
+            return Path(self._data_context_root_directory).joinpath(dir_path)
 
-        return partitions
-
-    def _get_data_asset_paths(self, data_asset_name):
+    def _get_file_paths_for_data_asset(self, data_asset_name: str = None) -> list:
         """
-        Returns a list of filepaths associated with the given data_asset_name
-        Args:
-            data_asset_name:
-
         Returns:
             paths (list)
         """
-        glob_config = self._get_data_asset_config(data_asset_name)
-        globs = sorted(glob.glob(self.base_directory + "/**", recursive=True))
-        files = [f for f in globs if os.path.isfile(f)]
+        base_directory: str
+        glob_directive: str
 
-        if "partition_regex" in glob_config.keys():
-            pattern = re.compile(glob_config["partition_regex"])
-            files = [file for file in files if pattern.match(file)]
-        return files
+        data_asset_directives: dict = self._get_data_asset_directives(data_asset_name=data_asset_name)
+        base_directory = data_asset_directives["base_directory"]
+        glob_directive = data_asset_directives["glob_directive"]
 
-    """
-    # Maybe we dont need this?
+        if Path(base_directory).is_dir():
+            path_list: list
+            if glob_directive:
+                path_list = [
+                    str(posix_path) for posix_path in Path(base_directory).glob(glob_directive)
+                ]
+            else:
+                path_list = [
+                    str(posix_path) for posix_path in self._get_valid_file_paths(base_directory=base_directory)
+                ]
+            return self._verify_file_paths(path_list=path_list)
+        raise ge_exceptions.DataConnectorError(f'Expected a directory, but path "{base_directory}" is not a directory.')
 
-    def _get_iterator(
-        self, data_asset_name, reader_method=None, reader_options=None, limit=None
-    ):
-        glob_config = self._get_data_asset_config(data_asset_name)
-        paths = glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
-        return self._build_batch_kwargs_path_iter(
-            paths,
-            glob_config,
-            reader_method=reader_method,
-            reader_options=reader_options,
-            limit=limit,
-        )
+    def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
+        glob_directive: str
+        base_directory: str
+        if (
+            data_asset_name
+            and self.assets
+            and self.assets.get(data_asset_name)
+            and self.assets[data_asset_name].get("config_params")
+            and self.assets[data_asset_name]["config_params"]
+        ):
+            base_directory = self._normalize_directory_path(
+                dir_path=self.assets[data_asset_name]["config_params"].get("base_directory", self.base_directory)
+            )
+            glob_directive = self.assets[data_asset_name]["config_params"].get("glob_directive")
+        else:
+            base_directory = self.base_directory
+            glob_directive = self.config_params.get("glob_directive")
+        return {"base_directory": base_directory, "glob_directive": glob_directive}
 
-    """
+    @staticmethod
+    def _verify_file_paths(path_list: list) -> list:
+        if not all(
+            [not Path(path).is_dir() for path in path_list]
+        ):
+            raise ge_exceptions.DataConnectorError(
+                "All paths for a configured data asset must be files (a directory was detected)."
+            )
+        return path_list
 
-    def _build_batch_kwargs_path_iter(
-        self,
-        path_list,
-        glob_config,
-        reader_method=None,
-        reader_options=None,
-        limit=None,
-    ):
+    def _get_valid_file_paths(self, base_directory: str = None) -> list:
+        if base_directory is None:
+            base_directory = self.base_directory
+        path_list: list = list(Path(base_directory).iterdir())
         for path in path_list:
-            yield self._build_batch_kwargs_from_path(
-                path,
-                glob_config,
-                reader_method=reader_method,
-                reader_options=reader_options,
-                limit=limit,
+            for extension in self.known_extensions:
+                if path.endswith(extension) and not path.startswith("."):
+                    path_list.append(path)
+                elif Path(path).is_dir:
+                    # Make sure there is at least one valid file inside the subdirectory.
+                    subdir_path_list: list = self._get_valid_file_paths(base_directory=path)
+                    if len(subdir_path_list) > 0:
+                        path_list.append(subdir_path_list)
+        return list(
+            set(
+                list(
+                    itertools.chain.from_iterable(
+                        [
+                            element for element in path_list
+                        ]
+                    )
+                )
             )
-
-    def _build_batch_kwargs_from_path(
-        self, path, glob_config, reader_method=None, reader_options=None, limit=None
-    ):
-
-        batch_kwargs = self._execution_environment.execution_engine.process_batch_parameters(
-            reader_method=reader_method
-            or glob_config.get("reader_method")
-            or self.reader_method,
-            reader_options=reader_options
-            or glob_config.get("reader_options")
-            or self.reader_options,
-            limit=limit or glob_config.get("limit"),
         )
 
-        batch_kwargs["path"] = path
-        batch_kwargs[
-            "execution_environment"
-        ] = self._execution_environment.name  # TODO : check if this breaks anything
-        return PathBatchKwargs(batch_kwargs)
-
-    def _get_data_asset_config(self, data_asset_name):
-        try:
-            return self.asset_param[data_asset_name]
-        except KeyError:
-            batch_kwargs = {
-                "data_asset_name": data_asset_name,
-            }
-            raise BatchKwargsError(
-                "Unknown asset_name %s" % data_asset_name, batch_kwargs
-            )
+    def build_batch_spec_from_partitions(
+        self,
+        partitions: List[Partition],
+        batch_definition: dict,
+        batch_spec: dict = None
+    ) -> PathBatchSpec:
+        """
+        Args:
+            partitions:
+            batch_definition:
+            batch_spec:
+        Returns:
+            batch_spec
+        """
+        # TODO: <Alex>If the list has multiple elements, we are using the first one (TBD/TODO multifile config / multibatch)</Alex>
+        if not batch_spec.get("path"):
+            path: str = str(partitions[0].data_reference)
+            batch_spec["path"] = path
+        return PathBatchSpec(batch_spec)
