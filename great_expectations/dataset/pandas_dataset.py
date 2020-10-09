@@ -435,7 +435,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if not treat_as_null:
             return ~column.isnull()
         else:
-            return -column.isnull() | -column.isin(treat_as_null)
+            return -column.isnull() & -column.isin(treat_as_null)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation

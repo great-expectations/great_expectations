@@ -25,7 +25,6 @@ try:
         stddev_samp,
         length as length_,
         when,
-        year,
         count,
         countDistinct
     )
@@ -567,10 +566,10 @@ class SparkDFDataset(MetaSparkDFDataset):
             try:
                 datetime.strptime(val, strftime_format)
                 return True
-            except TypeError as e:
+            except TypeError:
                 raise TypeError("Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format.")
 
-            except ValueError as e:
+            except ValueError:
                 return False
 
         success_udf = udf(is_parseable_by_format)
@@ -581,26 +580,48 @@ class SparkDFDataset(MetaSparkDFDataset):
     def expect_column_values_to_not_be_null(
         self,
         column,
+        treat_as_null=None,
         mostly=None,
         result_format=None,
         include_config=False,
         catch_exceptions=None,
         meta=None,
     ):
-        return column.withColumn('__success', column[0].isNotNull())
+        if not treat_as_null:
+            return column.withColumn('__success', column[0].isNotNull())
+        else:
+            treat_as_null_output = self.expect_column_values_to_not_be_in_set(column, treat_as_null,
+                                                                          mostly=mostly,
+                                                                          result_format=result_format,
+                                                                          include_config=include_config,
+                                                                          catch_exceptions=catch_exceptions,
+                                                                          meta=meta)
+            return column.withColumn('__success', when(column[0].isNotNull() & treat_as_null_output,
+                                                       lit(True)).otherwise(lit(False)))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
     def expect_column_values_to_be_null(
         self,
         column,
+        treat_as_null=None,
         mostly=None,
         result_format=None,
         include_config=False,
         catch_exceptions=None,
         meta=None,
     ):
-        return column.withColumn('__success', column[0].isNull())
+        if not treat_as_null:
+            return column.withColumn('__success', column[0].isNull())
+        else:
+            treat_as_null_output = self.expect_column_values_to_be_in_set(column, treat_as_null,
+                                                                          mostly=mostly,
+                                                                          result_format=result_format,
+                                                                          include_config=include_config,
+                                                                          catch_exceptions=catch_exceptions,
+                                                                          meta=meta)
+            return column.withColumn('__success', when(column[0].isNull() | treat_as_null_output,
+                                                       lit(True)).otherwise(lit(False)))
 
     @DocInherit
     @DataAsset.expectation(['column', 'type_', 'mostly'])
