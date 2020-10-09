@@ -8,6 +8,8 @@ Develop
 -----------------
 * [BUGFIX] Query batch kwargs support for Athena backend (issue 1964)
 
+* [BUGFIX] Skip config substitution if key is "password"
+
 0.12.4
 -----------------
 * [FEATURE] Add PagerdutyAlertAction (Thanks @NiallRees!)
