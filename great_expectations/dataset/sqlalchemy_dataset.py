@@ -597,21 +597,31 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_null(self,
                                         column,
+                                        treat_as_null=None,
                                         mostly=None,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
                                         ):
 
-        return sa.column(column) == None
+        if not treat_as_null:
+            return sa.column(column) == None
+        else:
+            treat_as_null.extend(None)
+            return self.expect_column_values_to_be_in_set(treat_as_null)
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_be_null(self,
                                             column,
+                                            treat_as_null=None,
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None
                                             ):
 
-        return sa.column(column) != None
+        if not treat_as_null:
+            return sa.column(column) != None
+        else:
+            treat_as_null.extend(None)
+            return self.expect_column_values_to_not_be_in_set(treat_as_null)
 
     def _get_dialect_type_module(self):
         if self.dialect is None:

@@ -6,7 +6,7 @@ from six import PY3, string_types
 from functools import wraps
 from numbers import Number
 from dateutil.parser import parse
-from datetime import datetime, timedelta
+from datetime import datetime
 
 if sys.version_info.major == 2:  # If python 2
     from itertools import izip_longest as zip_longest
@@ -838,13 +838,14 @@ class Dataset(MetaDataset):
 
     def expect_column_values_to_not_be_null(self,
                                             column,
+                                            treat_as_null=None,
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None
                                             ):
         """Expect column values to not be null.
 
-        To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an
-        np.NaN in pandas. Empty strings don't count as null unless they have been coerced to a null type.
+        To be counted as an exception, values must be explicitly null or missing (such as a NULL in PostgreSQL or an
+        np.NaN in pandas), or must be explicitly listed in `treat_as_null`.
 
         expect_column_values_to_not_be_null is a \
         :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
@@ -852,6 +853,8 @@ class Dataset(MetaDataset):
         Args:
             column (str): \
                 The column name.
+            treat_as_null (list or None): \
+                A list of additional values to treat as missing.
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
@@ -887,6 +890,7 @@ class Dataset(MetaDataset):
 
     def expect_column_values_to_be_null(self,
                                         column,
+                                        treat_as_null=None,
                                         mostly=None,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
                                         ):
@@ -898,6 +902,8 @@ class Dataset(MetaDataset):
         Args:
             column (str): \
                 The column name.
+            treat_as_null (list or None): \
+                A list of additional values to treat as missing.
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \

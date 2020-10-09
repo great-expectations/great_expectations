@@ -429,19 +429,24 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_not_be_null(self, column,
+    def expect_column_values_to_not_be_null(self, column, treat_as_null=None,
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None, include_nulls=True):
-
-        return ~column.isnull()
+        if not treat_as_null:
+            return ~column.isnull()
+        else:
+            return -column.isnull() | -column.isin(treat_as_null)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_null(self, column,
+    def expect_column_values_to_be_null(self, column, treat_as_null=None,
                                         mostly=None,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
-        return column.isnull()
+        if not treat_as_null:
+            return column.isnull()
+        else:
+            return column.isnull() | column.isin(treat_as_null)
 
     @DocInherit
     def expect_column_values_to_be_of_type(
