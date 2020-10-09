@@ -1,7 +1,1 @@
-# -*- coding: utf-8 -*-
-
-from .data_context import (
-    ConfigOnlyDataContext, 
-    DataContext,
-    ExplorerDataContext,
-)
+from .data_context import BaseDataContext, DataContext, ExplorerDataContext

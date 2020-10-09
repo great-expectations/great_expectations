@@ -72,6 +72,7 @@
       }
     }
   ],
-  "data_asset_name": null,
-  "expectation_suite_name": "default"
+  "data_asset_name": "my_source/my_generator/my_asset",
+  "expectation_suite_name": "default",
+  "meta": {}
 }

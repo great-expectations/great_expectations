@@ -9,8 +9,18 @@
       "a" : ["1/1/2016", "2/2/2016", "3/3/2016", "4/4/2016", "5/5/2016", null, null, null, null, null],
       "b" : ["1/1/2016", "2/1/2016", "3/1/2016", "4/1/2016", "5/1/2020", null, null, null, null, null]
     },
+    "schemas": {
+      "spark": {
+        "w": "IntegerType",
+        "x": "IntegerType",
+        "y": "IntegerType",
+        "z": "IntegerType",
+        "a": "StringType",
+        "b": "StringType"
+      }
+    },
     "tests" : [{
-      "title" : "Basic positive test",
+      "title" : "basic_positive_test",
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
@@ -22,7 +32,7 @@
         "success": true
       }
     },{
-      "title" : "Basic positive test with missing values and ignore_row_if=either_value_is_missing",
+      "title" : "basic_positive_test_with_missing_values_and_ignore_row_if__either_value_is_missing",
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
@@ -35,7 +45,7 @@
         "success": true
       }
     },{
-      "title" : "Test ties",
+      "title" : "test_ties",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
@@ -54,7 +64,7 @@
         "success": false
       }
     },{
-      "title" : "Test ties with or_equal",
+      "title" : "test_ties_with_or_equal",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
@@ -68,7 +78,7 @@
         "success": true
       }
     },{
-      "title" : "Test parse_strings_as_datetimes and mostly",
+      "title" : "test_parse_strings_as_datetimes_and_mostly",
       "exact_match_out" : false,
       "in": {
         "column_A": "a",

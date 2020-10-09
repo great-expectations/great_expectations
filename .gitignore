@@ -119,3 +119,9 @@ ENV/
 
 .DS_Store
 **/.pytest_cache
+
+# Vim swap files
+*.swp
+
+# Special "scratchpad" directory for notes, code samples, experiments, etc.
+DO_NOT_COMMIT

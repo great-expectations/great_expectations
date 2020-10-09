@@ -1,0 +1,91 @@
+{
+  "expectation_type" : "expect_column_values_to_not_match_like_pattern_list",
+  "datasets" : [{
+    "data" : {
+      "w" : ["111", "222", "333", "123", "321", "444", "456", "654", "555", null],
+      "x" : ["man", "plan", "canal", "panama", "hat", "bat", "bit", "bot", "but", "bet"]
+    },
+    "schemas": {
+      "spark": {
+        "w": "StringType",
+        "x": "StringType"
+      },
+      "mssql": {
+        "w": "NVARCHAR",
+        "x": "VARCHAR"
+      }
+    },
+    "tests" : [
+    {
+      "title" : "basic_positive_test",
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "like_pattern_list": ["[^ ]"]
+      },
+      "out": {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      },
+      "only_for": ["sqlalchemy"]
+    },
+    {
+      "title" : "positive_test_with_multiple_like_patternes",
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "like_pattern_list": ["^ ", "^a-zA-Z"]
+      },
+      "out": {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      },
+      "only_for": ["sqlalchemy"]
+    },
+    {
+      "title" : "basic_negative_test",
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "like_pattern_list": ["%[12]%", "%[45]%"]
+      },
+      "out": {
+        "unexpected_list": ["111", "222", "123", "321", "444", "456", "654", "555"],
+        "unexpected_index_list": [0,1,3,4,5,6,7,8],
+        "success": false
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title" : "negative_test_with_more_string-ish_strings",
+      "exact_match_out" : false,
+      "in": {
+        "column": "x",
+        "like_pattern_list": ["opatomus", "ovat", "h%t"]
+      },
+      "out": {
+        "unexpected_list": ["hat"],
+        "unexpected_index_list": [4],
+        "success": false
+      },
+      "only_for": ["sqlalchemy"]
+    },
+    {
+      "title" : "basic_negative_test",
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "like_pattern_list": ["%1%", "%2%", "%4%", "%5%"]
+      },
+      "out": {
+        "unexpected_list": ["111", "222", "123", "321", "444", "456", "654", "555"],
+        "unexpected_index_list": [0,1,3,4,5,6,7,8],
+        "success": false
+      },
+      "only_for": ["sqlite", "postresql", "mysql"]
+    }
+   ]
+  }]
+}

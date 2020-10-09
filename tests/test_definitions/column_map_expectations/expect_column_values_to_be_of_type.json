@@ -21,15 +21,6 @@
           "s": "float64",
           "s1": "int64"
         },
-        "postgresql": {
-          "x": "INTEGER",
-          "y": "DOUBLE_PRECISION",
-          "z": "TEXT",
-          "n": "TEXT",
-          "b": "BOOLEAN",
-          "s": "DOUBLE_PRECISION",
-          "s1": "BIGINT"
-        },
         "spark": {
           "x": "IntegerType",
           "y": "FloatType",
@@ -48,12 +39,30 @@
           "s": "FLOAT",
           "s1": "INTEGER"
         },
+        "postgresql": {
+          "x": "INTEGER",
+          "y": "DOUBLE_PRECISION",
+          "z": "TEXT",
+          "n": "TEXT",
+          "b": "BOOLEAN",
+          "s": "DOUBLE_PRECISION",
+          "s1": "BIGINT"
+        },
         "mysql": {
           "x": "INTEGER",
           "y": "FLOAT",
           "z": "TEXT",
           "n": "TEXT",
-          "b": "BOOLEAN",
+          "b": "TINYINT",
+          "s": "FLOAT",
+          "s1": "BIGINT"
+        },
+        "mssql": {
+          "x": "INTEGER",
+          "y": "FLOAT",
+          "z": "VARCHAR",
+          "n": "VARCHAR",
+          "b": "BIT",
           "s": "FLOAT",
           "s1": "BIGINT"
         }
@@ -124,7 +133,7 @@
           {
             "success":false
           },
-          "only_for": ["postgresql", "mysql"]
+          "only_for": ["postgresql", "mysql", "mssql"]
         },
         {
           "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
@@ -183,7 +192,7 @@
           {
             "success":true
           },
-          "only_for": ["postgres"]
+          "only_for": ["postgresql"]
         },
         {
           "_note": "type name here works for tested sql non-postgres types; for sql non-postgres note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
@@ -198,7 +207,7 @@
           {
             "success":true
           },
-          "only_for": ["mysql", "sqlite"]
+          "only_for": ["sqlite", "mysql", "mssql"]
         },
         {
           "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
@@ -236,7 +245,7 @@
           "exact_match_out": false,
           "in":{"column":"z","type_":"VARCHAR"},
           "out":{"success":true},
-          "only_for": ["sqlite"]
+          "only_for": ["sqlite", "mssql"]
         },
         {
           "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
@@ -263,7 +272,28 @@
           "out":{
             "success":true
           },
-          "only_for": ["sqlalchemy"]
+          "only_for": ["sqlalchemy"],
+          "suppress_test_for": ["mysql", "mssql"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "negative_test_sqlalchemy_floats_are_not_BOOLEAN",
+          "exact_match_out": false,
+          "in":{"column":"b","type_":"TINYINT"},
+          "out":{
+            "success":true
+          },
+          "only_for": ["mysql"]
+        },
+        {
+          "_note": "type name here works for mssql",
+          "title": "negative_test_mssql_floats_are_not_BIT",
+          "exact_match_out": false,
+          "in":{"column":"b","type_":"BIT"},
+          "out":{
+            "success":true
+          },
+          "only_for": ["mssql"]
         },
         {
           "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
@@ -341,8 +371,12 @@
           "datetime_tz": "DATETIME"
         },
         "mysql": {
-          "timestamp": "DATETIME",
-          "timestamp_tz": "DATETIME"
+          "datetime": "DATETIME",
+          "datetime_tz": "DATETIME"
+        },
+        "mssql": {
+          "datetime": "DATETIME",
+          "datetime_tz": "DATETIME"
         }
       },
       "tests": [

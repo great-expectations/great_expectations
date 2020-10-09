@@ -1,0 +1,21 @@
+{
+    "expectation_suite_name": "my_dag_node.default",
+    "data_asset_type": "Dataset",
+    "meta": {
+        "great_expectations_version": "0.9.4"
+    },
+    "expectations": [
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "x",
+                "min_value": {
+                    "$PARAMETER": "trunc(0.9 * urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result.observed_value)"
+                },
+                "max_value": {
+                    "$PARAMETER": "trunc(1.1 * urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result.observed_value)"
+                }
+            }
+        }
+    ]
+}

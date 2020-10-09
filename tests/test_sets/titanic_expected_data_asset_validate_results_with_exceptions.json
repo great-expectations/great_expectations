@@ -1,0 +1,196 @@
+{
+  "meta": {
+    "expectation_suite_name": "titanic",
+    "run_id": {
+      "run_time": "1955-11-05T00:00:00+00:00",
+      "run_name": null
+    },
+    "batch_kwargs": {
+      "ge_batch_id": "1234"
+    },
+    "batch_markers": {},
+    "batch_parameters": {},
+    "validation_time": "19551105T000000.000000Z"
+  },
+  "results": [
+    {
+      "meta": {},
+      "success": true,
+      "result": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Name"
+        },
+        "meta": {}
+      }
+    },
+    {
+      "meta": {},
+      "success": false,
+      "result": {},
+      "exception_info": {
+        "raised_exception": true,
+        "exception_message": "InvalidCacheValueError: Invalid result values were found when trying to instantiate an ExpectationValidationResult.\n- Invalid result values are likely caused by inconsistent cache values.\n- Great Expectations enables caching by default.\n- Please ensure that caching behavior is consistent between the underlying Dataset (e.g. Spark) and Great Expectations.\nResult: {\n  \"element_count\": 1313,\n  \"missing_count\": 0,\n  \"missing_percent\": 0.0,\n  \"unexpected_count\": 3,\n  \"unexpected_percent\": 0.2284843869002285,\n  \"unexpected_percent_nonmissing\": 0.2284843869002285,\n  \"partial_unexpected_list\": [\n    \"Downton (?Douton), Mr William James\",\n    \"Jacobsohn Mr Samuel\",\n    \"Seman Master Betros\"\n  ],\n  \"partial_unexpected_index_list\": [\n    394,\n    456,\n    1195\n  ],\n  \"partial_unexpected_counts\": [\n    {\n      \"value\": \"Downton (?Douton), Mr William James\",\n      \"count\": 1\n    },\n    {\n      \"value\": \"Jacobsohn Mr Samuel\",\n      \"count\": 1\n    },\n    {\n      \"value\": \"Seman Master Betros\",\n      \"count\": 1\n    }\n  ],\n  \"unexpected_list\": [\n    \"Downton (?Douton), Mr William James\",\n    \"Jacobsohn Mr Samuel\",\n    \"Seman Master Betros\"\n  ],\n  \"unexpected_index_list\": [\n    394,\n    456,\n    1195\n  ]\n}\n"
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_match_regex",
+        "kwargs": {
+          "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ",
+          "column": "Name",
+          "mostly": 0.95
+        },
+        "meta": {}
+      }
+    },
+    {
+      "meta": {},
+      "success": true,
+      "result": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "PClass"
+        },
+        "meta": {}
+      }
+    },
+    {
+      "meta": {},
+      "success": false,
+      "result": {},
+      "exception_info": {
+        "raised_exception": true,
+        "exception_message": "InvalidCacheValueError: Invalid result values were found when trying to instantiate an ExpectationValidationResult.\n- Invalid result values are likely caused by inconsistent cache values.\n- Great Expectations enables caching by default.\n- Please ensure that caching behavior is consistent between the underlying Dataset (e.g. Spark) and Great Expectations.\nResult: {\n  \"element_count\": 1313,\n  \"missing_count\": 0,\n  \"missing_percent\": 0.0,\n  \"unexpected_count\": 1,\n  \"unexpected_percent\": 0.07616146230007616,\n  \"unexpected_percent_nonmissing\": 0.07616146230007616,\n  \"partial_unexpected_list\": [\n    \"*\"\n  ],\n  \"partial_unexpected_index_list\": [\n    456\n  ],\n  \"partial_unexpected_counts\": [\n    {\n      \"value\": \"*\",\n      \"count\": 1\n    }\n  ],\n  \"unexpected_list\": [\n    \"*\"\n  ],\n  \"unexpected_index_list\": [\n    456\n  ]\n}\n"
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "PClass",
+          "value_set": [
+            "1st",
+            "2nd",
+            "3rd"
+          ]
+        },
+        "meta": {}
+      }
+    },
+    {
+      "meta": {},
+      "success": true,
+      "result": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Age"
+        },
+        "meta": {}
+      }
+    },
+    {
+      "meta": {},
+      "success": false,
+      "result": {},
+      "exception_info": {
+        "raised_exception": true,
+        "exception_message": "InvalidCacheValueError: Invalid result values were found when trying to instantiate an ExpectationValidationResult.\n- Invalid result values are likely caused by inconsistent cache values.\n- Great Expectations enables caching by default.\n- Please ensure that caching behavior is consistent between the underlying Dataset (e.g. Spark) and Great Expectations.\nResult: {\n  \"observed_value\": 30.397989417989418,\n  \"element_count\": 1313,\n  \"missing_count\": 557,\n  \"missing_percent\": 42.421934501142424\n}\n"
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_mean_to_be_between",
+        "kwargs": {
+          "column": "Age",
+          "max_value": 40,
+          "min_value": 20
+        },
+        "meta": {}
+      }
+    },
+    {
+      "meta": {},
+      "success": false,
+      "result": {},
+      "exception_info": {
+        "raised_exception": true,
+        "exception_message": "InvalidCacheValueError: Invalid result values were found when trying to instantiate an ExpectationValidationResult.\n- Invalid result values are likely caused by inconsistent cache values.\n- Great Expectations enables caching by default.\n- Please ensure that caching behavior is consistent between the underlying Dataset (e.g. Spark) and Great Expectations.\nResult: {\n  \"element_count\": 1313,\n  \"missing_count\": 557,\n  \"missing_percent\": 42.421934501142424,\n  \"unexpected_count\": 0,\n  \"unexpected_percent\": 0.0,\n  \"unexpected_percent_nonmissing\": 0.0,\n  \"partial_unexpected_list\": [],\n  \"partial_unexpected_index_list\": [],\n  \"partial_unexpected_counts\": [],\n  \"unexpected_list\": [],\n  \"unexpected_index_list\": []\n}\n"
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_between",
+        "kwargs": {
+          "column": "Age",
+          "max_value": 80,
+          "min_value": 0
+        },
+        "meta": {}
+      }
+    },
+    {
+      "meta": {},
+      "success": true,
+      "result": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Sex"
+        },
+        "meta": {}
+      }
+    },
+    {
+      "meta": {},
+      "success": true,
+      "result": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Survived"
+        },
+        "meta": {}
+      }
+    },
+    {
+      "meta": {},
+      "success": true,
+      "result": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "SexCode"
+        },
+        "meta": {}
+      }
+    }
+  ],
+  "success": false,
+  "statistics": {
+    "evaluated_expectations": 10,
+    "successful_expectations": 6,
+    "unsuccessful_expectations": 4,
+    "success_percent": 60.0
+  },
+  "evaluation_parameters": {}
+}

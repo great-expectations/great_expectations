@@ -128,7 +128,56 @@
         "error":{
           "traceback_substring": "argument of type 'NoneType' is not iterable"
           }
+      },
+    {
+      "title": "test_conditional_expectation_passes",
+      "only_for": ["pandas"],
+      "exact_match_out": false,
+      "in": {
+        "column": "z",
+        "value_set": ["hello"],
+        "catch_exceptions": true,
+       "row_condition": "x == '1'",
+        "condition_parser": "pandas"
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
       }
+    },
+    {
+      "title": "test_conditional_expectation_fails",
+      "only_for": ["pandas"],
+      "exact_match_out": false,
+      "in": {
+        "column": "z",
+        "value_set": ["jello"],
+        "catch_exceptions": true,
+        "row_condition": "x == 1",
+        "condition_parser": "pandas"
+      },
+      "out": {
+        "success": false,
+        "unexpected_index_list": [0],
+        "unexpected_list": ["hello"]
+      }
+    },
+    {
+      "title": "test_conditional_expectation_parser_errors",
+      "only_for": ["pandas"],
+      "exact_match_out": false,
+      "in": {
+        "column": "z",
+        "value_set": ["hello"],
+        "catch_exceptions": true,
+        "row_condition": "x == 1",
+        "condition_parser": "bad_parser"
+      },
+      "out": {
+        "traceback_substring": "must be 'python' or 'pandas'"
+      }
+    }
     ]},
     {
       "data": {
@@ -137,6 +186,9 @@
       "schemas": {
         "postgresql": {
           "empty_column": "TEXT"
+        },
+        "mssql": {
+          "empty_column": "VARCHAR"
         }
       },
       "tests": [{
@@ -157,19 +209,26 @@
       "dates" : ["2018-01-01", "2018-01-02", "2018-01-02 00:34:01"]
     },
     "schemas": {
+      "pandas": {
+        "dates": "datetime64"
+      },
       "sqlite": {
         "dates": "DATETIME"
       },
       "postgresql": {
         "dates": "TIMESTAMP"
       },
-      "pandas": {
-        "dates": "datetime64"
+      "mysql": {
+        "dates": "TIMESTAMP"
+      },
+      "mssql": {
+        "dates": "DATETIME"
       }
     },
     "tests" : [
       {
         "title": "Basic positive test case, datetime set",
+        "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "in": {
           "column": "dates",
@@ -178,11 +237,11 @@
         },
         "out": {
           "success": true
-        },
-        "suppress_test_for": ["sqlite"]
+        }
     },
     {
       "title": "Basic negative test case, datetime set",
+      "suppress_test_for": ["sqlite"],
       "exact_match_out": false,
       "in": {
         "column": "dates",
@@ -192,9 +251,8 @@
       "out": {
         "success": false,
         "unexpected_index_list": [0],
-        "unexpected_list": ["2018-01-01 00:00:00"]      
-      },
-      "suppress_test_for": ["sqlite"]
+        "unexpected_list": ["2018-01-01T00:00:00"]
+      }
     }]
   }]
 }

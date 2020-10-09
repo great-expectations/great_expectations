@@ -1,8 +1,7 @@
 {
-  "data_asset_name": null,
   "expectation_suite_name": "default",
   "meta": {
-    "great_expectations.__version__": "0.4.4"
+    "great_expectations_version": "0.4.4"
   },
   "expectations": [
     {

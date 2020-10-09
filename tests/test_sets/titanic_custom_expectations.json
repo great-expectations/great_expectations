@@ -1,12 +1,13 @@
 {
   "expectations": [
     {
-      "expectation_type": "expect_column_values_to_have_odd_lengths", 
+      "expectation_type": "expect_column_values_to_have_odd_lengths",
       "kwargs": {
         "column": "Name"
       }
     }
- ], 
- "data_asset_name": null,
- "expectation_suite_name": "default"
+  ],
+  "data_asset_name": "titanic",
+  "expectation_suite_name": "default",
+  "meta": {}
 }

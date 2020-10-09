@@ -1,0 +1,9 @@
+# A lot of Great Expectations' codebase and tests are tied to specific databases, cloud providers, etc.
+# In this file, comments on each row indicate which tests that package is used for.
+# To run tests for smaller subsets of infrastructure, please look at other requirements-dev-*.txt files.
+# Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
+
+flake8==3.8.3  # lint
+isort==5.4.2  # lint
+pre-commit>=2.6.0  # lint
+pyupgrade==2.7.2  # lint

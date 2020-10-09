@@ -1,0 +1,117 @@
+# This is a basic configuration for testing.
+# It has comments that should be preserved.
+config_version: 2
+datasources:
+  # For example, this one.
+  mydatasource:
+    class_name: PandasDatasource
+    data_asset_type:
+      class_name: PandasDataset
+    batch_kwargs_generators:
+      # The name default is read if no datasource or generator is specified
+      mygenerator:
+        type: subdir_reader
+        base_directory: ../data
+plugins_directory: plugins/
+
+expectations_store_name: expectations_store
+evaluation_parameter_store_name: evaluation_parameter_store
+validations_store_name: validations_store
+
+stores:
+  expectations_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: expectations/
+  validations_store:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/validations/
+
+  # These next three blocks are never used in tests.
+
+  # local_profiling_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: uncommitted/profiling/
+  #     serialization_type: json
+  #     file_extension: .json
+
+  # local_workbench_site_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: uncommitted/data_docs/local_site
+  #     file_extension: .html
+
+  # shared_team_site_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: uncommitted/data_docs/team_site
+  #     file_extension: .html
+
+  fixture_validation_results_store:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: fixtures/validations
+
+  evaluation_parameter_store:
+      module_name: great_expectations.data_context.store
+      class_name: EvaluationParameterStore
+
+data_docs_sites:
+  local_site: # site name
+  # “local_site” renders documentation for all the datasources in the project from GE artifacts in the local repo.
+  # The site includes expectation suites and profiling and validation results from uncommitted directory.
+  # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
+
+    module_name: great_expectations.render.renderer.site_builder
+    class_name: SiteBuilder
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/
+
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+
+    site_section_builders:
+      expectations:
+        source_store_name: validations_store
+
+      validations:
+        source_store_name: expectations_store
+        run_name_filter:
+          not_equals: custom_validations_filter
+
+      profiling:
+        source_store_name: expectations_store
+        run_name_filter:
+          equals: custom_profiling_filter
+
+validation_operators:
+  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
+  default:
+    class_name: ActionListValidationOperator
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+          target_store_name: validations_store
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+          target_store_name: evaluation_parameter_store
+      # Uncomment the notify_slack action below to send notifications during evaluation
+      # - name: notify_slack
+      #   action:
+      #     class_name: SlackNotificationAction
+      #     slack_webhook: ${validation_notification_slack_webhook}
+      #     notify_on: all
+      #     renderer:
+      #       module_name: great_expectations.render.renderer.slack_renderer
+      #       class_name: SlackRenderer

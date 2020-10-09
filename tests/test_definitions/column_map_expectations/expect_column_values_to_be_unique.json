@@ -21,6 +21,16 @@
         "unique": "IntegerType",
         "null": "NullType",
         "mult_dup": "StringType"
+      },
+      "mssql": {
+        "a": "VARCHAR",
+        "b": "NVARCHAR",
+        "c": "INTEGER",
+        "d": "NVARCHAR",
+        "n": "INTEGER",
+        "unique": "INTEGER",
+        "null": "NVARCHAR",
+        "mult_dup": "VARCHAR"
       }
     },
     "tests" : [
@@ -47,9 +57,9 @@
           "unexpected_index_list": [0, 1, 2]
         }
       },{
-        "title": "Multi-type column, contains 2 and '2'. Suppressed for SQAlchemy ",
-        "exact_match_out": false,
+        "title": "Multi-type column, contains 2 and '2'. Suppressed for SQAlchemy",
         "suppress_test_for": ["sqlalchemy"],
+        "exact_match_out": false,
         "in": {
           "column": "c",
           "mostly": 0.3
@@ -84,7 +94,7 @@
           "unexpected_index_list": [0, 1]
         }
       },{
-        "title": "Positive case, multiple null values",
+        "title": "positive_case_multiple_null_values",
         "exact_match_out": false,
         "in": {
           "column": "n"
@@ -106,7 +116,7 @@
           "unexpected_index_list": [0, 1]
         }
       },{
-        "title": "Positive case, all null values",
+        "title": "positive_case_all_null_values",
         "exact_match_out": false,
         "in": {
           "column": "null"

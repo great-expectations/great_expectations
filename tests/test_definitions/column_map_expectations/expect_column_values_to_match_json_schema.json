@@ -5,8 +5,14 @@
       "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
       "x" : ["{\"a\":1}", "{\"a\":2}", "{\"a\":3}", "{\"a\":4}", "{\"a\":5}", null, null, null, null, null]
     },
+    "schemas": {
+      "spark": {
+        "w": "IntegerType",
+        "x": "StringType"
+      }
+    },
     "tests" : [{
-      "title" : "Basic positive test",
+      "title" : "basic_positive_test",
       "exact_match_out" : false,
       "in": {
         "column": "x",
@@ -18,7 +24,7 @@
         "success": true
       }
     },{
-      "title" : "Positive test with a more complex schema",
+      "title" : "positive_test_with_a_more_complex_schema",
       "exact_match_out" : false,
       "in": {
         "column": "x",
@@ -37,7 +43,7 @@
         "success": true
       }
     },{
-      "title" : "Basic negative test",
+      "title" : "basic_negative_test",
       "exact_match_out" : false,
       "in": {
         "column": "x",

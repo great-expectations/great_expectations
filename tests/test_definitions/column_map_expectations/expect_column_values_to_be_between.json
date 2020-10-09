@@ -44,6 +44,22 @@
         "ts": "TIMESTAMP",
         "alpha": "TEXT",
         "numeric": "INTEGER"
+      },
+      "mysql": {
+        "x": "INTEGER",
+        "y": "TEXT",
+        "z": "INTEGER",
+        "ts": "TIMESTAMP",
+        "alpha": "TEXT",
+        "numeric": "INTEGER"
+      },
+      "mssql": {
+        "x": "INTEGER",
+        "y": "VARCHAR",
+        "z": "INTEGER",
+        "ts": "DATETIME",
+        "alpha": "VARCHAR",
+        "numeric": "INTEGER"
       }
     },
     "tests": [
@@ -62,7 +78,7 @@
         }
       },
       {
-        "title" : "Another basic positive test",
+        "title" : "another_basic_positive_test",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -76,7 +92,7 @@
         }
       },
       {
-        "title" : "Missing min_value",
+        "title" : "missing_min_value",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -89,7 +105,7 @@
         }
       },
       {
-        "title" : "Null min_value",
+        "title" : "null_min_value",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -103,7 +119,7 @@
         }
       },
       {
-        "title" : "Missing max_value",
+        "title" : "missing_max_value",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -116,7 +132,7 @@
         }
       },
       {
-        "title" : "Null max_value",
+        "title" : "null_max_value",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -130,7 +146,7 @@
         }
       },
       {
-        "title" : "Basic negative test",
+        "title" : "basic_negative_test",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
@@ -146,7 +162,7 @@
         }
       },
       {
-        "title" : "Another negative test",
+        "title" : "another_negative_test",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
@@ -163,7 +179,7 @@
         }
       },
       {
-        "title" : "Positive test with result_format=BOOLEAN_ONLY",
+        "title" : "positive_test_with_result_format__boolean_only",
         "exact_match_out": false,
         "out": {"success": true},
         "in": {
@@ -174,7 +190,7 @@
         }
       },
       {
-        "title" : "Another positive test with result_format=BOOLEAN_ONLY",
+        "title" : "another_positive_test_with_result_format__boolean_only",
         "exact_match_out": false,
         "out": {"success": true},
         "in": {
@@ -185,7 +201,7 @@
         }
       },
       {
-        "title" : "Negative test with result_format=BOOLEAN_ONLY",
+        "title" : "negative_test_with_result_format__boolean_only",
         "exact_match_out": false,
         "out": {"success": false},
         "in": {
@@ -196,7 +212,7 @@
         }
       },
       {
-        "title" : "Another negative test with result_format=BOOLEAN_ONLY",
+        "title" : "another_negative_test_with_result_format__boolean_only",
         "exact_match_out": false,
         "out": {"success": false},
         "in": {
@@ -207,7 +223,7 @@
         }
       },
       {
-        "title" : "Positive test with mostly",
+        "title" : "positive_test_with_mostly",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -222,7 +238,7 @@
         }
       },
       {
-        "title" : "2nd positive test with mostly",
+        "title" : "2nd_positive_test_with_mostly",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -237,7 +253,7 @@
         }
       },
       {
-        "title" : "3rd positive test with mostly",
+        "title" : "3rd_positive_test_with_mostly",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
@@ -256,7 +272,7 @@
         }
       },
       {
-        "title" : "Negative test with mostly",
+        "title" : "negative_test_with_mostly",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
@@ -277,7 +293,7 @@
         }
       },
       {
-        "title" : "Error: improperly mixed types",
+        "title" : "error:_improperly_mixed_types",
         "exact_match_out": false,
         "in": {
           "column": "y",
@@ -292,7 +308,7 @@
         }
       },
       {
-        "title" : "Error: improperly mixed types again",
+        "title" : "error:_improperly_mixed_types_again",
         "exact_match_out": false,
         "in": {
           "column": "y",
@@ -307,7 +323,7 @@
         }
       },
       {
-        "title" : "Error: improperly mixed types once more",
+        "title" : "error:_improperly_mixed_types_once_more",
         "exact_match_out": false,
         "in": {
           "column": "y",
@@ -322,7 +338,7 @@
         }
       },
       {
-        "title" : "Negative test to verify that the denominator for mostly works with missing values",
+        "title" : "negative_test_to_verify_that_the_denominator_for_mostly_works_with_missing_values",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
@@ -341,7 +357,7 @@
         }
       },
       {
-        "title" : "Positive test to verify that the denominator for mostly works with missing values",
+        "title" : "positive_test_to_verify_that_the_denominator_for_mostly_works_with_missing_values",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
@@ -360,7 +376,7 @@
         }
       },
       {
-        "title" : "Negative test with parse_strings_as_datetimes",
+        "title" : "negative_test_with_parse_strings_as_datetimes",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
@@ -382,7 +398,7 @@
         }
       },
       {
-        "title" : "Error on string-to-int comparisons",
+        "title" : "error_on_string-to-int_comparisons",
         "exact_match_out": false,
         "in": {
           "column": "numeric",
@@ -396,7 +412,7 @@
         }
       },
       {
-        "title" : "Test 'min_value is greater than max_value'",
+        "title" : "test_min_value_is_greater_than_max_value",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -505,6 +521,56 @@
           "unexpected_list": [],
           "unexpected_index_list": [],
           "success": true
+        }
+      },{
+        "title": "test_conditional_expectation_passes",
+        "only_for": ["pandas"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "strict_max": false,
+          "row_condition": "y == 'abc'",
+          "condition_parser": "pandas"
+        },
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        }
+      },{
+        "title": "test_conditional_expectation_fails",
+        "only_for": ["pandas"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "strict_max": false,
+          "row_condition": "y == 9",
+          "condition_parser": "pandas"
+        },
+        "out": {
+          "unexpected_list": [9],
+          "unexpected_index_list": [0],
+          "success": false
+        }
+      },{
+        "title": "test_conditional_expectation_parser_errors",
+        "only_for": ["pandas"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "catch_exceptions": true,
+          "strict_max": false,
+          "row_condition": "y == 9",
+          "condition_parser": "bad_parser"
+        },
+        "out": {
+          "traceback_substring": "must be 'python' or 'pandas'"
         }
       }
     ]

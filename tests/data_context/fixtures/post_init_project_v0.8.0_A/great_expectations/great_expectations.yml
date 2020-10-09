@@ -10,7 +10,7 @@ datasources:
     type: pandas
     data_asset_type:
       class_name: PandasDataset
-    generators:
+    batch_kwargs_generators:
       default:
         reader_options:
           engine: python
@@ -24,32 +24,32 @@ validation_operators:
     action_list:
       - name: store_validation_result
         action:
-          class_name: StoreAction
+          class_name: StoreValidationResultAction
           target_store_name: validations_store
       - name: store_evaluation_params
         action:
-          class_name: ExtractAndStoreEvaluationParamsAction
+          class_name: StoreEvaluationParametersAction
           target_store_name: evaluation_parameter_store
 
 stores:
   local_expectations_store:
     class_name: ExpectationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
   validations_store:
     class_name: ValidationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
   fixture_validation_results_store:
     class_name: ValidationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: fixtures/validations
 
   evaluation_parameter_store:
-    class_name: InMemoryEvaluationParameterStore
+    class_name: EvaluationParameterStore
 
 data_docs_sites:
   local_site: # site name
@@ -71,7 +71,7 @@ data_docs_sites:
       validations:
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
-        run_id_filter:
+        run_name_filter:
           ne: profiling
         renderer:
           class_name: ValidationResultsPageRenderer
@@ -79,7 +79,7 @@ data_docs_sites:
       profiling:
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
-        run_id_filter:
+        run_name_filter:
           eq: profiling
         renderer:
           class_name: ProfilingResultsPageRenderer

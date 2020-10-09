@@ -8,32 +8,50 @@
 
     {# {# Remove this when not debugging: #}
     {# <meta http-equiv="refresh" content="1"/> #}
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/bootstrap-table@1.16.0/dist/extensions/filter-control/bootstrap-table-filter-control.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
 
     <style>{% include 'data_docs_default_styles.css' %}</style>
     <style>{% include 'data_docs_custom_styles.css' ignore missing %}</style>
 
     {% include 'js_script_imports.j2' %}
+    {% include 'favicon.j2' %}
   </head>
 
-  <body
-        data-spy="scroll"
-        data-target="#navigation"
-        data-offset="50"
-    >
+  <body>
+    {% if show_how_to_buttons | default(True) %}
+      {% include 'carousel_modal.j2' %}
+    {% endif %}
+
+    {% if renderer_type in ["ValidationResultsPageRenderer", "ExpectationSuitePageRenderer"] and show_how_to_buttons | default(True) %}
+      {% include 'edit_expectations_instructions_modal.j2' %}
+    {% endif %}
+
     {% include 'top_navbar.j2' %}
+    {% if renderer_type == "ValidationResultsPageRenderer" and show_how_to_buttons | default(True) %}
+      <script>
+        try {
+          if (localStorage.getItem('ge-walkthrough-modal-dismissed') !== 'true') {
+            $(".ge-walkthrough-modal").modal();
+          }
+        }
+        catch(error) {
+          $(".ge-walkthrough-modal").modal();
+          console.log(error);
+        }
+      </script>
+    {% endif %}
 
     <div class="container-fluid pt-4 pb-4 pl-5 pr-5">
       <div class="row">
         {% include 'sidebar.j2' %}
-        <div class="col-md-10 col-lg-10 col-xs-12 pl-4 pr-3">
+        <div class="col-md-10 col-lg-10 col-xs-12 pl-md-4 pr-md-3">
         {% for section in sections %}
           {% set section_loop = loop -%}
           {% include 'section.j2' %}
         {% endfor %}
-        </div>
-        <div class="d-block d-sm-none col-12">
-          {% include 'ge_info.j2' %}
         </div>
       </div>
     </div>
