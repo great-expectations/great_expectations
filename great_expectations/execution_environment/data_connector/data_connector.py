@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 class DataConnector(object):
     DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_DATA_ASSET"
 
-    r"""
+    """
     DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
     can use to get individual batches of data. They add flexibility in how to obtain data
     such as with time-based partitioning, downsampling, or other techniques appropriate
@@ -406,7 +406,28 @@ Unable to build batch_spec for data asset "{data_asset_name}" (found {len(partit
         Returns:
             A list of available names
         """
-        raise NotImplementedError
+        available_data_asset_names: List[str] = []
+
+        if self.assets:
+            available_data_asset_names = list(self.assets.keys())
+
+        available_partitions: List[Partition] = self.get_available_partitions(
+            data_asset_name=None,
+            partition_query={
+                "custom_filter": None,
+                "partition_name": None,
+                "partition_definition": None,
+                "partition_index": None,
+                "limit": None,
+            },
+            runtime_parameters=None,
+            repartition=False
+        )
+        if available_partitions and len(available_partitions) > 0:
+            for partition in available_partitions:
+                available_data_asset_names.append(partition.data_asset_name)
+
+        return list(set(available_data_asset_names))
 
     def get_available_partitions(
         self,

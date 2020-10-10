@@ -84,43 +84,6 @@ class FilesDataConnector(DataConnector):
     def base_directory(self):
         return self._normalize_directory_path(dir_path=self._base_directory)
 
-    def get_available_data_asset_names(self) -> list:
-        available_data_asset_names: list = []
-        if self.assets:
-            available_data_asset_names.append(list(self.assets.keys()))
-        # TODO: <Alex>Keep the inefficient implementation for reference (e.g., in its own method), or delete?</Alex>
-        # The following implementation is inefficient, because it always incurs access to an external resource.
-        # available_data_asset_names.append(
-        #     [Path(path).stem for path in self._get_file_paths_for_data_asset(data_asset_name=None)]
-        # )
-        # The following implementation is more efficient, because it utilizes the partition cache.
-        available_partitions: List[Partition] = self.get_available_partitions(
-            data_asset_name=None,
-            partition_query={
-                "custom_filter": None,
-                "partition_name": None,
-                "partition_definition": None,
-                "partition_index": None,
-                "limit": None,
-            },
-            runtime_parameters=None,
-            repartition=False
-        )
-        available_data_asset_names.append(
-            [partition.data_asset_name for partition in available_partitions]
-        )
-        return list(
-            set(
-                list(
-                    itertools.chain.from_iterable(
-                        [
-                            element for element in available_data_asset_names
-                        ]
-                    )
-                )
-            )
-        )
-
     def _get_available_partitions(
         self,
         partitioner: Partitioner,

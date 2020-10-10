@@ -51,11 +51,6 @@ class PipelineDataConnector(DataConnector):
     def in_memory_dataset(self, in_memory_dataset: Any):
         self._in_memory_dataset = in_memory_dataset
 
-    def get_available_data_asset_names(self) -> list:
-        if self.assets:
-            return list(self.assets.keys())
-        return []
-
     def _get_available_partitions(
         self,
         partitioner: Partitioner,
