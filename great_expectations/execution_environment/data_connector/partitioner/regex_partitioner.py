@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 class RegexPartitioner(Partitioner):
     DEFAULT_GROUP_NAME_PATTERN: str = "group_"
-    DEFAULT_DELIMITER: str = "-"
 
     def __init__(
         self,
@@ -22,6 +21,7 @@ class RegexPartitioner(Partitioner):
         data_connector: DataConnector,
         sorters: list = None,
         allow_multipart_partitions: bool = False,
+        runtime_keys: list = None,
         config_params: dict = None,
         **kwargs
     ):
@@ -31,6 +31,7 @@ class RegexPartitioner(Partitioner):
             data_connector=data_connector,
             sorters=sorters,
             allow_multipart_partitions=allow_multipart_partitions,
+            runtime_keys=runtime_keys,
             config_params=config_params,
             **kwargs
         )
@@ -72,6 +73,7 @@ class RegexPartitioner(Partitioner):
         self,
         data_asset_name: str = None,
         *,
+        runtime_parameters: Union[dict, None] = None,
         paths: list = None,
         auto_discover_assets: bool = False
     ) -> List[Partition]:
@@ -81,17 +83,30 @@ class RegexPartitioner(Partitioner):
         partitioned_path: Partition
         if auto_discover_assets:
             for path in paths:
-                partitioned_path = self._find_partitions_for_path(path=path, data_asset_name=Path(path).stem)
+                partitioned_path = self._find_partitions_for_path(
+                    path=path,
+                    data_asset_name=Path(path).stem,
+                    runtime_parameters=runtime_parameters
+                )
                 if partitioned_path is not None:
                     partitions.append(partitioned_path)
         else:
             for path in paths:
-                partitioned_path = self._find_partitions_for_path(path=path, data_asset_name=data_asset_name)
+                partitioned_path = self._find_partitions_for_path(
+                    path=path,
+                    data_asset_name=data_asset_name,
+                    runtime_parameters=runtime_parameters
+                )
                 if partitioned_path is not None:
                     partitions.append(partitioned_path)
         return partitions
 
-    def _find_partitions_for_path(self, path: str, data_asset_name: str = None) -> Union[Partition, None]:
+    def _find_partitions_for_path(
+        self,
+        path: str,
+        data_asset_name: str = None,
+        runtime_parameters: Union[dict, None] = None
+    ) -> Union[Partition, None]:
         matches: Union[re.Match, None] = re.match(self.regex["pattern"], path)
         if matches is None:
             logger.warning(f'No match found for path: "{path}".')
@@ -101,27 +116,21 @@ class RegexPartitioner(Partitioner):
             group_names: list = [
                 f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
             ]
+            self._validate_sorters_configuration(
+                partition_keys=self.regex["group_names"],
+                num_actual_partition_keys=len(groups)
+            )
             for idx, group_name in enumerate(self.regex["group_names"]):
                 group_names[idx] = group_name
-            if self.sorters and len(self.sorters) > 0:
-                if any([sorter.name not in self.regex["group_names"] for sorter in self.sorters]):
-                    raise ge_exceptions.PartitionerError(
-                        f'''RegexPartitioner "{self.name}" specifies one or more sort keys that do not appear among
-configured match group names.
-                        '''
-                    )
-                if len(group_names) < len(self.sorters):
-                    raise ge_exceptions.PartitionerError(
-                        f'''RegexPartitioner "{self.name}", configured with {len(group_names)}, matches {len(groups)}
-group names, which is fewer than number of sorters specified is {len(self.sorters)}.
-                        '''
-                    )
             partition_definition: dict = {}
             for idx, group_value in enumerate(groups):
                 group_name: str = group_names[idx]
                 partition_definition[group_name] = group_value
-            partition_name: str = RegexPartitioner.DEFAULT_DELIMITER.join(partition_definition.values())
-
+            if runtime_parameters:
+                partition_definition.update(runtime_parameters)
+            partition_name: str = self.DEFAULT_DELIMITER.join(
+                [str(value) for value in partition_definition.values()]
+            )
         return Partition(
             name=partition_name,
             data_asset_name=data_asset_name,

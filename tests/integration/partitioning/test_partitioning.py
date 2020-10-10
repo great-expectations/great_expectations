@@ -1,3 +1,4 @@
+import pytest
 from typing import List
 import datetime
 
@@ -5,6 +6,7 @@ from great_expectations.data_context import DataContext
 from great_expectations.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+import great_expectations.exceptions as ge_exceptions
 
 
 def test_return_all_available_partitions_unsorted(
@@ -23,10 +25,11 @@ def test_return_all_available_partitions_unsorted(
             "custom_filter": None,
             "partition_name": None,
             "partition_definition": None,
-            "limit": None,
             "partition_index": None,
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -104,6 +107,33 @@ def test_return_all_available_partitions_unsorted(
     assert available_partitions == expected_returned_partitions
 
 
+def test_return_all_available_partitions_illegal_index_and_limit_combination(
+    execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
+):
+    execution_environment_name: str = "test_execution_environment"
+    data_connector_name: str = "test_filesystem_data_connector"
+
+    data_context: DataContext = \
+        execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
+    with pytest.raises(ge_exceptions.PartitionerError):
+        # noinspection PyUnusedLocal
+        available_partitions: List[Partition] = data_context.get_available_partitions(
+            execution_environment_name=execution_environment_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=None,
+            partition_query={
+                "custom_filter": None,
+                "partition_name": None,
+                "partition_definition": None,
+                "partition_index": 0,
+                "limit": 1
+            },
+            in_memory_dataset=None,
+            runtime_parameters=None,
+            repartition=False
+        )
+
+
 def test_return_all_available_partitions_sorted(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -120,10 +150,11 @@ def test_return_all_available_partitions_sorted(
             "custom_filter": None,
             "partition_name": None,
             "partition_definition": None,
-            "limit": None,
             "partition_index": None,
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -229,10 +260,11 @@ def test_return_partitions_sorted_filtered_by_custom_filter(
             "custom_filter": my_custom_partition_selector,
             "partition_name": None,
             "partition_definition": None,
-            "limit": None,
             "partition_index": None,
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -311,10 +343,11 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit(
                 datetime.datetime(2020, 7, 15).date(),
             "partition_name": None,
             "partition_definition": None,
-            "limit": 4,
             "partition_index": None,
+            "limit": 4
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -357,7 +390,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit(
     assert available_partitions == expected_returned_partitions
 
 
-def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_index_as_int(
+def test_return_partitions_sorted_filtered_by_custom_filter_with_index_as_int(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
     execution_environment_name: str = "test_execution_environment"
@@ -377,10 +410,11 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_inde
             datetime.datetime(2020, 7, 15).date(),
             "partition_name": None,
             "partition_definition": None,
-            "limit": 4,
             "partition_index": 0,
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -405,7 +439,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_inde
     assert available_partitions == expected_returned_partitions
 
 
-def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_index_as_str(
+def test_return_partitions_sorted_filtered_by_custom_filter_with_index_as_str(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
     execution_environment_name: str = "test_execution_environment"
@@ -425,10 +459,11 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_inde
             datetime.datetime(2020, 7, 15).date(),
             "partition_name": None,
             "partition_definition": None,
-            "limit": 4,
             "partition_index": "-1",
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -443,17 +478,17 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_inde
 
     expected_returned_partitions: List[Partition] = [
         Partition(
-            name="eugene-20200809-1500",
-            data_asset_name="eugene_20200809_1500",
-            definition={"name": "eugene", "timestamp": "20200809", "price": "1500"},
-            data_reference=f"{base_directory}/eugene_20200809_1500.csv"
+            name="abe-20200809-1040",
+            data_asset_name="abe_20200809_1040",
+            definition={"name": "abe", "timestamp": "20200809", "price": "1040"},
+            data_reference=f"{base_directory}/abe_20200809_1040.csv"
         ),
     ]
 
     assert available_partitions == expected_returned_partitions
 
 
-def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slice_as_list(
+def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_list(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
     execution_environment_name: str = "test_execution_environment"
@@ -473,10 +508,11 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slic
             datetime.datetime(2020, 7, 15).date(),
             "partition_name": None,
             "partition_definition": None,
-            "limit": 4,
             "partition_index": [1, 3],
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -507,7 +543,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slic
     assert available_partitions == expected_returned_partitions
 
 
-def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slice_as_tuple(
+def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_tuple(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
     execution_environment_name: str = "test_execution_environment"
@@ -527,10 +563,11 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slic
             datetime.datetime(2020, 7, 15).date(),
             "partition_name": None,
             "partition_definition": None,
-            "limit": 4,
-            "partition_index": (0, 4, 3)
+            "partition_index": (0, 4, 3),
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -561,7 +598,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slic
     assert available_partitions == expected_returned_partitions
 
 
-def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slice_as_str(
+def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_str(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
     execution_environment_name: str = "test_execution_environment"
@@ -581,10 +618,11 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slic
             datetime.datetime(2020, 7, 15).date(),
             "partition_name": None,
             "partition_definition": None,
-            "limit": 5,
-            "partition_index": "3:5"
+            "partition_index": "3:5",
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -615,7 +653,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slic
     assert available_partitions == expected_returned_partitions
 
 
-def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slice_obj(
+def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_obj(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
     execution_environment_name: str = "test_execution_environment"
@@ -635,10 +673,11 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit_with_slic
             datetime.datetime(2020, 7, 15).date(),
             "partition_name": None,
             "partition_definition": None,
-            "limit": 5,
-            "partition_index": slice(3, 5, None)
+            "partition_index": slice(3, 5, None),
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -686,10 +725,11 @@ def test_return_partitions_sorted_for_specific_data_asset_name(
             "custom_filter": None,
             "partition_name": None,
             "partition_definition": None,
-            "limit": None,
-            "partition_index": None
+            "partition_index": None,
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -731,10 +771,11 @@ def test_return_partitions_sorted_queried_by_partition_name(
             "custom_filter": None,
             "partition_name": "alex-20200819-1300",
             "partition_definition": None,
-            "limit": None,
-            "partition_index": None
+            "partition_index": None,
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -776,10 +817,11 @@ def test_return_partitions_sorted_queried_by_partition_definition_dict_1_key(
             "custom_filter": None,
             "partition_name": None,
             "partition_definition": {"timestamp": "20200809"},
-            "limit": None,
-            "partition_index": None
+            "partition_index": None,
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -839,10 +881,11 @@ def test_return_partitions_sorted_queried_by_partition_definition_dict_2_keys(
             "custom_filter": None,
             "partition_name": None,
             "partition_definition": {"timestamp": "20200809", "name": "will"},
-            "limit": None,
-            "partition_index": None
+            "partition_index": None,
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 
@@ -884,10 +927,11 @@ def test_return_partitions_sorted_queried_by_partition_definition_dict_1_key_wit
             "custom_filter": None,
             "partition_name": None,
             "partition_definition": {"name": "james"},
-            "limit": None,
-            "partition_index": 0
+            "partition_index": 0,
+            "limit": None
         },
         in_memory_dataset=None,
+        runtime_parameters=None,
         repartition=False
     )
 

@@ -619,7 +619,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 --ge-feature-maturity-info--
     """
 
-    recognized_batch_definition_keys = {"limit"}
+    recognized_batch_request_keys = {"limit"}
 
     recognized_batch_spec_defaults = {
         "reader_method",
@@ -788,16 +788,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 {"reader_method": reader_method},
             )
 
-    def process_batch_definition(self, batch_definition, batch_spec):
-        """Given that the batch definition has a limit state, transfers the limit dictionary entry from the batch_definition
+    def process_batch_request(self, batch_request, batch_spec):
+        """Given that the batch request has a limit state, transfers the limit dictionary entry from the batch_request
         to the batch_spec.
         Args:
-            batch_definition: The batch definition to use in configuring the batch spec's limit
+            batch_request: The batch request to use in configuring the batch spec's limit
             batch_spec: a batch_spec dictionary whose limit needs to be configured
         Returns:
             ReaderMethod to use for the filepath
         """
-        limit = batch_definition.get("limit")
+        limit = batch_request.get("limit")
         if limit is not None:
             if not batch_spec.get("limit"):
                 batch_spec["limit"] = limit

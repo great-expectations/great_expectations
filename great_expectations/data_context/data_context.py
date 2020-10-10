@@ -1068,10 +1068,10 @@ class BaseDataContext:
     # new get_batch
     def get_batch_from_new_style_datasource(
         self,
-        batch_definition: dict,
+        batch_request: dict,
         in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
     ) -> Batch:
-        execution_environment_name: str = batch_definition.get("execution_environment")
+        execution_environment_name: str = batch_request.get("execution_environment")
         runtime_environment: dict = {}
         if in_memory_dataset is not None:
             runtime_environment.update({"in_memory_dataset": in_memory_dataset})
@@ -1079,17 +1079,19 @@ class BaseDataContext:
             execution_environment_name=execution_environment_name,
             runtime_environment=runtime_environment
         )
+        if in_memory_dataset is not None:
+            execution_environment.in_memory_dataset = in_memory_dataset
         return execution_environment.get_batch(
-            batch_definition=batch_definition
+            batch_request=batch_request
         )
 
     def get_validator(
         self,
-        batch_definition,
+        batch_request,
         expectation_suite_name: Union[str, ExpectationSuite],
         in_memory_dataset: Any = None,
     ):
-        # execution_environment_name: str = batch_definition.get("execution_environment")
+        # execution_environment_name: str = batch_request.get("execution_environment")
         # runtime_environment: dict = {}
         # if in_memory_dataset is not None:
         #     runtime_environment.update({"in_memory_dataset": in_memory_dataset})
@@ -1098,7 +1100,7 @@ class BaseDataContext:
         #     runtime_environment=runtime_environment
         # )
         # return execution_environment.get_validator(
-        #     batch_definition=batch_definition,
+        #     batch_request=batch_request,
         #     expectation_suite_name=expectation_suite_name
         # )
         # TODO?
@@ -1516,6 +1518,7 @@ class BaseDataContext:
         data_asset_name: str = None,
         partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
         in_memory_dataset: Any = None,
+        runtime_parameters: Union[dict, None] = None,
         repartition: bool = False
     ) -> List[Partition]:
         runtime_environment: dict = {}
@@ -1525,10 +1528,13 @@ class BaseDataContext:
             execution_environment_name=execution_environment_name,
             runtime_environment=runtime_environment
         )
+        if in_memory_dataset is not None:
+            execution_environment.in_memory_dataset = in_memory_dataset
         available_partitions: List[Partition] = execution_environment.get_available_partitions(
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             partition_query=partition_query,
+            runtime_parameters=runtime_parameters,
             repartition=repartition
         )
         return available_partitions

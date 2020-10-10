@@ -427,7 +427,7 @@ Notes:
     _internal_names = pd.DataFrame._internal_names + [
         "_batch_spec",
         "_batch_markers",
-        "_batch_definition",
+        "_batch_request",
         "_batch_id",
         "_expectation_suite",
         "_config",
@@ -437,7 +437,7 @@ Notes:
     ]
     _internal_names_set = set(_internal_names)
 
-    recognized_batch_definition_keys = {
+    recognized_batch_request_keys = {
         "limit"
     }
 
@@ -625,16 +625,16 @@ Notes:
             f'Unable to determine reader method from path: "{path}".'
         )
 
-    def process_batch_definition(self, batch_definition, batch_spec):
-        """Takes in a batch definition and batch spec. If the batch definition has a limit, uses it to initialize the
+    def process_batch_request(self, batch_request, batch_spec):
+        """Takes in a batch request and batch spec. If the batch request has a limit, uses it to initialize the
         number of rows to process for the batch spec in obtaining a batch
         Args:
-            batch_definition (dict) - The batch definition as defined by the user
+            batch_request (dict) - The batch request as defined by the user
             batch_spec (dict) - The batch spec used to query the backend
         Returns:
              batch_spec (dict) - The batch spec used to query the backend, with the added row limit
         """
-        limit = batch_definition.get("limit")
+        limit = batch_request.get("limit")
         if limit is not None:
             if not batch_spec.get("reader_options"):
                 batch_spec["reader_options"] = {}

@@ -536,23 +536,23 @@ class ExecutionEngine(MetaExecutionEngine):
         """A getter for the Execution Engine's batches"""
         return self._batches
 
-    def process_batch_definition(self, batch_definition, batch_spec):
-        """Use ExecutionEngine-specific configuration to translate any batch_definition keys into batch_spec keys
+    def process_batch_request(self, batch_request, batch_spec):
+        """Use ExecutionEngine-specific configuration to translate any batch_request keys into batch_spec keys
 
         Args:
-            batch_definition (dict): batch_definition to process
-            batch_spec (dict): batch_spec to map processed batch_definition keys to
+            batch_request (dict): batch_request to process
+            batch_spec (dict): batch_spec to map processed batch_request keys to
 
         Returns:
             batch_spec (dict)
         """
         raise NotImplementedError
 
-    def load_batch(self, batch_definition):
+    def load_batch(self, batch_request):
         """
-        Load a Batch specified by the batch_definition.
+        Load a Batch specified by the batch_request.
 
-        :param batch_definition:
+        :param batch_request:
         :return:
         """
         raise NotImplementedError

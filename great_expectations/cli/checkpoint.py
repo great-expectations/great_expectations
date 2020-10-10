@@ -56,7 +56,7 @@ datasources paired with one or more Expectation Suites each.
     how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html
     maturity: Experimental
     maturity_details:
-        api_stability: Unstable (expect changes to batch definition; "assets to validate" is still totally untyped)
+        api_stability: Unstable (expect changes to batch request; "assets to validate" is still totally untyped)
         implementation_completeness: Complete
         unit_test_coverage: Partial ("golden path"-focused tests; error checking tests need to be improved)
         integration_infrastructure_test_coverage: N/A
@@ -71,7 +71,7 @@ datasources paired with one or more Expectation Suites each.
     how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
     maturity: Experimental
     maturity_details:
-        api_stability: Unstable (expect changes to batch definition; no checkpoint store)
+        api_stability: Unstable (expect changes to batch request; no checkpoint store)
         implementation_completeness: Complete
         unit_test_coverage: Complete
         integration_infrastructure_test_coverage: N/A

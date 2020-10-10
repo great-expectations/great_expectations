@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class ManualBatchKwargsGenerator(BatchKwargsGenerator):
     """ManualBatchKwargsGenerator returns manually-configured batch_kwargs for named data assets. It provides a
-    convenient way to capture complete batch definitions without requiring the configuration of a more
+    convenient way to capture complete batch request without requiring the configuration of a more
     fully-featured batch kwargs generator.
 
     A fully configured ManualBatchKwargsGenerator in yml might look like the following::
@@ -69,8 +69,8 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
         datasource_batch_kwargs = self._datasource.process_batch_parameters(**kwargs)
         asset_definition = deepcopy(self._get_data_asset_config(data_asset_name))
         if isinstance(asset_definition, list):
-            for batch_definition in asset_definition:
-                batch_definition.update(datasource_batch_kwargs)
+            for batch_request in asset_definition:
+                batch_request.update(datasource_batch_kwargs)
             return iter(asset_definition)
         else:
             asset_definition.update(datasource_batch_kwargs)
@@ -92,9 +92,9 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
         partition_ids = []
         asset_definition = self._get_data_asset_config(data_asset_name=data_asset_name)
         if isinstance(asset_definition, list):
-            for batch_definition in asset_definition:
+            for batch_request in asset_definition:
                 try:
-                    partition_ids.append(batch_definition["partition_id"])
+                    partition_ids.append(batch_request["partition_id"])
                 except KeyError:
                     pass
         elif isinstance(asset_definition, dict):
@@ -113,10 +113,10 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
                 data_asset_name=batch_parameters.get("data_asset_name")
             )
             if isinstance(asset_definition, list):
-                for batch_definition in asset_definition:
+                for batch_request in asset_definition:
                     try:
-                        if batch_definition["partition_id"] == partition_id:
-                            batch_kwargs = deepcopy(batch_definition)
+                        if batch_request["partition_id"] == partition_id:
+                            batch_kwargs = deepcopy(batch_request)
                             batch_kwargs.pop("partition_id")
                     except KeyError:
                         pass

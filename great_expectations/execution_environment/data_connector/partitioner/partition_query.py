@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import sys
 import itertools
 from typing import List, Dict, Callable, Union
 
@@ -22,8 +21,8 @@ def build_partition_query(
             partition_name=None,
             partition_definition=None,
             data_asset_name=None,
-            limit=None,
             partition_index=None,
+            limit=None,
         )
     partition_query_keys: set = set(partition_query_dict.keys())
     if not partition_query_keys <= PartitionQuery.RECOGNIZED_PARTITION_QUERY_KEYS:
@@ -63,16 +62,18 @@ def build_partition_query(
 "{str(type(data_asset_name))}", which is illegal.
             '''
         )
-    limit: int = partition_query_dict.get("limit")
-    if limit and not isinstance(limit, int):
+    partition_index: Union[int, list, tuple, slice, str, None] = partition_query_dict.get("partition_index")
+    limit: Union[int, None] = partition_query_dict.get("limit")
+    if limit and (not isinstance(limit, int) or limit < 0):
         raise ge_exceptions.PartitionerError(
-            f'''The type of a limit must be an integer (Python "int").  The type given is
-"{str(type(limit))}", which is illegal.
+            f'''The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The 
+type and value given are "{str(type(limit))}" and "{limit}", respectively, which is illegal.
             '''
         )
-    if limit is None or limit < 0:
-        limit = sys.maxsize
-    partition_index: Union[int, list, tuple, slice, str] = partition_query_dict.get("partition_index")
+    if partition_index is not None and limit is not None:
+        raise ge_exceptions.PartitionerError(
+            "Only one of partition_index or limit, but not both, can be specified (specifying both is illegal)."
+        )
     partition_index = _parse_partition_index(partition_index=partition_index)
     return PartitionQuery(
         custom_filter=custom_filter,
@@ -123,25 +124,25 @@ class PartitionQuery(object):
         "partition_name",
         "partition_definition",
         "data_asset_name",
-        "limit",
         "partition_index",
+        "limit",
     }
 
     def __init__(
         self,
         custom_filter: Callable = None,
         partition_name: str = None,
-        partition_definition: dict = None,
+        partition_definition: Union[dict, None] = None,
         data_asset_name: str = None,
+        partition_index: Union[int, slice, None] = None,
         limit: int = None,
-        partition_index: Union[slice, None] = None,
     ):
         self._custom_filter = custom_filter
         self._partition_name = partition_name
         self._data_asset_name = data_asset_name
         self._partition_definition = partition_definition
-        self._limit = limit
         self._partition_index = partition_index
+        self._limit = limit
 
     @property
     def custom_filter(self) -> Callable:
@@ -152,7 +153,7 @@ class PartitionQuery(object):
         return self._partition_name
 
     @property
-    def partition_definition(self) -> dict:
+    def partition_definition(self) -> Union[dict, None]:
         return self._partition_definition
 
     @property
@@ -160,12 +161,12 @@ class PartitionQuery(object):
         return self._data_asset_name
 
     @property
-    def limit(self) -> int:
-        return self._limit
+    def partition_index(self) -> Union[int, slice, None]:
+        return self._partition_index
 
     @property
-    def partition_index(self) -> Union[int, list, tuple, slice, str, None]:
-        return self._partition_index
+    def limit(self) -> int:
+        return self._limit
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
@@ -173,8 +174,8 @@ class PartitionQuery(object):
             "partition_name": self.partition_name,
             "partition_definition": self.partition_definition,
             "data_asset_name": self.data_asset_name,
-            "limit": self.limit,
             "partition_index": self.partition_index,
+            "limit": self.limit,
         }
         return str(doc_fields_dict)
 
@@ -196,8 +197,9 @@ class PartitionQuery(object):
                 partitions
             )
         )
-        selected_partitions = selected_partitions[:self.limit]
-        if self.partition_index is not None:
+        if self.partition_index is None:
+            selected_partitions = selected_partitions[:self.limit]
+        else:
             if isinstance(self.partition_index, int):
                 selected_partitions = [selected_partitions[self.partition_index]]
             else:
@@ -208,7 +210,7 @@ class PartitionQuery(object):
         def match_partition_to_query_params(
             data_asset_name: str,
             partition_name: str,
-            partition_definition: dict
+            partition_definition: Union[dict, None]
         ) -> bool:
             if self.partition_name:
                 if partition_name != self.partition_name:
@@ -217,17 +219,12 @@ class PartitionQuery(object):
                 if not partition_definition:
                     return False
                 partition_definition_query_keys: set = set(self.partition_definition.keys())
-                actual_partition_definition_keys: set = set(partition_definition.keys())
-                if not partition_definition_query_keys <= actual_partition_definition_keys:
-                    raise ge_exceptions.PartitionerError(
-                        f'''Unrecognized partition_definition query key(s):
-"{str(partition_definition_query_keys - actual_partition_definition_keys)}" detected.
-                        '''
-                    )
                 if not partition_definition_query_keys:
                     return False
                 for key in partition_definition_query_keys:
-                    if partition_definition[key] != self.partition_definition[key]:
+                    if not (
+                        key in partition_definition and partition_definition[key] == self.partition_definition[key]
+                    ):
                         return False
             if self.data_asset_name:
                 if data_asset_name != self.data_asset_name:

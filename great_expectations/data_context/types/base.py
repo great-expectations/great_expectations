@@ -142,6 +142,7 @@ class PartitionerConfig(DictDot):
         module_name=None,
         sorters=None,
         allow_multipart_partitions=False,
+        runtime_keys=None,
         config_params=None,
         **kwargs,
     ):
@@ -150,6 +151,8 @@ class PartitionerConfig(DictDot):
         if sorters is not None:
             self._sorters = sorters
         self._allow_multipart_partitions = allow_multipart_partitions
+        if runtime_keys is not None:
+            self._runtime_keys = runtime_keys
         if config_params is not None:
             self._config_params = config_params
         for k, v in kwargs.items():
@@ -170,6 +173,10 @@ class PartitionerConfig(DictDot):
     @property
     def allow_multipart_partitions(self):
         return self._allow_multipart_partitions
+
+    @property
+    def runtime_keys(self):
+        return self._runtime_keys
 
     @property
     def config_params(self):
@@ -195,6 +202,12 @@ class PartitionerConfigSchema(Schema):
         allow_none=False
     )
 
+    runtime_keys = fields.List(
+        cls_or_instance=fields.String(),
+        required=False,
+        allow_none=True
+    )
+
     config_params = fields.Dict(allow_none=True)
 
     @validates_schema
@@ -211,10 +224,10 @@ class DataConnectorConfig(DictDot):
     def __init__(
         self,
         class_name,
+        module_name=None,
         partitioners=None,
         default_partitioner=None,
         assets=None,
-        module_name=None,
         config_params=None,
         **kwargs
     ):

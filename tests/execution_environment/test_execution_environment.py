@@ -90,11 +90,11 @@ def test_get_batch(tmp_path_factory):
     data_connector_name: str = "test_filesystem_data_connector"
     data_asset_name: str = "Titanic"
 
-    batch_definition: dict = {
+    batch_request: dict = {
         "execution_environment": execution_environment_name,
         "data_connector": data_connector_name,
         "data_asset_name": data_asset_name,
-        "partition_query": None,
+        "partition_request": None,
         "limit": None,
         "batch_spec_passthrough": {
             "path": titanic_csv_destination_file_path,
@@ -104,7 +104,7 @@ def test_get_batch(tmp_path_factory):
         }
     }
     batch: Batch = execution_environment.get_batch(
-        batch_definition=batch_definition
+        batch_request=batch_request
     )
 
     assert batch.batch_spec is not None
@@ -117,7 +117,7 @@ def test_get_batch_with_caching():
     pass
 
 
-def test_get_batch_with_pipeline_style_batch_definition():
+def test_get_batch_with_pipeline_style_batch_request():
     test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     execution_environment_name: str = "test_execution_environment"
@@ -135,17 +135,17 @@ def test_get_batch_with_pipeline_style_batch_definition():
         data_context_root_directory=None
     )
     data_connector_name: str = "test_pipeline_data_connector"
-    data_asset_name: str = "test_asset_0"
+    data_asset_name: str = "test_asset_1"
 
-    batch_definition: dict = {
+    batch_request: dict = {
         "execution_environment": execution_environment_name,
         "data_connector": data_connector_name,
         "data_asset_name": data_asset_name,
-        "partition_query": None,
+        "partition_request": None,
         "limit": None,
     }
     batch: Batch = execution_environment.get_batch(
-        batch_definition=batch_definition
+        batch_request=batch_request
     )
     assert batch.batch_spec is not None
     assert batch.batch_spec["data_asset_name"] == data_asset_name
@@ -317,9 +317,10 @@ def test_get_available_partitions(tmp_path_factory):
             "custom_filter": None,
             "partition_name": None,
             "partition_definition": None,
-            "limit": None,
             "partition_index": None,
+            "limit": None,
         },
+        runtime_parameters=None,
         repartition=False
     )
 
