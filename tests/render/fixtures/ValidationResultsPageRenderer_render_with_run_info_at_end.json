@@ -31,9 +31,11 @@
           "subheader": {
             "content_block_type": "string_template",
             "string_template": {
-              "template": "${suite_title} ${expectation_suite_name}\n${status_title} ${html_success_icon} ${success}",
+              "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",
               "params": {
                 "suite_title": "Expectation Suite:",
+                "data_asset": "Data asset:",
+                "data_asset_name": null,
                 "status_title": "Status:",
                 "expectation_suite_name": "default",
                 "success": "Failed",
@@ -200,13 +202,15 @@
               {
                 "content_block_type": "string_template",
                 "string_template": {
-                  "template": "Must have more than $min_value rows.",
+                  "template": "Must have greater than or equal to $min_value rows.",
                   "params": {
                     "min_value": 0,
                     "max_value": null,
                     "result_format": "SUMMARY",
+                    "row_condition": null,
                     "condition_parser": null,
-                    "row_condition": null
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -400,9 +404,9 @@
                       "int"
                     ],
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null,
                     "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
                     "v__0": "BIGINT",
                     "v__1": "BYTEINT",
                     "v__2": "DECIMAL",
@@ -473,9 +477,11 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "mostly": null,
                     "row_condition": null,
-                    "mostly": null
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -536,8 +542,10 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
+                    "row_condition": null,
                     "condition_parser": null,
-                    "row_condition": null
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -597,8 +605,8 @@
                     "column": "Unnamed: 0",
                     "mostly": 0.5,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
                     "row_condition": null,
+                    "condition_parser": null,
                     "mostly_pct": "50"
                   },
                   "styling": {
@@ -653,10 +661,10 @@
                       "column": "Unnamed: 0",
                       "value_set": [],
                       "result_format": "SUMMARY",
-                      "condition_parser": null,
-                      "row_condition": null,
                       "mostly": null,
-                      "parse_strings_as_datetimes": null
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
                     },
                     "styling": {
                       "default": {
@@ -810,9 +818,9 @@
                   "params": {
                     "column": "Unnamed: 0",
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "mostly": null,
                     "row_condition": null,
-                    "mostly": null
+                    "condition_parser": null
                   },
                   "styling": {
                     "default": {
@@ -945,9 +953,9 @@
                       "string"
                     ],
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null,
                     "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
                     "v__0": "CHAR",
                     "v__1": "STRING",
                     "v__2": "StringType",
@@ -1015,9 +1023,11 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "mostly": null,
                     "row_condition": null,
-                    "mostly": null
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -1078,8 +1088,10 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
+                    "row_condition": null,
                     "condition_parser": null,
-                    "row_condition": null
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -1139,8 +1151,8 @@
                     "column": "Name",
                     "mostly": 0.5,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
                     "row_condition": null,
+                    "condition_parser": null,
                     "mostly_pct": "50"
                   },
                   "styling": {
@@ -1195,10 +1207,10 @@
                       "column": "Name",
                       "value_set": [],
                       "result_format": "SUMMARY",
-                      "condition_parser": null,
-                      "row_condition": null,
                       "mostly": null,
-                      "parse_strings_as_datetimes": null
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
                     },
                     "styling": {
                       "default": {
@@ -1347,9 +1359,9 @@
                       "column": "Name",
                       "regex": "^\\s+|\\s+$",
                       "result_format": "SUMMARY",
-                      "condition_parser": null,
+                      "mostly": null,
                       "row_condition": null,
-                      "mostly": null
+                      "condition_parser": null
                     },
                     "styling": {
                       "default": {
@@ -1530,9 +1542,9 @@
                       "string"
                     ],
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null,
                     "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
                     "v__0": "CHAR",
                     "v__1": "STRING",
                     "v__2": "StringType",
@@ -1600,9 +1612,11 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "mostly": null,
                     "row_condition": null,
-                    "mostly": null
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -1663,8 +1677,10 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
+                    "row_condition": null,
                     "condition_parser": null,
-                    "row_condition": null
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -1724,8 +1740,8 @@
                     "column": "PClass",
                     "mostly": 0.5,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
                     "row_condition": null,
+                    "condition_parser": null,
                     "mostly_pct": "50"
                   },
                   "styling": {
@@ -1780,10 +1796,10 @@
                       "column": "PClass",
                       "value_set": [],
                       "result_format": "SUMMARY",
-                      "condition_parser": null,
-                      "row_condition": null,
                       "mostly": null,
-                      "parse_strings_as_datetimes": null
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
                     },
                     "styling": {
                       "default": {
@@ -1895,9 +1911,9 @@
                     "column": "PClass",
                     "regex": "^\\s+|\\s+$",
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "mostly": null,
                     "row_condition": null,
-                    "mostly": null
+                    "condition_parser": null
                   },
                   "styling": {
                     "default": {
@@ -1957,8 +1973,8 @@
                     "column": "PClass",
                     "value_set": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null
+                    "row_condition": null,
+                    "condition_parser": null
                   },
                   "styling": {
                     "default": {
@@ -2092,9 +2108,9 @@
                       "float"
                     ],
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null,
                     "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
                     "v__0": "DOUBLE_PRECISION",
                     "v__1": "DoubleType",
                     "v__2": "FLOAT",
@@ -2163,9 +2179,11 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "mostly": null,
                     "row_condition": null,
-                    "mostly": null
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -2226,8 +2244,10 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
+                    "row_condition": null,
                     "condition_parser": null,
-                    "row_condition": null
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -2287,8 +2307,8 @@
                     "column": "Age",
                     "mostly": 0.5,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
                     "row_condition": null,
+                    "condition_parser": null,
                     "mostly_pct": "50"
                   },
                   "styling": {
@@ -2343,10 +2363,10 @@
                       "column": "Age",
                       "value_set": [],
                       "result_format": "SUMMARY",
-                      "condition_parser": null,
-                      "row_condition": null,
                       "mostly": null,
-                      "parse_strings_as_datetimes": null
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
                     },
                     "styling": {
                       "default": {
@@ -2502,9 +2522,11 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "parse_strings_as_datetimes": null,
                     "row_condition": null,
-                    "parse_strings_as_datetimes": null
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -2565,9 +2587,11 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "parse_strings_as_datetimes": null,
                     "row_condition": null,
-                    "parse_strings_as_datetimes": null
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -2628,8 +2652,10 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
+                    "row_condition": null,
                     "condition_parser": null,
-                    "row_condition": null
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -2690,8 +2716,10 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
+                    "row_condition": null,
                     "condition_parser": null,
-                    "row_condition": null
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -2782,8 +2810,8 @@
                         ]
                       },
                       "result_format": "SUMMARY",
-                      "condition_parser": null,
-                      "row_condition": null
+                      "row_condition": null,
+                      "condition_parser": null
                     }
                   }
                 },
@@ -2918,8 +2946,8 @@
                     "partition_object": null,
                     "threshold": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null
+                    "row_condition": null,
+                    "condition_parser": null
                   }
                 }
               },
@@ -3071,9 +3099,9 @@
                       "string"
                     ],
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null,
                     "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
                     "v__0": "CHAR",
                     "v__1": "STRING",
                     "v__2": "StringType",
@@ -3141,9 +3169,11 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "mostly": null,
                     "row_condition": null,
-                    "mostly": null
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -3204,8 +3234,10 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
+                    "row_condition": null,
                     "condition_parser": null,
-                    "row_condition": null
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -3265,8 +3297,8 @@
                     "column": "Sex",
                     "mostly": 0.5,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
                     "row_condition": null,
+                    "condition_parser": null,
                     "mostly_pct": "50"
                   },
                   "styling": {
@@ -3321,10 +3353,10 @@
                       "column": "Sex",
                       "value_set": [],
                       "result_format": "SUMMARY",
-                      "condition_parser": null,
-                      "row_condition": null,
                       "mostly": null,
-                      "parse_strings_as_datetimes": null
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
                     },
                     "styling": {
                       "default": {
@@ -3428,9 +3460,9 @@
                     "column": "Sex",
                     "regex": "^\\s+|\\s+$",
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "mostly": null,
                     "row_condition": null,
-                    "mostly": null
+                    "condition_parser": null
                   },
                   "styling": {
                     "default": {
@@ -3490,8 +3522,8 @@
                     "column": "Sex",
                     "value_set": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null
+                    "row_condition": null,
+                    "condition_parser": null
                   },
                   "styling": {
                     "default": {
@@ -3627,9 +3659,9 @@
                       "int"
                     ],
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null,
                     "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
                     "v__0": "BIGINT",
                     "v__1": "BYTEINT",
                     "v__2": "DECIMAL",
@@ -3700,9 +3732,11 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "mostly": null,
                     "row_condition": null,
-                    "mostly": null
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -3763,8 +3797,10 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
+                    "row_condition": null,
                     "condition_parser": null,
-                    "row_condition": null
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -3824,8 +3860,8 @@
                     "column": "Survived",
                     "mostly": 0.5,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
                     "row_condition": null,
+                    "condition_parser": null,
                     "mostly_pct": "50"
                   },
                   "styling": {
@@ -3880,10 +3916,10 @@
                       "column": "Survived",
                       "value_set": [],
                       "result_format": "SUMMARY",
-                      "condition_parser": null,
-                      "row_condition": null,
                       "mostly": null,
-                      "parse_strings_as_datetimes": null
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
                     },
                     "styling": {
                       "default": {
@@ -3987,8 +4023,8 @@
                     "column": "Survived",
                     "value_set": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null
+                    "row_condition": null,
+                    "condition_parser": null
                   },
                   "styling": {
                     "default": {
@@ -4124,9 +4160,9 @@
                       "int"
                     ],
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null,
                     "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
                     "v__0": "BIGINT",
                     "v__1": "BYTEINT",
                     "v__2": "DECIMAL",
@@ -4197,9 +4233,11 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
+                    "mostly": null,
                     "row_condition": null,
-                    "mostly": null
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -4260,8 +4298,10 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
+                    "row_condition": null,
                     "condition_parser": null,
-                    "row_condition": null
+                    "strict_min": null,
+                    "strict_max": null
                   },
                   "styling": {
                     "default": {
@@ -4321,8 +4361,8 @@
                     "column": "SexCode",
                     "mostly": 0.5,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
                     "row_condition": null,
+                    "condition_parser": null,
                     "mostly_pct": "50"
                   },
                   "styling": {
@@ -4377,10 +4417,10 @@
                       "column": "SexCode",
                       "value_set": [],
                       "result_format": "SUMMARY",
-                      "condition_parser": null,
-                      "row_condition": null,
                       "mostly": null,
-                      "parse_strings_as_datetimes": null
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
                     },
                     "styling": {
                       "default": {
@@ -4484,8 +4524,8 @@
                     "column": "SexCode",
                     "value_set": null,
                     "result_format": "SUMMARY",
-                    "condition_parser": null,
-                    "row_condition": null
+                    "row_condition": null,
+                    "condition_parser": null
                   },
                   "styling": {
                     "default": {

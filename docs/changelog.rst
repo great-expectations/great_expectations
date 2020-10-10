@@ -7,11 +7,71 @@ Changelog
 Develop
 -----------------
 
+* [BUGFIX] Skip config substitution if key is "password"
 
+0.12.4
+-----------------
+* [FEATURE] Add PagerdutyAlertAction (Thanks @NiallRees!)
+* [FEATURE] enable using Minio for S3 backend (Thanks @noklam!)
+* [ENHANCEMENT] Add SqlAlchemy support for expect_compound_columns_to_be_unique (Thanks @jhweaver!)
+* [ENHANCEMENT] Add Spark support for expect_compound_columns_to_be_unique (Thanks @tscottcoombes1!)
+* [ENHANCEMENT] Save expectation suites with datetimes in evaluation parameters (Thanks @mbakunze!)
+* [ENHANCEMENT] Show data asset name in Slack message (Thanks @haydarai!)
+* [ENHANCEMENT] Enhance data doc to show data asset name in overview block (Thanks @noklam!)
+* [ENHANCEMENT] Clean up checkpoint output
+* [BUGFIX] Change default prefix for TupleStoreBackend (issue 1907)
+* [BUGFIX] Duplicate s3 approach for GCS for building object keys
+* [BUGFIX] import NotebookConfig (Thanks @cclauss!)
+* [BUGFIX] Improve links (Thanks @sbrugman!)
+* [MAINTENANCE] Unpin black in requirements (Thanks @jtilly!)
+* [MAINTENANCE] remove test case name special characters
+
+0.12.3
+-----------------
+* [ENHANCEMENT] Add expect_compound_columns_to_be_unique and clarify multicolumn uniqueness
+* [ENHANCEMENT] Add expectation expect_table_columns_to_match_set
+* [ENHANCEMENT] Checkpoint run command now prints out details on each validation #1437
+* [ENHANCEMENT] Slack notifications can now display links to GCS-hosted DataDocs sites
+* [ENHANCEMENT] Public base URL can be configured for Data Docs sites
+* [ENHANCEMENT] SuiteEditNotebookRenderer.add_header class now allows usage of env variables in jinja templates (thanks @mbakunze)!
+* [ENHANCEMENT] Display table for Cramer's Phi expectation in Data Docs (thanks @mlondschien)!
+* [BUGFIX] Explicitly convert keys to tuples when removing from TupleS3StoreBackend (thanks @balexander)!
+* [BUGFIX] Use more-specific s3.meta.client.exceptions with dealing with boto resource api (thanks @lcorneliussen)!
+* [BUGFIX] Links to Amazon S3 are compatible with virtual host-style access and path-style access
+* [DOCS] How to Instantiate a Data Context on a Databricks Spark Cluster
+* [DOCS] Update to Deploying Great Expectations with Google Cloud Composer
+* [MAINTENANCE] Update moto dependency to include cryptography (see #spulec/moto/3290)
+
+0.12.2
+-----------------
+* [ENHANCEMENT] Update schema for anonymized expectation types to avoid large key domain
+* [ENHANCEMENT] BaseProfiler type mapping expanded to include more pandas and numpy dtypes
+* [BUGFIX] Allow for pandas reader option inference with parquet and Excel (thanks @dlachasse)!
+* [BUGFIX] Fix bug where running checkpoint fails if GCS data docs site has a prefix (thanks @sergii-tsymbal-exa)!
+* [BUGFIX] Fix bug in deleting datasource config from config file (thanks @rxmeez)!
+* [BUGFIX] clarify inclusiveness of min/max values in string rendering
+* [BUGFIX] Building data docs no longer crashes when a data asset name is an integer #1913
+* [DOCS] Add notes on transient table creation to Snowflake guide (thanks @verhey)!
+* [DOCS] Fixed several broken links and glossary organization (thanks @JavierMonton and @sbrugman)!
+* [DOCS] Deploying Great Expectations with Google Cloud Composer (Hosted Airflow)
+
+0.12.1
+-----------------
+* [FEATURE] Add ``expect_column_pair_cramers_phi_value_to_be_less_than`` expectation to ``PandasDatasource`` to check for the independence of two columns by computing their Cramers Phi (thanks @mlondschien)!
+* [FEATURE] add support for ``expect_column_pair_values_to_be_in_set`` to ``Spark`` (thanks @mikaylaedwards)!
+* [FEATURE] Add new expectation:`` expect_multicolumn_sum_to_equal`` for ``pandas` and ``Spark`` (thanks @chipmyersjr)!
+* [ENHANCEMENT] Update isort, pre-commit & pre-commit hooks, start more linting (thanks @dandandan)!
+* [ENHANCEMENT] Bundle shaded marshmallow==3.7.1 to avoid dependency conflicts on GCP Composer
+* [ENHANCEMENT] Improve row_condition support in aggregate expectations
+* [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
+* [BUGFIX] Fix bug preventing the use of get_available_partition_ids in s3 generator
+* [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
+* [BUGFIX] TupleGCSStoreBackend: remove duplicate prefix for urls (thanks @azban)!
+* [BUGFIX] Fix `TypeError: unhashable type` error in Data Docs rendering
 
 0.12.0
 -----------------
-* [BREAKING] This release includes a breaking change that *only* affects users who directly call `add_expectation`, `remove_expectation`, or `find_expectations`. (Most users do not use these APIs but add Expectations by stating them directly on Datasets). Those methods have been updated to take an ExpectationConfiguration object and `match_type` object. The change provides more flexibility in determining which expectations should be modified and allows us provide substantially improved support for two major features that we have frequently heard requested: conditional Expectations and more flexible multi-column custom expectations. See :ref:`expectation_suite_operations`_ and :ref:`migrating_versions`_ for more information.
+* [BREAKING] This release includes a breaking change that *only* affects users who directly call `add_expectation`, `remove_expectation`, or `find_expectations`. (Most users do not use these APIs but add Expectations by stating them directly on Datasets). Those methods have been updated to take an ExpectationConfiguration object and `match_type` object. The change provides more flexibility in determining which expectations should be modified and allows us provide substantially improved support for two major features that we have frequently heard requested: conditional Expectations and more flexible multi-column custom expectations. See :ref:`expectation_suite_operations` and :ref:`migrating_versions` for more information.
 * [FEATURE] Add support for conditional expectations using pandas execution engine (#1217 HUGE thanks @arsenii!)
 * [FEATURE] ValidationActions can now consume and return "payload", which can be used to share information across ValidationActions
 * [FEATURE] Add support for nested columns in the PySpark expectations (thanks @bramelfrink)!
@@ -229,10 +289,12 @@ Develop
   - DataContext.list_checkpoints() returns a list of checkpoint names found in the project
   - DataContext.get_checkpoint() returns a validated dictionary loaded from yml
   - new cli commands
+
     - `checkpoint new`
     - `checkpoint list`
     - `checkpoint run`
     - `checkpoint script`
+
 * marked cli `tap` commands as deprecating on next release
 * marked cli `validation-operator run` command as deprecating
 * internal improvements in the cli code
@@ -288,7 +350,7 @@ Develop
 
 0.10.0
 -----------------
-* (BREAKING) Clarified API language: renamed all ``generator`` parameters and methods to the more correct ``batch_kwargs_generator`` language. Existing projects may require simple migration steps. See :ref:`Upgrading to 0.10.x` for instructions.
+* (BREAKING) Clarified API language: renamed all ``generator`` parameters and methods to the more correct ``batch_kwargs_generator`` language. Existing projects may require simple migration steps. See :ref:`Upgrading to 0.10.x <upgrading_to_0.10.x>` for instructions.
 * Adds anonymized usage statistics to Great Expectations. See this article for details: :ref:`Usage Statistics`.
 * CLI: improve look/consistency of ``docs list``, ``suite list``, and ``datasource list`` output; add ``store list`` and ``validation-operator list`` commands.
 * New SuiteBuilderProfiler that facilitates faster suite generation by allowing columns to be profiled
@@ -604,7 +666,7 @@ Highlights include:
 
    - **Environments**: A DataContext can now manage :ref:`environment_and_secrets` more easily thanks to more dynamic and
      flexible variable substitution.
-   - **Stores**: A new internal abstraction for DataContexts, :ref:`Stores`, make extending GE easier by
+   - **Stores**: A new internal abstraction for DataContexts, :ref:`Stores <reference__core_concepts__data_context__stores>`, make extending GE easier by
      consolidating logic for reading and writing resources from a database, local, or cloud storage.
    - **Types**: Utilities configured in a DataContext are now referenced using `class_name` and `module_name` throughout
      the DataContext configuration, making it easier to extend or supplement pre-built resources. For now, the "type"
@@ -612,7 +674,7 @@ Highlights include:
 
 3. Partitioners: Batch Kwargs are clarified and enhanced to help easily reference well-known chunks of data using a
    partition_id. Batch ID and Batch Fingerprint help round out support for enhanced metadata around data
-   assets that GE validates. See :ref:`Batch Identifiers` for more information. The `GlobReaderBatchKwargsGenerator`,
+   assets that GE validates. See :ref:`Batch Identifiers <reference__core_concepts__batch_parameters>` for more information. The `GlobReaderBatchKwargsGenerator`,
    `QueryBatchKwargsGenerator`, `S3GlobReaderBatchKwargsGenerator`, `SubdirReaderBatchKwargsGenerator`, and `TableBatchKwargsGenerator` all support partition_id for
    easily accessing data assets.
 

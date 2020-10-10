@@ -2,7 +2,11 @@ import logging
 import uuid
 from copy import deepcopy
 
-from marshmallow import (
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
+
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
     ValidationError,
@@ -11,10 +15,6 @@ from marshmallow import (
     post_load,
     validates_schema,
 )
-from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap
-
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.types import DictDot
 from great_expectations.types.configurations import ClassConfigSchema
 

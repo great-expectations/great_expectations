@@ -14,7 +14,7 @@ def parameterized_expectation_suite():
         __file__,
         "../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
     )
-    with open(fixture_path, "r",) as suite:
+    with open(fixture_path,) as suite:
         return expectationSuiteSchema.load(json.load(suite))
 
 

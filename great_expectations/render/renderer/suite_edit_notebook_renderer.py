@@ -8,6 +8,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
     NotebookTemplateConfig,
+    NotebookConfig,
     notebookConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -165,6 +166,7 @@ class SuiteEditNotebookRenderer(Renderer):
             "header.py.j2",
             suite_name=suite_name,
             batch_kwargs=batch_kwargs,
+            env=os.environ,
         )
         self.add_code_cell(code, lint=True)
 
@@ -338,6 +340,8 @@ class SuiteEditNotebookRenderer(Renderer):
             batch_kwargs = dict(batch_kwargs)
         if batch_kwargs and "path" in batch_kwargs.keys():
             base_dir = batch_kwargs["path"]
+            if base_dir[0:5] in ["s3://", "gs://"]:
+                return batch_kwargs
             if not os.path.isabs(base_dir):
                 batch_kwargs["path"] = os.path.join("..", "..", base_dir)
 

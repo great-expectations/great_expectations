@@ -68,7 +68,7 @@ Uncomment the next cell and set data_source_name to one of these names.
             data_source_name = configured_datasources[0]["name"]
             display(
                 HTML(
-                    "Will be using this data source from your project's great_expectations.yml: <b>{0:s}</b>".format(
+                    "Will be using this data source from your project's great_expectations.yml: <b>{:s}</b>".format(
                         data_source_name
                     )
                 )
@@ -85,7 +85,7 @@ Uncomment the next cell and set data_source_name to one of these names.
                 HTML(
                     """
 <p>
-No {0:s} data sources found in the great_expectations.yml of your project.
+No {:s} data sources found in the great_expectations.yml of your project.
 </p>
 
 <p>
@@ -101,8 +101,8 @@ If you did not create the data source during init, here is how to add it now: <a
                 HTML(
                     """
 <p>
-Found more than one {0:s} data source in the great_expectations.yml of your project:
-<b>{1:s}</b>
+Found more than one {:s} data source in the great_expectations.yml of your project:
+<b>{:s}</b>
 </p>
 <p>
 Uncomment the next cell and set data_source_name to one of these names.
@@ -116,7 +116,7 @@ Uncomment the next cell and set data_source_name to one of these names.
             data_source_name = configured_datasources[0]
             display(
                 HTML(
-                    "Will be using this {0:s} data source from your project's great_expectations.yml: <b>{1:s}</b>".format(
+                    "Will be using this {:s} data source from your project's great_expectations.yml: <b>{:s}</b>".format(
                         data_source_type, data_source_name
                     )
                 )
@@ -195,13 +195,13 @@ def show_available_data_asset_names(context, data_source_name=None):
     for datasource in datasources:
         if data_source_name and datasource["name"] != data_source_name:
             continue
-        html += "<h2 style='margin: 0'>Datasource: {0:s} ({1:s})</h2>".format(
+        html += "<h2 style='margin: 0'>Datasource: {:s} ({:s})</h2>".format(
             datasource["name"], datasource["class_name"]
         )
         ds = context.get_datasource(datasource["name"])
         generators = ds.list_batch_kwargs_generators()
         for generator_info in generators:
-            html += "batch_kwargs_generator: {0:s} ({1:s})".format(
+            html += "batch_kwargs_generator: {:s} ({:s})".format(
                 generator_info["name"], generator_info["class_name"]
             )
             generator = ds.get_batch_kwargs_generator(generator_info["name"])
@@ -220,7 +220,7 @@ def show_available_data_asset_names(context, data_source_name=None):
                 html += styles
                 html += "<ul class='data-assets'>"
                 for data_asset_name in data_asset_names:
-                    html += "<li>{0:s}</li>".format(data_asset_name)
+                    html += "<li>{:s}</li>".format(data_asset_name)
                     data_asset_expectation_suite_keys = [
                         es_key
                         for es_key in expectation_suite_keys
@@ -231,7 +231,7 @@ def show_available_data_asset_names(context, data_source_name=None):
                     if len(data_asset_expectation_suite_keys) > 0:
                         html += "<ul>"
                         for es_key in data_asset_expectation_suite_keys:
-                            html += "<li><span class='expectation-suite'>Expectation Suite</span>: {0:s}</li>".format(
+                            html += "<li><span class='expectation-suite'>Expectation Suite</span>: {:s}</li>".format(
                                 es_key.expectation_suite_name
                             )
                         html += "</ul>"

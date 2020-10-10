@@ -13,7 +13,7 @@ from tests.test_utils import expectationSuiteValidationResultSchema
 def datetime_column_evrs():
     """hand-crafted EVRS for datetime columns"""
     with open(
-        file_relative_path(__file__, "../fixtures/datetime_column_evrs.json"), "r"
+        file_relative_path(__file__, "../fixtures/datetime_column_evrs.json")
     ) as infile:
         return expectationSuiteValidationResultSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)

@@ -1,3 +1,5 @@
+.. _tutorials__quick_start:
+
 ###########
 Quick start
 ###########
@@ -12,9 +14,9 @@ Off we go! Install Great Expectations:
 
     pip install great_expectations
 
-You can quickly try out Great Expectations using this guide: :ref:`how_to_guides__creating_and_editing_expectations__how_to_quickly_explore_data_using_expectations_in_a_notebook`.
+You can quickly try out Great Expectations using this guide: :ref:`tutorials__explore_expectations_in_a_notebook`.
 
-    .. figure:: ../images/interactive_mostly.gif
+    .. figure:: /images/interactive_mostly.gif
 
 To unlock more of the power of Great Expectations, you'll also need to configure a Data Context. From the root of the directory where you want to deploy Great Expectations:
 
@@ -24,4 +26,4 @@ To unlock more of the power of Great Expectations, you'll also need to configure
 
 The CLI will guide you through all the steps to set up a basic deployment of Great Expectations.
 
-After that, if you want to understand what just happened, check out :ref:`Getting started`. Alternatively, you can :ref:`Customize your deployment <tutorials__getting_started__customize_your_deployment>`.
+After that, if you want to understand what just happened while running ``init``, check out :ref:`tutorials__getting_started`.

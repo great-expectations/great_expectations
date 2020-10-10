@@ -4,7 +4,7 @@ from great_expectations.core import (
 )
 
 
-class Renderer(object):
+class Renderer:
     def __init__(self):
         # This is purely a convenience to provide an explicit mechanism to instantiate any Renderer, even ones that
         # used to be composed exclusively of classmethods
@@ -63,13 +63,11 @@ class Renderer(object):
         # Group EVRs by column
         sorted_columns = sorted(
             list(
-                set(
-                    [
-                        evr.expectation_config.kwargs["column"]
-                        for evr in evrs_
-                        if "column" in evr.expectation_config.kwargs
-                    ]
-                )
+                {
+                    evr.expectation_config.kwargs["column"]
+                    for evr in evrs_
+                    if "column" in evr.expectation_config.kwargs
+                }
             )
         )
 

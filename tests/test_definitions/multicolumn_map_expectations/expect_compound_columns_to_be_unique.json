@@ -1,5 +1,5 @@
 {
-  "expectation_type" : "expect_multicolumn_values_to_be_unique",
+  "expectation_type" : "expect_compound_columns_to_be_unique",
   "datasets" : [{
     "data" : {
       "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
@@ -49,8 +49,45 @@
         "column_list": ["a", "b"]
       },
       "out": {
-        "unexpected_list": [{"a": 1.0, "b": 1.0}, {"a": 1.0, "b": 1.0}, {"a": 1.0, "b": 1.0}, {"a": 2.0, "b": 2.0}, {"a": 2.0, "b": 2.0}],
-        "unexpected_index_list": [0,2,4,5,7],
+        "unexpected_list": [
+          {
+            "a": 1.0,
+            "b": 1.0
+          },
+          {
+            "a": 1.0,
+            "b": 2.0
+          },
+          {
+            "a": 1.0,
+            "b": 1.0
+          },
+          {
+            "a": 1.0,
+            "b": 2.0
+          },
+          {
+            "a": 1.0,
+            "b": 1.0
+          },
+          {
+            "a": 2.0,
+            "b": 2.0
+          },
+          {
+            "a": 2.0,
+            "b": 1.0
+          },
+          {
+            "a": 2.0,
+            "b": 2.0
+          },
+          {
+            "a": 2.0,
+            "b": 1.0
+          }
+        ],
+        "unexpected_index_list": [0,1,2,3,4,5,6,7,8],
         "success": false
       }
     },{
@@ -65,9 +102,9 @@
           "element_count": 10,
           "missing_count": 1,
           "missing_percent": 10.0,
-          "unexpected_count": 5,
-          "unexpected_percent": 50.0,
-          "unexpected_percent_nonmissing": 55.55555555555556,
+          "unexpected_count": 9,
+          "unexpected_percent": 90.0,
+          "unexpected_percent_nonmissing": 100.0,
           "partial_unexpected_list": [
             {
               "a": 1.0,
@@ -75,7 +112,15 @@
             },
             {
               "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
               "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
             },
             {
               "a": 1.0,
@@ -87,16 +132,18 @@
             },
             {
               "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
               "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
             }
           ],
-          "partial_unexpected_index_list": [
-            0,
-            2,
-            4,
-            5,
-            7
-          ],
+          "partial_unexpected_index_list": [0,1,2,3,4,5,6,7,8],
           "partial_unexpected_counts": [
             "partial_exception_counts requires a hashable type"
           ],
@@ -107,7 +154,15 @@
             },
             {
               "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
               "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
             },
             {
               "a": 1.0,
@@ -119,16 +174,18 @@
             },
             {
               "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
               "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
             }
           ],
-          "unexpected_index_list": [
-            0,
-            2,
-            4,
-            5,
-            7
-          ]
+          "unexpected_index_list": [0,1,2,3,4,5,6,7,8]
         }
       }
     }]

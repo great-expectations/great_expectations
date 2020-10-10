@@ -6,19 +6,19 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 try:
     import sqlalchemy
     from sqlalchemy import (
-        create_engine,
         Column,
-        String,
         MetaData,
+        String,
         Table,
-        select,
         and_,
         column,
+        create_engine,
+        select,
         text,
     )
-    from sqlalchemy.engine.url import URL
     from sqlalchemy.engine.reflection import Inspector
-    from sqlalchemy.exc import SQLAlchemyError, NoSuchTableError, IntegrityError
+    from sqlalchemy.engine.url import URL
+    from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
 except ImportError:
     sqlalchemy = None
     create_engine = None
@@ -58,7 +58,7 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             table = Table(table_name, meta, autoload=True, autoload_with=self.engine)
             # We do a "light" check: if the columns' names match, we will proceed, otherwise, create the table
-            if set([str(col.name).lower() for col in table.columns]) != (
+            if {str(col.name).lower() for col in table.columns} != (
                 set(key_columns) | {"value"}
             ):
                 raise ge_exceptions.StoreBackendError(

@@ -7,7 +7,7 @@ This guide will explain how to host and share Data Docs on AWS S3.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - `Set up the AWS Command Line Interface <https://aws.amazon.com/cli/>`_
 
 Steps
@@ -113,7 +113,7 @@ This can be useful for non-interactive environments.
 Additional notes
 ----------------
 
-Optionally, you may wish to update static hosting settings for your bucket to enable AWS to automatically serve your
+- Optionally, you may wish to update static hosting settings for your bucket to enable AWS to automatically serve your
 index.html file or a custom error file:
 
 .. code-block:: bash
@@ -121,7 +121,23 @@ index.html file or a custom error file:
   > aws s3 website s3://data-docs.my_org/ --index-document index.html
 
 
-If you wish to host a Data Docs site in a "subfolder" of an S3 bucket, add the ``prefix`` property to the configuration snippet in step 4, immediately after the ``bucket`` property.
+- If you wish to host a Data Docs site in a subfolder of an S3 bucket, add the ``prefix`` property to the configuration snippet in step 4, immediately after the ``bucket`` property.
+
+- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the Data Docs Store.  The following example will configure a S3 site with the ``base_public_path`` set to ``www.mydns.com``.  Data Docs will still be written to the configured location on S3 (for example ``https://s3.amazonaws.com/data-docs.my_org/docs/index.html``), but you will be able to access the pages from your DNS (``http://www.mydns.com/index.html`` in our example).
+
+.. code-block:: yaml
+
+    data_docs_sites:
+      s3_site:  # this is a user-selected name - you may select your own
+        class_name: SiteBuilder
+        store_backend:
+          class_name: TupleS3StoreBackend
+          bucket: data-docs.my_org  # UPDATE the bucket name here to match the bucket you configured above.
+          base_public_path: http://www.mydns.com
+        site_index_builder:
+          class_name: DefaultSiteIndexBuilder
+          show_cta_footer: true
+
 
 Additional resources
 --------------------

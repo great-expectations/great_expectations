@@ -858,6 +858,27 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
     assert obs == expected
 
 
+def test_render_path_fixes_relative_paths():
+    batch_kwargs = {"path": "data.csv"}
+    notebook_renderer = SuiteEditNotebookRenderer()
+    expected = {"path": "../../data.csv"}
+    assert notebook_renderer._fix_path_in_batch_kwargs(batch_kwargs) == expected
+
+
+def test_render_path_ignores_gcs_urls():
+    batch_kwargs = {"path": "gs://a-bucket/data.csv"}
+    notebook_renderer = SuiteEditNotebookRenderer()
+    expected = {"path": "gs://a-bucket/data.csv"}
+    assert notebook_renderer._fix_path_in_batch_kwargs(batch_kwargs) == expected
+
+
+def test_render_path_ignores_s3_urls():
+    batch_kwargs = {"path": "s3://a-bucket/data.csv"}
+    notebook_renderer = SuiteEditNotebookRenderer()
+    expected = {"path": "s3://a-bucket/data.csv"}
+    assert notebook_renderer._fix_path_in_batch_kwargs(batch_kwargs) == expected
+
+
 def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
     suite_with_multiple_citations, empty_data_context
 ):
@@ -1341,7 +1362,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     edit_notebook_path = os.path.join(uncommitted_dir, "edit_warning.ipynb")
     assert os.path.isfile(edit_notebook_path)
 
-    with open(edit_notebook_path, "r") as f:
+    with open(edit_notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
 
     # Run notebook

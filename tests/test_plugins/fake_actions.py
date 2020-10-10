@@ -1,8 +1,8 @@
-class TemporaryNoOpSummarizer(object):
+class TemporaryNoOpSummarizer:
     def render(self, input):
         return input
 
 
-class DropAllVowelsSummarizer(object):
+class DropAllVowelsSummarizer:
     def render(self, input):
         return input
