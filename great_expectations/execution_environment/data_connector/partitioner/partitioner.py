@@ -131,7 +131,7 @@ configuration.
             )
         return sorter
 
-    def get_available_partitions(
+    def find_or_create_partitions(
         self,
         data_asset_name: str = None,
         partition_query: Union[PartitionQuery, None] = None,

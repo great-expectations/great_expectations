@@ -27,7 +27,7 @@ def test_pipeline_partitioner():
         "data_reference": None
     }
     # no pipeline_datasets configured, so no partitions returned
-    returned_partitions = test_partitioner.get_available_partitions(
+    returned_partitions = test_partitioner.find_or_create_partitions(
         data_asset_name=None,
         partition_query=None,
         runtime_parameters=None,
@@ -51,7 +51,7 @@ def test_pipeline_partitioner_single_df():
         "definition": {"run_id": 1234567890},
         "data_reference": test_df
     }
-    returned_partitions = test_partitioner.get_available_partitions(
+    returned_partitions = test_partitioner.find_or_create_partitions(
         data_asset_name=None,
         partition_query=None,
         runtime_parameters=None,

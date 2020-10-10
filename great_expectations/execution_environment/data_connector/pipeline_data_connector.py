@@ -74,8 +74,7 @@ class PipelineDataConnector(DataConnector):
             "definition": runtime_parameters,
             "data_reference": self.in_memory_dataset
         }
-        # TODO: <Alex>Find or create partitions.</Alex>
-        return partitioner.get_available_partitions(
+        return partitioner.find_or_create_partitions(
             data_asset_name=data_asset_name,
             partition_query=partition_query,
             runtime_parameters=runtime_parameters,
