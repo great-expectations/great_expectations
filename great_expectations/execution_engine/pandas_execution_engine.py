@@ -18,18 +18,21 @@ from great_expectations.dataset.util import (
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
+# TODO: <Alex>See the cleanup notes in "great_expectations/core/batch.py" and "great_expectations/execution_environment/types/batch_spec.py".</Alex>
+# from ..core.batch import Batch, BatchMarkers
+from ..core.batch import Batch
+from ..core.id_dict import BatchSpec
 from great_expectations.execution_environment.types import (
     InMemoryBatchSpec,
     PathBatchSpec,
-    S3BatchSpec
+    S3BatchSpec,
+    BatchMarkers
 )
 from great_expectations.expectations.registry import (
     register_metric,
 )
 from great_expectations.validator.validator import Validator
 
-from ..core.batch import Batch, BatchMarkers
-from ..core.id_dict import BatchSpec
 from ..exceptions import BatchSpecError, ValidationError
 from ..exceptions.metric_exceptions import MetricError
 from ..execution_environment.util import hash_pandas_dataframe

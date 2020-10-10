@@ -5,10 +5,16 @@ from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot
 
 
+# TODO: <Alex>This module needs to be cleaned up.
+#  We have Batch used for the legacy design, and we also need Batch for the new design.
+#  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
+#  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
+# TODO: <Alex>See also "great_expectations/execution_environment/types/batch_spec.py".</Alex>
 class Batch(DictDot):
     def __init__(
         self,
         data,
+        batch_request=None,
         batch_spec=None,
         batch_markers=None,
         # The remaining parameters are for backward compatibility.
@@ -18,6 +24,7 @@ class Batch(DictDot):
         batch_kwargs=None,
     ):
         self._data = data
+        self._batch_request = batch_request
         self._batch_spec = batch_spec or BatchSpec()
 
         if not batch_markers:
@@ -64,6 +71,7 @@ class Batch(DictDot):
         return self._batch_kwargs
 
 
+# TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
 class BatchMarkers(BatchKwargs):
     """A BatchMarkers is a special type of BatchKwargs (so that it has a batch_fingerprint) but it generally does
     NOT require specific keys and instead captures information about the OUTPUT of a datasource's fetch

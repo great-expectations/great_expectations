@@ -103,6 +103,7 @@ class ExecutionEnvironment(object):
         )
 
         batch: Batch = self.execution_engine.load_batch(batch_spec=batch_spec)
+        batch["batch_request"] = batch_request
         return batch
 
     def _build_batch_spec(self, data_connector_name: str, batch_request: dict) -> BatchSpec:

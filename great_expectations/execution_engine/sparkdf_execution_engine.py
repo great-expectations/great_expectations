@@ -14,17 +14,20 @@ from dateutil.parser import parse
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+# TODO: <Alex>See the cleanup notes in "great_expectations/core/batch.py" and "great_expectations/execution_environment/types/batch_spec.py".</Alex>
+# from ..core.batch import Batch, BatchMarkers
+from ..core.batch import Batch
+from ..core.id_dict import BatchSpec, IDDict
 from great_expectations.execution_environment.types import (
     InMemoryBatchSpec,
     PathBatchSpec,
-    S3BatchSpec
+    S3BatchSpec,
+    BatchMarkers
 )
+from ..expectations.registry import register_metric
 from great_expectations.validator.validator import Validator
 
-from ..core.batch import Batch, BatchMarkers
-from ..core.id_dict import BatchSpec, IDDict
 from ..exceptions import BatchKwargsError, BatchSpecError, ValidationError
-from ..expectations.registry import register_metric
 from ..validator.validation_graph import MetricEdgeKey
 from .execution_engine import ExecutionEngine
 
