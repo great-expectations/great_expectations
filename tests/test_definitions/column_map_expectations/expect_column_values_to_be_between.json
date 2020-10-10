@@ -78,7 +78,7 @@
         }
       },
       {
-        "title" : "Another_basic_positive_test",
+        "title" : "another_basic_positive_test",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -92,7 +92,7 @@
         }
       },
       {
-        "title" : "Missing_min_value",
+        "title" : "missing_min_value",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -105,7 +105,7 @@
         }
       },
       {
-        "title" : "Null_min_value",
+        "title" : "null_min_value",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -179,7 +179,7 @@
         }
       },
       {
-        "title" : "positive_test_with_result_format__BOOLEAN_ONLY",
+        "title" : "positive_test_with_result_format__boolean_only",
         "exact_match_out": false,
         "out": {"success": true},
         "in": {
@@ -190,7 +190,7 @@
         }
       },
       {
-        "title" : "another_positive_test_with_result_format__BOOLEAN_ONLY",
+        "title" : "another_positive_test_with_result_format__boolean_only",
         "exact_match_out": false,
         "out": {"success": true},
         "in": {
@@ -201,7 +201,7 @@
         }
       },
       {
-        "title" : "Negative_test_with_result_format__BOOLEAN_ONLY",
+        "title" : "negative_test_with_result_format__boolean_only",
         "exact_match_out": false,
         "out": {"success": false},
         "in": {
@@ -212,7 +212,7 @@
         }
       },
       {
-        "title" : "Another_negative_test_with_result_format__BOOLEAN_ONLY",
+        "title" : "another_negative_test_with_result_format__boolean_only",
         "exact_match_out": false,
         "out": {"success": false},
         "in": {
@@ -223,7 +223,7 @@
         }
       },
       {
-        "title" : "Positive_test_with_mostly",
+        "title" : "positive_test_with_mostly",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -272,7 +272,7 @@
         }
       },
       {
-        "title" : "Negative_test_with_mostly",
+        "title" : "negative_test_with_mostly",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
@@ -293,7 +293,7 @@
         }
       },
       {
-        "title" : "Error:_improperly_mixed_types",
+        "title" : "error:_improperly_mixed_types",
         "exact_match_out": false,
         "in": {
           "column": "y",
@@ -308,7 +308,7 @@
         }
       },
       {
-        "title" : "Error:_improperly_mixed_types_again",
+        "title" : "error:_improperly_mixed_types_again",
         "exact_match_out": false,
         "in": {
           "column": "y",
@@ -323,7 +323,7 @@
         }
       },
       {
-        "title" : "Error:_improperly_mixed_types_once_more",
+        "title" : "error:_improperly_mixed_types_once_more",
         "exact_match_out": false,
         "in": {
           "column": "y",
@@ -338,7 +338,7 @@
         }
       },
       {
-        "title" : "Negative_test_to_verify_that_the_denominator_for_mostly_works_with_missing_values",
+        "title" : "negative_test_to_verify_that_the_denominator_for_mostly_works_with_missing_values",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
@@ -357,7 +357,7 @@
         }
       },
       {
-        "title" : "Positive_test_to_verify_that_the_denominator_for_mostly_works_with_missing_values",
+        "title" : "positive_test_to_verify_that_the_denominator_for_mostly_works_with_missing_values",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
@@ -376,7 +376,7 @@
         }
       },
       {
-        "title" : "Negative_test_with_parse_strings_as_datetimes",
+        "title" : "negative_test_with_parse_strings_as_datetimes",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
@@ -398,7 +398,7 @@
         }
       },
       {
-        "title" : "Error_on_string-to-int_comparisons",
+        "title" : "error_on_string-to-int_comparisons",
         "exact_match_out": false,
         "in": {
           "column": "numeric",
@@ -412,7 +412,7 @@
         }
       },
       {
-        "title" : "Test_'min_value_is_greater_than_max_value'",
+        "title" : "test_min_value_is_greater_than_max_value",
         "exact_match_out": false,
         "in": {
           "column": "x",

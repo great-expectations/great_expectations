@@ -2,6 +2,7 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.validation_operators import (
     NoOpAction,
     SlackNotificationAction,
+    PagerdutyAlertAction,
     StoreEvaluationParametersAction,
     StoreMetricsAction,
     StoreValidationResultAction,
@@ -21,6 +22,7 @@ class ActionAnonymizer(Anonymizer):
             StoreValidationResultAction,
             StoreEvaluationParametersAction,
             SlackNotificationAction,
+            PagerdutyAlertAction,
             UpdateDataDocsAction,
             ValidationAction,
         ]
