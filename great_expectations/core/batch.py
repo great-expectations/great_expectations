@@ -25,7 +25,9 @@ class Batch(DictDot):
     ):
         self._data = data
         self._batch_request = batch_request
-        self._batch_spec = batch_spec or BatchSpec()
+        if batch_spec is None:
+            batch_spec = BatchSpec()
+        self._batch_spec = batch_spec
 
         if not batch_markers:
             batch_markers = BatchMarkers(

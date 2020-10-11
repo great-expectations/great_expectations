@@ -118,7 +118,8 @@ class ExecutionEnvironment(object):
         """
         data_connector: DataConnector = self.get_data_connector(name=data_connector_name)
         self._update_data_connector_in_memory_dataset(data_connector=data_connector)
-        return data_connector.build_batch_spec(batch_request=batch_request)
+        # noinspection PyProtectedMember
+        return data_connector._build_batch_spec(batch_request=batch_request)
 
     @property
     def name(self):

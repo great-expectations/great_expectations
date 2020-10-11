@@ -83,7 +83,7 @@ class PipelineDataConnector(DataConnector):
             partition_config=partition_config
         )
 
-    def build_batch_spec_from_partitions(
+    def _build_batch_spec_from_partitions(
         self,
         partitions: List[Partition],
         batch_request: dict,

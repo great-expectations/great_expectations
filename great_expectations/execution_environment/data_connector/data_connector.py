@@ -51,7 +51,8 @@ class DataConnector(object):
     """
     _default_reader_options: dict = {}
 
-    #NOTE Abe 20201011 : This looks like a type defintion for BatchSpec, not a property of DataConnector
+    # NOTE Abe 20201011 : This looks like a type defintion for BatchRequest, not a property of DataConnector
+    # TODO: <Alex>Move these to the BatchRequest class when it implemented.</Alex>
     recognized_batch_request_keys: set = {
         "execution_environment",
         "data_connector",
@@ -130,7 +131,7 @@ class DataConnector(object):
     def batch_request_defaults(self) -> dict:
         return self._batch_request_defaults
 
-    def get_cached_partitions(
+    def _get_cached_partitions(
         self,
         data_asset_name: str = None,
         runtime_parameters: Union[dict, None] = None
@@ -212,7 +213,7 @@ structure of data under consideration.
             )
         for partition in partitions:
             data_asset_name: str = partition.data_asset_name
-            cached_partitions: List[Partition] = self.get_cached_partitions(
+            cached_partitions: List[Partition] = self._get_cached_partitions(
                 data_asset_name=data_asset_name,
                 runtime_parameters=runtime_parameters
             )
@@ -333,7 +334,7 @@ connector and the default_partitioner set to one of the configured partitioners.
             partitioner = self.get_partitioner(name=partitioner_name)
         return partitioner
 
-    def build_batch_spec(self, batch_request: dict) -> BatchSpec:
+    def _build_batch_spec(self, batch_request: dict) -> BatchSpec:
         if "data_asset_name" not in batch_request:
             raise ge_exceptions.BatchSpecError("Batch request must have a data_asset_name.")
 
@@ -386,13 +387,13 @@ Unable to build batch_spec for data asset "{data_asset_name}" (found {len(partit
                 '''
             )
 
-        batch_spec: BatchSpec = self.build_batch_spec_from_partitions(
+        batch_spec: BatchSpec = self._build_batch_spec_from_partitions(
             partitions=partitions, batch_request=batch_request, batch_spec=batch_spec_scaffold
         )
 
         return batch_spec
 
-    def build_batch_spec_from_partitions(
+    def _build_batch_spec_from_partitions(
         self,
         partitions: List[Partition],
         batch_request: dict,

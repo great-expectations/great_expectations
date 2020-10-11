@@ -148,7 +148,8 @@ configuration.
                 data_asset_name=data_asset_name,
             )
 
-        cached_partitions: List[Partition] = self.data_connector.get_cached_partitions(
+        # noinspection PyProtectedMember
+        cached_partitions: List[Partition] = self.data_connector._get_cached_partitions(
             data_asset_name=data_asset_name,
             runtime_parameters=runtime_parameters
         )
@@ -166,7 +167,8 @@ configuration.
                 runtime_parameters=runtime_parameters,
                 allow_multipart_partitions=self.allow_multipart_partitions
             )
-            cached_partitions = self.data_connector.get_cached_partitions(
+            # noinspection PyProtectedMember
+            cached_partitions = self.data_connector._get_cached_partitions(
                 data_asset_name=data_asset_name,
                 runtime_parameters=runtime_parameters
             )

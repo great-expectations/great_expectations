@@ -622,8 +622,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 --ge-feature-maturity-info--
     """
 
-    recognized_batch_request_keys = {"limit"}
-
     recognized_batch_spec_defaults = {
         "reader_method",
         "reader_options",

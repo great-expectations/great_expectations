@@ -192,7 +192,7 @@ class FilesDataConnector(DataConnector):
             )
         )
 
-    def build_batch_spec_from_partitions(
+    def _build_batch_spec_from_partitions(
         self,
         partitions: List[Partition],
         batch_request: dict,

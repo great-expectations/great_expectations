@@ -543,7 +543,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             data_connector = execution_environment.get_data_connector(
                 data_connector_name
             )
-            batch_spec = data_connector.build_batch_spec(
+            # noinspection PyProtectedMember
+            batch_spec = data_connector._build_batch_spec(
                 batch_request=batch_request
             )
 
