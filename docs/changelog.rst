@@ -7,6 +7,7 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] Add conditional expectations for SQLAlchemy backend
 * [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file
 * [ENHANCEMENT] More detailed information in Datasource.self_check() diagnostic (concerning ExecutionEngine objects)
 * [BUGFIX] Corrected handling of boto3_options by PandasExecutionEngine

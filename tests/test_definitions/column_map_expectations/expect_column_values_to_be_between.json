@@ -518,6 +518,22 @@
           "success": true
         }
       },{
+        "title": "test_conditional_expectation_passes_sqlalchemy",
+        "only_for": ["sqlalchemy"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "strict_max": false,
+          "row_condition": "y = 'abc'"
+        },
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        }
+      },{
         "title": "test_conditional_expectation_fails",
         "only_for": ["pandas"],
         "exact_match_out": false,
@@ -528,6 +544,22 @@
           "strict_max": false,
           "row_condition": "y == 9",
           "condition_parser": "pandas"
+        },
+        "out": {
+          "unexpected_list": [9],
+          "unexpected_index_list": [0],
+          "success": false
+        }
+      },{
+        "title": "test_conditional_expectation_fails_sqlalchemy",
+        "only_for": ["sqlalchemy"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "strict_max": false,
+          "row_condition": "y = '9'"
         },
         "out": {
           "unexpected_list": [9],

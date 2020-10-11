@@ -82,7 +82,24 @@
       "out": {
         "traceback_substring": "No function matches the given name and argument types."
       }
-    },{
+    },
+      {
+      "title": "test_conditional_expectation_passes_sqlalchemy",
+      "only_for": ["sqlalchemy"],
+      "exact_match_out" : false,
+      "in":{
+        "column": "s1",
+        "value": 4,
+        "catch_exceptions": true,
+        "row_condition": "equal_length_integer = 5 AND equal_length_string = 'e'"
+      },
+      "out" : {
+        "success":true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      }
+    },
+      {
       "title": "test_conditional_expectation_passes",
       "only_for": ["pandas"],
       "exact_match_out" : false,
@@ -108,6 +125,21 @@
         "catch_exceptions": true,
         "row_condition": "(equal_length_integer == 4) & (equal_length_string == 'd')",
         "condition_parser": "pandas"
+      },
+      "out" : {
+        "success": false,
+        "unexpected_index_list": [0],
+        "unexpected_list": ["slimy"]
+      }
+    }, {
+      "title": "test_conditional_expectation_fails_sqlalchemy",
+      "only_for": ["sqlalchemy"],
+      "exact_match_out" : false,
+      "in":{
+        "column": "s1",
+        "value": 4,
+        "catch_exceptions": true,
+        "row_condition": "(equal_length_integer = 4) AND (equal_length_string = 'd')"
       },
       "out" : {
         "success": false,

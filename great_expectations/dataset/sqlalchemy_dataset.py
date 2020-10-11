@@ -165,7 +165,7 @@ class MetaSqlAlchemyDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-            self, column, mostly=None, result_format=None, *args, **kwargs
+                self, column, mostly=None, result_format=None, row_condition=None, *args, **kwargs
         ):
             if self.batch_kwargs.get("use_quoted_name"):
                 column = quoted_name(column, quote=True)
@@ -233,6 +233,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 count_query = self._get_count_query_generic_sqlalchemy(
                     expected_condition=expected_condition,
                     ignore_values_condition=ignore_values_condition,
+                    row_condition=row_condition
                 )
 
             count_results: dict = dict(self.engine.execute(count_query).fetchone())
@@ -257,15 +258,20 @@ class MetaSqlAlchemyDataset(Dataset):
             count_results["null_count"] = int(count_results["null_count"])
             count_results["unexpected_count"] = int(count_results["unexpected_count"])
 
+            if row_condition:
+                where_clause = sa.and_(
+                    sa.not_(expected_condition), sa.not_(ignore_values_condition), sa.text(row_condition)
+                )
+            else:
+                where_clause = sa.and_(
+                    sa.not_(expected_condition), sa.not_(ignore_values_condition)
+                )
+
             # Retrieve unexpected values
             unexpected_query_results = self.engine.execute(
                 sa.select([sa.column(column)])
                 .select_from(self._table)
-                .where(
-                    sa.and_(
-                        sa.not_(expected_condition), sa.not_(ignore_values_condition)
-                    )
-                )
+                .where(where_clause)
                 .limit(unexpected_count_limit)
             )
 
@@ -389,8 +395,9 @@ class MetaSqlAlchemyDataset(Dataset):
         self,
         expected_condition: BinaryExpression,
         ignore_values_condition: BinaryExpression,
+        row_condition=None
     ) -> Select:
-        return sa.select(
+        qry = sa.select(
             [
                 sa.func.count().label("element_count"),
                 sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
@@ -412,6 +419,11 @@ class MetaSqlAlchemyDataset(Dataset):
                 ).label("unexpected_count"),
             ]
         ).select_from(self._table)
+
+        if row_condition:
+            qry = qry.where(sa.text(row_condition))
+
+        return qry
 
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
@@ -1411,6 +1423,7 @@ WHERE
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1456,6 +1469,7 @@ WHERE
         type_,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1503,6 +1517,7 @@ WHERE
         type_list,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1558,6 +1573,7 @@ WHERE
         mostly=None,
         parse_strings_as_datetimes=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1581,6 +1597,7 @@ WHERE
         mostly=None,
         parse_strings_as_datetimes=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1605,6 +1622,7 @@ WHERE
         output_strftime_format=None,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1660,6 +1678,7 @@ WHERE
         value,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1675,6 +1694,7 @@ WHERE
         max_value=None,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1712,6 +1732,7 @@ WHERE
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1820,6 +1841,7 @@ WHERE
         regex,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1840,6 +1862,7 @@ WHERE
         regex,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1863,6 +1886,7 @@ WHERE
         match_on="any",
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1904,6 +1928,7 @@ WHERE
         regex_list,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1979,6 +2004,7 @@ WHERE
         like_pattern,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -2002,6 +2028,7 @@ WHERE
         like_pattern,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -2026,6 +2053,7 @@ WHERE
         match_on="any",
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -2072,6 +2100,7 @@ WHERE
         like_pattern_list,
         mostly=None,
         result_format=None,
+        row_condition=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,

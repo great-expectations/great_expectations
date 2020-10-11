@@ -9,13 +9,16 @@ One may, for example, expect a column that holds the country of origin to not be
 
 Great Expectations allows you to express such Conditional Expectations via a :code:`row_condition` argument that can be passed to all Dataset Expectations.
 
-Today, conditional Expectations are available only for the Pandas but not for the Spark and SQLAlchemy backends. The feature is **experimental**. Please expect changes to API as additional backends are supported.
+Today, conditional Expectations are available only for the Pandas and SQLAlchemy backends, but not for the Spark backend. The feature is **experimental**. Please expect changes to API as additional backends are supported.
 
 For Pandas, the :code:`row_condition` argument should be a boolean
 expression string, which can be passed to :code:`pandas.DataFrame.query()` before Expectation Validation (see `pandas docs <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_).
 
-Optionally, the :code:`condition_parser` argument can be provided, which defines the syntax of conditions. Since the feature is **experimental** and only available for Pandas,
+Optionally, the :code:`condition_parser` argument can be provided for pandas datasets, which defines the syntax of conditions. Since the feature is **experimental** and only available for Pandas,
 this argument will be set to *"pandas"* by default, thus, demanding the appropriate syntax. Other engines might be implemented in future.
+
+For SQLAlchemy the :code:`row_condition` argument should be a valid SQL string. It will be added to the where clause of
+the query when validation expectations. The :code:`condition_parser` argument is not allowed for SQLAlchemy backends.
 
 The feature can be used, e.g., to test if different encodings of identical pieces of information are consistent with each other:
 
@@ -27,6 +30,27 @@ The feature can be used, e.g., to test if different encodings of identical piece
             column='Sex',
             value_set=['male'],
             row_condition='SexCode==0'
+        )
+    {
+        "success": true,
+        "result": {
+            "element_count": 851,
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+            "partial_unexpected_list": []
+        }
+    }
+
+For SQLAlchemy the expectation would be defined like this:
+
+.. code-block:: bash
+    >>> my_df.expect_column_values_to_be_in_set(
+            column='Sex',
+            value_set=['male'],
+            row_condition='SexCode=0'
         )
     {
         "success": true,

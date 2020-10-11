@@ -173,7 +173,25 @@
         "unexpected_index_list": [],
         "unexpected_list": []
       }
-    }, {
+    },
+    {
+      "title": "test_sqlalchemy_conditional_expectation_passes",
+      "only_for": ["sqlalchemy"],
+      "exact_match_out" : false,
+      "in":{
+        "column": "s1",
+        "min_value": 4,
+        "max_value": 4,
+        "catch_exceptions": true,
+        "row_condition": "s4 = 5"
+      },
+      "out" : {
+        "success":true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      }
+    },
+      {
       "title": "test_conditional_expectation_fails",
       "only_for": ["pandas"],
       "exact_match_out" : false,
@@ -190,7 +208,25 @@
         "unexpected_index_list": [0],
         "unexpected_list": ["slimy"]
       }
-    }, {
+    },
+    {
+      "title": "test_sqlalchemy_conditional_expectation_fails",
+      "only_for": ["sqlalchemy"],
+      "exact_match_out" : false,
+      "in":{
+        "column": "s1",
+        "min_value": 4,
+        "max_value": 4,
+        "catch_exceptions": true,
+        "row_condition": "s4 = 4"
+      },
+      "out" : {
+        "success":false,
+        "unexpected_index_list": [0],
+        "unexpected_list": ["slimy"]
+      }
+    },
+    {
       "title": "test_conditional_expectation_parser_errors",
       "only_for": ["pandas"],
       "exact_match_out" : false,

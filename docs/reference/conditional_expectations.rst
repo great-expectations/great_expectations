@@ -118,3 +118,38 @@ Conditional Expectations can also be used to test for alternative non-missingnes
             "partial_unexpected_list": []
         }
     }
+
+Example 4:
+==========
+
+The previous example for a SQLAlchemy backend.
+
+.. code-block:: bash
+
+    >>> my_df.expect_column_values_to_be_null(
+            column='Provider Last Name (Legal Name)',
+            row_condition='`Provider Organization Name (Legal Business Name)` IS NOT NULL'
+        )
+    {
+        "success": true,
+        "result": {
+            "element_count": 10515,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": []
+        }
+    }
+
+    >>> my_df.expect_column_values_to_not_be_null(
+            column='Authorized Official Last Name',
+            row_condition='`Provider Organization Name (Legal Business Name)` IS NOT NULL'
+        )
+    {
+        "success": true,
+        "result": {
+            "element_count": 10515,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": []
+        }
+    }
