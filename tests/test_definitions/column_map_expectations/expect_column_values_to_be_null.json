@@ -116,7 +116,7 @@
           "exact_match_out": false,
           "in": {
             "column": "no_null",
-	    "treat_as_null": ["a", "b", "d"]
+            "treat_as_null": ["a", "b", "d"],
             "mostly": 0.8
           },
           "out": {
