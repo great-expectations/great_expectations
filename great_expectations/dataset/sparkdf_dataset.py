@@ -1148,7 +1148,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         matches_json_schema_udf = udf(matches_json_schema, sparktypes.StringType())
 
         return column.withColumn("__success", matches_json_schema_udf(column[0]))
->>>>>>> upstream/develop
 
     @DocInherit
     @DataAsset.expectation(["column", "type_", "mostly"])
