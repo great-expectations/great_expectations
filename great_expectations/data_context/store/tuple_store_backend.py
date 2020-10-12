@@ -814,6 +814,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     def __init__(
         self,
         container,
+        connection_string,
         prefix="",
         filepath_template=None,
         filepath_prefix=None,
@@ -830,6 +831,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
         )
+        self.connection_string = connection_string
         self.prefix = prefix
         self.container = container
 
@@ -837,9 +839,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
         from azure.storage.blob import BlobServiceClient
 
-        if os.getenv("AZURE_STORAGE_CONNECTION_STRING"):
+        if self.connection_string:
             return BlobServiceClient.from_connection_string(
-                os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+                self.connection_string
             ).get_container_client(self.container)
         else:
             raise StoreBackendError(
