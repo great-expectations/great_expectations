@@ -10,7 +10,7 @@ from great_expectations.data_context.types.base import (
     SorterConfig,
     sorterConfigSchema
 )
-
+from great_expectations.core.id_dict import PartitionDefinitionSubset
 from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
@@ -135,7 +135,7 @@ configuration.
         self,
         data_asset_name: str = None,
         partition_query: Union[PartitionQuery, None] = None,
-        runtime_parameters: Union[dict, None] = None,
+        runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
         repartition: bool = False,
         # The remaining parameters are passed down to the specific partitioner from its containing data connector.
         **kwargs
@@ -191,7 +191,6 @@ configuration.
         self,
         data_asset_name: str = None,
         runtime_parameters: Union[dict, None] = None,
-        # TODO: <Alex></Alex>
         **kwargs
     ) -> List[Partition]:
         raise NotImplementedError

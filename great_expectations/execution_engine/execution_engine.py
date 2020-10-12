@@ -14,6 +14,7 @@ from dateutil.parser import parse
 from ruamel.yaml import YAML
 from scipy import stats
 
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.batch import Batch
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.execution_engine.util import (
@@ -188,8 +189,6 @@ class MetaExecutionEngine:
 
 # noinspection PyIncorrectDocstring
 class ExecutionEngine(MetaExecutionEngine):
-    recognized_batch_spec_defaults = set()
-
     ## TODO: JPC: 20200916 - can we explicitly list these args?
     def __init__(self, *args, **kwargs):
         self._execution_engine_config = {}
@@ -203,20 +202,6 @@ class ExecutionEngine(MetaExecutionEngine):
             self._metric_cache = {}
         else:
             self._metric_cache = NoOpDict()
-
-        batch_spec_defaults = kwargs.pop("batch_spec_defaults", {})
-        batch_spec_defaults_keys = set(batch_spec_defaults.keys())
-        if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
-            logger.warning(
-                "Unrecognized batch_spec_default(s): %s"
-                % str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)
-            )
-
-        self._batch_spec_defaults = {
-            key: value
-            for key, value in batch_spec_defaults.items()
-            if key in self.recognized_batch_spec_defaults
-        }
 
         loaded_batch_id = kwargs.pop("loaded_batch_id", None)
         self._loaded_batch_id = loaded_batch_id
@@ -513,11 +498,6 @@ class ExecutionEngine(MetaExecutionEngine):
     def validator(self):
         """A getter for the validator"""
         return self._validator
-
-    @property
-    def batch_spec_defaults(self):
-        """A getter for the batch spec defaults"""
-        return self._batch_spec_defaults
 
     @property
     def loaded_batch_id(self):

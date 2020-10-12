@@ -15,9 +15,14 @@ from dateutil.parser import parse
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 # TODO: <Alex>See the cleanup notes in "great_expectations/core/batch.py" and "great_expectations/execution_environment/types/batch_spec.py".</Alex>
-# from ..core.batch import Batch, BatchMarkers
-from ..core.batch import Batch
-from ..core.id_dict import BatchSpec, IDDict
+from ..core.batch import (
+    Batch,
+    BatchRequest
+)
+from ..core.id_dict import (
+    BatchSpec,
+    IDDict
+)
 from great_expectations.execution_environment.types import (
     InMemoryBatchSpec,
     PathBatchSpec,
@@ -622,6 +627,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 --ge-feature-maturity-info--
     """
 
+    # TODO: <Alex>Is this used in the new design?</Alex>
     recognized_batch_spec_defaults = {
         "reader_method",
         "reader_options",
@@ -789,7 +795,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 {"reader_method": reader_method},
             )
 
-    def process_batch_request(self, batch_request, batch_spec):
+    def process_batch_request(self, batch_request: BatchRequest, batch_spec: BatchSpec):
         """Given that the batch request has a limit state, transfers the limit dictionary entry from the batch_request
         to the batch_spec.
         Args:
@@ -798,7 +804,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         Returns:
             ReaderMethod to use for the filepath
         """
-        limit = batch_request.get("limit")
+        limit = batch_request.limit
         if limit is not None:
             if not batch_spec.get("limit"):
                 batch_spec["limit"] = limit

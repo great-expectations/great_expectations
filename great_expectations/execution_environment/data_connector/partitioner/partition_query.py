@@ -5,6 +5,7 @@ from typing import List, Dict, Callable, Union
 
 import logging
 
+from great_expectations.core.id_dict import PartitionDefinitionSubset
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.util import is_int
 import great_expectations.exceptions as ge_exceptions
@@ -13,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 def build_partition_query(
-    partition_query_dict: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None
+    partition_query_dict: Union[
+        Dict[str, Union[int, list, tuple, slice, str, Union[Dict, PartitionDefinitionSubset], Callable, None]], None
+    ] = None
 ):
     if not partition_query_dict:
         return PartitionQuery(
@@ -45,7 +48,7 @@ def build_partition_query(
 "{str(type(partition_name))}", which is illegal.
             '''
         )
-    partition_definition: dict = partition_query_dict.get("partition_definition")
+    partition_definition: Union[dict, None] = partition_query_dict.get("partition_definition")
     if partition_definition:
         if not isinstance(partition_definition, dict):
             raise ge_exceptions.PartitionerError(
@@ -55,6 +58,8 @@ def build_partition_query(
             )
         if not all([isinstance(key, str) for key in partition_definition.keys()]):
             raise ge_exceptions.PartitionerError('All partition_definition keys must strings (Python "str").')
+    if partition_definition is not None:
+        partition_definition: PartitionDefinitionSubset = PartitionDefinitionSubset(partition_definition)
     data_asset_name: str = partition_query_dict.get("data_asset_name")
     if data_asset_name and not isinstance(data_asset_name, str):
         raise ge_exceptions.PartitionerError(
@@ -132,7 +137,7 @@ class PartitionQuery(object):
         self,
         custom_filter: Callable = None,
         partition_name: str = None,
-        partition_definition: Union[dict, None] = None,
+        partition_definition: Union[PartitionDefinitionSubset, None] = None,
         data_asset_name: str = None,
         partition_index: Union[int, slice, None] = None,
         limit: int = None,
@@ -153,7 +158,7 @@ class PartitionQuery(object):
         return self._partition_name
 
     @property
-    def partition_definition(self) -> Union[dict, None]:
+    def partition_definition(self) -> Union[PartitionDefinitionSubset, None]:
         return self._partition_definition
 
     @property
@@ -210,7 +215,7 @@ class PartitionQuery(object):
         def match_partition_to_query_params(
             data_asset_name: str,
             partition_name: str,
-            partition_definition: Union[dict, None]
+            partition_definition: dict
         ) -> bool:
             if self.partition_name:
                 if partition_name != self.partition_name:

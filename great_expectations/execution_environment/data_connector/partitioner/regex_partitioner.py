@@ -7,6 +7,7 @@ import logging
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.core.id_dict import PartitionDefinition
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
@@ -126,6 +127,7 @@ class RegexPartitioner(Partitioner):
             for idx, group_value in enumerate(groups):
                 group_name: str = group_names[idx]
                 partition_definition[group_name] = group_value
+            partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
             if runtime_parameters:
                 partition_definition.update(runtime_parameters)
             partition_name: str = self.DEFAULT_DELIMITER.join(

@@ -1,6 +1,6 @@
 from pathlib import Path
 import itertools
-from typing import List, Dict, Union
+from typing import List, Union, Any
 
 import logging
 
@@ -9,6 +9,11 @@ from great_expectations.execution_environment.data_connector.partitioner.partiti
 from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.core.batch import BatchRequest
+from great_expectations.core.id_dict import (
+    PartitionDefinitionSubset,
+    BatchSpec
+)
 from great_expectations.execution_environment.types import PathBatchSpec
 import great_expectations.exceptions as ge_exceptions
 
@@ -36,7 +41,6 @@ class FilesDataConnector(DataConnector):
         default_partitioner: str = None,
         assets: dict = None,
         config_params: dict = None,
-        batch_request_defaults: dict = None,
         known_extensions: list = None,
         reader_options: dict = None,
         reader_method: str = None,
@@ -51,7 +55,6 @@ class FilesDataConnector(DataConnector):
             default_partitioner=default_partitioner,
             assets=assets,
             config_params=config_params,
-            batch_request_defaults=batch_request_defaults,
             execution_engine=execution_engine,
             data_context_root_directory=data_context_root_directory,
             **kwargs
@@ -89,7 +92,8 @@ class FilesDataConnector(DataConnector):
         partitioner: Partitioner,
         data_asset_name: str = None,
         partition_query: Union[PartitionQuery, None] = None,
-        runtime_parameters: Union[dict, None] = None,
+        in_memory_dataset: Any = None,
+        runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
         repartition: bool = None
     ) -> List[Partition]:
         # TODO: <Alex>TODO: Each specific data_connector should verify the given partitioner against the list of supported partitioners.</Alex>
@@ -192,22 +196,21 @@ class FilesDataConnector(DataConnector):
             )
         )
 
-    def _build_batch_spec_from_partitions(
+    def _build_batch_spec_from_partition(
         self,
-        partitions: List[Partition],
-        batch_request: dict,
-        batch_spec: dict = None
+        partition: Partition,
+        batch_request: BatchRequest,
+        batch_spec: BatchSpec
     ) -> PathBatchSpec:
         """
         Args:
-            partitions:
+            partition:
             batch_request:
             batch_spec:
         Returns:
             batch_spec
         """
-        # TODO: <Alex>If the list has multiple elements, we are using the first one (TBD/TODO multifile config / multibatch)</Alex>
         if not batch_spec.get("path"):
-            path: str = str(partitions[0].data_reference)
+            path: str = str(partition.data_reference)
             batch_spec["path"] = path
         return PathBatchSpec(batch_spec)

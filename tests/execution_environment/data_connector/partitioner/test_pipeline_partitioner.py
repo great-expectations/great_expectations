@@ -3,6 +3,7 @@ import pandas as pd
 
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner import PipelinePartitioner
+from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 import great_expectations.exceptions.exceptions as ge_exceptions
 
@@ -62,7 +63,7 @@ def test_pipeline_partitioner_single_df():
     expected_partition = Partition(
         name="partition_1",
         data_asset_name="test_asset_0",
-        definition={"run_id": 1234567890},
+        definition=PartitionDefinition({"run_id": 1234567890}),
         data_reference=test_df
     )
 

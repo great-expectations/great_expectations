@@ -2,7 +2,7 @@
 
 import copy
 import itertools
-from typing import List, Dict, Union, Callable
+from typing import List, Dict, Union, Callable, Any
 from ruamel.yaml.comments import CommentedMap
 
 import logging
@@ -18,7 +18,12 @@ from great_expectations.execution_environment.data_connector.partitioner.partiti
     PartitionQuery,
     build_partition_query
 )
-from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.batch import BatchRequest
+from great_expectations.core.id_dict import (
+    PartitionDefinitionSubset,
+    PartitionDefinition,
+    BatchSpec
+)
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
@@ -51,17 +56,6 @@ class DataConnector(object):
     """
     _default_reader_options: dict = {}
 
-    # NOTE Abe 20201011 : This looks like a type defintion for BatchRequest, not a property of DataConnector
-    # TODO: <Alex>Move these to the BatchRequest class when it implemented.</Alex>
-    recognized_batch_request_keys: set = {
-        "execution_environment",
-        "data_connector",
-        "data_asset_name",
-        "partition_request",
-        "batch_spec_passthrough",
-        "limit",
-    }
-
     def __init__(
         self,
         name: str,
@@ -69,30 +63,11 @@ class DataConnector(object):
         default_partitioner: str = None,
         assets: dict = None,
         config_params: dict = None,
-        batch_request_defaults: dict = None,
         execution_engine: ExecutionEngine = None,
         data_context_root_directory: str = None,
         **kwargs
     ):
         self._name = name
-
-        # TODO: <Alex>Is this needed?  Where do these batch_request_come_from and what are the values?</Alex>
-        batch_request_defaults = batch_request_defaults or {}
-        batch_request_defaults_keys = set(batch_request_defaults.keys())
-        if not batch_request_defaults_keys <= self.recognized_batch_request_keys:
-            logger.warning(
-                "Unrecognized batch_request key(s): %s"
-                % str(
-                    batch_request_defaults_keys
-                    - self.recognized_batch_request_keys
-                )
-            )
-
-        self._batch_request_defaults = {
-            key: value
-            for key, value in batch_request_defaults.items()
-            if key in self.recognized_batch_request_keys
-        }
 
         self._partitioners = partitioners or {}
         self._default_partitioner = default_partitioner
@@ -127,14 +102,10 @@ class DataConnector(object):
     def config_params(self) -> dict:
         return self._config_params
 
-    @property
-    def batch_request_defaults(self) -> dict:
-        return self._batch_request_defaults
-
     def _get_cached_partitions(
         self,
         data_asset_name: str = None,
-        runtime_parameters: Union[dict, None] = None
+        runtime_parameters: Union[PartitionDefinitionSubset, None] = None
     ) -> List[Partition]:
         cached_partitions: List[Partition]
         if data_asset_name is None:
@@ -163,8 +134,8 @@ class DataConnector(object):
             )
 
     @staticmethod
-    def _cache_partition_runtime_parameters_filter(partition: Partition, parameters: dict) -> bool:
-        partition_definition: dict = partition.definition
+    def _cache_partition_runtime_parameters_filter(partition: Partition, parameters: PartitionDefinitionSubset) -> bool:
+        partition_definition: PartitionDefinition = partition.definition
         for key, value in parameters.items():
             if not (key in partition_definition and partition_definition[key] == value):
                 return False
@@ -174,7 +145,7 @@ class DataConnector(object):
         self,
         partitions: List[Partition],
         partitioner_name: str,
-        runtime_parameters: dict,
+        runtime_parameters: PartitionDefinition,
         allow_multipart_partitions: bool = False
     ):
         """
@@ -334,70 +305,31 @@ connector and the default_partitioner set to one of the configured partitioners.
             partitioner = self.get_partitioner(name=partitioner_name)
         return partitioner
 
-    def _build_batch_spec(self, batch_request: dict) -> BatchSpec:
-        if "data_asset_name" not in batch_request:
+    def _build_batch_spec(self, batch_request: BatchRequest, partition: Partition) -> BatchSpec:
+        if not batch_request.data_asset_name:
             raise ge_exceptions.BatchSpecError("Batch request must have a data_asset_name.")
 
-        batch_request_keys: set = set(batch_request.keys())
-        if not batch_request_keys <= self.recognized_batch_request_keys:
-            logger.warning(
-                "Unrecognized batch_request key(s): %s"
-                % str(batch_request_keys - self.recognized_batch_request_keys)
-            )
+        batch_spec_scaffold: BatchSpec
+        batch_spec_passthrough: BatchSpec = batch_request.batch_spec_passthrough
+        if batch_spec_passthrough is None:
+            batch_spec_scaffold = BatchSpec()
+        else:
+            batch_spec_scaffold = copy.deepcopy(batch_spec_passthrough)
 
-        batch_request_defaults: dict = copy.deepcopy(self.batch_request_defaults)
-        batch_request: dict = {
-            key: value
-            for key, value in batch_request.items()
-            if key in self.recognized_batch_request_keys
-        }
-        batch_request: dict = nested_update(batch_request_defaults, batch_request)
-
-        batch_spec_defaults: dict = copy.deepcopy(
-            self._execution_engine.batch_spec_defaults
-        )
-        batch_spec_passthrough: dict = batch_request.get("batch_spec_passthrough", {})
-        batch_spec_scaffold: dict = nested_update(batch_spec_defaults, batch_spec_passthrough)
-
-        data_asset_name: str = batch_request.get("data_asset_name")
+        data_asset_name: str = batch_request.data_asset_name
         batch_spec_scaffold["data_asset_name"] = data_asset_name
 
-        partition_request: dict = batch_request.get("partition_request")
-        partition_query: dict = {
-            "custom_filter": None,
-            "partition_name": None,
-            "partition_definition": copy.deepcopy(partition_request),
-            "partition_index": None,
-            "limit": None
-        }
-        partitions: List[Partition] = self.get_available_partitions(
-            data_asset_name=data_asset_name,
-            partition_query=partition_query
-        )
-        if len(partitions) == 0:
-            raise ge_exceptions.BatchSpecError(
-                message=f'''
-Unable to build batch_spec for data asset "{data_asset_name}" (found 0 available partitions; must have exactly 1).
-                '''
-            )
-        if len(partitions) > 1:
-            raise ge_exceptions.BatchSpecError(
-                message=f'''
-Unable to build batch_spec for data asset "{data_asset_name}" (found {len(partitions)} partitions; must have exactly 1).
-                '''
-            )
-
-        batch_spec: BatchSpec = self._build_batch_spec_from_partitions(
-            partitions=partitions, batch_request=batch_request, batch_spec=batch_spec_scaffold
+        batch_spec: BatchSpec = self._build_batch_spec_from_partition(
+            partition=partition, batch_request=batch_request, batch_spec=batch_spec_scaffold
         )
 
         return batch_spec
 
-    def _build_batch_spec_from_partitions(
+    def _build_batch_spec_from_partition(
         self,
-        partitions: List[Partition],
-        batch_request: dict,
-        batch_spec: dict
+        partition: Partition,
+        batch_request: BatchRequest,
+        batch_spec: BatchSpec
     ) -> BatchSpec:
         raise NotImplementedError
 
@@ -433,16 +365,22 @@ Unable to build batch_spec for data asset "{data_asset_name}" (found {len(partit
     def get_available_partitions(
         self,
         data_asset_name: str = None,
-        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+        partition_query: Union[
+            Dict[str, Union[int, list, tuple, slice, str, Union[Dict, PartitionDefinitionSubset], Callable, None]], None
+        ] = None,
+        in_memory_dataset: Any = None,
         runtime_parameters: Union[dict, None] = None,
         repartition: bool = False
     ) -> List[Partition]:
         partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
         partition_query_obj: PartitionQuery = build_partition_query(partition_query_dict=partition_query)
+        if runtime_parameters is not None:
+            runtime_parameters: PartitionDefinitionSubset = PartitionDefinitionSubset(runtime_parameters)
         return self._get_available_partitions(
             partitioner=partitioner,
             data_asset_name=data_asset_name,
             partition_query=partition_query_obj,
+            in_memory_dataset=in_memory_dataset,
             runtime_parameters=runtime_parameters,
             repartition=repartition
         )
@@ -452,7 +390,8 @@ Unable to build batch_spec for data asset "{data_asset_name}" (found {len(partit
         partitioner: Partitioner,
         data_asset_name: str = None,
         partition_query: Union[PartitionQuery, None] = None,
-        runtime_parameters: Union[dict, None] = None,
+        in_memory_dataset: Any = None,
+        runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
         repartition: bool = False
     ) -> List[Partition]:
         raise NotImplementedError

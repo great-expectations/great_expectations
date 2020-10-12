@@ -1,5 +1,6 @@
 import pytest
 
+from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner import (
     RegexPartitioner,
@@ -112,13 +113,13 @@ def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_no
     partitions = regex_partitioner.find_or_create_partitions(paths=paths)
     assert partitions == [
         Partition(name="alex_20200809_1000.csv",
-                  definition={"group_0": "alex_20200809_1000.csv"},
+                  definition=PartitionDefinition({"group_0": "alex_20200809_1000.csv"}),
                   data_reference="alex_20200809_1000.csv", data_asset_name=None),
         Partition(name="eugene_20200810_1500.csv",
-                  definition={"group_0": "eugene_20200810_1500.csv"},
+                  definition=PartitionDefinition({"group_0": "eugene_20200810_1500.csv"}),
                   data_reference="eugene_20200810_1500.csv", data_asset_name=None),
         Partition(name="abe_20200831_1040.csv",
-                  definition={"group_0": "abe_20200831_1040.csv"},
+                  definition=PartitionDefinition({"group_0": "abe_20200831_1040.csv"}),
                   data_reference="abe_20200831_1040.csv", data_asset_name=None),
     ]
 
@@ -136,13 +137,13 @@ def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_au
     partitions = regex_partitioner.find_or_create_partitions(paths=paths, auto_discover_assets=True)
     assert partitions == [
         Partition(name="alex_20200809_1000.csv",
-                  definition={"group_0": "alex_20200809_1000.csv"},
+                  definition=PartitionDefinition({"group_0": "alex_20200809_1000.csv"}),
                   data_reference="alex_20200809_1000.csv", data_asset_name="alex_20200809_1000"),
         Partition(name="eugene_20200810_1500.csv",
-                  definition={"group_0": "eugene_20200810_1500.csv"},
+                  definition=PartitionDefinition({"group_0": "eugene_20200810_1500.csv"}),
                   data_reference="eugene_20200810_1500.csv", data_asset_name="eugene_20200810_1500"),
         Partition(name="abe_20200831_1040.csv",
-                  definition={"group_0": "abe_20200831_1040.csv"},
+                  definition=PartitionDefinition({"group_0": "abe_20200831_1040.csv"}),
                   data_reference="abe_20200831_1040.csv", data_asset_name="abe_20200831_1040"),
     ]
 
@@ -160,13 +161,13 @@ def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_da
     partitions = regex_partitioner.find_or_create_partitions(paths=paths, data_asset_name="test_asset_0")
     assert partitions == [
         Partition(name="alex_20200809_1000.csv",
-                  definition={"group_0": "alex_20200809_1000.csv"},
+                  definition=PartitionDefinition({"group_0": "alex_20200809_1000.csv"}),
                   data_reference="alex_20200809_1000.csv", data_asset_name="test_asset_0"),
         Partition(name="eugene_20200810_1500.csv",
-                  definition={"group_0": "eugene_20200810_1500.csv"},
+                  definition=PartitionDefinition({"group_0": "eugene_20200810_1500.csv"}),
                   data_reference="eugene_20200810_1500.csv", data_asset_name="test_asset_0"),
         Partition(name="abe_20200831_1040.csv",
-                  definition={"group_0": "abe_20200831_1040.csv"},
+                  definition=PartitionDefinition({"group_0": "abe_20200831_1040.csv"}),
                   data_reference="abe_20200831_1040.csv", data_asset_name="test_asset_0"),
     ]
 
@@ -189,13 +190,13 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
     partitions = regex_partitioner.find_or_create_partitions(paths=paths, auto_discover_assets=True)
     assert partitions == [
         Partition(name="alex-20200809-1000",
-                  definition={"name": "alex", "timestamp": "20200809", "price": "1000"},
+                  definition=PartitionDefinition({"name": "alex", "timestamp": "20200809", "price": "1000"}),
                   data_reference="my_dir/alex_20200809_1000.csv", data_asset_name="alex_20200809_1000"),
         Partition(name="eugene-20200810-1500",
-                  definition={"name": "eugene", "timestamp": "20200810", "price": "1500"},
+                  definition=PartitionDefinition({"name": "eugene", "timestamp": "20200810", "price": "1500"}),
                   data_reference="my_dir/eugene_20200810_1500.csv", data_asset_name="eugene_20200810_1500"),
         Partition(name="abe-20200831-1040",
-                  definition={"name": "abe", "timestamp": "20200831", "price": "1040"},
+                  definition=PartitionDefinition({"name": "abe", "timestamp": "20200831", "price": "1040"}),
                   data_reference="my_dir/abe_20200831_1040.csv", data_asset_name="abe_20200831_1040"),
     ]
 
@@ -216,13 +217,13 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_false_no_data
     partitions = regex_partitioner.find_or_create_partitions(paths=paths, auto_discover_assets=False)
     assert partitions == [
         Partition(name="alex-20200809-1000",
-                  definition={"name": "alex", "timestamp": "20200809", "price": "1000"},
+                  definition=PartitionDefinition({"name": "alex", "timestamp": "20200809", "price": "1000"}),
                   data_reference="my_dir/alex_20200809_1000.csv", data_asset_name=None),
         Partition(name="eugene-20200810-1500",
-                  definition={"name": "eugene", "timestamp": "20200810", "price": "1500"},
+                  definition=PartitionDefinition({"name": "eugene", "timestamp": "20200810", "price": "1500"}),
                   data_reference="my_dir/eugene_20200810_1500.csv", data_asset_name=None),
         Partition(name="abe-20200831-1040",
-                  definition={"name": "abe", "timestamp": "20200831", "price": "1040"},
+                  definition=PartitionDefinition({"name": "abe", "timestamp": "20200831", "price": "1040"}),
                   data_reference="my_dir/abe_20200831_1040.csv", data_asset_name=None),
     ]
 
@@ -245,13 +246,13 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_false_data_as
     partitions = regex_partitioner.find_or_create_partitions(paths=paths, data_asset_name="test_asset_0")
     assert partitions == [
         Partition(name="alex-20200809-1000",
-                  definition={"name": "alex", "timestamp": "20200809", "price": "1000"},
+                  definition=PartitionDefinition({"name": "alex", "timestamp": "20200809", "price": "1000"}),
                   data_reference="my_dir/alex_20200809_1000.csv", data_asset_name="test_asset_0"),
         Partition(name="eugene-20200810-1500",
-                  definition={"name": "eugene", "timestamp": "20200810", "price": "1500"},
+                  definition=PartitionDefinition({"name": "eugene", "timestamp": "20200810", "price": "1500"}),
                   data_reference="my_dir/eugene_20200810_1500.csv", data_asset_name="test_asset_0"),
         Partition(name="abe-20200831-1040",
-                  definition={"name": "abe", "timestamp": "20200831", "price": "1040"},
+                  definition=PartitionDefinition({"name": "abe", "timestamp": "20200831", "price": "1040"}),
                   data_reference="my_dir/abe_20200831_1040.csv", data_asset_name="test_asset_0"),
     ]
 
@@ -298,13 +299,13 @@ def test_regex_partitioner_compute_partitions_adding_sorters():
     partitions = regex_partitioner.find_or_create_partitions(paths=paths, data_asset_name="test_asset_0")
     assert partitions == [
         Partition(name="abe-20200831-1040",
-                  definition={"name": "abe", "timestamp": "20200831", "price": "1040"},
+                  definition=PartitionDefinition({"name": "abe", "timestamp": "20200831", "price": "1040"}),
                   data_reference="my_dir/abe_20200831_1040.csv", data_asset_name="test_asset_0"),
         Partition(name="alex-20200809-1000",
-                  definition={"name": "alex", "timestamp": "20200809", "price": "1000"},
+                  definition=PartitionDefinition({"name": "alex", "timestamp": "20200809", "price": "1000"}),
                   data_reference="my_dir/alex_20200809_1000.csv", data_asset_name="test_asset_0"),
         Partition(name="eugene-20200810-1500",
-                  definition={"name": "eugene", "timestamp": "20200810", "price": "1500"},
+                  definition=PartitionDefinition({"name": "eugene", "timestamp": "20200810", "price": "1500"}),
                   data_reference="my_dir/eugene_20200810_1500.csv", data_asset_name="test_asset_0"),
     ]
 

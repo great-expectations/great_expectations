@@ -19,8 +19,10 @@ from great_expectations.dataset.util import (
     validate_distribution_parameters,
 )
 # TODO: <Alex>See the cleanup notes in "great_expectations/core/batch.py" and "great_expectations/execution_environment/types/batch_spec.py".</Alex>
-# from ..core.batch import Batch, BatchMarkers
-from ..core.batch import Batch
+from ..core.batch import (
+    Batch,
+    BatchRequest
+)
 from ..core.id_dict import BatchSpec
 from great_expectations.execution_environment.types import (
     InMemoryBatchSpec,
@@ -420,13 +422,13 @@ Notes:
 --ge-feature-maturity-info--
     """
 
-    # TODO: <Alex>Do we still need this in the new design?</Alex>
     # this is necessary to subclass pandas in a proper way.
     # NOTE: specifying added properties in this way means that they will NOT be carried over when
     # the dataframe is manipulated, which we might want. To specify properties that are carried over
     # to manipulation results, we would just use `_metadata = ['row_count', ...]` here. The most likely
     # case is that we want the former, but also want to re-initialize these values to None so we don't
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
+    # noinspection PyProtectedMember
     _internal_names = pd.DataFrame._internal_names + [
         "_batch_spec",
         "_batch_markers",
@@ -444,6 +446,7 @@ Notes:
         "limit"
     }
 
+    # TODO: <Alex>Is this used in the new design?</Alex>
     recognized_batch_spec_defaults = {
         "reader_method",
         "reader_options",
@@ -628,7 +631,7 @@ Notes:
             f'Unable to determine reader method from path: "{path}".'
         )
 
-    def process_batch_request(self, batch_request, batch_spec):
+    def process_batch_request(self, batch_request: BatchRequest, batch_spec: BatchSpec):
         """Takes in a batch request and batch spec. If the batch request has a limit, uses it to initialize the
         number of rows to process for the batch spec in obtaining a batch
         Args:
@@ -637,7 +640,7 @@ Notes:
         Returns:
              batch_spec (dict) - The batch spec used to query the backend, with the added row limit
         """
-        limit = batch_request.get("limit")
+        limit = batch_request.limit
         if limit is not None:
             if not batch_spec.get("reader_options"):
                 batch_spec["reader_options"] = {}
