@@ -91,7 +91,7 @@
           "exact_match_out": false,
           "in": {
             "column": "two_null",
-            "treat_as_null": [5]
+              "treat_as_null": [5],
             "mostly": 0.75
           },
           "out": {
