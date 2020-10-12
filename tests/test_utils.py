@@ -17,6 +17,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationConfigurationSchema,
     ExpectationSuite,
+    ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
@@ -44,6 +45,7 @@ from great_expectations.validator.validator import Validator
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
 expectationConfigurationSchema = ExpectationConfigurationSchema()
+expectationSuiteSchema = ExpectationSuiteSchema()
 
 try:
     from sqlalchemy import create_engine
