@@ -10,6 +10,10 @@ import pytest
 
 import great_expectations as ge
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
+from tests.test_utils import (
+    expectationSuiteSchema,
+)
+
 
 
 def test_recursively_convert_to_json_serializable():
