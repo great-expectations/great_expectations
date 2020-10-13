@@ -1150,6 +1150,28 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return column.withColumn("__success", matches_json_schema_udf(column[0]))
 
     @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_be_json_parseable(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        def is_json(val):
+            try:
+                json.loads(val)
+                return True
+            except:
+                return False
+
+        is_json_udf = udf(is_json, sparktypes.StringType())
+
+        return column.withColumn("__success", is_json_udf(column[0]))
+
+    @DocInherit
     @DataAsset.expectation(["column", "type_", "mostly"])
     def expect_column_values_to_be_of_type(
         self,
