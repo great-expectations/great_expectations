@@ -7,6 +7,12 @@ from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecE
 logger = logging.getLogger(__name__)
 
 
+# TODO: <Alex>This module needs to be cleaned up.
+#  We have Batch used for the legacy design, and we also need Batch for the new design.
+#  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
+#  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
+# TODO: <Alex>See also "great_expectations/core/batch.py".</Alex>
+# TODO: <Alex>The following class is part of the new design.</Alex>
 class BatchMarkers(BatchSpec):
     """A BatchMarkers is a special type of BatchSpec (so that it has a batch_fingerprint) but it generally does
     NOT require specific keys and instead captures information about the OUTPUT of a datasource's fetch

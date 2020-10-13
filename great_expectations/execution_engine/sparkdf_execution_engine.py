@@ -14,17 +14,25 @@ from dateutil.parser import parse
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+# TODO: <Alex>See the cleanup notes in "great_expectations/core/batch.py" and "great_expectations/execution_environment/types/batch_spec.py".</Alex>
+from ..core.batch import (
+    Batch,
+    BatchRequest
+)
+from ..core.id_dict import (
+    BatchSpec,
+    IDDict
+)
 from great_expectations.execution_environment.types import (
     InMemoryBatchSpec,
     PathBatchSpec,
-    S3BatchSpec
+    S3BatchSpec,
+    BatchMarkers
 )
+from ..expectations.registry import register_metric
 from great_expectations.validator.validator import Validator
 
-from ..core.batch import Batch, BatchMarkers
-from ..core.id_dict import BatchSpec, IDDict
 from ..exceptions import BatchKwargsError, BatchSpecError, ValidationError
-from ..expectations.registry import register_metric
 from ..validator.validation_graph import MetricEdgeKey
 from .execution_engine import ExecutionEngine
 
@@ -619,8 +627,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 --ge-feature-maturity-info--
     """
 
-    recognized_batch_definition_keys = {"limit"}
-
+    # TODO: <Alex>Is this used in the new design?</Alex>
     recognized_batch_spec_defaults = {
         "reader_method",
         "reader_options",
@@ -788,16 +795,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 {"reader_method": reader_method},
             )
 
-    def process_batch_definition(self, batch_definition, batch_spec):
-        """Given that the batch definition has a limit state, transfers the limit dictionary entry from the batch_definition
+    def process_batch_request(self, batch_request: BatchRequest, batch_spec: BatchSpec):
+        """Given that the batch request has a limit state, transfers the limit dictionary entry from the batch_request
         to the batch_spec.
         Args:
-            batch_definition: The batch definition to use in configuring the batch spec's limit
+            batch_request: The batch request to use in configuring the batch spec's limit
             batch_spec: a batch_spec dictionary whose limit needs to be configured
         Returns:
             ReaderMethod to use for the filepath
         """
-        limit = batch_definition.get("limit")
+        limit = batch_request.limit
         if limit is not None:
             if not batch_spec.get("limit"):
                 batch_spec["limit"] = limit

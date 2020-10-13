@@ -817,9 +817,9 @@ class Validator:
             return self.batch.batch_markers
 
     @property
-    def batch_definition(self):
-        """Getter for the batch definition"""
-        return self.batch.batch_definition
+    def batch_request(self):
+        """Getter for the batch request"""
+        return self.batch.batch_request
 
     def discard_failing_expectations(self):
         """Removes any expectations from the validator where the validation has failed"""
@@ -1363,7 +1363,7 @@ class Validator:
                     "run_id": run_id,
                     "batch_spec": self.batch_spec,
                     "batch_markers": self.batch_markers,
-                    "batch_definition": self.batch_definition,
+                    "batch_request": self.batch_request,
                     "validation_time": validation_time,
                 },
             )
@@ -1424,7 +1424,7 @@ class Validator:
         comment,
         batch_spec=None,
         batch_markers=None,
-        batch_definition=None,
+        batch_request=None,
         citation_date=None,
     ):
         """Adds a citation to an existing Expectation Suite within the validator"""
@@ -1432,13 +1432,13 @@ class Validator:
             batch_spec = self.batch_spec
         if batch_markers is None:
             batch_markers = self.batch_markers
-        if batch_definition is None:
-            batch_definition = self.batch_definition
+        if batch_request is None:
+            batch_request = self.batch_request
         self._expectation_suite.add_citation(
             comment,
             batch_spec=batch_spec,
             batch_markers=batch_markers,
-            batch_definition=batch_definition,
+            batch_request=batch_request,
             citation_date=citation_date,
         )
 

@@ -10,7 +10,7 @@ from great_expectations.data_context.types.base import (
     SorterConfig,
     sorterConfigSchema
 )
-
+from great_expectations.core.id_dict import PartitionDefinitionSubset
 from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
@@ -24,12 +24,15 @@ logger = logging.getLogger(__name__)
 
 
 class Partitioner(object):
+    DEFAULT_DELIMITER: str = "-"
+
     def __init__(
         self,
         name: str,
         data_connector,
         sorters: list = None,
         allow_multipart_partitions: bool = False,
+        runtime_keys: list = None,
         config_params: dict = None,
         **kwargs
     ):
@@ -37,6 +40,7 @@ class Partitioner(object):
         self._data_connector = data_connector
         self._sorters = sorters
         self._allow_multipart_partitions = allow_multipart_partitions
+        self._runtime_keys = runtime_keys
         self._config_params = config_params
         self._sorters_cache = {}
 
@@ -57,6 +61,10 @@ class Partitioner(object):
     @property
     def allow_multipart_partitions(self) -> bool:
         return self._allow_multipart_partitions
+
+    @property
+    def runtime_keys(self) -> list:
+        return self._runtime_keys
 
     @property
     def config_params(self) -> dict:
@@ -82,7 +90,9 @@ class Partitioner(object):
                     )
                 else:
                     raise ge_exceptions.SorterError(
-                        f'Unable to load sorter with the name "{name}" -- no configuration found or invalid configuration.'
+                        f'''Unable to load sorter with the name "{name}" -- no configuration found or invalid
+configuration.
+                        '''
                     )
             else:
                 raise ge_exceptions.SorterError(
@@ -103,10 +113,12 @@ class Partitioner(object):
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, SorterConfig):
             config: dict = sorterConfigSchema.dump(config)
-        config.update({"name": name})
+        runtime_environment: dict = {
+            "name": name
+        }
         sorter: Sorter = instantiate_class_from_config(
             config=config,
-            runtime_environment={},
+            runtime_environment=runtime_environment,
             config_defaults={
                 "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter"
             },
@@ -119,35 +131,46 @@ class Partitioner(object):
             )
         return sorter
 
-    def get_available_partitions(
+    def find_or_create_partitions(
         self,
-        # The next three (3) general parameters are for both, creating partitions and querying partitions.
         data_asset_name: str = None,
         partition_query: Union[PartitionQuery, None] = None,
+        runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
         repartition: bool = False,
-        # The remaining parameters are passed down to the specific partitioner by its containing parent data connector.
+        # The remaining parameters are passed down to the specific partitioner from its containing data connector.
         **kwargs
     ) -> List[Partition]:
-        if repartition:
-            self.data_connector.reset_partitions_cache(data_asset_name=data_asset_name)
+        if runtime_parameters:
+            self._validate_runtime_keys_configuration(runtime_keys=list(runtime_parameters.keys()))
 
-        cached_partitions: List[Partition] = self.data_connector.get_cached_partitions(
-            data_asset_name=data_asset_name
+        if repartition:
+            self.data_connector.reset_partitions_cache(
+                data_asset_name=data_asset_name,
+            )
+
+        # noinspection PyProtectedMember
+        cached_partitions: List[Partition] = self.data_connector._get_cached_partitions(
+            data_asset_name=data_asset_name,
+            runtime_parameters=runtime_parameters
         )
         if cached_partitions is None or len(cached_partitions) == 0:
             partitions: List[Partition] = self._compute_partitions_for_data_asset(
                 data_asset_name=data_asset_name,
+                runtime_parameters=runtime_parameters,
                 **kwargs
             )
             if not partitions or len(partitions) == 0:
                 partitions = []
             self.data_connector.update_partitions_cache(
                 partitions=partitions,
-                allow_multipart_partitions=self.allow_multipart_partitions,
-                partitioner=self
+                partitioner_name=self.name,
+                runtime_parameters=runtime_parameters,
+                allow_multipart_partitions=self.allow_multipart_partitions
             )
-            cached_partitions = self.data_connector.get_cached_partitions(
-                data_asset_name=data_asset_name
+            # noinspection PyProtectedMember
+            cached_partitions = self.data_connector._get_cached_partitions(
+                data_asset_name=data_asset_name,
+                runtime_parameters=runtime_parameters
             )
         if cached_partitions is None or len(cached_partitions) == 0:
             return []
@@ -164,5 +187,35 @@ class Partitioner(object):
             return partitions
         return partitions
 
-    def _compute_partitions_for_data_asset(self, data_asset_name: str = None, **kwargs) -> List[Partition]:
+    def _compute_partitions_for_data_asset(
+        self,
+        data_asset_name: str = None,
+        runtime_parameters: Union[dict, None] = None,
+        **kwargs
+    ) -> List[Partition]:
         raise NotImplementedError
+
+    def _validate_sorters_configuration(self, partition_keys: List[str], num_actual_partition_keys: int):
+        if self.sorters and len(self.sorters) > 0:
+            if any([sorter.name not in partition_keys for sorter in self.sorters]):
+                raise ge_exceptions.PartitionerError(
+                    f'''Partitioner "{self.name}" specifies one or more sort keys that do not appear among the
+configured partition keys.
+                    '''
+                )
+            if len(partition_keys) < len(self.sorters):
+                raise ge_exceptions.PartitionerError(
+                    f'''Partitioner "{self.name}", configured with {len(partition_keys)} partition keys, matches
+{num_actual_partition_keys} actual partition keys; this is fewer than number of sorters specified, which is
+{len(self.sorters)}.
+                    '''
+                )
+
+    def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
+        if runtime_keys and len(runtime_keys) > 0:
+            if not (self.runtime_keys and set(runtime_keys) <= set(self.runtime_keys)):
+                raise ge_exceptions.PartitionerError(
+                    f'''Partitioner "{self.name}" was invoked with one or more runtime keys that do not appear among the
+configured runtime keys.
+                    '''
+                )

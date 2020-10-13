@@ -506,45 +506,46 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     def load_batch(
-        self, batch_definition=None, batch_spec=None, in_memory_dataset=None
+        self, batch_request=None, batch_spec=None, in_memory_dataset=None
     ) -> Batch:
         """
-        With the help of the execution environment and data connector specified within the batch definition,
+        With the help of the execution environment and data connector specified within the batch request,
         builds a batch spec and utilizes it to load a batch using the appropriate file reader and the given file path.
 
         Args:
            batch_spec (dict): A dictionary specifying the parameters used to build the batch
            in_memory_dataset (A Pandas DataFrame or None): Optional specification of an in memory Dataset used
                                                             to load a batch. A Data Asset name and partition ID
-                                                            must still be passed via batch definition.
+                                                            must still be passed via batch request.
 
         """
         # We need to build a batch_markers to be used in the dataframe
-        if not batch_spec and not batch_definition:
-            raise ValueError("must provide a batch spec or batch definition")
+        if not batch_spec and not batch_request:
+            raise ValueError("must provide a batch spec or batch request")
 
-        if batch_spec and batch_definition:
-            raise ValueError("only provide either batch spec or batch definition")
+        if batch_spec and batch_request:
+            raise ValueError("only provide either batch spec or batch request")
 
-        if batch_spec and not batch_definition:
-            logger.info("loading a batch without a batch_definition")
-            batch_definition = {}
+        if batch_spec and not batch_request:
+            logger.info("loading a batch without a batch_request")
+            batch_request = {}
         else:
-            execution_environment_name = batch_definition.get("execution_environment")
+            execution_environment_name = batch_request.get("execution_environment")
             if not self._data_context:
-                raise ValueError("Cannot use a batch definition without a data context")
+                raise ValueError("Cannot use a batch request without a data context")
             execution_environment = self._data_context.get_execution_environment(
                 execution_environment_name
             )
 
-            data_connector_name = batch_definition.get("data_connector")
+            data_connector_name = batch_request.get("data_connector")
             assert data_connector_name, "Batch definition must specify a data_connector"
 
             data_connector = execution_environment.get_data_connector(
                 data_connector_name
             )
-            batch_spec = data_connector.build_batch_spec(
-                batch_definition=batch_definition
+            # noinspection PyProtectedMember
+            batch_spec = data_connector._build_batch_spec(
+                batch_request=batch_request
             )
 
         batch_markers = BatchMarkers(
@@ -576,7 +577,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=self,
                 batch_spec=batch_spec,
                 data=batch_reference,
-                batch_definition=batch_definition,
+                batch_request=batch_request,
                 batch_markers=batch_markers,
                 data_context=self._data_context,
             )

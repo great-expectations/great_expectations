@@ -72,7 +72,7 @@ class TableDataConnector(DataConnector):
 
     """
 
-    recognized_batch_definition_keys = {
+    recognized_batch_request_keys = {
         "data_asset_name",
         "limit",
         "offset",

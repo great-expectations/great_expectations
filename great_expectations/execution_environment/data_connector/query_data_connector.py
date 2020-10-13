@@ -60,7 +60,7 @@ class QueryDataConnector(DataConnector):
         }
     """
 
-    recognized_batch_definition_keys = {
+    recognized_batch_request_keys = {
         "query_parameters",
         "partition_id",
         "data_asset_name",
@@ -170,7 +170,7 @@ class QueryDataConnector(DataConnector):
         data_asset_name = batch_parameters.pop("data_asset_name")
         raw_query = self._get_raw_query(data_asset_name=data_asset_name)
         partition_id = batch_parameters.pop("partition_id", None)
-        batch_kwargs = self._execution_environment.process_batch_definition(
+        batch_kwargs = self._execution_environment.process_batch_request(
             **batch_parameters
         )
         batch_kwargs["query"] = raw_query

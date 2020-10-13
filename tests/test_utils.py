@@ -646,7 +646,7 @@ def get_test_batch(
 
         return PandasExecutionEngine(caching=caching).load_batch(
             in_memory_dataset=df,
-            batch_definition={"data_asset_name": "test", "partition_name": table_name},
+            batch_request={"data_asset_name": "test", "partition_name": table_name},
             batch_spec=BatchSpec(
                 {
                     "ge_load_time": datetime.datetime.now(
@@ -1017,7 +1017,7 @@ def get_test_batch(
 
         return SparkDFExecutionEngine(caching=caching).load_batch(
             in_memory_dataset=spark_df,
-            batch_definition={"data_asset_name": "test", "partition_name": table_name},
+            batch_request={"data_asset_name": "test", "partition_name": table_name},
             batch_spec=BatchSpec(
                 {
                     "ge_load_time": datetime.datetime.now(
@@ -1662,11 +1662,21 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "test_pipeline_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
                     "class_name": "PipelineDataConnector",
+                    "partitioners": {
+                        "test_pipeline_partitioner": {
+                            "module_name": "great_expectations.execution_environment.data_connector.partitioner",
+                            "class_name": "PipelinePartitioner",
+                            "allow_multipart_partitions": False,
+                            "runtime_keys": [
+                                "custom_key_0",
+                                "run_id",
+                            ]
+                        }
+                    },
+                    "default_partitioner": "test_pipeline_partitioner",
                     "assets": {
                         "test_asset_1": {
-                            "config_params": {
-                                "partition_name": "spark_check_dataframe",
-                            },
+                            "partitioner": "test_pipeline_partitioner"
                         }
                     }
                 },
@@ -1688,17 +1698,21 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                                 },
                             },
                             "allow_multipart_partitions": False,
-                            "sorters": sorters
+                            "sorters": sorters,
+                            "runtime_keys": [
+                                "custom_key_0",
+                                "run_id",
+                            ]
                         }
                     },
                     "default_partitioner": "test_regex_partitioner",
                     "assets": {
                         "test_asset_0": {
-                            "config_params": {
-                                "glob_directive": "alex*",
-                            },
                             "partitioner": "test_regex_partitioner",
-                            "base_directory": data_asset_base_directory
+                            "config_params": {
+                                "base_directory": data_asset_base_directory,
+                                "glob_directive": "alex*",
+                            }
                         }
                     }
                 }

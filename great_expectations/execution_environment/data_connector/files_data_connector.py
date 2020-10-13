@@ -1,15 +1,19 @@
 from pathlib import Path
 import itertools
-from typing import List, Dict, Union
+from typing import List, Union, Any
 
 import logging
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.core.batch import BatchRequest
+from great_expectations.core.id_dict import (
+    PartitionDefinitionSubset,
+    BatchSpec
+)
 from great_expectations.execution_environment.types import PathBatchSpec
 import great_expectations.exceptions as ge_exceptions
 
@@ -37,7 +41,6 @@ class FilesDataConnector(DataConnector):
         default_partitioner: str = None,
         assets: dict = None,
         config_params: dict = None,
-        batch_definition_defaults: dict = None,
         known_extensions: list = None,
         reader_options: dict = None,
         reader_method: str = None,
@@ -52,7 +55,6 @@ class FilesDataConnector(DataConnector):
             default_partitioner=default_partitioner,
             assets=assets,
             config_params=config_params,
-            batch_definition_defaults=batch_definition_defaults,
             execution_engine=execution_engine,
             data_context_root_directory=data_context_root_directory,
             **kwargs
@@ -85,57 +87,23 @@ class FilesDataConnector(DataConnector):
     def base_directory(self):
         return self._normalize_directory_path(dir_path=self._base_directory)
 
-    def get_available_data_asset_names(self) -> list:
-        available_data_asset_names: list = []
-        if self.assets:
-            available_data_asset_names.append(list(self.assets.keys()))
-        available_data_asset_names.append(
-            [Path(path).stem for path in self._get_file_paths_for_data_asset(data_asset_name=None)]
-        )
-        return list(
-            set(
-                list(
-                    itertools.chain.from_iterable(
-                        [
-                            element for element in available_data_asset_names
-                        ]
-                    )
-                )
-            )
-        )
-
     def _get_available_partitions(
         self,
         partitioner: Partitioner,
         data_asset_name: str = None,
         partition_query: Union[PartitionQuery, None] = None,
+        in_memory_dataset: Any = None,
+        runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
         repartition: bool = None
     ) -> List[Partition]:
+        # TODO: <Alex>TODO: Each specific data_connector should verify the given partitioner against the list of supported partitioners.</Alex>
         paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
-        if isinstance(partitioner, NoOpPartitioner):
-            default_data_asset_name: str = data_asset_name or self.DEFAULT_DATA_ASSET_NAME
-            default_datasets: List[Dict[str, str]] = [
-                {
-                    "partition_name": Path(path).stem,
-                    "data_reference": path
-                }
-                for path in paths
-            ]
-            return partitioner.get_available_partitions(
-                # The next three (3) general parameters are for both, creating partitions and querying partitions.
-                data_asset_name=data_asset_name,
-                partition_query=partition_query,
-                repartition=repartition,
-                # The next two (2) parameters are specific for the NoOp partitioner under the present data connector.
-                pipeline_data_asset_name=default_data_asset_name,
-                pipeline_datasets=default_datasets
-            )
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
         auto_discover_assets: bool = not data_asset_config_exists
-        return partitioner.get_available_partitions(
-            # The next three (3) general parameters are for both, creating partitions and querying partitions.
+        return partitioner.find_or_create_partitions(
             data_asset_name=data_asset_name,
             partition_query=partition_query,
+            runtime_parameters=runtime_parameters,
             # The next two (2) parameters are specific for the partitioners that work under the present data connector.
             paths=paths,
             auto_discover_assets=auto_discover_assets
@@ -228,22 +196,21 @@ class FilesDataConnector(DataConnector):
             )
         )
 
-    def build_batch_spec_from_partitions(
+    def _build_batch_spec_from_partition(
         self,
-        partitions: List[Partition],
-        batch_definition: dict,
-        batch_spec: dict = None
+        partition: Partition,
+        batch_request: BatchRequest,
+        batch_spec: BatchSpec
     ) -> PathBatchSpec:
         """
         Args:
-            partitions:
-            batch_definition:
+            partition:
+            batch_request:
             batch_spec:
         Returns:
             batch_spec
         """
-        # TODO: <Alex>If the list has multiple elements, we are using the first one (TBD/TODO multifile config / multibatch)</Alex>
         if not batch_spec.get("path"):
-            path: str = str(partitions[0].data_reference)
+            path: str = str(partition.data_reference)
             batch_spec["path"] = path
         return PathBatchSpec(batch_spec)

@@ -9,7 +9,10 @@ from typing import Union, List
 
 from great_expectations.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest
+)
 from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import (
     execution_environment_files_data_connector_regex_partitioner_config,
@@ -84,17 +87,17 @@ def test_get_batch(tmp_path_factory):
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
         **execution_environment_config,
-        in_memory_dataset=None,
         data_context_root_directory=project_dir_path
     )
     data_connector_name: str = "test_filesystem_data_connector"
     data_asset_name: str = "Titanic"
 
-    batch_definition: dict = {
+    batch_request: dict = {
         "execution_environment": execution_environment_name,
         "data_connector": data_connector_name,
         "data_asset_name": data_asset_name,
-        "partition_query": None,
+        "in_memory_dataset": None,
+        "partition_request": None,
         "limit": None,
         "batch_spec_passthrough": {
             "path": titanic_csv_destination_file_path,
@@ -103,8 +106,9 @@ def test_get_batch(tmp_path_factory):
             "limit": 2000
         }
     }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
     batch: Batch = execution_environment.get_batch(
-        batch_definition=batch_definition
+        batch_request=batch_request
     )
 
     assert batch.batch_spec is not None
@@ -117,7 +121,7 @@ def test_get_batch_with_caching():
     pass
 
 
-def test_get_batch_with_pipeline_style_batch_definition():
+def test_get_batch_with_pipeline_style_batch_request():
     test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     execution_environment_name: str = "test_execution_environment"
@@ -131,21 +135,22 @@ def test_get_batch_with_pipeline_style_batch_definition():
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
         **execution_environment_config,
-        in_memory_dataset=test_df,
         data_context_root_directory=None
     )
     data_connector_name: str = "test_pipeline_data_connector"
-    data_asset_name: str = "test_asset_0"
+    data_asset_name: str = "test_asset_1"
 
-    batch_definition: dict = {
+    batch_request: dict = {
         "execution_environment": execution_environment_name,
         "data_connector": data_connector_name,
         "data_asset_name": data_asset_name,
-        "partition_query": None,
+        "in_memory_dataset": test_df,
+        "partition_request": None,
         "limit": None,
     }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
     batch: Batch = execution_environment.get_batch(
-        batch_definition=batch_definition
+        batch_request=batch_request
     )
     assert batch.batch_spec is not None
     assert batch.batch_spec["data_asset_name"] == data_asset_name
@@ -179,7 +184,6 @@ def test_get_available_data_asset_names(tmp_path_factory):
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
         **execution_environment_config,
-        in_memory_dataset=None,
         data_context_root_directory=project_dir_path
     )
     data_connector_names: Union[List, str, None] = None
@@ -304,7 +308,6 @@ def test_get_available_partitions(tmp_path_factory):
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
         **execution_environment_config,
-        in_memory_dataset=None,
         data_context_root_directory=project_dir_path
     )
 
@@ -317,9 +320,10 @@ def test_get_available_partitions(tmp_path_factory):
             "custom_filter": None,
             "partition_name": None,
             "partition_definition": None,
-            "limit": None,
             "partition_index": None,
+            "limit": None,
         },
+        runtime_parameters=None,
         repartition=False
     )
 
