@@ -10,7 +10,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
+from great_expectations.exceptions.metric_exceptions import MetricProviderError, MetricError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core.expect_column_value_z_scores_to_be_less_than import (
     ExpectColumnValueZScoresToBeLessThan,
@@ -83,6 +83,7 @@ def test_parse_validation_graph_with_nonmatching_validation_graph():
         kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True, },
     )
     validator = Validator()
+    metric_error = None
     graph = ValidationGraph()
     for configuration in [expectationConfiguration]:
         expectation_impl = get_expectation_impl("expect_column_value_z_scores_to_be_less_than")
@@ -108,8 +109,7 @@ def test_parse_validation_graph_with_nonmatching_validation_graph():
                 None,
             )
         )
-    ready_metrics, needed_metrics = validator._parse_validation_graph(validation_graph=graph,
-                                                                      validation_dependencies = validation_dependencies.get("metrics"))
+    ready_metrics, needed_metrics = validator._parse_validation_graph(validation_graph=graph, metrics = validation_dependencies.get("metrics"))
     assert len(ready_metrics) == 5 and len(needed_metrics) == 5
 
 
