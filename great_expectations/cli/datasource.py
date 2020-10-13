@@ -1138,7 +1138,7 @@ We could not determine the format of the file. What is it?
             default=path,
         )
 
-        path = os.path.abspath(path)
+        path = os.path.relpath(path)
 
         batch_kwargs = {"path": path, "datasource": datasource_name}
 

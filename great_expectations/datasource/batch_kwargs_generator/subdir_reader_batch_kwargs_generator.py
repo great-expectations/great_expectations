@@ -236,6 +236,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         else:
             for extension in self.known_extensions:
                 path = os.path.join(self.base_directory, data_asset_name + extension)
+                path = os.path.relpath(path)
                 if os.path.isfile(path):
                     return iter(
                         [
