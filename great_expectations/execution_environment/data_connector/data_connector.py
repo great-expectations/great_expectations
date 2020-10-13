@@ -32,8 +32,6 @@ logger = logging.getLogger(__name__)
 
 
 class DataConnector(object):
-    DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_DATA_ASSET"
-
     """
     DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
     can use to get individual batches of data. They add flexibility in how to obtain data
@@ -54,6 +52,8 @@ class DataConnector(object):
     specific batch of data, GE can store snapshots of batches or store metadata from an
     external data version control system.
     """
+    DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_DATA_ASSET"
+
     _default_reader_options: dict = {}
 
     def __init__(

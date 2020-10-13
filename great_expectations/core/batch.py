@@ -101,6 +101,10 @@ class Batch(DictDot):
 
 
 class BatchRequestMetadata(DictDot):
+    """
+    This class contains all attributes of a batch_request with the exclusion of the in_memory_dataset reference.  This
+    is due to the fact that the actual data is not part of the metadata (according to the definition of metadata).
+    """
     def __init__(
         self,
         execution_environment: str,
@@ -207,6 +211,9 @@ is illegal.
 
 
 class BatchRequest(BatchRequestMetadata):
+    """
+    This class augments the BatchRequestMetadata class by adding a single property: the in_memory_dataset reference.
+    """
     def __init__(
         self,
         execution_environment: str,
