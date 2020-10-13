@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from great_expectations import ExpectColumnMaxToBeBetween
+from great_expectations.core import IDDict
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
@@ -17,9 +18,11 @@ from great_expectations.expectations.core.expect_column_value_z_scores_to_be_les
 import great_expectations.validator
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.validator import validator
-from great_expectations.validator.validation_graph import ValidationGraph
+from great_expectations.validator.validation_graph import ValidationGraph, MetricEdge, MetricEdgeKey
 from great_expectations.validator.validator import Validator
 
+
+# TODO: extraneous metric keys potentially as a result of recursive execution
 def test_parse_validation_graph():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1,2,3,4,5,6]})
     expectationConfiguration = ExpectationConfiguration(
@@ -28,8 +31,86 @@ def test_parse_validation_graph():
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
-    result = Validator._parse_validation_graph()
-    assert result == ExpectationValidationResult(success=True, )
+    graph = ValidationGraph()
+    for configuration in [expectationConfiguration]:
+        expectation_impl = get_expectation_impl("expect_column_value_z_scores_to_be_less_than")
+        validation_dependencies = expectation_impl(
+            configuration
+        ).get_validation_dependencies(
+            configuration, PandasExecutionEngine, )
+
+        for metric_name in validation_dependencies.get("metrics"):
+            Validator()._populate_dependencies(
+                graph,
+                metric_name,
+                configuration,
+            )
+    ready_metrics, needed_metrics = Validator()._parse_validation_graph(validation_graph=graph, metrics=validation_dependencies.get("metrics"))
+    assert len(ready_metrics) == 4 and len(needed_metrics) == 5
+
+
+# Should be passing tests even if given incorrect Metric data
+def test_parse_validation_graph_with_bad_metrics_args():
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1,2,3,4,5,6]})
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True, },
+    )
+    validator = Validator()
+    graph = ValidationGraph()
+    for configuration in [expectationConfiguration]:
+        expectation_impl = get_expectation_impl("expect_column_value_z_scores_to_be_less_than")
+        validation_dependencies = expectation_impl(
+            configuration
+        ).get_validation_dependencies(
+            configuration, PandasExecutionEngine, )
+
+        for metric_name in validation_dependencies.get("metrics"):
+            validator._populate_dependencies(
+                graph,
+                metric_name,
+                configuration,
+            )
+    ready_metrics, needed_metrics = validator._parse_validation_graph(validation_graph=graph, metrics=("nonexistent", "NONE"))
+    assert len(ready_metrics) == 4 and len(needed_metrics) == 5
+
+
+# Should be passing tests even if given bad metrics, but why is it registered as a ready metric when it's not???
+def test_parse_validation_graph_with_nonmatching_validation_graph():
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1,2,3,4,5,6]})
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True, },
+    )
+    validator = Validator()
+    graph = ValidationGraph()
+    for configuration in [expectationConfiguration]:
+        expectation_impl = get_expectation_impl("expect_column_value_z_scores_to_be_less_than")
+        validation_dependencies = expectation_impl(
+            configuration
+        ).get_validation_dependencies(
+            configuration, PandasExecutionEngine, )
+
+        for metric_name in validation_dependencies.get("metrics"):
+            validator._populate_dependencies(
+                graph,
+                metric_name,
+                configuration,
+            )
+        graph.add(
+            MetricEdge(
+                MetricEdgeKey(
+                    metric_name = "column.aggregate.max",
+                    metric_domain_kwargs = IDDict(),
+                    metric_value_kwargs = IDDict(),
+                    filter_column_isnull=True,
+                ),
+                None,
+            )
+        )
+    ready_metrics, needed_metrics = validator._parse_validation_graph(validation_graph=graph,
+                                                                      validation_dependencies = validation_dependencies.get("metrics"))
+    assert len(ready_metrics) == 5 and len(needed_metrics) == 5
 
 
 # Talking-point: Isn't the sheer number of Metric Dependencies here a bit extraneous??
