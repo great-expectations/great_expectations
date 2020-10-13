@@ -122,7 +122,7 @@
           "out": {
             "success": false,
             "unexpected_list": ["c"],
-            "unexpected_index_list": [3]
+            "unexpected_index_list": [2]
           }
         },{
           "title": "Positive case with mostly and no unexpected values",

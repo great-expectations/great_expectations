@@ -40,7 +40,7 @@
           "exact_match_out": true,
           "in": {
             "column": "no_null",
-	    "treat_as_null": [5, "d"]
+	    "treat_as_null": [5, "e"]
           },
           "out": {
             "success": true,
