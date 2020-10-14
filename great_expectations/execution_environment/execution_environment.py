@@ -163,7 +163,7 @@ class ExecutionEnvironment(object):
     def get_batch_from_batch_definition(
         self,
         batch_definition: BatchDefinition,
-        in_memory_dataset: None,
+        in_memory_dataset: Any=None,
     ) -> Batch:
         """
 

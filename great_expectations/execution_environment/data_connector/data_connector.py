@@ -2,7 +2,7 @@
 
 import copy
 import itertools
-from typing import List, Dict, Union, Callable, Any
+from typing import List, Dict, Union, Callable, Any, Tuple
 from ruamel.yaml.comments import CommentedMap
 
 import logging
@@ -22,7 +22,11 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.id_dict import (
     PartitionDefinitionSubset,
     PartitionDefinition,
-    BatchSpec
+    BatchSpec,
+)
+from great_expectations.core.batch import (
+    BatchMarkers,
+    BatchDefinition,
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -299,33 +303,33 @@ connector and the default_partitioner set to one of the configured partitioners.
             partitioner = self.get_partitioner(name=partitioner_name)
         return partitioner
 
-    def _build_batch_spec(self, batch_request: BatchRequest, partition: Partition) -> BatchSpec:
-        if not batch_request.data_asset_name:
-            raise ge_exceptions.BatchSpecError("Batch request must have a data_asset_name.")
+    # def _build_batch_spec(self, batch_request: BatchRequest, partition: Partition) -> BatchSpec:
+    #     if not batch_request.data_asset_name:
+    #         raise ge_exceptions.BatchSpecError("Batch request must have a data_asset_name.")
 
-        batch_spec_scaffold: BatchSpec
-        batch_spec_passthrough: BatchSpec = batch_request.batch_spec_passthrough
-        if batch_spec_passthrough is None:
-            batch_spec_scaffold = BatchSpec()
-        else:
-            batch_spec_scaffold = copy.deepcopy(batch_spec_passthrough)
+    #     batch_spec_scaffold: BatchSpec
+    #     batch_spec_passthrough: BatchSpec = batch_request.batch_spec_passthrough
+    #     if batch_spec_passthrough is None:
+    #         batch_spec_scaffold = BatchSpec()
+    #     else:
+    #         batch_spec_scaffold = copy.deepcopy(batch_spec_passthrough)
 
-        data_asset_name: str = batch_request.data_asset_name
-        batch_spec_scaffold["data_asset_name"] = data_asset_name
+    #     data_asset_name: str = batch_request.data_asset_name
+    #     batch_spec_scaffold["data_asset_name"] = data_asset_name
 
-        batch_spec: BatchSpec = self._build_batch_spec_from_partition(
-            partition=partition, batch_request=batch_request, batch_spec=batch_spec_scaffold
-        )
+    #     batch_spec: BatchSpec = self._build_batch_spec_from_partition(
+    #         partition=partition, batch_request=batch_request, batch_spec=batch_spec_scaffold
+    #     )
 
-        return batch_spec
+    #     return batch_spec
 
-    def _build_batch_spec_from_partition(
-        self,
-        partition: Partition,
-        batch_request: BatchRequest,
-        batch_spec: BatchSpec
-    ) -> BatchSpec:
-        raise NotImplementedError
+    # def _build_batch_spec_from_partition(
+    #     self,
+    #     partition: Partition,
+    #     batch_request: BatchRequest,
+    #     batch_spec: BatchSpec
+    # ) -> BatchSpec:
+    #     raise NotImplementedError
 
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
@@ -389,3 +393,80 @@ connector and the default_partitioner set to one of the configured partitioners.
         repartition: bool = False
     ) -> List[Partition]:
         raise NotImplementedError
+
+
+    def get_batch_definition_list_from_batch_request(
+        self,
+        batch_request: BatchRequest,
+    ) -> List[BatchDefinition]:
+
+
+        BatchDefinition(
+            datasource_name=batch_request["datasource_name"],
+            data_connector_name=self._name,
+            data_asset_name=self.name,
+            partition_defintion={
+
+            }
+        )
+
+        return 
+
+    def get_batch_data_and_metadata_from_batch_definition(
+        self,
+        batch_definition: BatchDefinition,
+    ) -> Tuple[
+        Any, #batch_data
+        BatchSpec,
+        BatchMarkers,
+    ]:
+        batch_spec = self._build_batch_spec_from_batch_definition(batch_definition)
+        print(batch_spec)
+        print("???????")
+        batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
+            **batch_spec
+        )
+
+        return (
+            batch_data,
+            batch_spec,
+            batch_markers,
+        )
+
+    def _build_batch_spec_from_batch_definition(
+        self,
+        batch_definition: BatchDefinition
+    ) -> BatchSpec:
+
+        batch_spec_params = self._generate_batch_spec_parameters_from_batch_definition(
+            batch_definition
+        )
+
+        # TODO Abe 20201018: Reincorporate info from the execution_engine
+        # batch_spec = self._execution_engine.process_batch_request(
+        #     batch_request=batch_request,
+        #     batch_spec=batch_spec
+        # )
+
+        batch_spec = BatchSpec(
+            **batch_spec_params
+        )
+
+        return batch_spec
+
+    def _generate_batch_spec_parameters_from_batch_definition(
+        self,
+        batch_definition: BatchDefinition
+    ) -> dict:
+        #TODO Abe 20201018: This is an absolutely horrible way to get a path from a single partition_definition, but AFIACT it's the only method currently supported by our Partitioner
+        available_partitions = self.get_available_partitions(
+            data_asset_name=batch_definition.data_asset_name,
+        )
+        for partition in available_partitions:
+            if partition.definition == batch_definition.partition_definition:
+                path = partition.data_reference
+                continue
+
+        return {
+            "path" : path
+        }

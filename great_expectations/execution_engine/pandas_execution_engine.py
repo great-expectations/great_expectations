@@ -551,6 +551,30 @@ Notes:
         self._loaded_batch_id = batch_id
         return batch
 
+    def get_batch_data_and_markers(
+        self,
+        path: str,
+        reader_method:str="read_csv",
+        reader_options:dict={}
+    ) -> Tuple[
+        Any, #batch_data
+        BatchMarkers
+    ]:
+
+        reader_fn = self._get_reader_fn(reader_method, path)
+        batch_data = reader_fn(path, **reader_options)
+
+        batch_markers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        return batch_data, batch_markers
+
+
     @property
     def dataframe(self):
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a

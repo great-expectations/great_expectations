@@ -98,7 +98,6 @@ class FilesDataConnector(DataConnector):
         repartition: bool = None
     ) -> List[Partition]:
         # TODO: <Alex>TODO: Each specific data_connector should verify the given partitioner against the list of supported partitioners.</Alex>
-        print(data_asset_name)
         paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
         auto_discover_assets: bool = not data_asset_config_exists
