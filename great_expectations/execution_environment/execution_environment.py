@@ -197,7 +197,7 @@ class ExecutionEnvironment(object):
     ) -> List[Batch]:
 
         data_connector: DataConnector = self.get_data_connector(
-            name=batch_definition.data_connector_name
+            name=batch_request.data_connector_name
         )
 
         batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
@@ -270,9 +270,9 @@ class ExecutionEnvironment(object):
             raise ge_exceptions.DataConnectorError(
                 f'Unable to load data connector "{name}" -- no configuration found or invalid configuration.'
             )
-        data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
-            data_connector_config
-        )
+        # data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
+        #     data_connector_config
+        # )
         data_connector: DataConnector = self._build_data_connector_from_config(
             name=name, config=data_connector_config
         )
@@ -285,27 +285,19 @@ class ExecutionEnvironment(object):
         config: CommentedMap,
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
-        # We convert from the type back to a dictionary for purposes of instantiation
-        if isinstance(config, DataConnectorConfig):
-            config: dict = dataConnectorConfigSchema.dump(config)
-        module_name: str = "great_expectations.execution_environment.data_connector.data_connector"
-        runtime_environment: dict = {
-            "name": name,
-            "data_context_root_directory": self._data_context_root_directory
-        }
-        if self._execution_engine is not None:
-            runtime_environment.update({"execution_engine": self._execution_engine})
+        
         data_connector: DataConnector = instantiate_class_from_config(
             config=config,
-            runtime_environment=runtime_environment,
-            config_defaults={"module_name": module_name},
+            runtime_environment={
+                "name": name,
+                "data_context_root_directory": self._data_context_root_directory,
+                "execution_engine": self._execution_engine
+            },
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector"
+            },
         )
-        if not data_connector:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name="great_expectations.execution_environment.data_connector.data_connector",
-                package_name=None,
-                class_name=config["class_name"],
-            )
+
         return data_connector
 
     # TODO Abe 10/6/2020: Should this be an internal method?<Alex>Pros/cons for either choice exist; happy to discuss.</Alex>

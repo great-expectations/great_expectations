@@ -101,6 +101,7 @@ def test_get_batch_with_pipeline_style_batch_request():
     test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     execution_environment_name: str = "test_execution_environment"
+    print("l"*80)
     execution_environment_config: dict = execution_environment_files_data_connector_regex_partitioner_config(
         use_group_names=False,
         use_sorters=False,
@@ -108,6 +109,7 @@ def test_get_batch_with_pipeline_style_batch_request():
         data_asset_base_directory=None
     )[execution_environment_name]
     execution_environment_config.pop("class_name")
+
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
         **execution_environment_config,
@@ -125,7 +127,7 @@ def test_get_batch_with_pipeline_style_batch_request():
         "limit": None,
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
-    batch: Batch = execution_environment.get_batch(
+    batch: Batch = execution_environment.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
     assert batch.batch_spec is not None
