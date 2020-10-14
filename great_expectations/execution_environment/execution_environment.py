@@ -378,9 +378,12 @@ class ExecutionEnvironment(object):
         )
         return available_partitions
 
-    def self_check(self, pretty_print=True):
+    def self_check(self, pretty_print=True, max_examples=2):
         
         return_object = {}
+        return_object["execution_engine"] = {
+            "class_name" : self._execution_engine.__class__.__name__,
+        }
 
         if pretty_print:
             print(f"Execution engine: {self._execution_engine.__class__.__name__}")
@@ -388,22 +391,42 @@ class ExecutionEnvironment(object):
         if pretty_print:
             print(f"Data connectors:")
 
-        for data_connector in self.list_data_connectors():
+        data_connector_list = self.list_data_connectors()
+        data_connector_list.sort()
+        return_object["data_connectors"] = {
+            "count" : len(data_connector_list)
+        }
+
+        for data_connector in data_connector_list:
             if pretty_print:
                 print("\t"+data_connector["name"], ":", data_connector["class_name"])
                 print()
 
-            asset_names = self.get_available_data_asset_names(data_connector["name"])
+            asset_names = self.get_available_data_asset_names(data_connector["name"])[data_connector["name"]]
+            asset_names.sort()
             len_asset_names = len(asset_names)
 
+            data_connector_obj = {
+                "class_name" : data_connector["class_name"],
+                "data_asset_count" : len_asset_names,
+                "example_data_asset_names": asset_names[:max_examples],
+                "data_assets" : {}
+            }
+
             if pretty_print:
-                print(f"\tAvailable data_asset_names ({min(len_asset_names, 10)} of {len_asset_names}):")
+                print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
             
-            for asset_name in asset_names[data_connector["name"]]:
+            for asset_name in asset_names[:max_examples]:
                 partitions = self.get_available_partitions(data_connector["name"], asset_name)
                 len_partitions = len(partitions)
-                partition_names = [partition.name for partition in partitions]
+                example_partition_names = [partition.definition for partition in partitions][:max_examples]
                 if pretty_print:
-                    print(f"\t\t{asset_name} ({min(len_partitions, 10)} of {len_partitions}):", partition_names[:10])
+                    print(f"\t\t{asset_name} ({min(len_partitions, max_examples)} of {len_partitions}):", example_partition_names)
+                data_connector_obj["data_assets"][asset_name] = {
+                    "partition_count": len_partitions,
+                    "example_partition_names": example_partition_names
+                }
+
+            return_object["data_connectors"][data_connector["name"]] = data_connector_obj
 
         return return_object

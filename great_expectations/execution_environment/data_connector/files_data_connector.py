@@ -145,7 +145,6 @@ class FilesDataConnector(DataConnector):
                     str(posix_path) for posix_path in self._get_valid_file_paths(base_directory=base_directory)
                 ]
 
-            print(path_list)
             return self._verify_file_paths(path_list=path_list)
         raise ge_exceptions.DataConnectorError(f'Expected a directory, but path "{base_directory}" is not a directory.')
 

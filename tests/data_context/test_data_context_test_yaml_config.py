@@ -1,6 +1,7 @@
 import pytest
 import tempfile
 import os
+import json
 from tests.test_utils import (
     create_files_in_directory,
 )
@@ -110,4 +111,41 @@ data_connectors:
 """, return_mode="return_object"
     )
 
-    print(return_obj)
+    print(json.dumps(return_obj, indent=2))
+
+    assert return_obj == {
+        "execution_engine":{
+            "class_name":"PandasExecutionEngine"
+        },
+        "data_connectors":{
+            "count":1,
+            "my_filesystem_data_connector":{
+                "class_name":"FilesDataConnector",
+                "data_asset_count":10,
+                "example_data_asset_names":[
+                    "abe_20200809_1040",
+                    "alex_20200809_1000"
+                ],
+                "data_assets":{
+                    "abe_20200809_1040":{
+                    "partition_count":1,
+                    "example_partition_names":[
+                        {
+                            "letter":"abe_20200809_104",
+                            "number":"0"
+                        }
+                    ]
+                    },
+                    "alex_20200809_1000":{
+                    "partition_count":1,
+                    "example_partition_names":[
+                        {
+                            "letter":"alex_20200809_100",
+                            "number":"0"
+                        }
+                    ]
+                    }
+                }
+            }
+        }
+        }
