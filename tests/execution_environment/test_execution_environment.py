@@ -100,7 +100,6 @@ def test_get_batch_with_pipeline_style_batch_request():
     test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     execution_environment_name: str = "test_execution_environment"
-    print("l"*80)
     execution_environment_config: dict = execution_environment_files_data_connector_regex_partitioner_config(
         use_group_names=False,
         use_sorters=False,
@@ -345,7 +344,6 @@ def test_some_very_basic_stuff(basic_execution_environment):
     #         "number": "1",
     #     }
     # )
-    # assert batch.data == ""
 
     batch_list = basic_execution_environment.get_batch_list_from_batch_request(BatchRequest(
         execution_environment="my_execution_environment",
@@ -357,14 +355,15 @@ def test_some_very_basic_stuff(basic_execution_environment):
         }
     ))
     assert len(batch_list) == 1
+    assert type(batch_list[0].data) == pd.DataFrame
 
+    my_df = pd.DataFrame({"x": range(10), "y": range(10)})
     batch = basic_execution_environment.get_batch_from_batch_definition(BatchDefinition(
         "my_execution_environment",
-        "my_filesystem_data_connector",
-        "B1",
+        "_pipeline",
+        "_pipeline",
         partition_definition={
-            "letter": "B",
-            "number": "1",
+            "some_random_id": 1
         }
-    ))
+    ), in_memory_dataset=my_df)
     assert batch.batch_request == None

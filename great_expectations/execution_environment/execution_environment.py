@@ -171,9 +171,13 @@ class ExecutionEnvironment(object):
         Note: this method should *not* be used when getting a Batch from a BatchRequest, since it does not capture BatchRequest metadata.
         """
 
-        if in_memory_dataset:
-            batch_data = self.execution_engine.convert_to_executable_data_type(in_memory_dataset)
+        if type(in_memory_dataset) != type(None):
+            #NOTE Abe 20201014: Maybe do more careful type checking here?
+            #Seems like we should verify that in_memory_dataset is compatible with the execution_engine...?
+            batch_data = in_memory_dataset
             batch_spec, batch_markers = None, None
+
+            #NOTE Abe 20201014: We should also verify that the keys in batch_definition.partition_definition are compatible with the DataConnector?
 
         else:
             data_connector: DataConnector = self.get_data_connector(

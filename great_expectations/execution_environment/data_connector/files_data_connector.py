@@ -14,6 +14,10 @@ from great_expectations.core.id_dict import (
     PartitionDefinitionSubset,
     BatchSpec
 )
+from great_expectations.core.batch import (
+    BatchMarkers,
+    BatchDefinition,
+)
 from great_expectations.execution_environment.types import PathBatchSpec
 import great_expectations.exceptions as ge_exceptions
 
@@ -217,3 +221,25 @@ class FilesDataConnector(DataConnector):
             path: str = str(partition.data_reference)
             batch_spec["path"] = path
         return PathBatchSpec(batch_spec)
+
+    def _generate_batch_spec_parameters_from_batch_definition(
+        self,
+        batch_definition: BatchDefinition
+    ) -> dict:
+    
+        #TODO Abe 20201018: This is an absolutely horrible way to get a path from a single partition_definition, but AFIACT it's the only method currently supported by our Partitioner
+        available_partitions = self.get_available_partitions(
+            data_asset_name=batch_definition.data_asset_name,
+        )
+        for partition in available_partitions:
+            if partition.definition == batch_definition.partition_definition:
+                path = partition.data_reference
+                continue
+        try:
+            path
+        except UnboundLocalError:
+            raise ValueError(f"No partition in {available_partitions} matches the given partition definition {batch_definition.partition_definition} from batch definition {batch_definition}")
+
+        return {
+            "path" : path
+        }
