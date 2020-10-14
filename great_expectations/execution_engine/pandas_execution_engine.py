@@ -18,18 +18,23 @@ from great_expectations.dataset.util import (
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
+# TODO: <Alex>See the cleanup notes in "great_expectations/core/batch.py" and "great_expectations/execution_environment/types/batch_spec.py".</Alex>
+from ..core.batch import (
+    Batch,
+    BatchRequest
+)
+from ..core.id_dict import BatchSpec
 from great_expectations.execution_environment.types import (
     InMemoryBatchSpec,
     PathBatchSpec,
-    S3BatchSpec
+    S3BatchSpec,
+    BatchMarkers
 )
 from great_expectations.expectations.registry import (
     register_metric,
 )
 from great_expectations.validator.validator import Validator
 
-from ..core.batch import Batch, BatchMarkers
-from ..core.id_dict import BatchSpec
 from ..exceptions import BatchSpecError, ValidationError
 from ..exceptions.metric_exceptions import MetricError
 from ..execution_environment.util import hash_pandas_dataframe
@@ -417,17 +422,17 @@ Notes:
 --ge-feature-maturity-info--
     """
 
-    # TODO: <Alex>Do we still need this in the new design?</Alex>
     # this is necessary to subclass pandas in a proper way.
     # NOTE: specifying added properties in this way means that they will NOT be carried over when
     # the dataframe is manipulated, which we might want. To specify properties that are carried over
     # to manipulation results, we would just use `_metadata = ['row_count', ...]` here. The most likely
     # case is that we want the former, but also want to re-initialize these values to None so we don't
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
+    # noinspection PyProtectedMember
     _internal_names = pd.DataFrame._internal_names + [
         "_batch_spec",
         "_batch_markers",
-        "_batch_definition",
+        "_batch_request",
         "_batch_id",
         "_expectation_suite",
         "_config",
@@ -437,10 +442,11 @@ Notes:
     ]
     _internal_names_set = set(_internal_names)
 
-    recognized_batch_definition_keys = {
+    recognized_batch_request_keys = {
         "limit"
     }
 
+    # TODO: <Alex>Is this used in the new design?</Alex>
     recognized_batch_spec_defaults = {
         "reader_method",
         "reader_options",
@@ -545,6 +551,30 @@ Notes:
         self._loaded_batch_id = batch_id
         return batch
 
+    def get_batch_data_and_markers(
+        self,
+        path: str,
+        reader_method:str="read_csv",
+        reader_options:dict={}
+    ) -> Tuple[
+        Any, #batch_data
+        BatchMarkers
+    ]:
+
+        reader_fn = self._get_reader_fn(reader_method, path)
+        batch_data = reader_fn(path, **reader_options)
+
+        batch_markers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        return batch_data, batch_markers
+
+
     @property
     def dataframe(self):
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
@@ -625,16 +655,16 @@ Notes:
             f'Unable to determine reader method from path: "{path}".'
         )
 
-    def process_batch_definition(self, batch_definition, batch_spec):
-        """Takes in a batch definition and batch spec. If the batch definition has a limit, uses it to initialize the
+    def process_batch_request(self, batch_request: BatchRequest, batch_spec: BatchSpec):
+        """Takes in a batch request and batch spec. If the batch request has a limit, uses it to initialize the
         number of rows to process for the batch spec in obtaining a batch
         Args:
-            batch_definition (dict) - The batch definition as defined by the user
+            batch_request (dict) - The batch request as defined by the user
             batch_spec (dict) - The batch spec used to query the backend
         Returns:
              batch_spec (dict) - The batch spec used to query the backend, with the added row limit
         """
-        limit = batch_definition.get("limit")
+        limit = batch_request.limit
         if limit is not None:
             if not batch_spec.get("reader_options"):
                 batch_spec["reader_options"] = {}

@@ -49,12 +49,62 @@ def test_dataframe(spark_session):
             ),
             StructField("name_duplicate", StringType(), True),
             StructField("non.nested", StringType(), True),
+            StructField("name_with_duplicates", StringType(), True),
+            StructField("age_with_duplicates", IntegerType(), True),
+            StructField(
+                "address_with_duplicates",
+                StructType(
+                    [
+                        StructField("street", StringType(), True),
+                        StructField("city", StringType(), True),
+                        StructField("house_number", IntegerType(), True),
+                    ]
+                ),
+                False,
+            ),
         ]
     )
     rows = [
-        ("Alice", 1, ("Street 1", "Alabama", 10), "Alice", "a"),
-        ("Bob", 2, ("Street 2", "Brooklyn", 11), "Bob", "b"),
-        ("Charlie", 3, ("Street 3", "Alabama", 12), "Charlie", "c"),
+        (
+            "Alice",
+            1,
+            ("Street 1", "Alabama", 10),
+            "Alice",
+            "a",
+            "Alice",
+            1,
+            ("Street 1", "Alabama", 12),
+        ),
+        (
+            "Bob",
+            2,
+            ("Street 2", "Brooklyn", 11),
+            "Bob",
+            "b",
+            "Bob",
+            2,
+            ("Street 1", "Brooklyn", 12),
+        ),
+        (
+            "Charlie",
+            3,
+            ("Street 3", "Alabama", 12),
+            "Charlie",
+            "c",
+            "Charlie",
+            3,
+            ("Street 1", "Alabama", 12),
+        ),
+        (
+            "Dan",
+            4,
+            ("Street 4", "Boston", 12),
+            "Dan",
+            "d",
+            "Charlie",
+            3,
+            ("Street 1", "Boston", 12),
+        ),
     ]
 
     rdd = spark_session.sparkContext.parallelize(rows)
@@ -194,6 +244,67 @@ def test_expect_select_column_values_to_be_unique_within_record(
     # Expectation should fail when no `` surround a non-nested column with dot notation
     with pytest.raises(AnalysisException):
         test_dataframe.expect_select_column_values_to_be_unique_within_record(
+            ["address.street", "non.nested"]
+        )
+
+
+@pytest.mark.skipif(
+    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+)
+def test_expect_compound_columns_to_be_unique(spark_session, test_dataframe):
+    """
+    multicolumn_map_expectation
+    """
+    from pyspark.sql.utils import AnalysisException
+
+    # Positive tests
+    assert test_dataframe.expect_compound_columns_to_be_unique(["name", "age"]).success
+    assert test_dataframe.expect_compound_columns_to_be_unique(
+        ["address.street", "name"]
+    ).success
+    assert test_dataframe.expect_compound_columns_to_be_unique(
+        ["address.street", "address.city"]
+    ).success
+    assert test_dataframe.expect_compound_columns_to_be_unique(
+        ["name_with_duplicates", "age_with_duplicates", "name"]
+    ).success
+    assert test_dataframe.expect_compound_columns_to_be_unique(
+        ["address.street", "`non.nested`"]
+    ).success
+    assert test_dataframe.expect_compound_columns_to_be_unique(
+        ["name", "name_with_duplicates"]
+    ).success
+    assert test_dataframe.expect_compound_columns_to_be_unique(
+        [
+            "name",
+            "name_with_duplicates",
+            "address_with_duplicates.street",
+            "address_with_duplicates.city",
+            "address_with_duplicates.house_number",
+        ]
+    ).success
+
+    # Negative tests
+    assert not test_dataframe.expect_compound_columns_to_be_unique(
+        ["address_with_duplicates.city", "address_with_duplicates.house_number"]
+    ).success
+    assert not test_dataframe.expect_compound_columns_to_be_unique(
+        ["name_with_duplicates"]
+    ).success
+    assert not test_dataframe.expect_compound_columns_to_be_unique(
+        ["name_with_duplicates", "address_with_duplicates.street"]
+    ).success
+    assert not test_dataframe.expect_compound_columns_to_be_unique(
+        [
+            "name_with_duplicates",
+            "address_with_duplicates.street",
+            "address_with_duplicates.house_number",
+        ]
+    ).success
+
+    # Expectation should fail when no `` surround a non-nested column with dot notation
+    with pytest.raises(AnalysisException):
+        test_dataframe.expect_compound_columns_to_be_unique(
             ["address.street", "non.nested"]
         )
 

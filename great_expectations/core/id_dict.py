@@ -31,5 +31,17 @@ class BatchSpec(IDDict):
     pass
 
 
+class PartitionDefinitionSubset(IDDict):
+    pass
+
+
+class PartitionRequest(PartitionDefinitionSubset):
+    pass
+
+
+class PartitionDefinition(PartitionDefinitionSubset):
+    pass
+
+
 class MetricKwargs(IDDict):
     pass

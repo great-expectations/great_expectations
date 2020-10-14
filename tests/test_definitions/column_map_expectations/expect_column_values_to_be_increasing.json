@@ -11,7 +11,7 @@
       "b" : [null, 0, null, null, 2, null, null, 1, null, null]
     },
     "tests" : [{
-      "title" : "Basic_positive_test",
+      "title" : "basic_positive_test",
       "exact_match_out" : false,
       "in": {
         "column": "x"
@@ -33,7 +33,7 @@
         "success": true
       }
     },{
-      "title" : "Positive_test_with_strictly",
+      "title" : "positive_test_with_strictly",
       "exact_match_out" : false,
       "in": {
         "column": "y",
@@ -45,7 +45,7 @@
         "success": false
       }
     },{
-      "title" : "Basic_negative_test",
+      "title" : "basic_negative_test",
       "exact_match_out" : false,
       "in": {
         "column": "w"
@@ -56,7 +56,7 @@
         "success": false
       }
     },{
-      "title" : "Positive_test_with_parse_strings_as_datetimes",
+      "title" : "positive_test_with_parse_strings_as_datetimes",
       "exact_match_out" : false,
       "in": {
         "column": "zz",
@@ -68,7 +68,7 @@
         "success": true
       }
     },{
-      "title" : "Positive_test_with_interspersed_nulls",
+      "title" : "positive_test_with_interspersed_nulls",
       "exact_match_out" : false,
       "in": {
         "column": "a"
@@ -79,7 +79,7 @@
         "success": true
       }
     },{
-      "title" : "Negative_test_with_interspersed_nulls",
+      "title" : "negative_test_with_interspersed_nulls",
       "exact_match_out" : false,
       "in": {
         "column": "b"

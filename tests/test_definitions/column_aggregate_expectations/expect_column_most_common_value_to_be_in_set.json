@@ -24,7 +24,7 @@
           }
         }
       },{
-      "title" : "Negative_test__tie_for_most_common__full_value_set__ties_okay____FALSE",
+      "title" : "negative_test__tie_for_most_common__full_value_set__ties_okay__false",
       "exact_match_out" : false,
       "in": {
         "column": "x",
@@ -35,7 +35,7 @@
         "observed_value": [1, 2]
       }
     },{
-        "title" : "Positive_test__tie_for_most_common__ties_okay____TRUE",
+        "title" : "positive_test__tie_for_most_common__ties_okay__true",
         "exact_match_out" : false,
         "in": {
           "column": "x",
@@ -47,7 +47,7 @@
           "observed_value": [1, 2]
         }
       },{
-        "title" : "Positive_test__tie_for_most_common_(but_test_for_last_value)__ties_okay____TRUE",
+        "title" : "positive_test__tie_for_most_common_but_test_for_last_value__ties_okay__true",
         "exact_match_out" : false,
         "in": {
           "column": "x",
@@ -59,7 +59,7 @@
           "observed_value": [1, 2]
         }
       },{
-        "title" : "Negative_test__tie_for_most_common__value_set_does_not_match__ties_okay____FALSE",
+        "title" : "negative_test__tie_for_most_common__value_set_does_not_match__ties_okay__false",
         "exact_match_out" : false,
         "in": {
           "column": "x",
@@ -70,7 +70,7 @@
           "observed_value": [1, 2]
         }
       },{
-        "title" : "Negative_test__tie_for_most_common__value_set_does_not_match__ties_okay____True",
+        "title" : "negative_test__tie_for_most_common__value_set_does_not_match__ties_okay__true",
         "exact_match_out" : false,
         "in": {
           "column": "x",

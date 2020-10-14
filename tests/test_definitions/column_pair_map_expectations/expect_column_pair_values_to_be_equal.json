@@ -16,7 +16,7 @@
       }
     },
     "tests" : [{
-      "title" : "Trivial_case:_x__x",
+      "title" : "trivial_case:_x__x",
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
@@ -28,7 +28,7 @@
         "success": true
       }
     },{
-      "title" : "Basic_negative_example",
+      "title" : "basic_negative_example",
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
@@ -41,7 +41,7 @@
         "success": false
       }
     }, {
-      "title" : "Positive_example_with_mostly",
+      "title" : "positive_example_with_mostly",
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
@@ -55,7 +55,7 @@
         "success": true
       }
     }, {
-      "title" : "Positive_example_with_mismatched_null_values_and_ignore_row_if__either_value_is_missing",
+      "title" : "positive_example_with_mismatched_null_values_and_ignore_row_if__either_value_is_missing",
       "exact_match_out" : false,
       "in": {
         "column_A": "y",
@@ -67,7 +67,7 @@
         "success": true
       }
     }, {
-      "title" : "A_negative_example_with_mismatched_null_values_and_`ignore_row_if__both_values_are_missing`_set_explicitly",
+      "title" : "a_negative_example_with_mismatched_null_values_and_ignore_row_if__both_values_are_missing_set_explicitly",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
@@ -81,7 +81,7 @@
         "success": false
       }
     }, {
-      "title" : "A_negative_example_with_mismatched_null_values_and_`ignore_row_if__both_values_are_missing`_set_by_default",
+      "title" : "a_negative_example_with_mismatched_null_values_and_ignore_row_if__both_values_are_missing_set_by_default",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
@@ -94,7 +94,7 @@
         "success": false
       }
     }, {
-      "title" : "A_negative_example",
+      "title" : "a_negative_example",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
@@ -107,7 +107,7 @@
         "success": false
       }
     }, {
-      "title" : "A_positive_example_with_mostly",
+      "title" : "a_positive_example_with_mostly",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
@@ -121,7 +121,7 @@
         "success": true
       }
     }, {
-      "title" : "A_positive_example_with_ignore_row_if__either_value_is_missing",
+      "title" : "a_positive_example_with_ignore_row_if__either_value_is_missing",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",

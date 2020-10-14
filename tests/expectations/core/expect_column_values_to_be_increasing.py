@@ -62,7 +62,7 @@ def test_spark_expect_column_values_to_be_increasing_impl():
     expectation = ExpectColumnValuesToBeIncreasing(expectationConfiguration)
     myengine = SparkDFExecutionEngine()
     batch = myengine.load_batch(
-        batch_definition={"data_asset_name": "foo", "partition_name": "bar"},
+        batch_request={"data_asset_name": "foo", "partition_name": "bar"},
         batch_spec=BatchSpec({"blarg": "bah"}),
         in_memory_dataset=df,
     )
@@ -89,7 +89,7 @@ def test_spark_expect_column_values_to_be_increasing_impl():
     df = spark.createDataFrame(df)
     myengine = SparkDFExecutionEngine()
     batch = myengine.load_batch(
-        batch_definition={"data_asset_name": "foo", "partition_name": "bar"},
+        batch_request={"data_asset_name": "foo", "partition_name": "bar"},
         batch_spec=BatchSpec({"blarg": "bah"}),
         in_memory_dataset=df,
     )

@@ -6,7 +6,7 @@ import random
 import string
 from functools import wraps
 from types import ModuleType
-from typing import Union
+from typing import Union, List
 
 import numpy as np
 import pandas as pd
@@ -17,6 +17,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationConfigurationSchema,
     ExpectationSuite,
+    ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
@@ -44,6 +45,7 @@ from great_expectations.validator.validator import Validator
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
 expectationConfigurationSchema = ExpectationConfigurationSchema()
+expectationSuiteSchema = ExpectationSuiteSchema()
 
 try:
     from sqlalchemy import create_engine
@@ -644,7 +646,7 @@ def get_test_batch(
 
         return PandasExecutionEngine(caching=caching).load_batch(
             in_memory_dataset=df,
-            batch_definition={"data_asset_name": "test", "partition_name": table_name},
+            batch_request={"data_asset_name": "test", "partition_name": table_name},
             batch_spec=BatchSpec(
                 {
                     "ge_load_time": datetime.datetime.now(
@@ -1015,7 +1017,7 @@ def get_test_batch(
 
         return SparkDFExecutionEngine(caching=caching).load_batch(
             in_memory_dataset=spark_df,
-            batch_definition={"data_asset_name": "test", "partition_name": table_name},
+            batch_request={"data_asset_name": "test", "partition_name": table_name},
             batch_spec=BatchSpec(
                 {
                     "ge_load_time": datetime.datetime.now(
@@ -1598,3 +1600,184 @@ def safe_remove(path):
             os.remove(path)
         except OSError as e:
             print(e)
+
+
+def execution_environment_files_data_connector_regex_partitioner_config(
+    use_group_names: bool = False,
+    use_sorters: bool = False,
+    default_base_directory = "data",
+    data_asset_base_directory = None,
+):
+    if not use_group_names and use_sorters:
+        raise ValueError("The presently available data_connector and partitioner tests match sorters with group names.")
+
+    group_names: Union[list, None]
+    if use_group_names:
+        group_names = [
+            "name",
+            "timestamp",
+            "price"
+        ]
+    else:
+        group_names = None
+
+    sorters: Union[list, None]
+    if use_sorters:
+        sorters = [
+            # {
+            #     "name": "name",
+            #     "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            #     "class_name": "LexicographicSorter",
+            #     "orderby": "asc",
+            # },
+            {
+                "name": "timestamp",
+                "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+                "class_name": "DateTimeSorter",
+                "orderby": "desc",
+                "config_params": {
+                    "datetime_format": "%Y%m%d",
+                }
+            },
+            {
+                "name": "price",
+                "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+                "class_name": "NumericSorter",
+                "orderby": "desc",
+            },
+        ]
+    else:
+        sorters = None
+
+    execution_environments_config: dict = {
+        "test_execution_environment": {
+            "class_name": "ExecutionEnvironment",
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "class_name": "PandasExecutionEngine",
+                "caching": True,
+                "batch_spec_defaults": {}
+            },
+            "data_connectors": {
+                "test_pipeline_data_connector": {
+                    "module_name": "great_expectations.execution_environment.data_connector",
+                    "class_name": "PipelineDataConnector",
+                    "partitioners": {
+                        "test_pipeline_partitioner": {
+                            "module_name": "great_expectations.execution_environment.data_connector.partitioner",
+                            "class_name": "PipelinePartitioner",
+                            "allow_multipart_partitions": False,
+                            "runtime_keys": [
+                                "custom_key_0",
+                                "run_id",
+                            ]
+                        }
+                    },
+                    "default_partitioner": "test_pipeline_partitioner",
+                    "assets": {
+                        "test_asset_1": {
+                            "partitioner": "test_pipeline_partitioner"
+                        }
+                    }
+                },
+                "test_filesystem_data_connector": {
+                    "module_name": "great_expectations.execution_environment.data_connector",
+                    "class_name": "FilesDataConnector",
+                    "base_directory": default_base_directory,
+                    "glob_directive": "*",
+                    "partitioners": {
+                        "test_regex_partitioner": {
+                            "module_name": "great_expectations.execution_environment.data_connector.partitioner",
+                            "class_name": "RegexPartitioner",
+                            "config_params": {
+                                "regex": {
+                                    "pattern": r".+\/(.+)_(.+)_(.+)\.csv",
+                                    "group_names": group_names
+                                },
+                            },
+                            "allow_multipart_partitions": False,
+                            "sorters": sorters,
+                            "runtime_keys": [
+                                "custom_key_0",
+                                "run_id",
+                            ]
+                        }
+                    },
+                    "default_partitioner": "test_regex_partitioner",
+                    "assets": {
+                        "test_asset_0": {
+                            "partitioner": "test_regex_partitioner",
+                                "base_directory": data_asset_base_directory,
+                                "glob_directive": "alex*",
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return execution_environments_config
+
+
+def create_files_for_regex_partitioner(
+    root_directory_path: str,
+    directory_paths: list = None,
+    test_file_names: list = None
+):
+    if not directory_paths:
+        return
+
+    if not test_file_names:
+        test_file_names: list = [
+            "alex_20200809_1000.csv",
+            "eugene_20200809_1500.csv",
+            "james_20200811_1009.csv",
+            "abe_20200809_1040.csv",
+            "will_20200809_1002.csv",
+            "james_20200713_1567.csv",
+            "eugene_20201129_1900.csv",
+            "will_20200810_1001.csv",
+            "james_20200810_1003.csv",
+            "alex_20200819_1300.csv",
+        ]
+
+    base_directories = []
+    for dir_path in directory_paths:
+        if dir_path is None:
+            base_directories.append(dir_path)
+        else:
+            data_dir_path = os.path.join(root_directory_path, dir_path)
+            os.makedirs(data_dir_path, exist_ok=True)
+            base_dir = str(data_dir_path)
+            # Put test files into the directories.
+            for file_name in test_file_names:
+                file_path = os.path.join(base_dir, file_name)
+                with open(file_path, "w") as fp:
+                    fp.writelines([f'The name of this file is: "{file_path}".\n'])
+            base_directories.append(base_dir)
+
+def create_files_in_directory(
+    directory: str,
+    file_name_list: List[str],
+    file_content_fn = lambda: "x,y\n1,2\n2,3"
+):
+    subdirectories = []
+    for file_name in file_name_list:
+        splits = file_name.split("/")
+        for i in range(1, len(splits)):
+            subdirectories.append(
+                os.path.join(*splits[:i])
+            )
+    subdirectories = set(subdirectories)
+
+    for subdirectory in subdirectories:
+        os.makedirs(
+            os.path.join(directory, subdirectory),
+            exist_ok=True
+        )
+    
+    for file_name in file_name_list:
+        file_path = os.path.join(directory, file_name)
+        with open(file_path, "w") as f_:
+            f_.write(
+                file_content_fn()
+            )

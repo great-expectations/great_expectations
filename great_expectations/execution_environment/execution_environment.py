@@ -2,7 +2,7 @@
 
 import copy
 import logging
-from typing import List, Any
+from typing import Union, List, Dict, Callable, Any
 
 from great_expectations.data_context.types.base import (
     DataConnectorConfig,
@@ -10,10 +10,22 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from ruamel.yaml.comments import CommentedMap
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.types import BatchSpec
-from great_expectations.core.batch import Batch
+from great_expectations.execution_environment.data_connector.pipeline_data_connector import PipelineDataConnector
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.core.id_dict import (
+    PartitionRequest,
+    PartitionDefinition,
+    BatchSpec
+)
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequestMetadata,
+    BatchRequest,
+    BatchDefinition
+)
+
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +41,7 @@ class ExecutionEnvironment(object):
         name: str,
         execution_engine=None,
         data_connectors=None,
-        in_memory_dataset: Any = None,
         data_context_root_directory: str = None,
-        # **kwargs
     ):
         """
         Build a new ExecutionEnvironment.
@@ -43,14 +53,21 @@ class ExecutionEnvironment(object):
         """
         self._name = name
         self._execution_engine = instantiate_class_from_config(
-            config=execution_engine, runtime_environment={},
+            config=execution_engine,
+            runtime_environment={},
+            config_defaults={
+                "module_name": "great_expectations.execution_engine"
+            }
         )
+        self._execution_environment_config = {
+            "execution_engine": execution_engine
+        }
 
-        self._execution_environment_config = {}
-        self._execution_environment_config["execution_engine"] = execution_engine
+        if data_connectors is None:
+            data_connectors = {}
         self._execution_environment_config["data_connectors"] = data_connectors
 
-        self._in_memory_dataset = in_memory_dataset
+        self._data_connectors_cache = {}
 
         self._data_context_root_directory = data_context_root_directory
 
@@ -59,41 +76,155 @@ class ExecutionEnvironment(object):
         self._data_connectors_cache = {}
         self._build_data_connectors()
 
-    def get_batch(
+    def get_available_partitions(
         self,
-        batch_definition: dict
+        data_connector_name: str,
+        data_asset_name: str = None,
+        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+        in_memory_dataset: Any = None,
+        runtime_parameters: Union[dict, None] = None,
+        repartition: bool = False
+    ) -> List[Partition]:
+        data_connector: DataConnector = self.get_data_connector(
+            name=data_connector_name
+        )
+        available_partitions: List[Partition] = data_connector.get_available_partitions(
+            data_asset_name=data_asset_name,
+            partition_query=partition_query,
+            in_memory_dataset=in_memory_dataset,
+            runtime_parameters=runtime_parameters,
+            repartition=repartition
+        )
+        return available_partitions
+
+#     def get_batch(
+#         self,
+#         batch_request: BatchRequest
+#     ) -> Batch:
+#         if not batch_request:
+#             raise ge_exceptions.BatchDefinitionError(message="Batch request is empty.")
+
+#         partition_request: PartitionRequest = batch_request.partition_request
+#         data_asset_name: str = batch_request.data_asset_name
+#         partition_query: dict = {
+#             "custom_filter": None,
+#             "partition_name": None,
+#             "partition_definition": copy.deepcopy(partition_request),
+#             "partition_index": None,
+#             "limit": None
+#         }
+
+#         in_memory_dataset: Any = batch_request.in_memory_dataset
+
+#         data_connector_name: str = batch_request.data_connector_name
+#         if not data_connector_name:
+#             raise ge_exceptions.BatchDefinitionError(message="Batch request must specify a data_connector.")
+#         data_connector: DataConnector = self.get_data_connector(name=data_connector_name)
+
+#         partitions: List[Partition] = data_connector.get_available_partitions(
+#             data_asset_name=data_asset_name,
+#             partition_query=partition_query,
+#             in_memory_dataset=in_memory_dataset,
+#             runtime_parameters=None,
+#             repartition=False
+#         )
+#         if not partitions or len(partitions) == 0:
+#             raise ge_exceptions.BatchSpecError(
+#                 message=f'''
+# Unable to build batch_spec for data asset "{data_asset_name}" (found 0 available partitions; must have exactly 1).
+#                 '''
+#             )
+#         if len(partitions) > 1:
+#             raise ge_exceptions.BatchSpecError(
+#                 message=f'''
+# Unable to build batch_spec for data asset "{data_asset_name}" (found {len(partitions)} partitions; must have exactly 1).
+#                 '''
+#             )
+
+#         partition: Partition = partitions[0]
+#         # noinspection PyProtectedMember
+#         batch_spec: BatchSpec = data_connector._build_batch_spec(batch_request=batch_request, partition=partition)
+#         batch_spec = self.execution_engine.process_batch_request(
+#             batch_request=batch_request,
+#             batch_spec=batch_spec
+#         )
+
+#         batch: Batch = self.execution_engine.load_batch(batch_spec=batch_spec)
+#         partition_definition: PartitionDefinition = partition.definition
+#         batch_definition: BatchDefinition = BatchDefinition(
+#             execution_environment_name=self.name,
+#             data_connector_name=data_connector_name,
+#             data_asset_name=batch_request.data_asset_name,
+#             partition_definition=partition_definition
+#         )
+#         batch_request_metadata: BatchRequestMetadata = batch_request.batch_request_metadata
+#         batch.batch_request = batch_request_metadata
+#         batch.batch_definition = batch_definition
+
+#         return batch
+
+    def get_batch_from_batch_definition(
+        self,
+        batch_definition: BatchDefinition,
+        in_memory_dataset: Any=None,
     ) -> Batch:
-        if not batch_definition:
-            raise ge_exceptions.BatchDefinitionError(message="Batch definition is empty.")
-
-        data_connector_name: str = batch_definition.get("data_connector")
-        if not data_connector_name:
-            raise ge_exceptions.BatchDefinitionError(message="Batch definition must specify a data_connector.")
-
-        batch_spec: BatchSpec = self._build_batch_spec(
-            data_connector_name=data_connector_name,
-            batch_definition=batch_definition
-        )
-        batch_spec = self.execution_engine.process_batch_definition(
-            batch_definition=batch_definition,
-            batch_spec=batch_spec
-        )
-
-        batch: Batch = self.execution_engine.load_batch(batch_spec=batch_spec)
-        return batch
-
-    def _build_batch_spec(self, data_connector_name: str, batch_definition: dict) -> BatchSpec:
-        """Builds batch_spec using the provided data_connector and batch_definition.
-
-        Args:
-            data_connector_name (str): the name of the data_connector to use to build batch_spec
-            batch_definition (dict): dict specifying batch - used to generate a batch_spec
-
-        Returns:
-            BatchSpec
         """
-        data_connector: DataConnector = self.get_data_connector(name=data_connector_name)
-        return data_connector.build_batch_spec(batch_definition=batch_definition)
+
+
+        Note: this method should *not* be used when getting a Batch from a BatchRequest, since it does not capture BatchRequest metadata.
+        """
+
+        if type(in_memory_dataset) != type(None):
+            #NOTE Abe 20201014: Maybe do more careful type checking here?
+            #Seems like we should verify that in_memory_dataset is compatible with the execution_engine...?
+            batch_data = in_memory_dataset
+            batch_spec, batch_markers = None, None
+
+            #NOTE Abe 20201014: We should also verify that the keys in batch_definition.partition_definition are compatible with the DataConnector?
+
+        else:
+            data_connector: DataConnector = self.get_data_connector(
+                name=batch_definition.data_connector_name
+            )
+            batch_data, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata_from_batch_definition(batch_definition)
+
+        new_batch = Batch(
+            data = batch_data,
+            batch_request=None,
+            batch_definition=batch_definition,
+            batch_spec=batch_spec,
+            batch_markers=batch_markers,
+        )
+
+        return new_batch
+
+    def get_batch_list_from_batch_request(
+        self,
+        batch_request: BatchRequest
+    ) -> List[Batch]:
+
+        data_connector = self.get_data_connector(
+            name=batch_request.data_connector_name
+        )
+
+        batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
+            batch_request
+        )
+
+        batches = []
+        for batch_definition in batch_definition_list:
+            batch_data, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata_from_batch_definition(batch_definition)
+
+            new_batch = Batch(
+                data = batch_data,
+                batch_request=batch_request,
+                batch_definition=batch_definition,
+                batch_spec=batch_spec,
+                batch_markers=batch_markers,
+            )
+            batches.append(new_batch)
+
+        return batches
 
     @property
     def name(self):
@@ -117,8 +248,9 @@ class ExecutionEnvironment(object):
         Returns:
             None
         """
-        for data_connector in self._execution_environment_config["data_connectors"].keys():
-            self.get_data_connector(name=data_connector)
+        if "data_connectors" in self._execution_environment_config:
+            for data_connector in self._execution_environment_config["data_connectors"].keys():
+                self.get_data_connector(name=data_connector)
 
     # TODO Abe 10/6/2020: Should this be an internal method?
     def get_data_connector(self, name: str) -> DataConnector:
@@ -145,9 +277,9 @@ class ExecutionEnvironment(object):
             raise ge_exceptions.DataConnectorError(
                 f'Unable to load data connector "{name}" -- no configuration found or invalid configuration.'
             )
-        data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
-            data_connector_config
-        )
+        # data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
+        #     data_connector_config
+        # )
         data_connector: DataConnector = self._build_data_connector_from_config(
             name=name, config=data_connector_config
         )
@@ -160,32 +292,22 @@ class ExecutionEnvironment(object):
         config: CommentedMap,
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
-        # We convert from the type back to a dictionary for purposes of instantiation
-        if isinstance(config, DataConnectorConfig):
-            config: dict = dataConnectorConfigSchema.dump(config)
-        module_name: str = "great_expectations.execution_environment.data_connector.data_connector"
-        runtime_environment: dict = {
-            "name": name,
-            "data_context_root_directory": self._data_context_root_directory
-        }
-        if self._in_memory_dataset is not None:
-            runtime_environment.update({"in_memory_dataset": self._in_memory_dataset})
-        if self._execution_engine is not None:
-            runtime_environment.update({"execution_engine": self._execution_engine})
+        
         data_connector: DataConnector = instantiate_class_from_config(
             config=config,
-            runtime_environment=runtime_environment,
-            config_defaults={"module_name": module_name},
+            runtime_environment={
+                "name": name,
+                "data_context_root_directory": self._data_context_root_directory,
+                "execution_engine": self._execution_engine
+            },
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector"
+            },
         )
-        if not data_connector:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name="great_expectations.execution_environment.data_connector.data_connector",
-                package_name=None,
-                class_name=config["class_name"],
-            )
+
         return data_connector
 
-    # TODO Abe 10/6/2020: Should this be an internal method?
+    # TODO Abe 10/6/2020: Should this be an internal method?<Alex>Pros/cons for either choice exist; happy to discuss.</Alex>
     def list_data_connectors(self) -> List[dict]:
         """List currently-configured DataConnector for this ExecutionEnvironment.
 
@@ -195,15 +317,11 @@ class ExecutionEnvironment(object):
         data_connectors: List[dict] = []
 
         if "data_connectors" in self._execution_environment_config:
-            for key, value in self._execution_environment_config[
-                "data_connectors"
-            ].items():
+            for key, value in self._execution_environment_config["data_connectors"].items():
                 data_connectors.append({"name": key, "class_name": value["class_name"]})
 
         return data_connectors
 
-    # TODO: <Alex>This needs to be reviewed...</Alex>
-    # TODO: <Alex>What is this for, and how is this used?  This looks like it is for DataSource -- do we still need it for backward compatibility?</Alex>
     def get_available_data_asset_names(self, data_connector_names: list = None) -> dict:
         """
         Returns a dictionary of data_asset_names that the specified data
@@ -225,7 +343,6 @@ class ExecutionEnvironment(object):
                   }
                   ...
                 }
-
         """
         available_data_asset_names: dict = {}
         if data_connector_names is None:
@@ -237,9 +354,7 @@ class ExecutionEnvironment(object):
 
         for data_connector_name in data_connector_names:
             data_connector = self.get_data_connector(name=data_connector_name)
-            available_data_asset_names[
-                data_connector_name
-            ] = data_connector.get_available_data_asset_names()
+            available_data_asset_names[data_connector_name] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
 
     # TODO Abe 20201007: This is a super-rough version of this method, implemented to keep test_yaml_config unblocked. We'll need to test and document it.

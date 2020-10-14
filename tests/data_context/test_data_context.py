@@ -1379,11 +1379,12 @@ def test_get_batch_from_new_style_datasource_explicit_path(
     titanic_csv_destination_file_path: str = str(os.path.join(context_path, "data/Titanic.csv"))
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
-    batch_definition: dict = {
+    batch_request: dict = {
         "execution_environment": execution_environment_name,
         "data_connector": data_connector_name,
         "data_asset_name": data_asset_name,
-        "partition_query": None,
+        "in_memory_dataset": None,
+        "partition_request": None,
         "limit": None,
         "batch_spec_passthrough": {
             "path": titanic_csv_destination_file_path,
@@ -1393,8 +1394,7 @@ def test_get_batch_from_new_style_datasource_explicit_path(
         }
     }
     batch: Batch = data_context.get_batch_from_new_style_datasource(
-        batch_definition=batch_definition,
-        in_memory_dataset=None
+        batch_request=batch_request
     )
 
     assert batch.batch_spec is not None
