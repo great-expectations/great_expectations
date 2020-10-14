@@ -664,6 +664,20 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert result.exit_code == 1
     assert "Validation failed!" in stdout
 
+    # Check to make sure data docs are built
+    assert os.path.isfile(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "index.html")
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "validations")
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "expectations")
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "static")
+    )
+
     assert mock_emit.call_count == 4
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
