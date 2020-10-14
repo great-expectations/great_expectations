@@ -295,7 +295,7 @@ def test_get_available_partitions(tmp_path_factory):
     available_partitions: List[Partition] = execution_environment.get_available_partitions(
         data_connector_name=data_connector_name,
         data_asset_name=None,
-        partition_request={
+        partition_query={
             "custom_filter": None,
             "partition_name": None,
             "partition_definition": None,
@@ -311,7 +311,6 @@ def test_get_available_partitions(tmp_path_factory):
 
 def test_get_available_partitions_with_caching():
     pass
-
 
 
 

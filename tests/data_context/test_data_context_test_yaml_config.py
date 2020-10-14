@@ -113,46 +113,71 @@ def test_execution_environment_config(empty_data_context):
 #                 header: 0
 #         base_path: {temp_dir}
 # """)
-
     return_obj = empty_data_context.test_yaml_config(
         yaml_config=f"""
 class_name: ExecutionEnvironment
+
 execution_engine:
-    module_name: great_expectations.execution_engine.pandas_execution_engine
     class_name: PandasExecutionEngine
-    engine_spec_passthrough:
-        reader_method: read_csv
-        reader_options:
-        header: 0
 
 data_connectors:
-    test_filesystem_data_connector:
-        module_name: great_expectations.execution_environment.data_connector
+    my_filesystem_data_connector:
         class_name: FilesDataConnector
-
-        config_params:
-            base_directory: {temp_dir}
-            glob_directive: "*"
+        base_directory: {temp_dir}
+        glob_directive: '*.csv'
             
+        default_partitioner: my_regex_partitioner
         partitioners:
-            test_regex_partitioner:
-                module_name: great_expectations.execution_environment.data_connector.partitioner
+            my_regex_partitioner:
                 class_name: RegexPartitioner
                 config_params:
                     regex:
-                        pattern: ".+\/(.+)_(.+)_(.+)\\\.csv"
-                        group_names: group_names
+                        group_names:
+                            - letter
+                            - number
+                        pattern: {temp_dir}/(.+)(\d+)\.csv
+""", return_mode="return_object"
+    )
 
-                    allow_multipart_partitions: False,
-                    sorters: sorters
+#     return_obj = empty_data_context.test_yaml_config(
+#         yaml_config=f"""
+# class_name: ExecutionEnvironment
+# execution_engine:
+#     module_name: great_expectations.execution_engine.pandas_execution_engine
+#     class_name: PandasExecutionEngine
+#     engine_spec_passthrough:
+#         reader_method: read_csv
+#         reader_options:
+#         header: 0
 
-        default_partitioner: test_regex_partitioner
-        assets:
-            test_asset_0:
-                config_params:
-                    glob_directive: "alex*"
-                partitioner: test_regex_partitioner
-                base_directory: data_asset_base_directory
-""", return_mode="return_object")
+# data_connectors:
+#     test_filesystem_data_connector:
+#         module_name: great_expectations.execution_environment.data_connector
+#         class_name: FilesDataConnector
+
+#         config_params:
+#             base_directory: {temp_dir}
+#             glob_directive: "*"
+            
+#         partitioners:
+#             test_regex_partitioner:
+#                 module_name: great_expectations.execution_environment.data_connector.partitioner
+#                 class_name: RegexPartitioner
+#                 config_params:
+#                     regex:
+#                         pattern: ".+\/(.+)_(.+)_(.+)\\\.csv"
+#                         group_names: group_names
+
+#                     allow_multipart_partitions: False,
+#                     sorters: sorters
+
+#         default_partitioner: test_regex_partitioner
+#         assets:
+#             test_asset_0:
+#                 config_params:
+#                     glob_directive: "alex*"
+#                 partitioner: test_regex_partitioner
+#                 base_directory: data_asset_base_directory
+# """, return_mode="return_object")
     
     print(return_obj)
