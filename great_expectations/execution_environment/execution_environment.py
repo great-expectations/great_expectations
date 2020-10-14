@@ -196,7 +196,7 @@ class ExecutionEnvironment(object):
         batch_request: BatchRequest
     ) -> List[Batch]:
 
-        data_connector: DataConnector = self.get_data_connector(
+        data_connector = self.get_data_connector(
             name=batch_request.data_connector_name
         )
 

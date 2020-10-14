@@ -336,9 +336,9 @@ def test_some_very_basic_stuff(basic_execution_environment):
     ))
 
     batch_list = basic_execution_environment.get_batch_list_from_batch_request(BatchRequest(
-        "my_execution_environment",
-        "my_filesystem_data_connector",
-        "B1",
+        execution_environment="my_execution_environment",
+        data_connector="my_filesystem_data_connector",
+        data_asset_name="B1",
         partition_request={
             "letter": "B",
             "number": "1",

@@ -400,17 +400,17 @@ connector and the default_partitioner set to one of the configured partitioners.
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
 
+        partition_definition_list = self._generate_partition_definition_list_from_batch_request(batch_request)
+        batches = []
+        for partition_definition in partition_definition_list:
+            batches.append(BatchDefinition(
+                execution_environment_name=batch_request.execution_environment_name,
+                data_connector_name=self._name,
+                data_asset_name=batch_request.data_asset_name,
+                partition_definition=partition_definition,
+            ))
 
-        BatchDefinition(
-            datasource_name=batch_request["datasource_name"],
-            data_connector_name=self._name,
-            data_asset_name=self.name,
-            partition_defintion={
-
-            }
-        )
-
-        return 
+        return batches
 
     def get_batch_data_and_metadata_from_batch_definition(
         self,
@@ -421,8 +421,6 @@ connector and the default_partitioner set to one of the configured partitioners.
         BatchMarkers,
     ]:
         batch_spec = self._build_batch_spec_from_batch_definition(batch_definition)
-        print(batch_spec)
-        print("???????")
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             **batch_spec
         )
@@ -459,6 +457,7 @@ connector and the default_partitioner set to one of the configured partitioners.
         batch_definition: BatchDefinition
     ) -> dict:
         #TODO Abe 20201018: This is an absolutely horrible way to get a path from a single partition_definition, but AFIACT it's the only method currently supported by our Partitioner
+        print(batch_definition.data_asset_name)
         available_partitions = self.get_available_partitions(
             data_asset_name=batch_definition.data_asset_name,
         )
@@ -466,7 +465,21 @@ connector and the default_partitioner set to one of the configured partitioners.
             if partition.definition == batch_definition.partition_definition:
                 path = partition.data_reference
                 continue
+        try:
+            path
+        except UnboundLocalError:
+            raise ValueError(f"No partition in {available_partitions} matches the given partition definition {batch_definition.partition_definition} from batch definition {batch_definition}")
 
         return {
             "path" : path
         }
+
+    def _generate_partition_definition_list_from_batch_request(
+        self,
+        batch_definition: BatchDefinition
+    ) -> dict:
+        available_partitions = self.get_available_partitions(
+            data_asset_name=batch_definition.data_asset_name,
+            ### Need to pass data connector
+        )
+        return [partition.definition for partition in available_partitions]

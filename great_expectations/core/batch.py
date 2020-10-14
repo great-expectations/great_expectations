@@ -133,6 +133,10 @@ class BatchRequestMetadata(DictDot):
         self._sampling = sampling
 
     @property
+    def execution_environment_name(self) -> str:
+        return self._execution_environment_name
+
+    @property
     def data_connector_name(self) -> str:
         return self._data_connector_name
 
@@ -200,9 +204,11 @@ class BatchRequest(BatchRequestMetadata):
     """
     def __init__(
         self,
+        #TODO Abe 20201018: rename the next three vars to *_name
         execution_environment: str,
         data_connector: str,
         data_asset_name: str,
+        #TODO Abe 20201018: rename this to batch_data
         in_memory_dataset: Any = None,
         partition_request: Union[PartitionRequest, None] = None,
         limit: Union[int, None] = None,
