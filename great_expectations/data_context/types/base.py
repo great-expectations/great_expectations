@@ -107,6 +107,7 @@ class DatasourceConfig(DictDot):
         data_asset_type=None,
         batch_kwargs_generators=None,
         credentials=None,
+        boto3_options=None,
         reader_method=None,
         limit=None,
         **kwargs
@@ -125,6 +126,8 @@ class DatasourceConfig(DictDot):
             self.limit = limit
         for k, v in kwargs.items():
             setattr(self, k, v)
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
 
     @property
     def class_name(self):
@@ -221,6 +224,9 @@ class DatasourceConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.datasource")
     data_asset_type = fields.Nested(ClassConfigSchema)
+    boto3_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), allow_none=True
+    )
     # TODO: Update to generator-specific
     # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
     batch_kwargs_generators = fields.Dict(
