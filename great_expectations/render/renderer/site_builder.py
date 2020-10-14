@@ -286,6 +286,10 @@ class SiteBuilder:
         # copy static assets
         self.target_store.copy_static_assets()
 
+        # Rebuild site from scratch if index.html does not exist
+        if not self.target_store.index_html_exists():
+            resource_identifiers = []
+
         for site_section, site_section_builder in self.site_section_builders.items():
             site_section_builder.build(resource_identifiers=resource_identifiers)
 

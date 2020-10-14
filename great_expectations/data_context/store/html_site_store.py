@@ -326,6 +326,18 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
             for key in keys:
                 target_store_backend.remove_key(key)
 
+    def index_html_exists(self) -> bool:
+        """
+        Check to make sure index.html exists for the given store backend.
+
+        Returns:
+            bool: True if index.html exists, False otherwise.
+        """
+        for store_type, target_store_backend in self.store_backends.items():
+            keys = target_store_backend.list_keys()
+            if store_type == "static_assets":
+                return ("index.html",) in keys
+
     def copy_static_assets(self, static_assets_source_dir=None):
         """
         Copies static assets, using a special "static_assets" backend store that accepts variable-length tuples as
