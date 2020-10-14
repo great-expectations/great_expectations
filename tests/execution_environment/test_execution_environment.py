@@ -34,9 +34,8 @@ execution_engine:
 data_connectors:
     my_filesystem_data_connector:
         class_name: FilesDataConnector
-        config_params:
-            base_directory: /Users/abe/Desktop/temp_data
-            glob_directive: '*.csv'
+        base_directory: /Users/abe/Desktop/temp_data
+        glob_directive: '*.csv'
             
         default_partitioner: my_regex_partitioner
         partitioners:

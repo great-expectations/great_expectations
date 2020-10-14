@@ -62,7 +62,6 @@ class DataConnector(object):
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,
-        config_params: dict = None,
         execution_engine: ExecutionEngine = None,
         data_context_root_directory: str = None,
         **kwargs
@@ -72,7 +71,6 @@ class DataConnector(object):
         self._partitioners = partitioners or {}
         self._default_partitioner = default_partitioner
         self._assets = assets
-        self._config_params = config_params
 
         self._partitioners_cache: dict = {}
 
@@ -97,10 +95,6 @@ class DataConnector(object):
     @property
     def assets(self) -> dict:
         return self._assets
-
-    @property
-    def config_params(self) -> dict:
-        return self._config_params
 
     def _get_cached_partitions(
         self,

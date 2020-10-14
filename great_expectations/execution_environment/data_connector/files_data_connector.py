@@ -37,10 +37,11 @@ class FilesDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
+        base_directory: str,
+        glob_directive: str,
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,
-        config_params: dict = None,
         known_extensions: list = None,
         reader_options: dict = None,
         reader_method: str = None,
@@ -54,7 +55,6 @@ class FilesDataConnector(DataConnector):
             partitioners=partitioners,
             default_partitioner=default_partitioner,
             assets=assets,
-            config_params=config_params,
             execution_engine=execution_engine,
             data_context_root_directory=data_context_root_directory,
             **kwargs
@@ -69,7 +69,8 @@ class FilesDataConnector(DataConnector):
         self._reader_options = reader_options
 
         self._reader_method = reader_method
-        self._base_directory = self.config_params["base_directory"]
+        self._base_directory = base_directory
+        self._glob_directive = glob_directive
 
     @property
     def reader_options(self):
@@ -161,7 +162,7 @@ class FilesDataConnector(DataConnector):
             glob_directive = self.assets[data_asset_name]["config_params"].get("glob_directive")
         else:
             base_directory = self.base_directory
-            glob_directive = self.config_params.get("glob_directive")
+            glob_directive = self._glob_directive
         return {"base_directory": base_directory, "glob_directive": glob_directive}
 
     @staticmethod
