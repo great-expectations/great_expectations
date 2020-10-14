@@ -111,5 +111,3 @@ data_connectors:
     )
 
     print(return_obj)
-
-    # assert False

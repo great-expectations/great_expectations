@@ -377,8 +377,8 @@ class ExecutionEnvironment(object):
             repartition=repartition
         )
         return available_partitions
-        
-    def test(self, pretty_print=True):
+
+    def self_check(self, pretty_print=True):
         
         return_object = {}
 

@@ -136,7 +136,7 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
     def deserialize(self, key, value):
         return self._expectationSuiteValidationResultSchema.loads(value)
 
-    def test(self, pretty_print):
+    def self_check(self, pretty_print):
         return_obj = {}
 
         if pretty_print:

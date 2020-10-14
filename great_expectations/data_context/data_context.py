@@ -544,7 +544,7 @@ class BaseDataContext:
             print(f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}")
             print()
 
-        return_object = instantiated_class.test(pretty_print)
+        return_object = instantiated_class.self_check(pretty_print)
         
         if return_mode == "instantiated_class":
             return instantiated_class

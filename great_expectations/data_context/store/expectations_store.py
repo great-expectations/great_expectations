@@ -144,7 +144,7 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
         return self._expectationSuiteSchema.loads(value)
 
 
-    def test(self, pretty_print):
+    def self_check(self, pretty_print):
         return_obj = {}
 
         if pretty_print:
