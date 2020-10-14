@@ -6,7 +6,7 @@ import random
 import string
 from functools import wraps
 from types import ModuleType
-from typing import Union
+from typing import Union, List
 
 import numpy as np
 import pandas as pd
@@ -1754,3 +1754,30 @@ def create_files_for_regex_partitioner(
                 with open(file_path, "w") as fp:
                     fp.writelines([f'The name of this file is: "{file_path}".\n'])
             base_directories.append(base_dir)
+
+def create_files_in_directory(
+    directory: str,
+    file_name_list: List[str],
+    file_content_fn = lambda: "x,y\n1,2\n2,3"
+):
+    subdirectories = []
+    for file_name in file_name_list:
+        splits = file_name.split("/")
+        for i in range(1, len(splits)):
+            subdirectories.append(
+                os.path.join(*splits[:i])
+            )
+    subdirectories = set(subdirectories)
+
+    for subdirectory in subdirectories:
+        os.makedirs(
+            os.path.join(directory, subdirectory),
+            exist_ok=True
+        )
+    
+    for file_name in file_name_list:
+        file_path = os.path.join(directory, file_name)
+        with open(file_path, "w") as f_:
+            f_.write(
+                file_content_fn()
+            )
