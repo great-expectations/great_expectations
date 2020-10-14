@@ -112,21 +112,17 @@ class BatchRequestMetadata(DictDot):
         data_asset_name: str,
         partition_request: Union[dict, PartitionRequest, None] = None,
         limit: Union[int, None] = None,
-        batch_spec_passthrough: Union[dict, BatchSpec, None] = None,
         # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
         sampling: Union[dict, None] = None
     ):
         if partition_request and isinstance(partition_request, dict):
             partition_request = PartitionRequest(partition_request)
-        if batch_spec_passthrough and isinstance(batch_spec_passthrough, dict):
-            batch_spec_passthrough = BatchSpec(batch_spec_passthrough)
         self._validate_batch_request(
             execution_environment=execution_environment,
             data_connector=data_connector,
             data_asset_name=data_asset_name,
             partition_request=partition_request,
             limit=limit,
-            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         self._execution_environment_name = execution_environment
@@ -134,7 +130,6 @@ class BatchRequestMetadata(DictDot):
         self._data_asset_name = data_asset_name
         self._partition_request = partition_request
         self._limit = limit
-        self._batch_spec_passthrough = batch_spec_passthrough
         self._sampling = sampling
 
     @property
@@ -153,10 +148,6 @@ class BatchRequestMetadata(DictDot):
     def limit(self) -> int:
         return self._limit
 
-    @property
-    def batch_spec_passthrough(self) -> BatchSpec:
-        return self._batch_spec_passthrough
-
     @staticmethod
     def _validate_batch_request(
         execution_environment: str,
@@ -164,7 +155,6 @@ class BatchRequestMetadata(DictDot):
         data_asset_name: str,
         partition_request: Union[PartitionRequest, None] = None,
         limit: Union[int, None] = None,
-        batch_spec_passthrough: BatchSpec = None,
     ):
         if execution_environment is None:
             raise ge_exceptions.BatchDefinitionError("A valid execution_environment must be specified.")
@@ -202,12 +192,6 @@ class BatchRequestMetadata(DictDot):
 is illegal.
                 '''
             )
-        if batch_spec_passthrough and not isinstance(batch_spec_passthrough, BatchSpec):
-            raise ge_exceptions.BatchDefinitionError(
-                f'''The type of a batch_spec_passthrough must be a BatchSpec object.  The type given is
-"{str(type(batch_spec_passthrough))}", which is illegal.
-                '''
-            )
 
 
 class BatchRequest(BatchRequestMetadata):
@@ -222,7 +206,6 @@ class BatchRequest(BatchRequestMetadata):
         in_memory_dataset: Any = None,
         partition_request: Union[PartitionRequest, None] = None,
         limit: Union[int, None] = None,
-        batch_spec_passthrough: BatchSpec = None,
         # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
         sampling: Union[dict, None] = None
     ):
@@ -232,7 +215,6 @@ class BatchRequest(BatchRequestMetadata):
             data_asset_name=data_asset_name,
             partition_request=partition_request,
             limit=limit,
-            batch_spec_passthrough=batch_spec_passthrough,
             sampling=sampling
         )
         self._in_memory_dataset = in_memory_dataset

@@ -335,12 +335,12 @@ def test_some_very_basic_stuff(basic_execution_environment):
         }
     ))
 
-    # batch_list = basic_execution_environment.get_batch_list_from_batch_request(BatchRequest(
-    #     "my_execution_environment",
-    #     "my_filesystem_data_connector",
-    #     "B1",
-    #     partition_definition={
-    #         "letter": "B",
-    #         "number": "1",
-    #     }
-    # ))
+    batch_list = basic_execution_environment.get_batch_list_from_batch_request(BatchRequest(
+        "my_execution_environment",
+        "my_filesystem_data_connector",
+        "B1",
+        partition_request={
+            "letter": "B",
+            "number": "1",
+        }
+    ))
