@@ -97,6 +97,7 @@ class FilesDataConnector(DataConnector):
         repartition: bool = None
     ) -> List[Partition]:
         # TODO: <Alex>TODO: Each specific data_connector should verify the given partitioner against the list of supported partitioners.</Alex>
+        print(data_asset_name)
         paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
         auto_discover_assets: bool = not data_asset_config_exists
@@ -139,6 +140,8 @@ class FilesDataConnector(DataConnector):
                 path_list = [
                     str(posix_path) for posix_path in self._get_valid_file_paths(base_directory=base_directory)
                 ]
+
+            print(path_list)
             return self._verify_file_paths(path_list=path_list)
         raise ge_exceptions.DataConnectorError(f'Expected a directory, but path "{base_directory}" is not a directory.')
 
