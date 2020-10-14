@@ -23,40 +23,6 @@ from tests.test_utils import (
     create_files_for_regex_partitioner,
 )
 
-# def test_basic_execution_environment_setup():
-    # my_execution_environment = instantiate_class_from_config(yaml.load("""
-    # class_name: ExecutionEnvironment
-    
-    # execution_engine:
-    #     class_name: PandasExecutionEngine
-
-    # data_connectors:
-    #     my_filesystem_data_connector:
-    #     class_name: FilesDataConnector
-    #     config_params:
-    #         base_directory: /Users/abe/Desktop/temp_data
-    #         glob_directive: '*.csv'
-            
-    #     default_partitioner: my_regex_partitioner
-    #     partitioners:
-    #         my_regex_partitioner:
-    #         class_name: RegexPartitioner
-    #         config_params:
-    #             regex:
-    #             group_names:
-    #                 - letter
-    #                 - number
-    #             pattern: /Users/abe/Desktop/temp_data/(.+)(\d+)\.csv
-    # """, Loader=yaml.FullLoader),
-    #     runtime_environment={
-    #         "name": "my_execution_environment"
-    #     },
-    #     config_defaults={
-    #         "module_name": "great_expectations.execution_environment"
-    #     }
-    # )
-    # my_execution_environment.get_available_partitions("my_filesystem_data_connector")
-
 @pytest.fixture
 def basic_execution_environment(tmp_path_factory):
     basic_execution_environment = instantiate_class_from_config(yaml.load("""
@@ -348,13 +314,23 @@ def test_get_available_partitions_with_caching():
 
 
 def test_some_very_basic_stuff(basic_execution_environment):
+    assert len(basic_execution_environment.get_available_partitions("my_filesystem_data_connector")) == 6
+    # [ \
+    #     {'name': 'B-1', 'data_asset_name': 'B1', 'definition': {'letter': 'B', 'number': '1'}, 'data_reference': '/Users/abe/Desktop/temp_data/B1.csv'},
+    #     {'name': 'B-2', 'data_asset_name': 'B2', 'definition': {'letter': 'B', 'number': '2'}, 'data_reference': '/Users/abe/Desktop/temp_data/B2.csv'},
+    #     {'name': 'B-3', 'data_asset_name': 'B3', 'definition': {'letter': 'B', 'number': '3'}, 'data_reference': '/Users/abe/Desktop/temp_data/B3.csv'},
+    #     {'name': 'A-2', 'data_asset_name': 'A2', 'definition': {'letter': 'A', 'number': '2'}, 'data_reference': '/Users/abe/Desktop/temp_data/A2.csv'},
+    #     {'name': 'A-3', 'data_asset_name': 'A3', 'definition': {'letter': 'A', 'number': '3'}, 'data_reference': '/Users/abe/Desktop/temp_data/A3.csv'},
+    #     {'name': 'A-1', 'data_asset_name': 'A1', 'definition': {'letter': 'A', 'number': '1'}, 'data_reference': '/Users/abe/Desktop/temp_data/A1.csv'},
+    # ]
+
     basic_execution_environment.get_batch_from_batch_definition(BatchDefinition(
         "my_execution_environment",
         "my_filesystem_data_connector",
         "B1"
     ), in_memory_dataset=None)
 
-    basic_execution_environment.get_batch_list_from_batch_request(BatchRequest(
+    batch_list = basic_execution_environment.get_batch_list_from_batch_request(BatchRequest(
         "my_execution_environment",
         "my_filesystem_data_connector",
         "B1"
