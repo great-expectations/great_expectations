@@ -55,7 +55,6 @@ data_connectors:
             "module_name": "great_expectations.execution_environment"
         }
     )
-    # basic_execution_environment.get_available_partitions("my_filesystem_data_connector")
     return basic_execution_environment
 
 def test_get_batch_list_from_batch_request(basic_execution_environment):
@@ -325,7 +324,7 @@ def test_some_very_basic_stuff(basic_execution_environment):
     #     {'name': 'A-1', 'data_asset_name': 'A1', 'definition': {'letter': 'A', 'number': '1'}, 'data_reference': '/Users/abe/Desktop/temp_data/A1.csv'},
     # ]
 
-    basic_execution_environment.get_batch_from_batch_definition(BatchDefinition(
+    batch = basic_execution_environment.get_batch_from_batch_definition(BatchDefinition(
         "my_execution_environment",
         "my_filesystem_data_connector",
         "B1",
@@ -334,6 +333,19 @@ def test_some_very_basic_stuff(basic_execution_environment):
             "number": "1",
         }
     ))
+    assert batch.batch_request == None
+    assert type(batch.data) == pd.DataFrame
+    #TODO Abe 20201014: If equivalency worked correctly for BatchDefinition, this would be easy to test.
+    # assert batch.batch_definition == BatchDefinition(
+    #     "my_execution_environment",
+    #     "my_filesystem_data_connector",
+    #     "B1",
+    #     partition_definition={
+    #         "letter": "B",
+    #         "number": "1",
+    #     }
+    # )
+    # assert batch.data == ""
 
     batch_list = basic_execution_environment.get_batch_list_from_batch_request(BatchRequest(
         execution_environment="my_execution_environment",
@@ -344,3 +356,15 @@ def test_some_very_basic_stuff(basic_execution_environment):
             "number": "1",
         }
     ))
+    assert len(batch_list) == 1
+
+    batch = basic_execution_environment.get_batch_from_batch_definition(BatchDefinition(
+        "my_execution_environment",
+        "my_filesystem_data_connector",
+        "B1",
+        partition_definition={
+            "letter": "B",
+            "number": "1",
+        }
+    ))
+    assert batch.batch_request == None
