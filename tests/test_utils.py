@@ -1691,7 +1691,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                             "class_name": "RegexPartitioner",
                             "config_params": {
                                 "regex": {
-                                    "pattern": r".+\/(.+)_(.+)_(.+)\.csv",
+                                    "pattern": r"(.+)_(.+)_(.+)\.csv",
                                     "group_names": group_names
                                 },
                             },
