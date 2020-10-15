@@ -1,7 +1,10 @@
 import datetime
+import json
+import hashlib
 from typing import Union, Any
 
 from great_expectations.core.id_dict import (
+    IDDict,
     BatchKwargs,
     BatchSpec,
     PartitionRequest,
@@ -177,6 +180,25 @@ class BatchDefinition(DictDot):
     @property
     def partition_definition(self) -> PartitionDefinition:
         return self._partition_definition
+
+    @property
+    def id(self) -> str:
+        json_dict = {
+            "execution_environment_name" : self.execution_environment_name,
+            "data_connector_name" : self.data_connector_name,
+            "data_asset_name" : self.data_asset_name,
+            "partition_definition" : self.partition_definition,
+        }
+        return hashlib.md5(
+            json.dumps(json_dict, sort_keys=True).encode("utf-8")
+        ).hexdigest()
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            # Delegate comparison to the other instance's __eq__.
+            return NotImplemented
+        return self.id == other.id
+
 
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
