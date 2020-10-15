@@ -20,17 +20,6 @@ evaluation_parameter_store_name: evaluation_parameter_store
 validations_store_name: validations_store
 expectations_store_name: expectations_store
 
-data_docs_sites:
-  local_site:
-    class_name: SiteBuilder
-    # set to false to hide how-to buttons in Data Docs
-    show_how_to_buttons: true
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/data_docs/local_site/
-    site_index_builder:
-      class_name: DefaultSiteIndexBuilder
-
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -61,6 +50,9 @@ validation_operators:
         action:
           class_name: StoreEvaluationParametersAction
           target_store_name: evaluation_parameter_store
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
       # Uncomment the notify_slack action below to send notifications during evaluation
       # - name: notify_slack
       #   action:
@@ -70,3 +62,12 @@ validation_operators:
       #     renderer:
       #       module_name: great_expectations.render.renderer.slack_renderer
       #       class_name: SlackRenderer
+
+data_docs_sites:
+  local_site:  # this is a user-selected name - you may select your own
+    class_name: SiteBuilder
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/ # this is the default path but can be changed as required
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
