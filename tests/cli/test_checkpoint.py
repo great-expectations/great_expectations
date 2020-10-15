@@ -612,6 +612,17 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert os.path.isfile(
         os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "index.html")
     )
+    assert os.path.isfile(
+        os.path.join(
+            root_dir,
+            "uncommitted",
+            "data_docs",
+            "local_site",
+            "expectations",
+            "Titanic",
+            "warning.html",
+        )
+    )
     assert os.path.isdir(
         os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "validations")
     )
@@ -621,8 +632,7 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert os.path.isdir(
         os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "static")
     )
-
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
         {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -630,10 +640,13 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert usage_emits[1][0][0]["event"] == "data_asset.validate"
     assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
     assert usage_emits[2][0][0]["success"] is True
 
-    assert usage_emits[3] == mock.call(
+    assert usage_emits[3][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[3][0][0]["success"] is True
+
+    assert usage_emits[4] == mock.call(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
@@ -668,6 +681,17 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert os.path.isfile(
         os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "index.html")
     )
+    assert os.path.isfile(
+        os.path.join(
+            root_dir,
+            "uncommitted",
+            "data_docs",
+            "local_site",
+            "expectations",
+            "Titanic",
+            "warning.html",
+        )
+    )
     assert os.path.isdir(
         os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "validations")
     )
@@ -678,7 +702,7 @@ def test_checkpoint_run_happy_path_with_failed_validation(
         os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "static")
     )
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
         {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -686,10 +710,13 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert usage_emits[1][0][0]["event"] == "data_asset.validate"
     assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
     assert usage_emits[2][0][0]["success"] is True
 
-    assert usage_emits[3] == mock.call(
+    assert usage_emits[3][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[3][0][0]["success"] is True
+
+    assert usage_emits[4] == mock.call(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
