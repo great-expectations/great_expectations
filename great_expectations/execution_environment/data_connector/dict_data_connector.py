@@ -23,20 +23,6 @@ import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
-
-KNOWN_EXTENSIONS = [
-    ".csv",
-    ".tsv",
-    ".parquet",
-    ".xls",
-    ".xlsx",
-    ".json",
-    ".csv.gz",
-    ".tsv.gz",
-    ".feather",
-]
-
-
 class DictDataConnector(DataConnector):
     """This DataConnector is meant to closely mimic the FilesDataConnector, but without requiring an actual filesystem.
 
@@ -72,10 +58,11 @@ class DictDataConnector(DataConnector):
         self._cached_data_object_to_batch_definition_map = None
 
     def refresh_data_object_cache(self):
+        #Map data_objects to batch_definitions
         self._cached_data_object_to_batch_definition_map = {}
 
         for data_object in self._get_data_object_list():
-            mapped_batch_definition_list = self._map_data_object_to_batch_definition_list(data_object)
+            mapped_batch_definition_list = self._map_data_object_to_batch_request_list(data_object)
             self._cached_data_object_to_batch_definition_map[data_object] = mapped_batch_definition_list
 
     def get_unmatched_data_objects(self):
@@ -89,5 +76,18 @@ class DictDataConnector(DataConnector):
         data_object_keys.sort()
         return data_object_keys
 
-    def _map_data_object_to_batch_definition_list(self, data_object):
-        pass
+    def _map_data_object_to_batch_request_list(self, data_object) -> List[BatchDefinition]:
+        # Verify that a default_partitioner has been chosen
+        try:
+            self.default_partitioner
+        except ValueError:
+            #If not, return None
+            return
+
+        partition = self.default_partitioner._find_partitions_for_path(data_object)
+        return BatchRequest(
+            execution_environment="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            data_connector=self.name,
+            data_asset_name="FAKE_DATA_ASSET_NAME",
+            partition_request=partition.definition,
+        )

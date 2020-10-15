@@ -94,7 +94,10 @@ class DataConnector(object):
 
     @property
     def default_partitioner(self) -> str:
-        return self._default_partitioner
+        try:
+            return self.partitioners[self._default_partitioner]
+        except KeyError:
+            raise ValueError("No default partitioner has been set")
 
     @property
     def assets(self) -> dict:

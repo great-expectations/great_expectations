@@ -1,10 +1,7 @@
 import pytest
-import os
-import shutil
 import pandas as pd
 import yaml
-
-from typing import Union, List
+import json
 
 from great_expectations.execution_environment.data_connector import (
     FilesDataConnector,
@@ -109,7 +106,10 @@ config_params:
         pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
         """, Loader=yaml.FullLoader)
     )
-
+    my_data_connector._default_partitioner = "my_partitioner"
+    
     my_data_connector.refresh_data_object_cache()
 
-    assert set(my_data_connector.get_unmatched_data_objects()) == []
+    assert set(my_data_connector.get_unmatched_data_objects()) == set([])
+
+    # print(json.dumps(my_data_connector._cached_data_object_to_batch_definition_map, indent=2))
