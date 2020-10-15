@@ -43,7 +43,7 @@ class FilesDataConnector(DataConnector):
         name: str,
         base_directory: str,
         glob_directive: str,
-        partitioners: dict = None,
+        partitioners: dict = {},
         default_partitioner: str = None,
         assets: dict = None,
         known_extensions: list = None,
