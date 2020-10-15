@@ -1,4 +1,4 @@
-import datetime
+import pytest
 
 from great_expectations.core.batch import (
     Batch,
@@ -6,6 +6,8 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchSpec,
     BatchMarkers,
+    PartitionRequest,
+    PartitionDefinition,
 )
 
 def test_batch_definition_id():
@@ -13,9 +15,9 @@ def test_batch_definition_id():
         "A",
         "a",
         "aaa",
-        {
+        PartitionDefinition({
             "id": "A"
-        }
+        })
     )
     print(A.id)
 
@@ -23,31 +25,54 @@ def test_batch_definition_id():
         "B",
         "b",
         "bbb",
-        {
+        PartitionDefinition({
             "id": "B"
-        }
+        })
     )
     print(B.id)
 
     assert A.id != B.id
+
+def test_batch_definition_instantiation():
+    with pytest.raises(AssertionError):
+        A = BatchDefinition(
+            "A",
+            "a",
+            "aaa",
+            {
+                "id": "A"
+            }
+        )
+
+    A = BatchDefinition(
+        "A",
+        "a",
+        "aaa",
+        PartitionDefinition({
+            "id": "A"
+        })
+    )
+
+    print(A.id)
+
 
 def test_batch_definition_equality():
     A = BatchDefinition(
         "A",
         "a",
         "aaa",
-        {
+        PartitionDefinition({
             "id": "A"
-        }
+        })
     )
 
     B = BatchDefinition(
         "B",
         "b",
         "bbb",
-        {
+        PartitionDefinition({
             "id": "B"
-        }
+        })
     )
 
     assert A != B
@@ -56,9 +81,9 @@ def test_batch_definition_equality():
         "A",
         "a",
         "aaa",
-        {
+        PartitionDefinition({
             "id": "A"
-        }
+        })
     )
 
     assert A == A2
@@ -75,6 +100,7 @@ def test_batch__str__method():
             execution_environment_name="my_execution_environment",
             data_connector_name="my_data_connector",
             data_asset_name="my_data_asset_name",
+            partition_definition=PartitionDefinition({}),
         ),
         batch_spec=BatchSpec(
             path="/some/path/some.file"
@@ -97,7 +123,7 @@ def test_batch__str__method():
     "execution_environment_name": "my_execution_environment",
     "data_connector_name": "my_data_connector",
     "data_asset_name": "my_data_asset_name",
-    "partition_definition": null
+    "partition_definition": {}
   },
   "batch_spec": "{'path': '/some/path/some.file'}",
   "batch_markers": "{'ge_load_time': 'FAKE_LOAD_TIME'}"

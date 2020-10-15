@@ -13,6 +13,7 @@ from great_expectations.core.batch import (
     Batch,
     BatchRequest,
     BatchDefinition,
+    PartitionDefinition,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -71,7 +72,7 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
     batch_request: dict = {
         "execution_environment_name": execution_environment_name,
         "data_connector_name": data_connector_name,
-        "data_asset_name_name": data_asset_name,
+        "data_asset_name": data_asset_name,
         "partition_request": {
             "key": "Titanic.csv"
         },
@@ -122,7 +123,6 @@ def test_get_batch_with_pipeline_style_batch_request():
         "execution_environment_name": execution_environment_name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "in_memory_dataset": test_df,
         "partition_request": None,
         "limit": None,
     }
@@ -327,23 +327,22 @@ def test_some_very_basic_stuff(basic_execution_environment):
         "my_execution_environment",
         "my_filesystem_data_connector",
         "B1",
-        partition_definition={
+        partition_definition=PartitionDefinition({
             "letter": "B",
             "number": "1",
-        }
+        })
     ))
     assert batch.batch_request == None
     assert type(batch.data) == pd.DataFrame
-    #TODO Abe 20201014: If equivalency worked correctly for BatchDefinition, this would be easy to test.
-    # assert batch.batch_definition == BatchDefinition(
-    #     "my_execution_environment",
-    #     "my_filesystem_data_connector",
-    #     "B1",
-    #     partition_definition={
-    #         "letter": "B",
-    #         "number": "1",
-    #     }
-    # )
+    assert batch.batch_definition == BatchDefinition(
+        "my_execution_environment",
+        "my_filesystem_data_connector",
+        "B1",
+        partition_definition=PartitionDefinition({
+            "letter": "B",
+            "number": "1",
+        })
+    )
 
     batch_list = basic_execution_environment.get_batch_list_from_batch_request(BatchRequest(
         execution_environment_name="my_execution_environment",
@@ -362,8 +361,8 @@ def test_some_very_basic_stuff(basic_execution_environment):
         "my_execution_environment",
         "_pipeline",
         "_pipeline",
-        partition_definition={
+        partition_definition=PartitionDefinition({
             "some_random_id": 1
-        }
+        })
     ), in_memory_dataset=my_df)
     assert batch.batch_request == None

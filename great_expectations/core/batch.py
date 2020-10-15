@@ -130,8 +130,10 @@ class BatchDefinition(DictDot):
         execution_environment_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        partition_definition: PartitionDefinition = None,
+        partition_definition: PartitionDefinition,
     ):
+        assert type(partition_definition) == PartitionDefinition
+        
         self._execution_environment_name = execution_environment_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
