@@ -333,10 +333,9 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
         Returns:
             bool: True if index.html exists, False otherwise.
         """
-        for store_type, target_store_backend in self.store_backends.items():
-            keys = target_store_backend.list_keys()
-            if store_type == "static_assets":
-                return ("index.html",) in keys
+        # Note: existence of target_store_backend is checked in __init__()
+        target_store_backend = self.store_backends.get("static_assets")
+        return ("index.html",) in target_store_backend.list_keys()
 
     def copy_static_assets(self, static_assets_source_dir=None):
         """
