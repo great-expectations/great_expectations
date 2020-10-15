@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import itertools
 from typing import List, Union, Any
@@ -44,7 +45,7 @@ class FilesDataConnector(DataConnector):
         name: str,
         base_directory: str,
         glob_directive: str,
-        partitioners: dict = None,
+        partitioners: dict = {},
         default_partitioner: str = None,
         assets: dict = None,
         known_extensions: list = None,
@@ -106,6 +107,10 @@ class FilesDataConnector(DataConnector):
         paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
         auto_discover_assets: bool = not data_asset_config_exists
+        print(partitioner)
+        print("*****")
+        print(data_asset_name)
+        print(partition_query)
         return partitioner.find_or_create_partitions(
             data_asset_name=data_asset_name,
             partition_query=partition_query,
@@ -138,9 +143,7 @@ class FilesDataConnector(DataConnector):
         if Path(base_directory).is_dir():
             path_list: list
             if glob_directive:
-                path_list = [
-                    str(posix_path) for posix_path in Path(base_directory).glob(glob_directive)
-                ]
+                path_list = self._get_data_object_list()
             else:
                 path_list = [
                     str(posix_path) for posix_path in self._get_valid_file_paths(base_directory=base_directory)
@@ -182,6 +185,7 @@ class FilesDataConnector(DataConnector):
             )
         return path_list
 
+    #NOTE Abe 20201015: This looks like dead code.
     def _get_valid_file_paths(self, base_directory: str = None) -> list:
         if base_directory is None:
             base_directory = self.base_directory
@@ -206,6 +210,13 @@ class FilesDataConnector(DataConnector):
                 )
             )
         )
+    
+    def _get_data_object_list(self):
+        globbed_paths = Path(self.base_directory).glob(self._glob_directive)
+        paths = [
+            str(posix_path) for posix_path in globbed_paths
+        ]        
+        return paths
 
     def _build_batch_spec_from_partition(
         self,

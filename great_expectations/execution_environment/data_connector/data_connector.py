@@ -63,7 +63,7 @@ class DataConnector(object):
     def __init__(
         self,
         name: str,
-        partitioners: dict = None,
+        partitioners: dict = {},
         default_partitioner: str = None,
         assets: dict = None,
         execution_engine: ExecutionEngine = None,
@@ -72,17 +72,20 @@ class DataConnector(object):
     ):
         self._name = name
 
-        self._partitioners = partitioners or {}
+        self._partitioners = {}
+        self._build_partitioners_from_config(partitioners)
+
         self._default_partitioner = default_partitioner
         self._assets = assets
-
-        self._partitioners_cache: dict = {}
 
         # The partitions cache is a dictionary, which maintains lists of partitions for a data_asset_name as the key.
         self._partitions_cache: dict = {}
 
         self._execution_engine = execution_engine
         self._data_context_root_directory = data_context_root_directory
+
+        # This is a dictionary which maps data_objects onto batch_requests
+        self._cached_data_object_to_batch_definition_map = {}
 
     @property
     def name(self) -> str:
@@ -94,7 +97,10 @@ class DataConnector(object):
 
     @property
     def default_partitioner(self) -> str:
-        return self._default_partitioner
+        try:
+            return self.partitioners[self._default_partitioner]
+        except KeyError:
+            raise ValueError("No default partitioner has been set")
 
     @property
     def assets(self) -> dict:
@@ -232,39 +238,65 @@ multiple partitions, including "{partition}", for the same data reference -- thi
             if data_asset_name in self._partitions_cache:
                 self._partitions_cache[data_asset_name] = []
 
-    def get_partitioner(self, name: str):
-        """Get the (named) Partitioner from a DataConnector)
+    # def get_partitioner(self, name: str):
+    #     """Get the (named) Partitioner from a DataConnector)
+
+    #     Args:
+    #         name (str): name of Partitioner
+
+    #     Returns:
+    #         Partitioner (Partitioner)
+    #     """
+    #     if name in self._partitioners_cache:
+    #         return self._partitioners_cache[name]
+    #     elif name in self.partitioners:
+    #         partitioner_config: dict = copy.deepcopy(
+    #             self.partitioners[name]
+    #         )
+    #     else:
+    #         raise ge_exceptions.PartitionerError(
+    #             f'Unable to load partitioner "{name}" -- no configuration found or invalid configuration.'
+    #         )
+    #     partitioner_config: CommentedMap = partitionerConfigSchema.load(
+    #         partitioner_config
+    #     )
+    #     partitioner: Partitioner = self._build_partitioner_from_config(
+    #         name=name, config=partitioner_config
+    #     )
+    #     self._partitioners_cache[name] = partitioner
+    #     return partitioner
+
+    def _build_partitioners_from_config(self, config: CommentedMap):
+        for name, partitioner_config in config.items():
+            new_partitioner = self._build_partitioner_from_config(
+                name,
+                partitioner_config,
+            )
+            self.partitioners[name] = new_partitioner
+
+    def add_partitioner(self, partitioner_name: str, partitioner_config: dict) -> Partitioner:
+        """Add a new Partitioner to the DataConnector and (for convenience) return the instantiated Partitioner object.
 
         Args:
-            name (str): name of Partitioner
+            partitioner_name (str): a key for the new Store in in self._stores
+            partitioner_config (dict): a config for the Store to add
 
         Returns:
-            Partitioner (Partitioner)
+            partitioner (Partitioner)
         """
-        if name in self._partitioners_cache:
-            return self._partitioners_cache[name]
-        elif name in self.partitioners:
-            partitioner_config: dict = copy.deepcopy(
-                self.partitioners[name]
-            )
-        else:
-            raise ge_exceptions.PartitionerError(
-                f'Unable to load partitioner "{name}" -- no configuration found or invalid configuration.'
-            )
-        partitioner_config: CommentedMap = partitionerConfigSchema.load(
-            partitioner_config
-        )
-        partitioner: Partitioner = self._build_partitioner_from_config(
-            name=name, config=partitioner_config
-        )
-        self._partitioners_cache[name] = partitioner
-        return partitioner
+
+        new_partitioner = self._build_partitioner_from_config(partitioner_name, partitioner_config)
+        self.partitioners[partitioner_name] = new_partitioner
+
+        return new_partitioner
+
 
     def _build_partitioner_from_config(self, name: str, config: CommentedMap):
         """Build a Partitioner using the provided configuration and return the newly-built Partitioner."""
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, PartitionerConfig):
             config: dict = partitionerConfigSchema.dump(config)
+
         runtime_environment: dict = {
             "name": name,
             "data_connector": self
@@ -290,7 +322,7 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         if data_asset_config_exists and self.assets[data_asset_name].get("partitioner"):
             partitioner_name = self.assets[data_asset_name]["partitioner"]
         else:
-            partitioner_name = self.default_partitioner
+            partitioner_name = self.default_partitioner.name
         partitioner: Partitioner
         if partitioner_name is None:
             raise ge_exceptions.BatchSpecError(
@@ -300,7 +332,7 @@ connector and the default_partitioner set to one of the configured partitioners.
                 '''
             )
         else:
-            partitioner = self.get_partitioner(name=partitioner_name)
+            partitioner = self.partitioners[partitioner_name]
         return partitioner
 
     # def _build_batch_spec(self, batch_request: BatchRequest, partition: Partition) -> BatchSpec:
@@ -471,3 +503,40 @@ connector and the default_partitioner set to one of the configured partitioners.
             ### Need to pass data connector
         )
         return [partition.definition for partition in available_partitions]
+
+    def refresh_data_object_cache(self):
+        #Map data_objects to batch_definitions
+        self._cached_data_object_to_batch_definition_map = {}
+
+        for data_object in self._get_data_object_list():
+            mapped_batch_definition_list = self._map_data_object_to_batch_request_list(data_object)
+            self._cached_data_object_to_batch_definition_map[data_object] = mapped_batch_definition_list
+
+    def get_unmatched_data_objects(self):
+        if self._cached_data_object_to_batch_definition_map == None:
+            raise ValueError("_cached_data_object_to_batch_definition_map is None. Have you called refresh_data_object_cache yet?")
+
+        return [k for k,v in self._cached_data_object_to_batch_definition_map.items() if v == None]
+    
+    def get_data_object_list_count(self):
+        return len(self._cached_data_object_to_batch_definition_map)
+
+    #TODO Abe 20201015: This method is extremely janky. Needs better supporting methods, plus more thought and hardening.
+    def _map_data_object_to_batch_request_list(self, data_object) -> List[BatchDefinition]:
+        # Verify that a default_partitioner has been chosen
+        try:
+            self.default_partitioner
+        except ValueError:
+            #If not, return None
+            return
+
+        partition = self.default_partitioner._find_partitions_for_path(data_object)
+        if partition == None:
+            return None
+
+        return BatchRequest(
+            execution_environment="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            data_connector=self.name,
+            data_asset_name="FAKE_DATA_ASSET_NAME",
+            partition_request=partition.definition,
+        )
