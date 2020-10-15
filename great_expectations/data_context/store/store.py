@@ -1,4 +1,5 @@
 import logging
+import random
 
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -93,3 +94,7 @@ class Store:
         if self._use_fixed_length_key:
             return self._store_backend.has_key(key.to_fixed_length_tuple())
         return self._store_backend.has_key(key.to_tuple())
+
+    def self_check(self, pretty_print):
+        NotImplementedError(f"The test method is not implemented for Store class {self.__class__.__name__}.")
+ 

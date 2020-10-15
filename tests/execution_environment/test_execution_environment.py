@@ -50,7 +50,7 @@ data_connectors:
                         group_names:
                             - letter
                             - number
-                        pattern: {base_directory}/(.+)(\d+)\.csv
+                        pattern: (.+)(\d+)\.csv
     """, Loader=yaml.FullLoader),
         runtime_environment={
             "name": "my_execution_environment"
@@ -310,7 +310,6 @@ def test_get_available_partitions(tmp_path_factory):
 
 def test_get_available_partitions_with_caching():
     pass
-
 
 
 

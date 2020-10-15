@@ -1,3 +1,5 @@
+import random
+
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
 )
@@ -8,10 +10,13 @@ from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
+    ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import load_class
 from great_expectations.util import verify_dynamic_loading_support
-
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
 
 class ValidationsStore(Store):
     """
@@ -130,3 +135,56 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
 
     def deserialize(self, key, value):
         return self._expectationSuiteValidationResultSchema.loads(value)
+
+    def self_check(self, pretty_print):
+        return_obj = {}
+
+        if pretty_print:
+            print("Checking for existing keys...")
+
+        return_obj["keys"] = self.list_keys()
+        return_obj["len_keys"] = len(return_obj["keys"])
+        len_keys = return_obj["len_keys"]
+
+        if pretty_print:
+            if return_obj["len_keys"]==0:
+                print(f"\t{len_keys} keys found")
+            else:
+                print(f"\t{len_keys} keys found:")
+                for key in return_obj["keys"][:10]:
+                    print("\t\t"+str(key) )
+            if len_keys>10:
+                print("\t\t...")    
+            print()
+
+        test_key_name = "test-key-"+"".join([random.choice(list("0123456789ABCDEF")) for i in range(20)])
+
+        test_key = self._key_class(
+            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                expectation_suite_name="temporary_test_suite",
+            ),
+            run_id="temporary_test_run_id",
+            batch_identifier=test_key_name,
+        )
+        test_value = ExpectationSuiteValidationResult(success=True)
+
+        if pretty_print:
+            print(f"Attempting to add a new test key: {test_key}...")
+        self.set(
+            key=test_key,
+            value=test_value
+        )
+        if pretty_print:
+            print("\tTest key successfully added.")
+            print()
+
+        if pretty_print:
+            print(f"Attempting to retrieve the test value associated with key: {test_key}...")
+        test_value = self.get(
+            key=test_key,
+        )
+        if pretty_print:
+            print("\tTest value successfully retreived.")
+            print()
+
+        return return_obj

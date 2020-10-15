@@ -70,6 +70,9 @@ class ExecutionEnvironment(object):
 
         self._data_context_root_directory = data_context_root_directory
 
+        # if data_connectors is None:
+        #     data_connectors = {}
+        self._data_connectors_cache = {}
         self._build_data_connectors()
 
     def get_available_partitions(
@@ -352,3 +355,77 @@ class ExecutionEnvironment(object):
             data_connector = self.get_data_connector(name=data_connector_name)
             available_data_asset_names[data_connector_name] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
+
+    def get_available_partitions(
+        self,
+        data_connector_name: str,
+        data_asset_name: str = None,
+        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+        in_memory_dataset: Any = None,
+        runtime_parameters: Union[dict, None] = None,
+        repartition: bool = False
+    ) -> List[Partition]:
+        data_connector: DataConnector = self.get_data_connector(
+            name=data_connector_name
+        )
+        available_partitions: List[Partition] = data_connector.get_available_partitions(
+            data_asset_name=data_asset_name,
+            partition_query=partition_query,
+            in_memory_dataset=in_memory_dataset,
+            runtime_parameters=runtime_parameters,
+            repartition=repartition
+        )
+        return available_partitions
+
+    def self_check(self, pretty_print=True, max_examples=2):
+        
+        return_object = {}
+        return_object["execution_engine"] = {
+            "class_name" : self._execution_engine.__class__.__name__,
+        }
+
+        if pretty_print:
+            print(f"Execution engine: {self._execution_engine.__class__.__name__}")
+
+        if pretty_print:
+            print(f"Data connectors:")
+
+        data_connector_list = self.list_data_connectors()
+        data_connector_list.sort()
+        return_object["data_connectors"] = {
+            "count" : len(data_connector_list)
+        }
+
+        for data_connector in data_connector_list:
+            if pretty_print:
+                print("\t"+data_connector["name"], ":", data_connector["class_name"])
+                print()
+
+            asset_names = self.get_available_data_asset_names(data_connector["name"])[data_connector["name"]]
+            asset_names.sort()
+            len_asset_names = len(asset_names)
+
+            data_connector_obj = {
+                "class_name" : data_connector["class_name"],
+                "data_asset_count" : len_asset_names,
+                "example_data_asset_names": asset_names[:max_examples],
+                "data_assets" : {}
+            }
+
+            if pretty_print:
+                print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
+            
+            for asset_name in asset_names[:max_examples]:
+                partitions = self.get_available_partitions(data_connector["name"], asset_name)
+                len_partitions = len(partitions)
+                example_partition_names = [partition.definition for partition in partitions][:max_examples]
+                if pretty_print:
+                    print(f"\t\t{asset_name} ({min(len_partitions, max_examples)} of {len_partitions}):", example_partition_names)
+                data_connector_obj["data_assets"][asset_name] = {
+                    "partition_count": len_partitions,
+                    "example_partition_names": example_partition_names
+                }
+
+            return_object["data_connectors"][data_connector["name"]] = data_connector_obj
+
+        return return_object

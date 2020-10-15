@@ -1,6 +1,7 @@
 from pathlib import Path
 import itertools
 from typing import List, Union, Any
+import os
 
 import logging
 
@@ -73,7 +74,7 @@ class FilesDataConnector(DataConnector):
         self._reader_options = reader_options
 
         self._reader_method = reader_method
-        self._base_directory = base_directory
+        self._base_directory = os.path.join(base_directory, '') #Add trailing slash if it's not there already
         self._glob_directive = glob_directive
 
     @property
@@ -145,7 +146,10 @@ class FilesDataConnector(DataConnector):
                     str(posix_path) for posix_path in self._get_valid_file_paths(base_directory=base_directory)
                 ]
 
-            print(path_list)
+            # Trim paths to exclude the base_directory
+            base_directory_len = len(str(base_directory))
+            path_list = [path[base_directory_len:] for path in path_list]
+
             return self._verify_file_paths(path_list=path_list)
         raise ge_exceptions.DataConnectorError(f'Expected a directory, but path "{base_directory}" is not a directory.')
 
@@ -218,7 +222,7 @@ class FilesDataConnector(DataConnector):
             batch_spec
         """
         if not batch_spec.get("path"):
-            path: str = str(partition.data_reference)
+            path: str = os.path.join(self._base_directory, partition.data_reference)
             batch_spec["path"] = path
         return PathBatchSpec(batch_spec)
 
@@ -233,7 +237,7 @@ class FilesDataConnector(DataConnector):
         )
         for partition in available_partitions:
             if partition.definition == batch_definition.partition_definition:
-                path = partition.data_reference
+                path = os.path.join(self._base_directory, partition.data_reference)
                 continue
         try:
             path

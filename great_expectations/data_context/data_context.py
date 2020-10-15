@@ -288,7 +288,7 @@ class BaseDataContext:
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
-    def _build_store(self, store_name, store_config):
+    def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
         try:
             new_store = instantiate_class_from_config(
@@ -317,19 +317,11 @@ class BaseDataContext:
             1. follow a clear key-value pattern, and
             2. are usually edited programmatically, using the Context
 
-        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
-        As of 9/21/2019, the following Stores had not yet been implemented
-            * great_expectations.yml
-            * expectations
-            * data documentation
-            * config_variables
-            * anything accessed via write_resource
-
         Note that stores do NOT manage plugins.
         """
 
         for store_name, store_config in store_configs.items():
-            self._build_store(store_name, store_config)
+            self._build_store_from_config(store_name, store_config)
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
@@ -461,7 +453,7 @@ class BaseDataContext:
         """
 
         self._project_config["stores"][store_name] = store_config
-        return self._build_store(store_name, store_config)
+        return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
         self, validation_operator_name, validation_operator_config
@@ -499,6 +491,70 @@ class BaseDataContext:
             )
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
+
+    def test_yaml_config(
+        self,
+        yaml_config: str,
+        pretty_print=True,
+        return_mode="instantiated_class",
+    ):
+        """ Convenience method for testing yaml configs for Datasources, Checkpoints, and Stores
+        """
+        if pretty_print:
+            print("Attempting to instantiate class from config...")
+
+        config = yaml.load(yaml_config)
+
+        if "class_name" in config:
+            class_name = config["class_name"]
+        else:
+            class_name = None
+ 
+        if class_name in [
+            "ExpectationsStore",
+            "ValidationsStore",
+            "HtmlSiteStore",
+            "EvaluationParameterStore",
+            "MetricStore",
+            "SqlAlchemyQueryStore",
+        ]:
+            print(f"\tInstantiating as a Store, since class_name is {class_name}")
+            instantiated_class = self._build_store_from_config("my_temp_store", config)
+
+        elif class_name in ["ExecutionEnvironment"]:
+            print(f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}")
+            instantiated_class = instantiate_class_from_config(
+                config,
+                runtime_environment={},
+                config_defaults={
+                    "name" : "my_temp_execution_environment",
+                    "module_name": "great_expectations.execution_environment",
+                }
+            )
+
+        else:
+            print("\tNo matching class found. Attempting to instantiate class from the raw config...")
+            instantiated_class = instantiate_class_from_config(
+                config,
+                runtime_environment={},
+                config_defaults={}
+            )
+
+        if pretty_print:        
+            print(f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}")
+            print()
+
+        return_object = instantiated_class.self_check(pretty_print)
+        
+        if return_mode == "instantiated_class":
+            return instantiated_class
+        
+        elif return_mode == "return_object":
+            return return_object
+
+        else:
+            raise ValueError(f"Unknown return_mode: {return_mode}.")
+
 
     def _normalize_absolute_or_relative_path(self, path):
         if path is None:
@@ -1288,6 +1344,7 @@ class BaseDataContext:
 
         return datasource
 
+    # TODO: This uses the old style for class instantiation. We should rebuild it to use the new style.
     # TODO: update usage statistics
     # @usage_statistics_enabled_method(
     #     event_name="data_context.add_execution_environment",
