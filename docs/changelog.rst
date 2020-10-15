@@ -7,8 +7,8 @@ Changelog
 Develop
 -----------------
 * [BUGFIX] Query batch kwargs support for Athena backend (issue 1964)
-
 * [BUGFIX] Skip config substitution if key is "password"
+* [BUGFIX] Fully build data docs from scratch if they don't yet exist #1990
 
 0.12.4
 -----------------
