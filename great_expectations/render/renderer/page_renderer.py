@@ -121,6 +121,14 @@ class ValidationResultsPageRenderer(Renderer):
             self._render_validation_info(validation_results=validation_results)
         ]
 
+        if validation_results["meta"].get("batch_shape"):
+            collapse_content_blocks.append(
+                self._render_nested_table_from_dict(
+                    input_dict=validation_results["meta"].get("batch_shape"),
+                    header="Batch Shape",
+                )
+            )
+
         if validation_results["meta"].get("batch_markers"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(

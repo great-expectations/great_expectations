@@ -66,6 +66,7 @@ class DataAsset:
         )
         batch_parameters = kwargs.pop("batch_parameters", {})
         batch_markers = kwargs.pop("batch_markers", {})
+        batch_shape = kwargs.pop("batch_shape", {})
 
         if "autoinspect_func" in kwargs:
             warnings.warn(
@@ -81,6 +82,7 @@ class DataAsset:
         self._data_context = data_context
         self._batch_kwargs = BatchKwargs(batch_kwargs)
         self._batch_markers = batch_markers
+        self._batch_shape = batch_shape
         self._batch_parameters = batch_parameters
 
         # This special state variable tracks whether a validation run is going on, which will disable
@@ -457,6 +459,10 @@ class DataAsset:
     @property
     def batch_markers(self):
         return self._batch_markers
+
+    @property
+    def batch_shape(self):
+        return self._batch_shape
 
     @property
     def batch_parameters(self):
@@ -995,6 +1001,7 @@ class DataAsset:
                     "batch_markers": self.batch_markers,
                     "batch_parameters": self.batch_parameters,
                     "validation_time": validation_time,
+                    "batch_shape": self.batch_shape,
                 },
             )
 

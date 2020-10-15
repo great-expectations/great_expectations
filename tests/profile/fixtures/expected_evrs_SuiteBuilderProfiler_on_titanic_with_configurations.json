@@ -7,7 +7,8 @@
       "ge_batch_id": "3888859e-7b90-11ea-b685-acde48001122"
     },
     "batch_markers": {},
-    "batch_parameters": {}
+    "batch_parameters": {},
+    "batch_shape": {"row_count": 1313,"column_count": 7}
   },
   "statistics": {
     "evaluated_expectations": 22,

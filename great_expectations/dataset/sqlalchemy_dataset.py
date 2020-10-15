@@ -576,6 +576,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if len(self.columns) == 0:
             self.columns = self.column_reflection_fallback()
 
+        self._batch_shape = {
+            "row_count": self.get_row_count(),
+            "column_count": self.get_column_count(),
+        }
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super().__init__(*args, **kwargs)
 

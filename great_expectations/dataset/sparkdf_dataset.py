@@ -603,6 +603,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         self._persist = kwargs.pop("persist", True)
         if self._persist:
             self.spark_df.persist()
+        self._batch_shape = {
+            "row_count": self.get_row_count(),
+            "column_count": self.get_column_count(),
+        }
         super().__init__(*args, **kwargs)
 
     def head(self, n=5):

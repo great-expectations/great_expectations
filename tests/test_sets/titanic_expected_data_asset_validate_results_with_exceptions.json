@@ -10,6 +10,7 @@
     },
     "batch_markers": {},
     "batch_parameters": {},
+    "batch_shape": {"column_count": 7, "row_count": 1313},
     "validation_time": "19551105T000000.000000Z"
   },
   "results": [

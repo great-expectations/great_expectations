@@ -7,8 +7,8 @@ Changelog
 Develop
 -----------------
 * [BUGFIX] Query batch kwargs support for Athena backend (issue 1964)
-
 * [BUGFIX] Skip config substitution if key is "password"
+* [ENHANCEMENT] Data Docs now displays row count and column count in the more info section of Validation Result pages
 
 0.12.4
 -----------------

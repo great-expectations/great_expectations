@@ -233,6 +233,7 @@
       "ge_batch_id": "1234"
     },
     "batch_markers": {},
+    "batch_shape": {"column_count": 7, "row_count": 1313},
     "batch_parameters": {},
     "validation_time": "19551105T000000.000000Z"
   }

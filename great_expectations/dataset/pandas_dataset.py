@@ -380,6 +380,7 @@ Notes:
         "_batch_kwargs",
         "_batch_markers",
         "_batch_parameters",
+        "_batch_shape",
         "_batch_id",
         "_expectation_suite",
         "_config",
@@ -417,6 +418,10 @@ Notes:
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
+        self._batch_shape = {
+            "row_count": self.get_row_count(),
+            "column_count": self.get_column_count(),
+        }
 
     def _apply_row_condition(self, row_condition, condition_parser):
         if condition_parser not in ["python", "pandas"]:

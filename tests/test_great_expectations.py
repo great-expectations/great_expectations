@@ -789,6 +789,7 @@ def test_validate():
             "batch_kwargs": {"ge_batch_id": "1234"},
             "batch_markers": {},
             "batch_parameters": {},
+            "batch_shape": {"column_count": 7, "row_count": 1313},
         },
         results=[
             ExpectationValidationResult(
