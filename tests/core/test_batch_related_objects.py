@@ -67,8 +67,8 @@ def test_batch__str__method():
     batch = Batch(
         data=None,
         batch_request=BatchRequest(
-            execution_environment="my_execution_environment",
-            data_connector="my_data_connector",
+            execution_environment_name="my_execution_environment",
+            data_connector_name="my_data_connector",
             data_asset_name="my_data_asset_name",
         ),
         batch_definition=BatchDefinition(

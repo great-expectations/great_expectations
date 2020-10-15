@@ -69,10 +69,9 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
     # titanic_csv_destination_file_path: str = str(os.path.join(project_dir_path, "data/titanic/Titanic.csv"))
     
     batch_request: dict = {
-        "execution_environment": execution_environment_name,
-        "data_connector": data_connector_name,
-        "data_asset_name": data_asset_name,
-        "in_memory_dataset": None,
+        "execution_environment_name": execution_environment_name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name_name": data_asset_name,
         "partition_request": {
             "key": "Titanic.csv"
         },
@@ -120,8 +119,8 @@ def test_get_batch_with_pipeline_style_batch_request():
     data_asset_name: str = "test_asset_1"
 
     batch_request: dict = {
-        "execution_environment": execution_environment_name,
-        "data_connector": data_connector_name,
+        "execution_environment_name": execution_environment_name,
+        "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
         "in_memory_dataset": test_df,
         "partition_request": None,
@@ -347,8 +346,8 @@ def test_some_very_basic_stuff(basic_execution_environment):
     # )
 
     batch_list = basic_execution_environment.get_batch_list_from_batch_request(BatchRequest(
-        execution_environment="my_execution_environment",
-        data_connector="my_filesystem_data_connector",
+        execution_environment_name="my_execution_environment",
+        data_connector_name="my_filesystem_data_connector",
         data_asset_name="B1",
         partition_request={
             "letter": "B",

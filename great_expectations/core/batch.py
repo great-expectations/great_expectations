@@ -16,13 +16,12 @@ import great_expectations.exceptions as ge_exceptions
 
 class BatchRequest(DictDot):
     """
-    This class contains all attributes of a batch_request with the exclusion of the in_memory_dataset reference.  This
-    is due to the fact that the actual data is not part of the metadata (according to the definition of metadata).
+    This class contains all attributes of a batch_request.
     """
     def __init__(
         self,
-        execution_environment: str,
-        data_connector: str,
+        execution_environment_name: str,
+        data_connector_name: str,
         data_asset_name: str,
         partition_request: Union[dict, PartitionRequest, None] = None,
         limit: Union[int, None] = None,
@@ -32,15 +31,15 @@ class BatchRequest(DictDot):
         if partition_request and isinstance(partition_request, dict):
             partition_request = PartitionRequest(partition_request)
         self._validate_batch_request(
-            execution_environment=execution_environment,
-            data_connector=data_connector,
+            execution_environment_name=execution_environment_name,
+            data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             partition_request=partition_request,
             limit=limit,
         )
 
-        self._execution_environment_name = execution_environment
-        self._data_connector_name = data_connector
+        self._execution_environment_name = execution_environment_name
+        self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_request = partition_request
         self._limit = limit
@@ -68,26 +67,26 @@ class BatchRequest(DictDot):
 
     @staticmethod
     def _validate_batch_request(
-        execution_environment: str,
-        data_connector: str,
+        execution_environment_name: str,
+        data_connector_name: str,
         data_asset_name: str,
         partition_request: Union[PartitionRequest, None] = None,
         limit: Union[int, None] = None,
     ):
-        if execution_environment is None:
+        if execution_environment_name is None:
             raise ge_exceptions.BatchDefinitionError("A valid execution_environment must be specified.")
-        if execution_environment and not isinstance(execution_environment, str):
+        if execution_environment_name and not isinstance(execution_environment_name, str):
             raise ge_exceptions.BatchDefinitionError(
                 f'''The type of an execution_environment name must be a string (Python "str").  The type given is
-"{str(type(execution_environment))}", which is illegal.
+"{str(type(execution_environment_name))}", which is illegal.
             '''
             )
-        if data_connector is None:
+        if data_connector_name is None:
             raise ge_exceptions.BatchDefinitionError("A valid data_connector must be specified.")
-        if data_connector and not isinstance(data_connector, str):
+        if data_connector_name and not isinstance(data_connector_name, str):
             raise ge_exceptions.BatchDefinitionError(
                 f'''The type of a data_connector name must be a string (Python "str").  The type given is
-"{str(type(data_connector))}", which is illegal.
+"{str(type(data_connector_name))}", which is illegal.
                 '''
             )
         if data_asset_name is None:
