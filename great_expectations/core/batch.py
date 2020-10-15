@@ -151,6 +151,19 @@ class BatchRequest(BatchRequestMetadata):
     def in_memory_dataset(self, in_memory_dataset: Any):
         self._in_memory_dataset = in_memory_dataset
 
+    def get_json_dict(self) -> dict:
+        return {
+            "execution_environment_name" : self.execution_environment_name,
+            "data_connector_name" : self.data_connector_name,
+            "data_asset_name" : self.data_asset_name,
+            "partition_request" : self.partition_request,
+        }
+
+    def __str__(self):
+        return json.dumps(
+            self.get_json_dict(),
+            indent=2
+        )
 
 class BatchDefinition(DictDot):
     def __init__(
@@ -181,16 +194,21 @@ class BatchDefinition(DictDot):
     def partition_definition(self) -> PartitionDefinition:
         return self._partition_definition
 
-    @property
-    def id(self) -> str:
-        json_dict = {
+    def get_json_dict(self) -> dict:
+        return {
             "execution_environment_name" : self.execution_environment_name,
             "data_connector_name" : self.data_connector_name,
             "data_asset_name" : self.data_asset_name,
             "partition_definition" : self.partition_definition,
         }
+
+    @property
+    def id(self) -> str:
         return hashlib.md5(
-            json.dumps(json_dict, sort_keys=True).encode("utf-8")
+            json.dumps(
+                self.get_json_dict(),
+                sort_keys=True
+            ).encode("utf-8")
         ).hexdigest()
 
     def __eq__(self, other):
@@ -198,6 +216,12 @@ class BatchDefinition(DictDot):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         return self.id == other.id
+
+    def __str__(self):
+        return json.dumps(
+            self.get_json_dict(),
+            indent=2
+        )
 
 
 
@@ -302,3 +326,13 @@ class Batch(DictDot):
     @property
     def batch_kwargs(self):
         return self._batch_kwargs
+
+    def __str__(self):
+        json_dict = {
+            "data": str(self.data),
+            "batch_request": self.batch_request.get_json_dict(),
+            "batch_definition": self.batch_definition.get_json_dict(),
+            "batch_spec": str(self.batch_spec),
+            "batch_markers": str(self.batch_markers),
+        }
+        return json.dumps(json_dict, indent=2)
