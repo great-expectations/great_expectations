@@ -268,11 +268,29 @@ multiple partitions, including "{partition}", for the same data reference -- thi
             )
             self.partitioners[name] = new_partitioner
 
+    def add_partitioner(self, partitioner_name: str, partitioner_config: dict) -> Partitioner:
+        """Add a new Partitioner to the DataConnector and (for convenience) return the instantiated Partitioner object.
+
+        Args:
+            partitioner_name (str): a key for the new Store in in self._stores
+            partitioner_config (dict): a config for the Store to add
+
+        Returns:
+            partitioner (Partitioner)
+        """
+
+        new_partitioner = self._build_partitioner_from_config(partitioner_name, partitioner_config)
+        self.partitioners[partitioner_name] = new_partitioner
+
+        return new_partitioner
+
+
     def _build_partitioner_from_config(self, name: str, config: CommentedMap):
         """Build a Partitioner using the provided configuration and return the newly-built Partitioner."""
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, PartitionerConfig):
             config: dict = partitionerConfigSchema.dump(config)
+
         runtime_environment: dict = {
             "name": name,
             "data_connector": self
