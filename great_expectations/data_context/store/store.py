@@ -97,3 +97,4 @@ class Store:
 
     def self_check(self, pretty_print):
         NotImplementedError(f"The test method is not implemented for Store class {self.__class__.__name__}.")
+ 
