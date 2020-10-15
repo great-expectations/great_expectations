@@ -57,20 +57,6 @@ class DictDataConnector(DataConnector):
 
         self._cached_data_object_to_batch_definition_map = None
 
-    def refresh_data_object_cache(self):
-        #Map data_objects to batch_definitions
-        self._cached_data_object_to_batch_definition_map = {}
-
-        for data_object in self._get_data_object_list():
-            mapped_batch_definition_list = self._map_data_object_to_batch_request_list(data_object)
-            self._cached_data_object_to_batch_definition_map[data_object] = mapped_batch_definition_list
-
-    def get_unmatched_data_objects(self):
-        if self._cached_data_object_to_batch_definition_map == None:
-            raise ValueError("_cached_data_object_to_batch_definition_map is None. Have you called refresh_data_object_cache yet?")
-
-        return [k for k,v in self._cached_data_object_to_batch_definition_map.items() if v == None]
-    
     def _get_data_object_list(self):
         data_object_keys = list(self.data_object_dict.keys())
         data_object_keys.sort()

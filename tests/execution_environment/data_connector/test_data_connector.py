@@ -10,6 +10,9 @@ from great_expectations.execution_environment.data_connector import (
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
+from tests.test_utils import (
+    create_files_in_directory,
+)
 
 @pytest.fixture
 def basic_data_connector(tmp_path_factory):
@@ -61,7 +64,7 @@ def create_fake_data_frame():
         "y": list("ABCDEFGHIJ"),
     })
 
-def test__get_data_object_list():
+def test__DictDataConnector():
     data_object_dict = {
         "pretend/path/A-100.csv" : create_fake_data_frame(),
         "pretend/path/A-101.csv" : create_fake_data_frame(),
@@ -113,3 +116,70 @@ config_params:
     assert set(my_data_connector.get_unmatched_data_objects()) == set([])
 
     # print(json.dumps(my_data_connector._cached_data_object_to_batch_definition_map, indent=2))
+
+def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list= [
+            "pretend/path/A-100.csv",
+            "pretend/path/A-101.csv",
+            "pretend/directory/B-1.csv",
+            "pretend/directory/B-2.csv",            
+        ]
+    )
+
+    my_data_connector = FilesDataConnector(
+        name="my_data_connector",
+        base_directory=base_directory,
+        glob_directive='*/*/*.csv',
+    )
+
+    # assert my_data_connector.get_data_object_list_count() == 0
+    # with pytest.raises(ValueError):
+    #     set(my_data_connector.get_unmatched_data_objects()) == data_object_dict.keys()
+
+    my_data_connector.refresh_data_object_cache()
+
+    # Since we don't have a Partitioner yet, all keys should be unmatched
+    assert len(my_data_connector.get_unmatched_data_objects()) == 4
+
+    my_data_connector.add_partitioner(
+        "my_first_partitioner",
+        yaml.load("""
+class_name: RegexPartitioner
+config_params:
+    regex:
+        group_names:
+            - letter
+            - number
+        pattern: pretend/path/(.+)-(\\d+)\\.csv
+        """, Loader=yaml.FullLoader)
+    )
+    my_data_connector._default_partitioner = "my_first_partitioner"
+
+    my_data_connector.refresh_data_object_cache()
+
+    assert len(my_data_connector.get_unmatched_data_objects()) == 2
+
+    my_data_connector.add_partitioner(
+        "my_second_partitioner",
+        yaml.load("""
+class_name: RegexPartitioner
+config_params:
+    regex:
+        group_names:
+            - first_dir
+            - second_dir
+            - letter
+            - number
+        pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
+        """, Loader=yaml.FullLoader)
+    )
+    my_data_connector._default_partitioner = "my_second_partitioner"
+    
+    my_data_connector.refresh_data_object_cache()
+
+    assert set(my_data_connector.get_unmatched_data_objects()) == set([])
+
+    print(my_data_connector._cached_data_object_to_batch_definition_map)

@@ -49,7 +49,7 @@ data_connectors:
                         group_names:
                             - letter
                             - number
-                        pattern: {base_directory}/(.+)(\d+)\.csv
+                        pattern: (.+)(\d+)\.csv
     """, Loader=yaml.FullLoader),
         runtime_environment={
             "name": "my_execution_environment"

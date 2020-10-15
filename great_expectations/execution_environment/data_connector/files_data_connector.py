@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import itertools
 from typing import List, Union, Any
@@ -105,6 +106,10 @@ class FilesDataConnector(DataConnector):
         paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
         auto_discover_assets: bool = not data_asset_config_exists
+        print(partitioner)
+        print("*****")
+        print(data_asset_name)
+        print(partition_query)
         return partitioner.find_or_create_partitions(
             data_asset_name=data_asset_name,
             partition_query=partition_query,
@@ -202,9 +207,11 @@ class FilesDataConnector(DataConnector):
         )
     
     def _get_data_object_list(self):
-        return [
-            str(posix_path) for posix_path in Path(self.base_directory).glob(self._glob_directive)
-        ]
+        globbed_paths = Path(self.base_directory).glob(self._glob_directive)
+        paths = [
+            str(posix_path) for posix_path in globbed_paths
+        ]        
+        return paths
 
     def _build_batch_spec_from_partition(
         self,

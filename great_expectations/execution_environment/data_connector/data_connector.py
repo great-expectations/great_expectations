@@ -84,6 +84,9 @@ class DataConnector(object):
         self._execution_engine = execution_engine
         self._data_context_root_directory = data_context_root_directory
 
+        # This is a dictionary which maps data_objects onto batch_requests
+        self._cached_data_object_to_batch_definition_map = {}
+
     @property
     def name(self) -> str:
         return self._name
@@ -319,7 +322,7 @@ multiple partitions, including "{partition}", for the same data reference -- thi
         if data_asset_config_exists and self.assets[data_asset_name].get("partitioner"):
             partitioner_name = self.assets[data_asset_name]["partitioner"]
         else:
-            partitioner_name = self.default_partitioner
+            partitioner_name = self.default_partitioner.name
         partitioner: Partitioner
         if partitioner_name is None:
             raise ge_exceptions.BatchSpecError(
@@ -500,3 +503,40 @@ connector and the default_partitioner set to one of the configured partitioners.
             ### Need to pass data connector
         )
         return [partition.definition for partition in available_partitions]
+
+    def refresh_data_object_cache(self):
+        #Map data_objects to batch_definitions
+        self._cached_data_object_to_batch_definition_map = {}
+
+        for data_object in self._get_data_object_list():
+            mapped_batch_definition_list = self._map_data_object_to_batch_request_list(data_object)
+            self._cached_data_object_to_batch_definition_map[data_object] = mapped_batch_definition_list
+
+    def get_unmatched_data_objects(self):
+        if self._cached_data_object_to_batch_definition_map == None:
+            raise ValueError("_cached_data_object_to_batch_definition_map is None. Have you called refresh_data_object_cache yet?")
+
+        return [k for k,v in self._cached_data_object_to_batch_definition_map.items() if v == None]
+    
+    def get_data_object_list_count(self):
+        return len(self._cached_data_object_to_batch_definition_map)
+
+    #TODO Abe 20201015: This method is extremely janky. Needs better supporting methods, plus more thought and hardening.
+    def _map_data_object_to_batch_request_list(self, data_object) -> List[BatchDefinition]:
+        # Verify that a default_partitioner has been chosen
+        try:
+            self.default_partitioner
+        except ValueError:
+            #If not, return None
+            return
+
+        partition = self.default_partitioner._find_partitions_for_path(data_object)
+        if partition == None:
+            return None
+
+        return BatchRequest(
+            execution_environment="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            data_connector=self.name,
+            data_asset_name="FAKE_DATA_ASSET_NAME",
+            partition_request=partition.definition,
+        )
