@@ -14,7 +14,7 @@ from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot
 import great_expectations.exceptions as ge_exceptions
 
-class BatchRequestMetadata(DictDot):
+class BatchRequest(DictDot):
     """
     This class contains all attributes of a batch_request with the exclusion of the in_memory_dataset reference.  This
     is due to the fact that the actual data is not part of the metadata (according to the definition of metadata).
@@ -110,46 +110,6 @@ class BatchRequestMetadata(DictDot):
 is illegal.
                 '''
             )
-
-
-class BatchRequest(BatchRequestMetadata):
-    """
-    This class augments the BatchRequestMetadata class by adding a single property: the in_memory_dataset reference.
-    """
-    def __init__(
-        self,
-        #TODO Abe 20201018: rename the next three vars to *_name
-        execution_environment: str,
-        data_connector: str,
-        data_asset_name: str,
-        #TODO Abe 20201018: rename this to batch_data
-        in_memory_dataset: Any = None,
-        partition_request: Union[PartitionRequest, None] = None,
-        limit: Union[int, None] = None,
-        # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
-        sampling: Union[dict, None] = None
-    ):
-        super().__init__(
-            execution_environment=execution_environment,
-            data_connector=data_connector,
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            limit=limit,
-            sampling=sampling
-        )
-        self._in_memory_dataset = in_memory_dataset
-
-    @property
-    def batch_request_metadata(self) -> BatchRequestMetadata:
-        return super()
-
-    @property
-    def in_memory_dataset(self) -> Any:
-        return self._in_memory_dataset
-
-    @in_memory_dataset.setter
-    def in_memory_dataset(self, in_memory_dataset: Any):
-        self._in_memory_dataset = in_memory_dataset
 
     def get_json_dict(self) -> dict:
         return {
