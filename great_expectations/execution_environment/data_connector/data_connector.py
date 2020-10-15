@@ -72,7 +72,7 @@ class DataConnector(object):
     ):
         self._name = name
 
-        self._partitioners = []
+        self._partitioners = {}
         self._build_partitioners_from_config(partitioners)
 
         self._default_partitioner = default_partitioner

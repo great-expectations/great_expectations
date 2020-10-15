@@ -1288,6 +1288,9 @@ class BaseDataContext:
 
         return datasource
 
+    # TODO Abe 20201015 : This is copied from an outdated method of instantiating a class from a config.
+    # We look at should re-implementing this using add_store and _build_store as the model.
+
     # TODO: update usage statistics
     # @usage_statistics_enabled_method(
     #     event_name="data_context.add_execution_environment",
