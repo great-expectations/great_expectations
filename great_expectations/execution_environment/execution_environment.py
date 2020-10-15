@@ -20,7 +20,6 @@ from great_expectations.core.id_dict import (
 )
 from great_expectations.core.batch import (
     Batch,
-    BatchRequestMetadata,
     BatchRequest,
     BatchDefinition
 )

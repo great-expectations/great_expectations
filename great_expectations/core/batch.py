@@ -1,7 +1,10 @@
 import datetime
+import json
+import hashlib
 from typing import Union, Any
 
 from great_expectations.core.id_dict import (
+    IDDict,
     BatchKwargs,
     BatchSpec,
     PartitionRequest,
@@ -11,15 +14,14 @@ from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot
 import great_expectations.exceptions as ge_exceptions
 
-class BatchRequestMetadata(DictDot):
+class BatchRequest(DictDot):
     """
-    This class contains all attributes of a batch_request with the exclusion of the in_memory_dataset reference.  This
-    is due to the fact that the actual data is not part of the metadata (according to the definition of metadata).
+    This class contains all attributes of a batch_request.
     """
     def __init__(
         self,
-        execution_environment: str,
-        data_connector: str,
+        execution_environment_name: str,
+        data_connector_name: str,
         data_asset_name: str,
         partition_request: Union[dict, PartitionRequest, None] = None,
         limit: Union[int, None] = None,
@@ -29,15 +31,15 @@ class BatchRequestMetadata(DictDot):
         if partition_request and isinstance(partition_request, dict):
             partition_request = PartitionRequest(partition_request)
         self._validate_batch_request(
-            execution_environment=execution_environment,
-            data_connector=data_connector,
+            execution_environment_name=execution_environment_name,
+            data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             partition_request=partition_request,
             limit=limit,
         )
 
-        self._execution_environment_name = execution_environment
-        self._data_connector_name = data_connector
+        self._execution_environment_name = execution_environment_name
+        self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_request = partition_request
         self._limit = limit
@@ -65,26 +67,26 @@ class BatchRequestMetadata(DictDot):
 
     @staticmethod
     def _validate_batch_request(
-        execution_environment: str,
-        data_connector: str,
+        execution_environment_name: str,
+        data_connector_name: str,
         data_asset_name: str,
         partition_request: Union[PartitionRequest, None] = None,
         limit: Union[int, None] = None,
     ):
-        if execution_environment is None:
+        if execution_environment_name is None:
             raise ge_exceptions.BatchDefinitionError("A valid execution_environment must be specified.")
-        if execution_environment and not isinstance(execution_environment, str):
+        if execution_environment_name and not isinstance(execution_environment_name, str):
             raise ge_exceptions.BatchDefinitionError(
                 f'''The type of an execution_environment name must be a string (Python "str").  The type given is
-"{str(type(execution_environment))}", which is illegal.
+"{str(type(execution_environment_name))}", which is illegal.
             '''
             )
-        if data_connector is None:
+        if data_connector_name is None:
             raise ge_exceptions.BatchDefinitionError("A valid data_connector must be specified.")
-        if data_connector and not isinstance(data_connector, str):
+        if data_connector_name and not isinstance(data_connector_name, str):
             raise ge_exceptions.BatchDefinitionError(
                 f'''The type of a data_connector name must be a string (Python "str").  The type given is
-"{str(type(data_connector))}", which is illegal.
+"{str(type(data_connector_name))}", which is illegal.
                 '''
             )
         if data_asset_name is None:
@@ -108,46 +110,19 @@ is illegal.
                 '''
             )
 
+    def get_json_dict(self) -> dict:
+        return {
+            "execution_environment_name" : self.execution_environment_name,
+            "data_connector_name" : self.data_connector_name,
+            "data_asset_name" : self.data_asset_name,
+            "partition_request" : self.partition_request,
+        }
 
-class BatchRequest(BatchRequestMetadata):
-    """
-    This class augments the BatchRequestMetadata class by adding a single property: the in_memory_dataset reference.
-    """
-    def __init__(
-        self,
-        #TODO Abe 20201018: rename the next three vars to *_name
-        execution_environment: str,
-        data_connector: str,
-        data_asset_name: str,
-        #TODO Abe 20201018: rename this to batch_data
-        in_memory_dataset: Any = None,
-        partition_request: Union[PartitionRequest, None] = None,
-        limit: Union[int, None] = None,
-        # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
-        sampling: Union[dict, None] = None
-    ):
-        super().__init__(
-            execution_environment=execution_environment,
-            data_connector=data_connector,
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            limit=limit,
-            sampling=sampling
+    def __str__(self):
+        return json.dumps(
+            self.get_json_dict(),
+            indent=2
         )
-        self._in_memory_dataset = in_memory_dataset
-
-    @property
-    def batch_request_metadata(self) -> BatchRequestMetadata:
-        return super()
-
-    @property
-    def in_memory_dataset(self) -> Any:
-        return self._in_memory_dataset
-
-    @in_memory_dataset.setter
-    def in_memory_dataset(self, in_memory_dataset: Any):
-        self._in_memory_dataset = in_memory_dataset
-
 
 class BatchDefinition(DictDot):
     def __init__(
@@ -155,8 +130,10 @@ class BatchDefinition(DictDot):
         execution_environment_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        partition_definition: PartitionDefinition = None,
+        partition_definition: PartitionDefinition,
     ):
+        assert type(partition_definition) == PartitionDefinition
+        
         self._execution_environment_name = execution_environment_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
@@ -177,6 +154,36 @@ class BatchDefinition(DictDot):
     @property
     def partition_definition(self) -> PartitionDefinition:
         return self._partition_definition
+
+    def get_json_dict(self) -> dict:
+        return {
+            "execution_environment_name" : self.execution_environment_name,
+            "data_connector_name" : self.data_connector_name,
+            "data_asset_name" : self.data_asset_name,
+            "partition_definition" : self.partition_definition,
+        }
+
+    @property
+    def id(self) -> str:
+        return hashlib.md5(
+            json.dumps(
+                self.get_json_dict(),
+                sort_keys=True
+            ).encode("utf-8")
+        ).hexdigest()
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            # Delegate comparison to the other instance's __eq__.
+            return NotImplemented
+        return self.id == other.id
+
+    def __str__(self):
+        return json.dumps(
+            self.get_json_dict(),
+            indent=2
+        )
+
 
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
@@ -280,3 +287,13 @@ class Batch(DictDot):
     @property
     def batch_kwargs(self):
         return self._batch_kwargs
+
+    def __str__(self):
+        json_dict = {
+            "data": str(self.data),
+            "batch_request": self.batch_request.get_json_dict(),
+            "batch_definition": self.batch_definition.get_json_dict(),
+            "batch_spec": str(self.batch_spec),
+            "batch_markers": str(self.batch_markers),
+        }
+        return json.dumps(json_dict, indent=2)
