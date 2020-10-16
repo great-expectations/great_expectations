@@ -11,7 +11,6 @@ from great_expectations.execution_environment.types import PathBatchSpec, S3Batc
 
 from ..core.batch import Batch, BatchMarkers
 from ..core.id_dict import BatchSpec
-from ..datasource.pandas_datasource import HASH_THRESHOLD
 from ..exceptions import BatchSpecError, ValidationError
 from ..execution_environment.util import hash_pandas_dataframe
 from ..validator.validation_graph import MetricConfiguration
@@ -68,6 +67,7 @@ Notes:
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
+
     def configure_validator(self, validator):
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
@@ -98,7 +98,9 @@ Notes:
                 if batch_spec.get("data_asset_name"):
                     df = in_memory_dataset
                 else:
-                    raise ValueError("To pass an in_memory_dataset, you must also a data_asset_name as well.")
+                    raise ValueError(
+                        "To pass an in_memory_dataset, you must also a data_asset_name as well."
+                    )
         else:
             reader_method = batch_spec.get("reader_method")
             reader_options = batch_spec.get("reader_options") or {}
@@ -129,12 +131,11 @@ Notes:
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
-        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_spec != batch_spec:
-            batch = Batch(
-                data=df,
-                batch_spec=batch_spec,
-                batch_markers=batch_markers,
-            )
+        if (
+            not self.batches.get(batch_id)
+            or self.batches.get(batch_id).batch_spec != batch_spec
+        ):
+            batch = Batch(data=df, batch_spec=batch_spec, batch_markers=batch_markers,)
             self.batches[batch_id] = batch
         else:
             batch = self.batches.get(batch_id)
@@ -218,9 +219,7 @@ Notes:
                 "reader_options": {"compression": "gzip"},
             }
 
-        raise BatchSpecError(
-            f'Unable to determine reader method from path: "{path}".'
-        )
+        raise BatchSpecError(f'Unable to determine reader method from path: "{path}".')
 
     def process_batch_definition(self, batch_definition, batch_spec):
         """Takes in a batch definition and batch spec. If the batch definition has a limit, uses it to initialize the

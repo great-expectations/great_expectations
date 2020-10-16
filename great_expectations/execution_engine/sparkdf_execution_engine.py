@@ -3,10 +3,15 @@ import datetime
 import logging
 import uuid
 from io import StringIO
-from typing import Any, Callable, Dict, Iterable, Tuple
+from typing import Any, Callable, Dict, Iterable, Tuple, Union
 
 from great_expectations.core.id_dict import IDDict
-from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
+from great_expectations.execution_environment.types import (
+    BatchSpec,
+    InMemoryBatchSpec,
+    PathBatchSpec,
+    S3BatchSpec,
+)
 
 from ..core.batch import Batch, BatchMarkers
 from ..exceptions import (
@@ -190,7 +195,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 if batch_spec.get("data_asset_name"):
                     df = in_memory_dataset
                 else:
-                    raise ValueError("To pass an in_memory_dataset, you must also a data_asset_name as well.")
+                    raise ValueError(
+                        "To pass an in_memory_dataset, you must also a data_asset_name as well."
+                    )
         else:
             reader = self.spark.read
             reader_method = batch_spec.get("reader_method")
@@ -227,12 +234,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if self._persist:
             df.persist()
 
-        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_spec != batch_spec:
-            batch = Batch(
-                data=df,
-                batch_spec=batch_spec,
-                batch_markers=batch_markers,
-            )
+        if (
+            not self.batches.get(batch_id)
+            or self.batches.get(batch_id).batch_spec != batch_spec
+        ):
+            batch = Batch(data=df, batch_spec=batch_spec, batch_markers=batch_markers,)
             self.batches[batch_id] = batch
         else:
             batch = self.batches.get(batch_id)
