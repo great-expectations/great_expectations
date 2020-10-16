@@ -55,8 +55,8 @@ def test_basic_instantiation(tmp_path_factory):
 #                 pattern: {base_directory}/(.+)(\d+)\.csv
 
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
-    data_objects = basic_data_connector._get_data_object_list()
-    assert data_objects == []
+    data_references = basic_data_connector._get_data_reference_list()
+    assert data_references == []
 
 def create_fake_data_frame():
     return pd.DataFrame({
@@ -65,7 +65,7 @@ def create_fake_data_frame():
     })
 
 def test__DictDataConnector():
-    data_object_dict = {
+    data_reference_dict = {
         "pretend/path/A-100.csv" : create_fake_data_frame(),
         "pretend/path/A-101.csv" : create_fake_data_frame(),
         "pretend/directory/B-1.csv" : create_fake_data_frame(),
@@ -74,12 +74,12 @@ def test__DictDataConnector():
 
     my_data_connector = DictDataConnector(
         name="my_data_connector",
-        data_object_dict=data_object_dict
+        data_reference_dict=data_reference_dict
     )
 
     # Peer into internals to make sure things have loaded properly
-    data_objects = my_data_connector._get_data_object_list()
-    assert data_objects == [
+    data_references = my_data_connector._get_data_reference_list()
+    assert data_references == [
         "pretend/directory/B-1.csv",
         "pretend/directory/B-2.csv",
         "pretend/path/A-100.csv",
@@ -87,13 +87,13 @@ def test__DictDataConnector():
     ]
 
     with pytest.raises(ValueError):
-        set(my_data_connector.get_unmatched_data_objects()) == data_object_dict.keys()
+        set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 
 
-    my_data_connector.refresh_data_object_cache()
+    my_data_connector.refresh_data_reference_cache()
 
     # Since we don't have a Partitioner yet, all keys should be unmatched
-    assert set(my_data_connector.get_unmatched_data_objects()) == data_object_dict.keys()
+    assert set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 
     my_data_connector.add_partitioner(
         "my_partitioner",
@@ -111,11 +111,11 @@ config_params:
     )
     my_data_connector._default_partitioner = "my_partitioner"
     
-    my_data_connector.refresh_data_object_cache()
+    my_data_connector.refresh_data_reference_cache()
 
-    assert set(my_data_connector.get_unmatched_data_objects()) == set([])
+    assert set(my_data_connector.get_unmatched_data_references()) == set([])
 
-    # print(json.dumps(my_data_connector._cached_data_object_to_batch_definition_map, indent=2))
+    # print(json.dumps(my_data_connector._cached_data_reference_to_batch_definition_map, indent=2))
 
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
@@ -135,14 +135,14 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         glob_directive='*/*/*.csv',
     )
 
-    # assert my_data_connector.get_data_object_list_count() == 0
+    # assert my_data_connector.get_data_reference_list_count() == 0
     # with pytest.raises(ValueError):
-    #     set(my_data_connector.get_unmatched_data_objects()) == data_object_dict.keys()
+    #     set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 
-    my_data_connector.refresh_data_object_cache()
+    my_data_connector.refresh_data_reference_cache()
 
     # Since we don't have a Partitioner yet, all keys should be unmatched
-    assert len(my_data_connector.get_unmatched_data_objects()) == 4
+    assert len(my_data_connector.get_unmatched_data_references()) == 4
 
     my_data_connector.add_partitioner(
         "my_first_partitioner",
@@ -158,9 +158,9 @@ config_params:
     )
     my_data_connector._default_partitioner = "my_first_partitioner"
 
-    my_data_connector.refresh_data_object_cache()
+    my_data_connector.refresh_data_reference_cache()
 
-    assert len(my_data_connector.get_unmatched_data_objects()) == 2
+    assert len(my_data_connector.get_unmatched_data_references()) == 2
 
     my_data_connector.add_partitioner(
         "my_second_partitioner",
@@ -178,8 +178,8 @@ config_params:
     )
     my_data_connector._default_partitioner = "my_second_partitioner"
     
-    my_data_connector.refresh_data_object_cache()
+    my_data_connector.refresh_data_reference_cache()
 
-    assert set(my_data_connector.get_unmatched_data_objects()) == set([])
+    assert set(my_data_connector.get_unmatched_data_references()) == set([])
 
-    print(my_data_connector._cached_data_object_to_batch_definition_map)
+    print(my_data_connector._cached_data_reference_to_batch_definition_map)

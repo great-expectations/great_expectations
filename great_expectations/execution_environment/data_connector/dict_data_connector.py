@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class DictDataConnector(DataConnector):
     """This DataConnector is meant to closely mimic the FilesDataConnector, but without requiring an actual filesystem.
 
-    Instead, its data_objects are stored in a data_object_dictionary : {
+    Instead, its data_references are stored in a data_reference_dictionary : {
         "pretend/path/A-100.csv" : pandas_df_A_100,
         "pretend/path/A-101.csv" : pandas_df_A_101,
         "pretend/directory/B-1.csv" : pandas_df_B_1,
@@ -37,7 +37,7 @@ class DictDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
-        data_object_dict: {},
+        data_reference_dict: {},
         partitioners: dict = {},
         default_partitioner: str = None,
         assets: dict = None,
@@ -53,16 +53,16 @@ class DictDataConnector(DataConnector):
         )
 
         # This simulates the underlying filesystem
-        self.data_object_dict = data_object_dict
+        self.data_reference_dict = data_reference_dict
 
-        self._cached_data_object_to_batch_definition_map = None
+        self._cached_data_reference_to_batch_definition_map = None
 
-    def _get_data_object_list(self):
-        data_object_keys = list(self.data_object_dict.keys())
-        data_object_keys.sort()
-        return data_object_keys
+    def _get_data_reference_list(self):
+        data_reference_keys = list(self.data_reference_dict.keys())
+        data_reference_keys.sort()
+        return data_reference_keys
 
-    def _map_data_object_to_batch_request_list(self, data_object) -> List[BatchDefinition]:
+    def _map_data_reference_to_batch_request_list(self, data_reference) -> List[BatchDefinition]:
         # Verify that a default_partitioner has been chosen
         try:
             self.default_partitioner
@@ -70,7 +70,7 @@ class DictDataConnector(DataConnector):
             #If not, return None
             return
 
-        partition = self.default_partitioner._find_partitions_for_path(data_object)
+        partition = self.default_partitioner._find_partitions_for_path(data_reference)
         return BatchRequest(
             execution_environment="FAKE_EXECUTION_ENVIRONMENT_NAME",
             data_connector=self.name,
