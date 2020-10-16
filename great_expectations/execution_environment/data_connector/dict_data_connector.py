@@ -61,19 +61,3 @@ class DictDataConnector(DataConnector):
         data_object_keys = list(self.data_object_dict.keys())
         data_object_keys.sort()
         return data_object_keys
-
-    def _map_data_object_to_batch_request_list(self, data_object) -> List[BatchDefinition]:
-        # Verify that a default_partitioner has been chosen
-        try:
-            self.default_partitioner
-        except ValueError:
-            #If not, return None
-            return
-
-        partition = self.default_partitioner._find_partitions_for_path(data_object)
-        return BatchRequest(
-            execution_environment="FAKE_EXECUTION_ENVIRONMENT_NAME",
-            data_connector=self.name,
-            data_asset_name="FAKE_DATA_ASSET_NAME",
-            partition_request=partition.definition,
-        )
