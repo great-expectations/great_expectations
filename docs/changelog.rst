@@ -7,9 +7,9 @@ Changelog
 Develop
 -----------------
 * [BUGFIX] Query batch kwargs support for Athena backend (issue 1964)
-
 * [BUGFIX] Skip config substitution if key is "password"
 * [BUGFIX] fix site_names functionality and add site_names param to get_docs_sites_urls
+* [BUGFIX] Always render expectation suites in data docs unless passing a specific ExpectationSuiteIdentifier in resource_identifiers #1990
 
 0.12.4
 -----------------
