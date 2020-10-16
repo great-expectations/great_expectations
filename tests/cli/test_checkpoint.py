@@ -608,7 +608,31 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert result.exit_code == 0
     assert "Validation succeeded!" in stdout
 
-    assert mock_emit.call_count == 4
+    # Check to make sure data docs are built
+    assert os.path.isfile(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "index.html")
+    )
+    assert os.path.isfile(
+        os.path.join(
+            root_dir,
+            "uncommitted",
+            "data_docs",
+            "local_site",
+            "expectations",
+            "Titanic",
+            "warning.html",
+        )
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "validations")
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "expectations")
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "static")
+    )
+    assert mock_emit.call_count == 5
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
         {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -616,10 +640,13 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert usage_emits[1][0][0]["event"] == "data_asset.validate"
     assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
     assert usage_emits[2][0][0]["success"] is True
 
-    assert usage_emits[3] == mock.call(
+    assert usage_emits[3][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[3][0][0]["success"] is True
+
+    assert usage_emits[4] == mock.call(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
@@ -650,7 +677,32 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert result.exit_code == 1
     assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 4
+    # Check to make sure data docs are built
+    assert os.path.isfile(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "index.html")
+    )
+    assert os.path.isfile(
+        os.path.join(
+            root_dir,
+            "uncommitted",
+            "data_docs",
+            "local_site",
+            "expectations",
+            "Titanic",
+            "warning.html",
+        )
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "validations")
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "expectations")
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "static")
+    )
+
+    assert mock_emit.call_count == 5
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
         {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -658,10 +710,13 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert usage_emits[1][0][0]["event"] == "data_asset.validate"
     assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
     assert usage_emits[2][0][0]["success"] is True
 
-    assert usage_emits[3] == mock.call(
+    assert usage_emits[3][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[3][0][0]["success"] is True
+
+    assert usage_emits[4] == mock.call(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
