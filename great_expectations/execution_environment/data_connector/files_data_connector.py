@@ -107,10 +107,6 @@ class FilesDataConnector(DataConnector):
         paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
         auto_discover_assets: bool = not data_asset_config_exists
-        print(partitioner)
-        print("*****")
-        print(data_asset_name)
-        print(partition_query)
         return partitioner.find_or_create_partitions(
             data_asset_name=data_asset_name,
             partition_query=partition_query,
