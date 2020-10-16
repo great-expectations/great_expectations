@@ -3,7 +3,8 @@ from typing import Dict, List
 
 import snowflake
 import sqlalchemy as sa
-#import sqlalchemy_redshift
+
+# import sqlalchemy_redshift
 from dateutil.parser import parse
 from sqlalchemy.dialects import registry
 from sqlalchemy.engine import reflection

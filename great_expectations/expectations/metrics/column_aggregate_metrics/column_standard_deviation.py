@@ -1,4 +1,9 @@
-from great_expectations.execution_engine import PandasExecutionEngine, SparkDFExecutionEngine
+import logging
+
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -8,13 +13,10 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 
-import logging
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import (
-            stddev_samp,
-        )
+    from pyspark.sql.functions import stddev_samp
 except ImportError as e:
     logger.debug(str(e))
     logger.debug(
@@ -24,6 +26,7 @@ except ImportError as e:
 
 class ColumnStandardDeviation(ColumnAggregateMetric):
     """Metric Class for Aggregate Standard Deviation metric"""
+
     metric_name = "column.aggregate.standard_deviation"
 
     @column_aggregate_metric(engine=PandasExecutionEngine)

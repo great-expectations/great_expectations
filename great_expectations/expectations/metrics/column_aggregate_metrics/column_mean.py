@@ -1,4 +1,7 @@
-from great_expectations.execution_engine import PandasExecutionEngine, SparkDFExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -11,6 +14,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric import sa a
 
 class ColumnMean(ColumnAggregateMetric):
     """Metric Class for Aggregate Mean Metric"""
+
     metric_name = "column.aggregate.mean"
 
     @column_aggregate_metric(engine=PandasExecutionEngine)

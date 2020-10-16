@@ -117,8 +117,9 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             assert isinstance(
                 configuration.kwargs["threshold"], (float, int)
             ), "Provided threshold must be a number"
-            assert isinstance(configuration.kwargs["double_sided"], bool
-                              ),"Double sided parameter must be a boolean value"
+            assert isinstance(
+                configuration.kwargs["double_sided"], bool
+            ), "Double sided parameter must be a boolean value"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True

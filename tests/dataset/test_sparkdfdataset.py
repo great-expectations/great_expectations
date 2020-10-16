@@ -1,9 +1,9 @@
 import importlib.util
+import json
 from unittest import mock
 
 import pandas as pd
 import pytest
-import json
 
 from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 

@@ -31,10 +31,7 @@ DEFAULT_USAGE_STATISTICS_URL = (
 
 class AssetConfig(DictDot):
     def __init__(
-        self,
-        partitioner=None,
-        config_params=None,
-        **kwargs,
+        self, partitioner=None, config_params=None, **kwargs,
     ):
         if partitioner is not None:
             self._partitioner = partitioner
@@ -116,12 +113,10 @@ class SorterConfigSchema(Schema):
 
     name = fields.String(required=True)
     class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.execution_environment.data_connector.partitioner.sorter")
-    orderby = fields.String(
-        required=False,
-        missing="asc",
-        allow_none=False
+    module_name = fields.String(
+        missing="great_expectations.execution_environment.data_connector.partitioner.sorter"
     )
+    orderby = fields.String(required=False, missing="asc", allow_none=False)
 
     config_params = fields.Dict(allow_none=True)
 
@@ -181,7 +176,9 @@ class PartitionerConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.execution_environment.data_connector.partitioner")
+    module_name = fields.String(
+        missing="great_expectations.execution_environment.data_connector.partitioner"
+    )
 
     sorters = fields.List(
         cls_or_instance=fields.Nested(SorterConfigSchema),
@@ -190,9 +187,7 @@ class PartitionerConfigSchema(Schema):
     )
 
     allow_multipart_partitions = fields.Boolean(
-        required=False,
-        missing=False,
-        allow_none=False
+        required=False, missing=False, allow_none=False
     )
 
     config_params = fields.Dict(allow_none=True)
@@ -216,7 +211,7 @@ class DataConnectorConfig(DictDot):
         assets=None,
         module_name=None,
         config_params=None,
-        **kwargs
+        **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
@@ -261,12 +256,11 @@ class DataConnectorConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.execution_environment.data_connector")
-
-    default_partitioner = fields.String(
-        required=False,
-        allow_none=True,
+    module_name = fields.String(
+        missing="great_expectations.execution_environment.data_connector"
     )
+
+    default_partitioner = fields.String(required=False, allow_none=True,)
 
     partitioners = fields.Dict(
         keys=fields.Str(),
@@ -301,7 +295,7 @@ class ExecutionEngineConfig(DictDot):
         module_name=None,
         caching=None,
         batch_spec_defaults=None,
-        **kwargs
+        **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
@@ -354,7 +348,7 @@ class ExecutionEnvironmentConfig(DictDot):
         credentials=None,
         reader_method=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
@@ -421,7 +415,7 @@ class DatasourceConfig(DictDot):
         boto3_options=None,
         reader_method=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
@@ -535,9 +529,7 @@ class DatasourceConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.datasource")
     data_asset_type = fields.Nested(ClassConfigSchema)
-    boto3_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), allow_none=True
-    )
+    boto3_options = fields.Dict(keys=fields.Str(), values=fields.Str(), allow_none=True)
     # TODO: Update to generator-specific
     # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
     batch_kwargs_generators = fields.Dict(
@@ -762,9 +754,7 @@ class DataContextConfigSchema(Schema):
         error_messages={"invalid": "config version must " "be a number."},
     )
     datasources = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(DatasourceConfigSchema),
-        allow_none=True
+        keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema), allow_none=True
     )
     execution_environments = fields.Dict(
         keys=fields.Str(),
@@ -809,8 +799,8 @@ class DataContextConfigSchema(Schema):
 
         # When migrating from 0.7.x to 0.8.0
         if data["config_version"] == 0 and (
-                "validations_store" in list(data.keys())
-                or "validations_stores" in list(data.keys())
+            "validations_store" in list(data.keys())
+            or "validations_stores" in list(data.keys())
         ):
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."

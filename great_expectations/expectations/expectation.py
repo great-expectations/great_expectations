@@ -505,8 +505,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
             "mostly", self.default_kwarg_values.get("mostly")
         )
         success = (
-            metrics[self.column_map_metric]
-            / metrics["column_values.nonnull.count"]
+            metrics[self.column_map_metric] / metrics["column_values.nonnull.count"]
         )
 
         return _format_map_output(

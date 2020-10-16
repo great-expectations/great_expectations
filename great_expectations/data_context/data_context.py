@@ -11,13 +11,15 @@ import sys
 import uuid
 import warnings
 import webbrowser
-from typing import Dict, List, Optional, Callable, Union, Any
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -37,7 +39,6 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
-from ruamel.yaml.comments import CommentedMap
 from great_expectations.data_context.types.base import (  # TODO: deprecate
     CURRENT_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
@@ -64,14 +65,17 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
 from great_expectations.execution_environment import ExecutionEnvironment
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
-from great_expectations.core.batch import Batch
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -672,7 +676,9 @@ class BaseDataContext:
     def execution_environments(self) -> Dict[str, ExecutionEnvironment]:
         """A single holder for all ExecutionEnvironments in this context"""
         return {
-            execution_environment: self.get_execution_environment(execution_environment_name=execution_environment)
+            execution_environment: self.get_execution_environment(
+                execution_environment_name=execution_environment
+            )
             for execution_environment in self._project_config_with_variables_substituted.execution_environments
         }
 
@@ -1090,11 +1096,9 @@ class BaseDataContext:
             runtime_environment.update({"in_memory_dataset": in_memory_dataset})
         execution_environment: ExecutionEnvironment = self.get_execution_environment(
             execution_environment_name=execution_environment_name,
-            runtime_environment=runtime_environment
+            runtime_environment=runtime_environment,
         )
-        return execution_environment.get_batch(
-            batch_definition=batch_definition
-        )
+        return execution_environment.get_batch(batch_definition=batch_definition)
 
     def get_validator(
         self,
@@ -1454,7 +1458,7 @@ class BaseDataContext:
     def get_execution_environment(
         self,
         execution_environment_name: str = "default",
-        runtime_environment: Union[dict, None] = None
+        runtime_environment: Union[dict, None] = None,
     ) -> ExecutionEnvironment:
         """Get the named execution_environment
 
@@ -1488,7 +1492,7 @@ class BaseDataContext:
         execution_environment: ExecutionEnvironment = self._build_execution_environment_from_config(
             name=execution_environment_name,
             config=execution_environment_config,
-            runtime_environment=runtime_environment
+            runtime_environment=runtime_environment,
         )
         self._cached_execution_environments[
             execution_environment_name
@@ -1499,7 +1503,7 @@ class BaseDataContext:
         self,
         name: str,
         config: CommentedMap,
-        runtime_environment: Union[dict, None] = None
+        runtime_environment: Union[dict, None] = None,
     ) -> ExecutionEnvironment:
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, ExecutionEnvironmentConfig):
@@ -1527,22 +1531,26 @@ class BaseDataContext:
         execution_environment_name: str,
         data_connector_name: str,
         data_asset_name: str = None,
-        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+        partition_query: Union[
+            Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None
+        ] = None,
         in_memory_dataset: Any = None,
-        repartition: bool = False
+        repartition: bool = False,
     ) -> List[Partition]:
         runtime_environment: dict = {}
         if in_memory_dataset is not None:
             runtime_environment.update({"in_memory_dataset": in_memory_dataset})
         execution_environment: ExecutionEnvironment = self.get_execution_environment(
             execution_environment_name=execution_environment_name,
-            runtime_environment=runtime_environment
+            runtime_environment=runtime_environment,
         )
-        available_partitions: List[Partition] = execution_environment.get_available_partitions(
+        available_partitions: List[
+            Partition
+        ] = execution_environment.get_available_partitions(
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             partition_query=partition_query,
-            repartition=repartition
+            repartition=repartition,
         )
         return available_partitions
 
