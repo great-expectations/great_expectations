@@ -1,17 +1,26 @@
-from pathlib import Path
 import itertools
-from typing import List, Dict, Union
-
 import logging
+from pathlib import Path
+from typing import Dict, List, Union
 
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.types import PathBatchSpec
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
+from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import (
+    NoOpPartitioner,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partition_query import (
+    PartitionQuery,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partitioner import (
+    Partitioner,
+)
+from great_expectations.execution_environment.types import PathBatchSpec
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +52,7 @@ class FilesDataConnector(DataConnector):
         reader_method: str = None,
         execution_engine: ExecutionEngine = None,
         data_context_root_directory: str = None,
-        **kwargs
+        **kwargs,
     ):
         logger.debug(f'Constructing FilesDataConnector "{name}".')
         super().__init__(
@@ -55,7 +64,7 @@ class FilesDataConnector(DataConnector):
             batch_definition_defaults=batch_definition_defaults,
             execution_engine=execution_engine,
             data_context_root_directory=data_context_root_directory,
-            **kwargs
+            **kwargs,
         )
 
         if known_extensions is None:
@@ -90,15 +99,16 @@ class FilesDataConnector(DataConnector):
         if self.assets:
             available_data_asset_names.append(list(self.assets.keys()))
         available_data_asset_names.append(
-            [Path(path).stem for path in self._get_file_paths_for_data_asset(data_asset_name=None)]
+            [
+                Path(path).stem
+                for path in self._get_file_paths_for_data_asset(data_asset_name=None)
+            ]
         )
         return list(
             set(
                 list(
                     itertools.chain.from_iterable(
-                        [
-                            element for element in available_data_asset_names
-                        ]
+                        [element for element in available_data_asset_names]
                     )
                 )
             )
@@ -109,16 +119,15 @@ class FilesDataConnector(DataConnector):
         partitioner: Partitioner,
         data_asset_name: str = None,
         partition_query: Union[PartitionQuery, None] = None,
-        repartition: bool = None
+        repartition: bool = None,
     ) -> List[Partition]:
-        paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
+        paths: List[str] = self._get_file_paths_for_data_asset(
+            data_asset_name=data_asset_name
+        )
         if isinstance(partitioner, NoOpPartitioner):
             default_data_asset_name: str = data_asset_name or self.DEFAULT_DATA_ASSET_NAME
             default_datasets: List[Dict[str, str]] = [
-                {
-                    "partition_name": Path(path).stem,
-                    "data_reference": path
-                }
+                {"partition_name": Path(path).stem, "data_reference": path}
                 for path in paths
             ]
             return partitioner.get_available_partitions(
@@ -128,9 +137,11 @@ class FilesDataConnector(DataConnector):
                 repartition=repartition,
                 # The next two (2) parameters are specific for the NoOp partitioner under the present data connector.
                 pipeline_data_asset_name=default_data_asset_name,
-                pipeline_datasets=default_datasets
+                pipeline_datasets=default_datasets,
             )
-        data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
+        data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(
+            data_asset_name
+        )
         auto_discover_assets: bool = not data_asset_config_exists
         return partitioner.get_available_partitions(
             # The next three (3) general parameters are for both, creating partitions and querying partitions.
@@ -138,7 +149,7 @@ class FilesDataConnector(DataConnector):
             partition_query=partition_query,
             # The next two (2) parameters are specific for the partitioners that work under the present data connector.
             paths=paths,
-            auto_discover_assets=auto_discover_assets
+            auto_discover_assets=auto_discover_assets,
         )
 
     def _normalize_directory_path(self, dir_path: str) -> str:
@@ -157,7 +168,9 @@ class FilesDataConnector(DataConnector):
         base_directory: str
         glob_directive: str
 
-        data_asset_directives: dict = self._get_data_asset_directives(data_asset_name=data_asset_name)
+        data_asset_directives: dict = self._get_data_asset_directives(
+            data_asset_name=data_asset_name
+        )
         base_directory = data_asset_directives["base_directory"]
         glob_directive = data_asset_directives["glob_directive"]
 
@@ -165,14 +178,20 @@ class FilesDataConnector(DataConnector):
             path_list: list
             if glob_directive:
                 path_list = [
-                    str(posix_path) for posix_path in Path(base_directory).glob(glob_directive)
+                    str(posix_path)
+                    for posix_path in Path(base_directory).glob(glob_directive)
                 ]
             else:
                 path_list = [
-                    str(posix_path) for posix_path in self._get_valid_file_paths(base_directory=base_directory)
+                    str(posix_path)
+                    for posix_path in self._get_valid_file_paths(
+                        base_directory=base_directory
+                    )
                 ]
             return self._verify_file_paths(path_list=path_list)
-        raise ge_exceptions.DataConnectorError(f'Expected a directory, but path "{base_directory}" is not a directory.')
+        raise ge_exceptions.DataConnectorError(
+            f'Expected a directory, but path "{base_directory}" is not a directory.'
+        )
 
     def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
         glob_directive: str
@@ -185,9 +204,13 @@ class FilesDataConnector(DataConnector):
             and self.assets[data_asset_name]["config_params"]
         ):
             base_directory = self._normalize_directory_path(
-                dir_path=self.assets[data_asset_name]["config_params"].get("base_directory", self.base_directory)
+                dir_path=self.assets[data_asset_name]["config_params"].get(
+                    "base_directory", self.base_directory
+                )
             )
-            glob_directive = self.assets[data_asset_name]["config_params"].get("glob_directive")
+            glob_directive = self.assets[data_asset_name]["config_params"].get(
+                "glob_directive"
+            )
         else:
             base_directory = self.base_directory
             glob_directive = self.config_params.get("glob_directive")
@@ -195,9 +218,7 @@ class FilesDataConnector(DataConnector):
 
     @staticmethod
     def _verify_file_paths(path_list: list) -> list:
-        if not all(
-            [not Path(path).is_dir() for path in path_list]
-        ):
+        if not all([not Path(path).is_dir() for path in path_list]):
             raise ge_exceptions.DataConnectorError(
                 "All paths for a configured data asset must be files (a directory was detected)."
             )
@@ -213,26 +234,20 @@ class FilesDataConnector(DataConnector):
                     path_list.append(path)
                 elif Path(path).is_dir:
                     # Make sure there is at least one valid file inside the subdirectory.
-                    subdir_path_list: list = self._get_valid_file_paths(base_directory=path)
+                    subdir_path_list: list = self._get_valid_file_paths(
+                        base_directory=path
+                    )
                     if len(subdir_path_list) > 0:
                         path_list.append(subdir_path_list)
         return list(
-            set(
-                list(
-                    itertools.chain.from_iterable(
-                        [
-                            element for element in path_list
-                        ]
-                    )
-                )
-            )
+            set(list(itertools.chain.from_iterable([element for element in path_list])))
         )
 
     def build_batch_spec_from_partitions(
         self,
         partitions: List[Partition],
         batch_definition: dict,
-        batch_spec: dict = None
+        batch_spec: dict = None,
     ) -> PathBatchSpec:
         """
         Args:

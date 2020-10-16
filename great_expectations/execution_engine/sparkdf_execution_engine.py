@@ -5,7 +5,7 @@ import json
 import logging
 from collections import OrderedDict
 from functools import reduce, wraps
-from typing import Union, Any, Callable, Dict, Iterable, List, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Tuple, Union
 
 import jsonschema
 import numpy as np
@@ -17,7 +17,7 @@ from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.execution_environment.types import (
     InMemoryBatchSpec,
     PathBatchSpec,
-    S3BatchSpec
+    S3BatchSpec,
 )
 from great_expectations.validator.validator import Validator
 
@@ -673,7 +673,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 if batch_spec.get("data_asset_name"):
                     df = in_memory_dataset
                 else:
-                    raise ValueError("To pass an in_memory_dataset, you must also a data_asset_name as well.")
+                    raise ValueError(
+                        "To pass an in_memory_dataset, you must also a data_asset_name as well."
+                    )
         else:
             reader = self.spark.read
             reader_method = batch_spec.get("reader_method")
@@ -710,12 +712,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if self._persist:
             df.persist()
 
-        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_spec != batch_spec:
-            batch = Batch(
-                data=df,
-                batch_spec=batch_spec,
-                batch_markers=batch_markers,
-            )
+        if (
+            not self.batches.get(batch_id)
+            or self.batches.get(batch_id).batch_spec != batch_spec
+        ):
+            batch = Batch(data=df, batch_spec=batch_spec, batch_markers=batch_markers,)
             self.batches[batch_id] = batch
         else:
             batch = self.batches.get(batch_id)

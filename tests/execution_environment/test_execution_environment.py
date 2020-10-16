@@ -1,20 +1,22 @@
 import os
 import shutil
+from typing import List, Union
+
 import pandas as pd
 
-from typing import Union, List
+from great_expectations.core.batch import Batch
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
+from tests.test_utils import (
+    create_files_for_regex_partitioner,
+    execution_environment_files_data_connector_regex_partitioner_config,
+)
 
 # TODO: <Alex>Commenting out (temporarily).</Alex>
 # import yaml
-
-from great_expectations.execution_environment import ExecutionEnvironment
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.core.batch import Batch
-from great_expectations.data_context.util import file_relative_path
-from tests.test_utils import (
-    execution_environment_files_data_connector_regex_partitioner_config,
-    create_files_for_regex_partitioner,
-)
 
 
 # TODO: <Alex>Commenting out (temporarily).</Alex>
@@ -66,8 +68,12 @@ def test_get_batch(tmp_path_factory):
     os.makedirs(os.path.join(project_dir_path, "data"), exist_ok=True)
     os.makedirs(os.path.join(project_dir_path, "data/titanic"), exist_ok=True)
 
-    titanic_csv_source_file_path: str = file_relative_path(__file__, "../test_sets/Titanic.csv")
-    titanic_csv_destination_file_path: str = str(os.path.join(project_dir_path, "data/titanic/Titanic.csv"))
+    titanic_csv_source_file_path: str = file_relative_path(
+        __file__, "../test_sets/Titanic.csv"
+    )
+    titanic_csv_destination_file_path: str = str(
+        os.path.join(project_dir_path, "data/titanic/Titanic.csv")
+    )
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
     default_base_directory: str = "data/titanic"
@@ -78,8 +84,10 @@ def test_get_batch(tmp_path_factory):
         use_group_names=False,
         use_sorters=False,
         default_base_directory=default_base_directory,
-        data_asset_base_directory=data_asset_base_directory
-    )[execution_environment_name]
+        data_asset_base_directory=data_asset_base_directory,
+    )[
+        execution_environment_name
+    ]
     execution_environment_config.pop("class_name")
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
@@ -100,12 +108,10 @@ def test_get_batch(tmp_path_factory):
             "path": titanic_csv_destination_file_path,
             "reader_method": "read_csv",
             "reader_options": None,
-            "limit": 2000
-        }
+            "limit": 2000,
+        },
     }
-    batch: Batch = execution_environment.get_batch(
-        batch_definition=batch_definition
-    )
+    batch: Batch = execution_environment.get_batch(batch_definition=batch_definition)
 
     assert batch.batch_spec is not None
     assert batch.batch_spec["data_asset_name"] == data_asset_name
@@ -125,8 +131,10 @@ def test_get_batch_with_pipeline_style_batch_definition():
         use_group_names=False,
         use_sorters=False,
         default_base_directory=None,
-        data_asset_base_directory=None
-    )[execution_environment_name]
+        data_asset_base_directory=None,
+    )[
+        execution_environment_name
+    ]
     execution_environment_config.pop("class_name")
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
@@ -144,9 +152,7 @@ def test_get_batch_with_pipeline_style_batch_definition():
         "partition_query": None,
         "limit": None,
     }
-    batch: Batch = execution_environment.get_batch(
-        batch_definition=batch_definition
-    )
+    batch: Batch = execution_environment.get_batch(batch_definition=batch_definition)
     assert batch.batch_spec is not None
     assert batch.batch_spec["data_asset_name"] == data_asset_name
     assert isinstance(batch.data, pd.DataFrame)
@@ -166,15 +172,19 @@ def test_get_available_data_asset_names(tmp_path_factory):
     data_asset_base_directory: Union[str, None] = None
 
     base_directory_names: list = [default_base_directory, data_asset_base_directory]
-    create_files_for_regex_partitioner(root_directory_path=project_dir_path, directory_paths=base_directory_names)
+    create_files_for_regex_partitioner(
+        root_directory_path=project_dir_path, directory_paths=base_directory_names
+    )
 
     execution_environment_name: str = "test_execution_environment"
     execution_environment_config: dict = execution_environment_files_data_connector_regex_partitioner_config(
         use_group_names=False,
         use_sorters=False,
         default_base_directory=default_base_directory,
-        data_asset_base_directory=data_asset_base_directory
-    )[execution_environment_name]
+        data_asset_base_directory=data_asset_base_directory,
+    )[
+        execution_environment_name
+    ]
     execution_environment_config.pop("class_name")
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
@@ -188,48 +198,76 @@ def test_get_available_data_asset_names(tmp_path_factory):
         "test_pipeline_data_connector": ["test_asset_1"],
         "test_filesystem_data_connector": [
             "test_asset_0",
-            "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
-            "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
-            "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
-        ]
+            "abe_20200809_1040",
+            "james_20200811_1009",
+            "eugene_20201129_1900",
+            "will_20200809_1002",
+            "eugene_20200809_1500",
+            "james_20200810_1003",
+            "alex_20200819_1300",
+            "james_20200713_1567",
+            "will_20200810_1001",
+            "alex_20200809_1000",
+        ],
     }
 
     available_data_asset_names: dict = execution_environment.get_available_data_asset_names(
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
+    assert set(available_data_asset_names.keys()) == set(
+        expected_data_asset_names.keys()
+    )
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
-    data_connector_names = ["test_filesystem_data_connector", "test_pipeline_data_connector"]
+    data_connector_names = [
+        "test_filesystem_data_connector",
+        "test_pipeline_data_connector",
+    ]
 
     expected_data_asset_names: dict = {
         "test_pipeline_data_connector": ["test_asset_1"],
         "test_filesystem_data_connector": [
             "test_asset_0",
-            "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
-            "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
-            "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
-        ]
+            "abe_20200809_1040",
+            "james_20200811_1009",
+            "eugene_20201129_1900",
+            "will_20200809_1002",
+            "eugene_20200809_1500",
+            "james_20200810_1003",
+            "alex_20200819_1300",
+            "james_20200713_1567",
+            "will_20200810_1001",
+            "alex_20200809_1000",
+        ],
     }
 
     available_data_asset_names: dict = execution_environment.get_available_data_asset_names(
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
+    assert set(available_data_asset_names.keys()) == set(
+        expected_data_asset_names.keys()
+    )
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
     data_connector_names = ["test_filesystem_data_connector"]
 
     expected_data_asset_names: dict = {
-        'test_filesystem_data_connector': [
-            'test_asset_0',
-            'abe_20200809_1040', 'james_20200811_1009', 'eugene_20201129_1900',
-            'will_20200809_1002', 'eugene_20200809_1500', 'james_20200810_1003',
-            'alex_20200819_1300', 'james_20200713_1567', 'will_20200810_1001', 'alex_20200809_1000'
+        "test_filesystem_data_connector": [
+            "test_asset_0",
+            "abe_20200809_1040",
+            "james_20200811_1009",
+            "eugene_20201129_1900",
+            "will_20200809_1002",
+            "eugene_20200809_1500",
+            "james_20200810_1003",
+            "alex_20200819_1300",
+            "james_20200713_1567",
+            "will_20200810_1001",
+            "alex_20200809_1000",
         ]
     }
 
@@ -237,18 +275,27 @@ def test_get_available_data_asset_names(tmp_path_factory):
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
+    assert set(available_data_asset_names.keys()) == set(
+        expected_data_asset_names.keys()
+    )
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
     data_connector_names = "test_filesystem_data_connector"
 
     expected_data_asset_names: dict = {
-        'test_filesystem_data_connector': [
-            'test_asset_0',
-            'abe_20200809_1040', 'james_20200811_1009', 'eugene_20201129_1900',
-            'will_20200809_1002', 'eugene_20200809_1500', 'james_20200810_1003',
-            'alex_20200819_1300', 'james_20200713_1567', 'will_20200810_1001', 'alex_20200809_1000'
+        "test_filesystem_data_connector": [
+            "test_asset_0",
+            "abe_20200809_1040",
+            "james_20200811_1009",
+            "eugene_20201129_1900",
+            "will_20200809_1002",
+            "eugene_20200809_1500",
+            "james_20200810_1003",
+            "alex_20200819_1300",
+            "james_20200713_1567",
+            "will_20200810_1001",
+            "alex_20200809_1000",
         ]
     }
 
@@ -256,21 +303,23 @@ def test_get_available_data_asset_names(tmp_path_factory):
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
+    assert set(available_data_asset_names.keys()) == set(
+        expected_data_asset_names.keys()
+    )
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
     data_connector_names = ["test_pipeline_data_connector"]
 
-    expected_data_asset_names: dict = {
-        'test_pipeline_data_connector': ['test_asset_1']
-    }
+    expected_data_asset_names: dict = {"test_pipeline_data_connector": ["test_asset_1"]}
 
     available_data_asset_names: dict = execution_environment.get_available_data_asset_names(
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
+    assert set(available_data_asset_names.keys()) == set(
+        expected_data_asset_names.keys()
+    )
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
@@ -291,15 +340,19 @@ def test_get_available_partitions(tmp_path_factory):
     data_asset_base_directory: Union[str, None] = None
 
     base_directory_names: list = [default_base_directory, data_asset_base_directory]
-    create_files_for_regex_partitioner(root_directory_path=project_dir_path, directory_paths=base_directory_names)
+    create_files_for_regex_partitioner(
+        root_directory_path=project_dir_path, directory_paths=base_directory_names
+    )
 
     execution_environment_name: str = "test_execution_environment"
     execution_environment_config: dict = execution_environment_files_data_connector_regex_partitioner_config(
         use_group_names=False,
         use_sorters=False,
         default_base_directory=default_base_directory,
-        data_asset_base_directory=data_asset_base_directory
-    )[execution_environment_name]
+        data_asset_base_directory=data_asset_base_directory,
+    )[
+        execution_environment_name
+    ]
     execution_environment_config.pop("class_name")
     execution_environment: ExecutionEnvironment = ExecutionEnvironment(
         name=execution_environment_name,
@@ -310,7 +363,9 @@ def test_get_available_partitions(tmp_path_factory):
 
     data_connector_name: str = "test_filesystem_data_connector"
 
-    available_partitions: List[Partition] = execution_environment.get_available_partitions(
+    available_partitions: List[
+        Partition
+    ] = execution_environment.get_available_partitions(
         data_connector_name=data_connector_name,
         data_asset_name=None,
         partition_query={
@@ -320,7 +375,7 @@ def test_get_available_partitions(tmp_path_factory):
             "limit": None,
             "partition_index": None,
         },
-        repartition=False
+        repartition=False,
     )
 
     assert len(available_partitions) == 10

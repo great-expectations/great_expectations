@@ -33,7 +33,6 @@ class PandasDatasource(Datasource):
         "limit",
         "dataset_options",
         "boto3_options",
-
     }
 
     @classmethod
