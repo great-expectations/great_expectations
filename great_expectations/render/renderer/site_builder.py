@@ -388,7 +388,7 @@ class DefaultSiteSectionBuilder:
 
         expectation_suite_identifier_exists: bool = any(
             [isinstance(ri, ExpectationSuiteIdentifier) for ri in resource_identifiers]
-        )
+        ) if resource_identifiers is not None else False
 
         for resource_key in source_store_keys:
 
