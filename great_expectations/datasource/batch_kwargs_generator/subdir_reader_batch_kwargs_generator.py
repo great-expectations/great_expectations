@@ -20,6 +20,7 @@ KNOWN_EXTENSIONS = [
     ".csv.gz",
     ".tsv.gz",
     ".feather",
+    ".pkl",
 ]
 
 
