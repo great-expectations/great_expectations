@@ -286,10 +286,6 @@ class SiteBuilder:
         # copy static assets
         self.target_store.copy_static_assets()
 
-        # Rebuild site from scratch if index.html does not exist
-        if not self.target_store.index_html_exists():
-            resource_identifiers = []
-
         for site_section, site_section_builder in self.site_section_builders.items():
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
@@ -390,14 +386,22 @@ class DefaultSiteSectionBuilder:
                 source_store_keys, key=lambda x: x.run_id.run_time, reverse=True
             )[: self.validation_results_limit]
 
+        expectation_suite_identifier_exists: bool = any(
+            [isinstance(ri, ExpectationSuiteIdentifier) for ri in resource_identifiers]
+        )
+
         for resource_key in source_store_keys:
-            # if no resource_identifiers are passed, the section
-            # builder will build
-            # a page for every keys in its source store.
-            # if the caller did pass resource_identifiers, the section builder
-            # will build pages only for the specified resources
-            if resource_identifiers and resource_key not in resource_identifiers:
-                continue
+
+            # All expectation suites are always rendered unless resource_identifiers contains ExpectationSuiteIdentifier(s).
+            if expectation_suite_identifier_exists or (self.name != "expectations"):
+
+                # if no resource_identifiers are passed, the section
+                # builder will build
+                # a page for every keys in its source store.
+                # if the caller did pass resource_identifiers, the section builder
+                # will build pages only for the specified resources
+                if resource_identifiers and resource_key not in resource_identifiers:
+                    continue
 
             if self.run_name_filter:
                 if not resource_key_passes_run_name_filter(
