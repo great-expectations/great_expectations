@@ -538,8 +538,8 @@ connector and the default_partitioner set to one of the configured partitioners.
             return None
 
         return BatchRequest(
-            execution_environment="FAKE_EXECUTION_ENVIRONMENT_NAME",
-            data_connector=self.name,
+            execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            data_connector_name=self.name,
             data_asset_name="FAKE_DATA_ASSET_NAME",
             partition_request=partition.definition,
         )

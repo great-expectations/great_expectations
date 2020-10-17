@@ -377,7 +377,7 @@ class ExecutionEnvironment(object):
         )
         return available_partitions
 
-    def self_check(self, pretty_print=True, max_examples=2):
+    def self_check(self, pretty_print=True, max_examples=3):
         
         return_object = {}
         return_object["execution_engine"] = {
@@ -418,13 +418,21 @@ class ExecutionEnvironment(object):
             for asset_name in asset_names[:max_examples]:
                 partitions = self.get_available_partitions(data_connector["name"], asset_name)
                 len_partitions = len(partitions)
-                example_partition_names = [partition.definition for partition in partitions][:max_examples]
+                example_partition_names = [partition.data_reference for partition in partitions][:max_examples]
                 if pretty_print:
                     print(f"\t\t{asset_name} ({min(len_partitions, max_examples)} of {len_partitions}):", example_partition_names)
+
                 data_connector_obj["data_assets"][asset_name] = {
                     "partition_count": len_partitions,
                     "example_partition_names": example_partition_names
                 }
+
+            instantiated_data_connector = self.get_data_connector(data_connector["name"])
+            instantiated_data_connector.refresh_data_object_cache()
+            unmatched_data_references = instantiated_data_connector.get_unmatched_data_objects()
+            len_unmatched_data_references = len(unmatched_data_references)
+            if pretty_print:
+                print(f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):", unmatched_data_references[:max_examples])
 
             return_object["data_connectors"][data_connector["name"]] = data_connector_obj
 

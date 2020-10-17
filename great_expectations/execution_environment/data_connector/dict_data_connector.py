@@ -57,23 +57,7 @@ class DictDataConnector(DataConnector):
 
         self._cached_data_reference_to_batch_definition_map = None
 
-    def _get_data_reference_list(self):
-        data_reference_keys = list(self.data_reference_dict.keys())
-        data_reference_keys.sort()
-        return data_reference_keys
-
-    def _map_data_reference_to_batch_request_list(self, data_reference) -> List[BatchDefinition]:
-        # Verify that a default_partitioner has been chosen
-        try:
-            self.default_partitioner
-        except ValueError:
-            #If not, return None
-            return
-
-        partition = self.default_partitioner._find_partitions_for_path(data_reference)
-        return BatchRequest(
-            execution_environment="FAKE_EXECUTION_ENVIRONMENT_NAME",
-            data_connector=self.name,
-            data_asset_name="FAKE_DATA_ASSET_NAME",
-            partition_request=partition.definition,
-        )
+    def _get_data_object_list(self):
+        data_object_keys = list(self.data_object_dict.keys())
+        data_object_keys.sort()
+        return data_object_keys
