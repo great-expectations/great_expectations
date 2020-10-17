@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import copy
-from typing import Union, List, Iterator
+from typing import Union, List, Iterator, Any
 from ruamel.yaml.comments import CommentedMap
 
 import logging
@@ -10,6 +10,13 @@ from great_expectations.data_context.types.base import (
     SorterConfig,
     sorterConfigSchema
 )
+
+from great_expectations.core.batch import (
+    BatchRequest,
+    BatchDefinition,
+)
+
+
 from great_expectations.core.id_dict import PartitionDefinitionSubset
 from great_expectations.execution_environment.data_connector.partitioner.partition_request import PartitionRequest
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
@@ -132,6 +139,27 @@ configuration.
                 partitions = sorter.get_sorted_partitions(partitions=partitions)
             return partitions
         return partitions
+
+
+    def _convert_batch_request_to_data_reference(
+        self,
+        data_asset_name: str = None,
+        runtime_parameters: Union[dict, None] = None,
+        batch_request: BatchRequest = None,
+        **kwargs,
+    ) -> Any:
+        # <WILL> data_reference can be Any, since it can be a string that links to a path, or an actual data_frame
+        raise NotImplementedError
+
+    def _convert_data_reference_to_batch_request(
+        self,
+        data_asset_name: str = None,
+        runtime_parameters: Union[dict, None] = None,
+        data_reference: Any = None,
+        **kwargs,
+    ) -> BatchRequest:
+        # <WILL> data_reference can be Any, since it can be a string that links to a path, or an actual data_frame
+        raise NotImplementedError
 
     def _compute_partitions_for_data_asset(
         self,

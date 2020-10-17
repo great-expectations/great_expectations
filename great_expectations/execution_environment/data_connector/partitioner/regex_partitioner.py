@@ -1,13 +1,23 @@
 import regex as re
-from typing import List, Union
+from typing import List, Union, Any
 from pathlib import Path
 
 import logging
+
+from great_expectations.core.batch import (
+    BatchRequest,
+    BatchDefinition,
+)
 
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.id_dict import PartitionDefinition
 import great_expectations.exceptions as ge_exceptions
+
+from great_expectations.core.batch import (
+    BatchRequest,
+    BatchDefinition,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -67,44 +77,37 @@ class RegexPartitioner(Partitioner):
     def regex(self) -> dict:
         return self._regex
 
-    def _compute_partitions_for_data_asset(
+
+    def _convert_batch_request_to_data_reference(
         self,
         data_asset_name: str = None,
-        *,
         runtime_parameters: Union[dict, None] = None,
-        paths: list = None,
-        auto_discover_assets: bool = False
-    ) -> List[Partition]:
-        if not paths or len(paths) == 0:
-            return []
-        partitions: List[Partition] = []
-        partitioned_path: Partition
-        if auto_discover_assets:
-            for path in paths:
-                partitioned_path = self._find_partitions_for_path(
-                    path=path,
-                    data_asset_name=Path(path).stem,
-                    runtime_parameters=runtime_parameters
-                )
-                if partitioned_path is not None:
-                    partitions.append(partitioned_path)
-        else:
-            for path in paths:
-                partitioned_path = self._find_partitions_for_path(
-                    path=path,
-                    data_asset_name=data_asset_name,
-                    runtime_parameters=runtime_parameters
-                )
-                if partitioned_path is not None:
-                    partitions.append(partitioned_path)
-        return partitions
+        batch_request: BatchRequest = None,
+        **kwargs,
+    ) -> Any:
 
-    def _find_partitions_for_path(
+    def _convert_data_reference_to_batch_request(
+            self,
+            data_asset_name: str = None,
+            runtime_parameters: Union[dict, None] = None,
+            data_reference: Any = None,
+            **kwargs,
+    ) -> BatchRequest:
+        # <WILL> data_reference can be Any, since it can be a string that links to a path, or an actual data_frame
+        raise NotImplementedError
+
+
+
+    def _convert_batch_request_to_data_reference(
         self,
+        batch_request: BatchRequest,
         path: str,
         data_asset_name: str = None,
         runtime_parameters: Union[dict, None] = None
     ) -> Union[Partition, None]:
+        print("Hi will i got this far, isn't it wonderful?")
+        print(batch_request)
+
         matches: Union[re.Match, None] = re.match(self.regex["pattern"], path)
         if matches is None:
             logger.warning(f'No match found for path: "{path}".')
@@ -136,3 +139,6 @@ class RegexPartitioner(Partitioner):
             definition=partition_definition,
             data_reference=path
         )
+
+
+    def _conver

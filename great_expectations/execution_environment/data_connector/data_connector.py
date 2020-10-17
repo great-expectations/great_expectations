@@ -176,6 +176,7 @@ class DataConnector(object):
         is found to be identical to an existing partition, the data_reference property of the new partition is accepted.
         """
 
+        ### <WILL> THIS IS WHERE THE LOGIC WILL BE PULLED OUT FROM
         # Prevent non-unique partitions in submitted list of partitions.
         if not allow_multipart_partitions and partitions and len(partitions) > len(set(partitions)):
             raise ge_exceptions.PartitionerError(
@@ -537,7 +538,8 @@ connector and the default_partitioner set to one of the configured partitioners.
             return
 
         #TODO Abe 20201016: Instead of _find_partitions_for_path, this should be convert_data_reference_to_batch_request
-        partition = self.default_partitioner._find_partitions_for_path(data_reference)
+        #partition = self.default_partitioner._find_partitions_for_path(data_reference)
+        partition = self.default_partitioner.convert_data_(data_reference)
         if partition == None:
             return None
 
