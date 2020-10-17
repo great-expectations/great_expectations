@@ -5,6 +5,9 @@ from great_expectations.execution_environment.data_connector.partitioner import 
     RegexPartitioner,
     Partition,
 )
+from great_expectations.core.batch import (
+    BatchRequest
+)
 import great_expectations.exceptions.exceptions as ge_exceptions
 
 
@@ -372,3 +375,57 @@ def test_regex_partitioner_compute_partitions_sorters_too_many_sorters():
     with pytest.raises(ge_exceptions.PartitionerError):
         regex_partitioner.find_or_create_partitions(paths=paths, data_asset_name="test_asset_0")
 
+
+def test_convert_batch_request_to_data_reference():
+    regex_partitioner = RegexPartitioner(
+        name="test_regex_partitioner",
+        config_params={
+            "regex": {
+                "pattern": r".+\/(.+)_(\d+)_(\d+)\.csv",
+                "group_names": ["name", "timestamp", "price"]
+            }
+        }
+    )
+
+def test_convert_data_reference_to_batch_request():
+    regex_partitioner = RegexPartitioner(
+        name="test_regex_partitioner",
+        config_params={
+            "regex": {
+                "pattern": r"^(.+)_(\d+)_(\d+)\.csv$",
+                "group_names": ["name", "timestamp", "price"]
+            }
+        }
+    )
+
+    assert regex_partitioner.convert_data_reference_to_batch_request("alex_20200809_1000.csv") == BatchRequest(
+        execution_environment_name="PLACEHOLDER",
+        data_connector_name="PLACEHOLDER",
+        data_asset_name="PLACEHOLDER",
+        partition_request=PartitionDefinition(**{
+            "name": "alex",
+            "timestamp": "20200809",
+            "price": "1000",
+        })
+    )
+
+    assert regex_partitioner.convert_data_reference_to_batch_request("eugene_20200810_1500.csv") == BatchRequest(
+        execution_environment_name="PLACEHOLDER",
+        data_connector_name="PLACEHOLDER",
+        data_asset_name="PLACEHOLDER",
+        partition_request=PartitionDefinition(**{
+            "name": "eugene",
+            "timestamp": "20200810",
+            "price": "1500",
+        })
+    )
+
+    with pytest.raises(ValueError):
+        print(regex_partitioner.convert_data_reference_to_batch_request("DOESNT_MATCH_CAPTURING_GROUPS.csv"))
+
+    with pytest.raises(ValueError):
+        regex_partitioner.convert_data_reference_to_batch_request("eugene_DOESNT_MATCH_ALL_CAPTURING_GROUPS_1500.csv")
+
+    # TODO ABE 20201017 : Future case to handle
+    # with pytest.raises(ValueError):
+    #     regex_partitioner._convert_data_reference_to_batch_request("NOT_THE_RIGHT_DIR/eugene_20200810_1500.csv")

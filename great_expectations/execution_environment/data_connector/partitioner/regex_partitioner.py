@@ -77,41 +77,15 @@ class RegexPartitioner(Partitioner):
     def regex(self) -> dict:
         return self._regex
 
-
-    def _convert_batch_request_to_data_reference(
+    def convert_data_reference_to_batch_request(
         self,
-        data_asset_name: str = None,
-        runtime_parameters: Union[dict, None] = None,
-        batch_request: BatchRequest = None,
-        **kwargs,
-    ) -> Any:
-
-    def _convert_data_reference_to_batch_request(
-            self,
-            data_asset_name: str = None,
-            runtime_parameters: Union[dict, None] = None,
-            data_reference: Any = None,
-            **kwargs,
+        data_reference
     ) -> BatchRequest:
-        # <WILL> data_reference can be Any, since it can be a string that links to a path, or an actual data_frame
-        raise NotImplementedError
 
-
-
-    def _convert_batch_request_to_data_reference(
-        self,
-        batch_request: BatchRequest,
-        path: str,
-        data_asset_name: str = None,
-        runtime_parameters: Union[dict, None] = None
-    ) -> Union[Partition, None]:
-        print("Hi will i got this far, isn't it wonderful?")
-        print(batch_request)
-
-        matches: Union[re.Match, None] = re.match(self.regex["pattern"], path)
+        matches: Union[re.Match, None] = re.match(self.regex["pattern"], data_reference)
         if matches is None:
-            logger.warning(f'No match found for path: "{path}".')
-            return None
+            raise ValueError(f'No match found for data_reference: "{data_reference}".')
+            
         else:
             groups: tuple = matches.groups()
             group_names: list = [
@@ -128,17 +102,59 @@ class RegexPartitioner(Partitioner):
                 group_name: str = group_names[idx]
                 partition_definition[group_name] = group_value
             partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
-            if runtime_parameters:
-                partition_definition.update(runtime_parameters)
+            # if runtime_parameters:
+            #     partition_definition.update(runtime_parameters)
             partition_name: str = self.DEFAULT_DELIMITER.join(
                 [str(value) for value in partition_definition.values()]
             )
-        return Partition(
-            name=partition_name,
-            data_asset_name=data_asset_name,
-            definition=partition_definition,
-            data_reference=path
+        return BatchRequest(
+            execution_environment_name="PLACEHOLDER",
+            data_connector_name="PLACEHOLDER",
+            data_asset_name="PLACEHOLDER",
+            partition_request=partition_definition,
         )
 
 
-    def _conver
+    def convert_batch_request_to_data_reference(
+        self,
+        batch_request: BatchRequest,
+        path: str,
+        data_asset_name: str = None,
+        runtime_parameters: Union[dict, None] = None
+    ) -> Union[Partition, None]:
+        print("Hi will i got this far, isn't it wonderful?")
+        print(batch_request)
+
+        # matches: Union[re.Match, None] = re.match(self.regex["pattern"], path)
+        # if matches is None:
+        #     logger.warning(f'No match found for path: "{path}".')
+        #     return None
+        # else:
+        #     groups: tuple = matches.groups()
+        #     group_names: list = [
+        #         f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
+        #     ]
+        #     self._validate_sorters_configuration(
+        #         partition_keys=self.regex["group_names"],
+        #         num_actual_partition_keys=len(groups)
+        #     )
+        #     for idx, group_name in enumerate(self.regex["group_names"]):
+        #         group_names[idx] = group_name
+        #     partition_definition: dict = {}
+        #     for idx, group_value in enumerate(groups):
+        #         group_name: str = group_names[idx]
+        #         partition_definition[group_name] = group_value
+        #     partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
+        #     if runtime_parameters:
+        #         partition_definition.update(runtime_parameters)
+        #     partition_name: str = self.DEFAULT_DELIMITER.join(
+        #         [str(value) for value in partition_definition.values()]
+        #     )
+        # return Partition(
+        #     name=partition_name,
+        #     data_asset_name=data_asset_name,
+        #     definition=partition_definition,
+        #     data_reference=path
+        # )
+        raise NotImplementedError
+
