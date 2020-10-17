@@ -429,6 +429,35 @@ connector and the default_partitioner set to one of the configured partitioners.
     ) -> List[Partition]:
         raise NotImplementedError
 
+    def _batch_definition_matches_batch_request(
+        self,
+        batch_definition: BatchDefinition,
+        batch_request: BatchRequest,
+    ) -> bool:
+        assert isinstance(batch_definition, BatchDefinition)
+        assert isinstance(batch_request, BatchRequest)
+
+        if batch_request.execution_environment_name:
+            if batch_request.execution_environment_name != batch_definition.execution_environment_name:
+                return False
+        
+        if batch_request.data_connector_name:
+            if batch_request.data_connector_name != batch_definition.data_connector_name:
+                return False
+            
+        if batch_request.data_asset_name:
+            if batch_request.data_asset_name != batch_definition.data_asset_name:
+                return False
+        
+        #FIXME: This is too rigid. Needs to take into account ranges and stuff.
+        if batch_request.partition_request:
+            for k,v in batch_request.partition_request.items():
+                if (not k in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
+                    return False
+
+        return True
+
+
 
     def get_batch_definition_list_from_batch_request(
         self,

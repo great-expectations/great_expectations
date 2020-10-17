@@ -16,7 +16,10 @@ from tests.test_utils import (
 )
 
 from great_expectations.core.batch import (
-    BatchRequest
+    BatchRequest,
+    BatchDefinition,
+    PartitionRequest,
+    PartitionDefinition,
 )
 
 @pytest.fixture
@@ -208,94 +211,182 @@ def test_get_cached_data_reference_count():
 def test_available_data_asset_names():
     pass
 
-
-### FOR DEVELOPMENT ###
-def test__batch_request_to_batch_definition_simple(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "pretend/A/A-1.csv",
-            "pretend/A/A-2.csv",
-            "pretend/B/B-1.csv",
-            "pretend/B/B-2.csv",
-        ]
-    )
-
-    my_data_connector = FilesDataConnector(
+def test__batch_definition_matches_batch_request():
+    my_data_connector = DictDataConnector(
         name="my_data_connector",
-        base_directory=base_directory,
-        glob_directive='*/*/*.csv',
+        data_reference_dict={},
     )
 
-    #my_data_connector.refresh_data_object_cache()
-    my_data_connector.add_partitioner(
-        "my_first_partitioner",
-        yaml.load("""
-    class_name: RegexPartitioner
-    config_params:
-        regex:
-            group_names:
-                - letter
-                - number
-            pattern: pretend/(.+)-(\\d+)\\.csv
-            """, Loader=yaml.FullLoader)
-    )
-    my_data_connector._default_partitioner = "my_first_partitioner"
-
-    my_batch_request = BatchRequest(
-        execution_environment_name="IdontNeedThis",
-        data_asset_name="A",
-        data_connector_name="my_data_connector"
+    A = BatchDefinition(
+        "A",
+        "a",
+        "aaa",
+        PartitionDefinition({
+            "id": "A"
+        })
     )
 
-    returned = my_data_connector.get_batch_definition_list_from_batch_request(my_batch_request)
-    print(returned)
-
-
-### FOR DEVELOPMENT ###
-def test__batch_request_to_batch_definition_simple(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "pretend/A/A-1.csv",
-            "pretend/A/A-2.csv",
-            "pretend/B/B-1.csv",
-            "pretend/B/B-2.csv",
-        ]
+    assert my_data_connector._batch_definition_matches_batch_request(
+        A,
+        BatchRequest(
+            "A"
+        )
     )
 
-    my_data_connector = FilesDataConnector(
-        name="my_data_connector",
-        base_directory=base_directory,
-        glob_directive='*/*/*.csv',
+    assert my_data_connector._batch_definition_matches_batch_request(
+        A,
+        BatchRequest(
+            "B"
+        )
+    ) == False
+
+    assert my_data_connector._batch_definition_matches_batch_request(
+        A,
+        BatchRequest(
+            "A",
+            "a",
+        )
     )
 
-    my_data_connector.add_partitioner(
-        "my_first_partitioner",
-        yaml.load("""
-    class_name: RegexPartitioner
-    config_params:
-        regex:
-            group_names:
-                - letter
-                - number
-            pattern: pretend/(.+)-(\\d+)\\.csv
-            """, Loader=yaml.FullLoader)
-    )
-    my_data_connector._default_partitioner = "my_first_partitioner"
-
-    my_batch_request = BatchRequest(
-        execution_environment_name="IdontNeedThis",
-        data_asset_name="A-1",
-        data_connector_name="my_data_connector",
-        partition_request={
-            "limit": 2
-        }
+    assert my_data_connector._batch_definition_matches_batch_request(
+        A,
+        BatchRequest(
+            "A",
+            "a",
+            "aaa",
+        )
     )
 
-    returned = my_data_connector.get_batch_definition_list_from_batch_request(my_batch_request)
-    print(returned)
+    assert my_data_connector._batch_definition_matches_batch_request(
+        A,
+        BatchRequest(
+            "A",
+            "a",
+            "bbb"
+        )
+    ) == False
+
+    assert my_data_connector._batch_definition_matches_batch_request(
+        A,
+        BatchRequest(
+            "A",
+            "a",
+            "aaa",
+            {
+                "id": "A"
+            }
+        )
+    )
+
+    assert my_data_connector._batch_definition_matches_batch_request(
+        A,
+        BatchRequest(
+            "A",
+            "a",
+            "aaa",
+            {
+                "id": "B"
+            }
+        )
+    ) == False
+
+    assert my_data_connector._batch_definition_matches_batch_request(
+        A,
+        BatchRequest(
+            partition_request= {
+                "id": "A"
+            }
+        )
+    )
+
+    # TODO : Test cases to exercise ranges, etc.
 
 
+# ### FOR DEVELOPMENT ###
+# def test__batch_request_to_batch_definition_simple(tmp_path_factory):
+#     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+#     create_files_in_directory(
+#         directory=base_directory,
+#         file_name_list=[
+#             "pretend/A/A-1.csv",
+#             "pretend/A/A-2.csv",
+#             "pretend/B/B-1.csv",
+#             "pretend/B/B-2.csv",
+#         ]
+#     )
+
+#     my_data_connector = FilesDataConnector(
+#         name="my_data_connector",
+#         base_directory=base_directory,
+#         glob_directive='*/*/*.csv',
+#     )
+
+#     #my_data_connector.refresh_data_object_cache()
+#     my_data_connector.add_partitioner(
+#         "my_first_partitioner",
+#         yaml.load("""
+#     class_name: RegexPartitioner
+#     config_params:
+#         regex:
+#             group_names:
+#                 - letter
+#                 - number
+#             pattern: pretend/(.+)-(\\d+)\\.csv
+#             """, Loader=yaml.FullLoader)
+#     )
+#     my_data_connector._default_partitioner = "my_first_partitioner"
+
+#     my_batch_request = BatchRequest(
+#         execution_environment_name="IdontNeedThis",
+#         data_asset_name="A",
+#         data_connector_name="my_data_connector"
+#     )
+
+#     returned = my_data_connector.get_batch_definition_list_from_batch_request(my_batch_request)
+#     print(returned)
+
+
+# ### FOR DEVELOPMENT ###
+# def test__batch_request_to_batch_definition_simple(tmp_path_factory):
+#     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+#     create_files_in_directory(
+#         directory=base_directory,
+#         file_name_list=[
+#             "pretend/A/A-1.csv",
+#             "pretend/A/A-2.csv",
+#             "pretend/B/B-1.csv",
+#             "pretend/B/B-2.csv",
+#         ]
+#     )
+
+#     my_data_connector = FilesDataConnector(
+#         name="my_data_connector",
+#         base_directory=base_directory,
+#         glob_directive='*/*/*.csv',
+#     )
+
+#     my_data_connector.add_partitioner(
+#         "my_first_partitioner",
+#         yaml.load("""
+#     class_name: RegexPartitioner
+#     config_params:
+#         regex:
+#             group_names:
+#                 - letter
+#                 - number
+#             pattern: pretend/(.+)-(\\d+)\\.csv
+#             """, Loader=yaml.FullLoader)
+#     )
+#     my_data_connector._default_partitioner = "my_first_partitioner"
+
+#     my_batch_request = BatchRequest(
+#         execution_environment_name="IdontNeedThis",
+#         data_asset_name="A-1",
+#         data_connector_name="my_data_connector",
+#         partition_request={
+#             "limit": 2
+#         }
+#     )
+
+#     returned = my_data_connector.get_batch_definition_list_from_batch_request(my_batch_request)
+#     print(returned)

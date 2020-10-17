@@ -244,32 +244,6 @@ is illegal.
             return NotImplemented
         return self.id == other.id
 
-    #FIXME: This whole method needs to be moved to the DataConnector to allow for ranges and stuff.
-    def matches(self, batch_definition: BatchDefinition):
-        assert isinstance(batch_definition, BatchDefinition)
-
-        if self.execution_environment_name:
-            if self.execution_environment_name != batch_definition.execution_environment_name:
-                return False
-        
-        if self.data_connector_name:
-            if self.data_connector_name != batch_definition.data_connector_name:
-                return False
-            
-        if self.data_asset_name:
-            if self.data_asset_name != batch_definition.data_asset_name:
-                return False
-        
-        #FIXME: This is too rigid. Needs to take into account ranges and stuff.
-        if self.partition_request:
-            for k,v in self.partition_request.items():
-                if (not k in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
-                    return False
-
-        return True
-
-
-
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
 class BatchMarkers(BatchKwargs):
