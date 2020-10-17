@@ -14,113 +14,6 @@ from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot
 import great_expectations.exceptions as ge_exceptions
 
-class BatchRequest(DictDot):
-    """
-    This class contains all attributes of a batch_request.
-    """
-    def __init__(
-        self,
-        execution_environment_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
-        partition_request: PartitionRequest = None,
-        limit: Union[int, None] = None,
-        # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
-        sampling: Union[dict, None] = None
-    ):
-        self._validate_batch_request(
-            execution_environment_name=execution_environment_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            limit=limit,
-        )
-
-        self._execution_environment_name = execution_environment_name
-        self._data_connector_name = data_connector_name
-        self._data_asset_name = data_asset_name
-        self._partition_request = partition_request
-        self._limit = limit
-        self._sampling = sampling
-
-    @property
-    def execution_environment_name(self) -> str:
-        return self._execution_environment_name
-
-    @property
-    def data_connector_name(self) -> str:
-        return self._data_connector_name
-
-    @property
-    def data_asset_name(self) -> str:
-        return self._data_asset_name
-
-    @property
-    def partition_request(self) -> PartitionRequest:
-        return self._partition_request
-
-    @property
-    def limit(self) -> int:
-        return self._limit
-
-    @staticmethod
-    def _validate_batch_request(
-        execution_environment_name: str,
-        data_connector_name: str,
-        data_asset_name: str,
-        partition_request: Union[PartitionRequest, None] = None,
-        limit: Union[int, None] = None,
-    ):
-        if execution_environment_name and not isinstance(execution_environment_name, str):
-            raise TypeError(
-                f'''The type of an execution_environment name must be a string (Python "str").  The type given is
-"{str(type(execution_environment_name))}", which is illegal.
-            '''
-            )
-        if data_connector_name and not isinstance(data_connector_name, str):
-            raise TypeError(
-                f'''The type of a data_connector name must be a string (Python "str").  The type given is
-"{str(type(data_connector_name))}", which is illegal.
-                '''
-            )
-        if data_asset_name and not isinstance(data_asset_name, str):
-            raise TypeError(
-                f'''The type of a data_asset name must be a string (Python "str").  The type given is
-"{str(type(data_asset_name))}", which is illegal.
-                '''
-            )
-        if partition_request and not isinstance(partition_request, PartitionRequest):
-            raise TypeError(
-                f'''The type of a partition_request must be a PartitionRequest object.  The type given is
-"{str(type(partition_request))}", which is illegal.
-                '''
-            )
-        if limit and not isinstance(limit, int):
-            raise TypeError(
-                f'''The type of limit must be an integer (Python "int").  The type given is "{str(type(limit))}", which
-is illegal.
-                '''
-            )
-
-    def get_json_dict(self) -> dict:
-        return {
-            "execution_environment_name" : self.execution_environment_name,
-            "data_connector_name" : self.data_connector_name,
-            "data_asset_name" : self.data_asset_name,
-            "partition_request" : self.partition_request,
-        }
-
-    def __str__(self):
-        return json.dumps(
-            self.get_json_dict(),
-            indent=2
-        )
-
-    # def matches(self, batch_definition: BatchDefinition):
-    #     assert isinstance(batch_definition, BatchDefinition)
-
-
-
 class BatchDefinition(DictDot):
     def __init__(
         self,
@@ -233,6 +126,110 @@ class BatchDefinition(DictDot):
             indent=2
         )
 
+class BatchRequest(DictDot):
+    """
+    This class contains all attributes of a batch_request.
+    """
+    def __init__(
+        self,
+        execution_environment_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        partition_request: PartitionRequest = None,
+        limit: Union[int, None] = None,
+        # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
+        sampling: Union[dict, None] = None
+    ):
+        self._validate_batch_request(
+            execution_environment_name=execution_environment_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            partition_request=partition_request,
+            limit=limit,
+        )
+
+        self._execution_environment_name = execution_environment_name
+        self._data_connector_name = data_connector_name
+        self._data_asset_name = data_asset_name
+        self._partition_request = partition_request
+        self._limit = limit
+        self._sampling = sampling
+
+    @property
+    def execution_environment_name(self) -> str:
+        return self._execution_environment_name
+
+    @property
+    def data_connector_name(self) -> str:
+        return self._data_connector_name
+
+    @property
+    def data_asset_name(self) -> str:
+        return self._data_asset_name
+
+    @property
+    def partition_request(self) -> PartitionRequest:
+        return self._partition_request
+
+    @property
+    def limit(self) -> int:
+        return self._limit
+
+    @staticmethod
+    def _validate_batch_request(
+        execution_environment_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        partition_request: Union[PartitionRequest, None] = None,
+        limit: Union[int, None] = None,
+    ):
+        if execution_environment_name and not isinstance(execution_environment_name, str):
+            raise TypeError(
+                f'''The type of an execution_environment name must be a string (Python "str").  The type given is
+"{str(type(execution_environment_name))}", which is illegal.
+            '''
+            )
+        if data_connector_name and not isinstance(data_connector_name, str):
+            raise TypeError(
+                f'''The type of a data_connector name must be a string (Python "str").  The type given is
+"{str(type(data_connector_name))}", which is illegal.
+                '''
+            )
+        if data_asset_name and not isinstance(data_asset_name, str):
+            raise TypeError(
+                f'''The type of a data_asset name must be a string (Python "str").  The type given is
+"{str(type(data_asset_name))}", which is illegal.
+                '''
+            )
+        if partition_request and not isinstance(partition_request, PartitionRequest):
+            raise TypeError(
+                f'''The type of a partition_request must be a PartitionRequest object.  The type given is
+"{str(type(partition_request))}", which is illegal.
+                '''
+            )
+        if limit and not isinstance(limit, int):
+            raise TypeError(
+                f'''The type of limit must be an integer (Python "int").  The type given is "{str(type(limit))}", which
+is illegal.
+                '''
+            )
+
+    def get_json_dict(self) -> dict:
+        return {
+            "execution_environment_name" : self.execution_environment_name,
+            "data_connector_name" : self.data_connector_name,
+            "data_asset_name" : self.data_asset_name,
+            "partition_request" : self.partition_request,
+        }
+
+    def __str__(self):
+        return json.dumps(
+            self.get_json_dict(),
+            indent=2
+        )
+
+    # def matches(self, batch_definition: BatchDefinition):
+    #     assert isinstance(batch_definition, BatchDefinition)
 
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
