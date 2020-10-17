@@ -266,14 +266,6 @@ multiple partitions, including "{partition}", for the same data reference -- thi
     #     self._partitioners_cache[name] = partitioner
     #     return partitioner
 
-    def _build_partitioners_from_config(self, config: CommentedMap):
-        for name, partitioner_config in config.items():
-            new_partitioner = self._build_partitioner_from_config(
-                name,
-                partitioner_config,
-            )
-            self.partitioners[name] = new_partitioner
-
     def add_partitioner(self, partitioner_name: str, partitioner_config: dict) -> Partitioner:
         """Add a new Partitioner to the DataConnector and (for convenience) return the instantiated Partitioner object.
 
@@ -290,6 +282,13 @@ multiple partitions, including "{partition}", for the same data reference -- thi
 
         return new_partitioner
 
+    def _build_partitioners_from_config(self, config: CommentedMap):
+        for name, partitioner_config in config.items():
+            new_partitioner = self._build_partitioner_from_config(
+                name,
+                partitioner_config,
+            )
+            self.partitioners[name] = new_partitioner
 
     def _build_partitioner_from_config(self, name: str, config: CommentedMap):
         """Build a Partitioner using the provided configuration and return the newly-built Partitioner."""
@@ -498,6 +497,7 @@ connector and the default_partitioner set to one of the configured partitioners.
         self,
         batch_definition: BatchDefinition
     ) -> dict:
+        #FIXME: switch this to use the data_reference cache instead of the partition cache.
         available_partitions = self.get_available_partitions(
             data_asset_name=batch_definition.data_asset_name,
             ### Need to pass data connector
@@ -523,13 +523,16 @@ connector and the default_partitioner set to one of the configured partitioners.
 
     #TODO Abe 20201015: This method is extremely janky. Needs better supporting methods, plus more thought and hardening.
     def _map_data_reference_to_batch_request_list(self, data_reference) -> List[BatchDefinition]:
+        #FIXME: Make this smarter about choosing the right partitioner
+
         # Verify that a default_partitioner has been chosen
         try:
             self.default_partitioner
         except ValueError:
             #If not, return None
             return
-
+        
+        #TODO Abe 20201016: Instead of _find_partitions_for_path, this should be convert_data_reference_to_batch_request
         partition = self.default_partitioner._find_partitions_for_path(data_reference)
         if partition == None:
             return None

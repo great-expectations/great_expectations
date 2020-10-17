@@ -183,3 +183,28 @@ config_params:
     assert set(my_data_connector.get_unmatched_data_references()) == set([])
 
     print(my_data_connector._cached_data_reference_to_batch_definition_map)
+
+
+def test_get_batch_definition_list_from_batch_request():
+    pass
+
+def test_build_batch_spec_from_batch_definition():
+    pass
+
+def test_get_batch_data_and_metadata_from_batch_definition():
+    pass
+
+def test_convert_in_memory_dataset_to_batch():
+    pass
+
+def test_refresh_data_reference_cache():
+    pass
+
+def test_get_unmatched_data_references():
+    pass
+
+def test_get_cached_data_reference_count():
+    pass
+
+def test_available_data_asset_names():
+    pass
