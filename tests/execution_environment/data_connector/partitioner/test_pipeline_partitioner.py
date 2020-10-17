@@ -1,7 +1,6 @@
 import pytest
 import pandas as pd
 
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner import PipelinePartitioner
 from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
@@ -9,11 +8,9 @@ import great_expectations.exceptions.exceptions as ge_exceptions
 
 
 def test_pipeline_partitioner():
-    temp_data_connector = DataConnector(name="test")
-    test_partitioner = PipelinePartitioner(name="test_pipeline_partitioner", data_connector=temp_data_connector)
+    test_partitioner = PipelinePartitioner(name="test_pipeline_partitioner")
     # properties
     assert test_partitioner.name == "test_pipeline_partitioner"
-    assert test_partitioner.data_connector == temp_data_connector
     assert test_partitioner.sorters is None
     assert not test_partitioner.allow_multipart_partitions
     assert test_partitioner.config_params is None
@@ -30,7 +27,7 @@ def test_pipeline_partitioner():
     # no pipeline_datasets configured, so no partitions returned
     returned_partitions = test_partitioner.find_or_create_partitions(
         data_asset_name=None,
-        partition_query=None,
+        partition_request=None,
         runtime_parameters=None,
         repartition=False,
         partition_config=partition_config
@@ -40,8 +37,7 @@ def test_pipeline_partitioner():
 
 
 def test_pipeline_partitioner_single_df():
-    temp_data_connector = DataConnector(name="test")
-    test_partitioner = PipelinePartitioner(name="test_pipeline_partitioner", data_connector=temp_data_connector)
+    test_partitioner = PipelinePartitioner(name="test_pipeline_partitioner")
     # test df
     d = {'col1': [1, 2], 'col2': [3, 4]}
     test_df = pd.DataFrame(data=d)
@@ -54,7 +50,7 @@ def test_pipeline_partitioner_single_df():
     }
     returned_partitions = test_partitioner.find_or_create_partitions(
         data_asset_name=None,
-        partition_query=None,
+        partition_request=None,
         runtime_parameters=None,
         repartition=False,
         partition_config=partition_config

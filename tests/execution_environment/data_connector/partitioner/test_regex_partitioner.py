@@ -1,7 +1,6 @@
 import pytest
 
 from great_expectations.core.id_dict import PartitionDefinition
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner import (
     RegexPartitioner,
     Partition,
@@ -10,11 +9,9 @@ import great_expectations.exceptions.exceptions as ge_exceptions
 
 
 def test_regex_partitioner_instantiation():
-    data_connector = DataConnector(name="test")
-    partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector)
+    partitioner = RegexPartitioner(name="test_regex_partitioner")
     # defaults
     assert partitioner.name == "test_regex_partitioner"
-    assert partitioner.data_connector == data_connector
     assert partitioner.sorters is None
     assert not partitioner.allow_multipart_partitions
     assert partitioner.config_params is None
@@ -23,45 +20,38 @@ def test_regex_partitioner_instantiation():
 
 
 def test_regex_partitioner_regex_is_not_a_dict():
-    data_connector = DataConnector(name="test")
     config_params = {"regex": "i_am_not_a_dictionary"}
 
     with pytest.raises(ge_exceptions.PartitionerError):
         # noinspection PyUnusedLocal
         partitioner = RegexPartitioner(
             name="test_regex_partitioner",
-            data_connector=data_connector,
             config_params=config_params
         )
 
 
 def test_regex_partitioner_regex_missing_pattern():
-    data_connector = DataConnector(name="test")
     # missing pattern
     config_params = {"regex": {"not pattern": "not pattern either"}}
     with pytest.raises(ge_exceptions.PartitionerError):
-        RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector, config_params=config_params)
+        RegexPartitioner(name="test_regex_partitioner", config_params=config_params)
 
 
 def test_regex_partitioner_regex_no_groups_named():
-    data_connector = DataConnector(name="test")
     # adding pattern (no groups named)
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv"}}
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        data_connector=data_connector,
         config_params=config_params
     )
     assert regex_partitioner.regex == {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": []}
 
 
 def test_regex_partitioner_regex_groups_named():
-    data_connector = DataConnector(name="test")
     # adding pattern with named groups
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}}
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        data_connector=data_connector,
         config_params=config_params
     )
     assert regex_partitioner.regex == {
@@ -71,11 +61,9 @@ def test_regex_partitioner_regex_groups_named():
 
 
 def test_regex_partitioner_find_or_create_partitions_with_no_params():
-    data_connector = DataConnector(name="test")
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}}
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        data_connector=data_connector,
         config_params=config_params
     )
     # No file paths, nothing comes back
@@ -83,11 +71,9 @@ def test_regex_partitioner_find_or_create_partitions_with_no_params():
 
 
 def test_regex_partitioner_regex_does_not_match_paths():
-    data_connector = DataConnector(name="test")
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}}
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        data_connector=data_connector,
         config_params=config_params
     )
     paths: list = [
@@ -101,8 +87,7 @@ def test_regex_partitioner_regex_does_not_match_paths():
 
 
 def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_no_data_asset_name():
-    data_connector = DataConnector(name="test")
-    regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector)
+    regex_partitioner = RegexPartitioner(name="test_regex_partitioner")
     paths: list = [
         "alex_20200809_1000.csv",
         "eugene_20200810_1500.csv",
@@ -125,8 +110,7 @@ def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_no
 
 
 def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_autodiscover_assets():
-    data_connector = DataConnector(name="test")
-    regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector)
+    regex_partitioner = RegexPartitioner(name="test_regex_partitioner")
     paths: list = [
         "alex_20200809_1000.csv",
         "eugene_20200810_1500.csv",
@@ -149,8 +133,7 @@ def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_au
 
 
 def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_data_asset_name_configured():
-    data_connector = DataConnector(name="test")
-    regex_partitioner = RegexPartitioner(name="test_regex_partitioner", data_connector=data_connector)
+    regex_partitioner = RegexPartitioner(name="test_regex_partitioner")
     paths: list = [
         "alex_20200809_1000.csv",
         "eugene_20200810_1500.csv",
@@ -173,11 +156,9 @@ def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_da
 
 
 def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
-    data_connector = DataConnector(name="test")
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}}
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        data_connector=data_connector,
         config_params=config_params
     )
     paths: list = [
@@ -202,11 +183,9 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
 
 
 def test_regex_partitioner_compute_partitions_auto_discover_assets_false_no_data_asset_name():
-    data_connector = DataConnector(name="test")
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}}
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        data_connector=data_connector,
         config_params=config_params
     )
     paths: list = [
@@ -229,11 +208,9 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_false_no_data
 
 
 def test_regex_partitioner_compute_partitions_auto_discover_assets_false_data_asset_name_included():
-    data_connector = DataConnector(name="test")
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}}
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        data_connector=data_connector,
         config_params=config_params
     )
     paths: list = [
@@ -258,7 +235,6 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_false_data_as
 
 
 def test_regex_partitioner_compute_partitions_adding_sorters():
-    data_connector = DataConnector(name="test")
     sorters = [
                 {
                     "name": "name",
@@ -286,7 +262,6 @@ def test_regex_partitioner_compute_partitions_adding_sorters():
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}}
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        data_connector=data_connector,
         sorters=sorters,
         config_params=config_params
     )
@@ -311,7 +286,6 @@ def test_regex_partitioner_compute_partitions_adding_sorters():
 
 
 def test_regex_partitioner_compute_partitions_sorters_and_groups_names_do_not_match():
-    data_connector = DataConnector(name="test")
     sorters = [
                 {
                     "name": "name",
@@ -341,7 +315,6 @@ def test_regex_partitioner_compute_partitions_sorters_and_groups_names_do_not_ma
     }
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        data_connector=data_connector,
         sorters=sorters,
         config_params=config_params
     )
@@ -355,7 +328,6 @@ def test_regex_partitioner_compute_partitions_sorters_and_groups_names_do_not_ma
 
 
 def test_regex_partitioner_compute_partitions_sorters_too_many_sorters():
-    data_connector = DataConnector(name="test")
     sorters = [
                 {
                     "name": "name",
@@ -389,7 +361,6 @@ def test_regex_partitioner_compute_partitions_sorters_too_many_sorters():
     config_params = {"regex": {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}}
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        data_connector=data_connector,
         sorters=sorters,
         config_params=config_params
     )

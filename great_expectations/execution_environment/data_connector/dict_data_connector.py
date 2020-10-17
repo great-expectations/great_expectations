@@ -57,7 +57,7 @@ class DictDataConnector(DataConnector):
 
         self._data_references_cache = None
 
-    def _get_data_object_list(self):
-        data_object_keys = list(self.data_object_dict.keys())
-        data_object_keys.sort()
-        return data_object_keys
+    def _get_data_reference_list(self):
+        data_reference_keys = list(self.data_reference_dict.keys())
+        data_reference_keys.sort()
+        return data_reference_keys

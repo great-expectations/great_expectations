@@ -111,6 +111,7 @@ class FilesDataConnector(DataConnector):
         auto_discover_assets: bool = not data_asset_config_exists
         partitions = self._find_or_create_partitions(
             data_asset_name=data_asset_name,
+            batch_request=batch_request,
             partitioner=partitioner,
             partition_request=partition_request,
             runtime_parameters=runtime_parameters,
@@ -124,6 +125,7 @@ class FilesDataConnector(DataConnector):
     def _find_or_create_partitions(
             self,
             data_asset_name: str = None,
+            batch_request: BatchRequest = None,
             partitioner: Partitioner = None,
             partition_request: Union[PartitionRequest, None] = None,
             runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
@@ -146,12 +148,15 @@ class FilesDataConnector(DataConnector):
         if cached_partitions is None or len(cached_partitions) == 0:
             partitions: List[Partition] = partitioner._compute_partitions_for_data_asset(
                 data_asset_name=data_asset_name,
+                batch_request=batch_request,
                 runtime_parameters=runtime_parameters,
                 **kwargs
             )
 
             if not partitions or len(partitions) == 0:
                 partitions = []
+            # <WILL> this is where the partitions they match in a non-unique way
+            # Prevent non-unique partitions in submitted list of partitions.
             self.update_partitions_cache(
                 partitions=partitions,
                 partitioner_name=partitioner.name,
@@ -232,6 +237,8 @@ configured runtime keys.
             return self._verify_file_paths(path_list=path_list)
         raise ge_exceptions.DataConnectorError(f'Expected a directory, but path "{base_directory}" is not a directory.')
 
+
+    # <WILL> "config_params" will likely have to go.
     def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
         glob_directive: str
         base_directory: str
