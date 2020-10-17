@@ -139,7 +139,7 @@ class FilesDataConnector(DataConnector):
         if Path(base_directory).is_dir():
             path_list: list
             if glob_directive:
-                path_list = self._get_data_object_list()
+                path_list = self._get_data_reference_list()
             else:
                 path_list = [
                     str(posix_path) for posix_path in self._get_valid_file_paths(base_directory=base_directory)
@@ -207,7 +207,7 @@ class FilesDataConnector(DataConnector):
             )
         )
     
-    def _get_data_object_list(self):
+    def _get_data_reference_list(self):
         globbed_paths = Path(self.base_directory).glob(self._glob_directive)
         paths = [
             str(posix_path) for posix_path in globbed_paths

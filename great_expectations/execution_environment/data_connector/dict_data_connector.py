@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class DictDataConnector(DataConnector):
     """This DataConnector is meant to closely mimic the FilesDataConnector, but without requiring an actual filesystem.
 
-    Instead, its data_objects are stored in a data_object_dictionary : {
+    Instead, its data_references are stored in a data_reference_dictionary : {
         "pretend/path/A-100.csv" : pandas_df_A_100,
         "pretend/path/A-101.csv" : pandas_df_A_101,
         "pretend/directory/B-1.csv" : pandas_df_B_1,
@@ -37,7 +37,7 @@ class DictDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
-        data_object_dict: {},
+        data_reference_dict: {},
         partitioners: dict = {},
         default_partitioner: str = None,
         assets: dict = None,
@@ -53,9 +53,9 @@ class DictDataConnector(DataConnector):
         )
 
         # This simulates the underlying filesystem
-        self.data_object_dict = data_object_dict
+        self.data_reference_dict = data_reference_dict
 
-        self._cached_data_object_to_batch_definition_map = None
+        self._cached_data_reference_to_batch_definition_map = None
 
     def _get_data_object_list(self):
         data_object_keys = list(self.data_object_dict.keys())
