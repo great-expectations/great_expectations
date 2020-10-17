@@ -4,7 +4,6 @@ from pathlib import Path
 
 import logging
 
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.id_dict import PartitionDefinition
@@ -19,7 +18,6 @@ class RegexPartitioner(Partitioner):
     def __init__(
         self,
         name: str,
-        data_connector: DataConnector,
         sorters: list = None,
         allow_multipart_partitions: bool = False,
         runtime_keys: list = None,
@@ -29,7 +27,6 @@ class RegexPartitioner(Partitioner):
         logger.debug(f'Constructing RegexPartitioner "{name}".')
         super().__init__(
             name=name,
-            data_connector=data_connector,
             sorters=sorters,
             allow_multipart_partitions=allow_multipart_partitions,
             runtime_keys=runtime_keys,

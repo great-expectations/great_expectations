@@ -29,7 +29,6 @@ class Partitioner(object):
     def __init__(
         self,
         name: str,
-        data_connector,
         sorters: list = None,
         allow_multipart_partitions: bool = False,
         runtime_keys: list = None,
@@ -37,7 +36,6 @@ class Partitioner(object):
         **kwargs
     ):
         self._name = name
-        self._data_connector = data_connector
         self._sorters = sorters
         self._allow_multipart_partitions = allow_multipart_partitions
         self._runtime_keys = runtime_keys
@@ -47,10 +45,6 @@ class Partitioner(object):
     @property
     def name(self) -> str:
         return self._name
-
-    @property
-    def data_connector(self):
-        return self._data_connector
 
     @property
     def sorters(self) -> Union[List[Sorter], None]:
