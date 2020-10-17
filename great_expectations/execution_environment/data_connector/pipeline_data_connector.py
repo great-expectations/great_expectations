@@ -4,7 +4,7 @@ import logging
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
+from great_expectations.execution_environment.data_connector.partitioner.partition_request import PartitionRequest
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import BatchRequest
@@ -47,7 +47,8 @@ class PipelineDataConnector(DataConnector):
         self,
         partitioner: Partitioner,
         data_asset_name: str = None,
-        partition_query: Union[PartitionQuery, None] = None,
+        batch_request: BatchRequest = None,
+        partition_request: Union[PartitionRequest, None] = None,
         in_memory_dataset: Any = None,
         runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
         repartition: bool = False
@@ -57,8 +58,8 @@ class PipelineDataConnector(DataConnector):
         if data_asset_name and self.assets and data_asset_name in self.assets:
             pipeline_data_asset_name = data_asset_name
         partition_name: Union[str, None] = None
-        if partition_query:
-            partition_name = partition_query.partition_name
+        if partition_request:
+            partition_name = partition_request.partition_name
         # TODO: <Alex>For the future multi-batch support, this can become a list of partition configurations.</Alex>
         partition_config: dict = {
             "name": partition_name,
@@ -68,7 +69,7 @@ class PipelineDataConnector(DataConnector):
         }
         return partitioner.find_or_create_partitions(
             data_asset_name=data_asset_name,
-            partition_query=partition_query,
+            partition_request=partition_request,
             runtime_parameters=runtime_parameters,
             repartition=repartition,
             # The partition_config parameter is for the specific partitioners, working under the present data connector.

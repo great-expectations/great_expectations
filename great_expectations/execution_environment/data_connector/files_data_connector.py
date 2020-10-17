@@ -8,7 +8,7 @@ import logging
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
+from great_expectations.execution_environment.data_connector.partitioner.partition_request import PartitionRequest
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import BatchRequest
@@ -94,11 +94,13 @@ class FilesDataConnector(DataConnector):
     def base_directory(self):
         return self._normalize_directory_path(dir_path=self._base_directory)
 
+
     def _get_available_partitions(
         self,
         partitioner: Partitioner,
         data_asset_name: str = None,
-        partition_query: Union[PartitionQuery, None] = None,
+        batch_request: BatchRequest = None,
+        partition_request: Union[PartitionRequest, None] = None,
         in_memory_dataset: Any = None,
         runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
         repartition: bool = None
@@ -107,14 +109,92 @@ class FilesDataConnector(DataConnector):
         paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
         auto_discover_assets: bool = not data_asset_config_exists
-        return partitioner.find_or_create_partitions(
+        partitions = self._find_or_create_partitions(
             data_asset_name=data_asset_name,
-            partition_query=partition_query,
+            partitioner=partitioner,
+            partition_request=partition_request,
             runtime_parameters=runtime_parameters,
             # The next two (2) parameters are specific for the partitioners that work under the present data connector.
             paths=paths,
             auto_discover_assets=auto_discover_assets
         )
+        return partitions
+
+
+    def _find_or_create_partitions(
+            self,
+            data_asset_name: str = None,
+            partitioner: Partitioner = None,
+            partition_request: Union[PartitionRequest, None] = None,
+            runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
+            repartition: bool = False,
+            # The remaining parameters are passed down to the specific partitioner from its containing data connector.
+            **kwargs
+    ) -> List[Partition]:
+        if runtime_parameters:
+            self._validate_runtime_keys_configuration(runtime_keys=list(runtime_parameters.keys()))
+
+        if repartition:
+            self.reset_partitions_cache(
+                data_asset_name=data_asset_name,
+            )
+        # noinspection PyProtectedMember
+        cached_partitions: List[Partition] = self._get_cached_partitions(
+            data_asset_name=data_asset_name,
+            runtime_parameters=runtime_parameters
+        )
+        if cached_partitions is None or len(cached_partitions) == 0:
+            partitions: List[Partition] = partitioner._compute_partitions_for_data_asset(
+                data_asset_name=data_asset_name,
+                runtime_parameters=runtime_parameters,
+                **kwargs
+            )
+
+            if not partitions or len(partitions) == 0:
+                partitions = []
+            self.update_partitions_cache(
+                partitions=partitions,
+                partitioner_name=partitioner.name,
+                runtime_parameters=runtime_parameters,
+                allow_multipart_partitions=partitioner.allow_multipart_partitions
+            )
+            # noinspection PyProtectedMember
+            cached_partitions = self._get_cached_partitions(
+                data_asset_name=data_asset_name,
+                runtime_parameters=runtime_parameters
+            )
+        if cached_partitions is None or len(cached_partitions) == 0:
+            return []
+        cached_partitions = partitioner.get_sorted_partitions(partitions=cached_partitions)
+        if partition_request is None:
+            return cached_partitions
+        return partition_request.select_partitions(partitions=cached_partitions)
+
+
+    def _validate_sorters_configuration(self, partition_keys: List[str], num_actual_partition_keys: int):
+        if self.sorters and len(self.sorters) > 0:
+            if any([sorter.name not in partition_keys for sorter in self.sorters]):
+                raise ge_exceptions.PartitionerError(
+                    f'''Partitioner "{self.name}" specifies one or more sort keys that do not appear among the
+                configured partition keys.
+                    '''
+                )
+            if len(partition_keys) < len(self.sorters):
+                raise ge_exceptions.PartitionerError(
+                    f'''Partitioner "{self.name}", configured with {len(partition_keys)} partition keys, matches
+                    {num_actual_partition_keys} actual partition keys; this is fewer than number of sorters specified, which is
+                    {len(self.sorters)}.
+                    '''
+                )
+
+    def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
+        if runtime_keys and len(runtime_keys) > 0:
+            if not (self.runtime_keys and set(runtime_keys) <= set(self.runtime_keys)):
+                raise ge_exceptions.PartitionerError(
+                    f'''Partitioner "{self.name}" was invoked with one or more runtime keys that do not appear among the
+configured runtime keys.
+                    '''
+                )
 
     def _normalize_directory_path(self, dir_path: str) -> str:
         # If directory is a relative path, interpret it as relative to the data context's

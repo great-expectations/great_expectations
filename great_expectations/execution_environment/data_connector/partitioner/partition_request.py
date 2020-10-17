@@ -13,13 +13,13 @@ import great_expectations.exceptions as ge_exceptions
 logger = logging.getLogger(__name__)
 
 
-def build_partition_query(
-    partition_query_dict: Union[
+def build_partition_request(
+    partition_request_dict: Union[
         Dict[str, Union[int, list, tuple, slice, str, Union[Dict, PartitionDefinitionSubset], Callable, None]], None
     ] = None
 ):
-    if not partition_query_dict:
-        return PartitionQuery(
+    if not partition_request_dict:
+        return PartitionRequest(
             custom_filter=None,
             partition_name=None,
             partition_definition=None,
@@ -27,28 +27,28 @@ def build_partition_query(
             partition_index=None,
             limit=None,
         )
-    partition_query_keys: set = set(partition_query_dict.keys())
-    if not partition_query_keys <= PartitionQuery.RECOGNIZED_PARTITION_QUERY_KEYS:
+    partition_request_keys: set = set(partition_request_dict.keys())
+    if not partition_request_keys <= PartitionRequest.RECOGNIZED_PARTITION_REQUEST_KEYS:
         raise ge_exceptions.PartitionerError(
-            f'''Unrecognized partition_query key(s):
-"{str(partition_query_keys - PartitionQuery.RECOGNIZED_PARTITION_QUERY_KEYS)}" detected.
+            f'''Unrecognized partition_request key(s):
+"{str(partition_request_keys - PartitionRequest.RECOGNIZED_PARTITION_REQUEST_KEYS)}" detected.
             '''
         )
-    custom_filter: Callable = partition_query_dict.get("custom_filter")
+    custom_filter: Callable = partition_request_dict.get("custom_filter")
     if custom_filter and not isinstance(custom_filter, Callable):
         raise ge_exceptions.PartitionerError(
             f'''The type of a custom_filter be a function (Python "Callable").  The type given is
 "{str(type(custom_filter))}", which is illegal.
             '''
         )
-    partition_name: str = partition_query_dict.get("partition_name")
+    partition_name: str = partition_request_dict.get("partition_name")
     if partition_name and not isinstance(partition_name, str):
         raise ge_exceptions.PartitionerError(
             f'''The type of a partition_name must be a string (Python "str").  The type given is
 "{str(type(partition_name))}", which is illegal.
             '''
         )
-    partition_definition: Union[dict, None] = partition_query_dict.get("partition_definition")
+    partition_definition: Union[dict, None] = partition_request_dict.get("partition_definition")
     if partition_definition:
         if not isinstance(partition_definition, dict):
             raise ge_exceptions.PartitionerError(
@@ -60,15 +60,15 @@ def build_partition_query(
             raise ge_exceptions.PartitionerError('All partition_definition keys must strings (Python "str").')
     if partition_definition is not None:
         partition_definition: PartitionDefinitionSubset = PartitionDefinitionSubset(partition_definition)
-    data_asset_name: str = partition_query_dict.get("data_asset_name")
+    data_asset_name: str = partition_request_dict.get("data_asset_name")
     if data_asset_name and not isinstance(data_asset_name, str):
         raise ge_exceptions.PartitionerError(
             f'''The type of a data_asset_name must be a string (Python "str").  The type given is
 "{str(type(data_asset_name))}", which is illegal.
             '''
         )
-    partition_index: Union[int, list, tuple, slice, str, None] = partition_query_dict.get("partition_index")
-    limit: Union[int, None] = partition_query_dict.get("limit")
+    partition_index: Union[int, list, tuple, slice, str, None] = partition_request_dict.get("partition_index")
+    limit: Union[int, None] = partition_request_dict.get("limit")
     if limit and (not isinstance(limit, int) or limit < 0):
         raise ge_exceptions.PartitionerError(
             f'''The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The 
@@ -80,7 +80,7 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
             "Only one of partition_index or limit, but not both, can be specified (specifying both is illegal)."
         )
     partition_index = _parse_partition_index(partition_index=partition_index)
-    return PartitionQuery(
+    return PartitionRequest(
         custom_filter=custom_filter,
         partition_name=partition_name,
         partition_definition=partition_definition,
@@ -123,8 +123,8 @@ The type given is "{str(type(partition_index))}", which is illegal.
         )
 
 
-class PartitionQuery(object):
-    RECOGNIZED_PARTITION_QUERY_KEYS: set = {
+class PartitionRequest(object):
+    RECOGNIZED_PARTITION_REQUEST_KEYS: set = {
         "custom_filter",
         "partition_name",
         "partition_definition",

@@ -11,7 +11,7 @@ from great_expectations.data_context.types.base import (
     sorterConfigSchema
 )
 from great_expectations.core.id_dict import PartitionDefinitionSubset
-from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
+from great_expectations.execution_environment.data_connector.partitioner.partition_request import PartitionRequest
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 import great_expectations.exceptions as ge_exceptions
@@ -131,55 +131,7 @@ configuration.
             )
         return sorter
 
-    def find_or_create_partitions(
-        self,
-        data_asset_name: str = None,
-        partition_query: Union[PartitionQuery, None] = None,
-        runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
-        repartition: bool = False,
-        # The remaining parameters are passed down to the specific partitioner from its containing data connector.
-        **kwargs
-    ) -> List[Partition]:
-        if runtime_parameters:
-            self._validate_runtime_keys_configuration(runtime_keys=list(runtime_parameters.keys()))
-
-        if repartition:
-            self.data_connector.reset_partitions_cache(
-                data_asset_name=data_asset_name,
-            )
-
-        # noinspection PyProtectedMember
-        cached_partitions: List[Partition] = self.data_connector._get_cached_partitions(
-            data_asset_name=data_asset_name,
-            runtime_parameters=runtime_parameters
-        )
-        if cached_partitions is None or len(cached_partitions) == 0:
-            partitions: List[Partition] = self._compute_partitions_for_data_asset(
-                data_asset_name=data_asset_name,
-                runtime_parameters=runtime_parameters,
-                **kwargs
-            )
-            if not partitions or len(partitions) == 0:
-                partitions = []
-            self.data_connector.update_partitions_cache(
-                partitions=partitions,
-                partitioner_name=self.name,
-                runtime_parameters=runtime_parameters,
-                allow_multipart_partitions=self.allow_multipart_partitions
-            )
-            # noinspection PyProtectedMember
-            cached_partitions = self.data_connector._get_cached_partitions(
-                data_asset_name=data_asset_name,
-                runtime_parameters=runtime_parameters
-            )
-        if cached_partitions is None or len(cached_partitions) == 0:
-            return []
-        cached_partitions = self._get_sorted_partitions(partitions=cached_partitions)
-        if partition_query is None:
-            return cached_partitions
-        return partition_query.select_partitions(partitions=cached_partitions)
-
-    def _get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
+    def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
         if self.sorters and len(self.sorters) > 0:
             sorters: Iterator[Sorter] = reversed(self.sorters)
             for sorter in sorters:
