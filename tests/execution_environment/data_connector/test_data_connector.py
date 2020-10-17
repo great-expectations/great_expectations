@@ -89,7 +89,7 @@ def test__DictDataConnector():
         set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 
 
-    my_data_connector.refresh_data_reference_cache()
+    my_data_connector.refresh_data_references_cache()
 
     # Since we don't have a Partitioner yet, all keys should be unmatched
     assert set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
@@ -110,11 +110,11 @@ config_params:
     )
     my_data_connector._default_partitioner = "my_partitioner"
     
-    my_data_connector.refresh_data_reference_cache()
+    my_data_connector.refresh_data_references_cache()
 
     assert set(my_data_connector.get_unmatched_data_references()) == set([])
 
-    # print(json.dumps(my_data_connector._cached_data_reference_to_batch_definition_map, indent=2))
+    # print(json.dumps(my_data_connector._data_references_cache, indent=2))
 
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
@@ -138,7 +138,7 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     # with pytest.raises(ValueError):
     #     set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 
-    my_data_connector.refresh_data_reference_cache()
+    my_data_connector.refresh_data_references_cache()
 
     # Since we don't have a Partitioner yet, all keys should be unmatched
     assert len(my_data_connector.get_unmatched_data_references()) == 4
@@ -157,7 +157,7 @@ config_params:
     )
     my_data_connector._default_partitioner = "my_first_partitioner"
 
-    my_data_connector.refresh_data_reference_cache()
+    my_data_connector.refresh_data_references_cache()
 
     assert len(my_data_connector.get_unmatched_data_references()) == 4
 
@@ -177,11 +177,11 @@ config_params:
     )
     my_data_connector._default_partitioner = "my_second_partitioner"
     
-    my_data_connector.refresh_data_reference_cache()
+    my_data_connector.refresh_data_references_cache()
 
     assert set(my_data_connector.get_unmatched_data_references()) == set([])
 
-    print(my_data_connector._cached_data_reference_to_batch_definition_map)
+    print(my_data_connector._data_references_cache)
 
 
 def test_get_batch_definition_list_from_batch_request():
@@ -196,7 +196,7 @@ def test_get_batch_data_and_metadata_from_batch_definition():
 def test_convert_in_memory_dataset_to_batch():
     pass
 
-def test_refresh_data_reference_cache():
+def test_refresh_data_references_cache():
     pass
 
 def test_get_unmatched_data_references():

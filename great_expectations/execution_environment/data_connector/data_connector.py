@@ -85,7 +85,7 @@ class DataConnector(object):
         self._data_context_root_directory = data_context_root_directory
 
         # This is a dictionary which maps data_references onto batch_requests
-        self._cached_data_reference_to_batch_definition_map = {}
+        self._data_references_cache = {}
 
     @property
     def name(self) -> str:
@@ -432,19 +432,17 @@ connector and the default_partitioner set to one of the configured partitioners.
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,
+        execution_environment_name: str,
     ) -> List[BatchDefinition]:
         if batch_request.data_connector_name != self.name:
             raise ValueError(f"data_connector_name {data_connector_name} does not match name {self.name}.")
 
+        # TODO Abe 20201017: This code will switch most of the logic in DataConnector to use the data_references_cache, instead of the partitions_cache
         # batches = []
-        # for data_reference, batch_definition in self._cached_data_reference_to_batch_definition_map.items():
-        #     matches = True
-        #     matches = matches & (batch_request.execution_environment_name == batch_definition.execution_environment_name)
-        #     matches = matches & (batch_request.data_connector_name == batch_definition.data_connector_name)
-        #     matches = matches & (batch_request.data_asset_name == batch_definition.data_asset_name)
-        #     if matches:
+        # for data_reference, batch_definition in self._data_references_cache.items():
+        #     if self._batch_definition_uniquely_matches_batch_request(batch_definition, batch_request):
         #         batches.append(BatchDefinition(
-        #             execution_environment_name=batch_request.execution_environment_name,
+        #             execution_environment_name=execution_environment_name,
         #             data_connector_name=self._name,
         #             data_asset_name=batch_request.data_asset_name,
         #             partition_definition=partition_definition,
@@ -523,22 +521,22 @@ connector and the default_partitioner set to one of the configured partitioners.
         )
         return [partition.definition for partition in available_partitions]
 
-    def refresh_data_reference_cache(self):
+    def refresh_data_references_cache(self):
         #Map data_references to batch_definitions
-        self._cached_data_reference_to_batch_definition_map = {}
+        self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
             mapped_batch_definition_list = self._map_data_reference_to_batch_request_list(data_reference)
-            self._cached_data_reference_to_batch_definition_map[data_reference] = mapped_batch_definition_list
+            self._data_references_cache[data_reference] = mapped_batch_definition_list
 
     def get_unmatched_data_references(self):
-        if self._cached_data_reference_to_batch_definition_map == None:
-            raise ValueError("_cached_data_reference_to_batch_definition_map is None. Have you called refresh_data_reference_cache yet?")
+        if self._data_references_cache == None:
+            raise ValueError("_data_references_cache is None. Have you called refresh_data_references_cache yet?")
 
-        return [k for k,v in self._cached_data_reference_to_batch_definition_map.items() if v == None]
+        return [k for k,v in self._data_references_cache.items() if v == None]
     
     def get_data_reference_list_count(self):
-        return len(self._cached_data_reference_to_batch_definition_map)
+        return len(self._data_references_cache)
 
     #TODO Abe 20201015: This method is extremely janky. Needs better supporting methods, plus more thought and hardening.
     def _map_data_reference_to_batch_request_list(self, data_reference) -> List[BatchDefinition]:

@@ -30,7 +30,7 @@ def test_basic_instantiation(tmp_path_factory):
         data_reference_dict = data_reference_dict
     )
 
-    my_data_connector.refresh_data_reference_cache()
+    my_data_connector.refresh_data_references_cache()
     assert my_data_connector.get_unmatched_data_references() == []
     assert my_data_connector.get_data_reference_list_count() == 4
 

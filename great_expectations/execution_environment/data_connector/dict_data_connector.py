@@ -55,7 +55,7 @@ class DictDataConnector(DataConnector):
         # This simulates the underlying filesystem
         self.data_reference_dict = data_reference_dict
 
-        self._cached_data_reference_to_batch_definition_map = None
+        self._data_references_cache = None
 
     def _get_data_object_list(self):
         data_object_keys = list(self.data_object_dict.keys())
