@@ -229,6 +229,21 @@ is illegal.
             indent=2
         )
 
+    @property
+    def id(self) -> str:
+        return hashlib.md5(
+            json.dumps(
+                self.get_json_dict(),
+                sort_keys=True
+            ).encode("utf-8")
+        ).hexdigest()
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            # Delegate comparison to the other instance's __eq__.
+            return NotImplemented
+        return self.id == other.id
+
     #FIXME: This whole method needs to be moved to the DataConnector to allow for ranges and stuff.
     def matches(self, batch_definition: BatchDefinition):
         assert isinstance(batch_definition, BatchDefinition)
