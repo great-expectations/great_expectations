@@ -1572,7 +1572,7 @@ class BaseDataContext:
         execution_environment_name: str,
         data_connector_name: str,
         data_asset_name: str = None,
-        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+        partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
         in_memory_dataset: Any = None,
         runtime_parameters: Union[dict, None] = None,
         repartition: bool = False
@@ -1583,7 +1583,7 @@ class BaseDataContext:
         available_partitions: List[Partition] = execution_environment.get_available_partitions(
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_query=partition_query,
+            partition_request=partition_request,
             in_memory_dataset=in_memory_dataset,
             runtime_parameters=runtime_parameters,
             repartition=repartition

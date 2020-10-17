@@ -14,9 +14,9 @@ from great_expectations.data_context.types.base import (
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.partitioner.partition_query import (
-    PartitionQuery,
-    build_partition_query
+from great_expectations.execution_environment.data_connector.partitioner.partition_request import (
+    PartitionRequest,
+    build_partition_request
 )
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.id_dict import (
@@ -375,7 +375,7 @@ connector and the default_partitioner set to one of the configured partitioners.
 
         available_partitions: List[Partition] = self.get_available_partitions(
             data_asset_name=None,
-            partition_query={
+            partition_request={
                 "custom_filter": None,
                 "partition_name": None,
                 "partition_definition": None,
@@ -394,7 +394,8 @@ connector and the default_partitioner set to one of the configured partitioners.
     def get_available_partitions(
         self,
         data_asset_name: str = None,
-        partition_query: Union[
+        batch_request: BatchRequest = None,
+        partition_request: Union[
             Dict[str, Union[int, list, tuple, slice, str, Union[Dict, PartitionDefinitionSubset], Callable, None]], None
         ] = None,
         in_memory_dataset: Any = None,
@@ -402,13 +403,14 @@ connector and the default_partitioner set to one of the configured partitioners.
         repartition: bool = False
     ) -> List[Partition]:
         partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
-        partition_query_obj: PartitionQuery = build_partition_query(partition_query_dict=partition_query)
+        partition_request_obj: PartitionRequest = build_partition_request(partition_request_dict=partition_request)
         if runtime_parameters is not None:
             runtime_parameters: PartitionDefinitionSubset = PartitionDefinitionSubset(runtime_parameters)
         return self._get_available_partitions(
             partitioner=partitioner,
             data_asset_name=data_asset_name,
-            partition_query=partition_query_obj,
+            batch_request=batch_request,
+            partition_request=partition_request_obj,
             in_memory_dataset=in_memory_dataset,
             runtime_parameters=runtime_parameters,
             repartition=repartition
@@ -418,7 +420,8 @@ connector and the default_partitioner set to one of the configured partitioners.
         self,
         partitioner: Partitioner,
         data_asset_name: str = None,
-        partition_query: Union[PartitionQuery, None] = None,
+        batch_request: BatchRequest = None,
+        partition_request: Union[PartitionRequest, None] = None,
         in_memory_dataset: Any = None,
         runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
         repartition: bool = False
@@ -495,12 +498,13 @@ connector and the default_partitioner set to one of the configured partitioners.
 
     def _generate_partition_definition_list_from_batch_request(
         self,
-        batch_definition: BatchDefinition
+        batch_request: BatchRequest
     ) -> dict:
         #FIXME: switch this to use the data_reference cache instead of the partition cache.
         available_partitions = self.get_available_partitions(
-            data_asset_name=batch_definition.data_asset_name,
-            ### Need to pass data connector
+            data_asset_name=batch_request.data_asset_name,
+            batch_request=batch_request,
+            partition_request=batch_request.partition_request
         )
         return [partition.definition for partition in available_partitions]
 
@@ -531,7 +535,7 @@ connector and the default_partitioner set to one of the configured partitioners.
         except ValueError:
             #If not, return None
             return
-        
+
         #TODO Abe 20201016: Instead of _find_partitions_for_path, this should be convert_data_reference_to_batch_request
         partition = self.default_partitioner._find_partitions_for_path(data_reference)
         if partition == None:

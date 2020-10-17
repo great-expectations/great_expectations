@@ -79,7 +79,7 @@ class ExecutionEnvironment(object):
         self,
         data_connector_name: str,
         data_asset_name: str = None,
-        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+        partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
         in_memory_dataset: Any = None,
         runtime_parameters: Union[dict, None] = None,
         repartition: bool = False
@@ -89,7 +89,7 @@ class ExecutionEnvironment(object):
         )
         available_partitions: List[Partition] = data_connector.get_available_partitions(
             data_asset_name=data_asset_name,
-            partition_query=partition_query,
+            partition_request=partition_request,
             in_memory_dataset=in_memory_dataset,
             runtime_parameters=runtime_parameters,
             repartition=repartition
@@ -105,7 +105,7 @@ class ExecutionEnvironment(object):
 
 #         partition_request: PartitionRequest = batch_request.partition_request
 #         data_asset_name: str = batch_request.data_asset_name
-#         partition_query: dict = {
+#         partition_request: dict = {
 #             "custom_filter": None,
 #             "partition_name": None,
 #             "partition_definition": copy.deepcopy(partition_request),
@@ -122,7 +122,7 @@ class ExecutionEnvironment(object):
 
 #         partitions: List[Partition] = data_connector.get_available_partitions(
 #             data_asset_name=data_asset_name,
-#             partition_query=partition_query,
+#             partition_request=partition_request,
 #             in_memory_dataset=in_memory_dataset,
 #             runtime_parameters=None,
 #             repartition=False
@@ -360,7 +360,7 @@ class ExecutionEnvironment(object):
         self,
         data_connector_name: str,
         data_asset_name: str = None,
-        partition_query: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+        partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
         in_memory_dataset: Any = None,
         runtime_parameters: Union[dict, None] = None,
         repartition: bool = False
@@ -370,7 +370,7 @@ class ExecutionEnvironment(object):
         )
         available_partitions: List[Partition] = data_connector.get_available_partitions(
             data_asset_name=data_asset_name,
-            partition_query=partition_query,
+            partition_request=partition_request,
             in_memory_dataset=in_memory_dataset,
             runtime_parameters=runtime_parameters,
             repartition=repartition

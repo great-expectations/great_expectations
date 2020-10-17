@@ -6,7 +6,7 @@ import logging
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
+from great_expectations.execution_environment.data_connector.partitioner.partition_request import PartitionRequest
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import BatchRequest
