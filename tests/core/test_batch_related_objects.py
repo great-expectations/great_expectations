@@ -34,7 +34,7 @@ def test_batch_definition_id():
     assert A.id != B.id
 
 def test_batch_definition_instantiation():
-    with pytest.raises(AssertionError):
+    with pytest.raises(TypeError):
         A = BatchDefinition(
             "A",
             "a",
@@ -130,4 +130,118 @@ def test_batch__str__method():
 }"""
 
 
+def test_batch_request_instantiation():
+    BatchRequest(
+        execution_environment_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+        partition_request=PartitionRequest({
+            "id": "A"
+        })
+    )
 
+    BatchRequest(
+        "A",
+        "a",
+        "aaa",
+        PartitionRequest({
+            "id": "A"
+        })
+    )
+
+    with pytest.raises(TypeError):
+        BatchRequest(
+            "A",
+            "a",
+            "aaa",
+            PartitionDefinition({
+                "id": "A"
+            })
+        )
+
+    BatchRequest(
+        data_connector_name="a",
+        data_asset_name="aaa",
+        partition_request=PartitionRequest({
+            "id": "A"
+        })
+    )
+
+    BatchRequest(
+        data_asset_name="aaa",
+        partition_request=PartitionRequest({
+            "id": "A"
+        })
+    )
+
+    BatchRequest(
+        partition_request=PartitionRequest({
+            "id": "A"
+        })
+    )
+
+    BatchRequest(
+        execution_environment_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+    )
+
+
+def test_batch_request_matching_to_batch_definition():
+    A = BatchDefinition(
+        "A",
+        "a",
+        "aaa",
+        PartitionDefinition({
+            "id": "A"
+        })
+    )
+
+    assert BatchRequest(
+        "A"
+    ).matches(A)
+
+    assert not BatchRequest(
+        "A"
+    ).matches(A)
+
+    assert BatchRequest(
+        "A",
+        "a"
+    ).matches(A)
+
+    assert BatchRequest(
+        "A",
+        "a"
+        "aaa"
+    ).matches(A)
+
+    assert not BatchRequest(
+        "A",
+        "a"
+        "bbb"
+    ).matches(A)
+
+    assert BatchRequest(
+        "A",
+        "a"
+        "aaa",
+        PartitionRequest({
+            "id": "A"
+        })
+    ).matches(A)
+
+    assert not BatchRequest(
+        "A",
+        "a"
+        "aaa",
+        PartitionRequest({
+            "id": "B"
+        })
+    ).matches(A)
+
+    assert BatchRequest(
+        PartitionRequest({
+            "id": "A"
+        })
+    ).matches(A)

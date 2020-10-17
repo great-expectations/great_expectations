@@ -430,7 +430,22 @@ connector and the default_partitioner set to one of the configured partitioners.
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-        ###Abe 20201014: Should we verify that BatchRequest.data_connector_name == self._name?
+        if batch_request.data_connector_name != self.name:
+            raise ValueError(f"data_connector_name {data_connector_name} does not match name {self.name}.")
+
+        # batches = []
+        # for data_reference, batch_definition in self._cached_data_reference_to_batch_definition_map.items():
+        #     matches = True
+        #     matches = matches & (batch_request.execution_environment_name == batch_definition.execution_environment_name)
+        #     matches = matches & (batch_request.data_connector_name == batch_definition.data_connector_name)
+        #     matches = matches & (batch_request.data_asset_name == batch_definition.data_asset_name)
+        #     if matches:
+        #         batches.append(BatchDefinition(
+        #             execution_environment_name=batch_request.execution_environment_name,
+        #             data_connector_name=self._name,
+        #             data_asset_name=batch_request.data_asset_name,
+        #             partition_definition=partition_definition,
+        #         ))
 
         partition_definition_list = self._generate_partition_definition_list_from_batch_request(batch_request)
         batches = []

@@ -14,6 +14,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
     PartitionDefinition,
+    PartitionRequest,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -73,9 +74,9 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
         "execution_environment_name": execution_environment_name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "partition_request": {
+        "partition_request": PartitionRequest({
             "key": "Titanic.csv"
-        },
+        }),
         # "limit": None,
         # "batch_spec_passthrough": {
         #     "path": titanic_csv_destination_file_path,
@@ -331,6 +332,7 @@ def test_some_very_basic_stuff(basic_execution_environment):
             "number": "1",
         })
     ))
+
     assert batch.batch_request == None
     assert type(batch.data) == pd.DataFrame
     assert batch.batch_definition == BatchDefinition(
@@ -347,10 +349,10 @@ def test_some_very_basic_stuff(basic_execution_environment):
         execution_environment_name="my_execution_environment",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="B1",
-        partition_request={
+        partition_request=PartitionRequest({
             "letter": "B",
             "number": "1",
-        }
+        })
     ))
     assert len(batch_list) == 1
     assert type(batch_list[0].data) == pd.DataFrame

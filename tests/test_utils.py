@@ -1781,3 +1781,9 @@ def create_files_in_directory(
             f_.write(
                 file_content_fn()
             )
+
+def create_fake_data_frame():
+    return pd.DataFrame({
+        "x": range(10),
+        "y": list("ABCDEFGHIJ"),
+    })

@@ -12,6 +12,7 @@ from great_expectations.data_context.util import (
 )
 from tests.test_utils import (
     create_files_in_directory,
+    create_fake_data_frame,
 )
 
 @pytest.fixture
@@ -57,12 +58,6 @@ def test_basic_instantiation(tmp_path_factory):
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
     data_references = basic_data_connector._get_data_reference_list()
     assert data_references == []
-
-def create_fake_data_frame():
-    return pd.DataFrame({
-        "x": range(10),
-        "y": list("ABCDEFGHIJ"),
-    })
 
 def test__DictDataConnector():
     data_reference_dict = {
