@@ -14,7 +14,6 @@ class PipelinePartitioner(Partitioner):
     def __init__(
         self,
         name: str,
-        data_connector,
         sorters: list = None,
         allow_multipart_partitions: bool = False,
         runtime_keys: list = None,
@@ -24,7 +23,6 @@ class PipelinePartitioner(Partitioner):
         logger.debug(f'Constructing PipelinePartitioner "{name}".')
         super().__init__(
             name=name,
-            data_connector=data_connector,
             sorters=sorters,
             allow_multipart_partitions=allow_multipart_partitions,
             runtime_keys=runtime_keys,
