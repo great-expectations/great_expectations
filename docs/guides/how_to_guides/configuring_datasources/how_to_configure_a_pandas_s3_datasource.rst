@@ -61,7 +61,7 @@ To add an S3-backed Pandas datasource do this:
                     regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
                   your_third_data_asset_name:
                     prefix: prefix_to_folder_containing_your_third_data_asset_files/ # trailing slash is important
-                    regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
+                    regex_filter: .*  # The regex filter will filter the results returned by S3 for the prefix to only those matching the regex. Note: construct your regex to match the entire S3 key (including the prefix).
             module_name: great_expectations.datasource
             data_asset_type:
               class_name: PandasDataset
