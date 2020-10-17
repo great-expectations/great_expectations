@@ -49,7 +49,7 @@ class SinglePartitionDataConnector(DataConnector):
             execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
             data_connector_name=self.name,
             data_asset_name="FAKE_DATA_ASSET_NAME",
-            partition_request=PartitionRequest(**partition.definition),
+            partition_request=partition.definition,
         )
 
 class SinglePartitionDictDataConnector(SinglePartitionDataConnector):

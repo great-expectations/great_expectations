@@ -135,7 +135,7 @@ class BatchRequest(DictDot):
         execution_environment_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        partition_request: PartitionRequest = None,
+        partition_request: dict = None,
         limit: Union[int, None] = None,
         # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
         sampling: Union[dict, None] = None
@@ -168,7 +168,7 @@ class BatchRequest(DictDot):
         return self._data_asset_name
 
     @property
-    def partition_request(self) -> PartitionRequest:
+    def partition_request(self) -> dict: #PartitionRequest:
         return self._partition_request
 
     @property
@@ -180,7 +180,7 @@ class BatchRequest(DictDot):
         execution_environment_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        partition_request: Union[PartitionRequest, None] = None,
+        partition_request: Union[PartitionRequest, dict, None] = None,
         limit: Union[int, None] = None,
     ):
         if execution_environment_name and not isinstance(execution_environment_name, str):
@@ -201,9 +201,10 @@ class BatchRequest(DictDot):
 "{str(type(data_asset_name))}", which is illegal.
                 '''
             )
-        if partition_request and not isinstance(partition_request, PartitionRequest):
+        #TODO Abe 20201015: Switch this to PartitionRequest.
+        if partition_request and not isinstance(partition_request, dict):
             raise TypeError(
-                f'''The type of a partition_request must be a PartitionRequest object.  The type given is
+                f'''The type of a partition_request must be a dict object.  The type given is
 "{str(type(partition_request))}", which is illegal.
                 '''
             )
@@ -228,8 +229,31 @@ is illegal.
             indent=2
         )
 
-    # def matches(self, batch_definition: BatchDefinition):
-    #     assert isinstance(batch_definition, BatchDefinition)
+    #FIXME: This whole method needs to be moved to the DataConnector to allow for ranges and stuff.
+    def matches(self, batch_definition: BatchDefinition):
+        assert isinstance(batch_definition, BatchDefinition)
+
+        if self.execution_environment_name:
+            if self.execution_environment_name != batch_definition.execution_environment_name:
+                return False
+        
+        if self.data_connector_name:
+            if self.data_connector_name != batch_definition.data_connector_name:
+                return False
+            
+        if self.data_asset_name:
+            if self.data_asset_name != batch_definition.data_asset_name:
+                return False
+        
+        #FIXME: This is too rigid. Needs to take into account ranges and stuff.
+        if self.partition_request:
+            for k,v in self.partition_request.items():
+                if (not k in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
+                    return False
+
+        return True
+
+
 
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
