@@ -42,20 +42,6 @@ class SinglePartitionDataConnector(DataConnector):
             default_partitioner="ONE_AND_ONLY_PARTITIONER"
         )
 
-    # #TODO Abe 20201015: This method is extremely janky. Needs better supporting methods, plus more thought and hardening.
-    # def _map_data_reference_to_batch_request_list(self, data_reference) -> List[BatchDefinition]:
-    #     #TODO Abe 20201016: Instead of _find_partitions_for_path, this should be convert_data_reference_to_batch_request
-    #     partition = self.partitioner._find_partitions_for_path(data_reference)
-    #     if partition == None:
-    #         return None
-
-    #     return BatchRequest(
-    #         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-    #         data_connector_name=self.name,
-    #         data_asset_name="FAKE_DATA_ASSET_NAME",
-    #         partition_request=partition.definition,
-    #     )
-
 class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
     def __init__(
         self,

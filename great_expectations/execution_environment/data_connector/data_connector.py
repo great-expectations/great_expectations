@@ -566,7 +566,7 @@ connector and the default_partitioner set to one of the configured partitioners.
     def get_data_reference_list_count(self):
         return len(self._data_references_cache)
 
-    #TODO Abe 20201015: This method is extremely janky. Needs better supporting methods, plus more thought and hardening.
+    #TODO Abe 20201015: This method is still somewhat janky. Needs better supporting methods, plus more thought and hardening.
     def _map_data_reference_to_batch_definition_list(self,
         data_reference,
         execution_environment_name: str,
