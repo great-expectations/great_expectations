@@ -106,9 +106,6 @@ class RegexPartitioner(Partitioner):
                 [str(value) for value in partition_definition.values()]
             )
         return BatchRequest(
-            execution_environment_name="PLACEHOLDER",
-            data_connector_name="PLACEHOLDER",
-            data_asset_name="PLACEHOLDER",
             partition_request=partition_definition,
         )
 

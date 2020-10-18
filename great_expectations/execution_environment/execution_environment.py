@@ -75,27 +75,6 @@ class ExecutionEnvironment(object):
         self._data_connectors_cache = {}
         self._build_data_connectors()
 
-    def get_available_partitions(
-        self,
-        data_connector_name: str,
-        data_asset_name: str = None,
-        partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
-        in_memory_dataset: Any = None,
-        runtime_parameters: Union[dict, None] = None,
-        repartition: bool = False
-    ) -> List[Partition]:
-        data_connector: DataConnector = self.get_data_connector(
-            name=data_connector_name
-        )
-        available_partitions: List[Partition] = data_connector.get_available_partitions(
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            in_memory_dataset=in_memory_dataset,
-            runtime_parameters=runtime_parameters,
-            repartition=repartition
-        )
-        return available_partitions
-
 #     def get_batch(
 #         self,
 #         batch_request: BatchRequest
@@ -178,8 +157,6 @@ class ExecutionEnvironment(object):
             #Seems like we should verify that in_memory_dataset is compatible with the execution_engine...?
             batch_data = in_memory_dataset
             batch_spec, batch_markers = None, None
-
-            #NOTE Abe 20201014: We should also verify that the keys in batch_definition.partition_definition are compatible with the DataConnector?
 
         else:
             data_connector: DataConnector = self.get_data_connector(
@@ -356,26 +333,47 @@ class ExecutionEnvironment(object):
             available_data_asset_names[data_connector_name] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
 
-    def get_available_partitions(
+    def get_available_batch_definitions(
         self,
-        data_connector_name: str,
-        data_asset_name: str = None,
-        partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
-        in_memory_dataset: Any = None,
-        runtime_parameters: Union[dict, None] = None,
-        repartition: bool = False
+        batch_request: BatchRequest
+        # data_connector_name: str,
+        # data_asset_name: str = None,
+        # partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+        # in_memory_dataset: Any = None,
+        # runtime_parameters: Union[dict, None] = None,
+        # repartition: bool = False
     ) -> List[Partition]:
+        if batch_request.execution_environment_name != self.name:
+            raise ValueError(f"execution_environment_name {batch_request.execution_environment_name} does not match name {self.name}.")
+
         data_connector: DataConnector = self.get_data_connector(
-            name=data_connector_name
+            name=batch_request.data_connector_name
         )
-        available_partitions: List[Partition] = data_connector.get_available_partitions(
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            in_memory_dataset=in_memory_dataset,
-            runtime_parameters=runtime_parameters,
-            repartition=repartition
+        batch_definition_list = data_connector.get_batch_definition_list_from_batch_request(
+            batch_request
         )
-        return available_partitions
+        return batch_definition_list
+
+    # def get_available_partitions(
+    #     self,
+    #     data_connector_name: str,
+    #     data_asset_name: str = None,
+    #     partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+    #     in_memory_dataset: Any = None,
+    #     runtime_parameters: Union[dict, None] = None,
+    #     repartition: bool = False
+    # ) -> List[Partition]:
+    #     data_connector: DataConnector = self.get_data_connector(
+    #         name=data_connector_name
+    #     )
+    #     available_partitions: List[Partition] = data_connector.get_available_partitions(
+    #         data_asset_name=data_asset_name,
+    #         partition_request=partition_request,
+    #         in_memory_dataset=in_memory_dataset,
+    #         runtime_parameters=runtime_parameters,
+    #         repartition=repartition
+    #     )
+    #     return available_partitions
 
     def self_check(self, pretty_print=True, max_examples=3):
         

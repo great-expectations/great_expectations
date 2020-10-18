@@ -85,7 +85,7 @@ class DataConnector(object):
         self._data_context_root_directory = data_context_root_directory
 
         # This is a dictionary which maps data_references onto batch_requests
-        self._data_references_cache = {}
+        self._data_references_cache = None
 
     @property
     def name(self) -> str:
@@ -457,8 +457,6 @@ connector and the default_partitioner set to one of the configured partitioners.
 
         return True
 
-
-
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,
@@ -466,26 +464,15 @@ connector and the default_partitioner set to one of the configured partitioners.
         if batch_request.data_connector_name != self.name:
             raise ValueError(f"data_connector_name {data_connector_name} does not match name {self.name}.")
 
-        # TODO Abe 20201017: This code will switch most of the logic in DataConnector to use the data_references_cache, instead of the partitions_cache
-        # batches = []
-        # for data_reference, batch_definition in self._data_references_cache.items():
-        #     if self._batch_definition_matches_batch_request(batch_definition, batch_request):
-        #         batches.append(BatchDefinition(
-        #             execution_environment_name=execution_environment_name,
-        #             data_connector_name=self._name,
-        #             data_asset_name=batch_request.data_asset_name,
-        #             partition_definition=partition_definition,
-        #         ))
+        if self._data_references_cache == None:
+            self.refresh_data_references_cache(
+                batch_request.execution_environment_name
+            )
 
-        partition_definition_list = self._generate_partition_definition_list_from_batch_request(batch_request)
         batches = []
-        for partition_definition in partition_definition_list:
-            batches.append(BatchDefinition(
-                execution_environment_name=batch_request.execution_environment_name,
-                data_connector_name=self._name,
-                data_asset_name=batch_request.data_asset_name,
-                partition_definition=partition_definition,
-            ))
+        for data_reference, batch_definition in self._data_references_cache.items():
+            if self._batch_definition_matches_batch_request(batch_definition, batch_request):
+                batches.append(batch_definition)
 
         return batches
 
@@ -589,10 +576,10 @@ connector and the default_partitioner set to one of the configured partitioners.
             #If not, return None
             return
 
-        #TODO Abe 20201016: Instead of _find_partitions_for_path, this should be convert_data_reference_to_batch_request
-        #partition = self.default_partitioner._find_partitions_for_path(data_reference)
-        partition = self.default_partitioner.convert_data_(data_reference)
-        if partition == None:
+        batch_request = self.default_partitioner.convert_data_reference_to_batch_request(
+            data_reference
+        )
+        if batch_request == None:
             return None
 
         #FIXME: get the real data_asset_name
@@ -601,5 +588,5 @@ connector and the default_partitioner set to one of the configured partitioners.
             execution_environment_name=execution_environment_name,
             data_connector_name=self.name,
             data_asset_name="FAKE_DATA_ASSET_NAME",
-            partition_definition=partition.definition,
+            partition_definition=batch_request.partition_request,
         )
