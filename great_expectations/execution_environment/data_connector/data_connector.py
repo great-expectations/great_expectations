@@ -471,6 +471,10 @@ connector and the default_partitioner set to one of the configured partitioners.
 
         batches = []
         for data_reference, batch_definition in self._data_references_cache.items():
+            if batch_definition == None:
+                # The data_reference is unmatched.
+                continue
+
             if self._batch_definition_matches_batch_request(batch_definition, batch_request):
                 batches.append(batch_definition)
 
@@ -568,32 +572,25 @@ connector and the default_partitioner set to one of the configured partitioners.
         execution_environment_name: str,
     ) -> List[BatchDefinition]:
         #FIXME: Make this smarter about choosing the right partitioner
-
-        # Verify that a default_partitioner has been chosen
-        print(self.default_partitioner)
-        try:
-            print(self.default_partitioner)
-            self.default_partitioner
-        except ValueError:
-            raise ValueError(f"DataConnector {self.name} has no ")
-            #If not, return None
-            return
+        # This will raise an error if no default_partitioner has been specified.
+        self.default_partitioner
 
         batch_request = self.default_partitioner.convert_data_reference_to_batch_request(
             data_reference
         )
-        print("8"*80)
-        print(data_reference)
-        print(batch_request)
 
         if batch_request == None:
             return None
 
         #FIXME: get the real data_asset_name
+        if batch_request.data_asset_name:
+            data_asset_name = batch_request.data_asset_name
+        else:
+            data_asset_name = "FAKE_DATA_ASSET_NAME"
 
         return BatchDefinition(
             execution_environment_name=execution_environment_name,
             data_connector_name=self.name,
-            data_asset_name="FAKE_DATA_ASSET_NAME",
+            data_asset_name=data_asset_name,
             partition_definition=batch_request.partition_request,
         )

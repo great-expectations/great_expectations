@@ -82,30 +82,37 @@ class RegexPartitioner(Partitioner):
 
         matches: Union[re.Match, None] = re.match(self.regex["pattern"], data_reference)
         if matches is None:
-            raise ValueError(f'No match found for data_reference: "{data_reference}".')
+            # raise ValueError(f'No match found for data_reference: "{data_reference}".')
+            return None
             
+        groups: tuple = matches.groups()
+        group_names: list = [
+            f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
+        ]
+        self._validate_sorters_configuration(
+            partition_keys=self.regex["group_names"],
+            num_actual_partition_keys=len(groups)
+        )
+        for idx, group_name in enumerate(self.regex["group_names"]):
+            group_names[idx] = group_name
+        partition_definition: dict = {}
+        for idx, group_value in enumerate(groups):
+            group_name: str = group_names[idx]
+            partition_definition[group_name] = group_value
+        partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
+        # if runtime_parameters:
+        #     partition_definition.update(runtime_parameters)
+        partition_name: str = self.DEFAULT_DELIMITER.join(
+            [str(value) for value in partition_definition.values()]
+        )
+
+        if "data_asset_name" in partition_definition:
+            data_asset_name = partition_definition.pop("data_asset_name")
         else:
-            groups: tuple = matches.groups()
-            group_names: list = [
-                f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
-            ]
-            self._validate_sorters_configuration(
-                partition_keys=self.regex["group_names"],
-                num_actual_partition_keys=len(groups)
-            )
-            for idx, group_name in enumerate(self.regex["group_names"]):
-                group_names[idx] = group_name
-            partition_definition: dict = {}
-            for idx, group_value in enumerate(groups):
-                group_name: str = group_names[idx]
-                partition_definition[group_name] = group_value
-            partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
-            # if runtime_parameters:
-            #     partition_definition.update(runtime_parameters)
-            partition_name: str = self.DEFAULT_DELIMITER.join(
-                [str(value) for value in partition_definition.values()]
-            )
+            data_reference = None
+
         return BatchRequest(
+            data_asset_name=data_asset_name,
             partition_request=partition_definition,
         )
 

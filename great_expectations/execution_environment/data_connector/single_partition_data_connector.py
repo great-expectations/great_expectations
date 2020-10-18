@@ -27,8 +27,11 @@ class SinglePartitionDataConnector(DataConnector):
         name: str,
         partitioner: dict,
         data_assets: dict = None,
+        base_directory: str = None,
     ):
         logger.debug(f'Constructing SinglePartitionDataConnector "{name}".')
+
+        self.base_directory = base_directory
 
         super().__init__(
             name=name,
