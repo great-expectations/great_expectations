@@ -570,15 +570,22 @@ connector and the default_partitioner set to one of the configured partitioners.
         #FIXME: Make this smarter about choosing the right partitioner
 
         # Verify that a default_partitioner has been chosen
+        print(self.default_partitioner)
         try:
+            print(self.default_partitioner)
             self.default_partitioner
         except ValueError:
+            raise ValueError(f"DataConnector {self.name} has no ")
             #If not, return None
             return
 
         batch_request = self.default_partitioner.convert_data_reference_to_batch_request(
             data_reference
         )
+        print("8"*80)
+        print(data_reference)
+        print(batch_request)
+
         if batch_request == None:
             return None
 

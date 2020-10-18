@@ -92,7 +92,9 @@ def test__DictDataConnector():
         set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 
 
-    my_data_connector.refresh_data_references_cache()
+    my_data_connector.refresh_data_references_cache(
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME"
+    )
 
     # Since we don't have a Partitioner yet, all keys should be unmatched
     assert set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
@@ -113,7 +115,9 @@ config_params:
     )
     my_data_connector._default_partitioner = "my_partitioner"
     
-    my_data_connector.refresh_data_references_cache()
+    my_data_connector.refresh_data_references_cache(
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME"
+    )
 
     assert set(my_data_connector.get_unmatched_data_references()) == set([])
 
@@ -141,7 +145,9 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     # with pytest.raises(ValueError):
     #     set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 
-    my_data_connector.refresh_data_references_cache()
+    my_data_connector.refresh_data_references_cache(
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME"
+    )
 
     # Since we don't have a Partitioner yet, all keys should be unmatched
     assert len(my_data_connector.get_unmatched_data_references()) == 4
@@ -160,7 +166,9 @@ config_params:
     )
     my_data_connector._default_partitioner = "my_first_partitioner"
 
-    my_data_connector.refresh_data_references_cache()
+    my_data_connector.refresh_data_references_cache(
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME"
+    )
 
     assert len(my_data_connector.get_unmatched_data_references()) == 4
 

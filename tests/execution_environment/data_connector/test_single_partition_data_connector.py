@@ -10,10 +10,10 @@ from tests.test_utils import (
 
 def test_basic_instantiation(tmp_path_factory):
     data_reference_dict = {
-        "pretend/path/A-100.csv" : create_fake_data_frame(),
-        "pretend/path/A-101.csv" : create_fake_data_frame(),
-        "pretend/directory/B-1.csv" : create_fake_data_frame(),
-        "pretend/directory/B-2.csv" : create_fake_data_frame(),
+        "path/A-100.csv" : create_fake_data_frame(),
+        "path/A-101.csv" : create_fake_data_frame(),
+        "directory/B-1.csv" : create_fake_data_frame(),
+        "directory/B-2.csv" : create_fake_data_frame(),
     }
 
     my_data_connector = SinglePartitionDictDataConnector(
@@ -22,20 +22,20 @@ def test_basic_instantiation(tmp_path_factory):
             "class_name": "RegexPartitioner",
             "config_params": {
                 "regex": {
-                    "group_names": ["letter","number"],
-                    "pattern": "(.+)(\d+)\.csv"
+                    "group_names": ["data_asset_name", "letter","number"],
+                    "pattern": "(.*)/(.+)-(\d+)\.csv"
                 }
             }
         },
         data_reference_dict = data_reference_dict
     )
 
-    my_data_connector.refresh_data_references_cache()
-    assert my_data_connector.get_unmatched_data_references() == []
+    my_data_connector.refresh_data_references_cache("FAKE_EXECUTION_ENVIRONMENT_NAME")
     assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_unmatched_data_references() == []
 
     print(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
         execution_environment_name="something",
         data_connector_name="my_data_connector",
         data_asset_name="something",
-    )))    
+    )))
