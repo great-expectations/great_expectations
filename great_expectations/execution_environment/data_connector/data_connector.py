@@ -79,7 +79,7 @@ class DataConnector(object):
         self._assets = assets
 
         # The partitions cache is a dictionary, which maintains lists of partitions for a data_asset_name as the key.
-        self._partitions_cache: dict = {}
+        # self._partitions_cache: dict = {}
 
         self._execution_engine = execution_engine
         self._data_context_root_directory = data_context_root_directory
@@ -106,138 +106,138 @@ class DataConnector(object):
     def assets(self) -> dict:
         return self._assets
 
-    def _get_cached_partitions(
-        self,
-        data_asset_name: str = None,
-        runtime_parameters: Union[PartitionDefinitionSubset, None] = None
-    ) -> List[Partition]:
-        cached_partitions: List[Partition]
-        if data_asset_name is None:
-            cached_partitions = list(
-                itertools.chain.from_iterable(
-                    [
-                        partitions for name, partitions in self._partitions_cache.items()
-                    ]
-                )
-            )
-        else:
-            cached_partitions = self._partitions_cache.get(data_asset_name)
-        if runtime_parameters is None:
-            return cached_partitions
-        else:
-            if not cached_partitions:
-                return []
-            return list(
-                filter(
-                    lambda partition: self._cache_partition_runtime_parameters_filter(
-                        partition=partition,
-                        parameters=runtime_parameters
-                    ),
-                    cached_partitions
-                )
-            )
+#     def _get_cached_partitions(
+#         self,
+#         data_asset_name: str = None,
+#         runtime_parameters: Union[PartitionDefinitionSubset, None] = None
+#     ) -> List[Partition]:
+#         cached_partitions: List[Partition]
+#         if data_asset_name is None:
+#             cached_partitions = list(
+#                 itertools.chain.from_iterable(
+#                     [
+#                         partitions for name, partitions in self._partitions_cache.items()
+#                     ]
+#                 )
+#             )
+#         else:
+#             cached_partitions = self._partitions_cache.get(data_asset_name)
+#         if runtime_parameters is None:
+#             return cached_partitions
+#         else:
+#             if not cached_partitions:
+#                 return []
+#             return list(
+#                 filter(
+#                     lambda partition: self._cache_partition_runtime_parameters_filter(
+#                         partition=partition,
+#                         parameters=runtime_parameters
+#                     ),
+#                     cached_partitions
+#                 )
+#             )
 
-    @staticmethod
-    def _cache_partition_runtime_parameters_filter(partition: Partition, parameters: PartitionDefinitionSubset) -> bool:
-        partition_definition: PartitionDefinition = partition.definition
-        for key, value in parameters.items():
-            if not (key in partition_definition and partition_definition[key] == value):
-                return False
-        return True
+#     @staticmethod
+#     def _cache_partition_runtime_parameters_filter(partition: Partition, parameters: PartitionDefinitionSubset) -> bool:
+#         partition_definition: PartitionDefinition = partition.definition
+#         for key, value in parameters.items():
+#             if not (key in partition_definition and partition_definition[key] == value):
+#                 return False
+#         return True
 
-    def update_partitions_cache(
-        self,
-        partitions: List[Partition],
-        partitioner_name: str,
-        runtime_parameters: PartitionDefinition,
-        allow_multipart_partitions: bool = False
-    ):
-        """
-        The cache of partitions (keyed by a data_asset_name) is identified by the combination of the following entities:
-        -- name of the partition (string)
-        -- data_asset_name (string)
-        -- partition definition (dictionary)
-        Configurably, these entities are either supplied by the user function or computed by the specific partitioner.
+#     def update_partitions_cache(
+#         self,
+#         partitions: List[Partition],
+#         partitioner_name: str,
+#         runtime_parameters: PartitionDefinition,
+#         allow_multipart_partitions: bool = False
+#     ):
+#         """
+#         The cache of partitions (keyed by a data_asset_name) is identified by the combination of the following entities:
+#         -- name of the partition (string)
+#         -- data_asset_name (string)
+#         -- partition definition (dictionary)
+#         Configurably, these entities are either supplied by the user function or computed by the specific partitioner.
 
-        In order to serve as the identity of the Partition object, the above fields are hashed.  Hence, Partition
-        objects can be utilized in set operations, tested for presence in lists, containing multiple Partition objects,
-        and participate in any other logic operations, where equality checks play a role.  This is particularly
-        important, because one-to-many mappings (multiple "same" partition objects, differing only by the data_reference
-        property) especially if referencing different data objects, are illegal (unless configured otherwise).
+#         In order to serve as the identity of the Partition object, the above fields are hashed.  Hence, Partition
+#         objects can be utilized in set operations, tested for presence in lists, containing multiple Partition objects,
+#         and participate in any other logic operations, where equality checks play a role.  This is particularly
+#         important, because one-to-many mappings (multiple "same" partition objects, differing only by the data_reference
+#         property) especially if referencing different data objects, are illegal (unless configured otherwise).
 
-        In addition, it is considered illegal to have the same data_reference property in multiple Partition objects.
+#         In addition, it is considered illegal to have the same data_reference property in multiple Partition objects.
 
-        Note that the data_reference field of the Partition object does not participate in identifying a partition.
-        The reason for this is that data references can vary in type (files on a filesystem, S3 objects, Pandas or Spark
-        DataFrame objects, etc.) and maintaining references to them in general can result in large memory consumption.
-        Moreover, in the case of Pandas and Spark DataFrame objects (and other in-memory datasets), the metadata aspects
-        of the data object (as captured by the partition information) may remain the same, while the actual dataset
-        changes (e.g., the output of a processing stage of a data pipeline).  In such situations, if a new partition
-        is found to be identical to an existing partition, the data_reference property of the new partition is accepted.
-        """
+#         Note that the data_reference field of the Partition object does not participate in identifying a partition.
+#         The reason for this is that data references can vary in type (files on a filesystem, S3 objects, Pandas or Spark
+#         DataFrame objects, etc.) and maintaining references to them in general can result in large memory consumption.
+#         Moreover, in the case of Pandas and Spark DataFrame objects (and other in-memory datasets), the metadata aspects
+#         of the data object (as captured by the partition information) may remain the same, while the actual dataset
+#         changes (e.g., the output of a processing stage of a data pipeline).  In such situations, if a new partition
+#         is found to be identical to an existing partition, the data_reference property of the new partition is accepted.
+#         """
 
-        ### <WILL> THIS IS WHERE THE LOGIC WILL BE PULLED OUT FROM
-        # Prevent non-unique partitions in submitted list of partitions.
-        if not allow_multipart_partitions and partitions and len(partitions) > len(set(partitions)):
-            raise ge_exceptions.PartitionerError(
-                f'''Partitioner "{partitioner_name}" detected multiple data references in one or more partitions for the
-given data asset; however, allow_multipart_partitions is set to False.  Please consider modifying the directives, used
-to partition your dataset, or set allow_multipart_partitions to True, but be aware that unless you have a specific use
-case for multipart partitions, there is most likely a mismatch between the partitioning directives and the actual
-structure of data under consideration.
-                '''
-            )
-        for partition in partitions:
-            data_asset_name: str = partition.data_asset_name
-            cached_partitions: List[Partition] = self._get_cached_partitions(
-                data_asset_name=data_asset_name,
-                runtime_parameters=runtime_parameters
-            )
-            if cached_partitions is None or len(cached_partitions) == 0:
-                cached_partitions = []
-            if partition in cached_partitions:
-                # Prevent non-unique partitions in anticipated list of partitions.
-                non_unique_partitions: List[Partition] = [
-                    temp_partition
-                    for temp_partition in cached_partitions
-                    if temp_partition == partition
-                ]
-                if not allow_multipart_partitions and len(non_unique_partitions) > 1:
-                    raise ge_exceptions.PartitionerError(
-                        f'''Partitioner "{partitioner_name}" detected multiple data references for partition
-"{partition}" of data asset "{partition.data_asset_name}"; however, allow_multipart_partitions is set to
-False.  Please consider modifying the directives, used to partition your dataset, or set allow_multipart_partitions to
-True, but be aware that unless you have a specific use case for multipart partitions, there is most likely a mismatch
-between the partitioning directives and the actual structure of data under consideration.
-                        '''
-                    )
-                # Attempt to update the data_reference property with that provided as part of the submitted partition.
-                specific_partition_idx: int = cached_partitions.index(partition)
-                specific_partition: Partition = cached_partitions[specific_partition_idx]
-                if specific_partition.data_reference != partition.data_reference:
-                    specific_partition.data_reference = partition.data_reference
-            else:
-                # Prevent the same data_reference property value to be represented by multiple partitions.
-                partitions_with_given_data_reference: List[Partition] = [
-                    temp_partition
-                    for temp_partition in cached_partitions
-                    if temp_partition.data_reference == partition.data_reference
-                ]
-                if len(partitions_with_given_data_reference) > 0:
-                    raise ge_exceptions.PartitionerError(
-                        f'''Partitioner "{partitioner_name}" for data asset "{partition.data_asset_name}" detected
-multiple partitions, including "{partition}", for the same data reference -- this is illegal.
-                        '''
-                    )
-                cached_partitions.append(partition)
-            self._partitions_cache[data_asset_name] = cached_partitions
+#         ### <WILL> THIS IS WHERE THE LOGIC WILL BE PULLED OUT FROM
+#         # Prevent non-unique partitions in submitted list of partitions.
+#         if not allow_multipart_partitions and partitions and len(partitions) > len(set(partitions)):
+#             raise ge_exceptions.PartitionerError(
+#                 f'''Partitioner "{partitioner_name}" detected multiple data references in one or more partitions for the
+# given data asset; however, allow_multipart_partitions is set to False.  Please consider modifying the directives, used
+# to partition your dataset, or set allow_multipart_partitions to True, but be aware that unless you have a specific use
+# case for multipart partitions, there is most likely a mismatch between the partitioning directives and the actual
+# structure of data under consideration.
+#                 '''
+#             )
+#         for partition in partitions:
+#             data_asset_name: str = partition.data_asset_name
+#             cached_partitions: List[Partition] = self._get_cached_partitions(
+#                 data_asset_name=data_asset_name,
+#                 runtime_parameters=runtime_parameters
+#             )
+#             if cached_partitions is None or len(cached_partitions) == 0:
+#                 cached_partitions = []
+#             if partition in cached_partitions:
+#                 # Prevent non-unique partitions in anticipated list of partitions.
+#                 non_unique_partitions: List[Partition] = [
+#                     temp_partition
+#                     for temp_partition in cached_partitions
+#                     if temp_partition == partition
+#                 ]
+#                 if not allow_multipart_partitions and len(non_unique_partitions) > 1:
+#                     raise ge_exceptions.PartitionerError(
+#                         f'''Partitioner "{partitioner_name}" detected multiple data references for partition
+# "{partition}" of data asset "{partition.data_asset_name}"; however, allow_multipart_partitions is set to
+# False.  Please consider modifying the directives, used to partition your dataset, or set allow_multipart_partitions to
+# True, but be aware that unless you have a specific use case for multipart partitions, there is most likely a mismatch
+# between the partitioning directives and the actual structure of data under consideration.
+#                         '''
+#                     )
+#                 # Attempt to update the data_reference property with that provided as part of the submitted partition.
+#                 specific_partition_idx: int = cached_partitions.index(partition)
+#                 specific_partition: Partition = cached_partitions[specific_partition_idx]
+#                 if specific_partition.data_reference != partition.data_reference:
+#                     specific_partition.data_reference = partition.data_reference
+#             else:
+#                 # Prevent the same data_reference property value to be represented by multiple partitions.
+#                 partitions_with_given_data_reference: List[Partition] = [
+#                     temp_partition
+#                     for temp_partition in cached_partitions
+#                     if temp_partition.data_reference == partition.data_reference
+#                 ]
+#                 if len(partitions_with_given_data_reference) > 0:
+#                     raise ge_exceptions.PartitionerError(
+#                         f'''Partitioner "{partitioner_name}" for data asset "{partition.data_asset_name}" detected
+# multiple partitions, including "{partition}", for the same data reference -- this is illegal.
+#                         '''
+#                     )
+#                 cached_partitions.append(partition)
+#             self._partitions_cache[data_asset_name] = cached_partitions
 
-    def reset_partitions_cache(self, data_asset_name: str = None):
-        if data_asset_name is None:
-            self._partitions_cache = {}
-        else:
-            if data_asset_name in self._partitions_cache:
-                self._partitions_cache[data_asset_name] = []
+#     def reset_partitions_cache(self, data_asset_name: str = None):
+#         if data_asset_name is None:
+#             self._partitions_cache = {}
+#         else:
+#             if data_asset_name in self._partitions_cache:
+#                 self._partitions_cache[data_asset_name] = []
 
     # def get_partitioner(self, name: str):
     #     """Get the (named) Partitioner from a DataConnector)
