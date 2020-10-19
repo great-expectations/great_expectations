@@ -148,7 +148,6 @@ configuration.
         batch_request: BatchRequest = None,
         **kwargs,
     ) -> Any:
-        # <WILL> data_reference can be Any, since it can be a string that links to a path, or an actual data_frame
         raise NotImplementedError
 
     def _convert_data_reference_to_batch_request(
@@ -158,7 +157,6 @@ configuration.
         data_reference: Any = None,
         **kwargs,
     ) -> BatchRequest:
-        # <WILL> data_reference can be Any, since it can be a string that links to a path, or an actual data_frame
         raise NotImplementedError
 
     def _compute_partitions_for_data_asset(

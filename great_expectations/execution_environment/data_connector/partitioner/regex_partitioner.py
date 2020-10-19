@@ -91,9 +91,12 @@ class RegexPartitioner(Partitioner):
             
         else:
             groups: tuple = matches.groups()
+            # <WILL> is this automatically generated? 20201019
+            # should these ever be set by the user?
             group_names: list = [
                 f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
             ]
+            #
             self._validate_sorters_configuration(
                 partition_keys=self.regex["group_names"],
                 num_actual_partition_keys=len(groups)
@@ -110,12 +113,29 @@ class RegexPartitioner(Partitioner):
             partition_name: str = self.DEFAULT_DELIMITER.join(
                 [str(value) for value in partition_definition.values()]
             )
+
+        # <NOTE> : we have a separate branch that makes these parameters optional.
+        # 20201019 - this will be fixed in a "future" branch which is already done :)
         return BatchRequest(
             execution_environment_name="PLACEHOLDER",
             data_connector_name="PLACEHOLDER",
             data_asset_name="PLACEHOLDER",
             partition_request=partition_definition,
         )
+
+    def convert_batch_request_to_data_reference(
+            self,
+            batch_request: BatchRequest,
+    ) -> str:
+        if not isinstance(batch_request, BatchRequest):
+            raise TypeError("batch_request is not of an instance of type BatchRequest")
+
+        filepath_template = self._invert_regex_to_data_reference_template()
+        converted_string = filepath_template.format(
+            **batch_request.partition_request
+        )
+
+        return converted_string
 
     def _invert_regex_to_data_reference_template(self):
         """
@@ -126,10 +146,12 @@ class RegexPartitioner(Partitioner):
         data_reference_template = ""
         group_name_index = 0
 
-        # print("-"*80)
+        print("-"*80)
+        # AST to parse regex.
+        # this is re
         parsed_sre = sre_parse.parse(regex_pattern)
         for token, value in parsed_sre:
-            # print(type(token), token, value)
+            print(type(token), token, value)
 
             if token == sre_constants.LITERAL:
                 #Transcribe the character directly into the template
@@ -163,19 +185,4 @@ class RegexPartitioner(Partitioner):
         data_reference_template = re.sub("\*+", "*", data_reference_template)
 
         return data_reference_template
-
-    def convert_batch_request_to_data_reference(
-        self,
-        batch_request: BatchRequest,
-    ) -> str:
-        if not isinstance(batch_request, BatchRequest):
-            raise TypeError("batch_request is not of an instance of type BatchRequest")
-
-        filepath_template = self._invert_regex_to_data_reference_template()
-        converted_string = filepath_template.format(
-            **batch_request.partition_request
-        )
-
-        return converted_string
-        
 
