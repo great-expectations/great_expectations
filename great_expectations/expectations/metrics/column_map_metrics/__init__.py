@@ -3,6 +3,7 @@ from .column_value_lengths_equal import ColumnValuesValueLengthsEqual
 from .column_values_decreasing import ColumnValuesDecreasing
 from .column_values_in_set import ColumnValuesInSet
 from .column_values_increasing import ColumnValuesIncreasing
+from .column_values_non_null import ColumnValuesNonNull
 from .column_values_of_type import ColumnValuesOfType
 from .column_values_unique import ColumnValuesUnique
 from .column_values_z_score import ColumnValuesZScore
