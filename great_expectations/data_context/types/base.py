@@ -29,110 +29,124 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
-class DataContextConfig(DictDot):
+class AssetConfig(DictDot):
     def __init__(
-        self,
-        config_version,
-        expectations_store_name,
-        validations_store_name,
-        evaluation_parameter_store_name,
-        plugins_directory,
-        validation_operators,
-        stores,
-        data_docs_sites,
-        notebooks=None,
-        config_variables_file_path=None,
-        anonymous_usage_statistics=None,
-        commented_map=None,
-        datasources=None,
-        execution_environments=None,
+        self, partitioner=None, config_params=None, **kwargs,
     ):
-        if commented_map is None:
-            commented_map = CommentedMap()
-        self._commented_map = commented_map
-        self._config_version = config_version
-        if datasources is None:
-            datasources = {}
-        self.datasources = datasources
-        if execution_environments is None:
-            execution_environments = {}
-        self.execution_environments = execution_environments
-        self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        self.plugins_directory = plugins_directory
-        if not isinstance(validation_operators, dict):
-            raise ValueError(
-                "validation_operators must be configured with a dictionary"
-            )
-        self.validation_operators = validation_operators
-        self.stores = stores
-        self.notebooks = notebooks
-        self.data_docs_sites = data_docs_sites
-        self.config_variables_file_path = config_variables_file_path
-        if anonymous_usage_statistics is None:
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
-        elif isinstance(anonymous_usage_statistics, dict):
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-                **anonymous_usage_statistics
-            )
-        self.anonymous_usage_statistics = anonymous_usage_statistics
+        if partitioner is not None:
+            self._partitioner = partitioner
+        if config_params is not None:
+            self._config_params = config_params
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     @property
-    def commented_map(self):
-        return self._commented_map
+    def partitioner(self):
+        return self._partitioner
 
     @property
-    def config_version(self):
-        return self._config_version
-
-    @classmethod
-    def from_commented_map(cls, commented_map):
-        try:
-            config = dataContextConfigSchema.load(commented_map)
-            return cls(commented_map=commented_map, **config)
-        except ValidationError:
-            logger.error(
-                "Encountered errors during loading data context config. See ValidationError for more details."
-            )
-            raise
-
-    def to_yaml(self, outfile):
-        commented_map = deepcopy(self.commented_map)
-        commented_map.update(dataContextConfigSchema.dump(self))
-        yaml.dump(commented_map, outfile)
+    def config_params(self):
+        return self._config_params
 
 
-class ExecutionEngineConfigSchema(Schema):
+class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String()
-    module_name = fields.String(missing="great_expectations.execution_engine")
-    caching = fields.Boolean()
-    batch_spec_defaults = fields.Dict(allow_none=True)
+    partitioner = fields.String(required=False, allow_none=True)
+
+    config_params = fields.Dict(allow_none=True)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_execution_engine_config(self, data, **kwargs):
-        return ExecutionEngineConfig(**data)
+    def make_asset_config(self, data, **kwargs):
+        return AssetConfig(**data)
 
 
-class ExecutionEngineConfig(DictDot):
+class SorterConfig(DictDot):
+    def __init__(
+        self,
+        name,
+        class_name=None,
+        module_name=None,
+        orderby="asc",
+        config_params=None,
+        **kwargs,
+    ):
+        self._name = name
+        self._class_name = class_name
+        self._module_name = module_name
+        self._orderby = orderby
+        if config_params is not None:
+            self._config_params = config_params
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+    @property
+    def orderby(self):
+        return self._orderby
+
+    @property
+    def config_params(self):
+        return self._config_params
+
+
+class SorterConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    name = fields.String(required=True)
+    class_name = fields.String(required=True)
+    module_name = fields.String(
+        missing="great_expectations.execution_environment.data_connector.partitioner.sorter"
+    )
+    orderby = fields.String(required=False, missing="asc", allow_none=False)
+
+    config_params = fields.Dict(allow_none=True)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_sorter_config(self, data, **kwargs):
+        return SorterConfig(**data)
+
+
+class PartitionerConfig(DictDot):
     def __init__(
         self,
         class_name,
         module_name=None,
-        caching=None,
-        batch_spec_defaults=None,
-        **kwargs
+        sorters=None,
+        allow_multipart_partitions=False,
+        config_params=None,
+        **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
-        if caching is not None:
-            self.caching = caching
-        if batch_spec_defaults is not None:
-            self.batch_spec_defaults = batch_spec_defaults
+        if sorters is not None:
+            self._sorters = sorters
+        self._allow_multipart_partitions = allow_multipart_partitions
+        if config_params is not None:
+            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -143,6 +157,185 @@ class ExecutionEngineConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    @property
+    def sorters(self):
+        return self._sorters
+
+    @property
+    def allow_multipart_partitions(self):
+        return self._allow_multipart_partitions
+
+    @property
+    def config_params(self):
+        return self._config_params
+
+
+class PartitionerConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String(required=True)
+    module_name = fields.String(
+        missing="great_expectations.execution_environment.data_connector.partitioner"
+    )
+
+    sorters = fields.List(
+        cls_or_instance=fields.Nested(SorterConfigSchema),
+        required=False,
+        allow_none=True,
+    )
+
+    allow_multipart_partitions = fields.Boolean(
+        required=False, missing=False, allow_none=False
+    )
+
+    config_params = fields.Dict(allow_none=True)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_partitioner_config(self, data, **kwargs):
+        return PartitionerConfig(**data)
+
+
+class DataConnectorConfig(DictDot):
+    def __init__(
+        self,
+        class_name,
+        partitioners=None,
+        default_partitioner=None,
+        assets=None,
+        module_name=None,
+        config_params=None,
+        **kwargs,
+    ):
+        self._class_name = class_name
+        self._module_name = module_name
+        if partitioners is not None:
+            self._partitioners = partitioners
+        if default_partitioner is not None:
+            self._default_partitioner = default_partitioner
+        if assets is not None:
+            self._assets = assets
+        if config_params is not None:
+            self._config_params = config_params
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    @property
+    def partitioners(self):
+        return self._partitioners
+
+    @property
+    def default_partitioner(self):
+        return self._default_partitioner
+
+    @property
+    def assets(self):
+        return self._assets
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+    @property
+    def config_params(self):
+        return self._config_params
+
+
+class DataConnectorConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String(required=True)
+    module_name = fields.String(
+        missing="great_expectations.execution_environment.data_connector"
+    )
+
+    default_partitioner = fields.String(required=False, allow_none=True,)
+
+    partitioners = fields.Dict(
+        keys=fields.Str(),
+        values=fields.Nested(PartitionerConfigSchema),
+        required=False,
+        allow_none=True,
+    )
+
+    assets = fields.Dict(
+        keys=fields.Str(),
+        values=fields.Nested(AssetConfigSchema),
+        required=False,
+        allow_none=True,
+    )
+
+    config_params = fields.Dict(allow_none=True)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_data_connector_config(self, data, **kwargs):
+        return DataConnectorConfig(**data)
+
+
+class ExecutionEngineConfig(DictDot):
+    def __init__(
+        self,
+        class_name,
+        module_name=None,
+        caching=None,
+        batch_spec_defaults=None,
+        **kwargs,
+    ):
+        self._class_name = class_name
+        self._module_name = module_name
+        if caching is not None:
+            self.caching = caching
+        if batch_spec_defaults is not None:
+            self._batch_spec_defaults = batch_spec_defaults
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def batch_spec_defaults(self):
+        return self._batch_spec_defaults
+
+
+class ExecutionEngineConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String(required=True)
+    module_name = fields.String(missing="great_expectations.execution_engine")
+    caching = fields.Boolean()
+    batch_spec_defaults = fields.Dict(allow_none=True)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_execution_engine_config(self, data, **kwargs):
+        return ExecutionEngineConfig(**data)
 
 
 class ExecutionEnvironmentConfig(DictDot):
@@ -155,14 +348,15 @@ class ExecutionEnvironmentConfig(DictDot):
         credentials=None,
         reader_method=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
         self.execution_engine = execution_engine
-        if data_connectors is not None:
-            self.data_connectors = data_connectors
+        if data_connectors is None:
+            data_connectors = {}
+        self.data_connectors = data_connectors
         if credentials is not None:
             self.credentials = credentials
         if reader_method is not None:
@@ -188,22 +382,20 @@ class ExecutionEnvironmentConfigSchema(Schema):
     class_name = fields.String(missing="ExecutionEnvironment")
     module_name = fields.String(missing="great_expectations.execution_environment")
     execution_engine = fields.Nested(ExecutionEngineConfigSchema)
-    # TODO: Update to data_connector-specific
-    # data_connectors = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.DataConnectorSchema))
+
     data_connectors = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), allow_none=True
+        keys=fields.Str(),
+        values=fields.Nested(DataConnectorConfigSchema),
+        required=True,
+        allow_none=False,
     )
+
     credentials = fields.Raw(allow_none=True)
     spark_context = fields.Raw(allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
         pass
-        # if "generators" in data:
-        #     raise ge_exceptions.InvalidConfigError(
-        #         "Your current configuration uses the 'generators' key in a datasource, but in version 0.10 of "
-        #         "GE, that key is renamed to 'batch_kwargs_generators'. Please update your config to continue."
-        #     )
 
     # noinspection PyUnusedLocal
     @post_load
@@ -220,9 +412,10 @@ class DatasourceConfig(DictDot):
         data_asset_type=None,
         batch_kwargs_generators=None,
         credentials=None,
+        boto3_options=None,
         reader_method=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
@@ -238,6 +431,8 @@ class DatasourceConfig(DictDot):
             self.limit = limit
         for k, v in kwargs.items():
             setattr(self, k, v)
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
 
     @property
     def class_name(self):
@@ -327,7 +522,6 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
         return data
 
 
-# TODO: deprecate? keep for backwards compatibility?
 class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
@@ -335,6 +529,7 @@ class DatasourceConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.datasource")
     data_asset_type = fields.Nested(ClassConfigSchema)
+    boto3_options = fields.Dict(keys=fields.Str(), values=fields.Str(), allow_none=True)
     # TODO: Update to generator-specific
     # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
     batch_kwargs_generators = fields.Dict(
@@ -479,6 +674,80 @@ class NotebooksConfigSchema(Schema):
         return NotebooksConfig(**data)
 
 
+class DataContextConfig(DictDot):
+    def __init__(
+        self,
+        config_version,
+        expectations_store_name,
+        validations_store_name,
+        evaluation_parameter_store_name,
+        plugins_directory,
+        validation_operators,
+        stores,
+        data_docs_sites,
+        notebooks=None,
+        config_variables_file_path=None,
+        anonymous_usage_statistics=None,
+        commented_map=None,
+        datasources=None,
+        execution_environments=None,
+    ):
+        if commented_map is None:
+            commented_map = CommentedMap()
+        self._commented_map = commented_map
+        self._config_version = config_version
+        if datasources is None:
+            datasources = {}
+        self.datasources = datasources
+        if execution_environments is None:
+            execution_environments = {}
+        self.execution_environments = execution_environments
+        self.expectations_store_name = expectations_store_name
+        self.validations_store_name = validations_store_name
+        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.plugins_directory = plugins_directory
+        if not isinstance(validation_operators, dict):
+            raise ValueError(
+                "validation_operators must be configured with a dictionary"
+            )
+        self.validation_operators = validation_operators
+        self.stores = stores
+        self.notebooks = notebooks
+        self.data_docs_sites = data_docs_sites
+        self.config_variables_file_path = config_variables_file_path
+        if anonymous_usage_statistics is None:
+            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
+        elif isinstance(anonymous_usage_statistics, dict):
+            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
+                **anonymous_usage_statistics
+            )
+        self.anonymous_usage_statistics = anonymous_usage_statistics
+
+    @property
+    def commented_map(self):
+        return self._commented_map
+
+    @property
+    def config_version(self):
+        return self._config_version
+
+    @classmethod
+    def from_commented_map(cls, commented_map):
+        try:
+            config = dataContextConfigSchema.load(commented_map)
+            return cls(commented_map=commented_map, **config)
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading data context config. See ValidationError for more details."
+            )
+            raise
+
+    def to_yaml(self, outfile):
+        commented_map = deepcopy(self.commented_map)
+        commented_map.update(dataContextConfigSchema.dump(self))
+        yaml.dump(commented_map, outfile)
+
+
 class DataContextConfigSchema(Schema):
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,
@@ -555,5 +824,8 @@ class DataContextConfigSchema(Schema):
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 executionEnvironmentConfigSchema = ExecutionEnvironmentConfigSchema()
+dataConnectorConfigSchema = DataConnectorConfigSchema()
+partitionerConfigSchema = PartitionerConfigSchema()
+sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()

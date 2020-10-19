@@ -82,13 +82,13 @@ class ExpectColumnToExist(DatasetExpectation):
 
     """ A Metric Decorator for the Columns"""
 
-    @PandasExecutionEngine.metric(
-        metric_name="columns",
-        metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),
-        metric_value_keys=(),
-        metric_dependencies=(),
-        filter_column_isnull=False,
-    )
+    # @PandasExecutionEngine.metric(
+    #        metric_name="columns",
+    #        metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),
+    #        metric_value_keys=(),
+    #        metric_dependencies=(),
+    #        filter_column_isnull=False,
+    #    )
     def _pandas_columns(
         self,
         batches: Dict[str, Batch],
@@ -134,7 +134,7 @@ class ExpectColumnToExist(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

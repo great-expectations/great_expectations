@@ -7,6 +7,7 @@ import nbformat
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
+    NotebookConfig,
     NotebookTemplateConfig,
     notebookConfigSchema,
 )

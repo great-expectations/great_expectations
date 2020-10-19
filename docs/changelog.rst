@@ -6,6 +6,27 @@ Changelog
 
 Develop
 -----------------
+* [BUGFIX] Query batch kwargs support for Athena backend (issue 1964)
+
+* [BUGFIX] Skip config substitution if key is "password"
+* [BUGFIX] fix site_names functionality and add site_names param to get_docs_sites_urls
+
+0.12.4
+-----------------
+* [FEATURE] Add PagerdutyAlertAction (Thanks @NiallRees!)
+* [FEATURE] enable using Minio for S3 backend (Thanks @noklam!)
+* [ENHANCEMENT] Add SqlAlchemy support for expect_compound_columns_to_be_unique (Thanks @jhweaver!)
+* [ENHANCEMENT] Add Spark support for expect_compound_columns_to_be_unique (Thanks @tscottcoombes1!)
+* [ENHANCEMENT] Save expectation suites with datetimes in evaluation parameters (Thanks @mbakunze!)
+* [ENHANCEMENT] Show data asset name in Slack message (Thanks @haydarai!)
+* [ENHANCEMENT] Enhance data doc to show data asset name in overview block (Thanks @noklam!)
+* [ENHANCEMENT] Clean up checkpoint output
+* [BUGFIX] Change default prefix for TupleStoreBackend (issue 1907)
+* [BUGFIX] Duplicate s3 approach for GCS for building object keys
+* [BUGFIX] import NotebookConfig (Thanks @cclauss!)
+* [BUGFIX] Improve links (Thanks @sbrugman!)
+* [MAINTENANCE] Unpin black in requirements (Thanks @jtilly!)
+* [MAINTENANCE] remove test case name special characters
 
 0.12.3
 -----------------
@@ -23,10 +44,8 @@ Develop
 * [DOCS] Update to Deploying Great Expectations with Google Cloud Composer
 * [MAINTENANCE] Update moto dependency to include cryptography (see #spulec/moto/3290)
 
-
 0.12.2
 -----------------
-
 * [ENHANCEMENT] Update schema for anonymized expectation types to avoid large key domain
 * [ENHANCEMENT] BaseProfiler type mapping expanded to include more pandas and numpy dtypes
 * [BUGFIX] Allow for pandas reader option inference with parquet and Excel (thanks @dlachasse)!

@@ -116,13 +116,13 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.standard_deviation",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
+    # @PandasExecutionEngine.metric(
+    #        metric_name="column.aggregate.standard_deviation",
+    #        metric_domain_keys=DatasetExpectation.domain_keys,
+    #        metric_value_keys=tuple(),
+    #        metric_dependencies=tuple(),
+    #        filter_column_isnull=False,
+    #    )
     def _standard_deviation(
         self,
         batches: Dict[str, Batch],
@@ -137,7 +137,7 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
         )
         return series.std()
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

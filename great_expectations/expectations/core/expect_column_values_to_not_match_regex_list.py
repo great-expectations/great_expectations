@@ -108,34 +108,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapDatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.not_match_regex_list",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("regex_list",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
-    def _pandas_column_values_not_match_regex_list(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        regex_list = metric_value_kwargs["regex_list"]
-
-        regex_matches = []
-        for regex in regex_list:
-            regex_matches.append(series.astype(str).str.contains(regex))
-        regex_match_df = pd.concat(regex_matches, axis=1, ignore_index=True)
-
-        return pd.DataFrame(
-            {"column_values.not_match_regex_list": ~regex_match_df.any(axis="columns")}
-        )
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

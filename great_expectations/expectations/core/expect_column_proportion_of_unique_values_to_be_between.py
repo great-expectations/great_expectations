@@ -99,35 +99,6 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
 
     """ A Column Aggregate Metric Decorator for the Unique Proportion"""
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.unique_proportion",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
-    def _pandas_unique_proportion(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-    ):
-        """Unique Proportion Metric"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        total_values = series.shape[0]
-        unique_values = series.value_counts().shape[0]
-
-        if total_values > 0:
-            return unique_values / total_values
-        else:
-            return 0
-
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -184,7 +155,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
 
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

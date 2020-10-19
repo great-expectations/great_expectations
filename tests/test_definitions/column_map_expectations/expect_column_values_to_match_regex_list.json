@@ -15,7 +15,7 @@
     },
     "tests" : [
     {
-      "title" : "Basic_positive_test",
+      "title" : "basic_positive_test",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -29,7 +29,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title" : "Positive_test_with_multiple_regexes",
+      "title" : "positive_test_with_multiple_regexes",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -44,7 +44,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title" : "Basic_negative_test",
+      "title" : "basic_negative_test",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -59,7 +59,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title" : "Negative_test_with_more_string-ish_strings",
+      "title" : "negative_test_with_more_string-ish_strings",
       "exact_match_out" : false,
       "in": {
         "column": "x",
@@ -73,7 +73,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title" : "Positive_test_with_match_on__any",
+      "title" : "positive_test_with_match_on__any",
       "exact_match_out" : false,
       "in": {
         "column": "x",
@@ -88,7 +88,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title" : "Positive_test_column_name_has_space_and_match_on__any",
+      "title" : "positive_test_column_name_has_space_and_match_on__any",
       "exact_match_out" : false,
       "in": {
         "column": "column_name with space",

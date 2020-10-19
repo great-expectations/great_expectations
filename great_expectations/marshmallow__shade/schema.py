@@ -584,6 +584,13 @@ class Schema(base.SchemaABC, metaclass=SchemaMeta):
             if ``obj`` is invalid.
         """
         serialized = self.dump(obj, many=many)
+
+        def datetime_serializer(o):
+            if isinstance(o, dt.datetime):
+                return o.__str__()
+
+        if "default" not in kwargs:
+            kwargs.update({"default": datetime_serializer})
         return self.opts.render_module.dumps(serialized, *args, **kwargs)
 
     def _deserialize(

@@ -107,13 +107,13 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.length_equals",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("value",),
-        metric_dependencies=("column.value_lengths",),
-        filter_column_isnull=True,
-    )
+    # @PandasExecutionEngine.column_map_metric(
+    #     metric_name="column_values.length_equals",
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=("value",),
+    #     metric_dependencies=("column.value_lengths",),
+    #     filter_column_isnull=True,
+    # )
     def _pandas_column_values_length_equals(
         self,
         series: pd.Series,
@@ -130,12 +130,12 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
 
     """ A metric decorator for individual value lengths"""
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.value_lengths",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-    )
+    # @PandasExecutionEngine.metric(
+    #     metric_name="column.value_lengths",
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=(),
+    #     metric_dependencies=tuple(),
+    # )
     def _pandas_value_lengths(
         self,
         batches: Dict[str, Batch],
@@ -152,7 +152,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
 
         return series.str.len()
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

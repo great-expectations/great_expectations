@@ -1,130 +1,150 @@
-import datetime
-import glob
 import logging
-import os
-import re
+from pathlib import Path
+from typing import List, Union
 
-from great_expectations.execution_environment.data_connector.data_connector import (
-    DataConnector,
+import regex as re
+
+import great_expectations.exceptions as ge_exceptions
+
+# from great_expectations.execution_environment.data_connector.data_connector import (
+#     DataConnector,
+# )
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partitioner import (
+    Partitioner,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class RegexPartitioner(object):
-    """
-    A regex partitioner generates partitions based on the regex and names that are passed in a parameters
-    <WILL> write a better description
+class RegexPartitioner(Partitioner):
+    DEFAULT_GROUP_NAME_PATTERN: str = "group_"
+    DEFAULT_DELIMITER: str = "-"
 
-    CURRENTLY THIS ISN'T CONNECTED TO ANYTHING
-    """
+    def __init__(
+        self,
+        name: str,
+        data_connector: "DataConnector",
+        sorters: list = None,
+        allow_multipart_partitions: bool = False,
+        config_params: dict = None,
+        **kwargs,
+    ):
+        logger.debug(f'Constructing RegexPartitioner "{name}".')
+        super().__init__(
+            name=name,
+            data_connector=data_connector,
+            sorters=sorters,
+            allow_multipart_partitions=allow_multipart_partitions,
+            config_params=config_params,
+            **kwargs,
+        )
 
-    def __init__(self, asset_regex, asset_field_definitions, use_directory=True):
+        self._regex = self._process_regex_config()
 
-        self._asset_regex = asset_regex
-        self.asset_field_definitions = asset_field_definitions
-        self.partitions = []
-        # see if we can
-        self.partition_ids = "FOO"
-
-    def get_available_partitions(self, data_asset_name=None):
-        files_config = self._get_data_asset_config(data_asset_name=data_asset_name)
-        batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
-        partitions = [
-            self._partitioner(path, files_config)
-            for path in batch_paths
-            if self._partitioner(path, files_config) is not None
-        ]
-        return partitions
-
-    def get_available_partition_ids(self, data_asset_name=None):
-        partitions = self.get_available_partitions(data_asset_name)
-        partition_ids = []
-        for partition in partitions:
-            partition_ids.append(partition["partition_id"])
-        return partition_ids
-
-    def get_available_partition_definitions(self, data_asset_name=None):
-        partitions = self.get_available_partitions(data_asset_name)
-        # return partitions
-        partition_definitions = []
-        for partition in partitions:
-            partition_definitions.append(partition["partition_definition"])
-        return partition_definitions
-
-    def _partitioner(self, path, files_config):
-        partitions = {}
-
-        # if not configured then we return the default.
-        if "partition_regex" not in files_config:
-            partitions = {
-                "partition_definition": {},
-                "partition_id": (
-                    datetime.datetime.now(datetime.timezone.utc).strftime(
-                        "%Y%m%dT%H%M%S.%fZ"
-                    )
-                    + "__unmatched"
-                ),
-            }
-            return partitions
+    def _process_regex_config(self) -> dict:
+        regex: Union[dict, None]
+        if self.config_params:
+            regex = self.config_params.get("regex")
+            # check if dictionary
+            if not isinstance(regex, dict):
+                raise ge_exceptions.PartitionerError(
+                    f"""RegexPartitioner "{self.name}" requires a regex pattern configured as a dictionary.
+                    It is currently of type "{type(regex)}. Please check your configuration."""
+                )
+            # check if correct key exists
+            if not ("pattern" in regex.keys()):
+                raise ge_exceptions.PartitionerError(
+                    f"""RegexPartitioner "{self.name}" requires a regex pattern to be specified in its configuration.
+                    """
+                )
+            # check if group_names exists in regex config, if not add empty list
+            if not (
+                "group_names" in regex.keys() and isinstance(regex["group_names"], list)
+            ):
+                regex["group_names"] = []
         else:
-            # TODO: check if this is really dangerous, because it seems that way
+            # if no configuration exists at all, set defaults
+            regex = {"pattern": r"(.*)", "group_names": ["group_0",]}
+        return regex
 
-            partition_regex = (
-                self._base_directory + "/" + files_config["partition_regex"]
-            )
-            # matches = re.match(files_config["partition_regex"], path)
-            matches = re.match(partition_regex, path)
-            if matches is None:
-                logger.warning("No match found for path: %s" % path)
-                # return the empty partition
-                partitions = {
-                    "partition_definition": {},
-                    "partition_id": (
-                        datetime.datetime.now(datetime.timezone.utc).strftime(
-                            "%Y%m%dT%H%M%S.%fZ"
-                        )
-                        + "__unmatched"
-                    ),
-                }
-                return partitions
-            else:
-                # need to check that matches length is the same as partition_param
-                if "partition_param" in files_config:
-                    partition_params = files_config["partition_param"]
+    @property
+    def regex(self) -> dict:
+        return self._regex
 
-                    try:
-                        _ = matches[
-                            len(partition_params)
-                        ]  # check validitiy of partition params and whether the regex was configured correctly
-
-                    except:
-                        logger.warning(
-                            "The number of matches not match the delimiter. See if your partitions are defined correctly"
-                        )
-                        print("please check regex")  # TODO: Beef up this error message
-
-                    # NOTE : matches begin with the full regex match at index=0 and then each matching group
-                    # and then each subsequent match in following indices.
-                    # this is why partition_definition_inner_dict is loaded with partition_params[i] as key
-                    # and matches[i+1] as value
-                    partition_definition_inner_dict = {}
-                    for i in range(len(partition_params)):
-                        partition_definition_inner_dict[partition_params[i]] = matches[
-                            i + 1
-                        ]
-                    partitions["partition_definition"] = partition_definition_inner_dict
-
-                if "partition_delimiter" in files_config:
-                    delim = files_config["partition_delimiter"]
-                else:
-                    delim = "-"
-
-                # process partition_definition into partition id
-                partition_id = []
-                for key in partitions["partition_definition"].keys():
-                    partition_id.append(str(partitions["partition_definition"][key]))
-                partition_id = delim.join(partition_id)
-                partitions["partition_id"] = partition_id
-
+    def _compute_partitions_for_data_asset(
+        self,
+        data_asset_name: str = None,
+        *,
+        paths: list = None,
+        auto_discover_assets: bool = False,
+    ) -> List[Partition]:
+        if not paths or len(paths) == 0:
+            return []
+        partitions: List[Partition] = []
+        partitioned_path: Partition
+        if auto_discover_assets:
+            for path in paths:
+                partitioned_path = self._find_partitions_for_path(
+                    path=path, data_asset_name=Path(path).stem
+                )
+                if partitioned_path is not None:
+                    partitions.append(partitioned_path)
+        else:
+            for path in paths:
+                partitioned_path = self._find_partitions_for_path(
+                    path=path, data_asset_name=data_asset_name
+                )
+                if partitioned_path is not None:
+                    partitions.append(partitioned_path)
         return partitions
+
+    def _find_partitions_for_path(
+        self, path: str, data_asset_name: str = None
+    ) -> Union[Partition, None]:
+        matches: Union[re.Match, None] = re.match(self.regex["pattern"], path)
+        if matches is None:
+            logger.warning(f'No match found for path: "{path}".')
+            return None
+        else:
+            groups: tuple = matches.groups()
+            group_names: list = [
+                f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}"
+                for idx, group_value in enumerate(groups)
+            ]
+            for idx, group_name in enumerate(self.regex["group_names"]):
+                group_names[idx] = group_name
+            if self.sorters and len(self.sorters) > 0:
+                if any(
+                    [
+                        sorter.name not in self.regex["group_names"]
+                        for sorter in self.sorters
+                    ]
+                ):
+                    raise ge_exceptions.PartitionerError(
+                        f"""RegexPartitioner "{self.name}" specifies one or more sort keys that do not appear among
+configured match group names.
+                        """
+                    )
+                if len(group_names) < len(self.sorters):
+                    raise ge_exceptions.PartitionerError(
+                        f"""RegexPartitioner "{self.name}", configured with {len(group_names)}, matches {len(groups)}
+group names, which is fewer than number of sorters specified is {len(self.sorters)}.
+                        """
+                    )
+            partition_definition: dict = {}
+            for idx, group_value in enumerate(groups):
+                group_name: str = group_names[idx]
+                partition_definition[group_name] = group_value
+            partition_name: str = RegexPartitioner.DEFAULT_DELIMITER.join(
+                partition_definition.values()
+            )
+
+        return Partition(
+            name=partition_name,
+            data_asset_name=data_asset_name,
+            definition=partition_definition,
+            data_reference=path,
+        )

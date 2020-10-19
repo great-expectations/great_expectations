@@ -68,13 +68,13 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
 
     """ A Metric Decorator for the Column Count"""
 
-    @PandasExecutionEngine.metric(
-        metric_name="columns.count",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
+    # @PandasExecutionEngine.metric(
+    #        metric_name="columns.count",
+    #        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #        metric_value_keys=(),
+    #        metric_dependencies=tuple(),
+    #        filter_column_isnull=False,
+    #    )
     def _pandas_column_count(
         self,
         batches: Dict[str, Batch],
@@ -121,7 +121,7 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

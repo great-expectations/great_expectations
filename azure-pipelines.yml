@@ -1,7 +1,10 @@
 trigger:
   - develop
   - main
-
+  - 0.*-develop
+  - feature_dev_wip/partitioners
+  - feature/batch_spec
+ 
 resources:
   containers:
   - container: postgres

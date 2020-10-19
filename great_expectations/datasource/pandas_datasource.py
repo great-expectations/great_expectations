@@ -32,6 +32,7 @@ class PandasDatasource(Datasource):
         "reader_options",
         "limit",
         "dataset_options",
+        "boto3_options",
     }
 
     @classmethod
@@ -83,6 +84,7 @@ class PandasDatasource(Datasource):
                     "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon "
                     "initialization."
                 )
+            configuration["boto3_options"] = boto3_options
 
         if reader_options is not None:
             if isinstance(reader_options, dict):
