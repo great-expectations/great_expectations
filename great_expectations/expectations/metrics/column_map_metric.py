@@ -159,6 +159,18 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for column_aggregate_metric")
 
 
+def map_condition(engine: Type[ExecutionEngine], **kwargs):
+    def wrapper(metric_fn: Callable):
+        def inner_func(*args, **kwargs):
+            metric_fn(*args, **kwargs)
+
+        inner_func.map_condition_metric_engine = engine
+        inner_func.map_condition_metric_kwargs = kwargs
+        return inner_func
+
+    return wrapper
+
+
 def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     """Return the column aggregate metric decorator for the specified engine.
 
@@ -172,6 +184,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     if issubclass(engine, PandasExecutionEngine):
 
         def wrapper(metric_fn: Callable):
+            @map_condition
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -199,8 +212,6 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
                 )
                 return meets_expectation_series
 
-            inner_func.map_condition_metric_engine = engine
-            inner_func.map_condition_metric_kwags = kwargs
             return inner_func
 
         return wrapper
@@ -208,6 +219,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SqlAlchemyExecutionEngine):
 
         def wrapper(metric_fn: Callable):
+            @map_condition
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -247,8 +259,6 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
                     expected_condition = expected_condition
                 return expected_condition, compute_domain_kwargs
 
-            inner_func.map_condition_metric_engine = engine
-            inner_func.map_condition_metric_kwags = kwargs
             return inner_func
 
         return wrapper
@@ -256,6 +266,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SparkDFExecutionEngine):
 
         def wrapper(metric_fn: Callable):
+            @map_condition
             @wraps(metric_fn)
             def inner_func(
                 cls,
