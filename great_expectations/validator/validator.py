@@ -404,6 +404,7 @@ class Validator:
             )
         return evrs
 
+    # TODO: why does this take in a metrics argument?
     def _parse_validation_graph(self, validation_graph, metrics):
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
