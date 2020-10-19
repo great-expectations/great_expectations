@@ -557,11 +557,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             if generated_table_name is not None:
                 if self.engine.dialect.name.lower() == "bigquery":
                     logger.warning(
-                        "Created permanent table {table_name}".format(table_name=table_name)
+                        "Created permanent table {table_name}".format(
+                            table_name=table_name
+                        )
                     )
                 if self.engine.dialect.name.lower() == "awsathena":
                     logger.warning(
-                        "Created permanent table default.{table_name}".format(table_name=table_name)
+                        "Created permanent table default.{table_name}".format(
+                            table_name=table_name
+                        )
                     )
 
         try:

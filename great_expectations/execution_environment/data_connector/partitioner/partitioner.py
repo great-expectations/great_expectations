@@ -1,29 +1,26 @@
-# -*- coding: utf-8 -*-
-
 import copy
-from typing import Union, List, Iterator
+import logging
+from typing import Iterator, List, Union
+
 from ruamel.yaml.comments import CommentedMap
 
-import logging
-
-from great_expectations.data_context.types.base import (
-    SorterConfig,
-    sorterConfigSchema
-)
-
-from great_expectations.execution_environment.data_connector.partitioner.partition_query import PartitionQuery
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 import great_expectations.exceptions as ge_exceptions
-
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
+from great_expectations.data_context.types.base import SorterConfig, sorterConfigSchema
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partition_query import (
+    PartitionQuery,
+)
+from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import (
+    Sorter,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class Partitioner(object):
+class Partitioner:
     def __init__(
         self,
         name: str,
@@ -31,7 +28,7 @@ class Partitioner(object):
         sorters: list = None,
         allow_multipart_partitions: bool = False,
         config_params: dict = None,
-        **kwargs
+        **kwargs,
     ):
         self._name = name
         self._data_connector = data_connector
@@ -51,7 +48,10 @@ class Partitioner(object):
     @property
     def sorters(self) -> Union[List[Sorter], None]:
         if self._sorters:
-            return [self.get_sorter(name=sorter_config["name"]) for sorter_config in self._sorters]
+            return [
+                self.get_sorter(name=sorter_config["name"])
+                for sorter_config in self._sorters
+            ]
         return None
 
     @property
@@ -75,7 +75,9 @@ class Partitioner(object):
             return self._sorters_cache[name]
         else:
             if self._sorters:
-                sorter_names: list = [sorter_config["name"] for sorter_config in self._sorters]
+                sorter_names: list = [
+                    sorter_config["name"] for sorter_config in self._sorters
+                ]
                 if name in sorter_names:
                     sorter_config: dict = copy.deepcopy(
                         self._sorters[sorter_names.index(name)]
@@ -88,12 +90,8 @@ class Partitioner(object):
                 raise ge_exceptions.SorterError(
                     f'Unable to load sorter with the name "{name}" -- no configuration found or invalid configuration.'
                 )
-        sorter_config: CommentedMap = sorterConfigSchema.load(
-            sorter_config
-        )
-        sorter: Sorter = self._build_sorter_from_config(
-            name=name, config=sorter_config
-        )
+        sorter_config: CommentedMap = sorterConfigSchema.load(sorter_config)
+        sorter: Sorter = self._build_sorter_from_config(name=name, config=sorter_config)
         self._sorters_cache[name] = sorter
         return sorter
 
@@ -126,7 +124,7 @@ class Partitioner(object):
         partition_query: Union[PartitionQuery, None] = None,
         repartition: bool = False,
         # The remaining parameters are passed down to the specific partitioner by its containing parent data connector.
-        **kwargs
+        **kwargs,
     ) -> List[Partition]:
         if repartition:
             self.data_connector.reset_partitions_cache(data_asset_name=data_asset_name)
@@ -136,15 +134,14 @@ class Partitioner(object):
         )
         if cached_partitions is None or len(cached_partitions) == 0:
             partitions: List[Partition] = self._compute_partitions_for_data_asset(
-                data_asset_name=data_asset_name,
-                **kwargs
+                data_asset_name=data_asset_name, **kwargs
             )
             if not partitions or len(partitions) == 0:
                 partitions = []
             self.data_connector.update_partitions_cache(
                 partitions=partitions,
                 allow_multipart_partitions=self.allow_multipart_partitions,
-                partitioner=self
+                partitioner=self,
             )
             cached_partitions = self.data_connector.get_cached_partitions(
                 data_asset_name=data_asset_name
@@ -164,5 +161,7 @@ class Partitioner(object):
             return partitions
         return partitions
 
-    def _compute_partitions_for_data_asset(self, data_asset_name: str = None, **kwargs) -> List[Partition]:
+    def _compute_partitions_for_data_asset(
+        self, data_asset_name: str = None, **kwargs
+    ) -> List[Partition]:
         raise NotImplementedError

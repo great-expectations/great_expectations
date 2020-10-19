@@ -1603,19 +1603,17 @@ def safe_remove(path):
 def execution_environment_files_data_connector_regex_partitioner_config(
     use_group_names: bool = False,
     use_sorters: bool = False,
-    default_base_directory = "data",
-    data_asset_base_directory = None,
+    default_base_directory="data",
+    data_asset_base_directory=None,
 ):
     if not use_group_names and use_sorters:
-        raise ValueError("The presently available data_connector and partitioner tests match sorters with group names.")
+        raise ValueError(
+            "The presently available data_connector and partitioner tests match sorters with group names."
+        )
 
     group_names: Union[list, None]
     if use_group_names:
-        group_names = [
-            "name",
-            "timestamp",
-            "price"
-        ]
+        group_names = ["name", "timestamp", "price"]
     else:
         group_names = None
 
@@ -1633,9 +1631,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
                 "class_name": "DateTimeSorter",
                 "orderby": "desc",
-                "config_params": {
-                    "datetime_format": "%Y%m%d",
-                }
+                "config_params": {"datetime_format": "%Y%m%d",},
             },
             {
                 "name": "price",
@@ -1654,7 +1650,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "module_name": "great_expectations.execution_engine",
                 "class_name": "PandasExecutionEngine",
                 "caching": True,
-                "batch_spec_defaults": {}
+                "batch_spec_defaults": {},
             },
             "data_connectors": {
                 "test_pipeline_data_connector": {
@@ -1666,7 +1662,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                                 "partition_name": "spark_check_dataframe",
                             },
                         }
-                    }
+                    },
                 },
                 "test_filesystem_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
@@ -1682,34 +1678,30 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                             "config_params": {
                                 "regex": {
                                     "pattern": r".+\/(.+)_(.+)_(.+)\.csv",
-                                    "group_names": group_names
+                                    "group_names": group_names,
                                 },
                             },
                             "allow_multipart_partitions": False,
-                            "sorters": sorters
+                            "sorters": sorters,
                         }
                     },
                     "default_partitioner": "test_regex_partitioner",
                     "assets": {
                         "test_asset_0": {
-                            "config_params": {
-                                "glob_directive": "alex*",
-                            },
+                            "config_params": {"glob_directive": "alex*",},
                             "partitioner": "test_regex_partitioner",
-                            "base_directory": data_asset_base_directory
+                            "base_directory": data_asset_base_directory,
                         }
-                    }
-                }
-            }
+                    },
+                },
+            },
         }
     }
     return execution_environments_config
 
 
 def create_files_for_regex_partitioner(
-    root_directory_path: str,
-    directory_paths: list = None,
-    test_file_names: list = None
+    root_directory_path: str, directory_paths: list = None, test_file_names: list = None
 ):
     if not directory_paths:
         return

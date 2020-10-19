@@ -1,20 +1,21 @@
-# -*- coding: utf-8 -*-
-
-import sys
 import itertools
-from typing import List, Dict, Callable, Union
-
 import logging
+import sys
+from typing import Callable, Dict, List, Union
 
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.util import is_int
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
+from great_expectations.util import is_int
 
 logger = logging.getLogger(__name__)
 
 
 def build_partition_query(
-    partition_query_dict: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None
+    partition_query_dict: Union[
+        Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None
+    ] = None
 ):
     if not partition_query_dict:
         return PartitionQuery(
@@ -28,51 +29,55 @@ def build_partition_query(
     partition_query_keys: set = set(partition_query_dict.keys())
     if not partition_query_keys <= PartitionQuery.RECOGNIZED_PARTITION_QUERY_KEYS:
         raise ge_exceptions.PartitionerError(
-            f'''Unrecognized partition_query key(s):
+            f"""Unrecognized partition_query key(s):
 "{str(partition_query_keys - PartitionQuery.RECOGNIZED_PARTITION_QUERY_KEYS)}" detected.
-            '''
+            """
         )
     custom_filter: Callable = partition_query_dict.get("custom_filter")
     if custom_filter and not isinstance(custom_filter, Callable):
         raise ge_exceptions.PartitionerError(
-            f'''The type of a custom_filter be a function (Python "Callable").  The type given is
+            f"""The type of a custom_filter be a function (Python "Callable").  The type given is
 "{str(type(custom_filter))}", which is illegal.
-            '''
+            """
         )
     partition_name: str = partition_query_dict.get("partition_name")
     if partition_name and not isinstance(partition_name, str):
         raise ge_exceptions.PartitionerError(
-            f'''The type of a partition_name must be a string (Python "str").  The type given is
+            f"""The type of a partition_name must be a string (Python "str").  The type given is
 "{str(type(partition_name))}", which is illegal.
-            '''
+            """
         )
     partition_definition: dict = partition_query_dict.get("partition_definition")
     if partition_definition:
         if not isinstance(partition_definition, dict):
             raise ge_exceptions.PartitionerError(
-                f'''The type of a partition_definition must be a dictionary (Python "dict").  The type given is
+                f"""The type of a partition_definition must be a dictionary (Python "dict").  The type given is
 "{str(type(partition_definition))}", which is illegal.
-                '''
+                """
             )
         if not all([isinstance(key, str) for key in partition_definition.keys()]):
-            raise ge_exceptions.PartitionerError('All partition_definition keys must strings (Python "str").')
+            raise ge_exceptions.PartitionerError(
+                'All partition_definition keys must strings (Python "str").'
+            )
     data_asset_name: str = partition_query_dict.get("data_asset_name")
     if data_asset_name and not isinstance(data_asset_name, str):
         raise ge_exceptions.PartitionerError(
-            f'''The type of a data_asset_name must be a string (Python "str").  The type given is
+            f"""The type of a data_asset_name must be a string (Python "str").  The type given is
 "{str(type(data_asset_name))}", which is illegal.
-            '''
+            """
         )
     limit: int = partition_query_dict.get("limit")
     if limit and not isinstance(limit, int):
         raise ge_exceptions.PartitionerError(
-            f'''The type of a limit must be an integer (Python "int").  The type given is
+            f"""The type of a limit must be an integer (Python "int").  The type given is
 "{str(type(limit))}", which is illegal.
-            '''
+            """
         )
     if limit is None or limit < 0:
         limit = sys.maxsize
-    partition_index: Union[int, list, tuple, slice, str] = partition_query_dict.get("partition_index")
+    partition_index: Union[int, list, tuple, slice, str] = partition_query_dict.get(
+        "partition_index"
+    )
     partition_index = _parse_partition_index(partition_index=partition_index)
     return PartitionQuery(
         custom_filter=custom_filter,
@@ -94,9 +99,9 @@ def _parse_partition_index(
     elif isinstance(partition_index, (list, tuple)):
         if len(partition_index) > 3:
             raise ge_exceptions.PartitionerError(
-                f'''The number of partition_index slice components must be between 1 and 3 (the given number is
+                f"""The number of partition_index slice components must be between 1 and 3 (the given number is
 {len(partition_index)}).
-                '''
+                """
             )
         if len(partition_index) == 1:
             return _parse_partition_index(partition_index=partition_index[0])
@@ -107,17 +112,19 @@ def _parse_partition_index(
     elif isinstance(partition_index, str):
         if is_int(value=partition_index):
             return _parse_partition_index(partition_index=int(partition_index))
-        return _parse_partition_index(partition_index=[int(idx_str) for idx_str in partition_index.split(":")])
+        return _parse_partition_index(
+            partition_index=[int(idx_str) for idx_str in partition_index.split(":")]
+        )
     else:
         raise ge_exceptions.PartitionerError(
-            f'''The type of a partition_index must be an integer (Python "int"), or a list (Python "list") or a tuple
-(Python "tuple"), or a Python "slice" object, or a string that has the format of a single integer or a slice argument.  
+            f"""The type of a partition_index must be an integer (Python "int"), or a list (Python "list") or a tuple
+(Python "tuple"), or a Python "slice" object, or a string that has the format of a single integer or a slice argument.
 The type given is "{str(type(partition_index))}", which is illegal.
-            '''
+            """
         )
 
 
-class PartitionQuery(object):
+class PartitionQuery:
     RECOGNIZED_PARTITION_QUERY_KEYS: set = {
         "custom_filter",
         "partition_name",
@@ -178,7 +185,9 @@ class PartitionQuery(object):
         }
         return str(doc_fields_dict)
 
-    def select_partitions(self, partitions: Union[List[Partition], None] = None) -> List[Partition]:
+    def select_partitions(
+        self, partitions: Union[List[Partition], None] = None
+    ) -> List[Partition]:
         if partitions is None:
             return []
         filter_function: Callable
@@ -191,24 +200,26 @@ class PartitionQuery(object):
                 lambda partition: filter_function(
                     data_asset_name=partition.data_asset_name,
                     partition_name=partition.name,
-                    partition_definition=partition.definition
+                    partition_definition=partition.definition,
                 ),
-                partitions
+                partitions,
             )
         )
-        selected_partitions = selected_partitions[:self.limit]
+        selected_partitions = selected_partitions[: self.limit]
         if self.partition_index is not None:
             if isinstance(self.partition_index, int):
                 selected_partitions = [selected_partitions[self.partition_index]]
             else:
-                selected_partitions = list(itertools.chain.from_iterable([selected_partitions[self.partition_index]]))
+                selected_partitions = list(
+                    itertools.chain.from_iterable(
+                        [selected_partitions[self.partition_index]]
+                    )
+                )
         return selected_partitions
 
     def best_effort_partition_matcher(self) -> Callable:
         def match_partition_to_query_params(
-            data_asset_name: str,
-            partition_name: str,
-            partition_definition: dict
+            data_asset_name: str, partition_name: str, partition_definition: dict
         ) -> bool:
             if self.partition_name:
                 if partition_name != self.partition_name:
@@ -216,13 +227,18 @@ class PartitionQuery(object):
             if self.partition_definition:
                 if not partition_definition:
                     return False
-                partition_definition_query_keys: set = set(self.partition_definition.keys())
+                partition_definition_query_keys: set = set(
+                    self.partition_definition.keys()
+                )
                 actual_partition_definition_keys: set = set(partition_definition.keys())
-                if not partition_definition_query_keys <= actual_partition_definition_keys:
+                if (
+                    not partition_definition_query_keys
+                    <= actual_partition_definition_keys
+                ):
                     raise ge_exceptions.PartitionerError(
-                        f'''Unrecognized partition_definition query key(s):
+                        f"""Unrecognized partition_definition query key(s):
 "{str(partition_definition_query_keys - actual_partition_definition_keys)}" detected.
-                        '''
+                        """
                     )
                 if not partition_definition_query_keys:
                     return False
@@ -233,4 +249,5 @@ class PartitionQuery(object):
                 if data_asset_name != self.data_asset_name:
                     return False
             return True
+
         return match_partition_to_query_params
