@@ -1,6 +1,9 @@
 import regex as re
 from typing import List, Union, Any
 from pathlib import Path
+from string import Template
+import sre_parse
+import sre_constants
 
 import logging
 
@@ -77,41 +80,15 @@ class RegexPartitioner(Partitioner):
     def regex(self) -> dict:
         return self._regex
 
-
-    def _convert_batch_request_to_data_reference(
+    def convert_data_reference_to_batch_request(
         self,
-        data_asset_name: str = None,
-        runtime_parameters: Union[dict, None] = None,
-        batch_request: BatchRequest = None,
-        **kwargs,
-    ) -> Any:
-
-    def _convert_data_reference_to_batch_request(
-            self,
-            data_asset_name: str = None,
-            runtime_parameters: Union[dict, None] = None,
-            data_reference: Any = None,
-            **kwargs,
+        data_reference
     ) -> BatchRequest:
-        # <WILL> data_reference can be Any, since it can be a string that links to a path, or an actual data_frame
-        raise NotImplementedError
 
-
-
-    def _convert_batch_request_to_data_reference(
-        self,
-        batch_request: BatchRequest,
-        path: str,
-        data_asset_name: str = None,
-        runtime_parameters: Union[dict, None] = None
-    ) -> Union[Partition, None]:
-        print("Hi will i got this far, isn't it wonderful?")
-        print(batch_request)
-
-        matches: Union[re.Match, None] = re.match(self.regex["pattern"], path)
+        matches: Union[re.Match, None] = re.match(self.regex["pattern"], data_reference)
         if matches is None:
-            logger.warning(f'No match found for path: "{path}".')
-            return None
+            raise ValueError(f'No match found for data_reference: "{data_reference}".')
+            
         else:
             groups: tuple = matches.groups()
             group_names: list = [
@@ -128,17 +105,77 @@ class RegexPartitioner(Partitioner):
                 group_name: str = group_names[idx]
                 partition_definition[group_name] = group_value
             partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
-            if runtime_parameters:
-                partition_definition.update(runtime_parameters)
+            # if runtime_parameters:
+            #     partition_definition.update(runtime_parameters)
             partition_name: str = self.DEFAULT_DELIMITER.join(
                 [str(value) for value in partition_definition.values()]
             )
-        return Partition(
-            name=partition_name,
-            data_asset_name=data_asset_name,
-            definition=partition_definition,
-            data_reference=path
+        return BatchRequest(
+            execution_environment_name="PLACEHOLDER",
+            data_connector_name="PLACEHOLDER",
+            data_asset_name="PLACEHOLDER",
+            partition_request=partition_definition,
         )
 
+    def _invert_regex_to_data_reference_template(self):
+        """
+        NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
+        """
+        regex_pattern = self.regex["pattern"]
 
-    def _conver
+        data_reference_template = ""
+        group_name_index = 0
+
+        # print("-"*80)
+        parsed_sre = sre_parse.parse(regex_pattern)
+        for token, value in parsed_sre:
+            # print(type(token), token, value)
+
+            if token == sre_constants.LITERAL:
+                #Transcribe the character directly into the template
+                data_reference_template += chr(value)
+
+            elif token == sre_constants.SUBPATTERN:
+                #Replace the captured group with "{next_group_name}" in the template
+                data_reference_template += "{"+self.regex["group_names"][group_name_index]+"}"
+                group_name_index += 1
+
+            elif token in [
+                sre_constants.MAX_REPEAT,
+                sre_constants.IN,
+                sre_constants.BRANCH,
+                sre_constants.ANY,
+            ]:
+                #Replace the uncaptured group a wildcard in the template
+                data_reference_template += "*"
+
+            elif token in [
+                sre_constants.AT,
+                sre_constants.ASSERT_NOT,
+                sre_constants.ASSERT,
+            ]:
+                pass
+            
+            else:
+                raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
+
+        #Collapse adjacent wildcards into a single wildcard
+        data_reference_template = re.sub("\*+", "*", data_reference_template)
+
+        return data_reference_template
+
+    def convert_batch_request_to_data_reference(
+        self,
+        batch_request: BatchRequest,
+    ) -> str:
+        if not isinstance(batch_request, BatchRequest):
+            raise TypeError("batch_request is not of an instance of type BatchRequest")
+
+        filepath_template = self._invert_regex_to_data_reference_template()
+        converted_string = filepath_template.format(
+            **batch_request.partition_request
+        )
+
+        return converted_string
+        
+
