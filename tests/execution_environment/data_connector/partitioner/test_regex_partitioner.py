@@ -595,11 +595,9 @@ def test_convert_data_reference_to_batch_request():
         })
     )
 
-    with pytest.raises(ValueError):
-        print(regex_partitioner.convert_data_reference_to_batch_request("DOESNT_MATCH_CAPTURING_GROUPS.csv"))
+    assert regex_partitioner.convert_data_reference_to_batch_request("DOESNT_MATCH_CAPTURING_GROUPS.csv")) == None
 
-    with pytest.raises(ValueError):
-        regex_partitioner.convert_data_reference_to_batch_request("eugene_DOESNT_MATCH_ALL_CAPTURING_GROUPS_1500.csv")
+    assert regex_partitioner.convert_data_reference_to_batch_request("eugene_DOESNT_MATCH_ALL_CAPTURING_GROUPS_1500.csv") == None
 
     # TODO ABE 20201017 : Future case to handle
     # with pytest.raises(ValueError):

@@ -37,6 +37,7 @@ class DictDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
+        execution_environment_name: str,
         data_reference_dict: {},
         partitioners: dict = {},
         default_partitioner: str = None,
@@ -46,6 +47,7 @@ class DictDataConnector(DataConnector):
         logger.debug(f'Constructing DictDataConnector "{name}".')
         super().__init__(
             name=name,
+            execution_environment_name=execution_environment_name,
             partitioners=partitioners,
             default_partitioner=default_partitioner,
             assets=assets,

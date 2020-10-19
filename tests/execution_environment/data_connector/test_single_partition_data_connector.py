@@ -8,11 +8,15 @@ from great_expectations.core.batch import (
     BatchDefinition,
     PartitionDefinition,
 )
+from great_expectations.data_context import (
+    BaseDataContext
+)
 from great_expectations.data_context.util import (
     instantiate_class_from_config
 )
 from tests.test_utils import (
     create_fake_data_frame,
+    create_files_in_directory,
 )
 
 def test_basic_instantiation(tmp_path_factory):
@@ -37,7 +41,7 @@ def test_basic_instantiation(tmp_path_factory):
         data_reference_dict = data_reference_dict
     )
 
-    my_data_connector.refresh_data_references_cache("FAKE_EXECUTION_ENVIRONMENT_NAME")
+    my_data_connector.refresh_data_references_cache()
     assert my_data_connector.get_data_reference_list_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -84,9 +88,7 @@ partitioner:
         runtime_environment={"name": "my_data_connector"},
     )
 
-    my_data_connector.refresh_data_references_cache(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME"
-    )
+    my_data_connector.refresh_data_references_cache()
     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         data_connector_name="my_data_connector",
@@ -173,9 +175,7 @@ data_assets:
         runtime_environment={"name": "my_data_connector"},
     )
 
-    my_data_connector.refresh_data_references_cache(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME"
-    )
+    my_data_connector.refresh_data_references_cache()
 
     # FIXME: Abe 20201017 : These tests don't pass yet.
     # I'm starting to think we might want to separate out this behavior into a different class.
@@ -198,3 +198,44 @@ data_assets:
     #     data_connector_name="my_data_connector",
     #     data_asset_name="alpha",
     # )))
+
+
+def test_test_yaml_config(empty_data_context, tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list= [
+            "2020/01/alpha-1001.csv",
+            "2020/01/beta-1002.csv",
+            "2020/02/alpha-1003.csv",
+            "2020/02/beta-1004.csv",
+            "2020/03/alpha-1005.csv",
+            "2020/03/beta-1006.csv",
+            "2020/04/beta-1007.csv",
+        ]
+    )
+
+    empty_data_context.test_yaml_config(f"""
+class_name: ExecutionEnvironment
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_data_connector:
+        class_name: SinglePartitionFileDataConnector
+        base_directory: {base_directory}/
+        glob_directive: "*/*/*.csv"
+
+        partitioner:
+            class_name: RegexPartitioner
+            config_params:
+                regex:
+                    group_names:
+                        - year_dir
+                        - month_dir
+                        - data_asset_name
+                    pattern: (\d{{4}})/(\d{{2}})/(.*)-.*\.csv
+    """)
+
+    assert False

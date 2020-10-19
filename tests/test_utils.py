@@ -1662,6 +1662,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "test_pipeline_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
                     "class_name": "PipelineDataConnector",
+                    "execution_environment_name": "test_execution_environment",
                     "partitioners": {
                         "test_pipeline_partitioner": {
                             "module_name": "great_expectations.execution_environment.data_connector.partitioner",
@@ -1682,6 +1683,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 },
                 "test_filesystem_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
+                    "execution_environment_name": "test_execution_environment",
                     "class_name": "FilesDataConnector",
                     "base_directory": default_base_directory,
                     "glob_directive": "*",

@@ -414,20 +414,24 @@ class ExecutionEnvironment(object):
                 print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
             
             for asset_name in asset_names[:max_examples]:
-                partitions = self.get_available_partitions(data_connector["name"], asset_name)
-                len_partitions = len(partitions)
-                example_partition_names = [partition.data_reference for partition in partitions][:max_examples]
+                batch_definition_list = self.get_available_batch_definitions(BatchRequest(
+                    execution_environment_name=self.name,
+                    data_connector_name=data_connector["name"],
+                    data_asset_name=asset_name,
+                ))
+                len_batch_definition_list = len(batch_definition_list)
+                example_batch_definitions = [batch_definition_list.data_reference for batch_definition in batch_definition_list][:max_examples]
                 if pretty_print:
-                    print(f"\t\t{asset_name} ({min(len_partitions, max_examples)} of {len_partitions}):", example_partition_names)
+                    print(f"\t\t{asset_name} ({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):", example_batch_definitions)
 
                 data_connector_obj["data_assets"][asset_name] = {
-                    "partition_count": len_partitions,
-                    "example_partition_names": example_partition_names
+                    "partition_count": len_batch_definition_list,
+                    "example_partition_names": example_batch_definitions
                 }
 
             instantiated_data_connector = self.get_data_connector(data_connector["name"])
-            instantiated_data_connector.refresh_data_object_cache()
-            unmatched_data_references = instantiated_data_connector.get_unmatched_data_objects()
+            instantiated_data_connector.refresh_data_references_cache()
+            unmatched_data_references = instantiated_data_connector.get_unmatched_data_references()
             len_unmatched_data_references = len(unmatched_data_references)
             if pretty_print:
                 print(f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):", unmatched_data_references[:max_examples])

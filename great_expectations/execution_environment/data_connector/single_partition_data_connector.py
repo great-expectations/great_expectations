@@ -1,5 +1,6 @@
 import logging
 from typing import List
+from pathlib import Path
 
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import (
@@ -32,7 +33,6 @@ class SinglePartitionDataConnector(DataConnector):
         logger.debug(f'Constructing SinglePartitionDataConnector "{name}".')
 
         self.base_directory = base_directory
-
         super().__init__(
             name=name,
             partitioners={
@@ -62,3 +62,51 @@ class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
         data_reference_keys = list(self.data_reference_dict.keys())
         data_reference_keys.sort()
         return data_reference_keys
+
+class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
+    def __init__(
+        self,
+        name: str,
+        base_directory: str,
+        glob_directive: str = "*",
+        **kwargs,
+    ):
+        logger.debug(f'Constructing SinglePartitionFileDataConnector "{name}".')
+
+        self.glob_directive = glob_directive
+
+        super().__init__(
+            name,
+            base_directory=base_directory,
+            **kwargs
+        )
+
+    def _get_data_reference_list(self):
+        globbed_paths = Path(self.base_directory).glob(self.glob_directive)
+        path_list = [
+            str(posix_path) for posix_path in globbed_paths
+        ]
+
+        # Trim paths to exclude the base_directory
+        base_directory_len = len(str(self.base_directory))
+        path_list = [path[base_directory_len:] for path in path_list]
+
+        return path_list
+
+    def get_available_data_asset_names(self) -> List[str]:
+        """Return the list of asset names known by this data connector.
+
+        Returns:
+            A list of available names
+        """
+        if self._data_references_cache == None:
+            self.refresh_data_references_cache()
+
+        available_data_asset_names = []
+
+        for k,v in self._data_references_cache.items():
+            print(k,v)
+            if v != None:
+                available_data_asset_names.append(v.data_asset_name)
+
+        return list(set(available_data_asset_names))

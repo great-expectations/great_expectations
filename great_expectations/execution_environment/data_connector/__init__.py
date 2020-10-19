@@ -1,7 +1,7 @@
 from .single_partition_data_connector import (
     SinglePartitionDataConnector,
     SinglePartitionDictDataConnector,
-    # SinglePartitionFileDataConnector,
+    SinglePartitionFileDataConnector,
 )
 from .dict_data_connector import DictDataConnector
 from .files_data_connector import FilesDataConnector

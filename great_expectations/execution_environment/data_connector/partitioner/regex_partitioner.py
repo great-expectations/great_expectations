@@ -109,7 +109,7 @@ class RegexPartitioner(Partitioner):
         if "data_asset_name" in partition_definition:
             data_asset_name = partition_definition.pop("data_asset_name")
         else:
-            data_reference = None
+            data_asset_name = None
 
         return BatchRequest(
             data_asset_name=data_asset_name,

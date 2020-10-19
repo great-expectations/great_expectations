@@ -63,6 +63,7 @@ class DataConnector(object):
     def __init__(
         self,
         name: str,
+        execution_environment_name: str,
         partitioners: dict = {},
         default_partitioner: str = None,
         assets: dict = None,
@@ -71,6 +72,7 @@ class DataConnector(object):
         **kwargs
     ):
         self._name = name
+        self.execution_environment_name = execution_environment_name
 
         self._partitioners = {}
         self._build_partitioners_from_config(partitioners)
@@ -465,12 +467,12 @@ connector and the default_partitioner set to one of the configured partitioners.
             raise ValueError(f"data_connector_name {data_connector_name} does not match name {self.name}.")
 
         if self._data_references_cache == None:
-            self.refresh_data_references_cache(
-                batch_request.execution_environment_name
-            )
+            self.refresh_data_references_cache()
 
         batches = []
         for data_reference, batch_definition in self._data_references_cache.items():
+            print(batch_definition)
+            print(batch_request)
             if batch_definition == None:
                 # The data_reference is unmatched.
                 continue
@@ -543,7 +545,6 @@ connector and the default_partitioner set to one of the configured partitioners.
 
     def refresh_data_references_cache(
         self,
-        execution_environment_name: str,
     ):
         """
         """
@@ -553,7 +554,6 @@ connector and the default_partitioner set to one of the configured partitioners.
         for data_reference in self._get_data_reference_list():
             mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
                 data_reference,
-                execution_environment_name,
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
@@ -569,7 +569,6 @@ connector and the default_partitioner set to one of the configured partitioners.
     #TODO Abe 20201015: This method is still somewhat janky. Needs better supporting methods, plus more thought and hardening.
     def _map_data_reference_to_batch_definition_list(self,
         data_reference,
-        execution_environment_name: str,
     ) -> List[BatchDefinition]:
         #FIXME: Make this smarter about choosing the right partitioner
         # This will raise an error if no default_partitioner has been specified.
@@ -589,7 +588,7 @@ connector and the default_partitioner set to one of the configured partitioners.
             data_asset_name = "FAKE_DATA_ASSET_NAME"
 
         return BatchDefinition(
-            execution_environment_name=execution_environment_name,
+            execution_environment_name=self.execution_environment_name,
             data_connector_name=self.name,
             data_asset_name=data_asset_name,
             partition_definition=batch_request.partition_request,

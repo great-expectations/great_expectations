@@ -30,6 +30,7 @@ def basic_data_connector(tmp_path_factory):
 class_name: FilesDataConnector
 base_directory: {base_directory}
 glob_directive: '*.csv'
+execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
     
 default_partitioner: my_regex_partitioner
     """, Loader=yaml.FullLoader),
@@ -49,6 +50,7 @@ def test_basic_instantiation(tmp_path_factory):
         name="my_data_connector",
         base_directory=base_directory,
         glob_directive='*.csv',
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
     )
     
 # default_partitioner: my_regex_partitioner
@@ -76,7 +78,8 @@ def test__DictDataConnector():
 
     my_data_connector = DictDataConnector(
         name="my_data_connector",
-        data_reference_dict=data_reference_dict
+        data_reference_dict=data_reference_dict,
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
     )
 
     # Peer into internals to make sure things have loaded properly
@@ -92,9 +95,7 @@ def test__DictDataConnector():
         set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 
 
-    my_data_connector.refresh_data_references_cache(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME"
-    )
+    my_data_connector.refresh_data_references_cache()
 
     # Since we don't have a Partitioner yet, all keys should be unmatched
     assert set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
@@ -115,9 +116,7 @@ config_params:
     )
     my_data_connector._default_partitioner = "my_partitioner"
     
-    my_data_connector.refresh_data_references_cache(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME"
-    )
+    my_data_connector.refresh_data_references_cache()
 
     assert set(my_data_connector.get_unmatched_data_references()) == set([])
 
@@ -139,15 +138,14 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         name="my_data_connector",
         base_directory=base_directory,
         glob_directive='*/*/*.csv',
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
     )
 
     # assert my_data_connector.get_data_reference_list_count() == 0
     # with pytest.raises(ValueError):
     #     set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 
-    my_data_connector.refresh_data_references_cache(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME"
-    )
+    my_data_connector.refresh_data_references_cache()
 
     # Since we don't have a Partitioner yet, all keys should be unmatched
     assert len(my_data_connector.get_unmatched_data_references()) == 4
@@ -166,9 +164,7 @@ config_params:
     )
     my_data_connector._default_partitioner = "my_first_partitioner"
 
-    my_data_connector.refresh_data_references_cache(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME"
-    )
+    my_data_connector.refresh_data_references_cache()
 
     assert len(my_data_connector.get_unmatched_data_references()) == 4
 
@@ -222,6 +218,7 @@ def test_available_data_asset_names():
 def test__batch_definition_matches_batch_request():
     my_data_connector = DictDataConnector(
         name="my_data_connector",
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         data_reference_dict={},
     )
 
