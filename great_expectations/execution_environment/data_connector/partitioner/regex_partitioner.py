@@ -5,9 +5,10 @@ from typing import List, Union
 import regex as re
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.execution_environment.data_connector.data_connector import (
-    DataConnector,
-)
+
+# from great_expectations.execution_environment.data_connector.data_connector import (
+#     DataConnector,
+# )
 from great_expectations.execution_environment.data_connector.partitioner.partition import (
     Partition,
 )
@@ -25,7 +26,7 @@ class RegexPartitioner(Partitioner):
     def __init__(
         self,
         name: str,
-        data_connector: DataConnector,
+        data_connector: "DataConnector",
         sorters: list = None,
         allow_multipart_partitions: bool = False,
         config_params: dict = None,
