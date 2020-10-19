@@ -65,6 +65,12 @@ Steps
     2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained :ref:`here<how_to_guides__validation__how_to_run_a_checkpoint_in_terminal>` or from Python, as explained :ref:`here<how_to_guides__validation__how_to_run_a_checkpoint_in_python>`.
     3. Check your configured Data Docs sites to confirm that a new Validation Result has been added.
 
+Additional notes
+----------------
+
+The ``UpdateDataDocsAction`` generates an HTML file for the latest validation result and updates the index page to link to the new file, and re-renders expectation suite pages. It does not perform a full rebuild of Data Docs sites. This means that if you wish to render older Validation Results, you should run full Data Docs rebuild (via CLI's ``great_expectations docs build`` command or by calling ``context.build_data_docs()``).
+
+
 Additional resources
 --------------------
 

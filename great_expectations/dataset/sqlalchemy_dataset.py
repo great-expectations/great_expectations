@@ -113,6 +113,11 @@ try:
 except ImportError:
     pass
 
+try:
+    import pyathena.sqlalchemy_athena
+except ImportError:
+    pyathena = None
+
 
 class SqlAlchemyBatchReference:
     def __init__(self, engine, table_name=None, schema=None, query=None):
@@ -510,6 +515,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="pybigquery.sqlalchemy_bigquery"
             )
+        elif self.engine.dialect.name.lower() == "awsathena":
+            self.dialect = import_library_module(
+                module_name="pyathena.sqlalchemy_athena"
+            )
         else:
             self.dialect = None
 
@@ -545,13 +554,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql, schema_name=schema)
 
-            if (
-                generated_table_name is not None
-                and self.engine.dialect.name.lower() == "bigquery"
-            ):
-                logger.warning(
-                    "Created permanent table {table_name}".format(table_name=table_name)
-                )
+            if generated_table_name is not None:
+                if self.engine.dialect.name.lower() == "bigquery":
+                    logger.warning(
+                        "Created permanent table {table_name}".format(table_name=table_name)
+                    )
+                if self.engine.dialect.name.lower() == "awsathena":
+                    logger.warning(
+                        "Created permanent table default.{table_name}".format(table_name=table_name)
+                    )
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
@@ -744,6 +755,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ).scalar()
 
     def get_column_median(self, column):
+        # AWS Athena does not support offset
+        if self.sql_engine_dialect.name.lower() == "awsathena":
+            raise NotImplementedError("AWS Athena does not support OFFSET.")
         nonnull_count = self.get_column_nonnull_count(column)
         element_values = self.engine.execute(
             sa.select([sa.column(column)])
@@ -1200,6 +1214,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = (
                 custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]
             ).format(table_name=table_name)
+        elif self.sql_engine_dialect.name.lower() == "awsathena":
+            stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
                 table_name=table_name, custom_sql=custom_sql
@@ -1306,6 +1324,66 @@ WHERE
     ###
     ###
     #
+    # Compound Column Expectation Implementations
+    #
+    ###
+    ###
+    ###
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.expectation(["column_list", "ignore_row_if"])
+    def expect_compound_columns_to_be_unique(
+        self,
+        column_list,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        row_condition=None,
+        condition_parser=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        columns = [
+            sa.column(col["name"]) for col in self.columns if col["name"] in column_list
+        ]
+        query = (
+            sa.select([sa.func.count()])
+            .group_by(*columns)
+            .having(sa.func.count() > 1)
+            .select_from(self._table)
+        )
+
+        if ignore_row_if == "all_values_are_missing":
+            query = query.where(sa.and_(*[col != None for col in columns]))
+        elif ignore_row_if == "any_value_is_missing":
+            query = query.where(sa.or_(*[col != None for col in columns]))
+        elif ignore_row_if == "never":
+            pass
+        else:
+            raise ValueError(
+                "ignore_row_if was set to an unexpected value: %s" % ignore_row_if
+            )
+
+        unexpected_count = self.engine.execute(query).fetchone()
+
+        if unexpected_count is None:
+            # This can happen when the condition filters out all rows
+            unexpected_count = 0
+        else:
+            unexpected_count = unexpected_count[0]
+
+        total_count_query = sa.select([sa.func.count()]).select_from(self._table)
+        total_count = self.engine.execute(total_count_query).fetchone()[0]
+
+        return {
+            "success": unexpected_count == 0,
+            "result": {"unexpected_percent": 100.0 * unexpected_count / total_count}
+        }
+
+    ###
+    ###
+    ###
+    #
     # Column Map Expectation Implementations
     #
     ###
@@ -1323,7 +1401,6 @@ WHERE
         catch_exceptions=None,
         meta=None,
     ):
-
         return sa.column(column) == None
 
     @DocInherit
