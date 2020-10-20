@@ -55,8 +55,6 @@ Notes:
 --ge-feature-maturity-info--
     """
 
-    recognized_batch_definition_keys = {"limit"}
-
     recognized_batch_spec_defaults = {
         "reader_method",
         "reader_options",
