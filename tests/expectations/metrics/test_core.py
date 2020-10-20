@@ -33,7 +33,7 @@ def test_basic_metric():
         metric_value_kwargs=dict(),
     )
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    engine._loaded_batch_id = "batch_id"
+    engine._active_batch_data_id = "batch_id"
     engine._batches = {"batch_id": Batch(data=df)}
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 3}
@@ -48,7 +48,7 @@ def test_mean_metric_pd():
     )
     df = pd.DataFrame({"a": [1, 1, 3, 3, None]})
     engine._batches = {"batch_id": Batch(data=df)}
-    engine._loaded_batch_id = "batch_id"
+    engine._active_batch_data_id = "batch_id"
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 2}
 
@@ -62,7 +62,7 @@ def test_stdev_metric_pd():
     )
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine._batches = {"batch_id": Batch(data=df)}
-    engine._loaded_batch_id = "batch_id"
+    engine._active_batch_data_id = "batch_id"
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 1}
 
@@ -281,7 +281,7 @@ def test_map_column_value_lengths_between_pd():
 def test_z_score_under_threshold_pd():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, None]})
-    engine._loaded_batch_id = "batch_id"
+    engine._active_batch_data_id = "batch_id"
     engine._batches = {"batch_id": Batch(data=df)}
     mean = MetricConfiguration(
         metric_name="column.aggregate.mean",
@@ -336,7 +336,7 @@ def test_z_score_under_threshold_sa():
     engine = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     df.to_sql("test", engine)
-    engine._loaded_batch_id = "batch_id"
+    engine._active_batch_data_id = "batch_id"
     engine._batches = {"batch_id": Batch(data=df)}
     mean = MetricConfiguration(
         metric_name="column.aggregate.mean",
@@ -395,7 +395,7 @@ def test_z_score_under_threshold_spark():
     df = spark.createDataFrame(df)
 
     engine = SparkDFExecutionEngine()
-    engine._loaded_batch_id = "batch_id"
+    engine._active_batch_data_id = "batch_id"
     engine._batches = {"batch_id": Batch(data=df)}
     mean = MetricConfiguration(
         metric_name="column.aggregate.mean",
@@ -454,7 +454,7 @@ def test_table_metric():
         metric_value_kwargs=dict(),
     )
     df = pd.DataFrame({"a": [1, 2, 3, 3, None], "b": [1, 2, 3, 3, None]})
-    engine._loaded_batch_id = "batch_id"
+    engine._active_batch_data_id = "batch_id"
     engine._batches = {"batch_id": Batch(data=df)}
     # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))

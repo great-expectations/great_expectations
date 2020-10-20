@@ -584,7 +584,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             self.batches[batch_id] = batch
 
-        self._loaded_batch_id = batch_id
+        self._active_batch_data_id = batch_id
         return batch
 
     def get_compute_domain(
@@ -602,8 +602,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.loaded_batch:
-                batch = self.loaded_batch
+            if self.active_batch_data:
+                batch = self.active_batch_data
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."

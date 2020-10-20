@@ -243,18 +243,18 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         else:
             batch = self.batches.get(batch_id)
 
-        self._loaded_batch_id = batch_id
+        self._active_batch_data_id = batch_id
         return batch
 
     @property
     def dataframe(self):
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
-        if not self.loaded_batch:
+        if not self.active_batch_data:
             raise ValueError(
                 "Batch has not been loaded - please run load_batch() to load a batch."
             )
 
-        return self.loaded_batch.data
+        return self.active_batch_data
 
     @staticmethod
     def guess_reader_method_from_path(path):
@@ -347,8 +347,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.loaded_batch:
-                batch = self.loaded_batch
+            if self.active_batch_data:
+                batch = self.active_batch_data
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
