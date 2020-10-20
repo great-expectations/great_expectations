@@ -1,6 +1,7 @@
 import inspect
 import json
 import logging
+import warnings
 from datetime import datetime
 from functools import wraps
 from typing import List
@@ -62,7 +63,7 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -177,7 +178,7 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -281,7 +282,7 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -556,13 +557,35 @@ Notes:
             n_bins = 10
 
         if series.dtype in ["int", "float"]:
+            if bins is not None:
+                bins = sorted(np.unique(bins))
+                if np.min(series) < bins[0]:
+                    bins = [np.min(series)] + bins
+                if np.max(series) > bins[-1]:
+                    bins = bins + [np.max(series)]
+
             if bins is None:
                 bins = np.histogram_bin_edges(series[series.notnull()], bins=n_bins)
-                # Make sure max of series is included in rightmost bin
-                bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
 
-            # Missings get digitized into bin = n_bins+1
-            return np.digitize(series, bins=bins)
+            # Make sure max of series is included in rightmost bin
+            bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
+
+            # Create labels for returned series
+            # Used in e.g. crosstab that is printed as observed value in data docs.
+            precision = int(np.log10(min(bins[1:] - bins[:-1]))) + 2
+            labels = [
+                f"[{round(lower, precision)}, {round(upper, precision)})"
+                for lower, upper in zip(bins[:-1], bins[1:])
+            ]
+            if any(np.isnan(series)):
+                # Missings get digitized into bin = n_bins+1
+                labels += ["(missing)"]
+
+            return pd.Categorical.from_codes(
+                codes=np.digitize(series, bins=bins) - 1,
+                categories=labels,
+                ordered=True,
+            )
 
         else:
             if bins is None:
@@ -576,7 +599,11 @@ Notes:
                 replace = dict()
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
-            return series.replace(to_replace=replace).fillna("(missing)")
+            return (
+                series.replace(to_replace=replace)
+                .fillna("(missing)")
+                .astype("category")
+            )
 
     ### Expectation methods ###
 
@@ -1827,15 +1854,42 @@ Notes:
 
         return pd.Series(results, temp_df.index)
 
-    @DocInherit
-    @MetaPandasDataset.multicolumn_map_expectation
     def expect_multicolumn_values_to_be_unique(
         self,
         column_list,
+        mostly=None,
         ignore_row_if="all_values_are_missing",
         result_format=None,
-        row_condition=None,
-        condition_parser=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        deprecation_warning = (
+            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
+            "expect_select_column_values_to_be_unique_within_record instead."
+        )
+        warnings.warn(
+            deprecation_warning, DeprecationWarning,
+        )
+
+        return self.expect_select_column_values_to_be_unique_within_record(
+            column_list=column_list,
+            mostly=mostly,
+            ignore_row_if=ignore_row_if,
+            result_format=result_format,
+            include_config=include_config,
+            catch_exceptions=catch_exceptions,
+            meta=meta,
+        )
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_select_column_values_to_be_unique_within_record(
+        self,
+        column_list,
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1866,3 +1920,19 @@ Notes:
                 expected sum of columns
         """
         return column_list.sum(axis=1) == sum_total
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_compound_columns_to_be_unique(
+        self,
+        column_list,
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # Do not dropna here, since we have separately dealt with na in decorator
+        # Invert boolean so that duplicates are False and non-duplicates are True
+        return ~column_list.duplicated(keep=False)

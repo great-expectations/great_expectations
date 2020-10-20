@@ -2,6 +2,7 @@ import copy
 import inspect
 import json
 import logging
+import warnings
 from collections import OrderedDict
 from datetime import datetime
 from functools import reduce, wraps
@@ -40,6 +41,7 @@ try:
         lit,
         monotonically_increasing_id,
         stddev_samp,
+        struct,
         udf,
         when,
         year,
@@ -1124,6 +1126,28 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return column.withColumn("__success", matches_json_schema_udf(column[0]))
 
     @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_be_json_parseable(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        def is_json(val):
+            try:
+                json.loads(val)
+                return True
+            except:
+                return False
+
+        is_json_udf = udf(is_json, sparktypes.StringType())
+
+        return column.withColumn("__success", is_json_udf(column[0]))
+
+    @DocInherit
     @DataAsset.expectation(["column", "type_", "mostly"])
     def expect_column_values_to_be_of_type(
         self,
@@ -1372,11 +1396,40 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             "__success", when(col("set_AB").isNull(), lit(False)).otherwise(lit(True))
         )
 
-    @DocInherit
-    @MetaSparkDFDataset.multicolumn_map_expectation
     def expect_multicolumn_values_to_be_unique(
         self,
         column_list,  # pyspark.sql.DataFrame
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        deprecation_warning = (
+            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
+            "expect_select_column_values_to_be_unique_within_record instead."
+        )
+        warnings.warn(
+            deprecation_warning, DeprecationWarning,
+        )
+
+        return self.expect_select_column_values_to_be_unique_within_record(
+            column_list=column_list,
+            mostly=mostly,
+            ignore_row_if=ignore_row_if,
+            result_format=result_format,
+            include_config=include_config,
+            catch_exceptions=catch_exceptions,
+            meta=meta,
+        )
+
+    @DocInherit
+    @MetaSparkDFDataset.multicolumn_map_expectation
+    def expect_select_column_values_to_be_unique_within_record(
+        self,
+        column_list,  # pyspark.sql.DataFrame
+        mostly=None,
         ignore_row_if="all_values_are_missing",
         result_format=None,
         include_config=True,
@@ -1394,6 +1447,26 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         return column_list.withColumn(
             "__success", reduce(lambda a, b: a & b, conditions)
+        )
+
+    @DocInherit
+    @MetaSparkDFDataset.multicolumn_map_expectation
+    def expect_compound_columns_to_be_unique(
+        self,
+        column_list,  # pyspark.sql.DataFrame
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+
+        # Might want to throw an exception if only 1 column is passed
+        column_names = column_list.schema.names[:]
+        return column_list.withColumn(
+            "__success",
+            count(lit(1)).over(Window.partitionBy(struct(*column_names))) <= 1,
         )
 
     @DocInherit

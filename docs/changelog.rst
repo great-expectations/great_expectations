@@ -7,16 +7,66 @@ Changelog
 Develop
 -----------------
 
+0.12.5
+-----------------
+* [ENHANCEMENT] Implement expect_column_values_to_be_json_parseable in spark (Thanks @mikaylaedwards!)
+* [ENHANCEMENT] Fix boto3 options passing into datasource correctly (Thanks @noklam!)
+* [ENHANCEMENT] Add .pkl to list of recognized extensions (Thanks @KPLauritzen!)
+* [BUGFIX] Query batch kwargs support for Athena backend (issue 1964)
+* [BUGFIX] Skip config substitution if key is "password" (issue 1927)
+* [BUGFIX] fix site_names functionality and add site_names param to get_docs_sites_urls (issue 1991)
+* [BUGFIX] Always render expectation suites in data docs unless passing a specific ExpectationSuiteIdentifier in resource_identifiers (issue 1944)
+* [BUGFIX] remove black from requirements.txt
+* [BUGFIX] docs build cli: fix --yes argument (Thanks @varunbpatil!)
+* [DOCS] Update docstring for SubdirReaderBatchKwargsGenerator (Thanks @KPLauritzen!)
+* [DOCS] Fix broken link in README.md (Thanks @eyaltrabelsi!)
+* [DOCS] Clarifications on several docs (Thanks all!!)
+
+0.12.4
+-----------------
+* [FEATURE] Add PagerdutyAlertAction (Thanks @NiallRees!)
+* [FEATURE] enable using Minio for S3 backend (Thanks @noklam!)
+* [ENHANCEMENT] Add SqlAlchemy support for expect_compound_columns_to_be_unique (Thanks @jhweaver!)
+* [ENHANCEMENT] Add Spark support for expect_compound_columns_to_be_unique (Thanks @tscottcoombes1!)
+* [ENHANCEMENT] Save expectation suites with datetimes in evaluation parameters (Thanks @mbakunze!)
+* [ENHANCEMENT] Show data asset name in Slack message (Thanks @haydarai!)
+* [ENHANCEMENT] Enhance data doc to show data asset name in overview block (Thanks @noklam!)
+* [ENHANCEMENT] Clean up checkpoint output
+* [BUGFIX] Change default prefix for TupleStoreBackend (issue 1907)
+* [BUGFIX] Duplicate s3 approach for GCS for building object keys
+* [BUGFIX] import NotebookConfig (Thanks @cclauss!)
+* [BUGFIX] Improve links (Thanks @sbrugman!)
+* [MAINTENANCE] Unpin black in requirements (Thanks @jtilly!)
+* [MAINTENANCE] remove test case name special characters
+
+0.12.3
+-----------------
+* [ENHANCEMENT] Add expect_compound_columns_to_be_unique and clarify multicolumn uniqueness
+* [ENHANCEMENT] Add expectation expect_table_columns_to_match_set
+* [ENHANCEMENT] Checkpoint run command now prints out details on each validation #1437
+* [ENHANCEMENT] Slack notifications can now display links to GCS-hosted DataDocs sites
+* [ENHANCEMENT] Public base URL can be configured for Data Docs sites
+* [ENHANCEMENT] SuiteEditNotebookRenderer.add_header class now allows usage of env variables in jinja templates (thanks @mbakunze)!
+* [ENHANCEMENT] Display table for Cramer's Phi expectation in Data Docs (thanks @mlondschien)!
+* [BUGFIX] Explicitly convert keys to tuples when removing from TupleS3StoreBackend (thanks @balexander)!
+* [BUGFIX] Use more-specific s3.meta.client.exceptions with dealing with boto resource api (thanks @lcorneliussen)!
+* [BUGFIX] Links to Amazon S3 are compatible with virtual host-style access and path-style access
+* [DOCS] How to Instantiate a Data Context on a Databricks Spark Cluster
+* [DOCS] Update to Deploying Great Expectations with Google Cloud Composer
+* [MAINTENANCE] Update moto dependency to include cryptography (see #spulec/moto/3290)
+
+0.12.2
+-----------------
 * [ENHANCEMENT] Update schema for anonymized expectation types to avoid large key domain
+* [ENHANCEMENT] BaseProfiler type mapping expanded to include more pandas and numpy dtypes
 * [BUGFIX] Allow for pandas reader option inference with parquet and Excel (thanks @dlachasse)!
 * [BUGFIX] Fix bug where running checkpoint fails if GCS data docs site has a prefix (thanks @sergii-tsymbal-exa)!
 * [BUGFIX] Fix bug in deleting datasource config from config file (thanks @rxmeez)!
 * [BUGFIX] clarify inclusiveness of min/max values in string rendering
+* [BUGFIX] Building data docs no longer crashes when a data asset name is an integer #1913
 * [DOCS] Add notes on transient table creation to Snowflake guide (thanks @verhey)!
 * [DOCS] Fixed several broken links and glossary organization (thanks @JavierMonton and @sbrugman)!
 * [DOCS] Deploying Great Expectations with Google Cloud Composer (Hosted Airflow)
-* [ENHANCEMENT] BaseProfiler type mapping expanded to include more pandas and numpy dtypes
-
 
 0.12.1
 -----------------
@@ -257,7 +307,7 @@ Develop
     - `checkpoint list`
     - `checkpoint run`
     - `checkpoint script`
-    
+
 * marked cli `tap` commands as deprecating on next release
 * marked cli `validation-operator run` command as deprecating
 * internal improvements in the cli code

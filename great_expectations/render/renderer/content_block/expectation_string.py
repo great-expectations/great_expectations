@@ -452,17 +452,116 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         ]
 
     @classmethod
+    def expect_table_columns_to_match_set(
+        cls, expectation, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(
+            expectation.kwargs, ["column_set", "exact_match"]
+        )
+
+        if params["column_set"] is None:
+            template_str = "Must specify a set or list of columns."
+
+        else:
+            # standardize order of the set for output
+            params["column_list"] = list(params["column_set"])
+
+            column_list_template_str = ", ".join(
+                [f"$column_list_{idx}" for idx in range(len(params["column_list"]))]
+            )
+
+            exact_match_str = "exactly" if params["exact_match"] is True else "at least"
+
+            template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
+
+            for idx in range(len(params["column_list"])):
+                params["column_list_" + str(idx)] = params["column_list"][idx]
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    @classmethod
     def expect_column_pair_cramers_phi_value_to_be_less_than(
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
             expectation.kwargs, ["column_A", "column_B"]
         )
-
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
 
         template_str = "Values in $column_A and $column_B must be independent."
+        rendered_string_template_content = RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
+            }
+        )
+
+        return [rendered_string_template_content]
+
+    @classmethod
+    def expect_compound_columns_to_be_unique(
+        cls, expectation, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(
+            expectation.kwargs,
+            [
+                "column_list",
+                "ignore_row_if",
+                "row_condition",
+                "condition_parser",
+                "mostly",
+            ],
+        )
+
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+
+        template_str = (
+            f"Values for given compound columns must be unique together{mostly_str}: "
+        )
+        for idx in range(len(params["column_list"]) - 1):
+            template_str += "$column_list_" + str(idx) + ", "
+            params["column_list_" + str(idx)] = params["column_list"][idx]
+
+        last_idx = len(params["column_list"]) - 1
+        template_str += "$column_list_" + str(last_idx)
+        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -481,12 +580,91 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     def expect_multicolumn_values_to_be_unique(
         cls, expectation, styling=None, include_column_name=True
     ):
+        # NOTE: This expectation is deprecated, please use
+        # expect_select_column_values_to_be_unique_within_record instead.
+
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column_list", "ignore_row_if", "row_condition", "condition_parser"],
+            [
+                "column_list",
+                "ignore_row_if",
+                "row_condition",
+                "condition_parser",
+                "mostly",
+            ],
         )
 
-        template_str = "Values must always be unique across columns: "
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+
+        template_str = f"Values must always be unique across columns{mostly_str}: "
+        for idx in range(len(params["column_list"]) - 1):
+            template_str += "$column_list_" + str(idx) + ", "
+            params["column_list_" + str(idx)] = params["column_list"][idx]
+
+        last_idx = len(params["column_list"]) - 1
+        template_str += "$column_list_" + str(last_idx)
+        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    @classmethod
+    def expect_select_column_values_to_be_unique_within_record(
+        cls, expectation, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(
+            expectation.kwargs,
+            [
+                "column_list",
+                "ignore_row_if",
+                "row_condition",
+                "condition_parser",
+                "mostly",
+            ],
+        )
+
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+
+        template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
             template_str += "$column_list_" + str(idx) + ", "
             params["column_list_" + str(idx)] = params["column_list"][idx]
