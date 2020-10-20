@@ -170,9 +170,13 @@ class RegexPartitioner(Partitioner):
         if not isinstance(batch_request, BatchRequest):
             raise TypeError("batch_request is not of an instance of type BatchRequest")
 
+        partition_request = batch_request.partition_request
+        if "data_asset_name" in self.regex["group_names"]:
+            partition_request["data_asset_name"] = batch_request.data_asset_name
+
         filepath_template = self._invert_regex_to_data_reference_template()
         converted_string = filepath_template.format(
-            **batch_request.partition_request
+            **partition_request
         )
 
         return converted_string

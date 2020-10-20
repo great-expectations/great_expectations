@@ -471,8 +471,6 @@ connector and the default_partitioner set to one of the configured partitioners.
 
         batches = []
         for data_reference, batch_definition in self._data_references_cache.items():
-            print(batch_definition)
-            print(batch_request)
             if batch_definition == None:
                 # The data_reference is unmatched.
                 continue
@@ -593,3 +591,9 @@ connector and the default_partitioner set to one of the configured partitioners.
             data_asset_name=data_asset_name,
             partition_definition=batch_request.partition_request,
         )
+
+    def self_check(self,
+        pretty_print=True,
+        max_examples=3
+    ):
+        raise NotImplementedError
