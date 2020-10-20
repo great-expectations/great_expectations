@@ -302,6 +302,14 @@ class Validator:
         """
         graph = ValidationGraph()
         for configuration in configurations:
+            # Validating
+            try:
+                # Todo: try to find a way to access table columns so as to verify column is in table
+                assert configuration.expectation_type is not None, "Given configuration should include expectation type"
+            except AssertionError as e:
+                raise InvalidExpectationConfigurationError(str(e))
+
+
             expectation_impl = get_expectation_impl(configuration.expectation_type)
             validation_dependencies = expectation_impl().get_validation_dependencies(
                 configuration, self._execution_engine, runtime_configuration
