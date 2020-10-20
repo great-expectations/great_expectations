@@ -12,7 +12,7 @@ from great_expectations.expectations.metrics.column_map_metric import (
 
 
 class ColumnValuesNonNull(ColumnMapMetric):
-    condition_metric_name = "column_values.non_null"
+    condition_metric_name = "column_values.nonnull"
     filter_column_isnull = False
 
     @column_map_condition(engine=PandasExecutionEngine)
@@ -25,4 +25,4 @@ class ColumnValuesNonNull(ColumnMapMetric):
 
     @column_map_condition(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
-        return column.withColumn("__success", column[0].isNotNull())
+        return column.isNotNull()

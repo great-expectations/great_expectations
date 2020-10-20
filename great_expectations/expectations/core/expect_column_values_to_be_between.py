@@ -78,10 +78,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.is_between"
-    metric_dependencies = (
-        "column_values.is_between.count",
-        "column_values.nonnull.count",
-    )
     success_keys = (
         "min_value",
         "max_value",
@@ -156,67 +152,3 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
             )
 
         return True
-
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        """Validates the given data against a minimum and maximum threshold, returning a nested dictionary documenting the
-        validation."""
-
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
-        # Obtaining value for "mostly" and "threshold" arguments to evaluate success
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-
-        # If result_format is changed by the runtime configuration
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        else:
-            result_format = self.default_kwarg_values.get("result_format")
-
-        is_between_count = metric_vals.get("column_values.is_between.count")
-        nonnull_count = metric_vals.get("column_values.nonnull.count")
-
-        # Returning dictionary output with necessary metrics based on the format
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=(is_between_count / nonnull_count) >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.is_between.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.is_between.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.is_between.unexpected_index_list"
-            ),
-        )

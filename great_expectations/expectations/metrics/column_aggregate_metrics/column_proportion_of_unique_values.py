@@ -50,27 +50,29 @@ class ColumnUniqueProportion(ColumnAggregateMetric):
         else:
             return 0
 
+    @classmethod
+    def get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        """This should return a dictionary:
 
-def get_evaluation_dependencies(
-    self,
-    metric: MetricConfiguration,
-    configuration: Optional[ExpectationConfiguration] = None,
-    execution_engine: Optional[ExecutionEngine] = None,
-    runtime_configuration: Optional[dict] = None,
-):
-    """This should return a dictionary:
-
-    {
-      "dependency_name": MetricConfiguration,
-      ...
-    }
-    """
-    table_domain_kwargs = {
-        k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-    }
-    return {
-        "column.aggregate.unique_value_count": MetricConfiguration(
-            "column.aggregate.unique_value_count", metric.metric_domain_kwargs
-        ),
-        "table.row_count": MetricConfiguration("table.row_count", table_domain_kwargs),
-    }
+        {
+          "dependency_name": MetricConfiguration,
+          ...
+        }
+        """
+        table_domain_kwargs = {
+            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
+        }
+        return {
+            "column.aggregate.unique_value_count": MetricConfiguration(
+                "column.aggregate.unique_value_count", metric.metric_domain_kwargs
+            ),
+            "table.row_count": MetricConfiguration(
+                "table.row_count", table_domain_kwargs
+            ),
+        }

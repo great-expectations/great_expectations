@@ -102,10 +102,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.increasing"
-    metric_dependencies = (
-        "column_values.increasing.count",
-        "column_values.nonnull.count",
-    )
     success_keys = ("strictly", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
@@ -179,45 +175,3 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
                 column + "__success",
                 when(col("diff") >= 0, lit(True)).otherwise(lit(False)),
             )
-
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        metric_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        metric_vals = extract_metrics(
-            metric_dependencies, metrics, configuration, runtime_configuration
-        )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        else:
-            result_format = self.default_kwarg_values.get("result_format")
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=(
-                metric_vals.get("column_values.increasing.count")
-                / metric_vals.get("column_values.nonnull.count")
-            )
-            >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.increasing.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.increasing.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.increasing.unexpected_index_list"
-            ),
-        )

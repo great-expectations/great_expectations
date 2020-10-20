@@ -23,7 +23,10 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 class ColumnValuesZScore(ColumnMapMetric):
     condition_metric_name = "column_values.z_score.under_threshold"
-    condition_value_keys = ("double_sided, threshold",)
+    condition_value_keys = (
+        "double_sided",
+        "threshold",
+    )
 
     function_metric_name = "column_values.z_score.map_function"
     function_value_keys = tuple()
@@ -94,8 +97,9 @@ class ColumnValuesZScore(ColumnMapMetric):
 
         return z_score < threshold
 
+    @classmethod
     def get_evaluation_dependencies(
-        self,
+        cls,
         metric: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
@@ -109,7 +113,7 @@ class ColumnValuesZScore(ColumnMapMetric):
                     "column_values.z_score.map_function", metric.metric_domain_kwargs
                 )
             }
-        if metric.metric_name == "column_values.z_score":
+        if metric.metric_name == "column_values.z_score.map_function":
             return {
                 "column.aggregate.mean": MetricConfiguration(
                     "column.aggregate.mean", metric.metric_domain_kwargs
@@ -119,4 +123,9 @@ class ColumnValuesZScore(ColumnMapMetric):
                 ),
             }
         else:
-            return dict()
+            return super().get_evaluation_dependencies(
+                metric=metric,
+                configuration=configuration,
+                execution_engine=execution_engine,
+                runtime_configuration=runtime_configuration,
+            )

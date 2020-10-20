@@ -61,7 +61,6 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
         expect_table_row_count_to_equal
     """
 
-    metric_dependencies = ("column_values.count",)
     success_keys = (
         "min_value",
         "max_value",
@@ -146,55 +145,3 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
             raise ValueError("min_value and max_value must be integers")
 
         return True
-
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        """Validates the given data against the set minimum and maximum value thresholds for the row Count"""
-        # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
-        row_count = metric_vals.get("column_values.count")
-
-        # Obtaining components needed for validation
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
-
-        # Checking if mean lies between thresholds
-        if min_value is not None:
-            above_min = row_count >= min_value
-        else:
-            above_min = True
-
-        if max_value is not None:
-            below_max = row_count <= max_value
-        else:
-            below_max = True
-
-        success = above_min and below_max
-
-        return {"success": success, "result": {"observed_value": row_count}}

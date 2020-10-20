@@ -50,7 +50,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                     df = df[df[accessor_domain_kwargs["column"]].notnull()]
                 return metric_fn(
                     cls,
-                    df[accessor_domain_kwargs["column"]],
+                    column=df[accessor_domain_kwargs["column"]],
                     **metric_value_kwargs,
                     _metrics=metrics,
                 )
@@ -92,7 +92,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                 sqlalchemy_engine = execution_engine.engine
                 metric_aggregate = metric_fn(
                     cls,
-                    sa.column(column_name),
+                    column=sa.column(column_name),
                     **metric_value_kwargs,
                     _dialect=dialect,
                     _table=selectable,

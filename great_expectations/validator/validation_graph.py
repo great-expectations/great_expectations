@@ -9,7 +9,7 @@ class MetricConfiguration:
         self,
         metric_name: str,
         metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metric_value_kwargs: dict = None,
         metric_dependencies: dict = None,
     ):
         self._metric_name = metric_name
@@ -17,6 +17,8 @@ class MetricConfiguration:
             metric_domain_kwargs = IDDict(metric_domain_kwargs)
         self._metric_domain_kwargs = metric_domain_kwargs
         if not isinstance(metric_value_kwargs, IDDict):
+            if metric_value_kwargs is None:
+                metric_value_kwargs = dict()
             metric_value_kwargs = IDDict(metric_value_kwargs)
         self._metric_value_kwargs = metric_value_kwargs
         if metric_dependencies is None:
@@ -89,6 +91,7 @@ class ValidationGraph:
     def add(self, edge: MetricEdge):
         if edge.id not in self._edge_ids:
             self._edges.append(edge)
+            self._edge_ids.add(edge.id)
 
     @property
     def edges(self):

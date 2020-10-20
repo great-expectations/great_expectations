@@ -162,7 +162,7 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
 def map_condition(engine: Type[ExecutionEngine], **kwargs):
     def wrapper(metric_fn: Callable):
         def inner_func(*args, **kwargs):
-            metric_fn(*args, **kwargs)
+            return metric_fn(*args, **kwargs)
 
         inner_func.map_condition_metric_engine = engine
         inner_func.map_condition_metric_kwargs = kwargs
@@ -184,7 +184,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     if issubclass(engine, PandasExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @map_condition
+            @map_condition(engine)
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -219,7 +219,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SqlAlchemyExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @map_condition
+            @map_condition(engine)
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -328,6 +328,12 @@ def _pandas_column_map_values(
     df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
         domain_kwargs=metric_domain_kwargs,
     )
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[accessor_domain_kwargs["column"]].notnull()]
+
     data = df[accessor_domain_kwargs["column"]]
 
     # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
@@ -361,13 +367,17 @@ def _pandas_column_map_index(
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
     metrics: Dict[Tuple, Any],
-    filter_column_isnull,
     **kwargs,
 ):
     """Maps metric values and kwargs to results of success kwargs"""
     df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
         domain_kwargs=metric_domain_kwargs,
     )
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[accessor_domain_kwargs["column"]].notnull()]
     data = df[accessor_domain_kwargs["column"]]
     # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
@@ -388,13 +398,17 @@ def _pandas_column_map_value_counts(
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
     metrics: Dict[Tuple, Any],
-    filter_column_isnull,
     **kwargs,
 ):
     """Returns respective value counts for distinct column values"""
     df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
         domain_kwargs=metric_domain_kwargs,
     )
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[accessor_domain_kwargs["column"]].notnull()]
     data = df[accessor_domain_kwargs["column"]]
     # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
@@ -425,14 +439,17 @@ def _pandas_column_map_rows(
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
     metrics: Dict[Tuple, Any],
-    filter_column_isnull,
     **kwargs,
 ):
     """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""
-    row_domain = {k: v for (k, v) in metric_domain_kwargs.items() if k != "column"}
     df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
         domain_kwargs=metric_domain_kwargs,
     )
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[accessor_domain_kwargs["column"]].notnull()]
     # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
     boolean_mapped_success_values = metrics.get("expected_condition")
@@ -703,7 +720,7 @@ class ColumnMapMetric(Metric):
                         bundle_metric=False,
                     )
                     register_metric(
-                        metric_name=metric_name + ".count",
+                        metric_name=metric_name + ".unexpected_count",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -718,6 +735,15 @@ class ColumnMapMetric(Metric):
                         execution_engine=engine,
                         metric_class=cls,
                         metric_provider=_pandas_column_map_values,
+                        bundle_metric=False,
+                    )
+                    register_metric(
+                        metric_name=metric_name + ".unexpected_index_list",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_pandas_column_map_index,
                         bundle_metric=False,
                     )
                     register_metric(
@@ -879,10 +905,10 @@ class ColumnMapMetric(Metric):
             k: v for k, v in metric.metric_value_kwargs.items() if k != "result_format"
         }
 
-        if metric_name.endswith(".count"):
+        if metric_name.endswith(".unexpected_count"):
             return {
                 "expected_condition": MetricConfiguration(
-                    metric_name[: -len(".count")],
+                    metric_name[: -len(".unexpected_count")],
                     metric.metric_domain_kwargs,
                     base_metric_value_kwargs,
                 )

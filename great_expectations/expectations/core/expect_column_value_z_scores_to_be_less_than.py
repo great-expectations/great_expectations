@@ -1,21 +1,12 @@
 from typing import Dict, List, Optional, Union
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
-from ...data_asset.util import parse_result_format
 from ..expectation import (
     ColumnMapDatasetExpectation,
-    DatasetExpectation,
-    Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output,
 )
-from ..registry import extract_metrics, get_domain_metrics_dict_by_name
+from ..metrics import ColumnValuesZScore
 
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
@@ -71,14 +62,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     """
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    map_metric = "column_values.z_scores.under_threshold"
-    metric_dependencies = (
-        "column_values.z_scores.under_threshold.count",
-        "column.aggregate.mean",
-        "column.aggregate.standard_deviation",
-        "column_values.nonnull.count",
-        "column.z_scores",
-    )
+    map_metric = "column_values.z_score.under_threshold"
     success_keys = ("threshold", "double_sided", "mostly")
 
     # Default values

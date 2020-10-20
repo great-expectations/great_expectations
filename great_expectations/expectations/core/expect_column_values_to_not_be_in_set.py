@@ -92,10 +92,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.not_in_set"
-    metric_dependencies = (
-        "column_values.not_in_set.count",
-        "column_values.nonnull.count",
-    )
     success_keys = ("value_set", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
@@ -152,52 +148,3 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
         return pd.DataFrame(
             {"column_values.not_in_set": ~series.isin(parsed_value_set)}
         )
-
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        else:
-            result_format = self.default_kwarg_values.get("result_format")
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=(
-                metric_vals.get("column_values.not_in_set.count")
-                / metric_vals.get("column_values.nonnull.count")
-            )
-            >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.not_in_set.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.not_in_set.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.not_in_set.unexpected_index_list"
-            ),
-        )
-
-    #
-    # @renders(StringTemplate, modes=())
-    # def lkjdsf(self, mode={prescriptive}, {descriptive}, {valiation}):
-    #     return "I'm a thing"

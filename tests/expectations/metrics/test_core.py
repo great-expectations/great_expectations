@@ -133,7 +133,7 @@ def test_map_value_set_sa():
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     # Note: metric_dependencies is optional here in the config when called from a validator.
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set.count",
+        metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
         metric_dependencies={"expected_condition": desired_metric},
@@ -168,7 +168,7 @@ def test_map_of_type_sa():
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     # Note: metric_dependencies is optional here in the config when called from a validator.
     desired_metric = MetricConfiguration(
-        metric_name="column_values.of_type.count",
+        metric_name="column_values.of_type.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"type": int},
         metric_dependencies={"expected_condition": desired_metric},
@@ -202,7 +202,7 @@ def test_map_value_set_spark():
 
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set.count",
+        metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
         metric_dependencies={"expected_condition": desired_metric},
@@ -320,7 +320,7 @@ def test_z_score_under_threshold_pd():
     assert list(results[desired_metric.id]) == [True, True, True]
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold.count",
+        metric_name="column_values.z_score.under_threshold.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
         metric_dependencies={"expected_condition": desired_metric},
