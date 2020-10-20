@@ -4,6 +4,11 @@ import logging
 import uuid
 from typing import Any, Callable, Dict, Iterable, Tuple, Union
 
+try:
+    import pyspark.sql.functions as F
+except ImportError:
+    F = None
+
 from great_expectations.core.id_dict import IDDict
 from great_expectations.execution_environment.types import (
     BatchSpec,

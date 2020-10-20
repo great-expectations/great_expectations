@@ -41,7 +41,7 @@ def test_parse_validation_graph():
         ).get_validation_dependencies(configuration, engine)
 
         for metric_configuration in validation_dependencies["metrics"].values():
-            Validator()._populate_dependencies(
+            Validator(execution_engine=engine)._populate_dependencies(
                 graph, metric_configuration, configuration, execution_engine=engine
             )
     ready_metrics, needed_metrics = Validator()._parse_validation_graph(
@@ -58,9 +58,9 @@ def test_parse_validation_graph_with_bad_metrics_args():
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
     )
-    validator = Validator()
     graph = ValidationGraph()
     engine = PandasExecutionEngine()
+    validator = Validator(execution_engine=engine)
     for configuration in [expectationConfiguration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
@@ -98,7 +98,7 @@ def test_populate_dependencies():
         ).get_validation_dependencies(configuration, engine,)
 
         for metric_configuration in validation_dependencies["metrics"].values():
-            Validator()._populate_dependencies(
+            Validator(execution_engine=engine)._populate_dependencies(
                 graph, metric_configuration, configuration, execution_engine=engine
             )
     assert len(graph.edges) == 10
@@ -123,7 +123,7 @@ def test_populate_dependencies_with_incorrect_metric_name():
         ).get_validation_dependencies(configuration, engine,)
 
         try:
-            Validator()._populate_dependencies(
+            Validator(execution_engine=engine)._populate_dependencies(
                 graph,
                 MetricConfiguration("column_values.not_a_metric", IDDict()),
                 configuration,

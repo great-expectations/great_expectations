@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, Tuple, Type
 
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.sparkdf_execution_engine import (
+    F,
     SparkDFExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
