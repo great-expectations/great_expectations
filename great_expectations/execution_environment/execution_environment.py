@@ -273,8 +273,9 @@ class ExecutionEnvironment(object):
             config=config,
             runtime_environment={
                 "name": name,
+                "execution_environment_name": self.name,
                 "data_context_root_directory": self._data_context_root_directory,
-                "execution_engine": self._execution_engine
+                "execution_engine": self._execution_engine,
             },
             config_defaults={
                 "module_name": "great_expectations.execution_environment.data_connector"
