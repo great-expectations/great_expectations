@@ -1,4 +1,5 @@
 import pandas as pd
+import sqlalchemy as sa
 
 from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import (
@@ -248,7 +249,7 @@ def test_map_unique_sa():
 
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    sql_df = df.to_sql("test", eng)
+    df.to_sql("test", eng)
     engine = SqlAlchemyExecutionEngine(engine=eng)
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique",
@@ -294,6 +295,120 @@ def test_z_score_under_threshold_pd():
     )
     desired_metrics = (mean, stdev)
     metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.z_score.map_function",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "column.aggregate.standard_deviation": stdev,
+            "column.aggregate.mean": mean,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.z_score.under_threshold",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"double_sided": True, "threshold": 2},
+        metric_dependencies={"column_values.z_score.map_function": desired_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert list(results[desired_metric.id]) == [True, True, True]
+    metrics.update(results)
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.z_score.under_threshold.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"double_sided": True, "threshold": 2},
+        metric_dependencies={"expected_condition": desired_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == 0
+
+
+def test_z_score_under_threshold_sa():
+    engine = sa.create_engine("sqlite://")
+    df = pd.DataFrame({"a": [1, 2, 3, None]})
+    df.to_sql("test", engine)
+    engine._loaded_batch_id = "batch_id"
+    engine._batches = {"batch_id": Batch(data=df)}
+    mean = MetricConfiguration(
+        metric_name="column.aggregate.mean",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    stdev = MetricConfiguration(
+        metric_name="column.aggregate.standard_deviation",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metrics = (mean, stdev)
+    metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metrics))
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.z_score.map_function",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "column.aggregate.standard_deviation": stdev,
+            "column.aggregate.mean": mean,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.z_score.under_threshold",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"double_sided": True, "threshold": 2},
+        metric_dependencies={"column_values.z_score.map_function": desired_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert list(results[desired_metric.id]) == [True, True, True]
+    metrics.update(results)
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.z_score.under_threshold.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"double_sided": True, "threshold": 2},
+        metric_dependencies={"expected_condition": desired_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == 0
+
+
+def test_z_score_under_threshold_spark():
+    from pyspark.sql import DataFrame, SparkSession
+
+    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+    spark = SparkSession.builder.getOrCreate()
+    df = spark.createDataFrame(df)
+
+    engine = SparkDFExecutionEngine()
+    engine._loaded_batch_id = "batch_id"
+    engine._batches = {"batch_id": Batch(data=df)}
+    mean = MetricConfiguration(
+        metric_name="column.aggregate.mean",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    stdev = MetricConfiguration(
+        metric_name="column.aggregate.standard_deviation",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metrics = (mean, stdev)
+    metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metrics))
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.z_score.map_function",
