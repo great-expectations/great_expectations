@@ -81,10 +81,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.in_set"
-    metric_dependencies = (
-        "column_values.in_set.count",
-        "column_values.nonnull.count",
-    )
     success_keys = (
         "value_set",
         "mostly",

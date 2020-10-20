@@ -337,6 +337,7 @@ class DatasetExpectation(Expectation, ABC):
         "row_condition",
         "condition_parser",
     )
+    metric_dependencies = tuple()
 
     def get_validation_dependencies(
         self,
@@ -347,6 +348,17 @@ class DatasetExpectation(Expectation, ABC):
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
+        for metric_name in self.metric_dependencies:
+            metric_kwargs = get_metric_kwargs(
+                metric_name=metric_name,
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            dependencies["metrics"][metric_name] = MetricConfiguration(
+                metric_name=metric_name,
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
 
         return dependencies
 
@@ -375,7 +387,7 @@ class DatasetExpectation(Expectation, ABC):
 
 class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
     map_metric = None
-    metric_dependencies = "column_values.nonnull.count"
+
     success_keys = ("mostly",)
     default_kwarg_values = {"mostly": 1}
 
@@ -405,38 +417,51 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
-        dependencies["metrics"] = dict()
-        metric_dependencies = dependencies["metrics"]  # just get a convenient name
-        # metric_dependencies = set(self.metric_dependencies)
-        for dependency in self.metric_dependencies:
-            metric_kwargs = get_metric_kwargs(
-                metric_name=dependency,
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            dependencies["metrics"][dependency] = MetricConfiguration(
-                metric_name=dependency,
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-            )
+        assert isinstance(
+            self.map_metric, str
+        ), "ColumnMapDatasetExpectation must override get_validation_dependencies or declare exactly one map_metric"
+
+        # convenient name for updates
+        metric_dependencies = dependencies["metrics"]
+        metric_kwargs = get_metric_kwargs(
+            metric_name="column_values.nonnull.unexpected_count",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[
+            "column_values.nonnull.unexpected_count"
+        ] = MetricConfiguration(
+            "column_values.nonnull.unexpected_count",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+        metric_kwargs = get_metric_kwargs(
+            metric_name=self.map_metric + ".unexpected_count",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[
+            self.map_metric + ".unexpected_count"
+        ] = MetricConfiguration(
+            self.map_metric + ".unexpected_count",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
 
         result_format_str = dependencies["result_format"].get("result_format")
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
 
         metric_kwargs = get_metric_kwargs(
-            metric_name="column.row_count",
+            metric_name="table.row_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies["column.row_count"] = MetricConfiguration(
-            metric_name="column.row_count",
+        metric_dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-        assert isinstance(
-            self.map_metric, str
-        ), "ColumnMapDatasetExpectation must override get_validation_dependencies or declare exactly one map_metric"
 
         metric_kwargs = get_metric_kwargs(
             self.map_metric + ".unexpected_values",
@@ -504,17 +529,25 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
-        success = (
-            metrics[self.column_map_metric] / metrics["column_values.nonnull.count"]
-        )
+        null_count = metrics["column_values.nonnull.unexpected_count"]
+        if null_count is not None and null_count > 0:
+            success = (
+                1
+                - (
+                    metrics[self.map_metric + ".unexpected_count"]
+                    / metrics["column_values.nonnull.unexpected_count"]
+                )
+            ) >= mostly
+        else:
+            success = None
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
-            success=success >= mostly,
-            element_count=metrics.get("column.row_count"),
-            nonnull_count=metrics.get("column_values.nonnull.count"),
-            unexpected_count=metrics.get("column_values.nonnull.count")
-            - metrics.get(self.map_metric + ".count"),
+            success=success,
+            element_count=metrics.get("table.row_count"),
+            nonnull_count=metrics.get("table.row_count")
+            - metrics.get("column_values.nonnull.unexpected_count"),
+            unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
             unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
             unexpected_index_list=metrics.get(
                 self.map_metric + ".unexpected_index_list"

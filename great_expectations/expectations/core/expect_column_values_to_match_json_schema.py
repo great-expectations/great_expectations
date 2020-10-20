@@ -75,10 +75,6 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.match_json_schema"
-    metric_dependencies = (
-        "column_values.match_json_schema.count",
-        "column_values.nonnull.count",
-    )
     success_keys = (
         "json_schema",
         "mostly",
@@ -182,54 +178,3 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
     #         return data.withColumn(column + "__success", F.lit(True))
     #
     #     return data.withColumn(column + "__success", F.col(column).isin(json))
-
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        metric_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        metric_vals = extract_metrics(
-            metric_dependencies, metrics, configuration, runtime_configuration
-        )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
-        if metric_vals.get("column_values.nonnull.count") > 0:
-            success = metric_vals.get(
-                "column_values.match_json_schema.count"
-            ) / metric_vals.get("column_values.nonnull.count")
-        else:
-            # TODO: Setting this to 1 based on the notion that tests on empty columns should be vacuously true. Confirm.
-            success = 1
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=success >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.match_json_schema.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.match_json_schema.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.match_json_schema.unexpected_index_list"
-            ),
-        )

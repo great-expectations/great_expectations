@@ -53,7 +53,6 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         expect_table_row_count_to_be_between
     """
 
-    metric_dependencies = ("column_values.count",)
     success_keys = ("value",)
 
     default_kwarg_values = {

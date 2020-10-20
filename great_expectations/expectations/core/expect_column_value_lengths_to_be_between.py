@@ -73,10 +73,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.value_length_between"
-    metric_dependencies = (
-        "column_values.value_length_between.count",
-        "column_values.nonnull.count",
-    )
     success_keys = (
         "min_value",
         "max_value",
@@ -227,52 +223,3 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
                 return sa.func.length(column) > min_value
             else:
                 return sa.func.length(column) >= min_value
-
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        metric_dependencies = self.get_validation_dependencies(
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
-        )["metrics"]
-        metric_vals = extract_metrics(
-            metric_dependencies, metrics, configuration, runtime_configuration
-        )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=(
-                metric_vals.get("column_values.value_length_between.count")
-                / metric_vals.get("column_values.nonnull.count")
-            )
-            >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.value_length_between.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.value_length_between.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.value_length_between.unexpected_index"
-            ),
-        )

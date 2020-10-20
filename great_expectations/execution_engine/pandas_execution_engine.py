@@ -267,19 +267,18 @@ Notes:
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.loaded_batch:
-                batch = self.loaded_batch
+            if self.loaded_batch_id:
+                data = self.loaded_batch
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.batches:
-                batch = self.batches[batch_id]
+                data = self.batches[batch_id]
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
-        data = batch.data
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
         table = domain_kwargs.get("table", None)
@@ -297,11 +296,9 @@ Notes:
                     " and must be 'python' or 'pandas'"
                 )
             else:
-                data = batch.data.query(
-                    row_condition, parser=condition_parser
-                ).reset_index(drop=True)
-        else:
-            data = batch.data
+                data = data.query(row_condition, parser=condition_parser).reset_index(
+                    drop=True
+                )
 
         if "column" in compute_domain_kwargs:
             accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")

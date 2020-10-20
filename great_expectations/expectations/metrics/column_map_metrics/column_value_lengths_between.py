@@ -65,8 +65,9 @@ class ColumnValuesValueLengthsBetween(ColumnMapMetric):
 
         return metric_series
 
+    @classmethod
     def get_evaluation_dependencies(
-        self,
+        cls,
         metric: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,

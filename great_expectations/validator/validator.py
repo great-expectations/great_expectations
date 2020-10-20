@@ -53,12 +53,12 @@ logging.captureWarnings(True)
 class Validator:
     def __init__(
         self,
+        execution_engine,
         interactive_evaluation=True,
         expectation_suite=None,
         expectation_suite_name=None,
         data_context=None,
-        execution_engine=None,
-        batch=None,
+        batches=None,
         **kwargs,
     ):
         """
@@ -75,20 +75,17 @@ class Validator:
 
         """
 
-        self._batch = batch
+        self._batches = batches
         self._data_context = data_context
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
 
-        if execution_engine:
-            self._execution_engine.register_validator(self)
-
-            if batch:
-                if not execution_engine.batches.get(batch.batch_spec.to_id()):
-                    execution_engine.batches[batch.batch_spec.to_id()] = batch
-                execution_engine._loaded_batch_id = batch.batch_spec.to_id()
-        else:
-            self._data_context = None
+        if batches is not None:
+            ####
+            # pending load_batch api
+            self._execution_engine._loaded_batch_id = "batch_id"
+            self._execution_engine._batches = {"batch_id": batches[0].data}
+            #####
 
         # TURN TO self.interactive_evaluation (single flag -> property)
         self._validator_config = {"interactive_evaluation": interactive_evaluation}
@@ -347,7 +344,6 @@ class Validator:
             )
         return evrs
 
-    # TODO: why does this take in a metrics argument?
     def _parse_validation_graph(self, validation_graph, metrics):
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
@@ -371,7 +367,6 @@ class Validator:
 
     def _resolve_metrics(
         self,
-        batches: Dict[str, Batch],
         execution_engine: "ExecutionEngine",
         metrics_to_resolve: Iterable[MetricConfiguration],
         metrics: dict,
@@ -380,7 +375,7 @@ class Validator:
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
         resolved"""
         return execution_engine.resolve_metrics(
-            batches, metrics_to_resolve, metrics, runtime_configuration
+            metrics_to_resolve, metrics, runtime_configuration
         )
 
     def _initialize_expectations(
