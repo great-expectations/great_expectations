@@ -494,7 +494,7 @@ def get_dataset(
             table_name, engine=conn, profiler=profiler, caching=caching
         )
 
-    elif dataset_type == "spark":
+    elif dataset_type == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
         from pyspark.sql import SparkSession
 

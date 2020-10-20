@@ -28,13 +28,11 @@ class ExecutionEngine:
         self,
         name=None,
         caching=True,
-        data_context=None,
         batch_spec_defaults=None,
         batches=None,
         validator=None,
     ):
         self.name = name
-        self._data_context = data_context
         self._validator = validator
 
         # NOTE: using caching makes the strong assumption that the user will not modify the core data store
@@ -64,20 +62,10 @@ class ExecutionEngine:
         if batches is None:
             batches = dict()
         self._batches = batches
-        self._loaded_batch_id = None
+        self._active_batch_data_id = None
 
     def configure_validator(self, validator):
         self._validator = validator
-
-    @property
-    def data_context(self):
-        """Returns the internal Data Context (An object containing the data)"""
-        return self._data_context
-
-    @data_context.setter
-    def data_context(self, data_context):
-        """A setter for the Data Context"""
-        self._data_context = data_context
 
     @property
     def _active_validation(self):
@@ -103,34 +91,28 @@ class ExecutionEngine:
             self.validator._active_validation = active_validation
 
     @property
-    def loaded_batch_id(self):
-        ### TODO: A good docstring, and rename to "active_batch_data_id"
-        """A getter for the batch id"""
-        return self._loaded_batch_id
+    def active_batch_data_id(self):
+        """The batch id for the default batch data.
+
+        When an execution engine is asked to process a compute domain that does
+        not include a specific batch_id, then the data associated with the
+        active_batch_data_id will be used as the default.
+        """
+        return self._active_batch_data_id
 
     @property
-    def loaded_batch(self):
-        if self.loaded_batch_id is None:
+    def active_batch_data(self):
+        """The data from the currently-active batch.
+        """
+        if self.active_batch_data_id is None:
             return None
         else:
-            return self.batches.get(self.loaded_batch_id)
+            return self.batches.get(self.active_batch_data_id)
 
     @property
     def batches(self):
-        """A getter for the Execution Engine's batches"""
+        """The current dictionary of batches."""
         return self._batches
-
-    # def process_batch_definition(self, batch_definition, batch_spec):
-    #     """Use ExecutionEngine-specific configuration to translate any batch_definition keys into batch_spec keys
-    #
-    #     Args:
-    #         batch_definition (dict): batch_definition to process
-    #         batch_spec (dict): batch_spec to map processed batch_definition keys to
-    #
-    #     Returns:
-    #         batch_spec (dict)
-    #     """
-    #     raise NotImplementedError
 
     def load_batch(self, batch_definition):
         """
@@ -147,27 +129,17 @@ class ExecutionEngine:
         metrics: Dict[Tuple, Any] = None,
         runtime_configuration: dict = None,
     ) -> dict:
-        """A method used to 'resolve', or configure, metrics whose full configuration has not been provided. Given a
-        dictionary of metrics, any metric in the Iterable metrics_to_resolve has their configuration and provider
-        function
-        obtained so that it can be computed. The updated list of metrics is then returned
+        """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
+        of the provided metrics.
 
-                Args:
-                    batches (Dict[str, Batch): \
-                        A Dictionary of batch names and corresponding batches
-                    metrics_to_resolve (Iterable[MetricConfiguration]): \
-                        A list/ other iterable of MetricEdgeKeys that represent the metrics whose configurations
-                        need to be resolved
-                    metrics (float or None): \
-                        The list of the metrics and the corresponding configurations as registered within the registry
-                    runtime_configuration (dict): \
-                        A metric's runtime configuration, representing changes in result format/ other domains at
-                        runtime
+        Args:
+            metrics_to_resolve: the metrics to evaluate
+            metrics: already-computed metrics currently available to the engine
+            runtime_configuration: runtime configuration information
 
-
-                Returns:
-                    success (boolean), percent_success (float)
-                """
+        Returns:
+            resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
+        """
         if metrics is None:
             metrics = dict()
         resolved_metrics = dict()
@@ -203,12 +175,32 @@ class ExecutionEngine:
         return resolved_metrics
 
     def resolve_metric_bundle(self, metric_fn_bundle):
+        """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
     def get_compute_domain(self, domain_kwargs: dict) -> Tuple[Any, dict, dict]:
+        """get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
+        and specific engine semantics.
+
+        Returns:
+            A tuple consisting of three elements:
+
+            1. data correspondig to the compute domain;
+            2. a modified copy of domain_kwargs describing the domain of the data returned in (1);
+            3. a dictionary describing the access instructions for data elements included in the compute domain
+                (e.g. specific column name).
+
+            In general, the union of the compute_domain_kwargs and accessor_domain_kwargs will be the same as the domain_kwargs
+            provided to this method.
+        """
+
         raise NotImplementedError
 
     def add_column_null_filter_row_condition(self, column, domain_kwargs):
+        """EXPERIMENTAL
+
+        Add a row condition for handling null filter.
+        """
         if "row_condition" in domain_kwargs:
             raise GreatExpectationsError(
                 "ExecutionEngine does not support updating existing row_conditions."

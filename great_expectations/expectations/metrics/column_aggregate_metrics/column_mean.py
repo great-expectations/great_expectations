@@ -10,6 +10,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
+from great_expectations.expectations.metrics.column_aggregate_metric import F as F
 
 
 class ColumnMean(ColumnAggregateMetric):
@@ -30,4 +31,4 @@ class ColumnMean(ColumnAggregateMetric):
     @column_aggregate_metric(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
         """Spark Mean Implementation"""
-        return column.groupBy().mean().collect()[0]
+        return F.mean(column)
