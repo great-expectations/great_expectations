@@ -7,11 +7,6 @@ import sre_constants
 
 import logging
 
-from great_expectations.core.batch import (
-    BatchRequest,
-    BatchDefinition,
-)
-
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.id_dict import PartitionDefinition
@@ -56,7 +51,7 @@ class RegexPartitioner(Partitioner):
             # check if dictionary
             if not isinstance(regex, dict):
                 raise ge_exceptions.PartitionerError(
-                    f'''RegexPartitioner "{self.name}" requires a regex pattern configured as a dictionary. 
+                    f'''RegexPartitioner "{self.name}" requires a regex pattern configured as a dictionary.
                     It is currently of type "{type(regex)}. Please check your configuration.''')
             # check if correct key exists
             if not ("pattern" in regex.keys()):
@@ -87,8 +82,32 @@ class RegexPartitioner(Partitioner):
 
         matches: Union[re.Match, None] = re.match(self.regex["pattern"], data_reference)
         if matches is None:
-            raise ValueError(f'No match found for data_reference: "{data_reference}".')
-            
+            # raise ValueError(f'No match found for data_reference: "{data_reference}".')
+            return None
+
+        groups: tuple = matches.groups()
+        group_names: list = [
+            f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
+        ]
+        self._validate_sorters_configuration(
+            partition_keys=self.regex["group_names"],
+            num_actual_partition_keys=len(groups)
+        )
+        for idx, group_name in enumerate(self.regex["group_names"]):
+            group_names[idx] = group_name
+        partition_definition: dict = {}
+        for idx, group_value in enumerate(groups):
+            group_name: str = group_names[idx]
+            partition_definition[group_name] = group_value
+        partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
+        # if runtime_parameters:
+        #     partition_definition.update(runtime_parameters)
+        partition_name: str = self.DEFAULT_DELIMITER.join(
+            [str(value) for value in partition_definition.values()]
+        )
+
+        if "data_asset_name" in partition_definition:
+            data_asset_name = partition_definition.pop("data_asset_name")
         else:
             groups: tuple = matches.groups()
             # <WILL> is this automatically generated? 20201019
@@ -117,9 +136,7 @@ class RegexPartitioner(Partitioner):
         # <NOTE> : we have a separate branch that makes these parameters optional.
         # 20201019 - this will be fixed in a "future" branch which is already done :)
         return BatchRequest(
-            execution_environment_name="PLACEHOLDER",
-            data_connector_name="PLACEHOLDER",
-            data_asset_name="PLACEHOLDER",
+            data_asset_name=data_asset_name,
             partition_request=partition_definition,
         )
 
@@ -177,7 +194,7 @@ class RegexPartitioner(Partitioner):
                 sre_constants.ASSERT,
             ]:
                 pass
-            
+
             else:
                 raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
 
@@ -185,4 +202,3 @@ class RegexPartitioner(Partitioner):
         data_reference_template = re.sub("\*+", "*", data_reference_template)
 
         return data_reference_template
-

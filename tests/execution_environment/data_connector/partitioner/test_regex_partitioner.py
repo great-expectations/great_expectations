@@ -394,9 +394,6 @@ def test_convert_batch_request_to_data_reference():
 
     assert regex_partitioner.convert_batch_request_to_data_reference(
         BatchRequest(
-            execution_environment_name="PLACEHOLDER",
-            data_connector_name="PLACEHOLDER",
-            data_asset_name="PLACEHOLDER",
             partition_request=PartitionRequest(**{
                 "name": "alex",
                 "timestamp": "20200809",
@@ -418,9 +415,6 @@ def test_convert_batch_request_to_data_reference():
 
     assert regex_partitioner.convert_batch_request_to_data_reference(
         BatchRequest(
-            execution_environment_name="PLACEHOLDER",
-            data_connector_name="PLACEHOLDER",
-            data_asset_name="PLACEHOLDER",
             partition_request=PartitionDefinition(**{
                 "name": "alex",
                 "timestamp": "20200809",
@@ -442,9 +436,6 @@ def test_convert_batch_request_to_data_reference():
 
     assert regex_partitioner.convert_batch_request_to_data_reference(
         BatchRequest(
-            execution_environment_name="PLACEHOLDER",
-            data_connector_name="PLACEHOLDER",
-            data_asset_name="PLACEHOLDER",
             partition_request=PartitionDefinition(**{
                 "timestamp": "20200809",
                 "price": "1000",
@@ -587,10 +578,8 @@ def test_convert_data_reference_to_batch_request():
         }
     )
 
+    print(regex_partitioner.convert_data_reference_to_batch_request("alex_20200809_1000.csv"))
     assert regex_partitioner.convert_data_reference_to_batch_request("alex_20200809_1000.csv") == BatchRequest(
-        execution_environment_name="PLACEHOLDER",
-        data_connector_name="PLACEHOLDER",
-        data_asset_name="PLACEHOLDER",
         partition_request=PartitionDefinition(**{
             "name": "alex",
             "timestamp": "20200809",
@@ -599,9 +588,6 @@ def test_convert_data_reference_to_batch_request():
     )
 
     assert regex_partitioner.convert_data_reference_to_batch_request("eugene_20200810_1500.csv") == BatchRequest(
-        execution_environment_name="PLACEHOLDER",
-        data_connector_name="PLACEHOLDER",
-        data_asset_name="PLACEHOLDER",
         partition_request=PartitionDefinition(**{
             "name": "eugene",
             "timestamp": "20200810",
@@ -609,11 +595,9 @@ def test_convert_data_reference_to_batch_request():
         })
     )
 
-    with pytest.raises(ValueError):
-        print(regex_partitioner.convert_data_reference_to_batch_request("DOESNT_MATCH_CAPTURING_GROUPS.csv"))
+    assert regex_partitioner.convert_data_reference_to_batch_request("DOESNT_MATCH_CAPTURING_GROUPS.csv")) == None
 
-    with pytest.raises(ValueError):
-        regex_partitioner.convert_data_reference_to_batch_request("eugene_DOESNT_MATCH_ALL_CAPTURING_GROUPS_1500.csv")
+    assert regex_partitioner.convert_data_reference_to_batch_request("eugene_DOESNT_MATCH_ALL_CAPTURING_GROUPS_1500.csv") == None
 
     # TODO ABE 20201017 : Future case to handle
     # with pytest.raises(ValueError):

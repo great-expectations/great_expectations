@@ -14,6 +14,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
     PartitionDefinition,
+    PartitionRequest,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -320,7 +321,12 @@ def test_some_very_basic_stuff(basic_execution_environment):
         ["A1.csv", "A2.csv", "A3.csv", "B1.csv", "B2.csv", "B3.csv"],
     )
 
-    assert len(basic_execution_environment.get_available_partitions("my_filesystem_data_connector")) == 6
+    assert len(basic_execution_environment.get_available_batch_definitions(
+        BatchRequest(
+            execution_environment_name="my_execution_environment",
+            data_connector_name="my_filesystem_data_connector",
+        )
+    )) == 6
 
     batch = basic_execution_environment.get_batch_from_batch_definition(BatchDefinition(
         "my_execution_environment",
@@ -331,6 +337,7 @@ def test_some_very_basic_stuff(basic_execution_environment):
             "number": "1",
         })
     ))
+
     assert batch.batch_request == None
     assert type(batch.data) == pd.DataFrame
     assert batch.batch_definition == BatchDefinition(

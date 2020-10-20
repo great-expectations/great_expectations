@@ -14,131 +14,6 @@ from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot
 import great_expectations.exceptions as ge_exceptions
 
-class BatchRequest(DictDot):
-    """
-    This class contains all attributes of a batch_request.
-    """
-    def __init__(
-        self,
-        execution_environment_name: str,
-        data_connector_name: str,
-        data_asset_name: str,
-        partition_request: Union[dict, PartitionRequest, None] = None,
-        limit: Union[int, None] = None,
-        # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
-        sampling: Union[dict, None] = None
-    ):
-        if partition_request and isinstance(partition_request, dict):
-            partition_request = PartitionRequest(partition_request)
-        self._validate_batch_request(
-            execution_environment_name=execution_environment_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            limit=limit,
-        )
-
-        self._execution_environment_name = execution_environment_name
-        self._data_connector_name = data_connector_name
-        self._data_asset_name = data_asset_name
-        self._partition_request = partition_request
-        self._limit = limit
-        self._sampling = sampling
-
-    @property
-    def execution_environment_name(self) -> str:
-        return self._execution_environment_name
-
-    @property
-    def data_connector_name(self) -> str:
-        return self._data_connector_name
-
-    @property
-    def data_asset_name(self) -> str:
-        return self._data_asset_name
-
-    @property
-    def partition_request(self) -> PartitionRequest:
-        return self._partition_request
-
-    @property
-    def limit(self) -> int:
-        return self._limit
-
-    @staticmethod
-    def _validate_batch_request(
-        execution_environment_name: str,
-        data_connector_name: str,
-        data_asset_name: str,
-        partition_request: Union[PartitionRequest, None] = None,
-        limit: Union[int, None] = None,
-    ):
-        if execution_environment_name is None:
-            raise ge_exceptions.BatchDefinitionError("A valid execution_environment must be specified.")
-        if execution_environment_name and not isinstance(execution_environment_name, str):
-            raise ge_exceptions.BatchDefinitionError(
-                f'''The type of an execution_environment name must be a string (Python "str").  The type given is
-"{str(type(execution_environment_name))}", which is illegal.
-            '''
-            )
-        if data_connector_name is None:
-            raise ge_exceptions.BatchDefinitionError("A valid data_connector must be specified.")
-        if data_connector_name and not isinstance(data_connector_name, str):
-            raise ge_exceptions.BatchDefinitionError(
-                f'''The type of a data_connector name must be a string (Python "str").  The type given is
-"{str(type(data_connector_name))}", which is illegal.
-                '''
-            )
-        if data_asset_name is None:
-            raise ge_exceptions.BatchDefinitionError("A valid data_asset_name must be specified.")
-        if data_asset_name and not isinstance(data_asset_name, str):
-            raise ge_exceptions.BatchDefinitionError(
-                f'''The type of a data_asset name must be a string (Python "str").  The type given is
-"{str(type(data_asset_name))}", which is illegal.
-                '''
-            )
-        if partition_request and not isinstance(partition_request, PartitionRequest):
-            raise ge_exceptions.BatchDefinitionError(
-                f'''The type of a partition_request must be a PartitionRequest object.  The type given is
-"{str(type(partition_request))}", which is illegal.
-                '''
-            )
-        if limit and not isinstance(limit, int):
-            raise ge_exceptions.BatchDefinitionError(
-                f'''The type of limit must be an integer (Python "int").  The type given is "{str(type(limit))}", which
-is illegal.
-                '''
-            )
-
-    def get_json_dict(self) -> dict:
-        return {
-            "execution_environment_name" : self.execution_environment_name,
-            "data_connector_name" : self.data_connector_name,
-            "data_asset_name" : self.data_asset_name,
-            "partition_request" : self.partition_request,
-        }
-
-    def __str__(self):
-        return json.dumps(
-            self.get_json_dict(),
-            indent=2
-        )
-
-    @property
-    def id(self) -> str:
-        return hashlib.md5(
-            json.dumps(
-                self.get_json_dict(),
-                sort_keys=True
-            ).encode("utf-8")
-        ).hexdigest()
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            # Delegate comparison to the other instance's __eq__.
-            return NotImplemented
-        return self.id == other.id
-
 class BatchDefinition(DictDot):
     def __init__(
         self,
@@ -147,12 +22,64 @@ class BatchDefinition(DictDot):
         data_asset_name: str,
         partition_definition: PartitionDefinition,
     ):
+        self._validate_batch_definition(
+            execution_environment_name=execution_environment_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            partition_definition=partition_definition,
+            # limit=limit,
+        )
         assert type(partition_definition) == PartitionDefinition
         
         self._execution_environment_name = execution_environment_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_definition = partition_definition
+
+    @staticmethod
+    def _validate_batch_definition(
+        execution_environment_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        partition_definition: PartitionDefinition,
+        # limit: Union[int, None] = None,
+    ):
+        if execution_environment_name is None:
+            raise ValueError("A valid execution_environment must be specified.")
+        if execution_environment_name and not isinstance(execution_environment_name, str):
+            raise TypeError(
+                f'''The type of an execution_environment name must be a string (Python "str").  The type given is
+"{str(type(execution_environment_name))}", which is illegal.
+            '''
+            )
+        if data_connector_name is None:
+            raise ValueError("A valid data_connector must be specified.")
+        if data_connector_name and not isinstance(data_connector_name, str):
+            raise TypeError(
+                f'''The type of a data_connector name must be a string (Python "str").  The type given is
+"{str(type(data_connector_name))}", which is illegal.
+                '''
+            )
+        if data_asset_name is None:
+            raise ValueError("A valid data_asset_name must be specified.")
+        if data_asset_name and not isinstance(data_asset_name, str):
+            raise TypeError(
+                f'''The type of a data_asset name must be a string (Python "str").  The type given is
+"{str(type(data_asset_name))}", which is illegal.
+                '''
+            )
+        if partition_definition and not isinstance(partition_definition, PartitionDefinition):
+            raise TypeError(
+                f'''The type of a partition_request must be a PartitionDefinition object.  The type given is
+"{str(type(partition_definition))}", which is illegal.
+                '''
+            )
+#         if limit and not isinstance(limit, int):
+#             raise ge_exceptions.BatchDefinitionError(
+#                 f'''The type of limit must be an integer (Python "int").  The type given is "{str(type(limit))}", which
+# is illegal.
+#                 '''
+#             )
 
     @property
     def execution_environment_name(self) -> str:
@@ -199,6 +126,123 @@ class BatchDefinition(DictDot):
             indent=2
         )
 
+class BatchRequest(DictDot):
+    """
+    This class contains all attributes of a batch_request.
+    """
+    def __init__(
+        self,
+        execution_environment_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        partition_request: dict = None,
+        limit: Union[int, None] = None,
+        # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
+        sampling: Union[dict, None] = None
+    ):
+        self._validate_batch_request(
+            execution_environment_name=execution_environment_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            partition_request=partition_request,
+            limit=limit,
+        )
+
+        self._execution_environment_name = execution_environment_name
+        self._data_connector_name = data_connector_name
+        self._data_asset_name = data_asset_name
+        self._partition_request = partition_request
+        self._limit = limit
+        self._sampling = sampling
+
+    @property
+    def execution_environment_name(self) -> str:
+        return self._execution_environment_name
+
+    @property
+    def data_connector_name(self) -> str:
+        return self._data_connector_name
+
+    @property
+    def data_asset_name(self) -> str:
+        return self._data_asset_name
+
+    @property
+    def partition_request(self) -> dict: #PartitionRequest:
+        return self._partition_request
+
+    @property
+    def limit(self) -> int:
+        return self._limit
+
+    @staticmethod
+    def _validate_batch_request(
+        execution_environment_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        partition_request: Union[PartitionRequest, dict, None] = None,
+        limit: Union[int, None] = None,
+    ):
+        if execution_environment_name and not isinstance(execution_environment_name, str):
+            raise TypeError(
+                f'''The type of an execution_environment name must be a string (Python "str").  The type given is
+"{str(type(execution_environment_name))}", which is illegal.
+            '''
+            )
+        if data_connector_name and not isinstance(data_connector_name, str):
+            raise TypeError(
+                f'''The type of a data_connector name must be a string (Python "str").  The type given is
+"{str(type(data_connector_name))}", which is illegal.
+                '''
+            )
+        if data_asset_name and not isinstance(data_asset_name, str):
+            raise TypeError(
+                f'''The type of a data_asset name must be a string (Python "str").  The type given is
+"{str(type(data_asset_name))}", which is illegal.
+                '''
+            )
+        #TODO Abe 20201015: Switch this to PartitionRequest.
+        if partition_request and not isinstance(partition_request, dict):
+            raise TypeError(
+                f'''The type of a partition_request must be a dict object.  The type given is
+"{str(type(partition_request))}", which is illegal.
+                '''
+            )
+        if limit and not isinstance(limit, int):
+            raise TypeError(
+                f'''The type of limit must be an integer (Python "int").  The type given is "{str(type(limit))}", which
+is illegal.
+                '''
+            )
+
+    def get_json_dict(self) -> dict:
+        return {
+            "execution_environment_name" : self.execution_environment_name,
+            "data_connector_name" : self.data_connector_name,
+            "data_asset_name" : self.data_asset_name,
+            "partition_request" : self.partition_request,
+        }
+
+    def __str__(self):
+        return json.dumps(
+            self.get_json_dict(),
+            indent=2
+        )
+
+    @property
+    def id(self) -> str:
+        return hashlib.md5(
+            json.dumps(
+                self.get_json_dict(),
+                sort_keys=True
+            ).encode("utf-8")
+        ).hexdigest()
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            # Delegate comparison to the other instance's __eq__.
+            return NotImplemented
+        return self.id == other.id
 
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>

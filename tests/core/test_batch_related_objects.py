@@ -34,7 +34,7 @@ def test_batch_definition_id():
     assert A.id != B.id
 
 def test_batch_definition_instantiation():
-    with pytest.raises(AssertionError):
+    with pytest.raises(TypeError):
         A = BatchDefinition(
             "A",
             "a",
@@ -130,4 +130,58 @@ def test_batch__str__method():
 }"""
 
 
+def test_batch_request_instantiation():
+    BatchRequest(
+        execution_environment_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+        partition_request={
+            "id": "A"
+        }
+    )
 
+    BatchRequest(
+        "A",
+        "a",
+        "aaa",
+        {
+            "id": "A"
+        }
+    )
+
+    # with pytest.raises(TypeError):
+    #     BatchRequest(
+    #         "A",
+    #         "a",
+    #         "aaa",
+    #         PartitionDefinition({
+    #             "id": "A"
+    #         })
+    #     )
+
+    BatchRequest(
+        data_connector_name="a",
+        data_asset_name="aaa",
+        partition_request={
+            "id": "A"
+        }
+    )
+
+    BatchRequest(
+        data_asset_name="aaa",
+        partition_request={
+            "id": "A"
+        }
+    )
+
+    BatchRequest(
+        partition_request={
+            "id": "A"
+        }
+    )
+
+    BatchRequest(
+        execution_environment_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+    )

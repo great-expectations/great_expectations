@@ -75,27 +75,6 @@ class ExecutionEnvironment(object):
         self._data_connectors_cache = {}
         self._build_data_connectors()
 
-    def get_available_partitions(
-        self,
-        data_connector_name: str,
-        data_asset_name: str = None,
-        partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
-        in_memory_dataset: Any = None,
-        runtime_parameters: Union[dict, None] = None,
-        repartition: bool = False
-    ) -> List[Partition]:
-        data_connector: DataConnector = self.get_data_connector(
-            name=data_connector_name
-        )
-        available_partitions: List[Partition] = data_connector.get_available_partitions(
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            in_memory_dataset=in_memory_dataset,
-            runtime_parameters=runtime_parameters,
-            repartition=repartition
-        )
-        return available_partitions
-
 #     def get_batch(
 #         self,
 #         batch_request: BatchRequest
@@ -178,8 +157,6 @@ class ExecutionEnvironment(object):
             #Seems like we should verify that in_memory_dataset is compatible with the execution_engine...?
             batch_data = in_memory_dataset
             batch_spec, batch_markers = None, None
-
-            #NOTE Abe 20201014: We should also verify that the keys in batch_definition.partition_definition are compatible with the DataConnector?
 
         else:
             data_connector: DataConnector = self.get_data_connector(
@@ -296,8 +273,9 @@ class ExecutionEnvironment(object):
             config=config,
             runtime_environment={
                 "name": name,
+                "execution_environment_name": self.name,
                 "data_context_root_directory": self._data_context_root_directory,
-                "execution_engine": self._execution_engine
+                "execution_engine": self._execution_engine,
             },
             config_defaults={
                 "module_name": "great_expectations.execution_environment.data_connector"
@@ -356,26 +334,47 @@ class ExecutionEnvironment(object):
             available_data_asset_names[data_connector_name] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
 
-    def get_available_partitions(
+    def get_available_batch_definitions(
         self,
-        data_connector_name: str,
-        data_asset_name: str = None,
-        partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
-        in_memory_dataset: Any = None,
-        runtime_parameters: Union[dict, None] = None,
-        repartition: bool = False
+        batch_request: BatchRequest
+        # data_connector_name: str,
+        # data_asset_name: str = None,
+        # partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+        # in_memory_dataset: Any = None,
+        # runtime_parameters: Union[dict, None] = None,
+        # repartition: bool = False
     ) -> List[Partition]:
+        if batch_request.execution_environment_name != self.name:
+            raise ValueError(f"execution_environment_name {batch_request.execution_environment_name} does not match name {self.name}.")
+
         data_connector: DataConnector = self.get_data_connector(
-            name=data_connector_name
+            name=batch_request.data_connector_name
         )
-        available_partitions: List[Partition] = data_connector.get_available_partitions(
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            in_memory_dataset=in_memory_dataset,
-            runtime_parameters=runtime_parameters,
-            repartition=repartition
+        batch_definition_list = data_connector.get_batch_definition_list_from_batch_request(
+            batch_request
         )
-        return available_partitions
+        return batch_definition_list
+
+    # def get_available_partitions(
+    #     self,
+    #     data_connector_name: str,
+    #     data_asset_name: str = None,
+    #     partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+    #     in_memory_dataset: Any = None,
+    #     runtime_parameters: Union[dict, None] = None,
+    #     repartition: bool = False
+    # ) -> List[Partition]:
+    #     data_connector: DataConnector = self.get_data_connector(
+    #         name=data_connector_name
+    #     )
+    #     available_partitions: List[Partition] = data_connector.get_available_partitions(
+    #         data_asset_name=data_asset_name,
+    #         partition_request=partition_request,
+    #         in_memory_dataset=in_memory_dataset,
+    #         runtime_parameters=runtime_parameters,
+    #         repartition=repartition
+    #     )
+    #     return available_partitions
 
     def self_check(self, pretty_print=True, max_examples=3):
         
@@ -397,43 +396,10 @@ class ExecutionEnvironment(object):
         }
 
         for data_connector in data_connector_list:
-            if pretty_print:
-                print("\t"+data_connector["name"], ":", data_connector["class_name"])
-                print()
-
-            asset_names = self.get_available_data_asset_names(data_connector["name"])[data_connector["name"]]
-            asset_names.sort()
-            len_asset_names = len(asset_names)
-
-            data_connector_obj = {
-                "class_name" : data_connector["class_name"],
-                "data_asset_count" : len_asset_names,
-                "example_data_asset_names": asset_names[:max_examples],
-                "data_assets" : {}
-            }
-
-            if pretty_print:
-                print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
-            
-            for asset_name in asset_names[:max_examples]:
-                partitions = self.get_available_partitions(data_connector["name"], asset_name)
-                len_partitions = len(partitions)
-                example_partition_names = [partition.data_reference for partition in partitions][:max_examples]
-                if pretty_print:
-                    print(f"\t\t{asset_name} ({min(len_partitions, max_examples)} of {len_partitions}):", example_partition_names)
-
-                data_connector_obj["data_assets"][asset_name] = {
-                    "partition_count": len_partitions,
-                    "example_partition_names": example_partition_names
-                }
-
-            instantiated_data_connector = self.get_data_connector(data_connector["name"])
-            instantiated_data_connector.refresh_data_object_cache()
-            unmatched_data_references = instantiated_data_connector.get_unmatched_data_objects()
-            len_unmatched_data_references = len(unmatched_data_references)
-            if pretty_print:
-                print(f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):", unmatched_data_references[:max_examples])
-
-            return_object["data_connectors"][data_connector["name"]] = data_connector_obj
+            data_connector_return_obj = data_connector.self_check(
+                pretty_print=pretty_print,
+                max_examples=max_examples
+            )
+            return_object["data_connectors"][data_connector["name"]] = data_connector_return_obj
 
         return return_object

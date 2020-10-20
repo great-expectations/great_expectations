@@ -37,6 +37,7 @@ class DictDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
+        execution_environment_name: str,
         data_reference_dict: {},
         partitioners: dict = {},
         default_partitioner: str = None,
@@ -46,6 +47,7 @@ class DictDataConnector(DataConnector):
         logger.debug(f'Constructing DictDataConnector "{name}".')
         super().__init__(
             name=name,
+            execution_environment_name=execution_environment_name,
             partitioners=partitioners,
             default_partitioner=default_partitioner,
             assets=assets,
@@ -55,7 +57,7 @@ class DictDataConnector(DataConnector):
         # This simulates the underlying filesystem
         self.data_reference_dict = data_reference_dict
 
-        self._cached_data_reference_to_batch_definition_map = None
+        self._data_references_cache = None
 
     def _get_data_reference_list(self):
         data_reference_keys = list(self.data_reference_dict.keys())
