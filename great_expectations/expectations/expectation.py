@@ -23,7 +23,7 @@ from great_expectations.exceptions import (
 )
 from great_expectations.expectations.registry import (
     get_metric_kwargs,
-    register_expectation,
+    register_expectation, register_renderer,
 )
 from great_expectations.expectations.util import legacy_method_parameters
 
@@ -63,6 +63,7 @@ class MetaExpectation(ABCMeta):
         if not isabstract(newclass):
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
+        newclass._register_renderer_functions()
         default_kwarg_values = dict()
         for base in reversed(bases):
             default_kwargs = getattr(base, "default_kwarg_values", dict())
@@ -72,6 +73,18 @@ class MetaExpectation(ABCMeta):
             default_kwarg_values, attrs.get("default_kwarg_values", dict())
         )
         return newclass
+
+
+def renderer(renderer_name):
+    def wrapper(renderer_fn):
+        @wraps(renderer_fn)
+        def inner_func(*args, **kwargs):
+            return renderer_fn(*args, **kwargs)
+
+        inner_func._renderer_name = renderer_name
+        return inner_func
+
+    return wrapper
 
 
 class Expectation(ABC, metaclass=MetaExpectation):
@@ -96,6 +109,23 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if configuration is not None:
             self.validate_configuration(configuration)
         self._configuration = configuration
+
+    @classmethod
+    def _register_renderer_functions(cls):
+        expectation_type = camel_to_snake(cls.__name__)
+
+        for attr, candidate_renderer_fn in cls.__dict__.items():
+            if not hasattr(candidate_renderer_fn, "_renderer_name"):
+                continue
+            renderer_fn = getattr(cls, attr)
+            register_renderer(
+                expectation_type=expectation_type,
+                renderer_fn=renderer_fn
+            )
+
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(self, ):
+        pass
 
     @classmethod
     def get_allowed_config_keys(cls):
