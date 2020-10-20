@@ -357,7 +357,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     a url can be used to access the data. This will be overridden by all other configuration
                     options if any are provided.
         """
-        super().__init__(name=None, data_context=data_context)
+        super().__init__(name=name)
         self._name = name
         if engine is not None:
             if credentials is not None:
@@ -603,30 +603,30 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.active_batch_data:
-                batch = self.active_batch_data
+                data_object = self.active_batch_data
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.batches:
-                batch = self.batches[batch_id]
+                data_object = self.batches[batch_id]
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
         if "table" in domain_kwargs:
-            if domain_kwargs["table_name"] != batch.data.table_name:
+            if domain_kwargs["table_name"] != data_object.table_name:
                 raise ValueError("Unrecognized table name.")
             else:
-                selectable = batch.data.table
+                selectable = data_object.table
         elif "query" in domain_kwargs:
             raise ValueError(
                 "query is not currently supported by SqlAlchemyExecutionEngine"
             )
         else:
-            selectable = batch.data.table
+            selectable = data_object.table
 
         if "row_condition" in domain_kwargs:
             condition_engine = domain_kwargs["condition_engine"]

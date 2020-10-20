@@ -348,18 +348,17 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.active_batch_data:
-                batch = self.active_batch_data
+                data = self.active_batch_data
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.batches:
-                batch = self.batches[batch_id]
+                data = self.batches[batch_id]
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
-        data = batch.data
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
         table = domain_kwargs.get("table", None)
@@ -372,7 +371,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if row_condition:
             condition_parser = domain_kwargs.get("condition_parser", None)
             if condition_parser == "spark":
-                data = batch.data.filter(row_condition)
+                data = data.filter(row_condition)
             elif condition_parser == "great_expectations__experimental__":
                 parsed_condition = parse_condition_to_spark(row_condition)
                 data = data.filter(parsed_condition)
