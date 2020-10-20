@@ -55,8 +55,6 @@ Notes:
 --ge-feature-maturity-info--
     """
 
-    recognized_batch_definition_keys = {"limit"}
-
     recognized_batch_spec_defaults = {
         "reader_method",
         "reader_options",
@@ -140,7 +138,7 @@ Notes:
         else:
             batch = self.batches.get(batch_id)
 
-        self._loaded_batch_id = batch_id
+        self._active_batch_data_id = batch_id
         return batch
 
     @property
@@ -148,12 +146,12 @@ Notes:
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
         ValueError Exception
         """
-        if not self.loaded_batch:
+        if not self.active_batch_data:
             raise ValueError(
                 "Batch has not been loaded - please run load_batch() to load a batch."
             )
 
-        return self.loaded_batch.data
+        return self.active_batch_data
 
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
@@ -267,8 +265,8 @@ Notes:
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.loaded_batch_id:
-                data = self.loaded_batch
+            if self.active_batch_data_id:
+                data = self.active_batch_data
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."

@@ -2,8 +2,12 @@ import copy
 import datetime
 import logging
 import uuid
-from io import StringIO
 from typing import Any, Callable, Dict, Iterable, Tuple, Union
+
+try:
+    import pyspark.sql.functions as F
+except ImportError:
+    F = None
 
 from great_expectations.core.id_dict import IDDict
 from great_expectations.execution_environment.types import (
@@ -26,45 +30,12 @@ from .execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
-# TODO: <Alex>The various PySpark imports appearing below must be cleaned up to avoid multiple imports of the same modules/functions.</Alex>
 try:
-    from pyspark.sql import DataFrame, SparkSession
+    from pyspark.sql import SparkSession
 except ImportError:
     SparkSession = None
-    # TODO: review logging more detail here
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
-    )
-
-try:
-    import pyspark.sql.functions as F
-    import pyspark.sql.types as sparktypes
-    from pyspark.ml.feature import Bucketizer
-    from pyspark.sql import DataFrame, SQLContext, Window
-    from pyspark.sql.functions import (
-        array,
-        col,
-        count,
-        countDistinct,
-        datediff,
-        desc,
-        expr,
-        isnan,
-        lag,
-    )
-    from pyspark.sql.functions import length as length_
-    from pyspark.sql.functions import (
-        lit,
-        monotonically_increasing_id,
-        stddev_samp,
-        udf,
-        when,
-        year,
-    )
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
     )
 
 
@@ -243,18 +214,18 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         else:
             batch = self.batches.get(batch_id)
 
-        self._loaded_batch_id = batch_id
+        self._active_batch_data_id = batch_id
         return batch
 
     @property
     def dataframe(self):
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
-        if not self.loaded_batch:
+        if not self.active_batch_data:
             raise ValueError(
                 "Batch has not been loaded - please run load_batch() to load a batch."
             )
 
-        return self.loaded_batch.data
+        return self.active_batch_data
 
     @staticmethod
     def guess_reader_method_from_path(path):
@@ -347,19 +318,18 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.loaded_batch:
-                batch = self.loaded_batch
+            if self.active_batch_data:
+                data = self.active_batch_data
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.batches:
-                batch = self.batches[batch_id]
+                data = self.batches[batch_id]
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
-        data = batch.data
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
         table = domain_kwargs.get("table", None)
@@ -372,7 +342,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if row_condition:
             condition_parser = domain_kwargs.get("condition_parser", None)
             if condition_parser == "spark":
-                data = batch.data.filter(row_condition)
+                data = data.filter(row_condition)
             elif condition_parser == "great_expectations__experimental__":
                 parsed_condition = parse_condition_to_spark(row_condition)
                 data = data.filter(parsed_condition)

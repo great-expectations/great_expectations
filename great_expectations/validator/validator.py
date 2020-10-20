@@ -83,7 +83,7 @@ class Validator:
         if batches is not None:
             ####
             # pending load_batch api
-            self._execution_engine._loaded_batch_id = "batch_id"
+            self._execution_engine._active_batch_data_id = "batch_id"
             self._execution_engine._batches = {"batch_id": batches[0].data}
             #####
 
@@ -305,10 +305,11 @@ class Validator:
             # Validating
             try:
                 # Todo: try to find a way to access table columns so as to verify column is in table
-                assert configuration.expectation_type is not None, "Given configuration should include expectation type"
+                assert (
+                    configuration.expectation_type is not None
+                ), "Given configuration should include expectation type"
             except AssertionError as e:
                 raise InvalidExpectationConfigurationError(str(e))
-
 
             expectation_impl = get_expectation_impl(configuration.expectation_type)
             validation_dependencies = expectation_impl().get_validation_dependencies(
@@ -513,7 +514,7 @@ class Validator:
         if self._batch:
             return self._batch
         else:
-            return self.execution_engine.loaded_batch
+            return self.execution_engine.active_batch_data
 
     @property
     def batch_spec(self):
