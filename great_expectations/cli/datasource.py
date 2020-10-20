@@ -184,11 +184,12 @@ def _build_datasource_intro_string(datasource_count):
     "If True, this will override --max_data_assets.",
 )
 @click.option(
-    "--skip_prompt",
+    "--assume-yes",
+    "--yes",
     "-y",
     is_flag=True,
     default=False,
-    help="Skip prompt for datasource confirmation. ",
+    help="By default request confirmation unless you specify -y/--yes/--assume-yes flag to skip dialog",
 )
 @click.option(
     "--directory",
@@ -215,7 +216,7 @@ def datasource_profile(
     directory,
     view,
     additional_batch_kwargs,
-    skip_prompt
+    assume_yes
 ):
     """
     Profile a datasource (Experimental)
@@ -261,7 +262,7 @@ def datasource_profile(
                     profile_all_data_assets=profile_all_data_assets,
                     open_docs=view,
                     additional_batch_kwargs=additional_batch_kwargs,
-                    skip_prompt_flag=skip_prompt
+                    skip_prompt_flag=assume_yes
                 )
                 send_usage_message(
                     data_context=context, event="cli.datasource.profile", success=True
@@ -275,7 +276,7 @@ def datasource_profile(
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
                 additional_batch_kwargs=additional_batch_kwargs,
-                skip_prompt_flag=skip_prompt
+                skip_prompt_flag=assume_yes
             )
             send_usage_message(
                 data_context=context, event="cli.datasource.profile", success=True
