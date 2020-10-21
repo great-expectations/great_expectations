@@ -35,10 +35,10 @@ def test_name_date_price_list(tmp_path_factory):
                         "james_20200810_1003.csv",
                         "alex_20200819_1300.csv", ]
     )
-    my_data_connector_yaml = yaml.load("""
+    my_data_connector_yaml = yaml.load(f"""
         module_name: great_expectations.execution_environment.data_connector
         class_name: FilesDataConnector
-        base_directory: TO_BE_REPLACED_BELOW
+        base_directory: {base_directory}
         glob_directive: '*'
         default_partitioner: my_standard_partitioner
         assets:
@@ -84,7 +84,7 @@ def test_name_date_price_list(tmp_path_factory):
         },
     )
     # SO THINGS DONT CRASH
-    my_data_connector._base_directory = base_directory
+    # my_data_connector._base_directory = base_directory
 
     my_batch_request = BatchRequest(
         execution_environment_name="BASE",
