@@ -8,10 +8,7 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer.content_block import (
     ExpectationSuiteBulletListContentBlockRenderer,
 )
-from great_expectations.render.renderer.content_block.expectation_string import (
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
+from great_expectations.render.util import substitute_none_for_missing, parse_row_condition_string_pandas_engine
 
 
 def test_substitute_none_for_missing():
