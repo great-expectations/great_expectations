@@ -84,7 +84,7 @@ def test_name_date_price_list(tmp_path_factory):
         },
     )
 
-    # assert my_data_connector.self_check() == {}
+    assert my_data_connector.self_check() == {}
 
     my_batch_request = BatchRequest(
         execution_environment_name="BASE",
@@ -178,7 +178,7 @@ def test_alpha(tmp_path_factory):
         },
     )
 
-    # assert my_data_connector.self_check() == {}
+    assert my_data_connector.self_check() == {}
 
     # TODO : What should work
     my_batch_request = BatchRequest(
@@ -282,7 +282,7 @@ def test_foxtrot(tmp_path_factory):
         },
     )
 
-    # assert my_data_connector.self_check() == {}
+    assert my_data_connector.self_check() == {}
 
     # TODO : What should work
     my_batch_request = BatchRequest(
