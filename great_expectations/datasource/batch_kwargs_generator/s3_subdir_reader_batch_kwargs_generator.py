@@ -67,15 +67,13 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         self._reader_options = reader_options
         self._reader_method = reader_method
         self._base_directory = base_directory
-        print('@noklam', base_directory ,'***' *20)
-        print('@noklam', boto3_options, '***' * 20)
         if boto3_options is None:
             boto3_options = {}
         # s3fs can read credentials from ~/.aws/credentials, same as boto3
         client_kwargs = {}
-        if boto3_options.get('endpoint_url'):
-            client_kwargs['endpoint_url'] = boto3_options.get('endpoint_url')
-        self.fs =  s3fs.S3FileSystem(anon=False, client_kwargs=client_kwargs)
+        if boto3_options.get("endpoint_url"):
+            client_kwargs["endpoint_url"] = boto3_options.get("endpoint_url")
+        self.fs = s3fs.S3FileSystem(anon=False, client_kwargs=client_kwargs)
 
     @property
     def reader_options(self):
