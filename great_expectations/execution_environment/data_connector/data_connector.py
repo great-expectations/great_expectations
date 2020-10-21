@@ -4,6 +4,7 @@ import copy
 import itertools
 from typing import List, Dict, Union, Callable, Any, Tuple
 from ruamel.yaml.comments import CommentedMap
+import json
 
 import logging
 
@@ -85,9 +86,6 @@ class DataConnector(object):
 
         self._execution_engine = execution_engine
         self._data_context_root_directory = data_context_root_directory
-
-        # This is a dictionary which maps data_references onto batch_requests
-        self._data_references_cache = None
 
     @property
     def name(self) -> str:
@@ -371,28 +369,7 @@ connector and the default_partitioner set to one of the configured partitioners.
         Returns:
             A list of available names
         """
-        available_data_asset_names: List[str] = []
-
-        if self.assets:
-            available_data_asset_names = list(self.assets.keys())
-
-        available_partitions: List[Partition] = self.get_available_partitions(
-            data_asset_name=None,
-            partition_request={
-                "custom_filter": None,
-                "partition_name": None,
-                "partition_definition": None,
-                "partition_index": None,
-                "limit": None,
-            },
-            runtime_parameters=None,
-            repartition=False
-        )
-        if available_partitions and len(available_partitions) > 0:
-            for partition in available_partitions:
-                available_data_asset_names.append(partition.data_asset_name)
-
-        return list(set(available_data_asset_names))
+        raise NotImplementedError
 
     def get_available_partitions(
         self,
@@ -589,4 +566,61 @@ connector and the default_partitioner set to one of the configured partitioners.
         pretty_print=True,
         max_examples=3
     ):
-        raise NotImplementedError
+        if self._data_references_cache == None:
+            self.refresh_data_references_cache()
+
+        if pretty_print:
+            print("\t"+self.name, ":", self.__class__.__name__)
+            print()
+
+        asset_names = self.get_available_data_asset_names()
+        asset_names.sort()
+        len_asset_names = len(asset_names)
+
+        data_connector_obj = {
+            "class_name" : self.__class__.__name__,
+            "data_asset_count" : len_asset_names,
+            "example_data_asset_names": asset_names[:max_examples],
+            "data_assets" : {}
+            # "data_reference_count": self.
+        }
+
+        if pretty_print:
+            print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
+        
+        for asset_name in asset_names[:max_examples]:
+            batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
+                execution_environment_name=self.execution_environment_name,
+                data_connector_name=self.name,
+                data_asset_name=asset_name,
+            ))
+            len_batch_definition_list = len(batch_definition_list)
+            
+            example_data_references = [
+                self.default_partitioner.convert_batch_request_to_data_reference(BatchRequest(
+                    execution_environment_name=batch_definition.execution_environment_name,
+                    data_connector_name=batch_definition.data_connector_name,
+                    data_asset_name=batch_definition.data_asset_name,
+                    partition_request=batch_definition.partition_definition,
+                ))
+                for batch_definition in batch_definition_list
+            ][:max_examples]
+            example_data_references.sort()
+
+            if pretty_print:
+                print(f"\t\t{asset_name} ({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):", example_data_references)
+
+            data_connector_obj["data_assets"][asset_name] = {
+                "batch_definition_count": len_batch_definition_list,
+                "example_data_references": example_data_references
+            }
+
+        unmatched_data_references = self.get_unmatched_data_references()
+        len_unmatched_data_references = len(unmatched_data_references)
+        if pretty_print:
+            print(f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):", unmatched_data_references[:max_examples])
+        
+        data_connector_obj["unmatched_data_reference_count"] = len_unmatched_data_references
+        data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
+
+        return data_connector_obj
