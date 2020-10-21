@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+# TODO: <Alex>Clean up</Alex>
 import copy
 import itertools
 from typing import List, Dict, Union, Callable, Any, Tuple
@@ -12,6 +13,7 @@ from great_expectations.data_context.types.base import (
     partitionerConfigSchema
 )
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.partition_request import (
@@ -28,7 +30,8 @@ from great_expectations.core.batch import (
     BatchMarkers,
     BatchDefinition,
 )
-from great_expectations.core.util import nested_update
+# TODO: <Alex>Clean up</Alex>
+# from great_expectations.core.util import nested_update
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
@@ -64,27 +67,40 @@ class DataConnector(object):
         self,
         name: str,
         execution_environment_name: str,
-        partitioners: dict = {},
-        default_partitioner: str = None,
         assets: dict = None,
+        partitioners: dict = None,
+        default_partitioner: str = None,
         execution_engine: ExecutionEngine = None,
-        data_context_root_directory: str = None,
-        **kwargs
+        data_context_root_directory: str = None
     ):
         self._name = name
+
         self.execution_environment_name = execution_environment_name
 
-        self._partitioners = {}
-        self._build_partitioners_from_config(partitioners)
+        if assets is None:
+            assets = {}
+        _assets: Dict[str, Union[dict, Asset]] = assets
+        self._assets = _assets
+        self._build_assets_from_config(config=assets)
+
+        if partitioners is None:
+            partitioners = {}
+        _partitioners: Dict[str, Union[dict, Partitioner]] = partitioners
+        self._partitioners = _partitioners
+        self._build_partitioners_from_config(config=partitioners)
 
         self._default_partitioner = default_partitioner
-        self._assets = assets
-
-        # The partitions cache is a dictionary, which maintains lists of partitions for a data_asset_name as the key.
-        # self._partitions_cache: dict = {}
 
         self._execution_engine = execution_engine
+
         self._data_context_root_directory = data_context_root_directory
+
+        # TODO: <Alex></Alex>
+        # self._assets_cache: dict = {}
+
+        # TODO: <Alex>Deprecate</Alex>
+        # The partitions cache is a dictionary, which maintains lists of partitions for a data_asset_name as the key.
+        # self._partitions_cache: dict = {}
 
         # This is a dictionary which maps data_references onto batch_requests
         self._data_references_cache = None
@@ -94,19 +110,19 @@ class DataConnector(object):
         return self._name
 
     @property
-    def partitioners(self) -> dict:
+    def assets(self) -> Dict[str, Union[dict, Asset]]:
+        return self._assets
+
+    @property
+    def partitioners(self) -> Dict[str, Union[dict, Partitioner]]:
         return self._partitioners
 
     @property
-    def default_partitioner(self) -> str:
+    def default_partitioner(self) -> Union[str, Partitioner]:
         try:
             return self.partitioners[self._default_partitioner]
         except KeyError:
             raise ValueError("No default partitioner has been set")
-
-    @property
-    def assets(self) -> dict:
-        return self._assets
 
 #     def _get_cached_partitions(
 #         self,
@@ -269,23 +285,55 @@ class DataConnector(object):
     #     self._partitioners_cache[name] = partitioner
     #     return partitioner
 
-    def add_partitioner(self, partitioner_name: str, partitioner_config: dict) -> Partitioner:
-        """Add a new Partitioner to the DataConnector and (for convenience) return the instantiated Partitioner object.
+    # TODO: <Alex>We should not need this method any more.</Alex>
+    # def add_partitioner(self, partitioner_name: str, partitioner_config: dict) -> Partitioner:
+    #     """Add a new Partitioner to the DataConnector and (for convenience) return the instantiated Partitioner object.
+    #
+    #     Args:
+    #         partitioner_name (str): a key for the new Store in in self._stores
+    #         partitioner_config (dict): a config for the Store to add
+    #
+    #     Returns:
+    #         partitioner (Partitioner)
+    #     """
+    #
+    #     new_partitioner = self._build_partitioner_from_config(partitioner_name, partitioner_config)
+    #     self.partitioners[partitioner_name] = new_partitioner
+    #
+    #     return new_partitioner
 
-        Args:
-            partitioner_name (str): a key for the new Store in in self._stores
-            partitioner_config (dict): a config for the Store to add
+    # Replaces the asset configuration with the corresponding Asset object in the assets dictionary.
+    def _build_assets_from_config(self, config: Dict[str, dict]):
+        for name, asset_config in config.items():
+            new_asset: Asset = self._build_asset_from_config(
+                name=name,
+                config=asset_config,
+            )
+            self.assets[name] = new_asset
 
-        Returns:
-            partitioner (Partitioner)
-        """
+    def _build_asset_from_config(self, name: str, config: dict):
+        """Build an Asset using the provided configuration and return the newly-built Asset."""
+        runtime_environment: dict = {
+            "name": name,
+            "data_connector": self
+        }
+        asset: Asset = instantiate_class_from_config(
+            config=config,
+            runtime_environment=runtime_environment,
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector.asset"
+            },
+        )
+        if not asset:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name="great_expectations.execution_environment.data_connector.asset",
+                package_name=None,
+                class_name=config["class_name"],
+            )
+        return asset
 
-        new_partitioner = self._build_partitioner_from_config(partitioner_name, partitioner_config)
-        self.partitioners[partitioner_name] = new_partitioner
-
-        return new_partitioner
-
-    def _build_partitioners_from_config(self, config: CommentedMap):
+    # Replaces the partitoiner configuration with the corresponding Partitioner object in the partitioners dictionary.
+    def _build_partitioners_from_config(self, config: Dict[str, dict]):
         for name, partitioner_config in config.items():
             new_partitioner = self._build_partitioner_from_config(
                 name,
@@ -293,12 +341,8 @@ class DataConnector(object):
             )
             self.partitioners[name] = new_partitioner
 
-    def _build_partitioner_from_config(self, name: str, config: CommentedMap):
+    def _build_partitioner_from_config(self, name: str, config: dict):
         """Build a Partitioner using the provided configuration and return the newly-built Partitioner."""
-        # We convert from the type back to a dictionary for purposes of instantiation
-        if isinstance(config, PartitionerConfig):
-            config: dict = partitionerConfigSchema.dump(config)
-
         runtime_environment: dict = {
             "name": name,
             "data_connector": self
@@ -320,9 +364,12 @@ class DataConnector(object):
 
     def get_partitioner_for_data_asset(self, data_asset_name: str = None) -> Partitioner:
         partitioner_name: str
-        data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
-        if data_asset_config_exists and self.assets[data_asset_name].get("partitioner"):
-            partitioner_name = self.assets[data_asset_name]["partitioner"]
+        # data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
+        data_asset_config_exists: bool = data_asset_name is not None and isinstance(
+            self.assets.get(data_asset_name), Asset
+        )
+        if data_asset_config_exists and self.assets[data_asset_name].partitioner:
+            partitioner_name = self.assets[data_asset_name].partitioner
         else:
             partitioner_name = self.default_partitioner.name
         partitioner: Partitioner

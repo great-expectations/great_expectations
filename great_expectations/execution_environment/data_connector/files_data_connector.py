@@ -27,6 +27,7 @@ import great_expectations.exceptions as ge_exceptions
 logger = logging.getLogger(__name__)
 
 
+# TODO: <Alex>Should we make this a "set" object?</Alex>
 KNOWN_EXTENSIONS = [
     ".csv",
     ".tsv",
@@ -55,7 +56,6 @@ class FilesDataConnector(DataConnector):
         reader_method: str = None,
         execution_engine: ExecutionEngine = None,
         data_context_root_directory: str = None,
-        **kwargs
     ):
         logger.debug(f'Constructing FilesDataConnector "{name}".')
         super().__init__(
@@ -65,9 +65,15 @@ class FilesDataConnector(DataConnector):
             default_partitioner=default_partitioner,
             assets=assets,
             execution_engine=execution_engine,
-            data_context_root_directory=data_context_root_directory,
-            **kwargs
+            data_context_root_directory=data_context_root_directory
         )
+        self._glob_directive = glob_directive
+
+        # TODO: <Alex>This trailing slash appears to be unnecessary; in addition, the path must be normalized internally.</Alex>
+        # self._base_directory = os.path.join(base_directory, '') #Add trailing slash if it's not there already
+        self._base_directory = self._normalize_directory_path(dir_path=base_directory)
+
+        self._glob_directive = glob_directive
 
         if known_extensions is None:
             known_extensions = KNOWN_EXTENSIONS
@@ -78,24 +84,26 @@ class FilesDataConnector(DataConnector):
         self._reader_options = reader_options
 
         self._reader_method = reader_method
-        self._base_directory = os.path.join(base_directory, '') #Add trailing slash if it's not there already
-        self._glob_directive = glob_directive
 
     @property
-    def reader_options(self):
+    def base_directory(self) -> str:
+        return str(self._base_directory)
+
+    @property
+    def glob_directive(self) -> str:
+        return self._glob_directive
+
+    @property
+    def reader_options(self) -> dict:
         return self._reader_options
 
     @property
-    def reader_method(self):
+    def reader_method(self) -> str:
         return self._reader_method
 
     @property
-    def known_extensions(self):
+    def known_extensions(self) -> List[str]:
         return self._known_extensions
-
-    @property
-    def base_directory(self):
-        return self._normalize_directory_path(dir_path=self._base_directory)
 
     # TODO: <Alex>To be deleted, once the replacement fulfills all the requirements.</Alex>
     # def _get_available_partitions(
@@ -239,43 +247,24 @@ configured runtime keys.
         raise ge_exceptions.DataConnectorError(f'Expected a directory, but path "{base_directory}" is not a directory.')
 
     def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
-        glob_directive: str
-        data_asset_base_directory: str
-        if (
-            data_asset_name
-            and self.assets
-            and self.assets.get(data_asset_name)
-        ):
-            # TODO: <Alex>This is an old pattern.</Alex>
-            asset: Asset = self.get_asset(name=data_asset_name)
-            data_asset_base_directory: str = asset.base_directory
-            if not data_asset_base_directory:
-                data_asset_base_directory = self.base_directory
-            data_asset_base_directory = self._normalize_directory_path(dir_path=data_asset_base_directory)
-            glob_directive: str = asset.glob_directive
-        else:
-            data_asset_base_directory = self.base_directory
-            glob_directive = self.glob_directive
-        return {"base_directory": data_asset_base_directory, "glob_directive": glob_directive}
-
-    # TODO: <Alex>DELETE</Alex>
-    def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
-        glob_directive: str
         base_directory: str
+        glob_directive: str
         if (
-            data_asset_name
-            and self.assets
-            and self.assets.get(data_asset_name)
-            and self.assets[data_asset_name].get("config_params")
-            and self.assets[data_asset_name]["config_params"]
+            data_asset_name is not None
+            and isinstance(self.assets.get(data_asset_name), Asset)
         ):
-            base_directory = self._normalize_directory_path(
-                dir_path=self.assets[data_asset_name]["config_params"].get("base_directory", self.base_directory)
-            )
-            glob_directive = self.assets[data_asset_name]["config_params"].get("glob_directive")
+            asset = self.assets[data_asset_name]
+            base_directory = asset.base_directory
+            if not base_directory:
+                base_directory = self.base_directory
+            base_directory = self._normalize_directory_path(dir_path=base_directory)
+
+            glob_directive: str = asset.glob_directive
+            if not glob_directive:
+                glob_directive = self.glob_directive
         else:
             base_directory = self.base_directory
-            glob_directive = self._glob_directive
+            glob_directive = self.glob_directive
         return {"base_directory": base_directory, "glob_directive": glob_directive}
 
     @staticmethod

@@ -27,8 +27,7 @@ class PipelineDataConnector(DataConnector):
         default_partitioner: str = None,
         assets: dict = None,
         execution_engine: ExecutionEngine = None,
-        data_context_root_directory:str = None,
-        **kwargs
+        data_context_root_directory:str = None
     ):
         logger.debug(f'Constructing PipelineDataConnector "{name}".')
         super().__init__(
@@ -37,8 +36,7 @@ class PipelineDataConnector(DataConnector):
             default_partitioner=default_partitioner,
             assets=assets,
             execution_engine=execution_engine,
-            data_context_root_directory=data_context_root_directory,
-            **kwargs
+            data_context_root_directory=data_context_root_directory
         )
 
     def _get_available_partitions(
