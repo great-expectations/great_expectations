@@ -371,28 +371,7 @@ connector and the default_partitioner set to one of the configured partitioners.
         Returns:
             A list of available names
         """
-        available_data_asset_names: List[str] = []
-
-        if self.assets:
-            available_data_asset_names = list(self.assets.keys())
-
-        available_partitions: List[Partition] = self.get_available_partitions(
-            data_asset_name=None,
-            partition_request={
-                "custom_filter": None,
-                "partition_name": None,
-                "partition_definition": None,
-                "partition_index": None,
-                "limit": None,
-            },
-            runtime_parameters=None,
-            repartition=False
-        )
-        if available_partitions and len(available_partitions) > 0:
-            for partition in available_partitions:
-                available_data_asset_names.append(partition.data_asset_name)
-
-        return list(set(available_data_asset_names))
+        raise NotImplementedError
 
     def get_available_partitions(
         self,
