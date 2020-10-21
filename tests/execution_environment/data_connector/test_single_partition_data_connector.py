@@ -212,9 +212,6 @@ def test_test_yaml_config_(empty_data_context, tmp_path_factory):
         ]
     )
 
-
-    # test : missing data_asset_name --> should fail
-    # TODO: make fail more pretty
     return_object = empty_data_context.test_yaml_config(f"""
     module_name: great_expectations.execution_environment.data_connector
     class_name: SinglePartitionFileDataConnector
@@ -259,7 +256,7 @@ def test_test_yaml_config_excluding_non_regex_matching_files(empty_data_context,
     base_directory = str(tmp_path_factory.mktemp("test_something_needs_a_better_name"))
     create_files_in_directory(
         directory=base_directory,
-        file_name_list= [
+        file_name_list=[
             "2020/01/alpha-1001.csv",
             "2020/01/beta-1002.csv",
             "2020/02/alpha-1003.csv",
@@ -272,7 +269,7 @@ def test_test_yaml_config_excluding_non_regex_matching_files(empty_data_context,
         ]
     )
 
-    # gamma-202001.csv and gamma-202002.csv not match regex (which includes 2020/month directory).
+    # gamma-202001.csv and gamma-202002.csv do not match regex (which includes 2020/month directory).
 
     return_object = empty_data_context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
@@ -407,9 +404,7 @@ def test_that_needs_a_better_name():
                 'batch_definition_count': 2
             }
         },
-        'example_unmatched_data_references' : ['CCC.csv'],
+        'example_unmatched_data_references': ['CCC.csv'],
         'unmatched_data_reference_count': 1,
     }
-
-
 
