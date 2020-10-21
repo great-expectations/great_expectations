@@ -2,6 +2,7 @@ import logging
 import traceback
 from copy import deepcopy
 
+from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )
@@ -480,7 +481,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
-        expectation_string_fn = getattr(cls, expectation_type, None)
+        expectation_string_fn = get_renderer_impl(expectation_type=expectation_type, renderer_name="descriptive")
         if expectation_string_fn is None:
             expectation_string_fn = getattr(cls, "_missing_content_block_fn")
 
