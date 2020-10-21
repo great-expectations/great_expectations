@@ -1,13 +1,15 @@
 import logging
 import os
 import warnings
+from pathlib import Path
+from urllib.parse import urlparse, urlunparse
 
 import s3fs
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )
-from great_expectations.datasource.types import PathBatchKwargs
+from great_expectations.datasource.types import PathBatchKwargs, S3BatchKwargs
 from great_expectations.exceptions import BatchKwargsError, InvalidConfigError
 
 logger = logging.getLogger(__name__)
@@ -245,6 +247,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         else:
             for extension in self.known_extensions:
                 path = os.path.join(self.base_directory, data_asset_name + extension)
+                path = self._window_to_s3_path(path)
                 if self.fs.isfile(path):
                     return iter(
                         [
@@ -279,6 +282,22 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             reader_options=reader_options or self.reader_options,
             limit=limit,
         )
-        batch_kwargs["path"] = path
+        batch_kwargs["s3"] = path
         batch_kwargs["datasource"] = self._datasource.name
-        return PathBatchKwargs(batch_kwargs)
+
+        return S3BatchKwargs(batch_kwargs)
+
+    def _window_to_s3_path(self, path: str):
+        """
+        To handle window "\" path. "s3://bucket\\prefix" => "s3://bucket/prefix"
+        >>> path = os.path.join("s3://bucket", "prefix")
+        >>> window_to_s3_path(path)
+        >>>
+        """
+
+        s3_url = urlparse(path)
+        s3_path = Path(s3_url.path)
+        s3_new_url = urlunparse((s3_url.scheme, s3_url.netloc, s3_path.as_posix(),
+                                 s3_url.params, s3_url.query, s3_url.fragment))
+        return s3_new_url
+
