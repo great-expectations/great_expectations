@@ -82,7 +82,7 @@ class RegexPartitioner(Partitioner):
 
         matches: Union[re.Match, None] = re.match(self.regex["pattern"], data_reference)
         if matches is None:
-            # raise ValueError(f'No match found for data_reference: "{data_reference}".')
+            #raise ValueError(f'No match found for data_reference: "{data_reference}".')
             return None
 
         groups: tuple = matches.groups()
@@ -149,9 +149,13 @@ class RegexPartitioner(Partitioner):
         if not isinstance(batch_request, BatchRequest):
             raise TypeError("batch_request is not of an instance of type BatchRequest")
 
+        template_arguments = batch_request.partition_request
+        if batch_request.data_asset_name != None:
+            template_arguments["data_asset_name"] = batch_request.data_asset_name
+
         filepath_template = self._invert_regex_to_data_reference_template()
         converted_string = filepath_template.format(
-            **batch_request.partition_request
+            **template_arguments
         )
 
         return converted_string

@@ -94,7 +94,6 @@ class SinglePartitionDataConnector(DataConnector):
                 data_asset_name=asset_name,
             ))
             len_batch_definition_list = len(batch_definition_list)
-            
             example_data_references = [
                 self.default_partitioner.convert_batch_request_to_data_reference(BatchRequest(
                     execution_environment_name=batch_definition.execution_environment_name,
