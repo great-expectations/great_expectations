@@ -242,7 +242,9 @@ class DataConnectorConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.execution_environment.data_connector")
 
-    default_partitioner = fields.String(
+    assets = fields.Dict(
+        keys=fields.Str(),
+        values=fields.Nested(AssetConfigSchema),
         required=False,
         allow_none=True,
     )
@@ -254,9 +256,7 @@ class DataConnectorConfigSchema(Schema):
         allow_none=True,
     )
 
-    assets = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(AssetConfigSchema),
+    default_partitioner = fields.String(
         required=False,
         allow_none=True,
     )
@@ -805,6 +805,7 @@ dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 executionEnvironmentConfigSchema = ExecutionEnvironmentConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
+assetConfigSchema = AssetConfigSchema()
 partitionerConfigSchema = PartitionerConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()

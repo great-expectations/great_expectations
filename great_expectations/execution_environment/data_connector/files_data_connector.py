@@ -7,6 +7,7 @@ import os
 import logging
 
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition_request import PartitionRequest
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
@@ -237,6 +238,27 @@ configured runtime keys.
             return self._verify_file_paths(path_list=path_list)
         raise ge_exceptions.DataConnectorError(f'Expected a directory, but path "{base_directory}" is not a directory.')
 
+    def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
+        glob_directive: str
+        data_asset_base_directory: str
+        if (
+            data_asset_name
+            and self.assets
+            and self.assets.get(data_asset_name)
+        ):
+            # TODO: <Alex>This is an old pattern.</Alex>
+            asset: Asset = self.get_asset(name=data_asset_name)
+            data_asset_base_directory: str = asset.base_directory
+            if not data_asset_base_directory:
+                data_asset_base_directory = self.base_directory
+            data_asset_base_directory = self._normalize_directory_path(dir_path=data_asset_base_directory)
+            glob_directive: str = asset.glob_directive
+        else:
+            data_asset_base_directory = self.base_directory
+            glob_directive = self.glob_directive
+        return {"base_directory": data_asset_base_directory, "glob_directive": glob_directive}
+
+    # TODO: <Alex>DELETE</Alex>
     def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
         glob_directive: str
         base_directory: str
