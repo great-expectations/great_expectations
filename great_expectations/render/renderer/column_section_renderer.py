@@ -12,6 +12,8 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
+from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import \
+    ExpectColumnKlDivergenceToBeLessThan
 from great_expectations.render.renderer.content_block import (
     ExceptionListContentBlockRenderer,
 )
@@ -526,7 +528,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             }
         )
 
-        return self._expectation_string_renderer._get_kl_divergence_chart(
+        return ExpectColumnKlDivergenceToBeLessThan._get_kl_divergence_chart(
             observed_partition_object, header
         )
 

@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 _registered_expectations = dict()
 _registered_metrics = dict()
+_registered_renderers = dict()
+
 """
 {
   "metric_name"
@@ -20,6 +22,35 @@ _registered_metrics = dict()
       engine: provider
 }
 """
+
+
+def register_renderer(expectation_type: str, renderer_fn: Callable):
+    renderer_name = renderer_fn._renderer_name
+    if expectation_type not in _registered_renderers:
+        logger.debug(f"Registering {renderer_name} for expectation_type {expectation_type}.")
+        _registered_renderers[expectation_type] = {
+            renderer_name: renderer_fn
+        }
+        return
+
+    if renderer_name in _registered_renderers[expectation_type]:
+        if _registered_renderers[expectation_type][renderer_name] == renderer_fn:
+            logger.info(f"Multiple declarations of {renderer_name} renderer for expectation_type {expectation_type} "
+                        f"found.")
+            return
+        else:
+            logger.warning(f"Overwriting declaration of {renderer_name} renderer for expectation_type "
+                           f"{expectation_type}.")
+            _registered_renderers[expectation_type][renderer_name] = renderer_fn
+        return
+    else:
+        logger.debug(f"Registering {renderer_name} for expectation_type {expectation_type}.")
+        _registered_renderers[expectation_type][renderer_name] = renderer_fn
+        return
+
+
+def get_renderer_impl(expectation_type, renderer_name):
+    return _registered_renderers.get(expectation_type, {}).get(renderer_name)
 
 
 def register_expectation(expectation: Type["Expectation"]) -> None:

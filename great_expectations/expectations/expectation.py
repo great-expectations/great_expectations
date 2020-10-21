@@ -23,7 +23,7 @@ from great_expectations.exceptions import (
 )
 from great_expectations.expectations.registry import (
     get_metric_kwargs,
-    register_expectation,
+    register_expectation, register_renderer,
 )
 from great_expectations.expectations.util import legacy_method_parameters
 
@@ -40,6 +40,7 @@ from ..execution_engine import (
     SparkDFExecutionEngine,
 )
 from ..execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from ..render.types import RenderedStringTemplateContent
 from ..validator.validation_graph import MetricConfiguration
 from ..validator.validator import Validator
 
@@ -63,6 +64,7 @@ class MetaExpectation(ABCMeta):
         if not isabstract(newclass):
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
+        newclass._register_renderer_functions()
         default_kwarg_values = dict()
         for base in reversed(bases):
             default_kwargs = getattr(base, "default_kwarg_values", dict())
@@ -72,6 +74,18 @@ class MetaExpectation(ABCMeta):
             default_kwarg_values, attrs.get("default_kwarg_values", dict())
         )
         return newclass
+
+
+def renderer(renderer_name):
+    def wrapper(renderer_fn):
+        @wraps(renderer_fn)
+        def inner_func(*args, **kwargs):
+            return renderer_fn(*args, **kwargs)
+
+        inner_func._renderer_name = renderer_name
+        return inner_func
+
+    return wrapper
 
 
 class Expectation(ABC, metaclass=MetaExpectation):
@@ -96,6 +110,45 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if configuration is not None:
             self.validate_configuration(configuration)
         self._configuration = configuration
+
+    @classmethod
+    def _register_renderer_functions(cls):
+        expectation_type = camel_to_snake(cls.__name__)
+
+        for candidate_renderer_fn_name in dir(cls):
+            attr_obj = getattr(cls, candidate_renderer_fn_name)
+            if not hasattr(attr_obj, "_renderer_name"):
+                continue
+            register_renderer(
+                expectation_type=expectation_type,
+                renderer_fn=attr_obj
+            )
+
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "styling": {"parent": {"classes": ["alert", "alert-warning"]}},
+                    "string_template": {
+                        "template": "$expectation_type(**$kwargs)",
+                        "params": {
+                            "expectation_type": expectation_configuration.expectation_type,
+                            "kwargs": expectation_configuration.kwargs,
+                        },
+                        "styling": {
+                            "params": {
+                                "expectation_type": {
+                                    "classes": ["badge", "badge-warning"],
+                                }
+                            }
+                        },
+                    },
+                }
+            )
+        ]
 
     @classmethod
     def get_allowed_config_keys(cls):
@@ -251,9 +304,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
     ):
         if configuration is None:
             configuration = self.configuration
-        return Validator().graph_validate(
-            batches=batches,
-            execution_engine=execution_engine,
+        return Validator(execution_engine=execution_engine).graph_validate(
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
         )[0]

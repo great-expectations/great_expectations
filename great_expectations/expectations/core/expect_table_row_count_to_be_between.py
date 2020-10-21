@@ -12,9 +12,11 @@ from ..expectation import (
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output,
+    _format_map_output, renderer,
 )
 from ..registry import extract_metrics
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import substitute_none_for_missing, handle_strict_min_max, parse_row_condition_string_pandas_engine
 
 
 class ExpectTableRowCountToBeBetween(DatasetExpectation):
@@ -145,3 +147,56 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
             raise ValueError("min_value and max_value must be integers")
 
         return True
+
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            [
+                "min_value",
+                "max_value",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+
+        if params["min_value"] is None and params["max_value"] is None:
+            template_str = "May have any number of rows."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
+            elif params["min_value"] is None:
+                template_str = f"Must have {at_most_str} $max_value rows."
+            elif params["max_value"] is None:
+                template_str = f"Must have {at_least_str} $min_value rows."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]

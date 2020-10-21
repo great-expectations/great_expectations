@@ -12,9 +12,11 @@ from ..expectation import (
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output,
+    _format_map_output, renderer,
 )
 from ..registry import extract_metrics
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import substitute_none_for_missing, parse_row_condition_string_pandas_engine
 
 
 class ExpectColumnDistinctValuesToBeInSet(DatasetExpectation):
@@ -111,6 +113,61 @@ class ExpectColumnDistinctValuesToBeInSet(DatasetExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            ["column", "value_set", "row_condition", "condition_parser"],
+        )
+
+        if params["value_set"] is None or len(params["value_set"]) == 0:
+
+            if include_column_name:
+                template_str = "$column distinct values must belong to this set: [ ]"
+            else:
+                template_str = "distinct values must belong to a set, but that set is not specified."
+
+        else:
+
+            for i, v in enumerate(params["value_set"]):
+                params["v__" + str(i)] = v
+            values_string = " ".join(
+                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+            )
+
+            if include_column_name:
+                template_str = (
+                    "$column distinct values must belong to this set: "
+                    + values_string
+                    + "."
+                )
+            else:
+                template_str = (
+                    "distinct values must belong to this set: " + values_string + "."
+                )
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """Validating that user has inputted a value set and that configuration has been initialized"""

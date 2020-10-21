@@ -196,7 +196,7 @@ class ExecutionEngine:
 
         raise NotImplementedError
 
-    def add_column_null_filter_row_condition(self, column, domain_kwargs):
+    def add_column_null_filter_row_condition(self, domain_kwargs):
         """EXPERIMENTAL
 
         Add a row condition for handling null filter.
@@ -207,6 +207,8 @@ class ExecutionEngine:
             )
 
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
-        new_domain_kwargs["condition_engine"] = "great_expectations__experimental__"
+        assert "column" in domain_kwargs
+        column = domain_kwargs["column"]
+        new_domain_kwargs["condition_parser"] = "great_expectations__experimental__"
         new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
         return new_domain_kwargs

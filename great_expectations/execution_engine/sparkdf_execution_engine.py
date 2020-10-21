@@ -2,8 +2,12 @@ import copy
 import datetime
 import logging
 import uuid
-from io import StringIO
 from typing import Any, Callable, Dict, Iterable, Tuple, Union
+
+try:
+    import pyspark.sql.functions as F
+except ImportError:
+    F = None
 
 from great_expectations.core.id_dict import IDDict
 from great_expectations.execution_environment.types import (
@@ -26,45 +30,12 @@ from .execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
-# TODO: <Alex>The various PySpark imports appearing below must be cleaned up to avoid multiple imports of the same modules/functions.</Alex>
 try:
-    from pyspark.sql import DataFrame, SparkSession
+    from pyspark.sql import SparkSession
 except ImportError:
     SparkSession = None
-    # TODO: review logging more detail here
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
-    )
-
-try:
-    import pyspark.sql.functions as F
-    import pyspark.sql.types as sparktypes
-    from pyspark.ml.feature import Bucketizer
-    from pyspark.sql import DataFrame, SQLContext, Window
-    from pyspark.sql.functions import (
-        array,
-        col,
-        count,
-        countDistinct,
-        datediff,
-        desc,
-        expr,
-        isnan,
-        lag,
-    )
-    from pyspark.sql.functions import length as length_
-    from pyspark.sql.functions import (
-        lit,
-        monotonically_increasing_id,
-        stddev_samp,
-        udf,
-        when,
-        year,
-    )
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
     )
 
 

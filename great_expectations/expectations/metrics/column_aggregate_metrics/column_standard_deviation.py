@@ -23,6 +23,7 @@ except ImportError as e:
         "Unable to load spark context; install optional spark dependency for support."
     )
 
+from great_expectations.expectations.metrics.column_aggregate_metric import F as F
 
 class ColumnStandardDeviation(ColumnAggregateMetric):
     """Metric Class for Aggregate Standard Deviation metric"""
@@ -46,4 +47,4 @@ class ColumnStandardDeviation(ColumnAggregateMetric):
     @column_aggregate_metric(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
         """Spark Standard Deviation implementation"""
-        return stddev_samp(column).collect()[0][0]
+        return F.stddev_samp(column)

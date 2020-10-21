@@ -17,9 +17,11 @@ from ..expectation import (
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output,
+    _format_map_output, renderer,
 )
 from ..registry import extract_metrics, get_metric_kwargs
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import substitute_none_for_missing, parse_row_condition_string_pandas_engine, num_to_str
 
 try:
     import sqlalchemy as sa
@@ -159,6 +161,71 @@ class ExpectColumnPairValuesAToBeGreaterThanB(DatasetExpectation):
             return temp_column_A >= temp_column_B
         else:
             return temp_column_A > temp_column_B
+
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            [
+                "column_A",
+                "column_B",
+                "parse_strings_as_datetimes",
+                "ignore_row_if",
+                "mostly",
+                "or_equal",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+
+        if (params["column_A"] is None) or (params["column_B"] is None):
+            template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
+            params["row_condition"] = None
+
+        if params["mostly"] is None:
+            if params["or_equal"] in [None, False]:
+                template_str = "Values in $column_A must always be greater than those in $column_B."
+            else:
+                template_str = "Values in $column_A must always be greater than or equal to those in $column_B."
+        else:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            if params["or_equal"] in [None, False]:
+                template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
+            else:
+                template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
     # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(

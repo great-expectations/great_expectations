@@ -1,4 +1,5 @@
 """Rendering utility"""
+import copy
 import decimal
 import locale
 import re
@@ -109,3 +110,90 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
             DeprecationWarning,
         )
         return run_name_filter.get("ne") != run_name
+
+
+def substitute_none_for_missing(kwargs, kwarg_list):
+    """Utility function to plug Nones in when optional parameters are not specified in expectation kwargs.
+
+    Example:
+        Input:
+            kwargs={"a":1, "b":2},
+            kwarg_list=["c", "d"]
+
+        Output: {"a":1, "b":2, "c": None, "d": None}
+
+    This is helpful for standardizing the input objects for rendering functions.
+    The alternative is lots of awkward `if "some_param" not in kwargs or kwargs["some_param"] == None:` clauses in renderers.
+    """
+
+    new_kwargs = copy.deepcopy(kwargs)
+    for kwarg in kwarg_list:
+        if kwarg not in new_kwargs:
+            new_kwargs[kwarg] = None
+    return new_kwargs
+
+
+# NOTE: the method is pretty dirty
+def parse_row_condition_string_pandas_engine(condition_string):
+    if len(condition_string) == 0:
+        condition_string = "True"
+
+    template_str = "if "
+    params = dict()
+
+    condition_string = (
+        condition_string.replace("&", " AND ")
+        .replace(" and ", " AND ")
+        .replace("|", " OR ")
+        .replace(" or ", " OR ")
+        .replace("~", " NOT ")
+        .replace(" not ", " NOT ")
+    )
+    condition_string = " ".join(condition_string.split())
+
+    # replace tuples of values by lists of values
+    tuples_list = re.findall(r"\([^\(\)]*,[^\(\)]*\)", condition_string)
+    for value_tuple in tuples_list:
+        value_list = value_tuple.replace("(", "[").replace(")", "]")
+        condition_string = condition_string.replace(value_tuple, value_list)
+
+    # divide the whole condition into smaller parts
+    conditions_list = re.split(r"AND|OR|NOT(?! in)|\(|\)", condition_string)
+    conditions_list = [
+        condition.strip()
+        for condition in conditions_list
+        if condition != "" and condition != " "
+    ]
+
+    for i, condition in enumerate(conditions_list):
+        params["row_condition__" + str(i)] = condition.replace(" NOT ", " not ")
+        condition_string = condition_string.replace(
+            condition, "$row_condition__" + str(i)
+        )
+
+    template_str += condition_string.lower()
+
+    return template_str, params
+
+
+def handle_strict_min_max(params: dict) -> (str, str):
+    """
+    Utility function for the at least and at most conditions based on strictness.
+
+    Args:
+        params: dictionary containing "strict_min" and "strict_max" booleans.
+
+    Returns:
+        tuple of strings to use for the at least condition and the at most condition
+    """
+
+    at_least_str = (
+        "greater than"
+        if params.get("strict_min") is True
+        else "greater than or equal to"
+    )
+    at_most_str = (
+        "less than" if params.get("strict_max") is True else "less than or equal to"
+    )
+
+    return at_least_str, at_most_str

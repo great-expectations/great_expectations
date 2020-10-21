@@ -11,8 +11,10 @@ from great_expectations.execution_engine import (
 )
 
 from ...data_asset.util import parse_result_format
-from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output
+from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output, renderer
 from ..registry import extract_metrics, get_metric_kwargs
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import substitute_none_for_missing, num_to_str, parse_row_condition_string_pandas_engine
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +127,62 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     #     metric_dependencies=tuple(),
     #     filter_column_isnull=True,
     # )
+
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            [
+                "column",
+                "strictly",
+                "mostly",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+
+        if params.get("strictly"):
+            template_str = "values must be strictly greater than previous values"
+        else:
+            template_str = "values must be greater than or equal to previous values"
+
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
     def _spark_column_values_increasing(
         self,
