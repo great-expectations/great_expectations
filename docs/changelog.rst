@@ -6,11 +6,27 @@ Changelog
 
 Develop
 -----------------
+
 * [FEATURE] Add TupleAzureBlobStoreBackend
+
+0.12.6
+-----------------
+* [BUGFIX] replace black in requirements.txt
+
+0.12.5
+-----------------
+* [ENHANCEMENT] Implement expect_column_values_to_be_json_parseable in spark (Thanks @mikaylaedwards!)
+* [ENHANCEMENT] Fix boto3 options passing into datasource correctly (Thanks @noklam!)
+* [ENHANCEMENT] Add .pkl to list of recognized extensions (Thanks @KPLauritzen!)
 * [BUGFIX] Query batch kwargs support for Athena backend (issue 1964)
-* [BUGFIX] Skip config substitution if key is "password"
-* [BUGFIX] fix site_names functionality and add site_names param to get_docs_sites_urls
-* [BUGFIX] Always render expectation suites in data docs unless passing a specific ExpectationSuiteIdentifier in resource_identifiers #1990
+* [BUGFIX] Skip config substitution if key is "password" (issue 1927)
+* [BUGFIX] fix site_names functionality and add site_names param to get_docs_sites_urls (issue 1991)
+* [BUGFIX] Always render expectation suites in data docs unless passing a specific ExpectationSuiteIdentifier in resource_identifiers (issue 1944)
+* [BUGFIX] remove black from requirements.txt
+* [BUGFIX] docs build cli: fix --yes argument (Thanks @varunbpatil!)
+* [DOCS] Update docstring for SubdirReaderBatchKwargsGenerator (Thanks @KPLauritzen!)
+* [DOCS] Fix broken link in README.md (Thanks @eyaltrabelsi!)
+* [DOCS] Clarifications on several docs (Thanks all!!)
 
 0.12.4
 -----------------
