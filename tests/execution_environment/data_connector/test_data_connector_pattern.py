@@ -83,8 +83,8 @@ def test_name_date_price_list(tmp_path_factory):
             "module_name": "great_expectations.execution_environment.data_connector"
         },
     )
-    # SO THINGS DONT CRASH
-    # my_data_connector._base_directory = base_directory
+
+    # assert my_data_connector.self_check() == {}
 
     my_batch_request = BatchRequest(
         execution_environment_name="BASE",
@@ -132,10 +132,10 @@ def test_alpha(tmp_path_factory):
         ]
     )
 
-    my_data_connector_yaml = yaml.load("""
+    my_data_connector_yaml = yaml.load(f"""
                 module_name: great_expectations.execution_environment.data_connector
                 class_name: FilesDataConnector
-                base_directory: TO_BE_REPLACED
+                base_directory: {base_directory + "/test_dir_alpha"}
                 glob_directive: '*'
                 default_partitioner: my_standard_partitioner
                 assets:
@@ -178,9 +178,7 @@ def test_alpha(tmp_path_factory):
         },
     )
 
-    # so things don't crash
-    my_data_connector._base_directory = base_directory + "/test_dir_alpha"
-
+    # assert my_data_connector.self_check() == {}
 
     # TODO : What should work
     my_batch_request = BatchRequest(
@@ -233,10 +231,10 @@ def test_foxtrot(tmp_path_factory):
         ],
     )
 
-    my_data_connector_yaml = yaml.load("""
+    my_data_connector_yaml = yaml.load(f"""
             module_name: great_expectations.execution_environment.data_connector
             class_name: FilesDataConnector
-            base_directory: TO_BE_REPLACED
+            base_directory: {base_directory + "/test_dir_foxtrot"}
             glob_directive: '*'
             default_partitioner: my_standard_partitioner
             assets:
@@ -283,8 +281,8 @@ def test_foxtrot(tmp_path_factory):
             "module_name": "great_expectations.execution_environment.data_connector"
         },
     )
-    # SO THINGS DONT CRASH
-    my_data_connector._base_directory = base_directory + "/test_dir_foxtrot"
+
+    # assert my_data_connector.self_check() == {}
 
     # TODO : What should work
     my_batch_request = BatchRequest(
