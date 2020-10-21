@@ -96,7 +96,7 @@ class FilesDataConnector(DataConnector):
     def base_directory(self):
         return self._normalize_directory_path(dir_path=self._base_directory)
 
-
+    # TODO: <Alex>To be deleted, once the replacement fulfills all the requirements.</Alex>
     # def _get_available_partitions(
     #     self,
     #     partitioner: Partitioner,
@@ -237,8 +237,6 @@ configured runtime keys.
             return self._verify_file_paths(path_list=path_list)
         raise ge_exceptions.DataConnectorError(f'Expected a directory, but path "{base_directory}" is not a directory.')
 
-
-    # <WILL> "config_params" will likely have to go.
     def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
         glob_directive: str
         base_directory: str
