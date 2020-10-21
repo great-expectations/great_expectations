@@ -49,6 +49,10 @@ def register_renderer(expectation_type: str, renderer_fn: Callable):
         return
 
 
+def get_renderer_impl(expectation_type, renderer_name):
+    return _registered_renderers.get(expectation_type, {}).get(renderer_name)
+
+
 def register_expectation(expectation: Type["Expectation"]) -> None:
     expectation_type = expectation.expectation_type
     # TODO: add version to key
