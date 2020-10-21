@@ -57,7 +57,6 @@ class SinglePartitionDataConnector(DataConnector):
         data_asset_names = set()
         for batch_definition in batch_definition_list:
             data_asset_names.add(batch_definition.data_asset_name)
-
         return list(data_asset_names)
 
 
@@ -120,9 +119,7 @@ class SinglePartitionDataConnector(DataConnector):
 
         data_connector_obj["unmatched_data_reference_count"] = len_unmatched_data_references
         data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
-
         return data_connector_obj
-
 
 
 class SinglePartitionDictDataConnector(SinglePartitionDataConnector):

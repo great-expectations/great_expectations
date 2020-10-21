@@ -170,8 +170,6 @@ class RegexPartitioner(Partitioner):
         group_name_index = 0
 
         print("-"*80)
-        # AST to parse regex.
-        # this is re
         parsed_sre = sre_parse.parse(regex_pattern)
         for token, value in parsed_sre:
             print(type(token), token, value)
@@ -200,11 +198,10 @@ class RegexPartitioner(Partitioner):
                 sre_constants.ASSERT,
             ]:
                 pass
-
             else:
                 raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
 
-        #Collapse adjacent wildcards into a single wildcard
+        # Collapse adjacent wildcards into a single wildcard
         data_reference_template = re.sub("\*+", "*", data_reference_template)
 
         return data_reference_template

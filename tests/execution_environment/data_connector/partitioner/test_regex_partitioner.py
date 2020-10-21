@@ -454,7 +454,6 @@ def test__invert_regex_to_data_reference_template():
         }
     )
     assert regex_partitioner._invert_regex_to_data_reference_template() == "{name}_{timestamp}_{price}.csv"
-    assert False
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
         config_params={
