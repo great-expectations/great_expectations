@@ -436,27 +436,25 @@ connector and the default_partitioner set to one of the configured partitioners.
         batch_definition: BatchDefinition,
         batch_request: BatchRequest,
     ) -> bool:
+
         assert isinstance(batch_definition, BatchDefinition)
         assert isinstance(batch_request, BatchRequest)
-
         if batch_request.execution_environment_name:
             if batch_request.execution_environment_name != batch_definition.execution_environment_name:
                 return False
-        
+
         if batch_request.data_connector_name:
             if batch_request.data_connector_name != batch_definition.data_connector_name:
                 return False
-            
         if batch_request.data_asset_name:
             if batch_request.data_asset_name != batch_definition.data_asset_name:
                 return False
-        
+
         #FIXME: This is too rigid. Needs to take into account ranges and stuff.
         if batch_request.partition_request:
             for k,v in batch_request.partition_request.items():
                 if (not k in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
                     return False
-
         return True
 
     def get_batch_definition_list_from_batch_request(
@@ -464,17 +462,17 @@ connector and the default_partitioner set to one of the configured partitioners.
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         if batch_request.data_connector_name != self.name:
-            raise ValueError(f"data_connector_name {data_connector_name} does not match name {self.name}.")
+            raise ValueError(f"data_connector_name {batch_request.data_connector_name} does not match name {self.name}.")
 
         if self._data_references_cache == None:
             self.refresh_data_references_cache()
 
         batches = []
+
         for data_reference, batch_definition in self._data_references_cache.items():
             if batch_definition == None:
                 # The data_reference is unmatched.
                 continue
-
             if self._batch_definition_matches_batch_request(batch_definition, batch_request):
                 batches.append(batch_definition)
 
@@ -504,19 +502,12 @@ connector and the default_partitioner set to one of the configured partitioners.
         batch_definition: BatchDefinition
     ) -> BatchSpec:
 
+        # HERE <ABE> :
+
         batch_spec_params = self._generate_batch_spec_parameters_from_batch_definition(
             batch_definition
         )
-
-        # TODO Abe 20201018: Reincorporate info from the execution_engine.
-        # Note: This might not be necessary now that we're encoding that info as default params on get_batch_data_and_markers
-        # batch_spec = self._execution_engine.process_batch_request(
-        #     batch_request=batch_request,
-        #     batch_spec=batch_spec
-        # )
-
         # TODO Abe 20201018: Decide if we want to allow batch_spec_passthrough parameters anywhere.
-
         batch_spec = BatchSpec(
             **batch_spec_params
         )
@@ -568,20 +559,22 @@ connector and the default_partitioner set to one of the configured partitioners.
     def _map_data_reference_to_batch_definition_list(self,
         data_reference,
     ) -> List[BatchDefinition]:
-        #FIXME: Make this smarter about choosing the right partitioner
-        # This will raise an error if no default_partitioner has been specified.
-        self.default_partitioner
+
+        try:
+            self.default_partitioner
+        except ValueError:
+            raise ge_exceptions.DataConnectorError("Default Partitioner has not been set for data_connector")
 
         batch_request = self.default_partitioner.convert_data_reference_to_batch_request(
             data_reference
         )
-
         if batch_request == None:
             return None
 
-        #FIXME: get the real data_asset_name
+
         if batch_request.data_asset_name:
             data_asset_name = batch_request.data_asset_name
+        # process assets to populate data_asset_name in batch_definition:
         else:
             data_asset_name = "FAKE_DATA_ASSET_NAME"
 

@@ -109,6 +109,8 @@ class RegexPartitioner(Partitioner):
         if "data_asset_name" in partition_definition:
             data_asset_name = partition_definition.pop("data_asset_name")
         else:
+            # adding this, so things don't crash
+            data_asset_name = "DEFAULT_ASSET_NAME"
             groups: tuple = matches.groups()
             # <WILL> is this automatically generated? 20201019
             # should these ever be set by the user?
