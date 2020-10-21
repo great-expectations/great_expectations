@@ -33,13 +33,10 @@ class AssetConfig(DictDot):
     def __init__(
         self,
         partitioner=None,
-        config_params=None,
         **kwargs,
     ):
         if partitioner is not None:
             self._partitioner = partitioner
-        if config_params is not None:
-            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -47,18 +44,12 @@ class AssetConfig(DictDot):
     def partitioner(self):
         return self._partitioner
 
-    @property
-    def config_params(self):
-        return self._config_params
-
 
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
     partitioner = fields.String(required=False, allow_none=True)
-
-    config_params = fields.Dict(allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -77,15 +68,12 @@ class SorterConfig(DictDot):
         class_name=None,
         module_name=None,
         orderby="asc",
-        config_params=None,
         **kwargs,
     ):
         self._name = name
         self._class_name = class_name
         self._module_name = module_name
         self._orderby = orderby
-        if config_params is not None:
-            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -105,10 +93,6 @@ class SorterConfig(DictDot):
     def orderby(self):
         return self._orderby
 
-    @property
-    def config_params(self):
-        return self._config_params
-
 
 class SorterConfigSchema(Schema):
     class Meta:
@@ -122,8 +106,6 @@ class SorterConfigSchema(Schema):
         missing="asc",
         allow_none=False
     )
-
-    config_params = fields.Dict(allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -143,7 +125,6 @@ class PartitionerConfig(DictDot):
         sorters=None,
         allow_multipart_partitions=False,
         runtime_keys=None,
-        config_params=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -153,8 +134,6 @@ class PartitionerConfig(DictDot):
         self._allow_multipart_partitions = allow_multipart_partitions
         if runtime_keys is not None:
             self._runtime_keys = runtime_keys
-        if config_params is not None:
-            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -177,10 +156,6 @@ class PartitionerConfig(DictDot):
     @property
     def runtime_keys(self):
         return self._runtime_keys
-
-    @property
-    def config_params(self):
-        return self._config_params
 
 
 class PartitionerConfigSchema(Schema):
@@ -208,8 +183,6 @@ class PartitionerConfigSchema(Schema):
         allow_none=True
     )
 
-    config_params = fields.Dict(allow_none=True)
-
     @validates_schema
     def validate_schema(self, data, **kwargs):
         pass
@@ -228,7 +201,6 @@ class DataConnectorConfig(DictDot):
         partitioners=None,
         default_partitioner=None,
         assets=None,
-        config_params=None,
         **kwargs
     ):
         self._class_name = class_name
@@ -239,8 +211,6 @@ class DataConnectorConfig(DictDot):
             self._default_partitioner = default_partitioner
         if assets is not None:
             self._assets = assets
-        if config_params is not None:
-            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -263,10 +233,6 @@ class DataConnectorConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
-
-    @property
-    def config_params(self):
-        return self._config_params
 
 
 class DataConnectorConfigSchema(Schema):
@@ -294,8 +260,6 @@ class DataConnectorConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
-
-    config_params = fields.Dict(allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -422,7 +386,6 @@ class ExecutionEnvironmentConfigSchema(Schema):
         return ExecutionEnvironmentConfig(**data)
 
 
-# TODO: deprecate? keep for backwards compatibility?
 class DatasourceConfig(DictDot):
     def __init__(
         self,
