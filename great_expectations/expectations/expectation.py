@@ -40,6 +40,7 @@ from ..execution_engine import (
     SparkDFExecutionEngine,
 )
 from ..execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from ..render.types import RenderedStringTemplateContent
 from ..validator.validation_graph import MetricConfiguration
 from ..validator.validator import Validator
 
@@ -114,18 +115,40 @@ class Expectation(ABC, metaclass=MetaExpectation):
     def _register_renderer_functions(cls):
         expectation_type = camel_to_snake(cls.__name__)
 
-        for attr, candidate_renderer_fn in cls.__dict__.items():
-            if not hasattr(candidate_renderer_fn, "_renderer_name"):
+        for candidate_renderer_fn_name in dir(cls):
+            attr_obj = getattr(cls, candidate_renderer_fn_name)
+            if not hasattr(attr_obj, "_renderer_name"):
                 continue
-            renderer_fn = getattr(cls, attr)
             register_renderer(
                 expectation_type=expectation_type,
-                renderer_fn=renderer_fn
+                renderer_fn=attr_obj
             )
 
+    @classmethod
     @renderer(renderer_name="descriptive")
-    def _descriptive_renderer(self, ):
-        pass
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "styling": {"parent": {"classes": ["alert", "alert-warning"]}},
+                    "string_template": {
+                        "template": "$expectation_type(**$kwargs)",
+                        "params": {
+                            "expectation_type": expectation_configuration.expectation_type,
+                            "kwargs": expectation_configuration.kwargs,
+                        },
+                        "styling": {
+                            "params": {
+                                "expectation_type": {
+                                    "classes": ["badge", "badge-warning"],
+                                }
+                            }
+                        },
+                    },
+                }
+            )
+        ]
 
     @classmethod
     def get_allowed_config_keys(cls):
@@ -281,9 +304,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
     ):
         if configuration is None:
             configuration = self.configuration
-        return Validator().graph_validate(
-            batches=batches,
-            execution_engine=execution_engine,
+        return Validator(execution_engine=execution_engine).graph_validate(
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
         )[0]
