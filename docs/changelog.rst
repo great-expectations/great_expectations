@@ -7,6 +7,10 @@ Changelog
 Develop
 -----------------
 
+0.12.6
+-----------------
+* [BUGFIX] replace black in requirements.txt
+
 0.12.5
 -----------------
 * [ENHANCEMENT] Implement expect_column_values_to_be_json_parseable in spark (Thanks @mikaylaedwards!)
