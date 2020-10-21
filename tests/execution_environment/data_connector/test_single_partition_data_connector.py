@@ -2,12 +2,12 @@ import yaml
 from great_expectations.execution_environment.data_connector import (
     SinglePartitionDictDataConnector,
 )
+
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
     PartitionDefinition,
 )
-
 
 from great_expectations.data_context.util import (
     instantiate_class_from_config
@@ -146,7 +146,6 @@ class_name: SinglePartitionDictDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
 base_directory: my_base_directory/
 # glob_directive: '*.csv'
-
 partitioner:
     class_name: RegexPartitioner
     config_params:
@@ -158,11 +157,9 @@ partitioner:
 data_assets:
     - alpha:
         base_directory: alpha/files/go/here/
-
     - beta:
         base_directory: beta_here/
         # glob_directive: '*.txt'
-        
     - gamma:
         # glob_directive: '*.txt'
 
@@ -179,7 +176,6 @@ data_assets:
 
     # FIXME: Abe 20201017 : These tests don't pass yet.
     # I'm starting to think we might want to separate out this behavior into a different class.
-    # <WILL> ^^ which behavior and how?
     assert len(my_data_connector.get_unmatched_data_references()) == 0
     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
         data_connector_name="my_data_connector",
@@ -194,7 +190,6 @@ data_assets:
         data_connector_name="my_data_connector",
         data_asset_name="gamma",
     ))) == 5
-
 
 
 def test_test_yaml_config_(empty_data_context, tmp_path_factory):
@@ -311,7 +306,6 @@ partitioner:
         'example_unmatched_data_references' : [],
         'unmatched_data_reference_count': 0,
     }
-
 
 
 def test_self_check():

@@ -79,12 +79,10 @@ class RegexPartitioner(Partitioner):
         self,
         data_reference
     ) -> BatchRequest:
-
         matches: Union[re.Match, None] = re.match(self.regex["pattern"], data_reference)
         if matches is None:
             #raise ValueError(f'No match found for data_reference: "{data_reference}".')
             return None
-
         groups: tuple = matches.groups()
         group_names: list = [
             f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
@@ -112,8 +110,6 @@ class RegexPartitioner(Partitioner):
             # adding this, so things don't crash
             data_asset_name = "DEFAULT_ASSET_NAME"
             groups: tuple = matches.groups()
-            # <WILL> is this automatically generated? 20201019
-            # should these ever be set by the user?
             group_names: list = [
                 f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
             ]
@@ -136,7 +132,6 @@ class RegexPartitioner(Partitioner):
             )
 
         # <NOTE> : we have a separate branch that makes these parameters optional.
-        # 20201019 - this will be fixed in a "future" branch which is already done :)
         return BatchRequest(
             data_asset_name=data_asset_name,
             partition_request=partition_definition,
@@ -165,14 +160,13 @@ class RegexPartitioner(Partitioner):
         NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
         """
         regex_pattern = self.regex["pattern"]
-
         data_reference_template = ""
         group_name_index = 0
 
-        print("-"*80)
+        #print("-"*80)
         parsed_sre = sre_parse.parse(regex_pattern)
         for token, value in parsed_sre:
-            print(type(token), token, value)
+            #print(type(token), token, value)
 
             if token == sre_constants.LITERAL:
                 #Transcribe the character directly into the template
@@ -201,7 +195,7 @@ class RegexPartitioner(Partitioner):
             else:
                 raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
 
-        # Collapse adjacent wildcards into a single wildcard
+        #Collapse adjacent wildcards into a single wildcard
         data_reference_template = re.sub("\*+", "*", data_reference_template)
 
         return data_reference_template
