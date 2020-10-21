@@ -8,8 +8,11 @@ from great_expectations.execution_engine import ExecutionEngine, PandasExecution
 from ...data_asset.util import parse_result_format
 from ...exceptions import InvalidExpectationConfigurationError
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
-from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output
+from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output, renderer
 from ..registry import extract_metrics
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import parse_row_condition_string_pandas_engine, num_to_str, handle_strict_min_max, \
+    substitute_none_for_missing
 
 try:
     import sqlalchemy as sa
@@ -117,6 +120,75 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
+
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "values may have any length."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+
+                elif params["min_value"] is None:
+                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+
+                elif params["max_value"] is None:
+                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+            else:
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+
+                elif params["min_value"] is None:
+                    template_str = f"values must always be {at_most_str} $max_value characters long."
+
+                elif params["max_value"] is None:
+                    template_str = f"values must always be {at_least_str} $min_value characters long."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
     # @PandasExecutionEngine.column_map_metric(
     #     metric_name="column_values.value_length_between",

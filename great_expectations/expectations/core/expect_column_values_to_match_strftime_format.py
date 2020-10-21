@@ -18,9 +18,11 @@ from ..expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output,
+    _format_map_output, renderer,
 )
 from ..registry import extract_metrics, get_metric_kwargs
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import substitute_none_for_missing, num_to_str, parse_row_condition_string_pandas_engine
 
 try:
     import sqlalchemy as sa
@@ -100,3 +102,56 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapDatasetExpectation):
             raise ValueError("Unable to use provided strftime_format. " + str(e))
 
         return True
+
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            [
+                "column",
+                "strftime_format",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+
+        if not params.get("strftime_format"):
+            template_str = "values must match a strftime format but none was specified."
+        else:
+            template_str = (
+                "values must match the following strftime format: $strftime_format"
+            )
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                template_str += ", at least $mostly_pct % of the time."
+            else:
+                template_str += "."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]

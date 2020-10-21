@@ -19,9 +19,11 @@ from ..expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output,
+    _format_map_output, renderer,
 )
 from ..registry import extract_metrics, get_metric_kwargs
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import substitute_none_for_missing, num_to_str, parse_row_condition_string_pandas_engine
 
 try:
     import sqlalchemy as sa
@@ -129,6 +131,55 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
         return pd.DataFrame(
             {"column_values.match_json_schema": series.map(matches_json_schema)}
         )
+
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            ["column", "mostly", "json_schema", "row_condition", "condition_parser"],
+        )
+
+        if not params.get("json_schema"):
+            template_str = "values must match a JSON Schema but none was specified."
+        else:
+            params["formatted_json"] = (
+                "<pre>" + json.dumps(params.get("json_schema"), indent=4) + "</pre>"
+            )
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
+            else:
+                template_str = (
+                    "values must match the following JSON Schema: $formatted_json"
+                )
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": {"params": {"formatted_json": {"classes": []}}},
+                    },
+                }
+            )
+        ]
 
     # @SqlAlchemyExecutionEngine.column_map_metric(
     #     metric_name="column_values.match_json_schema",

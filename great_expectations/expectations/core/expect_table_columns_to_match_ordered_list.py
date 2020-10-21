@@ -11,9 +11,11 @@ from great_expectations.execution_engine import ExecutionEngine, PandasExecution
 from ..expectation import (
     DatasetExpectation,
     Expectation,
-    InvalidExpectationConfigurationError,
+    InvalidExpectationConfigurationError, renderer,
 )
 from ..registry import extract_metrics
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import substitute_none_for_missing
 
 
 class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
@@ -123,6 +125,37 @@ class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
+
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(expectation_configuration.kwargs, ["column_list"])
+
+        if params["column_list"] is None:
+            template_str = "Must have a list of columns in a specific order, but that order is not specified."
+
+        else:
+            template_str = "Must have these columns in this order: "
+            for idx in range(len(params["column_list"]) - 1):
+                template_str += "$column_list_" + str(idx) + ", "
+                params["column_list_" + str(idx)] = params["column_list"][idx]
+
+            last_idx = len(params["column_list"]) - 1
+            template_str += "$column_list_" + str(last_idx)
+            params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
     # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(

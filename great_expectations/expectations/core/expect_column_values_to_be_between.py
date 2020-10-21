@@ -11,9 +11,12 @@ from ..expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output,
+    _format_map_output, renderer,
 )
 from ..registry import extract_metrics
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import substitute_none_for_missing, handle_strict_min_max, num_to_str, \
+    parse_row_condition_string_pandas_engine
 
 
 class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
@@ -152,3 +155,68 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
             )
 
         return True
+
+    # NOTE: This method is a pretty good example of good usage of `params`.
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+
+        template_str = ""
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str += "may have any numerical value."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            mostly_str = ""
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                mostly_str = ", at least $mostly_pct % of the time"
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value{mostly_str}."
+
+            elif params["min_value"] is None:
+                template_str += f"values must be {at_most_str} $max_value{mostly_str}."
+
+            elif params["max_value"] is None:
+                template_str += f"values must be {at_least_str} $min_value{mostly_str}."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]

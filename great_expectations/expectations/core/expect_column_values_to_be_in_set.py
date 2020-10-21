@@ -93,11 +93,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
 
     @classmethod
     @renderer(renderer_name="descriptive")
-    def _descriptive_renderer(
-        cls, expectation, styling=None, include_column_name=True
-    ):
+    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation.kwargs,
+            expectation_configuration.kwargs,
             [
                 "column",
                 "value_set",
