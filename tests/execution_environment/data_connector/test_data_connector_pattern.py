@@ -1,5 +1,6 @@
 import pytest
 import yaml
+import json
 
 from great_expectations.execution_environment.data_connector import (
     DataConnector
@@ -35,10 +36,10 @@ def test_name_date_price_list(tmp_path_factory):
                         "james_20200810_1003.csv",
                         "alex_20200819_1300.csv", ]
     )
-    my_data_connector_yaml = yaml.load("""
+    my_data_connector_yaml = yaml.load(f"""
         module_name: great_expectations.execution_environment.data_connector
         class_name: FilesDataConnector
-        base_directory: TO_BE_REPLACED_BELOW
+        base_directory: {base_directory}
         glob_directive: '*'
         default_partitioner: my_standard_partitioner
         assets:
@@ -83,8 +84,10 @@ def test_name_date_price_list(tmp_path_factory):
             "module_name": "great_expectations.execution_environment.data_connector"
         },
     )
-    # SO THINGS DONT CRASH
-    my_data_connector._base_directory = base_directory
+
+    self_check_report = my_data_connector.self_check()
+    print(json.dumps(self_check_report, indent=2))
+    assert self_check_report == {}
 
     my_batch_request = BatchRequest(
         execution_environment_name="BASE",
@@ -132,10 +135,10 @@ def test_alpha(tmp_path_factory):
         ]
     )
 
-    my_data_connector_yaml = yaml.load("""
+    my_data_connector_yaml = yaml.load(f"""
                 module_name: great_expectations.execution_environment.data_connector
                 class_name: FilesDataConnector
-                base_directory: TO_BE_REPLACED
+                base_directory: {base_directory + "/test_dir_alpha"}
                 glob_directive: '*'
                 default_partitioner: my_standard_partitioner
                 assets:
@@ -178,9 +181,9 @@ def test_alpha(tmp_path_factory):
         },
     )
 
-    # so things don't crash
-    my_data_connector._base_directory = base_directory + "/test_dir_alpha"
-
+    self_check_report = my_data_connector.self_check()
+    print(json.dumps(self_check_report, indent=2))
+    assert self_check_report == {}
 
     # TODO : What should work
     my_batch_request = BatchRequest(
@@ -233,10 +236,10 @@ def test_foxtrot(tmp_path_factory):
         ],
     )
 
-    my_data_connector_yaml = yaml.load("""
+    my_data_connector_yaml = yaml.load(f"""
             module_name: great_expectations.execution_environment.data_connector
             class_name: FilesDataConnector
-            base_directory: TO_BE_REPLACED
+            base_directory: {base_directory + "/test_dir_foxtrot"}
             glob_directive: '*'
             default_partitioner: my_standard_partitioner
             assets:
@@ -265,7 +268,7 @@ def test_foxtrot(tmp_path_factory):
                 class_name: RegexPartitioner
                 config_params:
                   regex:
-                    pattern: ./(.*)-(.*).csv
+                    pattern: (.*)-(.*).csv
                     group_names:
                     - part_1
                     - part_2
@@ -283,8 +286,38 @@ def test_foxtrot(tmp_path_factory):
             "module_name": "great_expectations.execution_environment.data_connector"
         },
     )
-    # SO THINGS DONT CRASH
-    my_data_connector._base_directory = base_directory + "/test_dir_foxtrot"
+
+    self_check_report = my_data_connector.self_check()
+    print(json.dumps(self_check_report, indent=2))
+    assert self_check_report == {
+      "class_name": "FilesDataConnector",
+      "data_asset_count": 4,
+      "example_data_asset_names": [
+        "A",
+        "B",
+        "C"
+      ],
+      "data_assets": {
+        "A": {
+          "batch_definition_count": 0,
+          "example_data_references": []
+        },
+        "B": {
+          "batch_definition_count": 0,
+          "example_data_references": []
+        },
+        "C": {
+          "batch_definition_count": 0,
+          "example_data_references": []
+        }
+      },
+      "unmatched_data_reference_count": 4,
+      "example_unmatched_data_references": [
+        "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/A",
+        "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/C",
+        "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/D"
+      ]
+    }
 
     # TODO : What should work
     my_batch_request = BatchRequest(
