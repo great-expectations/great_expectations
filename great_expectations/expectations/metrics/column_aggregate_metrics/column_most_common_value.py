@@ -16,6 +16,6 @@ class ColumnMostCommonValue(ColumnAggregateMetric):
     metric_name = "column.aggregate.most_common_value"
 
     @column_aggregate_metric(engine=PandasExecutionEngine)
-    def _pandas(cls, column, value_set, ties_okay=None, **kwargs):
+    def _pandas(cls, column, **kwargs):
         mode_list = list(column.mode().values)
         return mode_list

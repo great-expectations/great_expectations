@@ -1,5 +1,7 @@
 from typing import Any, Dict, Tuple
 
+from dateutil.parser import parse
+
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -16,9 +18,14 @@ from great_expectations.expectations.metrics.metric import metric
 from great_expectations.expectations.metrics.utils import filter_pair_metric_nulls
 
 
-class ColumnPairValuesEqual(ColumnMapMetric):
-    condition_metric_name = "column_pair_values.equal"
-    condition_value_keys = ("ignore_row_if",)
+class ColumnPairValuesAGreaterThanB(ColumnMapMetric):
+    condition_metric_name = "column_pair_values.a_greater_than_b"
+    condition_value_keys = (
+        "ignore_row_if",
+        "or_equal",
+        "parse_strings_as_datetimes",
+        "allow_cross_type_comparisons",
+    )
     domain_keys = ("batch_id", "table", "column_a", "column_b")
 
     @map_condition(engine=PandasExecutionEngine, bundle_metric=False)
@@ -30,9 +37,18 @@ class ColumnPairValuesEqual(ColumnMapMetric):
         metrics: Dict[Tuple, Any],
         runtime_configuration: dict,
     ):
+
         ignore_row_if = metric_value_kwargs.get("ignore_row_if")
         if not ignore_row_if:
             ignore_row_if = "both_values_are_missing"
+        or_equal = metric_value_kwargs.get("or_equal")
+        parse_strings_as_datetimes = metric_value_kwargs.get(
+            "parse_strings_as_datetimes"
+        )
+        allow_cross_type_comparisons = metric_value_kwargs.get(
+            "allow_cross_type_comparisons"
+        )
+
         df, compute_domain, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs
         )
@@ -43,4 +59,18 @@ class ColumnPairValuesEqual(ColumnMapMetric):
             ignore_row_if=ignore_row_if,
         )
 
-        return column_A == column_B
+        if allow_cross_type_comparisons:
+            raise NotImplementedError
+
+        if parse_strings_as_datetimes:
+            temp_column_A = column_A.map(parse)
+            temp_column_B = column_B.map(parse)
+
+        else:
+            temp_column_A = column_A
+            temp_column_B = column_B
+
+        if or_equal:
+            return temp_column_A >= temp_column_B
+        else:
+            return temp_column_A > temp_column_B

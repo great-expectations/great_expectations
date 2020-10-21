@@ -1,3 +1,4 @@
+from .column_distinct_values import ColumnDistinctValues
 from .column_max import ColumnMax
 from .column_mean import ColumnMean
 from .column_min import ColumnMin

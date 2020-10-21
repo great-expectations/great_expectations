@@ -216,11 +216,12 @@ def test_map_value_set_spark():
 def test_map_metric_pd():
     engine = PandasExecutionEngine()
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set",
+        metric_name="column_values.value_lengths",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1]},
     )
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+    engine._active_batch_data_id = "batch_id"
     engine._batches = {"batch_id": df}
     # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
@@ -456,3 +457,99 @@ def test_table_metric():
     # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 5}
+
+
+def test_column_pairs_equal_metric_pd():
+    engine = PandasExecutionEngine()
+    desired_metric = MetricConfiguration(
+        metric_name="column_pair_values.equal",
+        metric_domain_kwargs={"column_a": "a", "column_b": "b"},
+        metric_value_kwargs=dict(),
+    )
+    df = pd.DataFrame({"a": [1, 2, 3, 3], "b": [1, 2, 3, 3]})
+    engine._active_batch_data_id = "batch_id"
+    engine._batches = {"batch_id": df}
+    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert list(results.values())[0].equals(pd.Series([True, True, True, True]))
+
+
+def test_column_pairs_equal_metric_pd():
+    engine = PandasExecutionEngine()
+    desired_metric = MetricConfiguration(
+        metric_name="column_pair_values.equal",
+        metric_domain_kwargs={"column_a": "a", "column_b": "b"},
+        metric_value_kwargs=dict(),
+    )
+    df = pd.DataFrame({"a": [1, 2, 3, 3, None], "b": [1, 2, 3, 3, None]})
+    engine._active_batch_data_id = "batch_id"
+    engine._batches = {"batch_id": df}
+    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert list(results.values())[0].equals(pd.Series([True, True, True, True]))
+
+
+def test_column_pairs_greater_metric_pd():
+    engine = PandasExecutionEngine()
+    desired_metric = MetricConfiguration(
+        metric_name="column_pair_values.a_greater_than_b",
+        metric_domain_kwargs={"column_a": "a", "column_b": "b"},
+        metric_value_kwargs={
+            "or_equal": True,
+            "ignore_row_if": "either_value_is_missing",
+        },
+    )
+    df = pd.DataFrame({"a": [2, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
+    engine._active_batch_data_id = "batch_id"
+    engine._batches = {"batch_id": df}
+    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert (
+        list(results.values())[0]
+        .reset_index(drop=True)
+        .equals(pd.Series([True, True, True, True]))
+    )
+
+
+def test_column_pairs_in_set_metric_pd():
+    engine = PandasExecutionEngine()
+    desired_metric = MetricConfiguration(
+        metric_name="column_pair_values.in_set",
+        metric_domain_kwargs={"column_a": "a", "column_b": "b"},
+        metric_value_kwargs={
+            "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
+            "ignore_row_if": "either_value_is_missing",
+        },
+    )
+    df = pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
+    engine._active_batch_data_id = "batch_id"
+    engine._batches = {"batch_id": df}
+    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert (
+        list(results.values())[0]
+        .reset_index(drop=True)
+        .equals(pd.Series([False, True, True, True]))
+    )
+
+
+def test_distinct_metric_spark():
+    from pyspark.sql import DataFrame, SparkSession
+
+    df = pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]})
+    spark = SparkSession.builder.getOrCreate()
+    df = spark.createDataFrame(df)
+
+    engine = SparkDFExecutionEngine()
+    engine._batches = {"batch_id": df}
+    engine._active_batch_data_id = "batch_id"
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.aggregate.distinct_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+
+    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert set(list(results.values())[0].reset_index(drop=True)) == {1, 2, 3}

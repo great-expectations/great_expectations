@@ -15,7 +15,7 @@ class ColumnValuesDecreasing(ColumnMapMetric):
     condition_value_keys = ("strictly",)
 
     @column_map_condition(engine=PandasExecutionEngine)
-    def _pandas(cls, column, strictly, **kwargs):
+    def _pandas(cls, column, strictly=None, **kwargs):
         series_diff = column.diff()
         # The first element is null, so it gets a bye and is always treated as True
         series_diff[series_diff.isnull()] = -1

@@ -13,8 +13,8 @@ from great_expectations.expectations.metrics.utils import _get_dialect_regex_exp
 logger = logging.getLogger(__name__)
 
 
-class ColumnValuesMatchRegexList(ColumnMapMetric):
-    condition_metric_name = "column_values.not_match_regex_list"
+class ColumnValuesMatchRegex(ColumnMapMetric):
+    condition_metric_name = "column_values.match_regex"
     condition_value_keys = ("regex",)
 
     @column_map_condition(engine=PandasExecutionEngine)
