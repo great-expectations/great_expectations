@@ -2,6 +2,8 @@ import logging
 import traceback
 from copy import deepcopy
 
+from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import \
+    ExpectColumnKlDivergenceToBeLessThan
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
@@ -277,7 +279,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return "--"
 
         observed_partition_object = evr.result["details"]["observed_partition"]
-        observed_distribution = super()._get_kl_divergence_chart(
+        observed_distribution = ExpectColumnKlDivergenceToBeLessThan._get_kl_divergence_chart(
             observed_partition_object
         )
 
