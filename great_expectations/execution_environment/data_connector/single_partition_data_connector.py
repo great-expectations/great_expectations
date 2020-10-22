@@ -12,8 +12,8 @@ from great_expectations.core.batch import (
 logger = logging.getLogger(__name__)
 
 
-class SinglePartitionDataConnector(DataConnector):
-    """SinglePartitionDataConnector is a base class for DataConnectors that require exactly one Partitioner be configured in the declaration.
+class SinglePartitionerDataConnector(DataConnector):
+    """SinglePartitionerDataConnector is a base class for DataConnectors that require exactly one Partitioner be configured in the declaration.
 
     Instead, its data_references are stored in a data_reference_dictionary : {
         "pretend/path/A-100.csv" : pandas_df_A_100,
@@ -31,7 +31,7 @@ class SinglePartitionDataConnector(DataConnector):
         data_assets: dict = None,
         base_directory: str = None,
     ):
-        logger.debug(f'Constructing SinglePartitionDataConnector "{name}".')
+        logger.debug(f'Constructing SinglePartitionerDataConnector "{name}".')
 
         self.base_directory = base_directory
         super().__init__(
@@ -120,14 +120,14 @@ class SinglePartitionDataConnector(DataConnector):
         return data_connector_obj
 
 
-class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
+class SinglePartitionerDictDataConnector(SinglePartitionerDataConnector):
     def __init__(
         self,
         name: str,
         data_reference_dict: {},
         **kwargs,
     ):
-        logger.debug(f'Constructing SinglePartitionDictDataConnector "{name}".')
+        logger.debug(f'Constructing SinglePartitionerDictDataConnector "{name}".')
         super().__init__(
             name,
             **kwargs
@@ -141,7 +141,7 @@ class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
         data_reference_keys.sort()
         return data_reference_keys
 
-class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
+class SinglePartitionerFileDataConnector(SinglePartitionerDataConnector):
     def __init__(
         self,
         name: str,
@@ -149,7 +149,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         glob_directive: str = "*",
         **kwargs,
     ):
-        logger.debug(f'Constructing SinglePartitionFileDataConnector "{name}".')
+        logger.debug(f'Constructing SinglePartitionerFileDataConnector "{name}".')
 
         self.glob_directive = glob_directive
 

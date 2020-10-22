@@ -1,7 +1,7 @@
 import yaml
 
 from great_expectations.execution_environment.data_connector import (
-    SinglePartitionDictDataConnector,
+    SinglePartitionerDictDataConnector,
 )
 from great_expectations.core.batch import (
     BatchRequest,
@@ -27,7 +27,7 @@ def test_basic_instantiation(tmp_path_factory):
         "directory/B-2.csv" : create_fake_data_frame(),
     }
 
-    my_data_connector = SinglePartitionDictDataConnector(
+    my_data_connector = SinglePartitionerDictDataConnector(
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         partitioner={
@@ -68,7 +68,7 @@ def test_example_with_implicit_data_asset_names():
     ])
 
     yaml_string = """
-class_name: SinglePartitionDictDataConnector
+class_name: SinglePartitionerDictDataConnector
 base_directory: my_base_directory/
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
     
@@ -143,7 +143,7 @@ def test_example_with_explicit_data_asset_names(tmp_path_factory):
     ])
 
     yaml_string = """
-class_name: SinglePartitionDictDataConnector
+class_name: SinglePartitionerDictDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
 base_directory: my_base_directory/
 # glob_directive: '*.csv'
@@ -220,7 +220,7 @@ def test_test_yaml_config(empty_data_context, tmp_path_factory):
 
     return_object = empty_data_context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
-class_name: SinglePartitionFileDataConnector
+class_name: SinglePartitionerFileDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
 name: TEST_DATA_CONNECTOR
 
@@ -239,7 +239,7 @@ partitioner:
     """, return_mode="return_object")
 
     assert return_object == {
-        'class_name': 'SinglePartitionFileDataConnector',
+        'class_name': 'SinglePartitionerFileDataConnector',
         'data_asset_count': 2,
         'example_data_asset_names': [
             'alpha',
@@ -267,7 +267,7 @@ partitioner:
 
 # data_connectors:
 #     my_data_connector:
-#         class_name: SinglePartitionFileDataConnector
+#         class_name: SinglePartitionerFileDataConnector
 #         execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
 #         base_directory: {base_directory}/
 #         glob_directive: "*/*/*.csv"
@@ -302,7 +302,7 @@ def test_something_needs_a_better_name(empty_data_context, tmp_path_factory):
 
     return_object = empty_data_context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
-class_name: SinglePartitionFileDataConnector
+class_name: SinglePartitionerFileDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
 name: TEST_DATA_CONNECTOR
 
@@ -321,7 +321,7 @@ partitioner:
     """, return_mode="return_object")
 
     assert return_object == {
-        'class_name': 'SinglePartitionFileDataConnector',
+        'class_name': 'SinglePartitionerFileDataConnector',
         'data_asset_count': 2,
         'example_data_asset_names': [
             'alpha',
@@ -350,7 +350,7 @@ def test_self_check():
         "B-2.csv" : create_fake_data_frame(),
     }
 
-    my_data_connector = SinglePartitionDictDataConnector(
+    my_data_connector = SinglePartitionerDictDataConnector(
         name="my_data_connector",
         data_reference_dict=data_reference_dict,
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
@@ -368,7 +368,7 @@ def test_self_check():
     self_check_return_object = my_data_connector.self_check()
 
     assert self_check_return_object == {
-        'class_name': 'SinglePartitionDictDataConnector',
+        'class_name': 'SinglePartitionerDictDataConnector',
         'data_asset_count': 2,
         'example_data_asset_names': [
             'A',
@@ -398,7 +398,7 @@ def test_that_needs_a_better_name():
         "CCC.csv" : create_fake_data_frame(),
     }
 
-    my_data_connector = SinglePartitionDictDataConnector(
+    my_data_connector = SinglePartitionerDictDataConnector(
         name="my_data_connector",
         data_reference_dict=data_reference_dict,
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
@@ -416,7 +416,7 @@ def test_that_needs_a_better_name():
     self_check_return_object = my_data_connector.self_check()
 
     assert self_check_return_object == {
-        'class_name': 'SinglePartitionDictDataConnector',
+        'class_name': 'SinglePartitionerDictDataConnector',
         'data_asset_count': 2,
         'example_data_asset_names': [
             'A',
