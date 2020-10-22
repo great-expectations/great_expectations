@@ -121,8 +121,6 @@ configuration.
         self,
         batch_request: BatchRequest = None,
     ) -> Any:
-        # <WILL> data_reference can be Any, since it can be a string that links to a path, or an actual data_frame
-        # <Abe> I think it'll be simpler to deal with in_memory_datasets separately, in their own method. A BatchRequest doesn't contain data.
         raise NotImplementedError
 
     def convert_data_reference_to_batch_request(
@@ -130,7 +128,6 @@ configuration.
         data_reference: Any = None,
         **kwargs,
     ) -> BatchRequest:
-        # <WILL> data_reference can be Any, since it can be a string that links to a path, or an actual data_frame
         raise NotImplementedError
 
     def _compute_partitions_for_data_asset(

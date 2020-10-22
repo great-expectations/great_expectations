@@ -185,6 +185,14 @@ class FilesDataConnector(DataConnector):
     #         return cached_partitions
     #     return partition_request.select_partitions(partitions=cached_partitions)
 
+    def get_available_data_asset_names(self) -> List[str]:
+        """Return the list of asset names known by this data connector.
+
+        Returns:
+            A list of available names
+        """
+        return list(self.assets.keys())
+
     def _validate_sorters_configuration(self, partition_keys: List[str], num_actual_partition_keys: int):
         if self.sorters and len(self.sorters) > 0:
             if any([sorter.name not in partition_keys for sorter in self.sorters]):
@@ -333,7 +341,8 @@ configured runtime keys.
         self,
         batch_definition: BatchDefinition
     ) -> dict:
-    
+
+        # TODO Will - convert to use batch_request_to_data_reference()
         #TODO Abe 20201018: This is an absolutely horrible way to get a path from a single partition_definition, but AFIACT it's the only method currently supported by our Partitioner
         available_partitions = self.get_available_partitions(
             data_asset_name=batch_definition.data_asset_name,

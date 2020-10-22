@@ -64,7 +64,6 @@ class SinglePartitionDataConnector(DataConnector):
         data_asset_names = set()
         for batch_definition in batch_definition_list:
             data_asset_names.add(batch_definition.data_asset_name)
-        
         return list(data_asset_names)
 
 
@@ -93,7 +92,6 @@ class SinglePartitionDataConnector(DataConnector):
 
         if pretty_print:
             print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
-        
         for asset_name in asset_names[:max_examples]:
             batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -101,7 +99,6 @@ class SinglePartitionDataConnector(DataConnector):
                 data_asset_name=asset_name,
             ))
             len_batch_definition_list = len(batch_definition_list)
-            
             example_data_references = [
                 self.default_partitioner.convert_batch_request_to_data_reference(BatchRequest(
                     execution_environment_name=batch_definition.execution_environment_name,
@@ -125,12 +122,9 @@ class SinglePartitionDataConnector(DataConnector):
         len_unmatched_data_references = len(unmatched_data_references)
         if pretty_print:
             print(f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):", unmatched_data_references[:max_examples])
-        
         data_connector_obj["unmatched_data_reference_count"] = len_unmatched_data_references
         data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
-
         return data_connector_obj
-
 
 
 class SinglePartitionDictDataConnector(SinglePartitionDataConnector):

@@ -4,6 +4,7 @@ import copy
 import itertools
 from typing import List, Dict, Union, Callable, Any, Tuple
 from ruamel.yaml.comments import CommentedMap
+import json
 
 import logging
 
@@ -412,28 +413,7 @@ connector and the default_partitioner set to one of the configured partitioners.
         Returns:
             A list of available names
         """
-        available_data_asset_names: List[str] = []
-
-        if self.assets:
-            available_data_asset_names = list(self.assets.keys())
-
-        available_partitions: List[Partition] = self.get_available_partitions(
-            data_asset_name=None,
-            partition_request={
-                "custom_filter": None,
-                "partition_name": None,
-                "partition_definition": None,
-                "partition_index": None,
-                "limit": None,
-            },
-            runtime_parameters=None,
-            repartition=False
-        )
-        if available_partitions and len(available_partitions) > 0:
-            for partition in available_partitions:
-                available_data_asset_names.append(partition.data_asset_name)
-
-        return list(set(available_data_asset_names))
+        raise NotImplementedError
 
     def get_available_partitions(
         self,
@@ -479,25 +459,20 @@ connector and the default_partitioner set to one of the configured partitioners.
     ) -> bool:
         assert isinstance(batch_definition, BatchDefinition)
         assert isinstance(batch_request, BatchRequest)
-
         if batch_request.execution_environment_name:
             if batch_request.execution_environment_name != batch_definition.execution_environment_name:
                 return False
-        
         if batch_request.data_connector_name:
             if batch_request.data_connector_name != batch_definition.data_connector_name:
                 return False
-            
         if batch_request.data_asset_name:
             if batch_request.data_asset_name != batch_definition.data_asset_name:
                 return False
-        
         #FIXME: This is too rigid. Needs to take into account ranges and stuff.
         if batch_request.partition_request:
             for k,v in batch_request.partition_request.items():
                 if (not k in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
                     return False
-
         return True
 
     def get_batch_definition_list_from_batch_request(
@@ -505,7 +480,7 @@ connector and the default_partitioner set to one of the configured partitioners.
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         if batch_request.data_connector_name != self.name:
-            raise ValueError(f"data_connector_name {data_connector_name} does not match name {self.name}.")
+            raise ValueError(f"data_connector_name {batch_request.data_connector_name} does not match name {self.name}.")
 
         if self._data_references_cache == None:
             self.refresh_data_references_cache()
@@ -515,7 +490,6 @@ connector and the default_partitioner set to one of the configured partitioners.
             if batch_definition == None:
                 # The data_reference is unmatched.
                 continue
-
             if self._batch_definition_matches_batch_request(batch_definition, batch_request):
                 batches.append(batch_definition)
 
@@ -544,20 +518,10 @@ connector and the default_partitioner set to one of the configured partitioners.
         self,
         batch_definition: BatchDefinition
     ) -> BatchSpec:
-
         batch_spec_params = self._generate_batch_spec_parameters_from_batch_definition(
             batch_definition
         )
-
-        # TODO Abe 20201018: Reincorporate info from the execution_engine.
-        # Note: This might not be necessary now that we're encoding that info as default params on get_batch_data_and_markers
-        # batch_spec = self._execution_engine.process_batch_request(
-        #     batch_request=batch_request,
-        #     batch_spec=batch_spec
-        # )
-
         # TODO Abe 20201018: Decide if we want to allow batch_spec_passthrough parameters anywhere.
-
         batch_spec = BatchSpec(
             **batch_spec_params
         )
@@ -609,23 +573,22 @@ connector and the default_partitioner set to one of the configured partitioners.
     def _map_data_reference_to_batch_definition_list(self,
         data_reference,
     ) -> List[BatchDefinition]:
-        #FIXME: Make this smarter about choosing the right partitioner
-        # This will raise an error if no default_partitioner has been specified.
-        self.default_partitioner
+    #FIXME: Make this smarter about choosing the right partitioner
+        try:
+            self.default_partitioner
+        except ValueError:
+            raise ge_exceptions.DataConnectorError("Default Partitioner has not been set for data_connector")
 
         batch_request = self.default_partitioner.convert_data_reference_to_batch_request(
             data_reference
         )
-
         if batch_request == None:
             return None
-
-        #FIXME: get the real data_asset_name
         if batch_request.data_asset_name:
             data_asset_name = batch_request.data_asset_name
+        # process assets to populate data_asset_name in batch_definition:
         else:
             data_asset_name = "FAKE_DATA_ASSET_NAME"
-
         return BatchDefinition(
             execution_environment_name=self.execution_environment_name,
             data_connector_name=self.name,
@@ -637,4 +600,61 @@ connector and the default_partitioner set to one of the configured partitioners.
         pretty_print=True,
         max_examples=3
     ):
-        raise NotImplementedError
+        if self._data_references_cache == None:
+            self.refresh_data_references_cache()
+
+        if pretty_print:
+            print("\t"+self.name, ":", self.__class__.__name__)
+            print()
+
+        asset_names = self.get_available_data_asset_names()
+        asset_names.sort()
+        len_asset_names = len(asset_names)
+
+        data_connector_obj = {
+            "class_name" : self.__class__.__name__,
+            "data_asset_count" : len_asset_names,
+            "example_data_asset_names": asset_names[:max_examples],
+            "data_assets" : {}
+            # "data_reference_count": self.
+        }
+
+        if pretty_print:
+            print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
+        
+        for asset_name in asset_names[:max_examples]:
+            batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
+                execution_environment_name=self.execution_environment_name,
+                data_connector_name=self.name,
+                data_asset_name=asset_name,
+            ))
+            len_batch_definition_list = len(batch_definition_list)
+            
+            example_data_references = [
+                self.default_partitioner.convert_batch_request_to_data_reference(BatchRequest(
+                    execution_environment_name=batch_definition.execution_environment_name,
+                    data_connector_name=batch_definition.data_connector_name,
+                    data_asset_name=batch_definition.data_asset_name,
+                    partition_request=batch_definition.partition_definition,
+                ))
+                for batch_definition in batch_definition_list
+            ][:max_examples]
+            example_data_references.sort()
+
+            if pretty_print:
+                print(f"\t\t{asset_name} ({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):", example_data_references)
+
+            data_connector_obj["data_assets"][asset_name] = {
+                "batch_definition_count": len_batch_definition_list,
+                "example_data_references": example_data_references
+            }
+
+        unmatched_data_references = self.get_unmatched_data_references()
+        len_unmatched_data_references = len(unmatched_data_references)
+        if pretty_print:
+            print(f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):", unmatched_data_references[:max_examples])
+        
+        data_connector_obj["unmatched_data_reference_count"] = len_unmatched_data_references
+        data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
+
+        return data_connector_obj
