@@ -87,6 +87,9 @@ class DataConnector(object):
         self._execution_engine = execution_engine
         self._data_context_root_directory = data_context_root_directory
 
+        # This is a dictionary which maps data_references onto batch_requests	
+        self._data_references_cache = None
+
     @property
     def name(self) -> str:
         return self._name
