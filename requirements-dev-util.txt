@@ -9,3 +9,4 @@ google-cloud-storage>=1.28.0  # all_tests
 moto[ec2]>=1.3.7  # all_tests
 pyarrow>=0.12.0,<=1.0.0  # all_tests
 xlrd>=1.1.0  # all_tests
+s3fs>=0.5.1 # all_tests
