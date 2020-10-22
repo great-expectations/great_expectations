@@ -6,6 +6,7 @@ from tests.test_utils import (
     create_files_in_directory,
 )
 
+
 def test_empty_store(empty_data_context):
 
     my_expectation_store = empty_data_context.test_yaml_config(
@@ -102,12 +103,10 @@ data_connectors:
         partitioners:
             my_regex_partitioner:
                 class_name: RegexPartitioner
-                config_params:
-                    regex:
-                        group_names:
-                            - letter
-                            - number
-                        pattern: {temp_dir}/(.+)(\d+)\.csv
+                group_names:
+                    - letter
+                    - number
+                pattern: {temp_dir}/(.+)(\d+)\.csv
 """, return_mode="return_object"
     )
 

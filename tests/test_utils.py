@@ -1635,9 +1635,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
                 "class_name": "DateTimeSorter",
                 "orderby": "desc",
-                "config_params": {
-                    "datetime_format": "%Y%m%d",
-                }
+                "datetime_format": "%Y%m%d",
             },
             {
                 "name": "price",
@@ -1662,28 +1660,28 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "test_pipeline_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
                     "class_name": "PipelineDataConnector",
-                    "execution_environment_name": "test_execution_environment",
                     "partitioners": {
                         "test_pipeline_partitioner": {
                             "module_name": "great_expectations.execution_environment.data_connector.partitioner",
                             "class_name": "PipelinePartitioner",
                             "allow_multipart_partitions": False,
                             "runtime_keys": [
-                                "custom_key_0",
                                 "run_id",
+                                "custom_key_0",
                             ]
                         }
                     },
                     "default_partitioner": "test_pipeline_partitioner",
                     "assets": {
                         "test_asset_1": {
+                            "module_name": "great_expectations.execution_environment.data_connector.asset",
+                            "class_name": "Asset",
                             "partitioner": "test_pipeline_partitioner"
                         }
                     }
                 },
                 "test_filesystem_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
-                    "execution_environment_name": "test_execution_environment",
                     "class_name": "FilesDataConnector",
                     "base_directory": default_base_directory,
                     "glob_directive": "*",
@@ -1691,26 +1689,26 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                         "test_regex_partitioner": {
                             "module_name": "great_expectations.execution_environment.data_connector.partitioner",
                             "class_name": "RegexPartitioner",
-                            "config_params": {
-                                "regex": {
-                                    "pattern": r"(.+)_(.+)_(.+)\.csv",
-                                    "group_names": group_names
-                                },
+                            "regex": {
+                                "pattern": r"(.+)_(.+)_(.+)\.csv",
+                                "group_names": group_names
                             },
                             "allow_multipart_partitions": False,
                             "sorters": sorters,
                             "runtime_keys": [
-                                "custom_key_0",
                                 "run_id",
+                                "custom_key_0",
                             ]
                         }
                     },
                     "default_partitioner": "test_regex_partitioner",
                     "assets": {
                         "test_asset_0": {
+                            "module_name": "great_expectations.execution_environment.data_connector.asset",
+                            "class_name": "Asset",
                             "partitioner": "test_regex_partitioner",
-                                "base_directory": data_asset_base_directory,
-                                "glob_directive": "alex*",
+                            "base_directory": data_asset_base_directory,
+                            "glob_directive": "alex*",
                         }
                     }
                 }

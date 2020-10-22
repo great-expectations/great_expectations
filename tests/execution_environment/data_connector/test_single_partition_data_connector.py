@@ -32,11 +32,9 @@ def test_basic_instantiation(tmp_path_factory):
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         partitioner={
             "class_name": "RegexPartitioner",
-            "config_params": {
-                "regex": {
-                    "group_names": ["data_asset_name", "letter","number"],
-                    "pattern": "(.*)/(.+)-(\\d+)\\.csv"
-                }
+            "regex": {
+                "group_names": ["data_asset_name", "letter","number"],
+                "pattern": "(.*)/(.+)-(\\d+)\\.csv"
             }
         },
         data_reference_dict = data_reference_dict,
@@ -74,13 +72,12 @@ execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
     
 partitioner:
     class_name: RegexPartitioner
-    config_params:
-        regex:
-            group_names:
-                - year_dir
-                - month_dir
-                - data_asset_name
-            pattern: (\\d{4})/(\\d{2})/(.+)-\\d+\\.csv
+    regex:
+        group_names:
+            - year_dir
+            - month_dir
+            - data_asset_name
+        pattern: (\\d{4})/(\\d{2})/(.+)-\\d+\\.csv
     """
     config = yaml.load(yaml_string, Loader=yaml.FullLoader)
     config["data_reference_dict"] = data_reference_dict
@@ -150,13 +147,12 @@ base_directory: my_base_directory/
     
 partitioner:
     class_name: RegexPartitioner
-    config_params:
-        regex:
-            group_names:
-                - data_asset_name
-                - year_dir
-                - month_dir
-            pattern: ^(.+)-(\\d{4})(\\d{2})\\.[csv|txt]$
+    regex:
+        group_names:
+            - data_asset_name
+            - year_dir
+            - month_dir
+        pattern: ^(.+)-(\\d{4})(\\d{2})\\.[csv|txt]$
 
 data_assets:
     - alpha:
@@ -229,13 +225,12 @@ glob_directive: "*/*/*.csv"
 
 partitioner:
     class_name: RegexPartitioner
-    config_params:
-        regex:
-            group_names:
-                - year_dir
-                - month_dir
-                - data_asset_name
-            pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    regex:
+        group_names:
+            - year_dir
+            - month_dir
+            - data_asset_name
+        pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
     """, return_mode="return_object")
 
     assert return_object == {
@@ -274,13 +269,12 @@ partitioner:
 
 #         partitioner:
 #             class_name: RegexPartitioner
-#             config_params:
-#                 regex:
-#                     group_names:
-#                         - year_dir
-#                         - month_dir
-#                         - data_asset_name
-#                     pattern: (\d{{4}})/(\d{{2}})/(.*)-.*\.csv
+#             regex:
+#                 group_names:
+#                     - year_dir
+#                     - month_dir
+#                     - data_asset_name
+#                 pattern: (\d{{4}})/(\d{{2}})/(.*)-.*\.csv
 #     """)
 
 def test_something_needs_a_better_name(empty_data_context, tmp_path_factory):
@@ -311,13 +305,12 @@ glob_directive: "*/*/*.csv"
 
 partitioner:
     class_name: RegexPartitioner
-    config_params:
-        regex:
-            group_names:
-                - year_dir
-                - month_dir
-                - data_asset_name
-            pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    regex:
+        group_names:
+            - year_dir
+            - month_dir
+            - data_asset_name
+        pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
     """, return_mode="return_object")
 
     assert return_object == {
@@ -356,11 +349,9 @@ def test_self_check():
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         partitioner={
             "class_name": "RegexPartitioner",
-            "config_params": {
-                "regex": {
-                    "group_names": ["data_asset_name", "number"],
-                    "pattern": "(.+)-(\\d+)\\.csv"
-                }
+            "regex": {
+                "group_names": ["data_asset_name", "number"],
+                "pattern": "(.+)-(\\d+)\\.csv"
             }
         },
     )
@@ -404,11 +395,9 @@ def test_that_needs_a_better_name():
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         partitioner={
             "class_name": "RegexPartitioner",
-            "config_params": {
-                "regex": {
-                    "group_names": ["data_asset_name", "number"],
-                    "pattern": "(.+)-(\\d+)\\.csv"
-                }
+            "regex": {
+                "group_names": ["data_asset_name", "number"],
+                "pattern": "(.+)-(\\d+)\\.csv"
             }
         },
     )

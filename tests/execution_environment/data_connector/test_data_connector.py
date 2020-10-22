@@ -57,12 +57,11 @@ def test_basic_instantiation(tmp_path_factory):
 # partitioners:
 #     my_regex_partitioner:
 #         class_name: RegexPartitioner
-#         config_params:
-#             regex:
-#                 group_names:
-#                     - letter
-#                     - number
-#                 pattern: {base_directory}/(.+)(\d+)\.csv
+#         regex:
+#             group_names:
+#                 - letter
+#                 - number
+#             pattern: {base_directory}/(.+)(\d+)\.csv
 
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
     data_references = basic_data_connector._get_data_reference_list()
@@ -104,14 +103,13 @@ def test__DictDataConnector():
         "my_partitioner",
         yaml.load("""
 class_name: RegexPartitioner
-config_params:
-    regex:
-        group_names:
-            - first_dir
-            - second_dir
-            - letter
-            - number
-        pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
+regex:
+    group_names:
+        - first_dir
+        - second_dir
+        - letter
+        - number
+    pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
         """, Loader=yaml.FullLoader)
     )
     my_data_connector._default_partitioner = "my_partitioner"
@@ -154,12 +152,11 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         "my_first_partitioner",
         yaml.load("""
 class_name: RegexPartitioner
-config_params:
-    regex:
-        group_names:
-            - letter
-            - number
-        pattern: pretend/path/(.+)-(\\d+)\\.csv
+regex:
+    group_names:
+        - letter
+        - number
+    pattern: pretend/path/(.+)-(\\d+)\\.csv
         """, Loader=yaml.FullLoader)
     )
     my_data_connector._default_partitioner = "my_first_partitioner"
@@ -172,14 +169,13 @@ config_params:
         "my_second_partitioner",
         yaml.load("""
 class_name: RegexPartitioner
-config_params:
-    regex:
-        group_names:
-            - first_dir
-            - second_dir
-            - letter
-            - number
-        pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
+regex:
+    group_names:
+        - first_dir
+        - second_dir
+        - letter
+        - number
+    pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
         """, Loader=yaml.FullLoader)
     )
     my_data_connector._default_partitioner = "my_second_partitioner"
@@ -318,28 +314,27 @@ def test__batch_definition_matches_batch_request():
 #             "pretend/B/B-2.csv",
 #         ]
 #     )
-
+#
 #     my_data_connector = FilesDataConnector(
 #         name="my_data_connector",
 #         base_directory=base_directory,
 #         glob_directive='*/*/*.csv',
 #     )
-
+#
 #     #my_data_connector.refresh_data_object_cache()
 #     my_data_connector.add_partitioner(
 #         "my_first_partitioner",
 #         yaml.load("""
 #     class_name: RegexPartitioner
-#     config_params:
-#         regex:
-#             group_names:
-#                 - letter
-#                 - number
-#             pattern: pretend/(.+)-(\\d+)\\.csv
+#     regex:
+#         group_names:
+#             - letter
+#             - number
+#         pattern: pretend/(.+)-(\\d+)\\.csv
 #             """, Loader=yaml.FullLoader)
 #     )
 #     my_data_connector._default_partitioner = "my_first_partitioner"
-
+#
 #     my_batch_request = BatchRequest(
 #         execution_environment_name="IdontNeedThis",
 #         data_asset_name="A",
@@ -373,12 +368,11 @@ def test__batch_definition_matches_batch_request():
 #         "my_first_partitioner",
 #         yaml.load("""
 #     class_name: RegexPartitioner
-#     config_params:
-#         regex:
-#             group_names:
-#                 - letter
-#                 - number
-#             pattern: pretend/(.+)-(\\d+)\\.csv
+#     regex:
+#         group_names:
+#             - letter
+#             - number
+#         pattern: pretend/(.+)-(\\d+)\\.csv
 #             """, Loader=yaml.FullLoader)
 #     )
 #     my_data_connector._default_partitioner = "my_first_partitioner"

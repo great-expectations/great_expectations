@@ -23,6 +23,7 @@ class PipelineDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
+        execution_environment_name: str,
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,
@@ -32,6 +33,7 @@ class PipelineDataConnector(DataConnector):
         logger.debug(f'Constructing PipelineDataConnector "{name}".')
         super().__init__(
             name=name,
+            execution_environment_name=execution_environment_name,
             partitioners=partitioners,
             default_partitioner=default_partitioner,
             assets=assets,
