@@ -87,6 +87,7 @@ def test_name_date_price_list(tmp_path_factory):
 
     self_check_report = my_data_connector.self_check()
     print(json.dumps(self_check_report, indent=2))
+    # TODO: This report is wrong; replace with something correct.
     assert self_check_report == {}
 
     my_batch_request = BatchRequest(
@@ -328,4 +329,3 @@ def test_foxtrot(tmp_path_factory):
 
     my_batch_definition = my_data_connector.get_batch_definition_list_from_batch_request(my_batch_request)
     assert my_batch_definition == []
-
