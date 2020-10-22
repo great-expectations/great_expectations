@@ -184,6 +184,14 @@ def _build_datasource_intro_string(datasource_count):
     "If True, this will override --max_data_assets.",
 )
 @click.option(
+    "--assume-yes",
+    "--yes",
+    "-y",
+    is_flag=True,
+    default=False,
+    help="By default request confirmation unless you specify -y/--yes/--assume-yes flag to skip dialog",
+)
+@click.option(
     "--directory",
     "-d",
     default=None,
@@ -208,6 +216,7 @@ def datasource_profile(
     directory,
     view,
     additional_batch_kwargs,
+    assume_yes
 ):
     """
     Profile a datasource (Experimental)
@@ -253,6 +262,7 @@ def datasource_profile(
                     profile_all_data_assets=profile_all_data_assets,
                     open_docs=view,
                     additional_batch_kwargs=additional_batch_kwargs,
+                    skip_prompt_flag=assume_yes
                 )
                 send_usage_message(
                     data_context=context, event="cli.datasource.profile", success=True
@@ -266,6 +276,7 @@ def datasource_profile(
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
                 additional_batch_kwargs=additional_batch_kwargs,
+                skip_prompt_flag=assume_yes
             )
             send_usage_message(
                 data_context=context, event="cli.datasource.profile", success=True
@@ -1401,6 +1412,16 @@ def _verify_pyspark_dependent_modules() -> bool:
     )
 
 
+def skip_prompt_message(skip_flag, prompt_message_text) -> bool:
+
+    if not skip_flag:
+        return click.confirm(
+            prompt_message_text, default=True
+        )
+
+    return skip_flag
+
+
 def profile_datasource(
     context,
     datasource_name,
@@ -1410,6 +1431,7 @@ def profile_datasource(
     max_data_assets=20,
     additional_batch_kwargs=None,
     open_docs=False,
+    skip_prompt_flag=False
 ):
     """"Profile a named datasource using the specified context"""
     # Note we are explicitly not using a logger in all CLI output to have
@@ -1476,9 +1498,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         if (
             data_assets
             or profile_all_data_assets
-            or click.confirm(
-                msg_confirm_ok_to_proceed.format(datasource_name), default=True
-            )
+            or skip_prompt_message(skip_prompt_flag, msg_confirm_ok_to_proceed.format(datasource_name))
         ):
             profiling_results = context.profile_datasource(
                 datasource_name,
@@ -1576,7 +1596,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 break
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
-    build_docs(context, view=open_docs)
+    build_docs(context, view=open_docs, assume_yes=skip_prompt_flag)
     if open_docs:  # This is mostly to keep tests from spawning windows
         context.open_data_docs()
 
