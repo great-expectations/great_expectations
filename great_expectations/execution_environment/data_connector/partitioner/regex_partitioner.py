@@ -51,7 +51,7 @@ class RegexPartitioner(Partitioner):
             # check if dictionary
             if not isinstance(regex, dict):
                 raise ge_exceptions.PartitionerError(
-                    f'''RegexPartitioner "{self.name}" requires a regex pattern configured as a dictionary. 
+                    f'''RegexPartitioner "{self.name}" requires a regex pattern configured as a dictionary.
                     It is currently of type "{type(regex)}. Please check your configuration.''')
             # check if correct key exists
             if not ("pattern" in regex.keys()):
@@ -79,12 +79,10 @@ class RegexPartitioner(Partitioner):
         self,
         data_reference
     ) -> BatchRequest:
-
         matches: Union[re.Match, None] = re.match(self.regex["pattern"], data_reference)
         if matches is None:
-            # raise ValueError(f'No match found for data_reference: "{data_reference}".')
+            #raise ValueError(f'No match found for data_reference: "{data_reference}".')
             return None
-            
         groups: tuple = matches.groups()
         group_names: list = [
             f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
@@ -109,26 +107,63 @@ class RegexPartitioner(Partitioner):
         if "data_asset_name" in partition_definition:
             data_asset_name = partition_definition.pop("data_asset_name")
         else:
-            data_asset_name = None
+            # adding this, so things don't crash
+            data_asset_name = "DEFAULT_ASSET_NAME"
+            groups: tuple = matches.groups()
+            group_names: list = [
+                f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
+            ]
+            #
+            self._validate_sorters_configuration(
+                partition_keys=self.regex["group_names"],
+                num_actual_partition_keys=len(groups)
+            )
+            for idx, group_name in enumerate(self.regex["group_names"]):
+                group_names[idx] = group_name
+            partition_definition: dict = {}
+            for idx, group_value in enumerate(groups):
+                group_name: str = group_names[idx]
+                partition_definition[group_name] = group_value
+            partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
+            partition_name: str = self.DEFAULT_DELIMITER.join(
+                [str(value) for value in partition_definition.values()]
+            )
 
         return BatchRequest(
             data_asset_name=data_asset_name,
             partition_request=partition_definition,
         )
 
+    def convert_batch_request_to_data_reference(
+            self,
+            batch_request: BatchRequest,
+    ) -> str:
+        if not isinstance(batch_request, BatchRequest):
+            raise TypeError("batch_request is not of an instance of type BatchRequest")
+
+        template_arguments = batch_request.partition_request
+        if batch_request.data_asset_name != None:
+            template_arguments["data_asset_name"] = batch_request.data_asset_name
+
+        filepath_template = self._invert_regex_to_data_reference_template()
+        converted_string = filepath_template.format(
+            **template_arguments
+        )
+
+        return converted_string
+
     def _invert_regex_to_data_reference_template(self):
         """
         NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
         """
         regex_pattern = self.regex["pattern"]
-
         data_reference_template = ""
         group_name_index = 0
 
-        # print("-"*80)
+        #print("-"*80)
         parsed_sre = sre_parse.parse(regex_pattern)
         for token, value in parsed_sre:
-            # print(type(token), token, value)
+            #print(type(token), token, value)
 
             if token == sre_constants.LITERAL:
                 #Transcribe the character directly into the template
@@ -154,7 +189,6 @@ class RegexPartitioner(Partitioner):
                 sre_constants.ASSERT,
             ]:
                 pass
-            
             else:
                 raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
 
@@ -162,23 +196,3 @@ class RegexPartitioner(Partitioner):
         data_reference_template = re.sub("\*+", "*", data_reference_template)
 
         return data_reference_template
-
-    def convert_batch_request_to_data_reference(
-        self,
-        batch_request: BatchRequest,
-    ) -> str:
-        if not isinstance(batch_request, BatchRequest):
-            raise TypeError("batch_request is not of an instance of type BatchRequest")
-
-        partition_request = batch_request.partition_request
-        if "data_asset_name" in self.regex["group_names"]:
-            partition_request["data_asset_name"] = batch_request.data_asset_name
-
-        filepath_template = self._invert_regex_to_data_reference_template()
-        converted_string = filepath_template.format(
-            **partition_request
-        )
-
-        return converted_string
-        
-
