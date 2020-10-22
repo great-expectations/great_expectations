@@ -532,6 +532,7 @@ connector and the default_partitioner set to one of the configured partitioners.
     def _map_data_reference_to_batch_definition_list(self,
         data_reference,
     ) -> List[BatchDefinition]:
+    #FIXME: Make this smarter about choosing the right partitioner
         try:
             self.default_partitioner
         except ValueError:
