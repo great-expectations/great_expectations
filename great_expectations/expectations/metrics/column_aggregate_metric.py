@@ -162,4 +162,4 @@ class ColumnAggregateMetric(Metric):
         "column",
     )
     bundle_metric = True
-    filter_column_isnull = False
+    filter_column_isnull = True

@@ -266,7 +266,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SparkDFExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @map_condition
+            @map_condition(engine)
             @wraps(metric_fn)
             def inner_func(
                 cls,
