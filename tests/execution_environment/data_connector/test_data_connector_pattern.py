@@ -291,6 +291,7 @@ def test_foxtrot(tmp_path_factory):
 
     self_check_report = my_data_connector.self_check()
     print(json.dumps(self_check_report, indent=2))
+    # TODO: This report is wrong; replace with something correct.
     assert self_check_report == {
       "class_name": "FilesDataConnector",
       "data_asset_count": 4,
