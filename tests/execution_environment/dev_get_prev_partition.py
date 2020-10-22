@@ -82,5 +82,6 @@ def test_name_date_price_list(tmp_path_factory):
         },
     )
 
-    partitions = my_data_connector.get_available_partitions()
-    print(partitions)
+    with pytest.raises(NotImplementedError):
+        partitions = my_data_connector.get_previous_batch_definition()
+        print(partitions)

@@ -434,6 +434,16 @@ connector and the default_partitioner set to one of the configured partitioners.
                     return False
         return True
 
+
+    def get_previous_batch_definition(
+        self,
+        query_batch_definition: BatchDefinition = None
+    ) -> BatchDefinition:
+        print('I sortof work now will')
+
+        raise NotImplementedError
+
+
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,
