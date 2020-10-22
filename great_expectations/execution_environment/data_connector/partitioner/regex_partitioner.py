@@ -131,7 +131,6 @@ class RegexPartitioner(Partitioner):
                 [str(value) for value in partition_definition.values()]
             )
 
-        # <NOTE> : we have a separate branch that makes these parameters optional.
         return BatchRequest(
             data_asset_name=data_asset_name,
             partition_request=partition_definition,
