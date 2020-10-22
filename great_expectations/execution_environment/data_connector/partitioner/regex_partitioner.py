@@ -125,7 +125,6 @@ class RegexPartitioner(Partitioner):
                 group_name: str = group_names[idx]
                 partition_definition[group_name] = group_value
             partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
-            # if runtime_parameters:
             #     partition_definition.update(runtime_parameters)
             partition_name: str = self.DEFAULT_DELIMITER.join(
                 [str(value) for value in partition_definition.values()]
