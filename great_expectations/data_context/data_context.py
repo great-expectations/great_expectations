@@ -1128,7 +1128,7 @@ class BaseDataContext:
         self,
         batch_request: dict
     ) -> Batch:
-        execution_environment_name: str = batch_request.get("execution_environment")
+        execution_environment_name: str = batch_request.get("execution_environment_name")
         if not execution_environment_name:
             raise ge_exceptions.ExecutionEnvironmentError(
                 message="Batch request must specify an execution_environment."

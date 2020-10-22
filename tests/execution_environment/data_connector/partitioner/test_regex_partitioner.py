@@ -430,7 +430,7 @@ def test_convert_batch_request_to_data_reference():
         )
     ) == "*_20200809_1000.csv"
 
-# TODO: <Alex>Why do method names have 2 underscores?</Alex>
+# TODO: <Alex>Why does this method name have 2 underscores?</Alex>
 def test__invert_regex_to_data_reference_template():
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",

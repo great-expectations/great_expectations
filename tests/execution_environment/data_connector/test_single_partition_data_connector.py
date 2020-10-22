@@ -120,6 +120,7 @@ partitioner:
         )
     )]
 
+
 def test_example_with_explicit_data_asset_names(tmp_path_factory):
     data_reference_dict = dict([
         (data_reference, create_fake_data_frame)
@@ -154,15 +155,18 @@ partitioner:
             - month_dir
         pattern: ^(.+)-(\\d{4})(\\d{2})\\.[csv|txt]$
 
-data_assets:
-    - alpha:
-        directory: alpha/files/go/here/
+assets:
+    alpha:
+        class_name: Asset
+        base_directory: alpha/files/go/here/
 
-    - beta:
-        directory: beta_here/
+    beta:
+        class_name: Asset
+        base_directory: beta_here/
         # glob_directive: '*.txt'
 
-    - gamma:
+    gamma:
+        class_name: Asset
         # glob_directive: '*.txt'
 
     """
@@ -240,7 +244,7 @@ partitioner:
             'alpha',
             'beta'
         ],
-        'data_assets': {
+        'assets': {
             'alpha': {
                 'example_data_references': ['2020/01/alpha-*.csv', '2020/02/alpha-*.csv', '2020/03/alpha-*.csv'],
                 'batch_definition_count': 3
@@ -320,7 +324,7 @@ partitioner:
             'alpha',
             'beta'
         ],
-        'data_assets': {
+        'assets': {
             'alpha': {
                 'example_data_references': ['2020/01/alpha-*.csv', '2020/02/alpha-*.csv', '2020/03/alpha-*.csv'],
                 'batch_definition_count': 3
@@ -365,7 +369,7 @@ def test_self_check():
             'A',
             'B'
         ],
-        'data_assets': {
+        'assets': {
             'A': {
                 'example_data_references': ['A-100.csv', 'A-101.csv'],
                 'batch_definition_count': 2
@@ -411,7 +415,7 @@ def test_that_needs_a_better_name():
             'A',
             'B'
         ],
-        'data_assets': {
+        'assets': {
             'A': {
                 'example_data_references': ['A-100.csv', 'A-101.csv'],
                 'batch_definition_count': 2

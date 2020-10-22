@@ -5,22 +5,9 @@ from typing import Union, List, Iterator, Any
 
 import logging
 
-# TODO: <Alex>Clean up.</Alex>
-# from great_expectations.data_context.types.base import (
-#     SorterConfig,
-#     sorterConfigSchema
-# )
-
-from great_expectations.core.batch import (
-    BatchRequest,
-    # TODO: <Alex>Clean up.</Alex>
-    # BatchDefinition,
-)
+from great_expectations.core.batch import BatchRequest
 
 
-# TODO: <Alex>Clean up.</Alex>
-# from great_expectations.core.id_dict import PartitionDefinitionSubset
-# from great_expectations.execution_environment.data_connector.partitioner.partition_request import PartitionRequest
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 import great_expectations.exceptions as ge_exceptions

@@ -60,7 +60,8 @@ def test_sorter_instantiation_custom_list():
     assert isinstance(my_custom, CustomListSorter)
     assert my_custom.name == "custom"
     assert my_custom.reverse is False
-    assert my_custom['reference_list'] == ['a', 'b', 'c']
+    # noinspection PyProtectedMember
+    assert my_custom._reference_list == ['a', 'b', 'c']
     # with incorrectly configured reference list
     sorter_params: dict = {
         'reference_list': [111, 222, 333]  # this shouldn't work. the reference list should only contain strings

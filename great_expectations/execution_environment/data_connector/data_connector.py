@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# TODO: <Alex>Clean up</Alex>
 import copy
 import itertools
 from typing import List, Dict, Union, Callable, Any, Tuple
@@ -30,8 +29,6 @@ from great_expectations.core.batch import (
     BatchMarkers,
     BatchDefinition,
 )
-# TODO: <Alex>Clean up</Alex>
-# from great_expectations.core.util import nested_update
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
@@ -95,10 +92,7 @@ class DataConnector(object):
 
         self._data_context_root_directory = data_context_root_directory
 
-        # TODO: <Alex></Alex>
-        # self._assets_cache: dict = {}
-
-        # TODO: <Alex>Deprecate</Alex>
+        # TODO: <Alex>The next 2 lines should be deleted once the user of the Partion object has been deprecated.</Alex>
         # The partitions cache is a dictionary, which maintains lists of partitions for a data_asset_name as the key.
         # self._partitions_cache: dict = {}
 
@@ -285,7 +279,7 @@ class DataConnector(object):
     #     self._partitioners_cache[name] = partitioner
     #     return partitioner
 
-    # TODO: <Alex>We should not need this method any more.</Alex>
+    # TODO: <Alex>We should not need this method any more; hence, it should be deleted.</Alex>
     # def add_partitioner(self, partitioner_name: str, partitioner_config: dict) -> Partitioner:
     #     """Add a new Partitioner to the DataConnector and (for convenience) return the instantiated Partitioner object.
     #

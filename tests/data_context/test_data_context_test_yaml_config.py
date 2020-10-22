@@ -35,6 +35,7 @@ store_backend:
 EGREGIOUS FORMATTING ERROR
 """)
 
+
 def test_filesystem_store(empty_data_context):
     tmp_dir = str(tempfile.mkdtemp())
     with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:
@@ -65,6 +66,7 @@ store_backend:
     module_name: "great_expectations.data_context.store.store_backend"
     class_name: InMemoryStoreBackend
 """)
+
 
 def test_execution_environment_config(empty_data_context):
 
@@ -103,10 +105,11 @@ data_connectors:
         partitioners:
             my_regex_partitioner:
                 class_name: RegexPartitioner
-                group_names:
-                    - letter
-                    - number
-                pattern: {temp_dir}/(.+)(\d+)\.csv
+                regex:
+                    group_names:
+                        - letter
+                        - number
+                    pattern: {temp_dir}/(.+)(\d+)\.csv
 """, return_mode="return_object"
     )
 
@@ -125,7 +128,7 @@ data_connectors:
                     "abe_20200809_1040",
                     "alex_20200809_1000"
                 ],
-                "data_assets":{
+                "assets":{
                     "abe_20200809_1040":{
                     "partition_count":1,
                     "example_partition_names":[
