@@ -220,7 +220,7 @@ def test_map_metric_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1]},
     )
-    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+    df = pd.DataFrame({"a": ["a", "aaa", "bcbc", "defgh", None]})
     engine._active_batch_data_id = "batch_id"
     engine._batches = {"batch_id": df}
     # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
@@ -531,6 +531,59 @@ def test_column_pairs_in_set_metric_pd():
         .reset_index(drop=True)
         .equals(pd.Series([False, True, True, True]))
     )
+
+
+def test_table_metric_spark():
+    from pyspark.sql import DataFrame, SparkSession
+
+    df = pd.DataFrame({"a": [1, 2, 1]})
+    spark = SparkSession.builder.getOrCreate()
+    df = spark.createDataFrame(df)
+
+    engine = SparkDFExecutionEngine()
+    engine._batches = {"batch_id": df}
+    engine._active_batch_data_id = "batch_id"
+
+    desired_metric = MetricConfiguration(
+        metric_name="table.row_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+
+    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert results == {desired_metric.id: 2}
+
+
+def test_median_metric_spark():
+    from pyspark.sql import DataFrame, SparkSession
+
+    df = pd.DataFrame({"a": [1, 2, 3]})
+    spark = SparkSession.builder.getOrCreate()
+    df = spark.createDataFrame(df)
+
+    engine = SparkDFExecutionEngine()
+    engine._batches = {"batch_id": df}
+    engine._active_batch_data_id = "batch_id"
+
+    row_count = MetricConfiguration(
+        metric_name="table.row_count",
+        metric_domain_kwargs={},
+        metric_value_kwargs=dict(),
+    )
+
+    desired_metrics = (row_count,)
+    metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.median",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"table_row_count": row_count,},
+    )
+    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert results == {desired_metric.id: 2}
 
 
 def test_distinct_metric_spark():

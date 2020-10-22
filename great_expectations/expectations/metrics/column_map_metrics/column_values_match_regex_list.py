@@ -11,7 +11,7 @@ from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetric,
     column_map_condition,
 )
-from great_expectations.expectations.metrics.utils import _get_dialect_regex_expression
+from great_expectations.expectations.metrics.util import get_dialect_regex_expression
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +44,7 @@ class ColumnValuesMatchRegexList(ColumnMapMetric):
         if len(regex_list) == 0:
             raise ValueError("At least one regex must be supplied in the regex_list.")
 
-        regex_expression = _get_dialect_regex_expression(
-            _dialect, column, regex_list[0]
-        )
+        regex_expression = get_dialect_regex_expression(column, regex_list[0], _dialect)
         if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(_dialect))
             raise NotImplementedError
@@ -54,14 +52,14 @@ class ColumnValuesMatchRegexList(ColumnMapMetric):
         if match_on == "any":
             condition = sa.or_(
                 *[
-                    _get_dialect_regex_expression(_dialect, column, regex)
+                    get_dialect_regex_expression(column, regex, _dialect)
                     for regex in regex_list
                 ]
             )
         else:
             condition = sa.and_(
                 *[
-                    _get_dialect_regex_expression(_dialect, column, regex)
+                    get_dialect_regex_expression(column, regex, _dialect)
                     for regex in regex_list
                 ]
             )

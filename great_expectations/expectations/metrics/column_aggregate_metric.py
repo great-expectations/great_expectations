@@ -142,6 +142,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                     cls,
                     column=data[column_name],
                     **metric_value_kwargs,
+                    _table=data,
                     _metrics=metrics,
                 )
                 return metric_aggregate, compute_domain_kwargs

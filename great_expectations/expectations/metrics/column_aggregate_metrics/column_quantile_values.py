@@ -20,15 +20,14 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
-from great_expectations.expectations.metrics.utils import (
-    attempt_allowing_relative_error,
-)
+from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
 logger = logging.getLogger(__name__)
 
 
 class ColumnQuantileValues(ColumnAggregateMetric):
     metric_name = "column.aggregate.quantile_values"
+    value_keys = ("quantile_ranges",)
 
     @column_aggregate_metric(engine=PandasExecutionEngine)
     def _pandas(cls, column, quantile_ranges, **kwargs):

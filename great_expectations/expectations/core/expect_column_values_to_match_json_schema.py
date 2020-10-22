@@ -15,15 +15,20 @@ from great_expectations.execution_engine import (
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output, renderer,
+    _format_map_output,
+    renderer,
 )
 from ..registry import extract_metrics, get_metric_kwargs
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing, num_to_str, parse_row_condition_string_pandas_engine
 
 try:
     import sqlalchemy as sa
@@ -96,45 +101,11 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
 
         return True
 
-    # @PandasExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_json_schema",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-    #     metric_value_keys=("json_schema",),
-    #     metric_dependencies=tuple(),
-    #     filter_column_isnull=True,
-    # )
-    def _pandas_column_values_match_json_schema(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        json_schema = metric_value_kwargs["json_schema"]
-
-        def matches_json_schema(val):
-            try:
-                val_json = json.loads(val)
-                jsonschema.validate(val_json, json_schema)
-                # jsonschema.validate raises an error if validation fails.
-                # So if we make it this far, we know that the validation succeeded.
-                return True
-            except jsonschema.ValidationError:
-                return False
-            except jsonschema.SchemaError:
-                raise
-            except:
-                raise
-
-        return pd.DataFrame(
-            {"column_values.match_json_schema": series.map(matches_json_schema)}
-        )
-
     @classmethod
     @renderer(renderer_name="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,
             ["column", "mostly", "json_schema", "row_condition", "condition_parser"],

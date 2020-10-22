@@ -23,7 +23,8 @@ from great_expectations.exceptions import (
 )
 from great_expectations.expectations.registry import (
     get_metric_kwargs,
-    register_expectation, register_renderer,
+    register_expectation,
+    register_renderer,
 )
 from great_expectations.expectations.util import legacy_method_parameters
 
@@ -119,14 +120,13 @@ class Expectation(ABC, metaclass=MetaExpectation):
             attr_obj = getattr(cls, candidate_renderer_fn_name)
             if not hasattr(attr_obj, "_renderer_name"):
                 continue
-            register_renderer(
-                expectation_type=expectation_type,
-                renderer_fn=attr_obj
-            )
+            register_renderer(expectation_type=expectation_type, renderer_fn=attr_obj)
 
     @classmethod
     @renderer(renderer_name="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         return [
             RenderedStringTemplateContent(
                 **{
@@ -305,8 +305,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if configuration is None:
             configuration = self.configuration
         return Validator(execution_engine=execution_engine).graph_validate(
-            configurations=[configuration],
-            runtime_configuration=runtime_configuration,
+            configurations=[configuration], runtime_configuration=runtime_configuration,
         )[0]
 
     @property
@@ -412,28 +411,6 @@ class DatasetExpectation(Expectation, ABC):
             )
 
         return dependencies
-
-    @staticmethod
-    def get_value_set_parser(execution_engine: ExecutionEngine):
-        if isinstance(execution_engine, PandasExecutionEngine):
-            return DatasetExpectation._pandas_value_set_parser
-
-        raise GreatExpectationsError(
-            f"No parser found for backend: {str(execution_engine.__name__)}"
-        )
-
-    @staticmethod
-    def _pandas_value_set_parser(value_set):
-        parsed_value_set = [
-            parse(value) if isinstance(value, str) else value for value in value_set
-        ]
-        return parsed_value_set
-
-    def parse_value_set(
-        self, execution_engine: Type[ExecutionEngine], value_set: Union[list, set]
-    ):
-        value_set_parser = self.get_value_set_parser(execution_engine)
-        return value_set_parser(value_set)
 
 
 class ColumnMapDatasetExpectation(DatasetExpectation, ABC):

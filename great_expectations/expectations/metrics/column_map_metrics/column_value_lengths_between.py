@@ -1,7 +1,12 @@
 from typing import Optional
 
+import sqlalchemy as sa
+
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetric,
     column_map_condition,
@@ -64,6 +69,45 @@ class ColumnValuesValueLengthsBetween(ColumnMapMetric):
             raise ValueError("Invalid configuration")
 
         return metric_series
+
+    @column_map_condition(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(
+        cls,
+        column,
+        _metrics,
+        min_value=None,
+        max_value=None,
+        strict_min=None,
+        strict_max=None,
+        **kwargs
+    ):
+        column_lengths = _metrics.get("column_values.value_lengths")
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        # Assert that min_value and max_value are integers
+        try:
+            if min_value is not None and not float(min_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
+
+            if max_value is not None and not float(max_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
+
+        except ValueError:
+            raise ValueError("min_value and max_value must be integers")
+
+        if min_value is not None and max_value is not None:
+            return sa.and_(
+                sa.func.length(column) >= min_value,
+                sa.func.length(column) <= max_value,
+            )
+
+        elif min_value is None and max_value is not None:
+            return sa.func.length(column) <= max_value
+
+        elif min_value is not None and max_value is None:
+            return sa.func.length(column) >= min_value
 
     @classmethod
     def get_evaluation_dependencies(

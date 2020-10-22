@@ -31,4 +31,4 @@ class ColumnDistinctValues(ColumnAggregateMetric):
 
     @column_aggregate_metric(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
-        return F.array_distinct(column)
+        pass

@@ -8,7 +8,7 @@ from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetric,
     column_map_condition,
 )
-from great_expectations.expectations.metrics.utils import _get_dialect_regex_expression
+from great_expectations.expectations.metrics.util import get_dialect_regex_expression
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +23,8 @@ class ColumnValuesNotMatchRegex(ColumnMapMetric):
 
     @column_map_condition(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, regex, _dialect, **kwargs):
-        regex_expression = _get_dialect_regex_expression(
-            _dialect, column, regex, positive=False
+        regex_expression = get_dialect_regex_expression(
+            column, regex, _dialect, positive=False
         )
         if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(_dialect))

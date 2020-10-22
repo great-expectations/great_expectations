@@ -7,16 +7,21 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    handle_strict_min_max,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     ColumnMapDatasetExpectation,
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output, renderer,
+    _format_map_output,
+    renderer,
 )
 from ..registry import extract_metrics
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing, handle_strict_min_max, parse_row_condition_string_pandas_engine
 
 
 class ExpectColumnMedianToBeBetween(DatasetExpectation):
@@ -97,31 +102,6 @@ class ExpectColumnMedianToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Median"""
-
-    # @PandasExecutionEngine.metric(
-    #        metric_name="column.aggregate.median",
-    #        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-    #        metric_value_keys=(),
-    #        metric_dependencies=tuple(),
-    #        filter_column_isnull=False,
-    #    )
-    def _pandas_median(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-    ):
-        """Median Metric Function"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        return series.median()
-
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -180,7 +160,9 @@ class ExpectColumnMedianToBeBetween(DatasetExpectation):
 
     @classmethod
     @renderer(renderer_name="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,
             [

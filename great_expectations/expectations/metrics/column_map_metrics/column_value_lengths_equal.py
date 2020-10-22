@@ -1,7 +1,12 @@
 from typing import Optional
 
+import sqlalchemy as sa
+
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetric,
     column_map_condition,
@@ -17,8 +22,13 @@ class ColumnValuesValueLengthsEqual(ColumnMapMetric):
     def _pandas(cls, column, value, _metrics, **kwargs):
         column_lengths = _metrics.get("column_values.value_lengths")
 
-        length_equals = column_lengths == value
-        return length_equals
+        return column_lengths == value
+
+    @column_map_condition(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(cls, column, value, _metrics, **kwargs):
+        column_lengths = _metrics.get("column_values.value_lengths")
+
+        return sa.func.length(sa.column(column)) == value
 
     @classmethod
     def get_evaluation_dependencies(

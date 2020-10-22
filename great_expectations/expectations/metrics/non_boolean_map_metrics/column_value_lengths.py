@@ -12,14 +12,13 @@ from great_expectations.expectations.metrics.column_map_metric import (
 )
 
 
-class ColumnValuesValueLengths(Metric):
+class ColumnValuesValueLengths(ColumnMapMetric):
     function_metric_name = "column_values.value_lengths"
-    function_value_keys = ("value",)
 
     @column_map_function(engine=PandasExecutionEngine)
-    def _pandas(cls, column, value, **kwargs):
+    def _pandas_function(cls, column, **kwargs):
         return column.astype(str).str.len()
 
     @column_map_function(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column, value, **kwargs):
+    def _sqlalchemy_function(cls, column, **kwargs):
         return sa.func.length(column)

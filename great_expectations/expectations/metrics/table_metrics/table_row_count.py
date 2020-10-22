@@ -1,4 +1,7 @@
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -19,3 +22,7 @@ class TableRowCount(TableMetric):
     @table_metric(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, table, **kwargs):
         return sa.func.count()
+
+    @table_metric(engine=SparkDFExecutionEngine)
+    def _spark(cls, table, **kwargs):
+        return table.count()

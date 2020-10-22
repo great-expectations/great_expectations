@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics.column_map_metric import (
     map_condition,
 )
 from great_expectations.expectations.metrics.metric import metric
-from great_expectations.expectations.metrics.utils import filter_pair_metric_nulls
+from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 
 
 class ColumnPairValuesAGreaterThanB(ColumnMapMetric):

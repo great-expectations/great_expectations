@@ -17,38 +17,30 @@ from great_expectations.expectations.metrics.column_aggregate_metric import sa a
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
+def unique_proportion(self, _metrics):
+    total_values = _metrics.get("table.row_count")
+    unique_values = _metrics.get("column.aggregate.unique_value_count")
+
+    if total_values > 0:
+        return unique_values / total_values
+    else:
+        return 0
+
+
 class ColumnUniqueProportion(ColumnAggregateMetric):
     metric_name = "column.aggregate.unique_proportion"
 
     @column_aggregate_metric(engine=PandasExecutionEngine)
     def _pandas(cls, column, _metrics, **kwargs):
-        total_values = _metrics.get("table.row_count")
-        unique_values = _metrics.get("column.aggregate.unique_value_count")
-
-        if total_values > 0:
-            return unique_values / total_values
-        else:
-            return 0
+        return unique_proportion(_metrics)
 
     @column_aggregate_metric(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _metrics, **kwargs):
-        total_values = _metrics.get("table.row_count")
-        unique_values = _metrics.get("column.aggregate.unique_value_count")
-
-        if total_values > 0:
-            return unique_values / total_values
-        else:
-            return 0
+        return unique_proportion(_metrics)
 
     @column_aggregate_metric(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _metrics, **kwargs):
-        total_values = _metrics.get("table.row_count")
-        unique_values = _metrics.get("column.aggregate.unique_value_count")
-
-        if total_values > 0:
-            return unique_values / total_values
-        else:
-            return 0
+        return unique_proportion(_metrics)
 
     @classmethod
     def get_evaluation_dependencies(

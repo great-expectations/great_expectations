@@ -17,7 +17,7 @@ from great_expectations.expectations.metrics.table_metric import (
     TableMetric,
     table_metric,
 )
-from great_expectations.expectations.metrics.utils import column_reflection_fallback
+from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 

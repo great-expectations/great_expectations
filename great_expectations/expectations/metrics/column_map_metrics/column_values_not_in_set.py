@@ -9,7 +9,7 @@ from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetric,
     column_map_condition,
 )
-from great_expectations.expectations.metrics.utils import _parse_value_set
+from great_expectations.expectations.metrics.util import parse_value_set
 
 
 class ColumnValuesNotInSet(ColumnMapMetric):
@@ -22,9 +22,7 @@ class ColumnValuesNotInSet(ColumnMapMetric):
             # Vacuously true
             return np.ones(len(column), dtype=np.bool_)
         if pd.api.types.is_datetime64_any_dtype(column):
-            parsed_value_set = PandasExecutionEngine.parse_value_set(
-                value_set=value_set
-            )
+            parsed_value_set = parse_value_set(value_set=value_set)
         else:
             parsed_value_set = value_set
 
@@ -35,7 +33,7 @@ class ColumnValuesNotInSet(ColumnMapMetric):
     @column_map_condition(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, value_set, parse_strings_as_datetimes, **kwargs):
         if parse_strings_as_datetimes:
-            parsed_value_set = _parse_value_set(value_set)
+            parsed_value_set = parse_value_set(value_set)
         else:
             parsed_value_set = value_set
         return column.notin_(tuple(parsed_value_set))
