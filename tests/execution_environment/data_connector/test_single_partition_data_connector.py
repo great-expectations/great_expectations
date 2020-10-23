@@ -470,18 +470,18 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
     }
 
 
-def test_redundant_information_in_naming_convention(empty_data_context, tmp_path_factory):
+def test_redundant_information_in_naming_convention_random_hash(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
-            "some_bucket/2021/01/01/log_file-20210101.csv",
-            "some_bucket/2021/01/02/log_file-20210102.csv",
-            "some_bucket/2021/01/03/log_file-20210103.csv",
-            "some_bucket/2021/01/04/log_file-20210104.csv",
-            "some_bucket/2021/01/05/log_file-20210105.csv",
-            "some_bucket/2021/01/06/log_file-20210106.csv",
-            "some_bucket/2021/01/07/log_file-20210107.csv",
+            "2021/01/01/log_file-2f1e94b40f310274b485e72050daf591.txt.gz",
+            "2021/01/02/log_file-7f5d35d4f90bce5bf1fad680daac48a2.txt.gz",
+            "2021/01/03/log_file-99d5ed1123f877c714bbe9a2cfdffc4b.txt.gz",
+            "2021/01/04/log_file-885d40a5661bbbea053b2405face042f.txt.gz",
+            "2021/01/05/log_file-d8e478f817b608729cfc8fb750ebfc84.txt.gz",
+            "2021/01/06/log_file-b1ca8d1079c00fd4e210f7ef31549162.txt.gz",
+            "2021/01/07/log_file-d34b4818c52e74b7827504920af19a5c.txt.gz",
         ]
     )
 
@@ -491,7 +491,60 @@ def test_redundant_information_in_naming_convention(empty_data_context, tmp_path
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
-          glob_directive: "*/*/*/*/*.csv"
+          glob_directive: "*/*/*/*.txt.gz"
+          partitioner:
+              class_name: RegexPartitioner
+              config_params:
+                regex:
+                    group_names:
+                      - year
+                      - month
+                      - day
+                      - data_asset_name
+                    pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
+              """, return_mode="return_object")
+
+    assert return_object == {
+        'class_name': 'SinglePartitionFileDataConnector',
+        'data_asset_count': 1,
+        'example_data_asset_names': [
+            'log_file'
+        ],
+        'data_assets': {
+            'log_file': {
+                'batch_definition_count': 7,
+                'example_data_references': ['2021/01/03/log_file-*.txt.gz',
+                                            '2021/01/04/log_file-*.txt.gz',
+                                            '2021/01/05/log_file-*.txt.gz']
+            }
+        },
+        'unmatched_data_reference_count': 0,
+        'example_unmatched_data_references': []
+    }
+
+
+def test_redundant_information_in_naming_convention_timestamp(empty_data_context, tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("logs"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "log_file-2021-01-01-035419.163324.txt.gz",
+            "log_file-2021-01-02-035513.905752.txt.gz",
+            "log_file-2021-01-03-035455.848839.txt.gz",
+            "log_file-2021-01-04-035251.47582.txt.gz",
+            "log_file-2021-01-05-033034.289789.txt.gz",
+            "log_file-2021-01-06-034958.505688.txt.gz",
+            "log_file-2021-01-07-033545.600898.txt.gz",
+        ]
+    )
+
+    return_object = empty_data_context.test_yaml_config(f"""
+          module_name: great_expectations.execution_environment.data_connector
+          class_name: SinglePartitionFileDataConnector
+          execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
+          name: TEST_DATA_CONNECTOR
+          base_directory: {base_directory}/
+          glob_directive: "*.txt.gz"
           partitioner:
               class_name: RegexPartitioner
               config_params:
@@ -501,7 +554,57 @@ def test_redundant_information_in_naming_convention(empty_data_context, tmp_path
                       - year
                       - month
                       - day
-                    pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.csv
+                    pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
+              """, return_mode="return_object")
+    assert return_object == {
+        'class_name': 'SinglePartitionFileDataConnector',
+        'data_asset_count': 1,
+        'example_data_asset_names': [
+            'log_file'
+        ],
+        'data_assets': {
+            'log_file': {
+                'batch_definition_count': 7,
+                'example_data_references': ['log_file-2021-01-01-*.txt.gz', 'log_file-2021-01-06-*.txt.gz', 'log_file-2021-01-07-*.txt.gz']
+            }
+        },
+        'unmatched_data_reference_count': 0,
+        'example_unmatched_data_references': []
+    }
+
+
+def test_redundant_information_in_naming_convention_bucket(empty_data_context, tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("logs"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "some_bucket/2021/01/01/log_file-20210101.txt.gz",
+            "some_bucket/2021/01/02/log_file-20210102.txt.gz",
+            "some_bucket/2021/01/03/log_file-20210103.txt.gz",
+            "some_bucket/2021/01/04/log_file-20210104.txt.gz",
+            "some_bucket/2021/01/05/log_file-20210105.txt.gz",
+            "some_bucket/2021/01/06/log_file-20210106.txt.gz",
+            "some_bucket/2021/01/07/log_file-20210107.txt.gz",
+        ]
+    )
+
+    return_object = empty_data_context.test_yaml_config(f"""
+          module_name: great_expectations.execution_environment.data_connector
+          class_name: SinglePartitionFileDataConnector
+          execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
+          name: TEST_DATA_CONNECTOR
+          base_directory: {base_directory}/
+          glob_directive: "*/*/*/*/*.txt.gz"
+          partitioner:
+              class_name: RegexPartitioner
+              config_params:
+                regex:
+                    group_names:
+                      - data_asset_name
+                      - year
+                      - month
+                      - day
+                    pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
               """, return_mode="return_object")
 
     assert return_object == {
@@ -513,7 +616,7 @@ def test_redundant_information_in_naming_convention(empty_data_context, tmp_path
        'data_assets': {
            'some_bucket': {
                'batch_definition_count': 7,
-               'example_data_references': ['some_bucket/2021/01/03/log_file-*.csv', 'some_bucket/2021/01/04/log_file-*.csv', 'some_bucket/2021/01/05/log_file-*.csv']
+               'example_data_references': ['some_bucket/2021/01/03/log_file-*.txt.gz', 'some_bucket/2021/01/04/log_file-*.txt.gz', 'some_bucket/2021/01/05/log_file-*.txt.gz']
            }
        },
        'unmatched_data_reference_count': 0,
