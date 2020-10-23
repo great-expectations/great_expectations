@@ -1128,7 +1128,7 @@ class BaseDataContext:
         self,
         batch_request: dict
     ) -> Batch:
-        execution_environment_name: str = batch_request.get("execution_environment")
+        execution_environment_name: str = batch_request.get("execution_environment_name")
         if not execution_environment_name:
             raise ge_exceptions.ExecutionEnvironmentError(
                 message="Batch request must specify an execution_environment."
@@ -1373,14 +1373,8 @@ class BaseDataContext:
             module_name=module_name, class_name=class_name
         )
 
-        # For any class that should be loaded, it may control its configuration construction
-        # by implementing a classmethod called build_configuration
-        if hasattr(execution_environment_class, "build_configuration"):
-            config = execution_environment_class.build_configuration(**kwargs)
-        else:
-            config = kwargs
+        config: dict = kwargs
 
-        config = executionEnvironmentConfigSchema.load(config)
         self._project_config["execution_environments"][name] = config
 
         # We perform variable substitution in the execution_environment's config here before using the config
@@ -1389,9 +1383,7 @@ class BaseDataContext:
         if initialize:
             execution_environment = self._build_execution_environment_from_config(
                 name,
-                self._project_config_with_variables_substituted.execution_environments[
-                    name
-                ],
+                config
             )
             self._cached_execution_environments[name] = execution_environment
         else:
@@ -1544,11 +1536,8 @@ class BaseDataContext:
     def _build_execution_environment_from_config(
         self,
         name: str,
-        config: CommentedMap
+        config: dict
     ) -> ExecutionEnvironment:
-        # We convert from the type back to a dictionary for purposes of instantiation.
-        if isinstance(config, ExecutionEnvironmentConfig):
-            config: dict = executionEnvironmentConfigSchema.dump(config)
         module_name: str = "great_expectations.execution_environment"
         runtime_environment: dict = {
             "name": name,

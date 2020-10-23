@@ -13,7 +13,6 @@ def test_pipeline_partitioner():
     assert test_partitioner.name == "test_pipeline_partitioner"
     assert test_partitioner.sorters is None
     assert not test_partitioner.allow_multipart_partitions
-    assert test_partitioner.config_params is None
     # no sorters
     with pytest.raises(ge_exceptions.SorterError):
         test_partitioner.get_sorter("i_dont_exist")

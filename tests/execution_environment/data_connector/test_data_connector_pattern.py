@@ -41,29 +41,25 @@ def test_name_date_price_list(tmp_path_factory):
         class_name: FilesDataConnector
         base_directory: {base_directory}
         glob_directive: '*'
-        default_partitioner: my_standard_partitioner
+        default_partitioner_name_name: my_standard_partitioner
         assets:
           DEFAULT_ASSET_NAME:
-            config_params:
-              glob_directive: '*'
-            partitioner: my_standard_partitioner
+            glob_directive: '*'
+            partitioner_name: my_standard_partitioner
         partitioners:
           my_standard_partitioner:
             class_name: RegexPartitioner
-            config_params:
-              regex:
-                pattern: .+\/(.+)_(.+)_(.+)\.csv
-                group_names:
-                - name
-                - timestamp
-                - price
+            pattern: .+\/(.+)_(.+)_(.+)\.csv
+            group_names:
+            - name
+            - timestamp
+            - price
             allow_multipart_partitions: false
             sorters:
             - orderby: asc
               class_name: LexicographicSorter
               name: name
-            - config_params:
-                datetime_format: '%Y%m%d'
+              datetime_format: '%Y%m%d'
               orderby: desc
               class_name: DateTimeSorter
               name: timestamp
@@ -73,8 +69,8 @@ def test_name_date_price_list(tmp_path_factory):
     """, Loader=yaml.FullLoader)
 
     my_data_connector: DataConnector = instantiate_class_from_config(
-    config=my_data_connector_yaml,
-    runtime_environment={
+        config=my_data_connector_yaml,
+        runtime_environment={
             "name": "general_filesystem_data_connector",
             "execution_environment_name": "BASE",
             "data_context_root_directory": base_directory,
@@ -141,32 +137,26 @@ def test_alpha(tmp_path_factory):
                 class_name: FilesDataConnector
                 base_directory: {base_directory + "/test_dir_alpha"}
                 glob_directive: '*'
-                default_partitioner: my_standard_partitioner
+                default_partitioner_name: my_standard_partitioner
                 assets:
                   A:
-                    config_params:
-                      glob_directive: '*.csv'
-                    partitioner: my_standard_partitioner
+                    glob_directive: '*.csv'
+                    partitioner_name: my_standard_partitioner
                   B:
-                    config_params:
-                      glob_directive: '*.csv'
-                    partitioner: my_standard_partitioner
+                    glob_directive: '*.csv'
+                    partitioner_name: my_standard_partitioner
                   C:
-                    config_params:
-                      glob_directive: '*.csv'
-                    partitioner: my_standard_partitioner
+                    glob_directive: '*.csv'
+                    partitioner_name: my_standard_partitioner
                   D:
-                    config_params:
-                      glob_directive: '*.csv'
-                    partitioner: my_standard_partitioner
+                    glob_directive: '*.csv'
+                    partitioner_name: my_standard_partitioner
                 partitioners:
                   my_standard_partitioner:
                     class_name: RegexPartitioner
-                    config_params:
-                      regex:
-                        pattern: .*/(.*).csv
-                        group_names:
-                        - part_1
+                    pattern: .*/(.*).csv
+                    group_names:
+                    - part_1
             """, Loader=yaml.FullLoader)
 
     my_data_connector: DataConnector = instantiate_class_from_config(
@@ -243,37 +233,31 @@ def test_foxtrot(tmp_path_factory):
             class_name: FilesDataConnector
             base_directory: {base_directory + "/test_dir_foxtrot"}
             glob_directive: '*'
-            default_partitioner: my_standard_partitioner
+            default_partitioner_name: my_standard_partitioner
             assets:
               A:
-                config_params:
-                  glob_directive: '*'
-                  base_directory: A/
-                partitioner: my_standard_partitioner
+                glob_directive: '*'
+                base_directory: A/
+                partitioner_name: my_standard_partitioner
               B:
-                config_params:
-                  glob_directive: '*'
-                  base_directory: B/
-                partitioner: my_standard_partitioner
+                glob_directive: '*'
+                base_directory: B/
+                partitioner_name: my_standard_partitioner
               C:
-                config_params:
-                  glob_directive: '*'
-                  base_directory: C/
-                partitioner: my_standard_partitioner
+                glob_directive: '*'
+                base_directory: C/
+                partitioner_name: my_standard_partitioner
               D:
-                config_params:
-                  glob_directive: '*'
-                  base_directory: D/
-                partitioner: my_standard_partitioner
+                glob_directive: '*'
+                base_directory: D/
+                partitioner_name: my_standard_partitioner
             partitioners:
               my_standard_partitioner:
                 class_name: RegexPartitioner
-                config_params:
-                  regex:
-                    pattern: (.*)-(.*).csv
-                    group_names:
-                    - part_1
-                    - part_2
+                pattern: (.*)-(.*).csv
+                group_names:
+                - part_1
+                - part_2
         """, Loader=yaml.FullLoader)
 
     my_data_connector: DataConnector = instantiate_class_from_config(
@@ -300,7 +284,7 @@ def test_foxtrot(tmp_path_factory):
         "B",
         "C"
       ],
-      "data_assets": {
+      "assets": {
         "A": {
           "batch_definition_count": 0,
           "example_data_references": []
