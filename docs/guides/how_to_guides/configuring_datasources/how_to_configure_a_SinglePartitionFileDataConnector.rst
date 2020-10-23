@@ -207,7 +207,7 @@ Here’s a configuration...
 Example 5: Nested directory structure with the data_asset_name on the outside
 -----------------------------------------------------------------------------
 
-Here’s another example of a nested directory struct.. _how_to_guides__miscellaneous__how_to_configure_a_singlepartitionfiledataconnector:
+In the following example, files are placed in a folder structure with the ``data_asset_name`` defined by the folder name (A, B, C, or D)
 
 .. code-block::
 
