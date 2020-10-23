@@ -475,13 +475,13 @@ def test_redundant_information_in_naming_convention(empty_data_context, tmp_path
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
-            "2021/01/01/log_file-20210101.csv",
-            "2021/01/02/log_file-20210102.csv",
-            "2021/01/03/log_file-20210103.csv",
-            "2021/01/04/log_file-20210104.csv",
-            "2021/01/05/log_file-20210105.csv",
-            "2021/01/06/log_file-20210106.csv",
-            "2021/01/07/log_file-20210107.csv",
+            "some_bucket/2021/01/01/log_file-20210101.csv",
+            "some_bucket/2021/01/02/log_file-20210102.csv",
+            "some_bucket/2021/01/03/log_file-20210103.csv",
+            "some_bucket/2021/01/04/log_file-20210104.csv",
+            "some_bucket/2021/01/05/log_file-20210105.csv",
+            "some_bucket/2021/01/06/log_file-20210106.csv",
+            "some_bucket/2021/01/07/log_file-20210107.csv",
         ]
     )
 
@@ -491,38 +491,31 @@ def test_redundant_information_in_naming_convention(empty_data_context, tmp_path
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
-          glob_directive: "*/*/*/*.csv"
+          glob_directive: "*/*/*/*/*.csv"
           partitioner:
               class_name: RegexPartitioner
               config_params:
                 regex:
                     group_names:
+                      - data_asset_name
                       - year
                       - month
                       - day
-                      - data_asset_name
-                    pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-(\\d{{8}})\\.csv
+                    pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.csv
               """, return_mode="return_object")
 
     assert return_object == {
-        'class_name': 'SinglePartitionFileDataConnector',
-        'data_asset_count': 7,
-        'example_data_asset_names': [
-            '20210101',
-            '20210102',
-            '20210103'
-        ],
-        'data_assets': {
-            '20210101': {
-                        'batch_definition_count': 1,
-                        'example_data_references': ['2021/01/01/log_file-20210101.csv']
-            },
-            '20210102': {'batch_definition_count': 1,
-                         'example_data_references': ['2021/01/02/log_file-20210102.csv']
-            },
-            '20210103': {'batch_definition_count': 1,
-                         'example_data_references': ['2021/01/03/log_file-20210103.csv']
-            }
-        },
-    'unmatched_data_reference_count': 0,
-    'example_unmatched_data_references': []}
+       'class_name': 'SinglePartitionFileDataConnector',
+       'data_asset_count': 1,
+       'example_data_asset_names': [
+           'some_bucket'
+       ],
+       'data_assets': {
+           'some_bucket': {
+               'batch_definition_count': 7,
+               'example_data_references': ['some_bucket/2021/01/03/log_file-*.csv', 'some_bucket/2021/01/04/log_file-*.csv', 'some_bucket/2021/01/05/log_file-*.csv']
+           }
+       },
+       'unmatched_data_reference_count': 0,
+       'example_unmatched_data_references': []
+   }

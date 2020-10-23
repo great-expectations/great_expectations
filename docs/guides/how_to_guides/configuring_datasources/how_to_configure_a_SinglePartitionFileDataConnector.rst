@@ -253,19 +253,19 @@ Here’s a configuration...
 	Unmatched data_references (0 of 0): []
 
 
-Example 6: Redundant information in the naming convention
----------------------------------------------------------
+Example 6: Redundant information in the naming convention (S3 Bucket)
+----------------------------------------------------------------------
 
 
 .. code-block::
 
-    2021/01/01/log_file-20210101.csv,
-    2021/01/02/log_file-20210102.csv,
-    2021/01/03/log_file-20210103.csv,
-    2021/01/04/log_file-20210104.csv,
-    2021/01/05/log_file-20210105.csv,
-    2021/01/06/log_file-20210106.csv,
-    2021/01/07/log_file-20210107.csv,
+    some_bucket/2021/01/01/log_file-20210101.csv,
+    some_bucket/2021/01/02/log_file-20210102.csv,
+    some_bucket/2021/01/03/log_file-20210103.csv,
+    some_bucket/2021/01/04/log_file-20210104.csv,
+    some_bucket/2021/01/05/log_file-20210105.csv,
+    some_bucket/2021/01/06/log_file-20210106.csv,
+    some_bucket/2021/01/07/log_file-20210107.csv,
 
 Here’s a configuration...
 
@@ -281,25 +281,17 @@ Here’s a configuration...
             - month
             - day
             - data_asset_name
-         pattern: (\d{4})/(\d{2})/(\d{2})/log_file-(\d{8}).csv
+         pattern: (\w{11})/(\d{4})/(\d{2})/(\d{2})/log_file-.*.csv
 
 
-
-Each day will be its own data asset, mapped to the corresponding ``log_file-*.csv``
-
+All the log files will be mapped to the data_asset ``some_bucket``.
 
 .. code-block::
 
-    Available data_asset_names (3 of 7):
-		20210101 (1 of 1): ['2021/01/01/log_file-20210101.csv']
-		20210102 (1 of 1): ['2021/01/02/log_file-20210102.csv']
-		20210103 (1 of 1): ['2021/01/03/log_file-20210103.csv']
+    Available data_asset_names (1 of 1):
+        some_bucket (3 of 7): ['some_bucket/2021/01/03/log_file-*.csv', 'some_bucket/2021/01/04/log_file-*.csv', 'some_bucket/2021/01/05/log_file-*.csv']
 
-	Unmatched data_references (0 of 0): []
-
-
-
-
+    Unmatched data_references (0 of 0): []
 
 
 
