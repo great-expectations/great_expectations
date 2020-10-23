@@ -11,6 +11,7 @@ from great_expectations.execution_environment.data_connector import (
     SinglePartitionerFileDataConnector,
 )
 
+
 from great_expectations.data_context import DataContext
 from great_expectations.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
@@ -54,22 +55,17 @@ def basic_files_dataconnector_yaml(tmp_path_factory):
     return base_directory, f"""
         class_name: SinglePartitionerFileDataConnector
         base_directory: {base_directory}
-        execution_environment_name: BLAH
+        execution_environment_name: BASE
         glob_directive: '*'
-        data_assets:
-         DEFAULT_ASSET_NAME:
-           config_params:
-             glob_directive: '*'
-           partitioner: my_standard_partitioner
+        assets:
+            DEFAULT_ASSET_NAME:
+                glob_directive: '*'
         partitioner:
           class_name: RegexPartitioner
-          config_params:
-            regex:
-              pattern: .*/*(.+)\.csv
-              group_names:
-                - name
-                - data_asset_name: my_asset
-                
+          pattern: .*/*(.+)\.csv
+          group_names:
+            - name
+            - data_asset_name: my_asset
           sorters:
             - orderby: asc
               name: name
@@ -94,7 +90,6 @@ data_connectors:
         config=my_datasource_loaded_yaml,
         runtime_environment={
             "name": "general_data_source",
-            "execution_environment_name": "BASE",
             "data_context_root_directory": basic_files_dataconnector_yaml[0],
             "execution_engine": "BASE_ENGINE",
         },
@@ -111,6 +106,6 @@ def test_stub(basic_datasource):
 
     # TODO : see if empty BatchRequest can be used to return full batch_list
     #returned_list = basic_datasource.get_batch_list_from_batch_request(BatchRequest(data_connector_name="my_connector"))
-    returned_list = basic_datasource.get_available_batch_definitions(BatchRequest(data_connector_name="my_connector"))
+    returned_list = basic_datasource.get_available_batch_definitions(BatchRequest(data_connector_name="my_connector", execution_environment_name="general_data_source"))
     print(returned_list)
     assert False
