@@ -17,7 +17,8 @@ from tests.test_utils import (
     create_files_in_directory,
 )
 
-def test_basic_instantiation(tmp_path_factory):
+
+def test_basic_instantiation():
     data_reference_dict = {
         "path/A-100.csv" : create_fake_data_frame(),
         "path/A-101.csv" : create_fake_data_frame(),
@@ -30,13 +31,9 @@ def test_basic_instantiation(tmp_path_factory):
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         partitioner={
             "class_name": "RegexPartitioner",
-            "config_params": {
-                "regex": {
-                    "group_names": ["data_asset_name", "letter","number"],
-                    "pattern": "(.*)/(.+)-(\\d+)\\.csv"
-                }
-            }
-        },
+            "pattern": "(.*)/(.+)-(\\d+)\\.csv",
+            "group_names": ["data_asset_name", "letter", "number"],
+    },
         data_reference_dict = data_reference_dict,
     )
 
@@ -72,13 +69,11 @@ execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
     
 partitioner:
     class_name: RegexPartitioner
-    config_params:
-        regex:
-            group_names:
-                - year_dir
-                - month_dir
-                - data_asset_name
-            pattern: (\\d{4})/(\\d{2})/(.+)-\\d+\\.csv
+    pattern: (\\d{4})/(\\d{2})/(.+)-\\d+\\.csv
+    group_names:
+        - year_dir
+        - month_dir
+        - data_asset_name
     """
     config = yaml.load(yaml_string, Loader=yaml.FullLoader)
     config["data_reference_dict"] = data_reference_dict
@@ -148,19 +143,21 @@ base_directory: my_base_directory/
 # glob_directive: '*.csv'
 partitioner:
     class_name: RegexPartitioner
-    config_params:
-        regex:
-            group_names:
-                - data_asset_name
-                - date
-            pattern: ^.*\/(.*)-(\d{4})(\d{2})\.(csv|txt)
-data_assets:
-    - alpha:
+    pattern: ^(.+)-(\\d{4})(\\d{2})\\.[csv|txt]$
+    group_names:
+        - data_asset_name
+        - year_dir
+        - month_dir
+
+assets:
+    alpha:
         base_directory: alpha/files/go/here/
-    - beta:
+
+    beta:
         base_directory: beta_here/
         # glob_directive: '*.txt'
-    - gamma:
+
+    gamma:
         # glob_directive: '*.txt'
 
     """
@@ -208,22 +205,22 @@ def test_test_yaml_config_(empty_data_context, tmp_path_factory):
     )
 
     return_object = empty_data_context.test_yaml_config(f"""
-    module_name: great_expectations.execution_environment.data_connector
-    class_name: SinglePartitionFileDataConnector
-    execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
-    name: TEST_DATA_CONNECTOR
-    base_directory: {base_directory}/
-    glob_directive: "*/*/*.csv"
-    partitioner:
-        class_name: RegexPartitioner
-        config_params:
-            regex:
-                group_names:
-                    - year_dir
-                    - month_dir
-                    - data_asset_name
-                pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
-        """, return_mode="return_object")
+module_name: great_expectations.execution_environment.data_connector
+class_name: SinglePartitionFileDataConnector
+execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
+name: TEST_DATA_CONNECTOR
+
+base_directory: {base_directory}/
+glob_directive: "*/*/*.csv"
+
+partitioner:
+    class_name: RegexPartitioner
+    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    group_names:
+        - year_dir
+        - month_dir
+        - data_asset_name
+    """, return_mode="return_object")
 
     assert return_object == {
         'class_name': 'SinglePartitionFileDataConnector',
@@ -232,7 +229,7 @@ def test_test_yaml_config_(empty_data_context, tmp_path_factory):
             'alpha',
             'beta'
         ],
-        'data_assets': {
+        'assets': {
             'alpha': {
                 'example_data_references': ['2020/01/alpha-*.csv', '2020/02/alpha-*.csv', '2020/03/alpha-*.csv'],
                 'batch_definition_count': 3
@@ -277,13 +274,11 @@ glob_directive: "*/*/*.csv"
 
 partitioner:
     class_name: RegexPartitioner
-    config_params:
-        regex:
-            group_names:
-                - year_dir
-                - month_dir
-                - data_asset_name
-            pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    group_names:
+        - year_dir
+        - month_dir
+        - data_asset_name
     """, return_mode="return_object")
 
     assert return_object == {
@@ -293,7 +288,7 @@ partitioner:
             'alpha',
             'beta'
         ],
-        'data_assets': {
+        'assets': {
             'alpha': {
                 'example_data_references': ['2020/01/alpha-*.csv', '2020/02/alpha-*.csv', '2020/03/alpha-*.csv'],
                 'batch_definition_count': 3
@@ -322,13 +317,9 @@ def test_self_check():
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         partitioner={
             "class_name": "RegexPartitioner",
-            "config_params": {
-                "regex": {
-                    "group_names": ["data_asset_name", "number"],
-                    "pattern": "(.+)-(\\d+)\\.csv"
-                }
-            }
-        },
+            "pattern": "(.+)-(\\d+)\\.csv",
+            "group_names": ["data_asset_name", "number"]
+        }
     )
 
     self_check_return_object = my_data_connector.self_check()
@@ -340,7 +331,7 @@ def test_self_check():
             'A',
             'B'
         ],
-        'data_assets': {
+        'assets': {
             'A': {
                 'example_data_references': ['A-100.csv', 'A-101.csv'],
                 'batch_definition_count': 2
@@ -370,13 +361,9 @@ def test_that_needs_a_better_name():
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         partitioner={
             "class_name": "RegexPartitioner",
-            "config_params": {
-                "regex": {
-                    "group_names": ["data_asset_name", "number"],
-                    "pattern": "(.+)-(\\d+)\\.csv"
-                }
-            }
-        },
+            "pattern": "(.+)-(\\d+)\\.csv",
+            "group_names": ["data_asset_name", "number"]
+        }
     )
 
     self_check_return_object = my_data_connector.self_check()
@@ -388,7 +375,7 @@ def test_that_needs_a_better_name():
             'A',
             'B'
         ],
-        'data_assets': {
+        'assets': {
             'A': {
                 'example_data_references': ['A-100.csv', 'A-101.csv'],
                 'batch_definition_count': 2
@@ -401,4 +388,3 @@ def test_that_needs_a_better_name():
         'example_unmatched_data_references': ['CCC.csv'],
         'unmatched_data_reference_count': 1,
     }
-
