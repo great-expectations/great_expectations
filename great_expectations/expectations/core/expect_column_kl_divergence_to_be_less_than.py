@@ -3,8 +3,11 @@ import pandas as pd
 
 from great_expectations.expectations.expectation import DatasetExpectation, renderer
 from great_expectations.render.types import RenderedGraphContent
-from great_expectations.render.util import substitute_none_for_missing, parse_row_condition_string_pandas_engine, \
-    num_to_str
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ExpectColumnKlDivergenceToBeLessThan(DatasetExpectation):
@@ -216,7 +219,9 @@ class ExpectColumnKlDivergenceToBeLessThan(DatasetExpectation):
 
     @classmethod
     @renderer(renderer_name="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,
             [

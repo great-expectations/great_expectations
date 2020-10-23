@@ -12,16 +12,21 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     ColumnMapDatasetExpectation,
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output, renderer,
+    _format_map_output,
+    renderer,
 )
 from ..registry import extract_metrics, get_metric_kwargs
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing, parse_row_condition_string_pandas_engine, num_to_str
 
 try:
     import sqlalchemy as sa
@@ -164,7 +169,9 @@ class ExpectColumnPairValuesAToBeGreaterThanB(DatasetExpectation):
 
     @classmethod
     @renderer(renderer_name="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,
             [

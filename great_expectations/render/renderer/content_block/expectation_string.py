@@ -1,11 +1,12 @@
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )
-from great_expectations.render.types import (
-    RenderedStringTemplateContent,
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
 )
-from great_expectations.render.util import num_to_str, substitute_none_for_missing, \
-    parse_row_condition_string_pandas_engine
 
 
 class ExpectationStringRenderer(ContentBlockRenderer):
@@ -288,7 +289,9 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     def expect_table_row_count_to_equal_other_table(
         cls, expectation_configuration, styling=None, include_column_name=True
     ):
-        params = substitute_none_for_missing(expectation_configuration.kwargs, ["other_table_name"])
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs, ["other_table_name"]
+        )
         template_str = "Row count must equal the row count of table $other_table_name."
 
         return [

@@ -25,6 +25,7 @@ except ImportError as e:
 
 from great_expectations.expectations.metrics.column_aggregate_metric import F as F
 
+
 class ColumnStandardDeviation(ColumnAggregateMetric):
     """Metric Class for Aggregate Standard Deviation metric"""
 

@@ -7,9 +7,16 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import DatasetExpectation, Expectation, renderer
+from great_expectations.expectations.expectation import (
+    DatasetExpectation,
+    Expectation,
+    renderer,
+)
 from great_expectations.expectations.registry import extract_metrics
-from great_expectations.render.util import parse_row_condition_string_pandas_engine, substitute_none_for_missing
+from great_expectations.render.util import (
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
@@ -179,7 +186,9 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
 
     @classmethod
     @renderer(renderer_name="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         params = substitute_none_for_missing(
             expectation_configuration["kwargs"],
             ["column", "quantile_ranges", "row_condition", "condition_parser"],

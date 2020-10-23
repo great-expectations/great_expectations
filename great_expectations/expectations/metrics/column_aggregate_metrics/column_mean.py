@@ -7,10 +7,12 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnAggregateMetric,
+)
+from great_expectations.expectations.metrics.column_aggregate_metric import F as F
+from great_expectations.expectations.metrics.column_aggregate_metric import (
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
-from great_expectations.expectations.metrics.column_aggregate_metric import F as F
 
 
 class ColumnMean(ColumnAggregateMetric):

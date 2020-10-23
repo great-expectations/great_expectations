@@ -12,7 +12,7 @@ class RunIdentifier(DataContextKey):
     """A RunIdentifier identifies a run (collection of validations) by run_name and run_time."""
 
     def __init__(self, run_name=None, run_time=None):
-        super(RunIdentifier, self).__init__()
+        super().__init__()
         assert run_name is None or isinstance(
             run_name, str
         ), "run_name must be an instance of str"

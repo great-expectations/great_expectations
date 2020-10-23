@@ -8,14 +8,15 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import substitute_none_for_missing
 from ..expectation import (
     DatasetExpectation,
     Expectation,
-    InvalidExpectationConfigurationError, renderer,
+    InvalidExpectationConfigurationError,
+    renderer,
 )
 from ..registry import extract_metrics
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing
 
 
 class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
@@ -128,8 +129,12 @@ class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
 
     @classmethod
     @renderer(renderer_name="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
-        params = substitute_none_for_missing(expectation_configuration.kwargs, ["column_list"])
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs, ["column_list"]
+        )
 
         if params["column_list"] is None:
             template_str = "Must have a list of columns in a specific order, but that order is not specified."

@@ -13,7 +13,11 @@ from great_expectations.execution_engine import (
 
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing, handle_strict_min_max, parse_row_condition_string_pandas_engine
+from ...render.util import (
+    handle_strict_min_max,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 try:
     import sqlalchemy as sa
@@ -26,7 +30,8 @@ from ..expectation import (
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output, renderer,
+    _format_map_output,
+    renderer,
 )
 from ..registry import extract_metrics
 
@@ -170,7 +175,9 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
 
     @classmethod
     @renderer(renderer_name="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,
             [

@@ -13,15 +13,20 @@ from great_expectations.execution_engine import (
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output, renderer,
+    _format_map_output,
+    renderer,
 )
 from ..registry import extract_metrics, get_metric_kwargs
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing, parse_row_condition_string_pandas_engine, num_to_str
 
 try:
     import sqlalchemy as sa
@@ -115,7 +120,9 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapDatasetExpectation):
 
     @classmethod
     @renderer(renderer_name="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,
             [
