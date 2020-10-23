@@ -7,7 +7,8 @@ import yaml
 from typing import Union, List
 
 from great_expectations.execution_environment.data_connector import (
-    DataConnector
+    DataConnector,
+    SinglePartitionerFileDataConnector,
 )
 
 from great_expectations.data_context import DataContext
@@ -30,58 +31,86 @@ from tests.test_utils import (
     create_files_in_directory,
 )
 
-
-
-def test_name_date_price_list(tmp_path_factory):
+@pytest.fixture
+def basic_files_dataconnector_yaml(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
-            "AAA.csv",
-            "BBB.csv",
-            "CCC.csv,"
+            "my_asset/AAA.csv",
+            "my_asset/BBB.csv",
+            "my_asset/CCC.csv,"
         ]
     )
-    my_data_connector_yaml = yaml.load(f"""
-           module_name: great_expectations.execution_environment.data_connector
-           class_name: FilesDataConnector
-           base_directory: {base_directory}
-           glob_directive: '*'
-           default_partitioner: my_standard_partitioner
-           assets:
-             DEFAULT_ASSET_NAME:
-               config_params:
-                 glob_directive: '*'
-               partitioner: my_standard_partitioner
-           partitioners:
-             my_standard_partitioner:
-               class_name: RegexPartitioner
-               config_params:
-                 regex:
-                   pattern: .+\/(.+)\.csv
-                   group_names:
-                   - name
-               allow_multipart_partitions: false
-               sorters:
-               - orderby: asc
-                 class_name: LexicographicSorter
-                 name: name
-              
-       """, Loader=yaml.FullLoader)
 
-    my_data_connector: DataConnector = instantiate_class_from_config(
-    config=my_data_connector_yaml,
-    runtime_environment={
-            "name": "general_filesystem_data_connector",
+    # These are all part of `my_asset`
+    # it has 3 partitions.... AAA, BBB, CCC
+    #
+
+
+    # <WILL> this is going to be configured in a weird way
+    # we will ignore data_assets??
+
+    return base_directory, f"""
+        class_name: SinglePartitionerFileDataConnector
+        base_directory: {base_directory}
+        execution_environment_name: BLAH
+        glob_directive: '*'
+        data_assets:
+         DEFAULT_ASSET_NAME:
+           config_params:
+             glob_directive: '*'
+           partitioner: my_standard_partitioner
+        partitioner:
+          class_name: RegexPartitioner
+          config_params:
+            regex:
+              pattern: .*/*(.+)\.csv
+              group_names:
+                - name
+                - data_asset_name: my_asset
+                
+          sorters:
+            - orderby: asc
+              name: name
+              class_name: LexicographicSorter 
+       """
+
+@pytest.fixture
+def basic_datasource(basic_files_dataconnector_yaml):
+    my_datasource_yaml = f"""
+module_name: great_expectations.execution_environment.execution_environment
+class_name: ExecutionEnvironment
+execution_engine: 
+    class_name: PandasExecutionEngine
+data_connectors:
+    my_connector: {basic_files_dataconnector_yaml[1]}
+           """
+
+
+    my_datasource_loaded_yaml = yaml.load(my_datasource_yaml, Loader=yaml.FullLoader)
+
+    my_datasource: ExecutionEnvironment = instantiate_class_from_config(
+        config=my_datasource_loaded_yaml,
+        runtime_environment={
+            "name": "general_data_source",
             "execution_environment_name": "BASE",
-            "data_context_root_directory": base_directory,
+            "data_context_root_directory": basic_files_dataconnector_yaml[0],
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
-            "module_name": "great_expectations.execution_environment.data_connector"
+            "module_name": "great_expectations.exec",
         },
     )
 
-    with pytest.raises(NotImplementedError):
-        partitions = my_data_connector.get_previous_batch_definition()
-        print(partitions)
+    return my_datasource
+
+
+def test_stub(basic_datasource):
+    assert isinstance(basic_datasource, ExecutionEnvironment)
+
+    # TODO : see if empty BatchRequest can be used to return full batch_list
+    #returned_list = basic_datasource.get_batch_list_from_batch_request(BatchRequest(data_connector_name="my_connector"))
+    returned_list = basic_datasource.get_available_batch_definitions(BatchRequest(data_connector_name="my_connector"))
+    print(returned_list)
+    assert False

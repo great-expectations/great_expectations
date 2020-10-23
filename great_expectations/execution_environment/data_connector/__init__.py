@@ -1,4 +1,4 @@
-from .single_partition_data_connector import (
+from .single_partitioner_data_connector import (
     SinglePartitionerDataConnector,
     SinglePartitionerDictDataConnector,
     SinglePartitionerFileDataConnector,
