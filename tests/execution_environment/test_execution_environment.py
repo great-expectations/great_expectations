@@ -26,6 +26,7 @@ from tests.test_utils import (
     create_files_in_directory,
 )
 
+
 @pytest.fixture
 def basic_execution_environment(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_execution_environment__filesystem_data_connector"))
@@ -42,18 +43,15 @@ data_connectors:
         base_directory: {base_directory}
         glob_directive: '*.csv'
             
-        default_partitioner: my_regex_partitioner
+        default_partitioner_name: my_regex_partitioner
         partitioners:
             my_regex_partitioner:
                 class_name: RegexPartitioner
-                config_params:
-                    regex:
-                        group_names:
-                            - letter
-                            - number
-                        pattern: (.+)(\d+)\.csv
-    """, Loader=yaml.FullLoader),
-        runtime_environment={
+                pattern: (.+)(\\d+)\\.csv
+                group_names:
+                    - letter
+                    - number
+    """, Loader=yaml.FullLoader), runtime_environment={
             "name": "my_execution_environment"
         },
         config_defaults={
@@ -61,6 +59,7 @@ data_connectors:
         }
     )
     return basic_execution_environment
+
 
 def test_get_batch_list_from_batch_request(basic_execution_environment):
     execution_environment_name: str = "test_execution_environment"
@@ -311,7 +310,6 @@ def test_get_available_partitions(tmp_path_factory):
 
 def test_get_available_partitions_with_caching():
     pass
-
 
 
 def test_some_very_basic_stuff(basic_execution_environment):

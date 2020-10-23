@@ -6,6 +6,7 @@ from tests.test_utils import (
     create_files_in_directory,
 )
 
+
 def test_empty_store(empty_data_context):
 
     my_expectation_store = empty_data_context.test_yaml_config(
@@ -33,6 +34,7 @@ store_backend:
     class_name: InMemoryStoreBackend
 EGREGIOUS FORMATTING ERROR
 """)
+
 
 def test_filesystem_store(empty_data_context):
     tmp_dir = str(tempfile.mkdtemp())
@@ -64,6 +66,7 @@ store_backend:
     module_name: "great_expectations.data_context.store.store_backend"
     class_name: InMemoryStoreBackend
 """)
+
 
 def test_execution_environment_config(empty_data_context):
 
@@ -98,16 +101,14 @@ data_connectors:
         base_directory: {temp_dir}
         glob_directive: '*.csv'
             
-        default_partitioner: my_regex_partitioner
+        default_partitioner_name: my_regex_partitioner
         partitioners:
             my_regex_partitioner:
                 class_name: RegexPartitioner
-                config_params:
-                    regex:
-                        group_names:
-                            - letter
-                            - number
-                        pattern: {temp_dir}/(.+)(\d+)\.csv
+                pattern: {temp_dir}/(.+)(\d+)\.csv
+                group_names:
+                    - letter
+                    - number
 """, return_mode="return_object"
     )
 
@@ -126,7 +127,7 @@ data_connectors:
                     "abe_20200809_1040",
                     "alex_20200809_1000"
                 ],
-                "data_assets":{
+                "assets":{
                     "abe_20200809_1040":{
                     "partition_count":1,
                     "example_partition_names":[
@@ -148,4 +149,4 @@ data_connectors:
                 }
             }
         }
-        }
+    }

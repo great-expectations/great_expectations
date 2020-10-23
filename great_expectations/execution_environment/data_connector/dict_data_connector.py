@@ -40,7 +40,7 @@ class DictDataConnector(DataConnector):
         execution_environment_name: str,
         data_reference_dict: {},
         partitioners: dict = {},
-        default_partitioner: str = None,
+        default_partitioner_name: str = None,
         assets: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
@@ -49,7 +49,7 @@ class DictDataConnector(DataConnector):
             name=name,
             execution_environment_name=execution_environment_name,
             partitioners=partitioners,
-            default_partitioner=default_partitioner,
+            default_partitioner_name=default_partitioner_name,
             assets=assets,
             execution_engine=execution_engine,
         )

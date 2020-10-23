@@ -253,9 +253,6 @@ class ExecutionEnvironment(object):
             raise ge_exceptions.DataConnectorError(
                 f'Unable to load data connector "{name}" -- no configuration found or invalid configuration.'
             )
-        # data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
-        #     data_connector_config
-        # )
         data_connector: DataConnector = self._build_data_connector_from_config(
             name=name, config=data_connector_config
         )
@@ -265,10 +262,9 @@ class ExecutionEnvironment(object):
     def _build_data_connector_from_config(
         self,
         name: str,
-        config: CommentedMap,
+        config: dict,
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
-        
         data_connector: DataConnector = instantiate_class_from_config(
             config=config,
             runtime_environment={

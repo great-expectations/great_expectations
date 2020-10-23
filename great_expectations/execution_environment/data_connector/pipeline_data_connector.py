@@ -23,24 +23,22 @@ class PipelineDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
+        execution_environment_name: str,
         partitioners: dict = None,
-        default_partitioner: str = None,
+        default_partitioner_name: str = None,
         assets: dict = None,
-        config_params: dict = None,
         execution_engine: ExecutionEngine = None,
-        data_context_root_directory:str = None,
-        **kwargs
+        data_context_root_directory:str = None
     ):
         logger.debug(f'Constructing PipelineDataConnector "{name}".')
         super().__init__(
             name=name,
+            execution_environment_name=execution_environment_name,
             partitioners=partitioners,
-            default_partitioner=default_partitioner,
+            default_partitioner_name=default_partitioner_name,
             assets=assets,
-            config_params=config_params,
             execution_engine=execution_engine,
-            data_context_root_directory=data_context_root_directory,
-            **kwargs
+            data_context_root_directory=data_context_root_directory
         )
 
     def _get_available_partitions(

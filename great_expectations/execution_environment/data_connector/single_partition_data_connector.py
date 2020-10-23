@@ -2,6 +2,7 @@ import logging
 from typing import List
 from pathlib import Path
 
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import (
     BatchRequest,
@@ -27,25 +28,29 @@ class SinglePartitionerDataConnector(DataConnector):
         self,
         name: str,
         execution_environment_name: str,
-        partitioner: dict,
-        data_assets: dict = None,
+        assets: dict = None,
+        partitioner: dict = None,
         base_directory: str = None,
     ):
         logger.debug(f'Constructing SinglePartitionerDataConnector "{name}".')
 
         self.base_directory = base_directory
+        if partitioner is None:
+            partitioner = {}
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
+            assets=assets,
             partitioners={
                 "ONE_AND_ONLY_PARTITIONER" : partitioner
             },
-            assets=data_assets,
-            default_partitioner="ONE_AND_ONLY_PARTITIONER"
+            default_partitioner_name="ONE_AND_ONLY_PARTITIONER",
+            execution_engine=None,
+            data_context_root_directory=None
         )
 
     def get_available_data_asset_names(self):
-        if self._data_references_cache == None:
+        if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
@@ -59,12 +64,12 @@ class SinglePartitionerDataConnector(DataConnector):
             data_asset_names.add(batch_definition.data_asset_name)
         return list(data_asset_names)
 
-
-    def self_check(self,
+    def self_check(
+        self,
         pretty_print=True,
         max_examples=3
     ):
-        if self._data_references_cache == None:
+        if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
         if pretty_print:
@@ -79,7 +84,7 @@ class SinglePartitionerDataConnector(DataConnector):
             "class_name" : self.__class__.__name__,
             "data_asset_count" : len_asset_names,
             "example_data_asset_names": asset_names[:max_examples],
-            "data_assets" : {}
+            "assets" : {}
             # "data_reference_count": self.
         }
 
@@ -106,7 +111,7 @@ class SinglePartitionerDataConnector(DataConnector):
             if pretty_print:
                 print(f"\t\t{asset_name} ({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):", example_data_references)
 
-            data_connector_obj["data_assets"][asset_name] = {
+            data_connector_obj["assets"][asset_name] = {
                 "batch_definition_count": len_batch_definition_list,
                 "example_data_references": example_data_references
             }
@@ -141,7 +146,13 @@ class SinglePartitionerDictDataConnector(SinglePartitionerDataConnector):
         data_reference_keys.sort()
         return data_reference_keys
 
+<<<<<<< HEAD
 class SinglePartitionerFileDataConnector(SinglePartitionerDataConnector):
+=======
+
+# TODO: <Alex>This connector appears to be not fully developed; in particular, passing kwargs to the constructor is discouraged.</Alex>
+class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
+>>>>>>> refactor/merge_caches_in_data_connector
     def __init__(
         self,
         name: str,
