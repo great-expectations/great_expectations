@@ -498,11 +498,19 @@ connector and the default_partitioner_name is set to the name of one of the conf
         if self._data_references_cache == None:
             self.refresh_data_references_cache()
 
-        batches = []
+        #print("this is data_references_cache")
+        #print(self._data_references_cache)
+
+        batches =[]
         for data_reference, batch_definition in self._data_references_cache.items():
             if batch_definition == None:
                 # The data_reference is unmatched.
                 continue
+            #print("this is batch_request")
+            #print(batch_request)
+            #print("this is batch_definition")
+
+            #print(batch_definition)
             if self._batch_definition_matches_batch_request(batch_definition, batch_request):
                 batches.append(batch_definition)
 
@@ -568,6 +576,8 @@ connector and the default_partitioner_name is set to the name of one of the conf
         self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
+            print("hi will")
+            print(data_reference)
             mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
                 data_reference,
             )

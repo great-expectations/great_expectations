@@ -50,6 +50,11 @@ class RegexPartitioner(Partitioner):
         data_reference
     ) -> BatchRequest:
         matches: Union[re.Match, None] = re.match(self._pattern, data_reference)
+
+        #print("\n\n\nlet's get this regex right")
+        #print(self._pattern, data_reference)
+        #print(matches)
+        #print("\n^^ this is matches")
         if matches is None:
             #raise ValueError(f'No match found for data_reference: "{data_reference}".')
             return None

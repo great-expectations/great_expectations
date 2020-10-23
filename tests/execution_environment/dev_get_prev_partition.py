@@ -34,13 +34,13 @@ from tests.test_utils import (
 
 @pytest.fixture
 def basic_files_dataconnector_yaml(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+    base_directory = str(tmp_path_factory.mktemp("get_previous_partition"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
             "my_asset/AAA.csv",
             "my_asset/BBB.csv",
-            "my_asset/CCC.csv,"
+            "my_asset/CCC.csv",
         ]
     )
 
@@ -55,19 +55,19 @@ def basic_files_dataconnector_yaml(tmp_path_factory):
     return base_directory, f"""
         class_name: SinglePartitionerFileDataConnector
         base_directory: {base_directory}
-        execution_environment_name: BASE
-        glob_directive: '*'
+        glob_directive: "*/*.csv"
+        execution_environment_name: general_data_source
         assets:
-            DEFAULT_ASSET_NAME:
-                glob_directive: '*'
+            default_asset:
+                base_directory: 
         partitioner:
           class_name: RegexPartitioner
-          pattern: .*/*(.+)\.csv
+          pattern: .*\\/(my_asset)\\/(.*).csv
           group_names:
+            - data_asset_name
             - name
-            - data_asset_name: my_asset
           sorters:
-            - orderby: asc
+            - orderby: desc
               name: name
               class_name: LexicographicSorter 
        """
@@ -105,7 +105,11 @@ def test_stub(basic_datasource):
     assert isinstance(basic_datasource, ExecutionEnvironment)
 
     # TODO : see if empty BatchRequest can be used to return full batch_list
-    #returned_list = basic_datasource.get_batch_list_from_batch_request(BatchRequest(data_connector_name="my_connector"))
-    returned_list = basic_datasource.get_available_batch_definitions(BatchRequest(data_connector_name="my_connector", execution_environment_name="general_data_source"))
-    print(returned_list)
-    assert False
+    #batch_list = basic_datasource.get_batch_list_from_batch_request(BatchRequest(data_connector_name="my_connector"))
+    #print(batch_list)
+
+    batch_definitions = basic_datasource.get_available_batch_definitions(BatchRequest(data_connector_name="my_connector", execution_environment_name="general_data_source"))
+    for defin in batch_definitions:
+        print(defin)
+        batch = basic_datasource.get_batch_from_batch_definition(defin)
+        print(batch)
