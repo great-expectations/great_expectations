@@ -331,14 +331,12 @@ Here’s a configuration that will allow all the log files to be associated with
 
     partitioner:
         class_name: RegexPartitioner
-        config_params:
-            regex:
-                group_names:
-                  - year
-                  - month
-                  - day
-                  - data_asset_name
-                pattern: (\d{4})/(\d{2})/(\d{2})/(log_file)-.*\.txt\.gz
+        group_names:
+            - year
+            - month
+            - day
+            - data_asset_name
+        pattern: (\d{4})/(\d{2})/(\d{2})/(log_file)-.*\.txt\.gz
 
 
 .. code-block::
@@ -377,15 +375,13 @@ Here’s a configuration that will allow all the log files to be associated with
     base_directory: /
 
     partitioner:
-      class_name: RegexPartitioner
-      config_params:
-      regex:
+        class_name: RegexPartitioner
         group_names:
-          - data_asset_name
-          - year
-          - month
-          - day
-          pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
+            - data_asset_name
+            - year
+            - month
+            - day
+        pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
 
 
 All the log files will be mapped to the data_asset ``log_file``.

@@ -143,7 +143,7 @@ base_directory: my_base_directory/
 # glob_directive: '*.csv'
 partitioner:
     class_name: RegexPartitioner
-    pattern: ^(.+)-(\\d{4})(\\d{2})\\.[csv|txt]$
+    pattern: .*\\/(.+)-(\\d{4})(\\d{2})\\.[csv|txt]
     group_names:
         - data_asset_name
         - year_dir
@@ -152,14 +152,12 @@ partitioner:
 assets:
     alpha:
         base_directory: alpha/files/go/here/
-
     beta:
         base_directory: beta_here/
         # glob_directive: '*.txt'
-
     gamma:
-        # glob_directive: '*.txt'
-
+        base_directory: 
+        
     """
     config = yaml.load(yaml_string, Loader=yaml.FullLoader)
     config["data_reference_dict"] = data_reference_dict
@@ -171,7 +169,6 @@ assets:
 
     my_data_connector.refresh_data_references_cache()
 
-    # FIXME: Abe 20201017 : These tests don't pass yet.
     # I'm starting to think we might want to separate out this behavior into a different class.
     assert len(my_data_connector.get_unmatched_data_references()) == 0
     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
@@ -420,13 +417,11 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
     glob_directive: "*/*.csv"
     partitioner:
         class_name: RegexPartitioner
-        config_params:
-            regex:
-                group_names:
-                    - data_asset_name
-                    - letter
-                    - number
-                pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
+        group_names:
+            - data_asset_name
+            - letter
+            - number
+        pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
         """, return_mode="return_object")
 
     assert return_object == {
@@ -437,7 +432,7 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
              'B',
              'C'
         ],
-        'data_assets': {
+        'assets': {
             'A': {
                 'batch_definition_count': 3,
                 'example_data_references': ['A/A-1.csv', 'A/A-2.csv', 'A/A-3.csv']
@@ -480,14 +475,13 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
           glob_directive: "*/*/*/*.txt.gz"
           partitioner:
               class_name: RegexPartitioner
-              config_params:
-                regex:
-                    group_names:
-                      - year
-                      - month
-                      - day
-                      - data_asset_name
-                    pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
+              group_names:
+                - year
+                - month
+                - day
+                - data_asset_name
+              pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
+              
               """, return_mode="return_object")
 
     assert return_object == {
@@ -496,7 +490,7 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
         'example_data_asset_names': [
             'log_file'
         ],
-        'data_assets': {
+        'assets': {
             'log_file': {
                 'batch_definition_count': 7,
                 'example_data_references': ['2021/01/03/log_file-*.txt.gz',
@@ -533,22 +527,20 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
           glob_directive: "*.txt.gz"
           partitioner:
               class_name: RegexPartitioner
-              config_params:
-                regex:
-                    group_names:
-                      - data_asset_name
-                      - year
-                      - month
-                      - day
-                    pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
-              """, return_mode="return_object")
+              group_names:
+                - data_asset_name
+                - year
+                - month
+                - day
+              pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
+      """, return_mode="return_object")
     assert return_object == {
         'class_name': 'SinglePartitionFileDataConnector',
         'data_asset_count': 1,
         'example_data_asset_names': [
             'log_file'
         ],
-        'data_assets': {
+        'assets': {
             'log_file': {
                 'batch_definition_count': 7,
                 'example_data_references': ['log_file-2021-01-01-*.txt.gz', 'log_file-2021-01-06-*.txt.gz', 'log_file-2021-01-07-*.txt.gz']
@@ -583,28 +575,30 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context, t
           glob_directive: "*/*/*/*/*.txt.gz"
           partitioner:
               class_name: RegexPartitioner
-              config_params:
-                regex:
-                    group_names:
-                      - data_asset_name
-                      - year
-                      - month
-                      - day
-                    pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
+              group_names:
+                  - data_asset_name
+                  - year
+                  - month
+                  - day
+              pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
               """, return_mode="return_object")
 
     assert return_object == {
-       'class_name': 'SinglePartitionFileDataConnector',
-       'data_asset_count': 1,
-       'example_data_asset_names': [
-           'some_bucket'
-       ],
-       'data_assets': {
-           'some_bucket': {
-               'batch_definition_count': 7,
-               'example_data_references': ['some_bucket/2021/01/03/log_file-*.txt.gz', 'some_bucket/2021/01/04/log_file-*.txt.gz', 'some_bucket/2021/01/05/log_file-*.txt.gz']
-           }
-       },
-       'unmatched_data_reference_count': 0,
-       'example_unmatched_data_references': []
-   }
+        'class_name': 'SinglePartitionFileDataConnector',
+        'data_asset_count': 1,
+        'example_data_asset_names': [
+            'some_bucket'
+        ],
+        'assets': {
+            'some_bucket': {
+                'batch_definition_count': 7,
+                'example_data_references': [
+                    'some_bucket/2021/01/03/log_file-*.txt.gz',
+                    'some_bucket/2021/01/04/log_file-*.txt.gz',
+                    'some_bucket/2021/01/05/log_file-*.txt.gz'
+                ]
+            }
+        },
+        'unmatched_data_reference_count': 0,
+        'example_unmatched_data_references': []
+    }
