@@ -205,7 +205,6 @@ def test_test_yaml_config_(empty_data_context, tmp_path_factory):
     )
 
     return_object = empty_data_context.test_yaml_config(f"""
-<<<<<<< HEAD
     module_name: great_expectations.execution_environment.data_connector
     class_name: SinglePartitionerFileDataConnector
     execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -222,24 +221,6 @@ def test_test_yaml_config_(empty_data_context, tmp_path_factory):
                     - data_asset_name
                 pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
         """, return_mode="return_object")
-=======
-module_name: great_expectations.execution_environment.data_connector
-class_name: SinglePartitionFileDataConnector
-execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
-name: TEST_DATA_CONNECTOR
-
-base_directory: {base_directory}/
-glob_directive: "*/*/*.csv"
-
-partitioner:
-    class_name: RegexPartitioner
-    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
-    group_names:
-        - year_dir
-        - month_dir
-        - data_asset_name
-    """, return_mode="return_object")
->>>>>>> refactor/merge_caches_in_data_connector
 
     assert return_object == {
         'class_name': 'SinglePartitionerFileDataConnector',
@@ -407,8 +388,3 @@ def test_that_needs_a_better_name():
         'example_unmatched_data_references': ['CCC.csv'],
         'unmatched_data_reference_count': 1,
     }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> refactor/merge_caches_in_data_connector

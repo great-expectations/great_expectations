@@ -147,13 +147,7 @@ class SinglePartitionerDictDataConnector(SinglePartitionerDataConnector):
         data_reference_keys.sort()
         return data_reference_keys
 
-<<<<<<< HEAD
 class SinglePartitionerFileDataConnector(SinglePartitionerDataConnector):
-=======
-
-# TODO: <Alex>This connector appears to be not fully developed; in particular, passing kwargs to the constructor is discouraged.</Alex>
-class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
->>>>>>> refactor/merge_caches_in_data_connector
     def __init__(
         self,
         name: str,
