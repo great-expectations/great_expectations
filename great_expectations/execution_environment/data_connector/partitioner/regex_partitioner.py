@@ -1,21 +1,21 @@
-import regex as re
-from typing import List, Union, Any
 import copy
+import logging
+import sre_constants
+import sre_parse
 from pathlib import Path
 from string import Template
-import sre_parse
-import sre_constants
+from typing import Any, List, Union
 
-import logging
+import regex as re
 
-from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.core.id_dict import PartitionDefinition
 import great_expectations.exceptions as ge_exceptions
-
-from great_expectations.core.batch import (
-    BatchRequest,
-    BatchDefinition,
+from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.id_dict import PartitionDefinition
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partitioner import (
+    Partitioner,
 )
 
 logger = logging.getLogger(__name__)
@@ -38,33 +38,30 @@ class RegexPartitioner(Partitioner):
             name=name,
             sorters=sorters,
             allow_multipart_partitions=allow_multipart_partitions,
-            runtime_keys=runtime_keys
+            runtime_keys=runtime_keys,
         )
 
         self._pattern = pattern
         self._group_names = group_names
 
     # TODO: <Alex>See PyCharm warnings as to the method signature.</Alex>
-    def convert_data_reference_to_batch_request(
-        self,
-        data_reference
-    ) -> BatchRequest:
+    def convert_data_reference_to_batch_request(self, data_reference) -> BatchRequest:
         matches: Union[re.Match, None] = re.match(self._pattern, data_reference)
 
-        #print("\n\n\nlet's get this regex right")
-        #print(self._pattern, data_reference)
-        #print(matches)
-        #print("\n^^ this is matches")
+        # print("\n\n\nlet's get this regex right")
+        # print(self._pattern, data_reference)
+        # print(matches)
+        # print("\n^^ this is matches")
         if matches is None:
-            #raise ValueError(f'No match found for data_reference: "{data_reference}".')
+            # raise ValueError(f'No match found for data_reference: "{data_reference}".')
             return None
         groups: tuple = matches.groups()
         group_names: list = [
-            f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
+            f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}"
+            for idx, group_value in enumerate(groups)
         ]
         self._validate_sorters_configuration(
-            partition_keys=self._group_names,
-            num_actual_partition_keys=len(groups)
+            partition_keys=self._group_names, num_actual_partition_keys=len(groups)
         )
         for idx, group_name in enumerate(self._group_names):
             group_names[idx] = group_name
@@ -72,7 +69,9 @@ class RegexPartitioner(Partitioner):
         for idx, group_value in enumerate(groups):
             group_name: str = group_names[idx]
             partition_definition[group_name] = group_value
-        partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
+        partition_definition: PartitionDefinition = PartitionDefinition(
+            partition_definition
+        )
         # if runtime_parameters:
         #     partition_definition.update(runtime_parameters)
         partition_name: str = self.DEFAULT_DELIMITER.join(
@@ -86,12 +85,12 @@ class RegexPartitioner(Partitioner):
             data_asset_name = "DEFAULT_ASSET_NAME"
             groups: tuple = matches.groups()
             group_names: list = [
-                f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
+                f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}"
+                for idx, group_value in enumerate(groups)
             ]
             #
             self._validate_sorters_configuration(
-                partition_keys=self._group_names,
-                num_actual_partition_keys=len(groups)
+                partition_keys=self._group_names, num_actual_partition_keys=len(groups)
             )
             for idx, group_name in enumerate(self._group_names):
                 group_names[idx] = group_name
@@ -99,19 +98,19 @@ class RegexPartitioner(Partitioner):
             for idx, group_value in enumerate(groups):
                 group_name: str = group_names[idx]
                 partition_definition[group_name] = group_value
-            partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
+            partition_definition: PartitionDefinition = PartitionDefinition(
+                partition_definition
+            )
             partition_name: str = self.DEFAULT_DELIMITER.join(
                 [str(value) for value in partition_definition.values()]
             )
 
         return BatchRequest(
-            data_asset_name=data_asset_name,
-            partition_request=partition_definition,
+            data_asset_name=data_asset_name, partition_request=partition_definition,
         )
 
     def convert_batch_request_to_data_reference(
-            self,
-            batch_request: BatchRequest,
+        self, batch_request: BatchRequest,
     ) -> str:
         if not isinstance(batch_request, BatchRequest):
             raise TypeError("batch_request is not of an instance of type BatchRequest")
@@ -121,9 +120,7 @@ class RegexPartitioner(Partitioner):
             template_arguments["data_asset_name"] = batch_request.data_asset_name
 
         filepath_template = self._invert_regex_to_data_reference_template()
-        converted_string = filepath_template.format(
-            **template_arguments
-        )
+        converted_string = filepath_template.format(**template_arguments)
 
         return converted_string
 
@@ -135,18 +132,20 @@ class RegexPartitioner(Partitioner):
         data_reference_template = ""
         group_name_index = 0
 
-        #print("-"*80)
+        # print("-"*80)
         parsed_sre = sre_parse.parse(regex_pattern)
         for token, value in parsed_sre:
-            #print(type(token), token, value)
+            # print(type(token), token, value)
 
             if token == sre_constants.LITERAL:
-                #Transcribe the character directly into the template
+                # Transcribe the character directly into the template
                 data_reference_template += chr(value)
 
             elif token == sre_constants.SUBPATTERN:
-                #Replace the captured group with "{next_group_name}" in the template
-                data_reference_template += "{"+self._group_names[group_name_index]+"}"
+                # Replace the captured group with "{next_group_name}" in the template
+                data_reference_template += (
+                    "{" + self._group_names[group_name_index] + "}"
+                )
                 group_name_index += 1
 
             elif token in [
@@ -155,7 +154,7 @@ class RegexPartitioner(Partitioner):
                 sre_constants.BRANCH,
                 sre_constants.ANY,
             ]:
-                #Replace the uncaptured group a wildcard in the template
+                # Replace the uncaptured group a wildcard in the template
                 data_reference_template += "*"
 
             elif token in [
@@ -165,9 +164,11 @@ class RegexPartitioner(Partitioner):
             ]:
                 pass
             else:
-                raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
+                raise ValueError(
+                    f"Unrecognized regex token {token} in regex pattern {regex_pattern}."
+                )
 
-        #Collapse adjacent wildcards into a single wildcard
-        data_reference_template = re.sub("\*+", "*", data_reference_template)
+        # Collapse adjacent wildcards into a single wildcard
+        data_reference_template = re.sub(r"\*+", "*", data_reference_template)
 
         return data_reference_template

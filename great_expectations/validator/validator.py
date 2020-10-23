@@ -118,13 +118,11 @@ class Validator:
         validator_attrs = set(super().__dir__())
         class_expectation_impls = set(list_registered_expectation_implementations())
         execution_engine_expectation_impls = (
-            set(
-                [
-                    attr_name
-                    for attr_name in self.execution_engine.__dir__()
-                    if attr_name.startswith("expect_")
-                ]
-            )
+            {
+                attr_name
+                for attr_name in self.execution_engine.__dir__()
+                if attr_name.startswith("expect_")
+            }
             if self.execution_engine
             else set()
         )

@@ -115,7 +115,7 @@ except ImportError:
     pass
 
 
-class SqlAlchemyBatchReference(object):
+class SqlAlchemyBatchReference:
     """An Object representing an access to a SqlAlchemyBatch"""
 
     def __init__(self, engine, table_name=None, schema=None, query=None):
@@ -732,7 +732,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
                 head_sql_str += "`" + self._table.name + "`"
             else:
                 head_sql_str += self._table.name
-            head_sql_str += " limit {0:d}".format(n)
+            head_sql_str += " limit {:d}".format(n)
 
             # Limit is unknown in mssql! Use top instead!
             if self.engine.dialect.name.lower() == "mssql":
@@ -1268,7 +1268,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
             condition = max_condition
 
         query = (
-            sa.select([sa.func.count((sa.column(column)))])
+            sa.select([sa.func.count(sa.column(column))])
             .where(sa.and_(sa.column(column) != None, condition))
             .select_from(self._table)
         )

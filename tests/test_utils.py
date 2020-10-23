@@ -6,7 +6,7 @@ import random
 import string
 from functools import wraps
 from types import ModuleType
-from typing import Union, List
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -1605,19 +1605,17 @@ def safe_remove(path):
 def execution_environment_files_data_connector_regex_partitioner_config(
     use_group_names: bool = False,
     use_sorters: bool = False,
-    default_base_directory = "data",
-    data_asset_base_directory = None,
+    default_base_directory="data",
+    data_asset_base_directory=None,
 ):
     if not use_group_names and use_sorters:
-        raise ValueError("The presently available data_connector and partitioner tests match sorters with group names.")
+        raise ValueError(
+            "The presently available data_connector and partitioner tests match sorters with group names."
+        )
 
     group_names: Union[list, None]
     if use_group_names:
-        group_names = [
-            "name",
-            "timestamp",
-            "price"
-        ]
+        group_names = ["name", "timestamp", "price"]
     else:
         group_names = None
 
@@ -1654,7 +1652,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "module_name": "great_expectations.execution_engine",
                 "class_name": "PandasExecutionEngine",
                 "caching": True,
-                "batch_spec_defaults": {}
+                "batch_spec_defaults": {},
             },
             "data_connectors": {
                 "test_pipeline_data_connector": {
@@ -1665,19 +1663,16 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                             "module_name": "great_expectations.execution_environment.data_connector.partitioner",
                             "class_name": "PipelinePartitioner",
                             "allow_multipart_partitions": False,
-                            "runtime_keys": [
-                                "run_id",
-                                "custom_key_0",
-                            ]
+                            "runtime_keys": ["run_id", "custom_key_0",],
                         }
                     },
                     "default_partitioner_name": "test_pipeline_partitioner",
                     "assets": {
                         "test_asset_1": {
                             "module_name": "great_expectations.execution_environment.data_connector.asset",
-                            "partitioner_name": "test_pipeline_partitioner"
+                            "partitioner_name": "test_pipeline_partitioner",
                         }
-                    }
+                    },
                 },
                 "test_filesystem_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
@@ -1692,10 +1687,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                             "group_names": group_names,
                             "allow_multipart_partitions": False,
                             "sorters": sorters,
-                            "runtime_keys": [
-                                "run_id",
-                                "custom_key_0",
-                            ]
+                            "runtime_keys": ["run_id", "custom_key_0",],
                         }
                     },
                     "default_partitioner_name": "test_regex_partitioner",
@@ -1706,18 +1698,16 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                             "base_directory": data_asset_base_directory,
                             "glob_directive": "alex*",
                         }
-                    }
-                }
-            }
+                    },
+                },
+            },
         }
     }
     return execution_environments_config
 
 
 def create_files_for_regex_partitioner(
-    root_directory_path: str,
-    directory_paths: list = None,
-    test_file_names: list = None
+    root_directory_path: str, directory_paths: list = None, test_file_names: list = None
 ):
     if not directory_paths:
         return
@@ -1752,36 +1742,24 @@ def create_files_for_regex_partitioner(
             base_directories.append(base_dir)
 
 
-
 def create_files_in_directory(
-    directory: str,
-    file_name_list: List[str],
-    file_content_fn=lambda: "x,y\n1,2\n2,3"
+    directory: str, file_name_list: List[str], file_content_fn=lambda: "x,y\n1,2\n2,3"
 ):
     subdirectories = []
     for file_name in file_name_list:
         splits = file_name.split("/")
         for i in range(1, len(splits)):
-            subdirectories.append(
-                os.path.join(*splits[:i])
-            )
+            subdirectories.append(os.path.join(*splits[:i]))
     subdirectories = set(subdirectories)
 
     for subdirectory in subdirectories:
-        os.makedirs(
-            os.path.join(directory, subdirectory),
-            exist_ok=True
-        )
-    
+        os.makedirs(os.path.join(directory, subdirectory), exist_ok=True)
+
     for file_name in file_name_list:
         file_path = os.path.join(directory, file_name)
         with open(file_path, "w") as f_:
-            f_.write(
-                file_content_fn()
-            )
+            f_.write(file_content_fn())
+
 
 def create_fake_data_frame():
-    return pd.DataFrame({
-        "x": range(10),
-        "y": list("ABCDEFGHIJ"),
-    })
+    return pd.DataFrame({"x": range(10), "y": list("ABCDEFGHIJ"),})

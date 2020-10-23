@@ -32,7 +32,7 @@ class AssetConfigurationSchema(Schema):
         return AssetConfiguration(**data)
 
 
-class AssetConfiguration(object):
+class AssetConfiguration:
     def __init__(self, table, schema=None):
         self.__table = table
         self.__schema = schema

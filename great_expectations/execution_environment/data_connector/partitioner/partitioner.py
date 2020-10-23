@@ -1,25 +1,21 @@
-# -*- coding: utf-8 -*-
-
 import copy
-from typing import Union, List, Iterator, Any
-
 import logging
+from typing import Any, Iterator, List, Union
 
-from great_expectations.core.batch import BatchRequest
-
-
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 import great_expectations.exceptions as ge_exceptions
-
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
+from great_expectations.core.batch import BatchRequest
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
+from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import (
+    Sorter,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class Partitioner(object):
+class Partitioner:
     DEFAULT_DELIMITER: str = "-"
 
     def __init__(
@@ -27,7 +23,7 @@ class Partitioner(object):
         name: str,
         sorters: list = None,
         allow_multipart_partitions: bool = False,
-        runtime_keys: list = None
+        runtime_keys: list = None,
     ):
         self._name = name
         self._sorters = sorters
@@ -42,7 +38,10 @@ class Partitioner(object):
     @property
     def sorters(self) -> Union[List[Sorter], None]:
         if self._sorters:
-            return [self.get_sorter(name=sorter_config["name"]) for sorter_config in self._sorters]
+            return [
+                self.get_sorter(name=sorter_config["name"])
+                for sorter_config in self._sorters
+            ]
         return None
 
     @property
@@ -66,33 +65,31 @@ class Partitioner(object):
             return self._sorters_cache[name]
         else:
             if self._sorters:
-                sorter_names: list = [sorter_config["name"] for sorter_config in self._sorters]
+                sorter_names: list = [
+                    sorter_config["name"] for sorter_config in self._sorters
+                ]
                 if name in sorter_names:
                     sorter_config: dict = copy.deepcopy(
                         self._sorters[sorter_names.index(name)]
                     )
                 else:
                     raise ge_exceptions.SorterError(
-                        f'''Unable to load sorter with the name "{name}" -- no configuration found or invalid
+                        f"""Unable to load sorter with the name "{name}" -- no configuration found or invalid
 configuration.
-                        '''
+                        """
                     )
             else:
                 raise ge_exceptions.SorterError(
                     f'Unable to load sorter with the name "{name}" -- no configuration found or invalid configuration.'
                 )
-        sorter: Sorter = self._build_sorter_from_config(
-            name=name, config=sorter_config
-        )
+        sorter: Sorter = self._build_sorter_from_config(name=name, config=sorter_config)
         self._sorters_cache[name] = sorter
         return sorter
 
     @staticmethod
     def _build_sorter_from_config(name: str, config: dict) -> Sorter:
         """Build a Sorter using the provided configuration and return the newly-built Sorter."""
-        runtime_environment: dict = {
-            "name": name
-        }
+        runtime_environment: dict = {"name": name}
         sorter: Sorter = instantiate_class_from_config(
             config=config,
             runtime_environment=runtime_environment,
@@ -118,15 +115,12 @@ configuration.
         return partitions
 
     def convert_batch_request_to_data_reference(
-        self,
-        batch_request: BatchRequest = None,
+        self, batch_request: BatchRequest = None,
     ) -> Any:
         raise NotImplementedError
 
     def convert_data_reference_to_batch_request(
-        self,
-        data_reference: Any = None,
-        **kwargs,
+        self, data_reference: Any = None, **kwargs,
     ) -> BatchRequest:
         raise NotImplementedError
 
@@ -134,31 +128,33 @@ configuration.
         self,
         data_asset_name: str = None,
         runtime_parameters: Union[dict, None] = None,
-        **kwargs
+        **kwargs,
     ) -> List[Partition]:
         raise NotImplementedError
 
-    def _validate_sorters_configuration(self, partition_keys: List[str], num_actual_partition_keys: int):
+    def _validate_sorters_configuration(
+        self, partition_keys: List[str], num_actual_partition_keys: int
+    ):
         if self.sorters and len(self.sorters) > 0:
             if any([sorter.name not in partition_keys for sorter in self.sorters]):
                 raise ge_exceptions.PartitionerError(
-                    f'''Partitioner "{self.name}" specifies one or more sort keys that do not appear among the
+                    f"""Partitioner "{self.name}" specifies one or more sort keys that do not appear among the
 configured partition keys.
-                    '''
+                    """
                 )
             if len(partition_keys) < len(self.sorters):
                 raise ge_exceptions.PartitionerError(
-                    f'''Partitioner "{self.name}", configured with {len(partition_keys)} partition keys, matches
+                    f"""Partitioner "{self.name}", configured with {len(partition_keys)} partition keys, matches
 {num_actual_partition_keys} actual partition keys; this is fewer than number of sorters specified, which is
 {len(self.sorters)}.
-                    '''
+                    """
                 )
 
     def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
         if runtime_keys and len(runtime_keys) > 0:
             if not (self.runtime_keys and set(runtime_keys) <= set(self.runtime_keys)):
                 raise ge_exceptions.PartitionerError(
-                    f'''Partitioner "{self.name}" was invoked with one or more runtime keys that do not appear among the
+                    f"""Partitioner "{self.name}" was invoked with one or more runtime keys that do not appear among the
 configured runtime keys.
-                    '''
+                    """
                 )

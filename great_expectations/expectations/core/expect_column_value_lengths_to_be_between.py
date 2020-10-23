@@ -108,7 +108,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
             assert configuration.kwargs.get(
                 "min_value"
             ) is not None or configuration.kwargs.get(
-                "max_value" is not None
+                "max_value" != None
             ), "min_value and max_value cannot both be None"
             if configuration.kwargs.get("min_value"):
                 assert float(

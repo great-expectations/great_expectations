@@ -1,14 +1,18 @@
 import logging
-from typing import List
 from pathlib import Path
+from typing import List
 
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.data_connector.files_data_connector import FilesDataConnector
 from great_expectations.core.batch import (
-    BatchRequest,
     BatchDefinition,
+    BatchRequest,
     PartitionRequest,
+)
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
+from great_expectations.execution_environment.data_connector.files_data_connector import (
+    FilesDataConnector,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,6 +29,7 @@ class SinglePartitionerDataConnector(DataConnector):
         ...
     }
     """
+
     def __init__(
         self,
         name: str,
@@ -42,12 +47,10 @@ class SinglePartitionerDataConnector(DataConnector):
             name=name,
             execution_environment_name=execution_environment_name,
             assets=assets,
-            partitioners={
-                "ONE_AND_ONLY_PARTITIONER" : partitioner
-            },
+            partitioners={"ONE_AND_ONLY_PARTITIONER": partitioner},
             default_partitioner_name="ONE_AND_ONLY_PARTITIONER",
             execution_engine=None,
-            data_context_root_directory=None
+            data_context_root_directory=None,
         )
 
     def get_available_data_asset_names(self):
@@ -55,26 +58,24 @@ class SinglePartitionerDataConnector(DataConnector):
             self.refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
-        batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name=self.execution_environment_name,
-            data_connector_name=self.name,
-        ))
+        batch_definition_list = self.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                execution_environment_name=self.execution_environment_name,
+                data_connector_name=self.name,
+            )
+        )
 
         data_asset_names = set()
         for batch_definition in batch_definition_list:
             data_asset_names.add(batch_definition.data_asset_name)
         return list(data_asset_names)
 
-    def self_check(
-        self,
-        pretty_print=True,
-        max_examples=3
-    ):
+    def self_check(self, pretty_print=True, max_examples=3):
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
         if pretty_print:
-            print("\t"+self.name, ":", self.__class__.__name__)
+            print("\t" + self.name, ":", self.__class__.__name__)
             print()
 
         asset_names = self.get_available_data_asset_names()
@@ -82,62 +83,72 @@ class SinglePartitionerDataConnector(DataConnector):
         len_asset_names = len(asset_names)
 
         data_connector_obj = {
-            "class_name" : self.__class__.__name__,
-            "data_asset_count" : len_asset_names,
+            "class_name": self.__class__.__name__,
+            "data_asset_count": len_asset_names,
             "example_data_asset_names": asset_names[:max_examples],
-            "assets" : {}
+            "assets": {}
             # "data_reference_count": self.
         }
 
         if pretty_print:
-            print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
+            print(
+                f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):"
+            )
         for asset_name in asset_names[:max_examples]:
-            batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
-                execution_environment_name=self.execution_environment_name,
-                data_connector_name=self.name,
-                data_asset_name=asset_name,
-            ))
+            batch_definition_list = self.get_batch_definition_list_from_batch_request(
+                BatchRequest(
+                    execution_environment_name=self.execution_environment_name,
+                    data_connector_name=self.name,
+                    data_asset_name=asset_name,
+                )
+            )
             len_batch_definition_list = len(batch_definition_list)
             example_data_references = [
-                self.default_partitioner.convert_batch_request_to_data_reference(BatchRequest(
-                    execution_environment_name=batch_definition.execution_environment_name,
-                    data_connector_name=batch_definition.data_connector_name,
-                    data_asset_name=batch_definition.data_asset_name,
-                    partition_request=batch_definition.partition_definition,
-                ))
+                self.default_partitioner.convert_batch_request_to_data_reference(
+                    BatchRequest(
+                        execution_environment_name=batch_definition.execution_environment_name,
+                        data_connector_name=batch_definition.data_connector_name,
+                        data_asset_name=batch_definition.data_asset_name,
+                        partition_request=batch_definition.partition_definition,
+                    )
+                )
                 for batch_definition in batch_definition_list
             ][:max_examples]
             example_data_references.sort()
 
             if pretty_print:
-                print(f"\t\t{asset_name} ({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):", example_data_references)
+                print(
+                    f"\t\t{asset_name} ({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):",
+                    example_data_references,
+                )
 
             data_connector_obj["assets"][asset_name] = {
                 "batch_definition_count": len_batch_definition_list,
-                "example_data_references": example_data_references
+                "example_data_references": example_data_references,
             }
 
         unmatched_data_references = self.get_unmatched_data_references()
         len_unmatched_data_references = len(unmatched_data_references)
         if pretty_print:
-            print(f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):", unmatched_data_references[:max_examples])
-        data_connector_obj["unmatched_data_reference_count"] = len_unmatched_data_references
-        data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
+            print(
+                f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):",
+                unmatched_data_references[:max_examples],
+            )
+        data_connector_obj[
+            "unmatched_data_reference_count"
+        ] = len_unmatched_data_references
+        data_connector_obj[
+            "example_unmatched_data_references"
+        ] = unmatched_data_references[:max_examples]
         return data_connector_obj
 
 
 class SinglePartitionerDictDataConnector(SinglePartitionerDataConnector):
     def __init__(
-        self,
-        name: str,
-        data_reference_dict: {},
-        **kwargs,
+        self, name: str, data_reference_dict: {}, **kwargs,
     ):
         logger.debug(f'Constructing SinglePartitionerDictDataConnector "{name}".')
-        super().__init__(
-            name,
-            **kwargs
-        )
+        super().__init__(name, **kwargs)
 
         # This simulates the underlying filesystem
         self.data_reference_dict = data_reference_dict
@@ -147,29 +158,20 @@ class SinglePartitionerDictDataConnector(SinglePartitionerDataConnector):
         data_reference_keys.sort()
         return data_reference_keys
 
+
 class SinglePartitionerFileDataConnector(SinglePartitionerDataConnector):
     def __init__(
-        self,
-        name: str,
-        base_directory: str,
-        glob_directive: str = "*",
-        **kwargs,
+        self, name: str, base_directory: str, glob_directive: str = "*", **kwargs,
     ):
         logger.debug(f'Constructing SinglePartitionerFileDataConnector "{name}".')
 
         self.glob_directive = glob_directive
 
-        super().__init__(
-            name,
-            base_directory=base_directory,
-            **kwargs
-        )
+        super().__init__(name, base_directory=base_directory, **kwargs)
 
     def _get_data_reference_list(self):
         globbed_paths = Path(self.base_directory).glob(self.glob_directive)
-        path_list = [
-            str(posix_path) for posix_path in globbed_paths
-        ]
+        path_list = [str(posix_path) for posix_path in globbed_paths]
 
         # Trim paths to exclude the base_directory
         base_directory_len = len(str(self.base_directory))
@@ -188,24 +190,22 @@ class SinglePartitionerFileDataConnector(SinglePartitionerDataConnector):
 
         available_data_asset_names = []
 
-        for k,v in self._data_references_cache.items():
+        for k, v in self._data_references_cache.items():
             if v != None:
                 available_data_asset_names.append(v.data_asset_name)
 
         return list(set(available_data_asset_names))
 
     def _generate_batch_spec_parameters_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition
+        self, batch_definition: BatchDefinition
     ) -> dict:
 
         # TODO Will - convert to use batch_request_to_data_reference()
-        #TODO Abe 20201018: This is an absolutely horrible way to get a path from a single partition_definition, but AFIACT it's the only method currently supported by our Partitioner
+        # TODO Abe 20201018: This is an absolutely horrible way to get a path from a single partition_definition, but AFIACT it's the only method currently supported by our Partitioner
 
         print("IM WHERE I NEED TO BE!")
 
-        
-        """        
+        """
         available_partitions = self.get_available_partitions(
             data_asset_name=batch_definition.data_asset_name,
         )

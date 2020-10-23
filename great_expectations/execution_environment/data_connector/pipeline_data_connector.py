@@ -1,16 +1,20 @@
-from typing import Union, List, Any
-
 import logging
+from typing import Any, List, Union
 
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition_request import PartitionRequest
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.id_dict import (
-    PartitionDefinitionSubset,
-    BatchSpec
+from great_expectations.core.id_dict import BatchSpec, PartitionDefinitionSubset
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partition_request import (
+    PartitionRequest,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partitioner import (
+    Partitioner,
 )
 from great_expectations.execution_environment.types.batch_spec import InMemoryBatchSpec
 
@@ -28,7 +32,7 @@ class PipelineDataConnector(DataConnector):
         default_partitioner_name: str = None,
         assets: dict = None,
         execution_engine: ExecutionEngine = None,
-        data_context_root_directory:str = None
+        data_context_root_directory: str = None,
     ):
         logger.debug(f'Constructing PipelineDataConnector "{name}".')
         super().__init__(
@@ -38,7 +42,7 @@ class PipelineDataConnector(DataConnector):
             default_partitioner_name=default_partitioner_name,
             assets=assets,
             execution_engine=execution_engine,
-            data_context_root_directory=data_context_root_directory
+            data_context_root_directory=data_context_root_directory,
         )
 
     def _get_available_partitions(
@@ -49,7 +53,7 @@ class PipelineDataConnector(DataConnector):
         partition_request: Union[PartitionRequest, None] = None,
         in_memory_dataset: Any = None,
         runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
-        repartition: bool = False
+        repartition: bool = False,
     ) -> List[Partition]:
         # TODO: <Alex>TODO: Each specific data_connector should verify the given partitioner against the list of supported partitioners.</Alex>
         pipeline_data_asset_name: str = self.DEFAULT_DATA_ASSET_NAME
@@ -63,7 +67,7 @@ class PipelineDataConnector(DataConnector):
             "name": partition_name,
             "data_asset_name": pipeline_data_asset_name,
             "definition": runtime_parameters,
-            "data_reference": in_memory_dataset
+            "data_reference": in_memory_dataset,
         }
         return partitioner.find_or_create_partitions(
             data_asset_name=data_asset_name,
@@ -71,14 +75,11 @@ class PipelineDataConnector(DataConnector):
             runtime_parameters=runtime_parameters,
             repartition=repartition,
             # The partition_config parameter is for the specific partitioners, working under the present data connector.
-            partition_config=partition_config
+            partition_config=partition_config,
         )
 
     def _build_batch_spec_from_partition(
-        self,
-        partition: Partition,
-        batch_request: BatchRequest,
-        batch_spec: BatchSpec
+        self, partition: Partition, batch_request: BatchRequest, batch_spec: BatchSpec
     ) -> InMemoryBatchSpec:
         """
         Args:

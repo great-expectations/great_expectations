@@ -18,23 +18,18 @@ from great_expectations.dataset.util import (
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
-# TODO: <Alex>See the cleanup notes in "great_expectations/core/batch.py" and "great_expectations/execution_environment/types/batch_spec.py".</Alex>
-from ..core.batch import (
-    Batch,
-    BatchRequest
-)
-from ..core.id_dict import BatchSpec
 from great_expectations.execution_environment.types import (
+    BatchMarkers,
     InMemoryBatchSpec,
     PathBatchSpec,
     S3BatchSpec,
-    BatchMarkers
 )
-from great_expectations.expectations.registry import (
-    register_metric,
-)
+from great_expectations.expectations.registry import register_metric
 from great_expectations.validator.validator import Validator
 
+# TODO: <Alex>See the cleanup notes in "great_expectations/core/batch.py" and "great_expectations/execution_environment/types/batch_spec.py".</Alex>
+from ..core.batch import Batch, BatchRequest
+from ..core.id_dict import BatchSpec
 from ..exceptions import BatchSpecError, ValidationError
 from ..exceptions.metric_exceptions import MetricError
 from ..execution_environment.util import hash_pandas_dataframe
@@ -442,9 +437,7 @@ Notes:
     ]
     _internal_names_set = set(_internal_names)
 
-    recognized_batch_request_keys = {
-        "limit"
-    }
+    recognized_batch_request_keys = {"limit"}
 
     # TODO: <Alex>Is this used in the new design?</Alex>
     recognized_batch_spec_defaults = {
@@ -507,7 +500,9 @@ Notes:
                 if batch_spec.get("data_asset_name"):
                     df = in_memory_dataset
                 else:
-                    raise ValueError("To pass an in_memory_dataset, you must also a data_asset_name as well.")
+                    raise ValueError(
+                        "To pass an in_memory_dataset, you must also a data_asset_name as well."
+                    )
         else:
             reader_method = batch_spec.get("reader_method")
             reader_options = batch_spec.get("reader_options") or {}
@@ -538,12 +533,11 @@ Notes:
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
-        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_spec != batch_spec:
-            batch = Batch(
-                data=df,
-                batch_spec=batch_spec,
-                batch_markers=batch_markers,
-            )
+        if (
+            not self.batches.get(batch_id)
+            or self.batches.get(batch_id).batch_spec != batch_spec
+        ):
+            batch = Batch(data=df, batch_spec=batch_spec, batch_markers=batch_markers,)
             self.batches[batch_id] = batch
         else:
             batch = self.batches.get(batch_id)
@@ -552,14 +546,8 @@ Notes:
         return batch
 
     def get_batch_data_and_markers(
-        self,
-        path: str,
-        reader_method:str="read_csv",
-        reader_options:dict={}
-    ) -> Tuple[
-        Any, #batch_data
-        BatchMarkers
-    ]:
+        self, path: str, reader_method: str = "read_csv", reader_options: dict = {}
+    ) -> Tuple[Any, BatchMarkers]:  # batch_data
 
         reader_fn = self._get_reader_fn(reader_method, path)
         batch_data = reader_fn(path, **reader_options)
@@ -573,7 +561,6 @@ Notes:
         )
 
         return batch_data, batch_markers
-
 
     @property
     def dataframe(self):
@@ -651,9 +638,7 @@ Notes:
                 "reader_options": {"compression": "gzip"},
             }
 
-        raise BatchSpecError(
-            f'Unable to determine reader method from path: "{path}".'
-        )
+        raise BatchSpecError(f'Unable to determine reader method from path: "{path}".')
 
     def process_batch_request(self, batch_request: BatchRequest, batch_spec: BatchSpec):
         """Takes in a batch request and batch spec. If the batch request has a limit, uses it to initialize the

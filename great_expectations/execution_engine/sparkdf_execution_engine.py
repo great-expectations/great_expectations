@@ -5,7 +5,7 @@ import json
 import logging
 from collections import OrderedDict
 from functools import reduce, wraps
-from typing import Union, Any, Callable, Dict, Iterable, List, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Tuple, Union
 
 import jsonschema
 import numpy as np
@@ -14,25 +14,19 @@ from dateutil.parser import parse
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
-# TODO: <Alex>See the cleanup notes in "great_expectations/core/batch.py" and "great_expectations/execution_environment/types/batch_spec.py".</Alex>
-from ..core.batch import (
-    Batch,
-    BatchRequest
-)
-from ..core.id_dict import (
-    BatchSpec,
-    IDDict
-)
 from great_expectations.execution_environment.types import (
+    BatchMarkers,
     InMemoryBatchSpec,
     PathBatchSpec,
     S3BatchSpec,
-    BatchMarkers
 )
-from ..expectations.registry import register_metric
 from great_expectations.validator.validator import Validator
 
+# TODO: <Alex>See the cleanup notes in "great_expectations/core/batch.py" and "great_expectations/execution_environment/types/batch_spec.py".</Alex>
+from ..core.batch import Batch, BatchRequest
+from ..core.id_dict import BatchSpec, IDDict
 from ..exceptions import BatchKwargsError, BatchSpecError, ValidationError
+from ..expectations.registry import register_metric
 from ..validator.validation_graph import MetricEdgeKey
 from .execution_engine import ExecutionEngine
 
@@ -680,7 +674,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 if batch_spec.get("data_asset_name"):
                     df = in_memory_dataset
                 else:
-                    raise ValueError("To pass an in_memory_dataset, you must also a data_asset_name as well.")
+                    raise ValueError(
+                        "To pass an in_memory_dataset, you must also a data_asset_name as well."
+                    )
         else:
             reader = self.spark.read
             reader_method = batch_spec.get("reader_method")
@@ -717,12 +713,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if self._persist:
             df.persist()
 
-        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_spec != batch_spec:
-            batch = Batch(
-                data=df,
-                batch_spec=batch_spec,
-                batch_markers=batch_markers,
-            )
+        if (
+            not self.batches.get(batch_id)
+            or self.batches.get(batch_id).batch_spec != batch_spec
+        ):
+            batch = Batch(data=df, batch_spec=batch_spec, batch_markers=batch_markers,)
             self.batches[batch_id] = batch
         else:
             batch = self.batches.get(batch_id)

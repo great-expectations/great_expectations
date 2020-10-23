@@ -38,7 +38,7 @@ class ValidationAction:
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
-        **kwargs
+        **kwargs,
     ):
         """
 
@@ -52,7 +52,7 @@ class ValidationAction:
             validation_result_suite,
             validation_result_suite_identifier,
             data_asset,
-            **kwargs
+            **kwargs,
         )
 
     def _run(
@@ -211,9 +211,7 @@ PagerdutyAlertAction sends a pagerduty event
         """
         super().__init__(data_context)
         if not pypd:
-            raise DataContextError(
-                "ModuleNotFoundError: No module named 'pypd'"
-            )
+            raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
         self.api_key = api_key
         assert api_key, "No Pagerduty api_key found in action config."
         self.routing_key = routing_key
@@ -254,16 +252,18 @@ PagerdutyAlertAction sends a pagerduty event
                 "expectation_suite_name", "__no_expectation_suite_name__"
             )
             pypd.api_key = self.api_key
-            pypd.EventV2.create(data={
-                "routing_key": self.routing_key,
-                "dedup_key": expectation_suite_name,
-                "event_action": "trigger",
-                "payload": {
-                    "summary": f"Great Expectations suite check {expectation_suite_name} has failed",
-                    "severity": "critical",
-                    "source": "Great Expectations",
+            pypd.EventV2.create(
+                data={
+                    "routing_key": self.routing_key,
+                    "dedup_key": expectation_suite_name,
+                    "event_action": "trigger",
+                    "payload": {
+                        "summary": f"Great Expectations suite check {expectation_suite_name} has failed",
+                        "severity": "critical",
+                        "source": "Great Expectations",
+                    },
                 }
-            })
+            )
 
             return {"pagerduty_alert_result": "success"}
         return {"pagerduty_alert_result": "none sent"}

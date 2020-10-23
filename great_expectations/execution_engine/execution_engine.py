@@ -14,8 +14,8 @@ from dateutil.parser import parse
 from ruamel.yaml import YAML
 from scipy import stats
 
-from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.batch import Batch
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.execution_engine.util import (
     build_categorical_partition_object,

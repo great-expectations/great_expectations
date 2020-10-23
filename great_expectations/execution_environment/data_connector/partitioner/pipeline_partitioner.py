@@ -1,9 +1,12 @@
-from typing import Union, List
-
 import logging
+from typing import List, Union
 
-from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partitioner import (
+    Partitioner,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -16,14 +19,14 @@ class PipelinePartitioner(Partitioner):
         name: str,
         sorters: list = None,
         allow_multipart_partitions: bool = False,
-        runtime_keys: list = None
+        runtime_keys: list = None,
     ):
         logger.debug(f'Constructing PipelinePartitioner "{name}".')
         super().__init__(
             name=name,
             sorters=sorters,
             allow_multipart_partitions=allow_multipart_partitions,
-            runtime_keys=runtime_keys
+            runtime_keys=runtime_keys,
         )
 
     def _compute_partitions_for_data_asset(

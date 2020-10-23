@@ -544,9 +544,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 data_connector_name
             )
             # noinspection PyProtectedMember
-            batch_spec = data_connector._build_batch_spec(
-                batch_request=batch_request
-            )
+            batch_spec = data_connector._build_batch_spec(batch_request=batch_request)
 
         batch_markers = BatchMarkers(
             {

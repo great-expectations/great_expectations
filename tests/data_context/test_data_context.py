@@ -2,12 +2,13 @@ import json
 import os
 import shutil
 
+import pandas as pd
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
-import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
@@ -30,7 +31,6 @@ from great_expectations.exceptions import (
     ConfigNotFoundError,
     DataContextError,
 )
-from great_expectations.core.batch import Batch
 from great_expectations.execution_environment.types import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -1364,19 +1364,22 @@ def test_get_batch_when_passed_a_suite(titanic_data_context):
 
 
 def test_get_batch_from_new_style_datasource_explicit_path(
-    execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
+    execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context,
 ):
     execution_environment_name: str = "test_execution_environment"
     data_connector_name: str = "test_filesystem_data_connector"
     data_asset_name: str = "Titanic"
 
-    data_context: DataContext = \
-        execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
+    data_context: DataContext = execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
 
     context_path: str = data_context.root_directory
 
-    titanic_csv_source_file_path: str = file_relative_path(__file__, "../test_sets/Titanic.csv")
-    titanic_csv_destination_file_path: str = str(os.path.join(context_path, "data/Titanic.csv"))
+    titanic_csv_source_file_path: str = file_relative_path(
+        __file__, "../test_sets/Titanic.csv"
+    )
+    titanic_csv_destination_file_path: str = str(
+        os.path.join(context_path, "data/Titanic.csv")
+    )
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
     batch_request: dict = {
@@ -1390,8 +1393,8 @@ def test_get_batch_from_new_style_datasource_explicit_path(
             "path": titanic_csv_destination_file_path,
             "reader_method": "read_csv",
             "reader_options": None,
-            "limit": 2000
-        }
+            "limit": 2000,
+        },
     }
     batch: Batch = data_context.get_batch_from_new_style_datasource(
         batch_request=batch_request

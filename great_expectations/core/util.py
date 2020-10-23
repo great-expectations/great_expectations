@@ -5,8 +5,8 @@ from collections.abc import Mapping
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from IPython import get_ipython
 
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +163,6 @@ def ensure_json_serializable(data):
 
     import numpy as np
     import pandas as pd
-    from six import integer_types, string_types
 
     try:
         if not isinstance(data, list) and np.isnan(data):
@@ -175,7 +174,7 @@ def ensure_json_serializable(data):
     except ValueError:
         pass
 
-    if isinstance(data, (string_types, integer_types, float, bool)):
+    if isinstance(data, ((str,), (int,), float, bool)):
         # No problem to encode json
         return
 

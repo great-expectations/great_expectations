@@ -1,27 +1,28 @@
-from pathlib import Path
 import itertools
-from typing import List, Union, Any
-
 import logging
+from pathlib import Path
+from typing import Any, List, Union
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
+from great_expectations.core.id_dict import BatchSpec, PartitionDefinitionSubset
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition_request import PartitionRequest
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.core.batch import BatchRequest
-from great_expectations.core.id_dict import (
-    PartitionDefinitionSubset,
-    BatchSpec
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
 )
-from great_expectations.core.batch import (
-    BatchMarkers,
-    BatchDefinition,
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partition_request import (
+    PartitionRequest,
+)
+from great_expectations.execution_environment.data_connector.partitioner.partitioner import (
+    Partitioner,
 )
 from great_expectations.execution_environment.types import PathBatchSpec
-import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
+
 
 class DictDataConnector(DataConnector):
     """This DataConnector is meant to closely mimic the FilesDataConnector, but without requiring an actual filesystem.
@@ -34,6 +35,7 @@ class DictDataConnector(DataConnector):
         ...
     }
     """
+
     def __init__(
         self,
         name: str,

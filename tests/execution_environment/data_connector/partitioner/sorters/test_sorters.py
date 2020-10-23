@@ -1,14 +1,17 @@
 import pytest
+
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.id_dict import PartitionDefinition
+from great_expectations.execution_environment.data_connector.partitioner.partition import (
+    Partition,
+)
 from great_expectations.execution_environment.data_connector.partitioner.sorter import (
-    Sorter,
-    LexicographicSorter,
-    NumericSorter,
     CustomListSorter,
     DateTimeSorter,
+    LexicographicSorter,
+    NumericSorter,
+    Sorter,
 )
-from great_expectations.core.id_dict import PartitionDefinition
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 
 
 def test_sorter_instantiation_base():
@@ -33,14 +36,14 @@ def test_sorter_instantiation_lexicographic():
 
 def test_sorter_instantiation_datetime():
     sorter_params: dict = {
-        'datetime_format': '%Y%m%d',
+        "datetime_format": "%Y%m%d",
     }
     # DateTimeSorter
     my_dt = DateTimeSorter(name="dt", orderby="desc", **sorter_params)
     assert isinstance(my_dt, DateTimeSorter)
     assert my_dt.name == "dt"
     assert my_dt.reverse is True
-    assert my_dt._datetime_format == '%Y%m%d'
+    assert my_dt._datetime_format == "%Y%m%d"
 
 
 def test_sorter_instantiation_numeric():
@@ -54,38 +57,40 @@ def test_sorter_instantiation_numeric():
 def test_sorter_instantiation_custom_list():
     # CustomListSorter
     sorter_params: dict = {
-        'reference_list': ['a', 'b', 'c'],
+        "reference_list": ["a", "b", "c"],
     }
     my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
     assert isinstance(my_custom, CustomListSorter)
     assert my_custom.name == "custom"
     assert my_custom.reverse is False
     # noinspection PyProtectedMember
-    assert my_custom._reference_list == ['a', 'b', 'c']
+    assert my_custom._reference_list == ["a", "b", "c"]
     # with incorrectly configured reference list
     sorter_params: dict = {
-        'reference_list': [111, 222, 333]  # this shouldn't work. the reference list should only contain strings
+        "reference_list": [
+            111,
+            222,
+            333,
+        ]  # this shouldn't work. the reference list should only contain strings
     }
     with pytest.raises(ge_exceptions.SorterError):
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
-    sorter_params: dict = {
-        'reference_list': None
-    }
+    sorter_params: dict = {"reference_list": None}
     with pytest.raises(ge_exceptions.SorterError):
         # noinspection PyUnusedLocal
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
-    sorter_params: dict = {
-        'reference_list': 1 # not a list
-    }
+    sorter_params: dict = {"reference_list": 1}  # not a list
     with pytest.raises(ge_exceptions.SorterError):
         # noinspection PyUnusedLocal
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
 
 
-def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_elements):
+def test_sorter_instantiation_custom_list_with_periodic_table(
+    periodic_table_of_elements,
+):
     # CustomListSorter
     sorter_params: dict = {
-        'reference_list': periodic_table_of_elements,
+        "reference_list": periodic_table_of_elements,
     }
     my_custom = CustomListSorter(name="element", orderby="asc", **sorter_params)
     # noinspection PyProtectedMember
@@ -95,7 +100,7 @@ def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_
         name="test",
         data_asset_name="fake",
         definition=PartitionDefinition({"element": "Hydrogen"}),
-        data_reference="nowhere"
+        data_reference="nowhere",
     )
     returned_partition_key = my_custom.get_partition_key(test_partition)
     assert returned_partition_key == 0
@@ -104,7 +109,7 @@ def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_
         name="test",
         data_asset_name="fake",
         definition=PartitionDefinition({"element": "Vibranium"}),
-        data_reference="nowhere"
+        data_reference="nowhere",
     )
     with pytest.raises(ge_exceptions.SorterError):
         my_custom.get_partition_key(test_partition)

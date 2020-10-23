@@ -7,7 +7,7 @@ from functools import wraps
 from inspect import getcallargs
 from pathlib import Path
 from types import ModuleType
-from typing import Callable, Union, Any
+from typing import Any, Callable, Union
 
 import black
 from pkg_resources import Distribution
