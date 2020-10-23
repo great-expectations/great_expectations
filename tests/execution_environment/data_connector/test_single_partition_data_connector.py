@@ -502,6 +502,69 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
     }
 
 
+
+# def test_redundant_information_in_naming_convention_random_hash_asset_name_is_date(empty_data_context, tmp_path_factory):
+#     base_directory = str(tmp_path_factory.mktemp("logs"))
+#     create_files_in_directory(
+#         directory=base_directory,
+#         file_name_list=[
+#             "2021/01/01/log_file-2f1e94b40f310274b485e72050daf591.txt.gz",
+#             "2021/01/01/log_file-8277e0910d750195b448797616e091ad.txt.gz",
+#             "2021/01/02/log_file-7f5d35d4f90bce5bf1fad680daac48a2.txt.gz",
+#             "2021/01/02/log_file-912ec803b2ce49e4a541068d495ab570.txt.gz",
+#             "2021/01/03/log_file-99d5ed1123f877c714bbe9a2cfdffc4b.txt.gz",
+#             "2021/01/03/log_file-45901b519281e201d4535cb90678d870.txt.gz",
+#             "2021/01/04/log_file-885d40a5661bbbea053b2405face042f.txt.gz",
+#             "2021/01/04/log_file-103935fb414d693ba3a5f01a9d9399d3.txt.gz",
+#             "2021/01/05/log_file-6e232cfb9357a98911d9794d0b0eb804.txt.gz",
+#             "2021/01/05/log_file-d8e478f817b608729cfc8fb750ebfc84.txt.gz",
+#             "2021/01/06/log_file-4786f3282f04de5b5c7317c490c6d922.txt.gz",
+#             "2021/01/06/log_file-b1ca8d1079c00fd4e210f7ef31549162.txt.gz",
+#             "2021/01/07/log_file-d34b4818c52e74b7827504920af19a5c.txt.gz",
+#             "2021/01/07/log_file-a21075a36eeddd084e17611a238c7101.txt.gz",
+#         ]
+#     )
+#     return_object = empty_data_context.test_yaml_config(f
+#           module_name: great_expectations.execution_environment.data_connector
+#           class_name: SinglePartitionFileDataConnector
+#           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
+#           name: TEST_DATA_CONNECTOR
+#           base_directory: {base_directory}/
+#           glob_directive: "*/*/*/*.txt.gz"
+#           partitioner:
+#               class_name: RegexPartitioner
+#               group_names:
+#                 - data_asset_name
+#               pattern: (\\d{{4}}\\/\\d{{2}}\\/\\d{{2}})/log_file-.*\\.txt\\.gz
+#               , return_mode="return_object")
+#
+#     return_object == {
+#         'class_name': 'SinglePartitionFileDataConnector',
+#         'data_asset_count': 7,
+#         'example_data_asset_names': [
+#             '2021/01/01',
+#             '2021/01/02',
+#             '2021/01/03'
+#         ],
+#         'assets': {
+#             '2021/01/01': {
+#                 'batch_definition_count': 2,
+#                 'example_data_references': ['2021/01/01/log_file-*.txt.gz', '2021/01/01/log_file-*.txt.gz']
+#             },
+#             '2021/01/02': {
+#                 'batch_definition_count': 2,
+#                 'example_data_references': ['2021/01/02/log_file-*.txt.gz', '2021/01/02/log_file-*.txt.gz']
+#             },
+#             '2021/01/03': {
+#                 'batch_definition_count': 2,
+#                 'example_data_references': ['2021/01/03/log_file-*.txt.gz', '2021/01/03/log_file-*.txt.gz']
+#             }
+#         },
+#         'unmatched_data_reference_count': 0,
+#         'example_unmatched_data_references': []
+#     }
+
+
 def test_redundant_information_in_naming_convention_timestamp(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
