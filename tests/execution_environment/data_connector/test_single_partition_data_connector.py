@@ -143,7 +143,7 @@ base_directory: my_base_directory/
 # glob_directive: '*.csv'
 partitioner:
     class_name: RegexPartitioner
-    pattern: ^(.+)-(\\d{4})(\\d{2})\\.[csv|txt]$
+    pattern: .*\\/(.+)-(\\d{4})(\\d{2})\\.[csv|txt]
     group_names:
         - data_asset_name
         - year_dir
@@ -158,6 +158,7 @@ assets:
         # glob_directive: '*.txt'
 
     gamma:
+        base_directory: 
         # glob_directive: '*.txt'
 
     """
@@ -213,13 +214,11 @@ def test_test_yaml_config_(empty_data_context, tmp_path_factory):
     glob_directive: "*/*/*.csv"
     partitioner:
         class_name: RegexPartitioner
-        config_params:
-            regex:
-                group_names:
-                    - year_dir
-                    - month_dir
-                    - data_asset_name
-                pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+        group_names:
+            - year_dir
+            - month_dir
+            - data_asset_name
+        pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
         """, return_mode="return_object")
 
     assert return_object == {
