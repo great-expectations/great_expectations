@@ -403,10 +403,9 @@ def test_that_needs_a_better_name():
         'unmatched_data_reference_count': 1,
     }
 
-<<<<<<< Updated upstream
-=======
 
-def test_dir_charlie(empty_data_context, tmp_path_factory):
+
+def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_dir_charlie"))
     create_files_in_directory(
         directory=base_directory,
@@ -428,7 +427,7 @@ def test_dir_charlie(empty_data_context, tmp_path_factory):
 
     return_object = empty_data_context.test_yaml_config(f"""
     module_name: great_expectations.execution_environment.data_connector
-    class_name: SinglePartitionerFileDataConnector
+    class_name: SinglePartitionFileDataConnector
     execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
     name: TEST_DATA_CONNECTOR
     base_directory: {base_directory}/
@@ -445,7 +444,7 @@ def test_dir_charlie(empty_data_context, tmp_path_factory):
         """, return_mode="return_object")
 
     assert return_object == {
-        'class_name': 'SinglePartitionerFileDataConnector',
+        'class_name': 'SinglePartitionFileDataConnector',
         'data_asset_count': 4,
         'example_data_asset_names': [
              'A',
@@ -488,7 +487,7 @@ def test_redundant_information_in_naming_convention(empty_data_context, tmp_path
 
     return_object = empty_data_context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
-          class_name: SinglePartitionerFileDataConnector
+          class_name: SinglePartitionFileDataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
@@ -506,7 +505,7 @@ def test_redundant_information_in_naming_convention(empty_data_context, tmp_path
               """, return_mode="return_object")
 
     assert return_object == {
-        'class_name': 'SinglePartitionerFileDataConnector',
+        'class_name': 'SinglePartitionFileDataConnector',
         'data_asset_count': 7,
         'example_data_asset_names': [
             '20210101',
@@ -527,4 +526,3 @@ def test_redundant_information_in_naming_convention(empty_data_context, tmp_path
         },
     'unmatched_data_reference_count': 0,
     'example_unmatched_data_references': []}
->>>>>>> Stashed changes
