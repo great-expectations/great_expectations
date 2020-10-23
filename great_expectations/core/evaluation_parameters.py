@@ -7,7 +7,6 @@ from collections import namedtuple
 
 from pyparsing import (
     CaselessKeyword,
-    Combine,
     Forward,
     Group,
     Literal,
@@ -95,10 +94,6 @@ class EvaluationParameterParser:
             # or use provided pyparsing_common.number, but convert back to str:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
             fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
-            ge_urn = Combine(
-                Literal("urn:great_expectations:")
-                + Word(alphas, alphanums + "_$:?=%.&")
-            )
             variable = Word(alphas, alphanums + "_$")
             ident = ge_urn | variable
 
@@ -194,8 +189,9 @@ def build_evaluation_parameters(
             # If not, try to parse the evaluation parameter and substitute, which will raise
             # an exception if we do not have a value
             else:
+                raw_value = value["$PARAMETER"]
                 parameter_value = parse_evaluation_parameter(
-                    value["$PARAMETER"],
+                    raw_value,
                     evaluation_parameters=evaluation_parameters,
                     data_context=data_context,
                 )
@@ -308,7 +304,15 @@ def parse_evaluation_parameter(
                 return store.get_query_result(
                     res["metric_name"], res.get("metric_kwargs", {})
                 )
-            else:
+            elif res["urn_type"] == "$PREV":
+                return {
+                    "metric_name": None,
+                    "metric_domain_kwargs": {
+                        "batch_request": {"partition_index": "previous"}
+                    },
+                    "metric_value_kwargs": None,
+                }
+            elif res["urn_type"] == "$PREV_BATCH":
                 logger.error(
                     "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
                 )
@@ -327,6 +331,8 @@ def parse_evaluation_parameter(
     elif len(L) == 1:
         # In this case, we *do* have a substitution for a single type. We treat this specially because in this
         # case, we allow complex type substitutions (i.e. do not coerce to string as part of parsing)
+        # NOTE: 20201023 - JPC - to support MetricDefinition as an evaluation parameter type, we need to handle that
+        # case here; is the evaluation parameter provided here in fact a metric definition?
         return evaluation_parameters[L[0]]
 
     elif len(L) == 0 or L[0] != "Parse Failure":

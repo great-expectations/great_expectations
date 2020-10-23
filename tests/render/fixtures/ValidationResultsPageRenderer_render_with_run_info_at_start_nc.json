@@ -1,0 +1,4721 @@
+{
+  "sections": [
+    {
+      "content_blocks": [
+        {
+          "content_block_type": "header",
+          "styling": {
+            "classes": [
+              "col-12",
+              "p-0"
+            ],
+            "header": {
+              "classes": [
+                "alert",
+                "alert-secondary"
+              ]
+            }
+          },
+          "header": {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "Overview",
+              "tag": "h5",
+              "styling": {
+                "classes": [
+                  "m-0"
+                ]
+              }
+            }
+          },
+          "subheader": {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",
+              "params": {
+                "suite_title": "Expectation Suite:",
+                "data_asset": "Data asset:",
+                "data_asset_name": null,
+                "status_title": "Status:",
+                "expectation_suite_name": "default",
+                "success": "Failed",
+                "html_success_icon": "<i class=\"fas fa-times text-danger\" aria-hidden=\"true\"></i>"
+              },
+              "styling": {
+                "params": {
+                  "suite_title": {
+                    "classes": [
+                      "h6"
+                    ]
+                  },
+                  "status_title": {
+                    "classes": [
+                      "h6"
+                    ]
+                  },
+                  "expectation_suite_name": {
+                    "tag": "a",
+                    "attributes": {
+                      "href": "../../../../expectations/default.html"
+                    }
+                  }
+                },
+                "classes": [
+                  "mb-0",
+                  "mt-1"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "content_block_type": "table",
+          "styling": {
+            "classes": [
+              "col-6",
+              "table-responsive",
+              "mt-1",
+              "p-1"
+            ],
+            "body": {
+              "classes": [
+                "table",
+                "table-sm"
+              ],
+              "styles": {
+                "margin-bottom": "0.5rem !important",
+                "margin-top": "0.5rem !important"
+              }
+            }
+          },
+          "header": {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "Statistics",
+              "tag": "h6",
+              "styling": {
+                "classes": [
+                  "m-0"
+                ]
+              }
+            }
+          },
+          "table": [
+            [
+              "Evaluated Expectations",
+              51
+            ],
+            [
+              "Successful Expectations",
+              43
+            ],
+            [
+              "Unsuccessful Expectations",
+              8
+            ],
+            [
+              "Success Percent",
+              "\u224884.31%"
+            ]
+          ]
+        },
+        {
+          "content_block_type": "collapse",
+          "styling": {
+            "body": {
+              "classes": [
+                "card",
+                "card-body"
+              ]
+            },
+            "classes": [
+              "col-12",
+              "p-1"
+            ]
+          },
+          "collapse_toggle_link": "Show more info...",
+          "collapse": [
+            {
+              "content_block_type": "table",
+              "styling": {
+                "classes": [
+                  "col-12",
+                  "table-responsive",
+                  "mt-1"
+                ],
+                "body": {
+                  "classes": [
+                    "table",
+                    "table-sm"
+                  ],
+                  "styles": {
+                    "margin-bottom": "0.5rem !important",
+                    "margin-top": "0.5rem !important"
+                  }
+                }
+              },
+              "header": {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "Info",
+                  "tag": "h6",
+                  "styling": {
+                    "classes": [
+                      "m-0"
+                    ]
+                  }
+                }
+              },
+              "table": [
+                [
+                  "Great Expectations Version",
+                  "0.9.7+17.g02805059.dirty"
+                ],
+                [
+                  "Run Name",
+                  "20200322T170247.671855Z"
+                ],
+                [
+                  "Run Time",
+                  "2020-03-22T17:02:47.671855Z"
+                ]
+              ]
+            },
+            {
+              "content_block_type": "table",
+              "styling": {
+                "body": {
+                  "classes": [
+                    "table",
+                    "table-sm"
+                  ],
+                  "styles": {
+                    "margin-bottom": "0.5rem !important",
+                    "margin-top": "0.5rem !important"
+                  }
+                }
+              },
+              "header": {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "Batch Kwargs",
+                  "tag": "h6",
+                  "styling": {
+                    "classes": [
+                      "m-0"
+                    ]
+                  }
+                }
+              },
+              "table": [
+                [
+                  {
+                    "content_block_type": "string_template",
+                    "styling": {
+                      "parent": {
+                        "classes": [
+                          "pr-3"
+                        ]
+                      }
+                    },
+                    "string_template": {
+                      "template": "$value",
+                      "params": {
+                        "value": "ge_batch_id"
+                      },
+                      "styling": {
+                        "default": {
+                          "styles": {
+                            "word-break": "break-all"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "content_block_type": "string_template",
+                    "styling": {
+                      "parent": {
+                        "classes": []
+                      }
+                    },
+                    "string_template": {
+                      "template": "$value",
+                      "params": {
+                        "value": "f499679e-6c5e-11ea-8d20-acde48001122"
+                      },
+                      "styling": {
+                        "default": {
+                          "styles": {
+                            "word-break": "break-all"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              ]
+            }
+          ],
+          "inline_link": false
+        }
+      ],
+      "section_name": "Overview"
+    },
+    {
+      "content_blocks": [
+        {
+          "content_block_type": "header",
+          "styling": {
+            "classes": [
+              "col-12",
+              "p-0"
+            ],
+            "header": {
+              "classes": [
+                "alert",
+                "alert-secondary"
+              ]
+            }
+          },
+          "header": {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "Table-Level Expectations",
+              "tag": "h5",
+              "styling": {
+                "classes": [
+                  "m-0"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "content_block_type": "table",
+          "styling": {
+            "body": {
+              "classes": [
+                "table"
+              ]
+            },
+            "classes": [
+              "ml-2",
+              "mr-2",
+              "mt-0",
+              "mb-0",
+              "table-responsive",
+              "hide-succeeded-validations-column-section-target-child"
+            ]
+          },
+          "table": [
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "Must have greater than or equal to $min_value rows.",
+                  "params": {
+                    "min_value": 0,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "1,313"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "Must have a list of columns in a specific order, but that order is not specified.",
+                  "params": {
+                    "column_list": null,
+                    "result_format": "SUMMARY"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "['Unnamed: 0', 'Name', 'PClass', 'Age', 'Sex', 'Survived', 'SexCode']"
+            ]
+          ],
+          "header_row": [
+            "Status",
+            "Expectation",
+            "Observed Value"
+          ],
+          "header_row_options": {
+            "Status": {
+              "sortable": true
+            }
+          },
+          "table_options": {
+            "search": true,
+            "icon-size": "sm"
+          }
+        }
+      ],
+      "section_name": "Table-Level Expectations"
+    },
+    {
+      "content_blocks": [
+        {
+          "content_block_type": "header",
+          "styling": {
+            "classes": [
+              "col-12",
+              "p-0"
+            ],
+            "header": {
+              "classes": [
+                "alert",
+                "alert-secondary"
+              ]
+            }
+          },
+          "header": {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "Unnamed: 0",
+              "tag": "h5",
+              "styling": {
+                "classes": [
+                  "m-0"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "content_block_type": "table",
+          "styling": {
+            "body": {
+              "classes": [
+                "table"
+              ]
+            },
+            "classes": [
+              "ml-2",
+              "mr-2",
+              "mt-0",
+              "mb-0",
+              "table-responsive"
+            ]
+          },
+          "table": [
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7 $v__8 $v__9.",
+                  "params": {
+                    "column": "Unnamed: 0",
+                    "type_list": [
+                      "BIGINT",
+                      "BYTEINT",
+                      "DECIMAL",
+                      "INT",
+                      "INTEGER",
+                      "IntegerType",
+                      "LongType",
+                      "SMALLINT",
+                      "TINYINT",
+                      "int"
+                    ],
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "v__0": "BIGINT",
+                    "v__1": "BYTEINT",
+                    "v__2": "DECIMAL",
+                    "v__3": "INT",
+                    "v__4": "INTEGER",
+                    "v__5": "IntegerType",
+                    "v__6": "LongType",
+                    "v__7": "SMALLINT",
+                    "v__8": "TINYINT",
+                    "v__9": "int"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "int64"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any number of unique values.",
+                  "params": {
+                    "column": "Unnamed: 0",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "1,313"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any fraction of unique values.",
+                  "params": {
+                    "column": "Unnamed: 0",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "1"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "values must not be null, at least $mostly_pct % of the time.",
+                  "params": {
+                    "column": "Unnamed: 0",
+                    "mostly": 0.5,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "mostly_pct": "50"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "100% not null"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u274c"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "tag": "i",
+                        "classes": [
+                          "fas",
+                          "fa-times",
+                          "text-danger"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              [
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "values must belong to this set: [ ].",
+                    "params": {
+                      "column": "Unnamed: 0",
+                      "value_set": [],
+                      "result_format": "SUMMARY",
+                      "mostly": null,
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
+                    },
+                    "styling": {
+                      "default": {
+                        "classes": [
+                          "badge",
+                          "badge-secondary"
+                        ]
+                      },
+                      "params": {
+                        "column": {
+                          "classes": [
+                            "badge",
+                            "badge-primary"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
+                    "params": {
+                      "unexpected_count": "1,313",
+                      "unexpected_percent": "100%",
+                      "element_count": "1,313"
+                    },
+                    "tag": "strong",
+                    "styling": {
+                      "classes": [
+                        "text-danger"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "table",
+                  "styling": {
+                    "body": {
+                      "classes": [
+                        "table-bordered",
+                        "table-sm",
+                        "mt-3"
+                      ]
+                    }
+                  },
+                  "table": [
+                    [
+                      1
+                    ],
+                    [
+                      2
+                    ],
+                    [
+                      3
+                    ],
+                    [
+                      4
+                    ],
+                    [
+                      5
+                    ],
+                    [
+                      6
+                    ],
+                    [
+                      7
+                    ],
+                    [
+                      8
+                    ],
+                    [
+                      9
+                    ],
+                    [
+                      10
+                    ],
+                    [
+                      11
+                    ],
+                    [
+                      12
+                    ],
+                    [
+                      13
+                    ],
+                    [
+                      14
+                    ],
+                    [
+                      15
+                    ],
+                    [
+                      16
+                    ],
+                    [
+                      17
+                    ],
+                    [
+                      18
+                    ],
+                    [
+                      19
+                    ],
+                    [
+                      20
+                    ]
+                  ],
+                  "header_row": [
+                    "Sampled Unexpected Values"
+                  ]
+                }
+              ],
+              "100% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "values must be unique.",
+                  "params": {
+                    "column": "Unnamed: 0",
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "0% unexpected"
+            ]
+          ],
+          "header_row": [
+            "Status",
+            "Expectation",
+            "Observed Value"
+          ],
+          "header_row_options": {
+            "Status": {
+              "sortable": true
+            }
+          },
+          "table_options": {
+            "search": true,
+            "icon-size": "sm"
+          }
+        }
+      ],
+      "section_name": "Unnamed: 0"
+    },
+    {
+      "content_blocks": [
+        {
+          "content_block_type": "header",
+          "styling": {
+            "classes": [
+              "col-12",
+              "p-0"
+            ],
+            "header": {
+              "classes": [
+                "alert",
+                "alert-secondary"
+              ]
+            }
+          },
+          "header": {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "Name",
+              "tag": "h5",
+              "styling": {
+                "classes": [
+                  "m-0"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "content_block_type": "table",
+          "styling": {
+            "body": {
+              "classes": [
+                "table"
+              ]
+            },
+            "classes": [
+              "ml-2",
+              "mr-2",
+              "mt-0",
+              "mb-0",
+              "table-responsive"
+            ]
+          },
+          "table": [
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6.",
+                  "params": {
+                    "column": "Name",
+                    "type_list": [
+                      "CHAR",
+                      "STRING",
+                      "StringType",
+                      "TEXT",
+                      "VARCHAR",
+                      "str",
+                      "string"
+                    ],
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "v__0": "CHAR",
+                    "v__1": "STRING",
+                    "v__2": "StringType",
+                    "v__3": "TEXT",
+                    "v__4": "VARCHAR",
+                    "v__5": "str",
+                    "v__6": "string"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "0% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any number of unique values.",
+                  "params": {
+                    "column": "Name",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "1,310"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any fraction of unique values.",
+                  "params": {
+                    "column": "Name",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "\u22480.9977151561"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "values must not be null, at least $mostly_pct % of the time.",
+                  "params": {
+                    "column": "Name",
+                    "mostly": 0.5,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "mostly_pct": "50"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "100% not null"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u274c"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "tag": "i",
+                        "classes": [
+                          "fas",
+                          "fa-times",
+                          "text-danger"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              [
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "values must belong to this set: [ ].",
+                    "params": {
+                      "column": "Name",
+                      "value_set": [],
+                      "result_format": "SUMMARY",
+                      "mostly": null,
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
+                    },
+                    "styling": {
+                      "default": {
+                        "classes": [
+                          "badge",
+                          "badge-secondary"
+                        ]
+                      },
+                      "params": {
+                        "column": {
+                          "classes": [
+                            "badge",
+                            "badge-primary"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
+                    "params": {
+                      "unexpected_count": "1,313",
+                      "unexpected_percent": "100%",
+                      "element_count": "1,313"
+                    },
+                    "tag": "strong",
+                    "styling": {
+                      "classes": [
+                        "text-danger"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "table",
+                  "styling": {
+                    "body": {
+                      "classes": [
+                        "table-bordered",
+                        "table-sm",
+                        "mt-3"
+                      ]
+                    }
+                  },
+                  "table": [
+                    [
+                      "Carlsson, Mr Frans Olof"
+                    ],
+                    [
+                      "Connolly, Miss Kate"
+                    ],
+                    [
+                      "Kelly, Mr James"
+                    ],
+                    [
+                      "Allen, Miss Elisabeth Walton"
+                    ],
+                    [
+                      "Allison, Master Hudson Trevor"
+                    ],
+                    [
+                      "Allison, Miss Helen Loraine"
+                    ],
+                    [
+                      "Allison, Mr Hudson Joshua Creighton"
+                    ],
+                    [
+                      "Allison, Mrs Hudson JC (Bessie Waldo Daniels)"
+                    ],
+                    [
+                      "Anderson, Mr Harry"
+                    ],
+                    [
+                      "Andrews, Miss Kornelia Theodosia"
+                    ],
+                    [
+                      "Andrews, Mr Thomas, jr"
+                    ],
+                    [
+                      "Appleton, Mrs Edward Dale (Charlotte Lamson)"
+                    ],
+                    [
+                      "Artagaveytia, Mr Ramon"
+                    ],
+                    [
+                      "Astor, Colonel John Jacob"
+                    ],
+                    [
+                      "Astor, Mrs John Jacob (Madeleine Talmadge Force)"
+                    ],
+                    [
+                      "Aubert, Mrs Leontine Pauline"
+                    ],
+                    [
+                      "Barkworth, Mr Algernon H"
+                    ],
+                    [
+                      "Baumann, Mr John D"
+                    ],
+                    [
+                      "Baxter, Mr Quigg Edmond"
+                    ],
+                    [
+                      "Baxter, Mrs James (Helene DeLaudeniere Chaput)"
+                    ]
+                  ],
+                  "header_row": [
+                    "Sampled Unexpected Values"
+                  ]
+                }
+              ],
+              "100% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u274c"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "tag": "i",
+                        "classes": [
+                          "fas",
+                          "fa-times",
+                          "text-danger"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              [
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "values must not match this regular expression: $regex.",
+                    "params": {
+                      "column": "Name",
+                      "regex": "^\\s+|\\s+$",
+                      "result_format": "SUMMARY",
+                      "mostly": null,
+                      "row_condition": null,
+                      "condition_parser": null
+                    },
+                    "styling": {
+                      "default": {
+                        "classes": [
+                          "badge",
+                          "badge-secondary"
+                        ]
+                      },
+                      "params": {
+                        "column": {
+                          "classes": [
+                            "badge",
+                            "badge-primary"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
+                    "params": {
+                      "unexpected_count": "3",
+                      "unexpected_percent": "\u22480.2285%",
+                      "element_count": "1,313"
+                    },
+                    "tag": "strong",
+                    "styling": {
+                      "classes": [
+                        "text-danger"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "table",
+                  "styling": {
+                    "body": {
+                      "classes": [
+                        "table-bordered",
+                        "table-sm",
+                        "mt-3"
+                      ]
+                    }
+                  },
+                  "table": [
+                    [
+                      "Barber, Ms ",
+                      1
+                    ],
+                    [
+                      "Daly, Mr Peter Denis ",
+                      1
+                    ],
+                    [
+                      "Geiger, Miss Emily ",
+                      1
+                    ]
+                  ],
+                  "header_row": [
+                    "Unexpected Value",
+                    "Count"
+                  ]
+                }
+              ],
+              "\u22480.22848% unexpected"
+            ]
+          ],
+          "header_row": [
+            "Status",
+            "Expectation",
+            "Observed Value"
+          ],
+          "header_row_options": {
+            "Status": {
+              "sortable": true
+            }
+          },
+          "table_options": {
+            "search": true,
+            "icon-size": "sm"
+          }
+        }
+      ],
+      "section_name": "Name"
+    },
+    {
+      "content_blocks": [
+        {
+          "content_block_type": "header",
+          "styling": {
+            "classes": [
+              "col-12",
+              "p-0"
+            ],
+            "header": {
+              "classes": [
+                "alert",
+                "alert-secondary"
+              ]
+            }
+          },
+          "header": {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "PClass",
+              "tag": "h5",
+              "styling": {
+                "classes": [
+                  "m-0"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "content_block_type": "table",
+          "styling": {
+            "body": {
+              "classes": [
+                "table"
+              ]
+            },
+            "classes": [
+              "ml-2",
+              "mr-2",
+              "mt-0",
+              "mb-0",
+              "table-responsive"
+            ]
+          },
+          "table": [
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6.",
+                  "params": {
+                    "column": "PClass",
+                    "type_list": [
+                      "CHAR",
+                      "STRING",
+                      "StringType",
+                      "TEXT",
+                      "VARCHAR",
+                      "str",
+                      "string"
+                    ],
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "v__0": "CHAR",
+                    "v__1": "STRING",
+                    "v__2": "StringType",
+                    "v__3": "TEXT",
+                    "v__4": "VARCHAR",
+                    "v__5": "str",
+                    "v__6": "string"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "0% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any number of unique values.",
+                  "params": {
+                    "column": "PClass",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "4"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any fraction of unique values.",
+                  "params": {
+                    "column": "PClass",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "\u22480.003046458492"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "values must not be null, at least $mostly_pct % of the time.",
+                  "params": {
+                    "column": "PClass",
+                    "mostly": 0.5,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "mostly_pct": "50"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "100% not null"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u274c"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "tag": "i",
+                        "classes": [
+                          "fas",
+                          "fa-times",
+                          "text-danger"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              [
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "values must belong to this set: [ ].",
+                    "params": {
+                      "column": "PClass",
+                      "value_set": [],
+                      "result_format": "SUMMARY",
+                      "mostly": null,
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
+                    },
+                    "styling": {
+                      "default": {
+                        "classes": [
+                          "badge",
+                          "badge-secondary"
+                        ]
+                      },
+                      "params": {
+                        "column": {
+                          "classes": [
+                            "badge",
+                            "badge-primary"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
+                    "params": {
+                      "unexpected_count": "1,313",
+                      "unexpected_percent": "100%",
+                      "element_count": "1,313"
+                    },
+                    "tag": "strong",
+                    "styling": {
+                      "classes": [
+                        "text-danger"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "table",
+                  "styling": {
+                    "body": {
+                      "classes": [
+                        "table-bordered",
+                        "table-sm",
+                        "mt-3"
+                      ]
+                    }
+                  },
+                  "table": [
+                    [
+                      "3rd",
+                      711
+                    ],
+                    [
+                      "1st",
+                      322
+                    ],
+                    [
+                      "2nd",
+                      279
+                    ],
+                    [
+                      "*",
+                      1
+                    ]
+                  ],
+                  "header_row": [
+                    "Unexpected Value",
+                    "Count"
+                  ]
+                }
+              ],
+              "100% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "values must not match this regular expression: $regex.",
+                  "params": {
+                    "column": "PClass",
+                    "regex": "^\\s+|\\s+$",
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "0% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "distinct values must belong to a set, but that set is not specified.",
+                  "params": {
+                    "column": "PClass",
+                    "value_set": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "['*', '1st', '2nd', '3rd']"
+            ]
+          ],
+          "header_row": [
+            "Status",
+            "Expectation",
+            "Observed Value"
+          ],
+          "header_row_options": {
+            "Status": {
+              "sortable": true
+            }
+          },
+          "table_options": {
+            "search": true,
+            "icon-size": "sm"
+          }
+        }
+      ],
+      "section_name": "PClass"
+    },
+    {
+      "content_blocks": [
+        {
+          "content_block_type": "header",
+          "styling": {
+            "classes": [
+              "col-12",
+              "p-0"
+            ],
+            "header": {
+              "classes": [
+                "alert",
+                "alert-secondary"
+              ]
+            }
+          },
+          "header": {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "Age",
+              "tag": "h5",
+              "styling": {
+                "classes": [
+                  "m-0"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "content_block_type": "table",
+          "styling": {
+            "body": {
+              "classes": [
+                "table"
+              ]
+            },
+            "classes": [
+              "ml-2",
+              "mr-2",
+              "mt-0",
+              "mb-0",
+              "table-responsive"
+            ]
+          },
+          "table": [
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.",
+                  "params": {
+                    "column": "Age",
+                    "type_list": [
+                      "DOUBLE_PRECISION",
+                      "DoubleType",
+                      "FLOAT",
+                      "FLOAT4",
+                      "FLOAT8",
+                      "FloatType",
+                      "NUMERIC",
+                      "float"
+                    ],
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "v__0": "DOUBLE_PRECISION",
+                    "v__1": "DoubleType",
+                    "v__2": "FLOAT",
+                    "v__3": "FLOAT4",
+                    "v__4": "FLOAT8",
+                    "v__5": "FloatType",
+                    "v__6": "NUMERIC",
+                    "v__7": "float"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "float64"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any number of unique values.",
+                  "params": {
+                    "column": "Age",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "75"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any fraction of unique values.",
+                  "params": {
+                    "column": "Age",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "\u22480.09920634921"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "values must not be null, at least $mostly_pct % of the time.",
+                  "params": {
+                    "column": "Age",
+                    "mostly": 0.5,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "mostly_pct": "50"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "\u224857.578% not null"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u274c"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "tag": "i",
+                        "classes": [
+                          "fas",
+                          "fa-times",
+                          "text-danger"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              [
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "values must belong to this set: [ ].",
+                    "params": {
+                      "column": "Age",
+                      "value_set": [],
+                      "result_format": "SUMMARY",
+                      "mostly": null,
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
+                    },
+                    "styling": {
+                      "default": {
+                        "classes": [
+                          "badge",
+                          "badge-secondary"
+                        ]
+                      },
+                      "params": {
+                        "column": {
+                          "classes": [
+                            "badge",
+                            "badge-primary"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
+                    "params": {
+                      "unexpected_count": "756",
+                      "unexpected_percent": "\u224857.58%",
+                      "element_count": "1,313"
+                    },
+                    "tag": "strong",
+                    "styling": {
+                      "classes": [
+                        "text-danger"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "table",
+                  "styling": {
+                    "body": {
+                      "classes": [
+                        "table-bordered",
+                        "table-sm",
+                        "mt-3"
+                      ]
+                    }
+                  },
+                  "table": [
+                    [
+                      22.0
+                    ],
+                    [
+                      21.0
+                    ],
+                    [
+                      30.0
+                    ],
+                    [
+                      18.0
+                    ],
+                    [
+                      36.0
+                    ],
+                    [
+                      24.0
+                    ],
+                    [
+                      26.0
+                    ],
+                    [
+                      27.0
+                    ],
+                    [
+                      28.0
+                    ],
+                    [
+                      19.0
+                    ],
+                    [
+                      20.0
+                    ],
+                    [
+                      23.0
+                    ],
+                    [
+                      25.0
+                    ],
+                    [
+                      32.0
+                    ],
+                    [
+                      45.0
+                    ],
+                    [
+                      29.0
+                    ],
+                    [
+                      31.0
+                    ],
+                    [
+                      33.0
+                    ],
+                    [
+                      35.0
+                    ],
+                    [
+                      39.0
+                    ]
+                  ],
+                  "header_row": [
+                    "Sampled Unexpected Values"
+                  ]
+                }
+              ],
+              "\u224857.578% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "minimum value may have any numerical value.",
+                  "params": {
+                    "column": "Age",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "parse_strings_as_datetimes": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "0.17"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "maximum value may have any numerical value.",
+                  "params": {
+                    "column": "Age",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "parse_strings_as_datetimes": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "71"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "mean may have any numerical value.",
+                  "params": {
+                    "column": "Age",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "\u224830.39798942"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "median may have any numerical value.",
+                  "params": {
+                    "column": "Age",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "28"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              [
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "quantiles must be within the following value ranges.",
+                    "params": {
+                      "column": "Age",
+                      "quantile_ranges": {
+                        "quantiles": [
+                          0.05,
+                          0.25,
+                          0.5,
+                          0.75,
+                          0.95
+                        ],
+                        "value_ranges": [
+                          [
+                            null,
+                            null
+                          ],
+                          [
+                            null,
+                            null
+                          ],
+                          [
+                            null,
+                            null
+                          ],
+                          [
+                            null,
+                            null
+                          ],
+                          [
+                            null,
+                            null
+                          ]
+                        ]
+                      },
+                      "result_format": "SUMMARY",
+                      "row_condition": null,
+                      "condition_parser": null
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "table",
+                  "header_row": [
+                    "Quantile",
+                    "Min Value",
+                    "Max Value"
+                  ],
+                  "table": [
+                    [
+                      "0.05",
+                      "Any",
+                      "Any"
+                    ],
+                    [
+                      "Q1",
+                      "Any",
+                      "Any"
+                    ],
+                    [
+                      "Median",
+                      "Any",
+                      "Any"
+                    ],
+                    [
+                      "Q3",
+                      "Any",
+                      "Any"
+                    ],
+                    [
+                      "0.95",
+                      "Any",
+                      "Any"
+                    ]
+                  ],
+                  "styling": {
+                    "body": {
+                      "classes": [
+                        "table",
+                        "table-sm",
+                        "table-unbordered",
+                        "col-4",
+                        "mt-2"
+                      ]
+                    },
+                    "parent": {
+                      "styles": {
+                        "list-style-type": "none"
+                      }
+                    }
+                  }
+                }
+              ],
+              {
+                "content_block_type": "table",
+                "styling": {
+                  "body": {
+                    "classes": [
+                      "table",
+                      "table-sm",
+                      "table-unbordered",
+                      "col-4"
+                    ]
+                  }
+                },
+                "table": [
+                  [
+                    "0.05",
+                    "6.0"
+                  ],
+                  [
+                    "Q1",
+                    "21.0"
+                  ],
+                  [
+                    "Median",
+                    "28.0"
+                  ],
+                  [
+                    "Q3",
+                    "39.0"
+                  ],
+                  [
+                    "0.95",
+                    "57.0"
+                  ]
+                ],
+                "header_row": [
+                  "Quantile",
+                  "Value"
+                ]
+              }
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "can match any distribution.",
+                  "params": {
+                    "column": "Age",
+                    "partition_object": null,
+                    "threshold": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null
+                  }
+                }
+              },
+              {
+                "content_block_type": "content_block_container",
+                "content_blocks": [
+                  {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                      "template": "KL Divergence: $observed_value",
+                      "params": {
+                        "observed_value": "None (-infinity, infinity, or NaN)"
+                      },
+                      "styling": {
+                        "classes": [
+                          "mb-2"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "content_block_type": "graph",
+                    "styling": {
+                      "classes": [
+                        "col-4",
+                        "mt-2",
+                        "pl-1",
+                        "pr-1"
+                      ],
+                      "parent": {
+                        "styles": {
+                          "list-style-type": "none"
+                        }
+                      }
+                    },
+                    "graph": "{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v4.8.1.json\",\n  \"autosize\": \"fit\",\n  \"config\": {\n    \"view\": {\n      \"continuousHeight\": 300,\n      \"continuousWidth\": 400\n    }\n  },\n  \"data\": {\n    \"name\": \"data-239befdaa7503a2ed2cd7283306bb6f7\"\n  },\n  \"datasets\": {\n    \"data-239befdaa7503a2ed2cd7283306bb6f7\": [\n      {\n        \"bin_max\": 4.1,\n        \"bin_min\": 0.2,\n        \"fraction\": 0.04365079365079365\n      },\n      {\n        \"bin_max\": 8.0,\n        \"bin_min\": 4.1,\n        \"fraction\": 0.017195767195767195\n      },\n      {\n        \"bin_max\": 12.0,\n        \"bin_min\": 8.0,\n        \"fraction\": 0.015873015873015872\n      },\n      {\n        \"bin_max\": 15.9,\n        \"bin_min\": 12.0,\n        \"fraction\": 0.01984126984126984\n      },\n      {\n        \"bin_max\": 19.8,\n        \"bin_min\": 15.9,\n        \"fraction\": 0.10052910052910052\n      },\n      {\n        \"bin_max\": 23.8,\n        \"bin_min\": 19.8,\n        \"fraction\": 0.14814814814814814\n      },\n      {\n        \"bin_max\": 27.7,\n        \"bin_min\": 23.8,\n        \"fraction\": 0.1335978835978836\n      },\n      {\n        \"bin_max\": 31.7,\n        \"bin_min\": 27.7,\n        \"fraction\": 0.1111111111111111\n      },\n      {\n        \"bin_max\": 35.6,\n        \"bin_min\": 31.7,\n        \"fraction\": 0.082010582010582\n      },\n      {\n        \"bin_max\": 39.5,\n        \"bin_min\": 35.6,\n        \"fraction\": 0.08068783068783068\n      },\n      {\n        \"bin_max\": 43.5,\n        \"bin_min\": 39.5,\n        \"fraction\": 0.051587301587301584\n      },\n      {\n        \"bin_max\": 47.4,\n        \"bin_min\": 43.5,\n        \"fraction\": 0.05952380952380952\n      },\n      {\n        \"bin_max\": 51.3,\n        \"bin_min\": 47.4,\n        \"fraction\": 0.04894179894179894\n      },\n      {\n        \"bin_max\": 55.3,\n        \"bin_min\": 51.3,\n        \"fraction\": 0.0291005291005291\n      },\n      {\n        \"bin_max\": 59.2,\n        \"bin_min\": 55.3,\n        \"fraction\": 0.022486772486772486\n      },\n      {\n        \"bin_max\": 63.1,\n        \"bin_min\": 59.2,\n        \"fraction\": 0.017195767195767195\n      },\n      {\n        \"bin_max\": 67.1,\n        \"bin_min\": 63.1,\n        \"fraction\": 0.011904761904761904\n      },\n      {\n        \"bin_max\": 71.0,\n        \"bin_min\": 67.1,\n        \"fraction\": 0.006613756613756613\n      }\n    ]\n  },\n  \"encoding\": {\n    \"tooltip\": [\n      {\n        \"field\": \"bin_min\",\n        \"type\": \"quantitative\"\n      },\n      {\n        \"field\": \"bin_max\",\n        \"type\": \"quantitative\"\n      },\n      {\n        \"field\": \"fraction\",\n        \"type\": \"quantitative\"\n      }\n    ],\n    \"x\": {\n      \"field\": \"bin_min\",\n      \"type\": \"ordinal\"\n    },\n    \"x2\": {\n      \"field\": \"bin_max\"\n    },\n    \"y\": {\n      \"field\": \"fraction\",\n      \"type\": \"quantitative\"\n    }\n  },\n  \"height\": 400,\n  \"mark\": \"bar\",\n  \"width\": 250\n}"
+                  }
+                ]
+              }
+            ]
+          ],
+          "header_row": [
+            "Status",
+            "Expectation",
+            "Observed Value"
+          ],
+          "header_row_options": {
+            "Status": {
+              "sortable": true
+            }
+          },
+          "table_options": {
+            "search": true,
+            "icon-size": "sm"
+          }
+        }
+      ],
+      "section_name": "Age"
+    },
+    {
+      "content_blocks": [
+        {
+          "content_block_type": "header",
+          "styling": {
+            "classes": [
+              "col-12",
+              "p-0"
+            ],
+            "header": {
+              "classes": [
+                "alert",
+                "alert-secondary"
+              ]
+            }
+          },
+          "header": {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "Sex",
+              "tag": "h5",
+              "styling": {
+                "classes": [
+                  "m-0"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "content_block_type": "table",
+          "styling": {
+            "body": {
+              "classes": [
+                "table"
+              ]
+            },
+            "classes": [
+              "ml-2",
+              "mr-2",
+              "mt-0",
+              "mb-0",
+              "table-responsive"
+            ]
+          },
+          "table": [
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6.",
+                  "params": {
+                    "column": "Sex",
+                    "type_list": [
+                      "CHAR",
+                      "STRING",
+                      "StringType",
+                      "TEXT",
+                      "VARCHAR",
+                      "str",
+                      "string"
+                    ],
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "v__0": "CHAR",
+                    "v__1": "STRING",
+                    "v__2": "StringType",
+                    "v__3": "TEXT",
+                    "v__4": "VARCHAR",
+                    "v__5": "str",
+                    "v__6": "string"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "0% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any number of unique values.",
+                  "params": {
+                    "column": "Sex",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "2"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any fraction of unique values.",
+                  "params": {
+                    "column": "Sex",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "\u22480.001523229246"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "values must not be null, at least $mostly_pct % of the time.",
+                  "params": {
+                    "column": "Sex",
+                    "mostly": 0.5,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "mostly_pct": "50"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "100% not null"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u274c"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "tag": "i",
+                        "classes": [
+                          "fas",
+                          "fa-times",
+                          "text-danger"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              [
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "values must belong to this set: [ ].",
+                    "params": {
+                      "column": "Sex",
+                      "value_set": [],
+                      "result_format": "SUMMARY",
+                      "mostly": null,
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
+                    },
+                    "styling": {
+                      "default": {
+                        "classes": [
+                          "badge",
+                          "badge-secondary"
+                        ]
+                      },
+                      "params": {
+                        "column": {
+                          "classes": [
+                            "badge",
+                            "badge-primary"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
+                    "params": {
+                      "unexpected_count": "1,313",
+                      "unexpected_percent": "100%",
+                      "element_count": "1,313"
+                    },
+                    "tag": "strong",
+                    "styling": {
+                      "classes": [
+                        "text-danger"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "table",
+                  "styling": {
+                    "body": {
+                      "classes": [
+                        "table-bordered",
+                        "table-sm",
+                        "mt-3"
+                      ]
+                    }
+                  },
+                  "table": [
+                    [
+                      "male",
+                      851
+                    ],
+                    [
+                      "female",
+                      462
+                    ]
+                  ],
+                  "header_row": [
+                    "Unexpected Value",
+                    "Count"
+                  ]
+                }
+              ],
+              "100% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "values must not match this regular expression: $regex.",
+                  "params": {
+                    "column": "Sex",
+                    "regex": "^\\s+|\\s+$",
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "0% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "distinct values must belong to a set, but that set is not specified.",
+                  "params": {
+                    "column": "Sex",
+                    "value_set": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "['female', 'male']"
+            ]
+          ],
+          "header_row": [
+            "Status",
+            "Expectation",
+            "Observed Value"
+          ],
+          "header_row_options": {
+            "Status": {
+              "sortable": true
+            }
+          },
+          "table_options": {
+            "search": true,
+            "icon-size": "sm"
+          }
+        }
+      ],
+      "section_name": "Sex"
+    },
+    {
+      "content_blocks": [
+        {
+          "content_block_type": "header",
+          "styling": {
+            "classes": [
+              "col-12",
+              "p-0"
+            ],
+            "header": {
+              "classes": [
+                "alert",
+                "alert-secondary"
+              ]
+            }
+          },
+          "header": {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "Survived",
+              "tag": "h5",
+              "styling": {
+                "classes": [
+                  "m-0"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "content_block_type": "table",
+          "styling": {
+            "body": {
+              "classes": [
+                "table"
+              ]
+            },
+            "classes": [
+              "ml-2",
+              "mr-2",
+              "mt-0",
+              "mb-0",
+              "table-responsive"
+            ]
+          },
+          "table": [
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7 $v__8 $v__9.",
+                  "params": {
+                    "column": "Survived",
+                    "type_list": [
+                      "BIGINT",
+                      "BYTEINT",
+                      "DECIMAL",
+                      "INT",
+                      "INTEGER",
+                      "IntegerType",
+                      "LongType",
+                      "SMALLINT",
+                      "TINYINT",
+                      "int"
+                    ],
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "v__0": "BIGINT",
+                    "v__1": "BYTEINT",
+                    "v__2": "DECIMAL",
+                    "v__3": "INT",
+                    "v__4": "INTEGER",
+                    "v__5": "IntegerType",
+                    "v__6": "LongType",
+                    "v__7": "SMALLINT",
+                    "v__8": "TINYINT",
+                    "v__9": "int"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "int64"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any number of unique values.",
+                  "params": {
+                    "column": "Survived",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "2"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any fraction of unique values.",
+                  "params": {
+                    "column": "Survived",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "\u22480.001523229246"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "values must not be null, at least $mostly_pct % of the time.",
+                  "params": {
+                    "column": "Survived",
+                    "mostly": 0.5,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "mostly_pct": "50"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "100% not null"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u274c"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "tag": "i",
+                        "classes": [
+                          "fas",
+                          "fa-times",
+                          "text-danger"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              [
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "values must belong to this set: [ ].",
+                    "params": {
+                      "column": "Survived",
+                      "value_set": [],
+                      "result_format": "SUMMARY",
+                      "mostly": null,
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
+                    },
+                    "styling": {
+                      "default": {
+                        "classes": [
+                          "badge",
+                          "badge-secondary"
+                        ]
+                      },
+                      "params": {
+                        "column": {
+                          "classes": [
+                            "badge",
+                            "badge-primary"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
+                    "params": {
+                      "unexpected_count": "1,313",
+                      "unexpected_percent": "100%",
+                      "element_count": "1,313"
+                    },
+                    "tag": "strong",
+                    "styling": {
+                      "classes": [
+                        "text-danger"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "table",
+                  "styling": {
+                    "body": {
+                      "classes": [
+                        "table-bordered",
+                        "table-sm",
+                        "mt-3"
+                      ]
+                    }
+                  },
+                  "table": [
+                    [
+                      0,
+                      863
+                    ],
+                    [
+                      1,
+                      450
+                    ]
+                  ],
+                  "header_row": [
+                    "Unexpected Value",
+                    "Count"
+                  ]
+                }
+              ],
+              "100% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "distinct values must belong to a set, but that set is not specified.",
+                  "params": {
+                    "column": "Survived",
+                    "value_set": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "[0, 1]"
+            ]
+          ],
+          "header_row": [
+            "Status",
+            "Expectation",
+            "Observed Value"
+          ],
+          "header_row_options": {
+            "Status": {
+              "sortable": true
+            }
+          },
+          "table_options": {
+            "search": true,
+            "icon-size": "sm"
+          }
+        }
+      ],
+      "section_name": "Survived"
+    },
+    {
+      "content_blocks": [
+        {
+          "content_block_type": "header",
+          "styling": {
+            "classes": [
+              "col-12",
+              "p-0"
+            ],
+            "header": {
+              "classes": [
+                "alert",
+                "alert-secondary"
+              ]
+            }
+          },
+          "header": {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "SexCode",
+              "tag": "h5",
+              "styling": {
+                "classes": [
+                  "m-0"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "content_block_type": "table",
+          "styling": {
+            "body": {
+              "classes": [
+                "table"
+              ]
+            },
+            "classes": [
+              "ml-2",
+              "mr-2",
+              "mt-0",
+              "mb-0",
+              "table-responsive"
+            ]
+          },
+          "table": [
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7 $v__8 $v__9.",
+                  "params": {
+                    "column": "SexCode",
+                    "type_list": [
+                      "BIGINT",
+                      "BYTEINT",
+                      "DECIMAL",
+                      "INT",
+                      "INTEGER",
+                      "IntegerType",
+                      "LongType",
+                      "SMALLINT",
+                      "TINYINT",
+                      "int"
+                    ],
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "v__0": "BIGINT",
+                    "v__1": "BYTEINT",
+                    "v__2": "DECIMAL",
+                    "v__3": "INT",
+                    "v__4": "INTEGER",
+                    "v__5": "IntegerType",
+                    "v__6": "LongType",
+                    "v__7": "SMALLINT",
+                    "v__8": "TINYINT",
+                    "v__9": "int"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "int64"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any number of unique values.",
+                  "params": {
+                    "column": "SexCode",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "mostly": null,
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "2"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "may have any fraction of unique values.",
+                  "params": {
+                    "column": "SexCode",
+                    "min_value": null,
+                    "max_value": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "strict_min": null,
+                    "strict_max": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "\u22480.001523229246"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "values must not be null, at least $mostly_pct % of the time.",
+                  "params": {
+                    "column": "SexCode",
+                    "mostly": 0.5,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null,
+                    "mostly_pct": "50"
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "100% not null"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u274c"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "tag": "i",
+                        "classes": [
+                          "fas",
+                          "fa-times",
+                          "text-danger"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              [
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "values must belong to this set: [ ].",
+                    "params": {
+                      "column": "SexCode",
+                      "value_set": [],
+                      "result_format": "SUMMARY",
+                      "mostly": null,
+                      "parse_strings_as_datetimes": null,
+                      "row_condition": null,
+                      "condition_parser": null
+                    },
+                    "styling": {
+                      "default": {
+                        "classes": [
+                          "badge",
+                          "badge-secondary"
+                        ]
+                      },
+                      "params": {
+                        "column": {
+                          "classes": [
+                            "badge",
+                            "badge-primary"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "string_template",
+                  "string_template": {
+                    "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
+                    "params": {
+                      "unexpected_count": "1,313",
+                      "unexpected_percent": "100%",
+                      "element_count": "1,313"
+                    },
+                    "tag": "strong",
+                    "styling": {
+                      "classes": [
+                        "text-danger"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "content_block_type": "table",
+                  "styling": {
+                    "body": {
+                      "classes": [
+                        "table-bordered",
+                        "table-sm",
+                        "mt-3"
+                      ]
+                    }
+                  },
+                  "table": [
+                    [
+                      0,
+                      851
+                    ],
+                    [
+                      1,
+                      462
+                    ]
+                  ],
+                  "header_row": [
+                    "Unexpected Value",
+                    "Count"
+                  ]
+                }
+              ],
+              "100% unexpected"
+            ],
+            [
+              {
+                "content_block_type": "string_template",
+                "styling": {
+                  "parent": {
+                    "classes": [
+                      "hide-succeeded-validation-target-child"
+                    ]
+                  }
+                },
+                "string_template": {
+                  "template": "$icon",
+                  "params": {
+                    "icon": "",
+                    "markdown_status_icon": "\u2705"
+                  },
+                  "styling": {
+                    "params": {
+                      "icon": {
+                        "classes": [
+                          "fas",
+                          "fa-check-circle",
+                          "text-success"
+                        ],
+                        "tag": "i"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "content_block_type": "string_template",
+                "string_template": {
+                  "template": "distinct values must belong to a set, but that set is not specified.",
+                  "params": {
+                    "column": "SexCode",
+                    "value_set": null,
+                    "result_format": "SUMMARY",
+                    "row_condition": null,
+                    "condition_parser": null
+                  },
+                  "styling": {
+                    "default": {
+                      "classes": [
+                        "badge",
+                        "badge-secondary"
+                      ]
+                    },
+                    "params": {
+                      "column": {
+                        "classes": [
+                          "badge",
+                          "badge-primary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "[0, 1]"
+            ]
+          ],
+          "header_row": [
+            "Status",
+            "Expectation",
+            "Observed Value"
+          ],
+          "header_row_options": {
+            "Status": {
+              "sortable": true
+            }
+          },
+          "table_options": {
+            "search": true,
+            "icon-size": "sm"
+          }
+        }
+      ],
+      "section_name": "SexCode"
+    }
+  ],
+  "data_asset_name": null,
+  "full_data_asset_identifier": null,
+  "renderer_type": "ValidationResultsPageRenderer",
+  "page_title": "Validations / default / 2020-03-22T17:02:47.671855Z",
+  "utm_medium": "validation-results-page",
+  "cta_footer": null,
+  "expectation_suite_name": "default",
+  "batch_kwargs": {
+    "ge_batch_id": "f499679e-6c5e-11ea-8d20-acde48001122"
+  },
+  "batch_spec": null
+}
