@@ -19,8 +19,6 @@ logger = logging.getLogger(__name__)
 # TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
 def instantiate_class_from_config(config, runtime_environment, config_defaults=None):
     """Build a GE class from configuration dictionaries."""
-    if config is None:
-        config = {}
 
     if config_defaults is None:
         config_defaults = {}
