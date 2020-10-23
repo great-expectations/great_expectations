@@ -30,7 +30,8 @@ class RegexPartitioner(Partitioner):
         sorters: list = None,
         allow_multipart_partitions: bool = False,
         runtime_keys: list = None,
-        regex: dict = None
+        pattern: str = r"(.*)",
+        group_names: List[str] = None,
     ):
         logger.debug(f'Constructing RegexPartitioner "{name}".')
         super().__init__(
@@ -40,48 +41,15 @@ class RegexPartitioner(Partitioner):
             runtime_keys=runtime_keys
         )
 
-        self._regex = self._process_regex_config(regex_config=regex)
-
-    def _process_regex_config(self, regex_config: dict) -> dict:
-        regex: Union[dict, None]
-        if regex_config:
-            # check if dictionary
-            if not isinstance(regex_config, dict):
-                raise ge_exceptions.PartitionerError(
-                    f'''RegexPartitioner "{self.name}" requires a regex pattern configured as a dictionary.  It is
-currently of type "{type(regex_config)}. Please check your configuration.
-                    '''
-                )
-            # check if correct key exists
-            if not ("pattern" in regex_config.keys()):
-                raise ge_exceptions.PartitionerError(
-                    f'''RegexPartitioner "{self.name}" requires a regex pattern to be specified in its configuration.
-                    '''
-                )
-            regex = copy.deepcopy(regex_config)
-            # check if group_names exists in regex config, if not add empty list
-            if not ("group_names" in regex_config.keys() and isinstance(regex_config["group_names"], list)):
-                regex["group_names"] = []
-        else:
-            # if no configuration exists at all, set defaults
-            regex = {
-                "pattern": r"(.*)",
-                "group_names": [
-                    "group_0",
-                ]
-            }
-        return regex
-
-    @property
-    def regex(self) -> dict:
-        return self._regex
+        self._pattern = pattern
+        self._group_names = group_names
 
     # TODO: <Alex>See PyCharm warnings as to the method signature.</Alex>
     def convert_data_reference_to_batch_request(
         self,
         data_reference
     ) -> BatchRequest:
-        matches: Union[re.Match, None] = re.match(self.regex["pattern"], data_reference)
+        matches: Union[re.Match, None] = re.match(self._pattern, data_reference)
         if matches is None:
             #raise ValueError(f'No match found for data_reference: "{data_reference}".')
             return None
@@ -90,10 +58,10 @@ currently of type "{type(regex_config)}. Please check your configuration.
             f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
         ]
         self._validate_sorters_configuration(
-            partition_keys=self.regex["group_names"],
+            partition_keys=self._group_names,
             num_actual_partition_keys=len(groups)
         )
-        for idx, group_name in enumerate(self.regex["group_names"]):
+        for idx, group_name in enumerate(self._group_names):
             group_names[idx] = group_name
         partition_definition: dict = {}
         for idx, group_value in enumerate(groups):
@@ -117,10 +85,10 @@ currently of type "{type(regex_config)}. Please check your configuration.
             ]
             #
             self._validate_sorters_configuration(
-                partition_keys=self.regex["group_names"],
+                partition_keys=self._group_names,
                 num_actual_partition_keys=len(groups)
             )
-            for idx, group_name in enumerate(self.regex["group_names"]):
+            for idx, group_name in enumerate(self._group_names):
                 group_names[idx] = group_name
             partition_definition: dict = {}
             for idx, group_value in enumerate(groups):
@@ -158,7 +126,7 @@ currently of type "{type(regex_config)}. Please check your configuration.
         """
         NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
         """
-        regex_pattern = self.regex["pattern"]
+        regex_pattern = self._pattern
         data_reference_template = ""
         group_name_index = 0
 
@@ -173,7 +141,7 @@ currently of type "{type(regex_config)}. Please check your configuration.
 
             elif token == sre_constants.SUBPATTERN:
                 #Replace the captured group with "{next_group_name}" in the template
-                data_reference_template += "{"+self.regex["group_names"][group_name_index]+"}"
+                data_reference_template += "{"+self._group_names[group_name_index]+"}"
                 group_name_index += 1
 
             elif token in [

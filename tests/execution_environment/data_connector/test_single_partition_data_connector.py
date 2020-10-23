@@ -17,7 +17,8 @@ from tests.test_utils import (
     create_files_in_directory,
 )
 
-def test_basic_instantiation(tmp_path_factory):
+
+def test_basic_instantiation():
     data_reference_dict = {
         "path/A-100.csv" : create_fake_data_frame(),
         "path/A-101.csv" : create_fake_data_frame(),
@@ -30,11 +31,9 @@ def test_basic_instantiation(tmp_path_factory):
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         partitioner={
             "class_name": "RegexPartitioner",
-            "regex": {
-                "group_names": ["data_asset_name", "letter","number"],
-                "pattern": "(.*)/(.+)-(\\d+)\\.csv"
-            }
-        },
+            "pattern": "(.*)/(.+)-(\\d+)\\.csv",
+            "group_names": ["data_asset_name", "letter", "number"],
+    },
         data_reference_dict = data_reference_dict,
     )
 
@@ -70,12 +69,11 @@ execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
     
 partitioner:
     class_name: RegexPartitioner
-    regex:
-        group_names:
-            - year_dir
-            - month_dir
-            - data_asset_name
-        pattern: (\\d{4})/(\\d{2})/(.+)-\\d+\\.csv
+    pattern: (\\d{4})/(\\d{2})/(.+)-\\d+\\.csv
+    group_names:
+        - year_dir
+        - month_dir
+        - data_asset_name
     """
     config = yaml.load(yaml_string, Loader=yaml.FullLoader)
     config["data_reference_dict"] = data_reference_dict
@@ -145,25 +143,21 @@ base_directory: my_base_directory/
 # glob_directive: '*.csv'
 partitioner:
     class_name: RegexPartitioner
-    regex:
-        group_names:
-            - data_asset_name
-            - year_dir
-            - month_dir
-        pattern: ^(.+)-(\\d{4})(\\d{2})\\.[csv|txt]$
+    pattern: ^(.+)-(\\d{4})(\\d{2})\\.[csv|txt]$
+    group_names:
+        - data_asset_name
+        - year_dir
+        - month_dir
 
 assets:
     alpha:
-        class_name: Asset
         base_directory: alpha/files/go/here/
 
     beta:
-        class_name: Asset
         base_directory: beta_here/
         # glob_directive: '*.txt'
 
     gamma:
-        class_name: Asset
         # glob_directive: '*.txt'
 
     """
@@ -221,12 +215,11 @@ glob_directive: "*/*/*.csv"
 
 partitioner:
     class_name: RegexPartitioner
-    regex:
-        group_names:
-            - year_dir
-            - month_dir
-            - data_asset_name
-        pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    group_names:
+        - year_dir
+        - month_dir
+        - data_asset_name
     """, return_mode="return_object")
 
     assert return_object == {
@@ -281,12 +274,11 @@ glob_directive: "*/*/*.csv"
 
 partitioner:
     class_name: RegexPartitioner
-    regex:
-        group_names:
-            - year_dir
-            - month_dir
-            - data_asset_name
-        pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    group_names:
+        - year_dir
+        - month_dir
+        - data_asset_name
     """, return_mode="return_object")
 
     assert return_object == {
@@ -325,11 +317,9 @@ def test_self_check():
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         partitioner={
             "class_name": "RegexPartitioner",
-            "regex": {
-                "group_names": ["data_asset_name", "number"],
-                "pattern": "(.+)-(\\d+)\\.csv"
-            }
-        },
+            "pattern": "(.+)-(\\d+)\\.csv",
+            "group_names": ["data_asset_name", "number"]
+        }
     )
 
     self_check_return_object = my_data_connector.self_check()
@@ -371,11 +361,9 @@ def test_that_needs_a_better_name():
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         partitioner={
             "class_name": "RegexPartitioner",
-            "regex": {
-                "group_names": ["data_asset_name", "number"],
-                "pattern": "(.+)-(\\d+)\\.csv"
-            }
-        },
+            "pattern": "(.+)-(\\d+)\\.csv",
+            "group_names": ["data_asset_name", "number"]
+        }
     )
 
     self_check_return_object = my_data_connector.self_check()
@@ -400,4 +388,3 @@ def test_that_needs_a_better_name():
         'example_unmatched_data_references': ['CCC.csv'],
         'unmatched_data_reference_count': 1,
     }
-

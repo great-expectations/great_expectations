@@ -22,67 +22,58 @@ def test_regex_partitioner_instantiation():
     assert not partitioner.allow_multipart_partitions
     # without regex configured, you will get a default pattern
     # noinspection PyProtectedMember
-    assert partitioner._regex == {"pattern": r"(.*)", "group_names": ["group_0"]}
-
-
-def test_regex_partitioner_regex_is_not_a_dict():
-    regex = "i_am_not_a_dictionary"
-
-    with pytest.raises(ge_exceptions.PartitionerError):
-        # noinspection PyUnusedLocal,PyTypeChecker
-        partitioner = RegexPartitioner(
-            name="test_regex_partitioner",
-            regex=regex
-        )
-
-
-def test_regex_partitioner_regex_missing_pattern():
-    # missing pattern
-    regex = {"not pattern": "not pattern either"}
-    with pytest.raises(ge_exceptions.PartitionerError):
-        RegexPartitioner(name="test_regex_partitioner", regex=regex)
+    assert partitioner._pattern == r"(.*)"
+    # noinspection PyProtectedMember
+    assert partitioner._group_names is None
 
 
 def test_regex_partitioner_regex_no_groups_named():
     # adding pattern (no groups named)
-    regex = {"pattern": r".+\/(.+)_(.+)_(.+)\.csv"}
+    pattern = r".+\/(.+)_(.+)_(.+)\.csv"
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex=regex
+        pattern=pattern,
     )
     # noinspection PyProtectedMember
-    assert regex_partitioner._regex == {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": []}
+    assert regex_partitioner._pattern == r".+\/(.+)_(.+)_(.+)\.csv"
+    # noinspection PyProtectedMember
+    assert regex_partitioner._group_names is None
 
 
 def test_regex_partitioner_regex_groups_named():
     # adding pattern with named groups
-    regex = {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}
+    pattern = r".+\/(.+)_(.+)_(.+)\.csv"
+    group_names = ["name", "timestamp", "price"]
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex=regex
+        pattern=pattern,
+        group_names=group_names
     )
     # noinspection PyProtectedMember
-    assert regex_partitioner._regex == {
-        "pattern": r".+\/(.+)_(.+)_(.+)\.csv",
-        "group_names": ["name", "timestamp", "price"]
-    }
+    assert regex_partitioner._pattern == r".+\/(.+)_(.+)_(.+)\.csv"
+    # noinspection PyProtectedMember
+    assert regex_partitioner._group_names == ["name", "timestamp", "price"]
 
 
 def test_regex_partitioner_find_or_create_partitions_with_no_params():
-    regex = {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}
+    pattern = r".+\/(.+)_(.+)_(.+)\.csv"
+    group_names = ["name", "timestamp", "price"]
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex=regex
+        pattern=pattern,
+        group_names=group_names
     )
     # No file paths, nothing comes back
     assert regex_partitioner.find_or_create_partitions() == []
 
 
 def test_regex_partitioner_regex_does_not_match_paths():
-    regex = {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}
+    pattern = r".+\/(.+)_(.+)_(.+)\.csv"
+    group_names = ["name", "timestamp", "price"]
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex=regex
+        pattern=pattern,
+        group_names=group_names
     )
     paths: list = [
         "my_dir/hi.csv",
@@ -164,10 +155,12 @@ def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_da
 
 
 def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
-    regex = {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}
+    pattern = r".+\/(.+)_(.+)_(.+)\.csv"
+    group_names = ["name", "timestamp", "price"]
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex=regex
+        pattern=pattern,
+        group_names=group_names
     )
     paths: list = [
         "my_dir/alex_20200809_1000.csv",
@@ -191,10 +184,12 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
 
 
 def test_regex_partitioner_compute_partitions_auto_discover_assets_false_no_data_asset_name():
-    regex = {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}
+    pattern = r".+\/(.+)_(.+)_(.+)\.csv"
+    group_names = ["name", "timestamp", "price"]
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex=regex
+        pattern=pattern,
+        group_names=group_names
     )
     paths: list = [
         "my_dir/alex_20200809_1000.csv",
@@ -216,10 +211,12 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_false_no_data
 
 
 def test_regex_partitioner_compute_partitions_auto_discover_assets_false_data_asset_name_included():
-    regex = {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}
+    pattern = r".+\/(.+)_(.+)_(.+)\.csv"
+    group_names = ["name", "timestamp", "price"]
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex=regex
+        pattern=pattern,
+        group_names=group_names
     )
     paths: list = [
         "my_dir/alex_20200809_1000.csv",
@@ -265,11 +262,13 @@ def test_regex_partitioner_compute_partitions_adding_sorters():
                 },
             ]
 
-    regex = {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}
+    pattern = r".+\/(.+)_(.+)_(.+)\.csv"
+    group_names = ["name", "timestamp", "price"]
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
         sorters=sorters,
-        regex=regex
+        pattern=pattern,
+        group_names=group_names
     )
     paths: list = [
         "my_dir/alex_20200809_1000.csv",
@@ -314,11 +313,13 @@ def test_regex_partitioner_compute_partitions_sorters_and_groups_names_do_not_ma
                 },
             ]
     # the group named price -> not_price
-    regex = {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "not_price"]}
+    pattern = r".+\/(.+)_(.+)_(.+)\.csv"
+    group_names = ["name", "timestamp", "not_price"]
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
         sorters=sorters,
-        regex=regex
+        pattern=pattern,
+        group_names=group_names
     )
     paths: list = [
         "my_dir/alex_20200809_1000.csv",
@@ -358,11 +359,13 @@ def test_regex_partitioner_compute_partitions_sorters_too_many_sorters():
                 },
             ]
 
-    regex = {"pattern": r".+\/(.+)_(.+)_(.+)\.csv", "group_names": ["name", "timestamp", "price"]}
+    pattern = r".+\/(.+)_(.+)_(.+)\.csv"
+    group_names = ["name", "timestamp", "price"]
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
         sorters=sorters,
-        regex=regex
+        pattern=pattern,
+        group_names=group_names
     )
     paths: list = [
         "my_dir/alex_20200809_1000.csv",
@@ -377,10 +380,8 @@ def test_convert_batch_request_to_data_reference():
     # Test an example with only capturing groups in the regex pattern
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex={
-            "pattern": r"^(.+)_(\d+)_(\d+)\.csv$",
-            "group_names": ["name", "timestamp", "price"]
-        }
+        pattern=r"^(.+)_(\d+)_(\d+)\.csv$",
+        group_names=["name", "timestamp", "price"]
     )
 
     assert regex_partitioner.convert_batch_request_to_data_reference(
@@ -396,10 +397,8 @@ def test_convert_batch_request_to_data_reference():
     # Test an example with an uncaptured regex group (should return a WildcardDataReference)
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex={
-            "pattern": r"^(.+)_(\d+)_\d+\.csv$",
-            "group_names": ["name", "timestamp"]
-        }
+        pattern=r"^(.+)_(\d+)_\d+\.csv$",
+        group_names=["name", "timestamp"]
     )
 
     assert regex_partitioner.convert_batch_request_to_data_reference(
@@ -415,10 +414,8 @@ def test_convert_batch_request_to_data_reference():
     # Test an example with an uncaptured regex group that's not at the end (should return a WildcardDataReference)
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex={
-            "pattern": r"^.+_(\d+)_(\d+)\.csv$",
-            "group_names": ["timestamp", "price"]
-        }
+        pattern=r"^.+_(\d+)_(\d+)\.csv$",
+        group_names=["timestamp", "price"]
     )
 
     assert regex_partitioner.convert_batch_request_to_data_reference(
@@ -434,55 +431,42 @@ def test_convert_batch_request_to_data_reference():
 def test__invert_regex_to_data_reference_template():
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex={
-            "pattern": r"^(.+)_(\d+)_(\d+)\.csv$",
-            "group_names": ["name", "timestamp", "price"]
-        }
+        pattern=r"^(.+)_(\d+)_(\d+)\.csv$",
+        group_names=["name", "timestamp", "price"]
     )
     assert regex_partitioner._invert_regex_to_data_reference_template() == "{name}_{timestamp}_{price}.csv"
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex={
-            "pattern": r"^(.+)_(\d+)_\d+\.csv$",
-            "group_names": ["name", "timestamp",]
-        }
+        pattern=r"^(.+)_(\d+)_\d+\.csv$",
+        group_names=["name", "timestamp"]
     )
     assert regex_partitioner._invert_regex_to_data_reference_template() == "{name}_{timestamp}_*.csv"
 
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex={
-            "pattern": r"^.+_(\d+)_(\d+)\.csv$",
-            "group_names": ["timestamp", "price"]
-        }
+        pattern=r"^.+_(\d+)_(\d+)\.csv$",
+        group_names=["timestamp", "price"]
     )
     assert regex_partitioner._invert_regex_to_data_reference_template() == "*_{timestamp}_{price}.csv"
 
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex={
-            "pattern": r"(^.+)_(\d+)_.\d\W\w[a-z](?!.*::.*::)\d\.csv$",
-            "group_names": ["name", "timestamp"]
-        }
+        pattern=r"(^.+)_(\d+)_.\d\W\w[a-z](?!.*::.*::)\d\.csv$",
+        group_names=["name", "timestamp"]
     )
     assert regex_partitioner._invert_regex_to_data_reference_template() == "{name}_{timestamp}_*.csv"
 
-
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex={
-            "pattern": r"(.*)-([ABC])\.csv",
-            "group_names": ["name", "type"]
-        }
+        pattern=r"(.*)-([ABC])\.csv",
+        group_names=["name", "type"]
     )
     assert regex_partitioner._invert_regex_to_data_reference_template() == "{name}-{type}.csv"
 
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex={
-            "pattern": r"(.*)-[A|B|C]\.csv",
-            "group_names": ["name"]
-        }
+        pattern=r"(.*)-[A|B|C]\.csv",
+        group_names=["name"]
     )
     assert regex_partitioner._invert_regex_to_data_reference_template() == "{name}-*.csv"
 
@@ -530,23 +514,17 @@ def test__invert_regex_to_data_reference_template():
         print(name)
         regex_partitioner = RegexPartitioner(
             name="test_regex_partitioner",
-            regex={
-                "pattern": regex,
-                "group_names": ["name", "timestamp"]
-            }
+            pattern=regex,
+            group_names=["name", "timestamp"]
         )
         name, regex, regex_partitioner._invert_regex_to_data_reference_template()
-
-
 
 
 def test_convert_data_reference_to_batch_request():
     regex_partitioner = RegexPartitioner(
         name="test_regex_partitioner",
-        regex={
-            "pattern": r"^(.+)_(\d+)_(\d+)\.csv$",
-            "group_names": ["name", "timestamp", "price"]
-        }
+        pattern=r"^(.+)_(\d+)_(\d+)\.csv$",
+        group_names=["name", "timestamp", "price"]
     )
 
     print(regex_partitioner.convert_data_reference_to_batch_request("alex_20200809_1000.csv"))

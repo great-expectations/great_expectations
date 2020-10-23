@@ -67,7 +67,7 @@ class DataConnector(object):
         execution_environment_name: str,
         assets: dict = None,
         partitioners: dict = None,
-        default_partitioner: str = None,
+        default_partitioner_name: str = None,
         execution_engine: ExecutionEngine = None,
         data_context_root_directory: str = None
     ):
@@ -87,7 +87,7 @@ class DataConnector(object):
         self._partitioners = _partitioners
         self._build_partitioners_from_config(config=partitioners)
 
-        self._default_partitioner = default_partitioner
+        self._default_partitioner_name = default_partitioner_name
 
         self._execution_engine = execution_engine
 
@@ -115,7 +115,7 @@ class DataConnector(object):
     @property
     def default_partitioner(self) -> Union[str, Partitioner]:
         try:
-            return self.partitioners[self._default_partitioner]
+            return self.partitioners[self._default_partitioner_name]
         except KeyError:
             raise ValueError("No default partitioner has been set")
 
@@ -316,7 +316,8 @@ class DataConnector(object):
             config=config,
             runtime_environment=runtime_environment,
             config_defaults={
-                "module_name": "great_expectations.execution_environment.data_connector.asset"
+                "module_name": "great_expectations.execution_environment.data_connector.asset",
+                "class_name": "Asset"
             },
         )
         if not asset:
@@ -363,8 +364,8 @@ class DataConnector(object):
         data_asset_config_exists: bool = data_asset_name is not None and isinstance(
             self.assets.get(data_asset_name), Asset
         )
-        if data_asset_config_exists and self.assets[data_asset_name].partitioner:
-            partitioner_name = self.assets[data_asset_name].partitioner
+        if data_asset_config_exists and self.assets[data_asset_name].partitioner_name:
+            partitioner_name = self.assets[data_asset_name].partitioner_name
         else:
             partitioner_name = self.default_partitioner.name
         partitioner: Partitioner
@@ -372,7 +373,7 @@ class DataConnector(object):
             raise ge_exceptions.BatchSpecError(
                 message=f'''
 No partitioners found for data connector "{self.name}" -- at least one partitioner must be configured for a data
-connector and the default_partitioner set to one of the configured partitioners.
+connector and the default_partitioner_name is set to the name of one of the configured partitioners.
                 '''
             )
         else:

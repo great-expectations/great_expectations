@@ -32,24 +32,24 @@ DEFAULT_USAGE_STATISTICS_URL = (
 class AssetConfig(DictDot):
     def __init__(
         self,
-        partitioner=None,
+        partitioner_name=None,
         **kwargs,
     ):
-        if partitioner is not None:
-            self._partitioner = partitioner
+        if partitioner_name is not None:
+            self._partitioner_name = partitioner_name
         for k, v in kwargs.items():
             setattr(self, k, v)
 
     @property
-    def partitioner(self):
-        return self._partitioner
+    def partitioner_name(self):
+        return self._partitioner_name
 
 
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    partitioner = fields.String(required=False, allow_none=True)
+    partitioner_name = fields.String(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -199,7 +199,7 @@ class DataConnectorConfig(DictDot):
         class_name,
         module_name=None,
         partitioners=None,
-        default_partitioner=None,
+        default_partitioner_name=None,
         assets=None,
         **kwargs
     ):
@@ -207,8 +207,8 @@ class DataConnectorConfig(DictDot):
         self._module_name = module_name
         if partitioners is not None:
             self._partitioners = partitioners
-        if default_partitioner is not None:
-            self._default_partitioner = default_partitioner
+        if default_partitioner_name is not None:
+            self._default_partitioner_name = default_partitioner_name
         if assets is not None:
             self._assets = assets
         for k, v in kwargs.items():
@@ -219,8 +219,8 @@ class DataConnectorConfig(DictDot):
         return self._partitioners
 
     @property
-    def default_partitioner(self):
-        return self._default_partitioner
+    def default_partitioner_name(self):
+        return self._default_partitioner_name
 
     @property
     def assets(self):
@@ -256,7 +256,7 @@ class DataConnectorConfigSchema(Schema):
         allow_none=True,
     )
 
-    default_partitioner = fields.String(
+    default_partitioner_name = fields.String(
         required=False,
         allow_none=True,
     )

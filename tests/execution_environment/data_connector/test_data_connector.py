@@ -32,7 +32,7 @@ base_directory: {base_directory}
 glob_directive: '*.csv'
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
     
-default_partitioner: my_regex_partitioner
+default_partitioner_name: my_regex_partitioner
     """, Loader=yaml.FullLoader),
         runtime_environment={
             "name": "my_data_connector"
@@ -53,15 +53,14 @@ def test_basic_instantiation(tmp_path_factory):
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
     )
     
-# default_partitioner: my_regex_partitioner
+# default_partitioner_name: my_regex_partitioner
 # partitioners:
 #     my_regex_partitioner:
 #         class_name: RegexPartitioner
-#         regex:
-#             group_names:
-#                 - letter
-#                 - number
-#             pattern: {base_directory}/(.+)(\d+)\.csv
+#         pattern: {base_directory}/(.+)(\d+)\.csv
+#         group_names:
+#             - letter
+#             - number
 
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
     data_references = basic_data_connector._get_data_reference_list()
@@ -103,16 +102,15 @@ def test__DictDataConnector():
         "my_partitioner",
         yaml.load("""
 class_name: RegexPartitioner
-regex:
-    group_names:
-        - first_dir
-        - second_dir
-        - letter
-        - number
-    pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
+pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
+group_names:
+    - first_dir
+    - second_dir
+    - letter
+    - number
         """, Loader=yaml.FullLoader)
     )
-    my_data_connector._default_partitioner = "my_partitioner"
+    my_data_connector._default_partitioner_name = "my_partitioner"
     
     my_data_connector.refresh_data_references_cache()
 
@@ -152,14 +150,13 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         "my_first_partitioner",
         yaml.load("""
 class_name: RegexPartitioner
-regex:
-    group_names:
-        - letter
-        - number
-    pattern: pretend/path/(.+)-(\\d+)\\.csv
+pattern: pretend/path/(.+)-(\\d+)\\.csv
+group_names:
+    - letter
+    - number
         """, Loader=yaml.FullLoader)
     )
-    my_data_connector._default_partitioner = "my_first_partitioner"
+    my_data_connector._default_partitioner_name = "my_first_partitioner"
 
     my_data_connector.refresh_data_references_cache()
 
@@ -169,16 +166,15 @@ regex:
         "my_second_partitioner",
         yaml.load("""
 class_name: RegexPartitioner
-regex:
-    group_names:
-        - first_dir
-        - second_dir
-        - letter
-        - number
-    pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
+pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
+group_names:
+    - first_dir
+    - second_dir
+    - letter
+    - number
         """, Loader=yaml.FullLoader)
     )
-    my_data_connector._default_partitioner = "my_second_partitioner"
+    my_data_connector._default_partitioner_name = "my_second_partitioner"
     
     my_data_connector.refresh_data_references_cache()
 
@@ -326,14 +322,13 @@ def test__batch_definition_matches_batch_request():
 #         "my_first_partitioner",
 #         yaml.load("""
 #     class_name: RegexPartitioner
-#     regex:
-#         group_names:
-#             - letter
-#             - number
-#         pattern: pretend/(.+)-(\\d+)\\.csv
+#     pattern: pretend/(.+)-(\\d+)\\.csv
+#     group_names:
+#         - letter
+#         - number
 #             """, Loader=yaml.FullLoader)
 #     )
-#     my_data_connector._default_partitioner = "my_first_partitioner"
+#     my_data_connector._default_partitioner_name = "my_first_partitioner"
 #
 #     my_batch_request = BatchRequest(
 #         execution_environment_name="IdontNeedThis",
@@ -368,14 +363,13 @@ def test__batch_definition_matches_batch_request():
 #         "my_first_partitioner",
 #         yaml.load("""
 #     class_name: RegexPartitioner
-#     regex:
-#         group_names:
-#             - letter
-#             - number
-#         pattern: pretend/(.+)-(\\d+)\\.csv
+#     pattern: pretend/(.+)-(\\d+)\\.csv
+#     group_names:
+#         - letter
+#         - number
 #             """, Loader=yaml.FullLoader)
 #     )
-#     my_data_connector._default_partitioner = "my_first_partitioner"
+#     my_data_connector._default_partitioner_name = "my_first_partitioner"
 
 #     my_batch_request = BatchRequest(
 #         execution_environment_name="IdontNeedThis",

@@ -1671,12 +1671,11 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                             ]
                         }
                     },
-                    "default_partitioner": "test_pipeline_partitioner",
+                    "default_partitioner_name": "test_pipeline_partitioner",
                     "assets": {
                         "test_asset_1": {
                             "module_name": "great_expectations.execution_environment.data_connector.asset",
-                            "class_name": "Asset",
-                            "partitioner": "test_pipeline_partitioner"
+                            "partitioner_name": "test_pipeline_partitioner"
                         }
                     }
                 },
@@ -1689,10 +1688,8 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                         "test_regex_partitioner": {
                             "module_name": "great_expectations.execution_environment.data_connector.partitioner",
                             "class_name": "RegexPartitioner",
-                            "regex": {
-                                "pattern": r"(.+)_(.+)_(.+)\.csv",
-                                "group_names": group_names
-                            },
+                            "pattern": r"(.+)_(.+)_(.+)\.csv",
+                            "group_names": group_names,
                             "allow_multipart_partitions": False,
                             "sorters": sorters,
                             "runtime_keys": [
@@ -1701,12 +1698,11 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                             ]
                         }
                     },
-                    "default_partitioner": "test_regex_partitioner",
+                    "default_partitioner_name": "test_regex_partitioner",
                     "assets": {
                         "test_asset_0": {
                             "module_name": "great_expectations.execution_environment.data_connector.asset",
-                            "class_name": "Asset",
-                            "partitioner": "test_regex_partitioner",
+                            "partitioner_name": "test_regex_partitioner",
                             "base_directory": data_asset_base_directory,
                             "glob_directive": "alex*",
                         }

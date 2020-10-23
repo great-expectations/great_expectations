@@ -30,8 +30,6 @@ class SinglePartitionDataConnector(DataConnector):
         execution_environment_name: str,
         assets: dict = None,
         partitioner: dict = None,
-        execution_engine: ExecutionEngine = None,
-        data_context_root_directory: str = None,
         base_directory: str = None,
     ):
         logger.debug(f'Constructing SinglePartitionDataConnector "{name}".')
@@ -46,13 +44,13 @@ class SinglePartitionDataConnector(DataConnector):
             partitioners={
                 "ONE_AND_ONLY_PARTITIONER" : partitioner
             },
-            default_partitioner="ONE_AND_ONLY_PARTITIONER",
-            execution_engine=execution_engine,
-            data_context_root_directory=data_context_root_directory
+            default_partitioner_name="ONE_AND_ONLY_PARTITIONER",
+            execution_engine=None,
+            data_context_root_directory=None
         )
 
     def get_available_data_asset_names(self):
-        if self._data_references_cache == None:
+        if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
@@ -66,12 +64,12 @@ class SinglePartitionDataConnector(DataConnector):
             data_asset_names.add(batch_definition.data_asset_name)
         return list(data_asset_names)
 
-
-    def self_check(self,
+    def self_check(
+        self,
         pretty_print=True,
         max_examples=3
     ):
-        if self._data_references_cache == None:
+        if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
         if pretty_print:

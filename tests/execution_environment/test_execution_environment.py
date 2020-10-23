@@ -43,15 +43,14 @@ data_connectors:
         base_directory: {base_directory}
         glob_directive: '*.csv'
             
-        default_partitioner: my_regex_partitioner
+        default_partitioner_name: my_regex_partitioner
         partitioners:
             my_regex_partitioner:
                 class_name: RegexPartitioner
-                regex:
-                    group_names:
-                        - letter
-                        - number
-                    pattern: (.+)(\\d+)\\.csv
+                pattern: (.+)(\\d+)\\.csv
+                group_names:
+                    - letter
+                    - number
     """, Loader=yaml.FullLoader), runtime_environment={
             "name": "my_execution_environment"
         },

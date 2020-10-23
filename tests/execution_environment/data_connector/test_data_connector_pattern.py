@@ -41,21 +41,19 @@ def test_name_date_price_list(tmp_path_factory):
         class_name: FilesDataConnector
         base_directory: {base_directory}
         glob_directive: '*'
-        default_partitioner: my_standard_partitioner
+        default_partitioner_name_name: my_standard_partitioner
         assets:
           DEFAULT_ASSET_NAME:
-            class_name: Asset
             glob_directive: '*'
-            partitioner: my_standard_partitioner
+            partitioner_name: my_standard_partitioner
         partitioners:
           my_standard_partitioner:
             class_name: RegexPartitioner
-            regex:
-              pattern: .+\/(.+)_(.+)_(.+)\.csv
-              group_names:
-              - name
-              - timestamp
-              - price
+            pattern: .+\/(.+)_(.+)_(.+)\.csv
+            group_names:
+            - name
+            - timestamp
+            - price
             allow_multipart_partitions: false
             sorters:
             - orderby: asc
@@ -139,31 +137,26 @@ def test_alpha(tmp_path_factory):
                 class_name: FilesDataConnector
                 base_directory: {base_directory + "/test_dir_alpha"}
                 glob_directive: '*'
-                default_partitioner: my_standard_partitioner
+                default_partitioner_name: my_standard_partitioner
                 assets:
                   A:
-                    class_name: Asset
                     glob_directive: '*.csv'
-                    partitioner: my_standard_partitioner
+                    partitioner_name: my_standard_partitioner
                   B:
-                    class_name: Asset
                     glob_directive: '*.csv'
-                    partitioner: my_standard_partitioner
+                    partitioner_name: my_standard_partitioner
                   C:
-                    class_name: Asset
                     glob_directive: '*.csv'
-                    partitioner: my_standard_partitioner
+                    partitioner_name: my_standard_partitioner
                   D:
-                    class_name: Asset
                     glob_directive: '*.csv'
-                    partitioner: my_standard_partitioner
+                    partitioner_name: my_standard_partitioner
                 partitioners:
                   my_standard_partitioner:
                     class_name: RegexPartitioner
-                    regex:
-                      pattern: .*/(.*).csv
-                      group_names:
-                      - part_1
+                    pattern: .*/(.*).csv
+                    group_names:
+                    - part_1
             """, Loader=yaml.FullLoader)
 
     my_data_connector: DataConnector = instantiate_class_from_config(
@@ -240,36 +233,31 @@ def test_foxtrot(tmp_path_factory):
             class_name: FilesDataConnector
             base_directory: {base_directory + "/test_dir_foxtrot"}
             glob_directive: '*'
-            default_partitioner: my_standard_partitioner
+            default_partitioner_name: my_standard_partitioner
             assets:
               A:
-                class_name: Asset
                 glob_directive: '*'
                 base_directory: A/
-                partitioner: my_standard_partitioner
+                partitioner_name: my_standard_partitioner
               B:
-                class_name: Asset
                 glob_directive: '*'
                 base_directory: B/
-                partitioner: my_standard_partitioner
+                partitioner_name: my_standard_partitioner
               C:
-                class_name: Asset
                 glob_directive: '*'
                 base_directory: C/
-                partitioner: my_standard_partitioner
+                partitioner_name: my_standard_partitioner
               D:
-                class_name: Asset
                 glob_directive: '*'
                 base_directory: D/
-                partitioner: my_standard_partitioner
+                partitioner_name: my_standard_partitioner
             partitioners:
               my_standard_partitioner:
                 class_name: RegexPartitioner
-                regex:
-                  pattern: (.*)-(.*).csv
-                  group_names:
-                  - part_1
-                  - part_2
+                pattern: (.*)-(.*).csv
+                group_names:
+                - part_1
+                - part_2
         """, Loader=yaml.FullLoader)
 
     my_data_connector: DataConnector = instantiate_class_from_config(

@@ -101,15 +101,14 @@ data_connectors:
         base_directory: {temp_dir}
         glob_directive: '*.csv'
             
-        default_partitioner: my_regex_partitioner
+        default_partitioner_name: my_regex_partitioner
         partitioners:
             my_regex_partitioner:
                 class_name: RegexPartitioner
-                regex:
-                    group_names:
-                        - letter
-                        - number
-                    pattern: {temp_dir}/(.+)(\d+)\.csv
+                pattern: {temp_dir}/(.+)(\d+)\.csv
+                group_names:
+                    - letter
+                    - number
 """, return_mode="return_object"
     )
 
@@ -150,4 +149,4 @@ data_connectors:
                 }
             }
         }
-        }
+    }

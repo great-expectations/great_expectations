@@ -49,7 +49,7 @@ class FilesDataConnector(DataConnector):
         base_directory: str,
         glob_directive: str,
         partitioners: dict = {},
-        default_partitioner: str = None,
+        default_partitioner_name: str = None,
         assets: dict = None,
         known_extensions: list = None,
         reader_options: dict = None,
@@ -62,7 +62,7 @@ class FilesDataConnector(DataConnector):
             name=name,
             execution_environment_name=execution_environment_name,
             partitioners=partitioners,
-            default_partitioner=default_partitioner,
+            default_partitioner_name=default_partitioner_name,
             assets=assets,
             execution_engine=execution_engine,
             data_context_root_directory=data_context_root_directory
