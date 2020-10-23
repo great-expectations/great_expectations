@@ -168,9 +168,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         # Trim paths to exclude the base_directory
         base_directory_len = len(str(self.base_directory))
         path_list = [path[base_directory_len:] for path in path_list]
-
         return path_list
-
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
 

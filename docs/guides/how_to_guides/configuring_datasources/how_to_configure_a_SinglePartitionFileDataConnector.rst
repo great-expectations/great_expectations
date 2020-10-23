@@ -207,12 +207,100 @@ Here’s a configuration...
 Example 5: Nested directory structure with the data_asset_name on the outside
 -----------------------------------------------------------------------------
 
-test_dir_charlie
+
+Here’s another example of a nested directory structure with data_asset_name defined in the folder name.
+
+.. code-block::
+
+    A/A-1.csv
+    A/A-2.csv
+    A/A-3.csv
+    B/B-1.csv
+    B/B-2.csv
+    B/B-3.csv
+    C/C-1.csv
+    C/C-2.csv
+    C/C-3.csv
+    D/D-1.csv
+    D/D-2.csv
+    D/D-3.csv
+
+Here’s a configuration...
+
+.. code-block:: yaml
+
+    class_name: SinglePartitionerFileDataConnector
+    base_directory: /
+
+    partitioner:
+        class_name: RegexPartitioner
+        group_names:
+            - data_asset_name
+            - letter
+            - number
+        pattern: (\w{1})/(\w{1})-(\d{1}).csv
+
+
+...will now make "A" and "B" and "C" into data_assets, with each containing 3 data_referencess
+
+.. code-block::
+
+	Available data_asset_names (3 of 4):
+		A (3 of 3): ['test_dir_charlie/A/A-1.csv', 'test_dir_charlie/A/A-2.csv', 'test_dir_charlie/A/A-3.csv']
+		B (3 of 3): ['test_dir_charlie/B/B-1.csv', 'test_dir_charlie/B/B-2.csv', 'test_dir_charlie/B/B-3.csv']
+		C (3 of 3): ['test_dir_charlie/C/C-1.csv', 'test_dir_charlie/C/C-2.csv', 'test_dir_charlie/C/C-3.csv']
+
+	Unmatched data_references (0 of 0): []
+
 
 Example 6: Redundant information in the naming convention
 ---------------------------------------------------------
 
-Example 3 here: https://github.com/superconductive/design/blob/main/docs/20201015_partitioners_v2.md
+
+.. code-block::
+
+    2021/01/01/log_file-20210101.csv,
+    2021/01/02/log_file-20210102.csv,
+    2021/01/03/log_file-20210103.csv,
+    2021/01/04/log_file-20210104.csv,
+    2021/01/05/log_file-20210105.csv,
+    2021/01/06/log_file-20210106.csv,
+    2021/01/07/log_file-20210107.csv,
+
+Here’s a configuration...
+
+.. code-block:: yaml
+
+    class_name: SinglePartitionerFileDataConnector
+    base_directory: /
+
+    partitioner:
+        class_name: RegexPartitioner
+         group_names:
+            - year
+            - month
+            - day
+            - data_asset_name
+         pattern: (\d{4})/(\d{2})/(\d{2})/log_file-(\d{8}).csv
+
+
+
+Each day will be its own data asset, mapped to the corresponding ``log_file-*.csv``
+
+
+.. code-block::
+
+    Available data_asset_names (3 of 7):
+		20210101 (1 of 1): ['2021/01/01/log_file-20210101.csv']
+		20210102 (1 of 1): ['2021/01/02/log_file-20210102.csv']
+		20210103 (1 of 1): ['2021/01/03/log_file-20210103.csv']
+
+	Unmatched data_references (0 of 0): []
+
+
+
+
+
 
 
 More examples to be written:

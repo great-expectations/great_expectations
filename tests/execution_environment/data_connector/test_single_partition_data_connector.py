@@ -17,12 +17,13 @@ from tests.test_utils import (
     create_files_in_directory,
 )
 
+
 def test_basic_instantiation(tmp_path_factory):
     data_reference_dict = {
-        "path/A-100.csv" : create_fake_data_frame(),
-        "path/A-101.csv" : create_fake_data_frame(),
-        "directory/B-1.csv" : create_fake_data_frame(),
-        "directory/B-2.csv" : create_fake_data_frame(),
+        "path/A-100.csv": create_fake_data_frame(),
+        "path/A-101.csv": create_fake_data_frame(),
+        "directory/B-1.csv": create_fake_data_frame(),
+        "directory/B-2.csv": create_fake_data_frame(),
     }
 
     my_data_connector = SinglePartitionDictDataConnector(
@@ -32,12 +33,12 @@ def test_basic_instantiation(tmp_path_factory):
             "class_name": "RegexPartitioner",
             "config_params": {
                 "regex": {
-                    "group_names": ["data_asset_name", "letter","number"],
+                    "group_names": ["data_asset_name", "letter", "number"],
                     "pattern": "(.*)/(.+)-(\\d+)\\.csv"
                 }
             }
         },
-        data_reference_dict = data_reference_dict,
+        data_reference_dict=data_reference_dict,
     )
 
     my_data_connector.refresh_data_references_cache()
@@ -69,7 +70,7 @@ def test_example_with_implicit_data_asset_names():
 class_name: SinglePartitionDictDataConnector
 base_directory: my_base_directory/
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
-    
+
 partitioner:
     class_name: RegexPartitioner
     config_params:
@@ -196,7 +197,7 @@ def test_test_yaml_config_(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
         directory=base_directory,
-        file_name_list= [
+        file_name_list=[
             "2020/01/alpha-1001.csv",
             "2020/01/beta-1002.csv",
             "2020/02/alpha-1003.csv",
@@ -242,7 +243,7 @@ def test_test_yaml_config_(empty_data_context, tmp_path_factory):
                 'batch_definition_count': 4
             }
         },
-        'example_unmatched_data_references' : [],
+        'example_unmatched_data_references': [],
         'unmatched_data_reference_count': 0,
     }
 
@@ -303,17 +304,17 @@ partitioner:
                 'batch_definition_count': 4
             }
         },
-        'example_unmatched_data_references' : [],
+        'example_unmatched_data_references': [],
         'unmatched_data_reference_count': 0,
     }
 
 
 def test_self_check():
     data_reference_dict = {
-        "A-100.csv" : create_fake_data_frame(),
-        "A-101.csv" : create_fake_data_frame(),
-        "B-1.csv" : create_fake_data_frame(),
-        "B-2.csv" : create_fake_data_frame(),
+        "A-100.csv": create_fake_data_frame(),
+        "A-101.csv": create_fake_data_frame(),
+        "B-1.csv": create_fake_data_frame(),
+        "B-2.csv": create_fake_data_frame(),
     }
 
     my_data_connector = SinglePartitionDictDataConnector(
@@ -350,7 +351,7 @@ def test_self_check():
                 'batch_definition_count': 2
             }
         },
-        'example_unmatched_data_references' : [],
+        'example_unmatched_data_references': [],
         'unmatched_data_reference_count': 0,
     }
 
@@ -402,3 +403,128 @@ def test_that_needs_a_better_name():
         'unmatched_data_reference_count': 1,
     }
 
+<<<<<<< Updated upstream
+=======
+
+def test_dir_charlie(empty_data_context, tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_dir_charlie"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "A/A-1.csv",
+            "A/A-2.csv",
+            "A/A-3.csv",
+            "B/B-1.csv",
+            "B/B-2.csv",
+            "B/B-3.csv",
+            "C/C-1.csv",
+            "C/C-2.csv",
+            "C/C-3.csv",
+            "D/D-1.csv",
+            "D/D-2.csv",
+            "D/D-3.csv",
+        ]
+    )
+
+    return_object = empty_data_context.test_yaml_config(f"""
+    module_name: great_expectations.execution_environment.data_connector
+    class_name: SinglePartitionerFileDataConnector
+    execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
+    name: TEST_DATA_CONNECTOR
+    base_directory: {base_directory}/
+    glob_directive: "*/*.csv"
+    partitioner:
+        class_name: RegexPartitioner
+        config_params:
+            regex:
+                group_names:
+                    - data_asset_name
+                    - letter
+                    - number
+                pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
+        """, return_mode="return_object")
+
+    assert return_object == {
+        'class_name': 'SinglePartitionerFileDataConnector',
+        'data_asset_count': 4,
+        'example_data_asset_names': [
+             'A',
+             'B',
+             'C'
+        ],
+        'data_assets': {
+            'A': {
+                'batch_definition_count': 3,
+                'example_data_references': ['A/A-1.csv', 'A/A-2.csv', 'A/A-3.csv']
+            },
+            'B': {
+                'batch_definition_count': 3,
+                'example_data_references': ['B/B-1.csv', 'B/B-2.csv', 'B/B-3.csv']
+            },
+            'C': {
+                'batch_definition_count': 3,
+                'example_data_references': ['C/C-1.csv', 'C/C-2.csv', 'C/C-3.csv']
+            }
+        },
+        'unmatched_data_reference_count': 0,
+        'example_unmatched_data_references': []
+    }
+
+
+def test_redundant_information_in_naming_convention(empty_data_context, tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("logs"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "2021/01/01/log_file-20210101.csv",
+            "2021/01/02/log_file-20210102.csv",
+            "2021/01/03/log_file-20210103.csv",
+            "2021/01/04/log_file-20210104.csv",
+            "2021/01/05/log_file-20210105.csv",
+            "2021/01/06/log_file-20210106.csv",
+            "2021/01/07/log_file-20210107.csv",
+        ]
+    )
+
+    return_object = empty_data_context.test_yaml_config(f"""
+          module_name: great_expectations.execution_environment.data_connector
+          class_name: SinglePartitionerFileDataConnector
+          execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
+          name: TEST_DATA_CONNECTOR
+          base_directory: {base_directory}/
+          glob_directive: "*/*/*/*.csv"
+          partitioner:
+              class_name: RegexPartitioner
+              config_params:
+                regex:
+                    group_names:
+                      - year
+                      - month
+                      - day
+                      - data_asset_name
+                    pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-(\\d{{8}})\\.csv
+              """, return_mode="return_object")
+
+    assert return_object == {
+        'class_name': 'SinglePartitionerFileDataConnector',
+        'data_asset_count': 7,
+        'example_data_asset_names': [
+            '20210101',
+            '20210102',
+            '20210103'
+        ],
+        'data_assets': {
+            '20210101': {
+                        'batch_definition_count': 1,
+                        'example_data_references': ['2021/01/01/log_file-20210101.csv']
+            },
+            '20210102': {'batch_definition_count': 1,
+                         'example_data_references': ['2021/01/02/log_file-20210102.csv']
+            },
+            '20210103': {'batch_definition_count': 1,
+                         'example_data_references': ['2021/01/03/log_file-20210103.csv']
+            }
+        },
+    'unmatched_data_reference_count': 0,
+    'example_unmatched_data_references': []}
+>>>>>>> Stashed changes
