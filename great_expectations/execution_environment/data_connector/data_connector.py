@@ -302,6 +302,11 @@ class DataConnector(object):
         for name, asset_config in config.items():
             if asset_config is None:
                 raise ValueError("Asset config should not be None.")
+            for property in asset_config.keys():
+                if asset_config[property] is None:
+                    raise ValueError(
+                        f'If Asset config defines the property "{property}", then its value must be specified.'
+                    )
             new_asset: Asset = self._build_asset_from_config(
                 name=name,
                 config=asset_config,
