@@ -17,8 +17,15 @@ from great_expectations.expectations.expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
     _format_map_output,
+    renderer,
 )
 from great_expectations.expectations.registry import extract_metrics
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
@@ -67,7 +74,6 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.nonnull"
-    metric_dependencies = ("column_values.nonnull.count",)
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -84,106 +90,50 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
             configuration = self.configuration
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name=map_metric,
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
-    def _pandas_nonnull_count(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = False,
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
     ):
-        return pd.DataFrame({"column_values.nonnull": ~series.isnull()})
-
-    @SqlAlchemyExecutionEngine.column_map_metric(
-        metric_name=map_metric,
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
-    def _sqlalchemy_nonnull_map_metric(
-        self,
-        column,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        import sqlalchemy as sa
-
-        return sa.not_(column.is_(None))
-
-    @SparkDFExecutionEngine.column_map_metric(
-        metric_name=map_metric,
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-    )
-    def _spark_null_map_metric(
-        self,
-        column: "pyspark.sql.Column",
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        return column.isNotNull()
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        metric_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        metric_vals = extract_metrics(
-            metric_dependencies, metrics, configuration, runtime_configuration
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            ["column", "mostly", "row_condition", "condition_parser"],
         )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
+
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
             )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            if include_column_name:
+                template_str = "$column values must not be null, at least $mostly_pct % of the time."
+            else:
+                template_str = (
+                    "values must not be null, at least $mostly_pct % of the time."
+                )
         else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
+            if include_column_name:
+                template_str = "$column values must never be null."
+            else:
+                template_str = "values must never be null."
 
-        if metric_vals.get("column_values.nonnull.count") > 0:
-            success = metric_vals.get("column_values.nonnull.count") / metric_vals.get(
-                "column_values.count"
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
             )
-        else:
-            # TODO: Setting this to 1 based on the notion that tests on empty columns should be vacuously true. Confirm.
-            success = 1
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=success >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=None,
-            unexpected_count=metric_vals.get("column_values.count")
-            - metric_vals.get("column_values.nonnull.count"),
-            unexpected_list=metric_vals.get("column_values.nonnull.unexpected_values"),
-            unexpected_index_list=metric_vals.get(
-                "column_values.nonnull.unexpected_index_list"
-            ),
-        )
+        ]

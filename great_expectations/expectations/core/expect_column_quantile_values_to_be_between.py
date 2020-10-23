@@ -7,8 +7,16 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import DatasetExpectation, Expectation
+from great_expectations.expectations.expectation import (
+    DatasetExpectation,
+    Expectation,
+    renderer,
+)
 from great_expectations.expectations.registry import extract_metrics
+from great_expectations.render.util import (
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
@@ -176,33 +184,77 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
             )
         return True
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.quantiles",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=("quantile_ranges",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
-    def _pandas_quantiles(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
     ):
-
-        """Quantile Function"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
+        params = substitute_none_for_missing(
+            expectation_configuration["kwargs"],
+            ["column", "quantile_ranges", "row_condition", "condition_parser"],
         )
-        quantile_ranges = metric_value_kwargs["quantile_ranges"]
-        return series.quantile(
-            tuple(quantile_ranges["quantiles"],), interpolation="nearest"
-        ).tolist()
+        template_str = "quantiles must be within the following value ranges."
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
+        expectation_string_obj = {
+            "content_block_type": "string_template",
+            "string_template": {"template": template_str, "params": params},
+        }
+
+        quantiles = params["quantile_ranges"]["quantiles"]
+        value_ranges = params["quantile_ranges"]["value_ranges"]
+
+        table_header_row = ["Quantile", "Min Value", "Max Value"]
+        table_rows = []
+
+        quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
+
+        for quantile, value_range in zip(quantiles, value_ranges):
+            quantile_string = quantile_strings.get(quantile, "{:3.2f}".format(quantile))
+            table_rows.append(
+                [
+                    quantile_string,
+                    str(value_range[0]) if value_range[0] is not None else "Any",
+                    str(value_range[1]) if value_range[1] is not None else "Any",
+                ]
+            )
+
+        quantile_range_table = {
+            "content_block_type": "table",
+            "header_row": table_header_row,
+            "table": table_rows,
+            "styling": {
+                "body": {
+                    "classes": [
+                        "table",
+                        "table-sm",
+                        "table-unbordered",
+                        "col-4",
+                        "mt-2",
+                    ],
+                },
+                "parent": {"styles": {"list-style-type": "none"}},
+            },
+        }
+
+        return [expectation_string_obj, quantile_range_table]
+
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

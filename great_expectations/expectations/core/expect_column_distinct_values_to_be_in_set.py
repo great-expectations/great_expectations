@@ -7,12 +7,18 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     ColumnMapDatasetExpectation,
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
+    renderer,
 )
 from ..registry import extract_metrics
 
@@ -112,30 +118,62 @@ class ExpectColumnDistinctValuesToBeInSet(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Mode metric"""
-
-    @PandasExecutionEngine.metric(
-        metric_name="column.value_counts",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
-    def _pandas_value_counts(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
     ):
-        """Distinct value counts metric"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            ["column", "value_set", "row_condition", "condition_parser"],
         )
 
-        return series.value_counts()
+        if params["value_set"] is None or len(params["value_set"]) == 0:
+
+            if include_column_name:
+                template_str = "$column distinct values must belong to this set: [ ]"
+            else:
+                template_str = "distinct values must belong to a set, but that set is not specified."
+
+        else:
+
+            for i, v in enumerate(params["value_set"]):
+                params["v__" + str(i)] = v
+            values_string = " ".join(
+                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+            )
+
+            if include_column_name:
+                template_str = (
+                    "$column distinct values must belong to this set: "
+                    + values_string
+                    + "."
+                )
+            else:
+                template_str = (
+                    "distinct values must belong to this set: " + values_string + "."
+                )
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """Validating that user has inputted a value set and that configuration has been initialized"""
@@ -151,8 +189,7 @@ class ExpectColumnDistinctValuesToBeInSet(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
+    def validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: dict,

@@ -45,7 +45,7 @@ GE core team members use this checklist to ship releases.
 3. Make a new branch from ``develop`` called something like ``release-prep-2020-06-01``.
 4. In this branch, update the version number in the ``great_expectations/deployment_version`` file.
 
-5. Update the ``changelog.rst``: move all things under ``develop`` under a new heading with the new release number.
+5. Update the ``changelog.rst``: move all things under ``develop`` under a new heading with the new release number. NOTE: You should remove the Develop heading for the released version, it will be replaced in step #12.
 
   * Verify that any changes to requirements are specifically identified in the changelog
   * Double check the grouping / order of changes matches [BREAKING], [FEATURE], [ENHANCEMENT], [BUGFIX], [DOCS], [MAINTENANCE] and that all changes since the last release are mentioned or summarized in a bullet.

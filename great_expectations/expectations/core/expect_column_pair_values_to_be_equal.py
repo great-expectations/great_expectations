@@ -11,12 +11,19 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     ColumnMapDatasetExpectation,
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
+    renderer,
 )
 from ..registry import extract_metrics, get_metric_kwargs
 
@@ -92,13 +99,13 @@ class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.metric(
-        metric_name="equal_columns",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("column_A", "column_B"),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
+    # @PandasExecutionEngine.metric(
+    #        metric_name="equal_columns",
+    #        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #        metric_value_keys=("column_A", "column_B"),
+    #        metric_dependencies=tuple(),
+    #        filter_column_isnull=False,
+    #    )
     def _pandas_equal_columns(
         self,
         batches: Dict[str, Batch],
@@ -117,7 +124,65 @@ class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
 
         return (column_A == column_B).any()
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            [
+                "column_A",
+                "column_B",
+                "ignore_row_if",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+
+        # NOTE: This renderer doesn't do anything with "ignore_row_if"
+
+        if (params["column_A"] is None) or (params["column_B"] is None):
+            template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
+            params["row_condition"] = None
+
+        if params["mostly"] is None:
+            template_str = "Values in $column_A and $column_B must always be equal."
+        else:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

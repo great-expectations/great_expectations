@@ -1,9 +1,9 @@
+import copy
 import datetime
 import logging
 import uuid
-from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Tuple
 from urllib.parse import urlparse
 
 from sqlalchemy.engine import reflection
@@ -11,13 +11,14 @@ from sqlalchemy.engine.default import DefaultDialect
 from sqlalchemy.sql import Select
 from sqlalchemy.sql.elements import TextClause
 
+from great_expectations.core import IDDict
 from great_expectations.execution_environment.types import (
     SqlAlchemyDatasourceQueryBatchSpec,
     SqlAlchemyDatasourceTableBatchSpec,
 )
-from great_expectations.expectations.registry import register_metric
+from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
 from great_expectations.util import import_library_module
-from great_expectations.validator.validation_graph import MetricEdgeKey
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 try:
     import sqlalchemy as sa
@@ -28,6 +29,7 @@ from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.exceptions import (
     BatchSpecError,
     DatasourceKeyPairAuthBadPassphraseError,
+    GreatExpectationsError,
     InvalidConfigError,
     ValidationError,
 )
@@ -355,7 +357,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     a url can be used to access the data. This will be overridden by all other configuration
                     options if any are provided.
         """
-        super().__init__(name=None, data_context=data_context)
+        super().__init__(name=name)
         self._name = name
         if engine is not None:
             if credentials is not None:
@@ -581,12 +583,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             self.batches[batch_id] = batch
 
-        self._loaded_batch_id = batch_id
+        self._active_batch_data_id = batch_id
         return batch
 
-    def _get_selectable(
-        self, domain_kwargs: dict = None, batches: Dict[str, Batch] = None
-    ) -> sa.sql.Selectable:
+    def get_compute_domain(
+        self, domain_kwargs: dict = None
+    ) -> Tuple[sa.sql.Selectable, dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
@@ -599,84 +601,107 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if batches and len(batches) == 1:
-                batch = [batch for batch in batches.values()][0]
-            elif self.loaded_batch:
-                batch = self.loaded_batch
+            if self.active_batch_data:
+                data_object = self.active_batch_data
             else:
                 raise ValidationError(
-                    "No batch is specified, but multiple batches are available."
+                    "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batches and batch_id in batches:
-                batch = batches[batch_id]
-            elif batch_id == self.loaded_batch_id:
-                batch = self.loaded_batch
+            if batch_id in self.batches:
+                data_object = self.batches[batch_id]
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
-        table_name = domain_kwargs.get("table", None)
-        if table_name and table_name != batch.data.table_name:
-            raise ValueError("Unrecognized table name.")
-        else:
-            table = batch.data.table
-
-        row_condition = domain_kwargs.get("row_condition", None)
-        if row_condition:
+        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs = dict()
+        if "table" in domain_kwargs:
+            if domain_kwargs["table_name"] != data_object.table_name:
+                raise ValueError("Unrecognized table name.")
+            else:
+                selectable = data_object.table
+        elif "query" in domain_kwargs:
             raise ValueError(
-                "SqlAlchemyExecutionEngine does not support row_condition."
+                "query is not currently supported by SqlAlchemyExecutionEngine"
             )
+        else:
+            selectable = data_object.table
 
-        return table
+        if "row_condition" in domain_kwargs:
+            condition_engine = domain_kwargs["condition_engine"]
+            if condition_engine == "great_expectations__experimental__":
+                parsed_condition = parse_condition_to_sqlalchemy(
+                    domain_kwargs["row_condition"]
+                )
+                selectable = selectable.where(parsed_condition)
 
-    def batch_resolve(
-        self,
-        resolve_batch: Iterable[Tuple[MetricEdgeKey, Callable, dict]],
-        metrics: Dict[Tuple, Any] = None,
+            else:
+                raise GreatExpectationsError(
+                    "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
+                )
+
+        if "column" in compute_domain_kwargs:
+            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+
+        return selectable, compute_domain_kwargs, accessor_domain_kwargs
+
+    def resolve_metric_bundle(
+        self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
     ) -> dict:
         """For every metrics in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds a
         bundles the metrics into one large query dictionary so that they are all executed simultaneously. Will fail if
         bundling the metrics together is not possible.
 
             Args:
-                resolve_batch (Iterable[Tuple[MetricEdgeKey, Callable, dict]): \
-                    A Dictionary containing a Metric's MetricEdgeKeys (its unique identifier), its metric provider function
-                    (the function that actually executes the metric), and its domain and value keyword argument dictionary.
+                metric_fn_bundle (Iterable[Tuple[MetricConfiguration, Callable, dict]): \
+                    A Dictionary containing a Metric's MetricConfiguration (its unique identifier), its metric provider function
+                    (the function that actually executes the metric), and the arguments to pass to the metric provider function.
                 metrics (Dict[Tuple, Any]): \
                     A dictionary of metrics defined in the registry and corresponding arguments
 
             Returns:
                 A dictionary of metric names and their corresponding now-queried values.
         """
-        if metrics is None:
-            metrics = dict()
+        resolved_metrics = dict()
 
         # We need a different query for each domain (where clause).
         queries: Dict[Tuple, dict] = dict()
-        for metric_to_resolve, metric_provider, metric_provider_kwargs in resolve_batch:
+        for (
+            metric_to_resolve,
+            metric_provider,
+            metric_provider_kwargs,
+        ) in metric_fn_bundle:
             # We have different semantics for bundled metric providers, so ensure we actually are working only with those.
             assert (
-                metric_provider._can_be_bundled
-            ), "batch_resolve only supports metrics that support bundled computation"
+                metric_provider._bundle_metric
+            ), "resolve_metric_bundle only supports metrics that support bundled computation"
             # batch_id and table are the only determining factors for bundled metrics
             batch_id = metric_to_resolve.metric_domain_kwargs.get("batch_id")
             table = metric_to_resolve.metric_domain_kwargs.get("table")
-            select, selectable = metric_provider(
-                self, **metric_provider_kwargs, metrics=metrics
-            )
-            if (batch_id, table) not in queries:
-                queries[(batch_id, table)] = {
+            select, domain_kwargs = metric_provider(**metric_provider_kwargs)
+            if not isinstance(domain_kwargs, IDDict):
+                domain_kwargs = IDDict(domain_kwargs)
+            domain_id = domain_kwargs.to_id()
+            if domain_id not in queries:
+                queries[domain_id] = {
                     "select": [],
                     "ids": [],
-                    "select_from": selectable,
+                    "domain_kwargs": domain_kwargs,
                 }
-            queries[(batch_id, table)]["select"].append(
+            queries[domain_id]["select"].append(
                 select.label(metric_to_resolve.metric_name)
             )
-            queries[(batch_id, table)]["ids"].append(metric_to_resolve.id)
+            queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
+            selectable, compute_domain_kwargs, _ = self.get_compute_domain(
+                query["domain_kwargs"]
+            )
+            assert (
+                compute_domain_kwargs == query["domain_kwargs"]
+            ), "Invalid compute domain returned from a bundled metric. Verify that its target compute domain is a valid compute domain."
+            assert len(query["select"]) == len(query["ids"])
             res = self.engine.execute(
-                sa.select(query["select"]).select_from(query["select_from"])
+                sa.select(query["select"]).select_from(selectable)
             ).fetchall()
             assert (
                 len(res) == 1
@@ -685,256 +710,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 res[0]
             ), "unexpected number of metrics returned"
             for idx, id in enumerate(query["ids"]):
-                metrics[id] = res[0][idx]
+                resolved_metrics[id] = res[0][idx]
 
-        return metrics
-
-    def _column_map_count(
-        self,
-        metric_name: str,
-        batches: Dict[str, Batch],
-        execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: Dict[Tuple, Any],
-        filter_column_isnull,
-        **kwargs,
-    ):
-        """Returns column nonnull count for ColumnMapExpectations"""
-        assert metric_name.endswith(".count")
-        metric_key = MetricEdgeKey(
-            metric_name[: -len(".count")],
-            metric_domain_kwargs,
-            metric_value_kwargs,
-            filter_column_isnull=filter_column_isnull,
-        ).id
-        expected_condition = metrics.get(metric_key)
-        table = execution_engine._get_selectable(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-        return sa.func.sum(sa.case([(expected_condition, 1,)], else_=0,)), table
-
-    def _column_map_values(
-        self,
-        metric_name: str,
-        batches: Dict[str, Batch],
-        execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: Dict[Tuple, Any],
-        filter_column_isnull,
-        **kwargs,
-    ):
-        """
-        Particularly for the purpose of finding unexpected values, returns all the metric values which do not meet an
-        expected Expectation condition for ColumnMapExpectation Expectations.
-        """
-
-        assert metric_name.endswith(".unexpected_values")
-        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
-        result_format = metric_value_kwargs["result_format"]
-        base_metric_value_kwargs = {
-            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
-        }
-        metric_key = MetricEdgeKey(
-            metric_name[: -len(".unexpected_values")],
-            metric_domain_kwargs,
-            base_metric_value_kwargs,
-            filter_column_isnull=filter_column_isnull,
-        ).id
-        unexpected_condition = sa.not_(metrics.get(metric_key))
-        table = execution_engine._get_selectable(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-        query = (
-            sa.select([sa.column(metric_domain_kwargs.get("column"))])
-            .select_from(table)
-            .where(unexpected_condition)
-        )
-        if result_format["result_format"] != "COMPLETE":
-            query = query.limit(result_format["partial_unexpected_count"])
-        return execution_engine.engine.execute(query).fetchall()
-
-    def _column_map_value_counts(
-        self,
-        metric_name: str,
-        batches: Dict[str, Batch],
-        execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: Dict[Tuple, Any],
-        filter_column_isnull,
-        **kwargs,
-    ):
-        """
-        Returns value counts for all the metric values which do not meet an expected Expectation condition for instances
-        of ColumnMapExpectation.
-        """
-
-        assert metric_name.endswith(".unexpected_value_counts")
-        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
-        result_format = metric_value_kwargs["result_format"]
-        base_metric_value_kwargs = {
-            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
-        }
-        metric_key = MetricEdgeKey(
-            metric_name[: -len(".unexpected_value_counts")],
-            metric_domain_kwargs,
-            base_metric_value_kwargs,
-            filter_column_isnull=filter_column_isnull,
-        ).id
-        unexpected_condition = sa.not_(metrics.get(metric_key))
-        table = execution_engine._get_selectable(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-        column = sa.column(metric_domain_kwargs["column"])
-        return execution_engine.engine.execute(
-            sa.select([column, sa.func.count(column)])
-            .select_from(table)
-            .where(unexpected_condition)
-            .groupby(column)
-        ).fetchall()
-
-    def _column_map_rows(
-        self,
-        metric_name: str,
-        batches: Dict[str, Batch],
-        execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: Dict[Tuple, Any],
-        filter_column_isnull,
-        **kwargs,
-    ):
-        """
-        Returns all rows of the metric values which do not meet an expected Expectation condition for instances
-        of ColumnMapExpectation.
-        """
-
-        assert metric_name.endswith(".unexpected_rows")
-        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
-        result_format = metric_value_kwargs["result_format"]
-        base_metric_value_kwargs = {
-            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
-        }
-        metric_key = MetricEdgeKey(
-            metric_name[: -len(".unexpected_rows")],
-            metric_domain_kwargs,
-            base_metric_value_kwargs,
-            filter_column_isnull=filter_column_isnull,
-        ).id
-        unexpected_condition = sa.not_(metrics.get(metric_key))
-        table = execution_engine._get_selectable(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-        query = sa.select([sa.text("*")]).select_from(table).where(unexpected_condition)
-        if result_format["result_format"] != "COMPLETE":
-            query = query.limit(result_format["partial_unexpected_count"])
-        return execution_engine.engine.execute(query).fetchall()
-
-    @classmethod
-    def column_map_metric(
-        cls,
-        metric_name: str,
-        metric_domain_keys: Tuple[str, ...],
-        metric_value_keys: Tuple[str, ...],
-        metric_dependencies: Tuple[str, ...],
-        filter_column_isnull: bool = True,
-    ):
-        """
-        A decorator for declaring a metric provider for instances of map Expectations, registering the metric itself
-        and several specialized column map sub methods used to provide further information about the Expectation itself.
-
-        Returns:
-            A generic metric provider function, which includes an expected metric condition.
-        """
-
-        def outer(metric_fn: Callable):
-            _declared_name = metric_name
-
-            @wraps(metric_fn)
-            def inner_func(
-                self,
-                metric_name: str,
-                batches: Dict[str, Batch],
-                execution_engine: SqlAlchemyExecutionEngine,
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
-                metrics: Dict[Tuple, Any],
-                **kwargs,
-            ):
-                if _declared_name != metric_name:
-                    logger.warning("using metric provider with an unrecognized metric")
-                column = sa.column(metric_domain_kwargs.get("column"))
-                metric_condition = metric_fn(
-                    self,
-                    column=column,
-                    metrics=metrics,
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    metric_value_kwargs=metric_value_kwargs,
-                    **kwargs,
-                )
-                if filter_column_isnull:
-                    expected_condition = sa.and_(
-                        metric_condition, sa.not_(column.is_(None))
-                    )
-                else:
-                    expected_condition = metric_condition
-                return expected_condition
-
-            register_metric(
-                metric_name=metric_name,
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=metric_value_keys,
-                execution_engine=cls,
-                metric_dependencies=tuple(),
-                metric_provider=inner_func,
-                bundle_computation=False,
-                filter_column_isnull=filter_column_isnull,
-            )
-            register_metric(
-                metric_name=metric_name + ".count",
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=metric_value_keys,
-                execution_engine=cls,
-                metric_dependencies=(metric_name,),
-                metric_provider=cls._column_map_count,
-                bundle_computation=True,
-                filter_column_isnull=filter_column_isnull,
-            )
-            # noinspection PyTypeChecker
-            register_metric(
-                metric_name=metric_name + ".unexpected_values",
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=(*metric_value_keys, "result_format"),
-                execution_engine=cls,
-                metric_dependencies=(metric_name,),
-                metric_provider=cls._column_map_values,
-                bundle_computation=False,
-                filter_column_isnull=filter_column_isnull,
-            )
-            # noinspection PyTypeChecker
-            register_metric(
-                metric_name=metric_name + ".unexpected_value_counts",
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=(*metric_value_keys, "result_format"),
-                execution_engine=cls,
-                metric_dependencies=(metric_name,),
-                metric_provider=cls._column_map_value_counts,
-                bundle_computation=False,
-                filter_column_isnull=filter_column_isnull,
-            )
-            # noinspection PyTypeChecker
-            register_metric(
-                metric_name=metric_name + ".unexpected_rows",
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=(*metric_value_keys, "result_format"),
-                execution_engine=cls,
-                metric_dependencies=(metric_name,),
-                metric_provider=cls._column_map_rows,
-                bundle_computation=False,
-                filter_column_isnull=filter_column_isnull,
-            )
-            return inner_func
-
-        return outer
+        return resolved_metrics

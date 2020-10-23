@@ -11,7 +11,18 @@ from great_expectations.execution_engine import (
 )
 
 from ...data_asset.util import parse_result_format
-from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
+from ..expectation import (
+    ColumnMapDatasetExpectation,
+    Expectation,
+    _format_map_output,
+    renderer,
+)
 from ..registry import extract_metrics, get_metric_kwargs
 
 logger = logging.getLogger(__name__)
@@ -102,10 +113,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.increasing"
-    metric_dependencies = (
-        "column_values.increasing.count",
-        "column_values.nonnull.count",
-    )
     success_keys = ("strictly", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
@@ -122,40 +129,72 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         return super().validate_configuration(configuration)
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.increasing",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("strictly",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
-    def _pandas_column_values_increasing(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
+    # @PandasExecutionEngine.column_map_metric(
+    #     metric_name="column_values.increasing",
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=("strictly",),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=True,
+    # )
+
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
     ):
-        strictly = metric_value_kwargs["strictly"]
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            [
+                "column",
+                "strictly",
+                "mostly",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
 
-        series_diff = series.diff()
-        # The first element is null, so it gets a bye and is always treated as True
-        series_diff[series_diff.isnull()] = 1
-
-        if strictly:
-            return pd.DataFrame({"column_values.increasing": series_diff > 0})
+        if params.get("strictly"):
+            template_str = "values must be strictly greater than previous values"
         else:
-            return pd.DataFrame({"column_values.increasing": series_diff >= 0})
+            template_str = "values must be greater than or equal to previous values"
 
-    @SparkDFExecutionEngine.column_map_metric(
-        metric_name="column_values.increasing",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("strictly",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
     def _spark_column_values_increasing(
         self,
         column: "pyspark.sql.Column",
@@ -205,45 +244,3 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
                 column + "__success",
                 when(col("diff") >= 0, lit(True)).otherwise(lit(False)),
             )
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        metric_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        metric_vals = extract_metrics(
-            metric_dependencies, metrics, configuration, runtime_configuration
-        )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        else:
-            result_format = self.default_kwarg_values.get("result_format")
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=(
-                metric_vals.get("column_values.increasing.count")
-                / metric_vals.get("column_values.nonnull.count")
-            )
-            >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.increasing.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.increasing.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.increasing.unexpected_index_list"
-            ),
-        )

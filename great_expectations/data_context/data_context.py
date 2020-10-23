@@ -576,6 +576,7 @@ class BaseDataContext:
         resource_identifier=None,
         site_name: Optional[str] = None,
         only_if_exists=True,
+        site_names: Optional[List[str]] = None,
     ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
@@ -590,12 +591,24 @@ class BaseDataContext:
                 the URLs of the index page.
             site_name: Optionally specify which site to open. If not specified,
                 return all urls in the project.
+            site_names: Optionally specify which sites are active. Sites not in
+                this list are not processed, even if specified in site_name.
 
         Returns:
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        sites = self._project_config_with_variables_substituted.data_docs_sites
+        unfiltered_sites = (
+            self._project_config_with_variables_substituted.data_docs_sites
+        )
+
+        # Filter out sites that are not in site_names
+        sites = (
+            {k: v for k, v in unfiltered_sites.items() if k in site_names}
+            if site_names
+            else unfiltered_sites
+        )
+
         if not sites:
             logger.debug("Found no data_docs_sites.")
             return []
@@ -1135,7 +1148,8 @@ class BaseDataContext:
             )
 
         execution_environment: ExecutionEnvironment = self.get_execution_environment(
-            execution_environment_name=execution_environment_name
+            execution_environment_name=execution_environment_name,
+            runtime_environment=runtime_environment,
         )
         batch_request: BatchRequest = BatchRequest(**batch_request)
         return execution_environment.get_batch(batch_request=batch_request)
@@ -1490,7 +1504,9 @@ class BaseDataContext:
         return datasource
 
     def get_execution_environment(
-        self, execution_environment_name: str
+        self,
+        execution_environment_name: str = "default",
+        runtime_environment: Union[dict, None] = None,
     ) -> ExecutionEnvironment:
         """Get the named execution_environment
 
@@ -1521,7 +1537,9 @@ class BaseDataContext:
             execution_environment_config
         )
         execution_environment: ExecutionEnvironment = self._build_execution_environment_from_config(
-            name=execution_environment_name, config=execution_environment_config
+            name=execution_environment_name,
+            config=execution_environment_config,
+            runtime_environment=runtime_environment,
         )
         self._cached_execution_environments[
             execution_environment_name
@@ -1529,7 +1547,10 @@ class BaseDataContext:
         return execution_environment
 
     def _build_execution_environment_from_config(
-        self, name: str, config: dict
+        self,
+        name: str,
+        config: CommentedMap,
+        runtime_environment: Union[dict, None] = None,
     ) -> ExecutionEnvironment:
         module_name: str = "great_expectations.execution_environment"
         runtime_environment: dict = {
@@ -1562,7 +1583,8 @@ class BaseDataContext:
         repartition: bool = False,
     ) -> List[Partition]:
         execution_environment: ExecutionEnvironment = self.get_execution_environment(
-            execution_environment_name=execution_environment_name
+            execution_environment_name=execution_environment_name,
+            runtime_environment=runtime_environment,
         )
         available_partitions: List[
             Partition
@@ -1998,7 +2020,7 @@ class BaseDataContext:
             for site_name, site_config in sites.items():
                 logger.debug("Building Data Docs Site %s" % site_name,)
 
-                if (site_names and site_name in site_names) or not site_names:
+                if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
                     module_name = "great_expectations.render.renderer.site_builder"
                     site_builder = instantiate_class_from_config(

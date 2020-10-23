@@ -8,7 +8,19 @@ from great_expectations.execution_engine import ExecutionEngine, PandasExecution
 from ...data_asset.util import parse_result_format
 from ...exceptions import InvalidExpectationConfigurationError
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
-from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    handle_strict_min_max,
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
+from ..expectation import (
+    ColumnMapDatasetExpectation,
+    Expectation,
+    _format_map_output,
+    renderer,
+)
 from ..registry import extract_metrics
 
 try:
@@ -73,10 +85,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.value_length_between"
-    metric_dependencies = (
-        "column_values.value_length_between.count",
-        "column_values.nonnull.count",
-    )
     success_keys = (
         "min_value",
         "max_value",
@@ -122,13 +130,84 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.value_length_between",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "values may have any length."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+
+                elif params["min_value"] is None:
+                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+
+                elif params["max_value"] is None:
+                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+            else:
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+
+                elif params["min_value"] is None:
+                    template_str = f"values must always be {at_most_str} $max_value characters long."
+
+                elif params["max_value"] is None:
+                    template_str = f"values must always be {at_least_str} $min_value characters long."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    # @PandasExecutionEngine.column_map_metric(
+    #     metric_name="column_values.value_length_between",
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=True,
+    # )
     def _pandas_value_length_between(
         self,
         series: pd.Series,
@@ -175,13 +254,13 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
 
         return pd.DataFrame({"column_values.value_length_between": metric_series})
 
-    @SqlAlchemyExecutionEngine.column_map_metric(
-        metric_name="column_values.value_length_between",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
+    # @SqlAlchemyExecutionEngine.column_map_metric(
+    #     metric_name="column_values.value_length_between",
+    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=True,
+    # )
     def _sqlalchemy_value_length_between(
         self,
         column: sa.column,
@@ -227,52 +306,3 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
                 return sa.func.length(column) > min_value
             else:
                 return sa.func.length(column) >= min_value
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        metric_dependencies = self.get_validation_dependencies(
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
-        )["metrics"]
-        metric_vals = extract_metrics(
-            metric_dependencies, metrics, configuration, runtime_configuration
-        )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=(
-                metric_vals.get("column_values.value_length_between.count")
-                / metric_vals.get("column_values.nonnull.count")
-            )
-            >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.value_length_between.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.value_length_between.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.value_length_between.unexpected_index"
-            ),
-        )

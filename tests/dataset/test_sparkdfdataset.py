@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from unittest import mock
 
 import pandas as pd
@@ -353,3 +354,73 @@ def test_expect_column_value_lengths_to_equal(spark_session, test_dataframe):
     assert test_dataframe.expect_column_value_lengths_to_equal(
         "address.street", 8
     ).success
+
+
+@pytest.mark.skipif(
+    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+)
+def test_expect_column_values_to_be_json_parseable(spark_session):
+    d1 = json.dumps({"i": [1, 2, 3], "j": 35, "k": {"x": "five", "y": 5, "z": "101"}})
+    d2 = json.dumps({"i": 1, "j": 2, "k": [3, 4, 5]})
+    d3 = json.dumps({"i": "a", "j": "b", "k": "c"})
+    d4 = json.dumps(
+        {"i": [4, 5], "j": [6, 7], "k": [8, 9], "l": {4: "x", 5: "y", 6: "z"}}
+    )
+    inner = {
+        "json_col": [d1, d2, d3, d4],
+        "not_json": [4, 5, 6, 7],
+        "py_dict": [
+            {"a": 1, "out": 1},
+            {"b": 2, "out": 4},
+            {"c": 3, "out": 9},
+            {"d": 4, "out": 16},
+        ],
+        "most": [d1, d2, d3, "d4"],
+    }
+
+    data_reshaped = list(zip(*[v for _, v in inner.items()]))
+    df = spark_session.createDataFrame(
+        data_reshaped, ["json_col", "not_json", "py_dict", "most"]
+    )
+    D = SparkDFDataset(df)
+    D.set_default_expectation_argument("result_format", "COMPLETE")
+
+    T = [
+        {
+            "in": {"column": "json_col"},
+            "out": {"success": True, "unexpected_list": [],},
+        },
+        {
+            "in": {"column": "not_json"},
+            "out": {"success": False, "unexpected_list": [4, 5, 6, 7],},
+        },
+        {
+            "in": {"column": "py_dict"},
+            "out": {
+                "success": False,
+                "unexpected_list": [
+                    {"a": 1, "out": 1},
+                    {"b": 2, "out": 4},
+                    {"c": 3, "out": 9},
+                    {"d": 4, "out": 16},
+                ],
+            },
+        },
+        {
+            "in": {"column": "most"},
+            "out": {"success": False, "unexpected_list": ["d4"],},
+        },
+        {
+            "in": {"column": "most", "mostly": 0.75},
+            "out": {
+                "success": True,
+                "unexpected_index_list": [3],
+                "unexpected_list": ["d4"],
+            },
+        },
+    ]
+
+    for t in T:
+        out = D.expect_column_values_to_be_json_parseable(**t["in"])
+        assert t["out"]["success"] == out.success
+        assert t["out"]["unexpected_list"] == out.result["unexpected_list"]

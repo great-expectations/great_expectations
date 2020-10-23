@@ -14,11 +14,18 @@ from great_expectations.execution_engine import (
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
+    renderer,
 )
 from ..registry import extract_metrics, get_metric_kwargs
 
@@ -69,10 +76,6 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.match_strftime_format"
-    metric_dependencies = (
-        "column_values.match_strftime_format.count",
-        "column_values.nonnull.count",
-    )
     success_keys = (
         "strftime_format",
         "mostly",
@@ -105,135 +108,57 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapDatasetExpectation):
 
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.match_strftime_format",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("strftime_format",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
-    def _pandas_column_values_match_strftime_format(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
     ):
-        def is_parseable_by_format(val):
-            try:
-                datetime.strptime(val, strftime_format)
-                return True
-            except TypeError:
-                raise TypeError(
-                    "Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            [
+                "column",
+                "strftime_format",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+
+        if not params.get("strftime_format"):
+            template_str = "values must match a strftime format but none was specified."
+        else:
+            template_str = (
+                "values must match the following strftime format: $strftime_format"
+            )
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
                 )
-            except ValueError:
-                return False
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                template_str += ", at least $mostly_pct % of the time."
+            else:
+                template_str += "."
 
-        strftime_format = metric_value_kwargs["strftime_format"]
+        if include_column_name:
+            template_str = "$column " + template_str
 
-        return pd.DataFrame(
-            {"column_values.match_strftime_format": series.map(is_parseable_by_format)}
-        )
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
-    # @SqlAlchemyExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_strftime_format",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-    #     metric_value_keys=("regex",),
-    #     metric_dependencies=tuple(),
-    # )
-    # def _sqlalchemy_match_strftime_format(
-    #     self,
-    #     column: sa.column,
-    #     regex: str,
-    #     runtime_configuration: dict = None,
-    #     filter_column_isnull: bool = True,
-    # ):
-    #     regex_expression = execution_engine._get_dialect_regex_expression(column, regex)
-    #     if regex_expression is None:
-    #         logger.warning(
-    #             "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
-    #         )
-    #         raise NotImplementedError
-    #
-    #     return regex_expression
-    #     if regex is None:
-    #         # vacuously true
-    #         return True
-    #
-    #     return column.in_(tuple(regex))
-    #
-    # @SparkDFExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_strftime_format",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-    #     metric_value_keys=("regex",),
-    #     metric_dependencies=tuple(),
-    # )
-    # def _spark_match_strftime_format(
-    #     self,
-    #     data: "pyspark.sql.DataFrame",
-    #     column: str,
-    #     regex: str,
-    #     runtime_configuration: dict = None,
-    #     filter_column_isnull: bool = True,
-    # ):
-    #     import pyspark.sql.functions as F
-    #
-    #     if regex is None:
-    #         # vacuously true
-    #         return data.withColumn(column + "__success", F.lit(True))
-    #
-    #     return data.withColumn(column + "__success", F.col(column).isin(regex))
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        metric_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        metric_vals = extract_metrics(
-            metric_dependencies, metrics, configuration, runtime_configuration
-        )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
             )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
-        if metric_vals.get("column_values.nonnull.count") > 0:
-            success = metric_vals.get(
-                "column_values.match_strftime_format.count"
-            ) / metric_vals.get("column_values.nonnull.count")
-        else:
-            # TODO: Setting this to 1 based on the notion that tests on empty columns should be vacuously true. Confirm.
-            success = 1
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=success >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.match_strftime_format.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.match_strftime_format.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.match_strftime_format.unexpected_index_list"
-            ),
-        )
+        ]

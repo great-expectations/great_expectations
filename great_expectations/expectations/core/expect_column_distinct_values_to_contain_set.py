@@ -7,12 +7,18 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     ColumnMapDatasetExpectation,
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
+    renderer,
 )
 from ..registry import extract_metrics
 
@@ -39,13 +45,13 @@ class ExpectColumnDistinctValuesToContainSet(DatasetExpectation):
 
     """ A Column Map Metric Decorator for the Mode metric"""
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.value_counts",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
+    # @PandasExecutionEngine.metric(
+    #        metric_name="column.value_counts",
+    #        metric_domain_keys=DatasetExpectation.domain_keys,
+    #        metric_value_keys=(),
+    #        metric_dependencies=tuple(),
+    #        filter_column_isnull=True,
+    #    )
     def _pandas_value_counts(
         self,
         batches: Dict[str, Batch],
@@ -77,7 +83,62 @@ class ExpectColumnDistinctValuesToContainSet(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            [
+                "column",
+                "value_set",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+
+        if params["value_set"] is None or len(params["value_set"]) == 0:
+            values_string = "[ ]"
+        else:
+            for i, v in enumerate(params["value_set"]):
+                params["v__" + str(i)] = v
+
+            values_string = " ".join(
+                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+            )
+
+        template_str = "distinct values must contain this set: " + values_string + "."
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

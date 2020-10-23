@@ -117,7 +117,7 @@ You can also test out profiling on your own data [here]().
 Every component of the framework is designed to be extensible: Expectations, storage, profilers, renderers for documentation, actions taken after validation, etc.  This design choice gives a lot of creative freedom to developers working with Great Expectations.
 
 Recent extensions include:
-* [Renderers for data dictionaries](https://greatexpectations.io/blog/20191004_data_dictionary_plugin)
+* [Renderers for data dictionaries](https://greatexpectations.io/blog/20200731_data_dictionary_plugin/)
 * [BigQuery and GCS integration](https://github.com/great-expectations/great_expectations/pull/841)
 * [Notifications to MatterMost](https://github.com/great-expectations/great_expectations/issues/902)
 

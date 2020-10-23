@@ -1,0 +1,49 @@
+import logging
+
+import pandas as pd
+import sqlalchemy as sa
+
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectations.metrics.column_map_metric import (
+    ColumnMapMetric,
+    column_map_condition,
+)
+from great_expectations.expectations.metrics.util import get_dialect_regex_expression
+
+logger = logging.getLogger(__name__)
+
+
+class ColumnValuesNotMatchRegexList(ColumnMapMetric):
+    condition_metric_name = "column_values.not_match_regex_list"
+    condition_value_keys = ("regex_list",)
+
+    @column_map_condition(engine=PandasExecutionEngine)
+    def _pandas(cls, column, regex_list, **kwargs):
+        regex_matches = []
+        for regex in regex_list:
+            regex_matches.append(column.astype(str).str.contains(regex))
+        regex_match_df = pd.concat(regex_matches, axis=1, ignore_index=True)
+
+        return ~regex_match_df.any(axis="columns")
+
+    @column_map_condition(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(cls, column, regex_list, _dialect, **kwargs):
+        if len(regex_list) == 0:
+            raise ValueError("At least one regex must be supplied in the regex_list.")
+
+        regex_expression = get_dialect_regex_expression(
+            column, regex_list[0], _dialect, positive=False
+        )
+        if regex_expression is None:
+            logger.warning("Regex is not supported for dialect %s" % str(_dialect))
+            raise NotImplementedError
+
+        return sa.and_(
+            *[
+                get_dialect_regex_expression(column, regex, _dialect, positive=False)
+                for regex in regex_list
+            ]
+        )

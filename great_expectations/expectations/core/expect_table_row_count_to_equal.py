@@ -8,12 +8,18 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     ColumnMapDatasetExpectation,
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
+    renderer,
 )
 from ..registry import extract_metrics
 
@@ -53,7 +59,6 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         expect_table_row_count_to_be_between
     """
 
-    metric_dependencies = ("column_values.count",)
     success_keys = ("value",)
 
     default_kwarg_values = {
@@ -121,7 +126,44 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
 
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            ["value", "row_condition", "condition_parser"],
+        )
+        template_str = "Must have exactly $value rows."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

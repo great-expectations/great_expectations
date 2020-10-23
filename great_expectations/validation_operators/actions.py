@@ -538,7 +538,8 @@ list of sites to update:
 
         # get the URL for the validation result
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
-            resource_identifier=validation_result_suite_identifier
+            resource_identifier=validation_result_suite_identifier,
+            site_names=self._site_names,
         )
         # process payload
         data_docs_validation_results = {}

@@ -15,11 +15,18 @@ from great_expectations.execution_engine import (
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
+    renderer,
 )
 from ..registry import extract_metrics, get_metric_kwargs
 
@@ -75,10 +82,6 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.match_json_schema"
-    metric_dependencies = (
-        "column_values.match_json_schema.count",
-        "column_values.nonnull.count",
-    )
     success_keys = (
         "json_schema",
         "mostly",
@@ -98,41 +101,56 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
 
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.match_json_schema",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("json_schema",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
-    def _pandas_column_values_match_json_schema(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
+    @classmethod
+    @renderer(renderer_name="descriptive")
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
     ):
-        json_schema = metric_value_kwargs["json_schema"]
-
-        def matches_json_schema(val):
-            try:
-                val_json = json.loads(val)
-                jsonschema.validate(val_json, json_schema)
-                # jsonschema.validate raises an error if validation fails.
-                # So if we make it this far, we know that the validation succeeded.
-                return True
-            except jsonschema.ValidationError:
-                return False
-            except jsonschema.SchemaError:
-                raise
-            except:
-                raise
-
-        return pd.DataFrame(
-            {"column_values.match_json_schema": series.map(matches_json_schema)}
+        params = substitute_none_for_missing(
+            expectation_configuration.kwargs,
+            ["column", "mostly", "json_schema", "row_condition", "condition_parser"],
         )
+
+        if not params.get("json_schema"):
+            template_str = "values must match a JSON Schema but none was specified."
+        else:
+            params["formatted_json"] = (
+                "<pre>" + json.dumps(params.get("json_schema"), indent=4) + "</pre>"
+            )
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
+            else:
+                template_str = (
+                    "values must match the following JSON Schema: $formatted_json"
+                )
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": {"params": {"formatted_json": {"classes": []}}},
+                    },
+                }
+            )
+        ]
 
     # @SqlAlchemyExecutionEngine.column_map_metric(
     #     metric_name="column_values.match_json_schema",
@@ -182,54 +200,3 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
     #         return data.withColumn(column + "__success", F.lit(True))
     #
     #     return data.withColumn(column + "__success", F.col(column).isin(json))
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        metric_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        metric_vals = extract_metrics(
-            metric_dependencies, metrics, configuration, runtime_configuration
-        )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
-        if metric_vals.get("column_values.nonnull.count") > 0:
-            success = metric_vals.get(
-                "column_values.match_json_schema.count"
-            ) / metric_vals.get("column_values.nonnull.count")
-        else:
-            # TODO: Setting this to 1 based on the notion that tests on empty columns should be vacuously true. Confirm.
-            success = 1
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=success >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.match_json_schema.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.match_json_schema.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.match_json_schema.unexpected_index_list"
-            ),
-        )
