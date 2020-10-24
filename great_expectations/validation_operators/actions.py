@@ -283,7 +283,6 @@ MicrosoftTeamsNotificationAction sends a Microsoft Teams notification to a given
       # put the actual webhook URL in the uncommitted/config_variables.yml file
       microsoft_teams_webhook: ${validation_notification_microsoft_teams_webhook}
       notify_on: all # possible values: "all", "failure", "success"
-      notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
       renderer:
         # the class that implements the message to be sent
         # this is the default implementation, but you can
@@ -294,12 +293,7 @@ MicrosoftTeamsNotificationAction sends a Microsoft Teams notification to a given
     """
 
     def __init__(
-        self,
-        data_context,
-        renderer,
-        microsoft_teams_webhook,
-        notify_on="all",
-        notify_with=None,
+        self, data_context, renderer, microsoft_teams_webhook, notify_on="all",
     ):
         """Construct a MicrosoftTeamsNotificationAction
 
@@ -330,7 +324,6 @@ MicrosoftTeamsNotificationAction sends a Microsoft Teams notification to a given
             microsoft_teams_webhook
         ), "No Microsoft teams webhook found in action config."
         self.notify_on = notify_on
-        self.notify_with = notify_with
 
     def _run(
         self,
@@ -369,9 +362,7 @@ MicrosoftTeamsNotificationAction sends a Microsoft Teams notification to a given
             or self.notify_on == "failure"
             and not validation_success
         ):
-            query = self.renderer.render(
-                validation_result_suite, data_docs_pages, self.notify_with
-            )
+            query = self.renderer.render(validation_result_suite, data_docs_pages)
             # this will actually sent the POST request to the Microsoft Teams webapp server
             teams_notif_result = send_microsoft_teams_notifications(
                 query, microsoft_teams_webhook=self.teams_webhook
