@@ -343,7 +343,8 @@ configured runtime keys.
     ) -> dict:
 
         # TODO Will - convert to use batch_request_to_data_reference()
-        #TODO Abe 20201018: This is an absolutely horrible way to get a path from a single partition_definition, but AFIACT it's the only method currently supported by our Partitioner
+        # TODO Abe 20201018: This is an absolutely horrible way to get a path from a single partition_definition, but AFIACT it's the only method currently supported by our Partitioner
+        # TODO: <Alex>This call is deprecated -- it leeds to _get_available_partitions() above, which was commented out.</Alex>
         available_partitions = self.get_available_partitions(
             data_asset_name=batch_definition.data_asset_name,
         )
@@ -357,5 +358,5 @@ configured runtime keys.
             raise ValueError(f"No partition in {available_partitions} matches the given partition definition {batch_definition.partition_definition} from batch definition {batch_definition}")
 
         return {
-            "path" : path
+            "path": path
         }

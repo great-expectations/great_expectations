@@ -460,8 +460,8 @@ connector and the default_partitioner_name is set to the name of one of the conf
     ) -> List[Partition]:
         raise NotImplementedError
 
+    @staticmethod
     def _batch_definition_matches_batch_request(
-        self,
         batch_definition: BatchDefinition,
         batch_request: BatchRequest,
     ) -> bool:
@@ -479,7 +479,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
         #FIXME: This is too rigid. Needs to take into account ranges and stuff.
         if batch_request.partition_request:
             for k,v in batch_request.partition_request.items():
-                if (not k in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
+                if (k not in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
                     return False
         return True
 
@@ -488,20 +488,27 @@ connector and the default_partitioner_name is set to the name of one of the conf
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         if batch_request.data_connector_name != self.name:
-            raise ValueError(f"data_connector_name {batch_request.data_connector_name} does not match name {self.name}.")
+            raise ValueError(
+                f"data_connector_name {batch_request.data_connector_name} does not match name {self.name}."
+            )
 
-        if self._data_references_cache == None:
+        if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
-        batches = []
+        batch_definitions: List[BatchDefinition] = []
         for data_reference, batch_definition in self._data_references_cache.items():
-            if batch_definition == None:
+            # TODO: <Alex>The data_reference cach refreshing mechanism needs to be reviwed.  Right now, it returns exactly one BatchDefinition in the list.</Alex>
+            if batch_definition is None:
                 # The data_reference is unmatched.
                 continue
-            if self._batch_definition_matches_batch_request(batch_definition, batch_request):
-                batches.append(batch_definition)
+            batch_definition: BatchDefinition = batch_definition[0]
+            if self._batch_definition_matches_batch_request(
+                batch_definition=batch_definition,
+                batch_request=batch_request
+            ):
+                batch_definitions.append(batch_definition)
 
-        return batches
+        return batch_definitions
 
     def get_batch_data_and_metadata_from_batch_definition(
         self,
@@ -559,17 +566,17 @@ connector and the default_partitioner_name is set to the name of one of the conf
     ):
         """
         """
-        #Map data_references to batch_definitions
+        # Map data_references to batch_definitions
         self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
             mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
-                data_reference,
+                data_reference=data_reference,
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
     def get_unmatched_data_references(self):
-        if self._data_references_cache == None:
+        if self._data_references_cache is None:
             raise ValueError("_data_references_cache is None. Have you called refresh_data_references_cache yet?")
 
         return [k for k,v in self._data_references_cache.items() if v == None]
@@ -577,32 +584,39 @@ connector and the default_partitioner_name is set to the name of one of the conf
     def get_data_reference_list_count(self):
         return len(self._data_references_cache)
 
-    #TODO Abe 20201015: This method is still somewhat janky. Needs better supporting methods, plus more thought and hardening.
-    def _map_data_reference_to_batch_definition_list(self,
-        data_reference,
+    # TODO Abe 20201015: This method is still somewhat janky. Needs better supporting methods, plus more thought and hardening.
+    def _map_data_reference_to_batch_definition_list(
+        self,
+        data_reference: Any,
     ) -> List[BatchDefinition]:
-    #FIXME: Make this smarter about choosing the right partitioner
+        # FIXME: Make this smarter about choosing the right partitioner
         try:
+            # TODO: <Alex>We have a method for getting the correct partitioner for a given data_asset_name (it must be given).</Alex>
             self.default_partitioner
         except ValueError:
             raise ge_exceptions.DataConnectorError("Default Partitioner has not been set for data_connector")
 
-        batch_request = self.default_partitioner.convert_data_reference_to_batch_request(
-            data_reference
+        # TODO: <Alex>How can the system figure out the data_asset_name just from the data_reference value?</Alex>
+        batch_request: BatchRequest = self.default_partitioner.convert_data_reference_to_batch_request(
+            data_reference=data_reference
         )
-        if batch_request == None:
+        if batch_request is None:
             return None
+        data_asset_name: str
         if batch_request.data_asset_name:
             data_asset_name = batch_request.data_asset_name
         # process assets to populate data_asset_name in batch_definition:
         else:
             data_asset_name = "FAKE_DATA_ASSET_NAME"
-        return BatchDefinition(
-            execution_environment_name=self.execution_environment_name,
-            data_connector_name=self.name,
-            data_asset_name=data_asset_name,
-            partition_definition=batch_request.partition_request,
-        )
+        # TODO: <Alex>Note: this is so far the list containing exactly one element.  Abe: was this intended?</Alex>
+        return [
+            BatchDefinition(
+                execution_environment_name=self.execution_environment_name,
+                data_connector_name=self.name,
+                data_asset_name=data_asset_name,
+                partition_definition=batch_request.partition_request,
+            )
+        ]
 
     def self_check(self,
         pretty_print=True,
@@ -620,10 +634,10 @@ connector and the default_partitioner_name is set to the name of one of the conf
         len_asset_names = len(asset_names)
 
         data_connector_obj = {
-            "class_name" : self.__class__.__name__,
-            "data_asset_count" : len_asset_names,
+            "class_name": self.__class__.__name__,
+            "data_asset_count": len_asset_names,
             "example_data_asset_names": asset_names[:max_examples],
-            "data_assets" : {}
+            "data_assets": {}
             # "data_reference_count": self.
         }
 
@@ -666,3 +680,6 @@ connector and the default_partitioner_name is set to the name of one of the conf
         data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
 
         return data_connector_obj
+
+    def _get_data_reference_list(self):
+        raise NotImplementedError

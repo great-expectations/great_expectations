@@ -28,7 +28,7 @@ class PipelineDataConnector(DataConnector):
         default_partitioner_name: str = None,
         assets: dict = None,
         execution_engine: ExecutionEngine = None,
-        data_context_root_directory:str = None
+        data_context_root_directory: str = None
     ):
         logger.debug(f'Constructing PipelineDataConnector "{name}".')
         super().__init__(

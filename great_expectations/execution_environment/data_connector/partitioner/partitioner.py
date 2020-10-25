@@ -5,11 +5,9 @@ from typing import Union, List, Iterator, Any
 
 import logging
 
-from great_expectations.core.batch import BatchRequest
-
-
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
+from great_expectations.core.batch import BatchRequest
 import great_expectations.exceptions as ge_exceptions
 
 from great_expectations.data_context.util import (
@@ -126,7 +124,8 @@ configuration.
     def convert_data_reference_to_batch_request(
         self,
         data_reference: Any = None,
-        **kwargs,
+        # TODO: <Alex>Abe, is "kwargs" supposed to be in the signature?</Alex>
+        # **kwargs,
     ) -> BatchRequest:
         raise NotImplementedError
 

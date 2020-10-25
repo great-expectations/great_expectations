@@ -62,16 +62,18 @@ def test_basic_instantiation(tmp_path_factory):
 #             - letter
 #             - number
 
+
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
     data_references = basic_data_connector._get_data_reference_list()
     assert data_references == []
 
+
 def test__DictDataConnector():
     data_reference_dict = {
-        "pretend/path/A-100.csv" : create_fake_data_frame(),
-        "pretend/path/A-101.csv" : create_fake_data_frame(),
-        "pretend/directory/B-1.csv" : create_fake_data_frame(),
-        "pretend/directory/B-2.csv" : create_fake_data_frame(),
+        "pretend/path/A-100.csv": create_fake_data_frame(),
+        "pretend/path/A-101.csv": create_fake_data_frame(),
+        "pretend/directory/B-1.csv": create_fake_data_frame(),
+        "pretend/directory/B-2.csv": create_fake_data_frame(),
     }
 
     my_data_connector = DictDataConnector(
@@ -89,10 +91,14 @@ def test__DictDataConnector():
         "pretend/path/A-101.csv",
     ]
 
-    with pytest.raises(ValueError):
-        set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
+    # TODO: <Alex>This statement seems to have no effect.  What is its purpose?</Alex>
+    # with pytest.raises(ValueError):
+    #     set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 
-
+    # TODO: <Alex>This statement causes the error "great_expectations.exceptions.exceptions.DataConnectorError: Default Partitioner has not been set for data_connector"
+    # to be raised by DataConnector._map_data_reference_to_batch_definition_list() because the instantiation of DictDataConnector above does include partitioners and default_partitioner_name
+    # The behavior of the above method must be fixed for this test to continue.
+    # </Alex>
     my_data_connector.refresh_data_references_cache()
 
     # Since we don't have a Partitioner yet, all keys should be unmatched
@@ -117,6 +123,7 @@ group_names:
     assert set(my_data_connector.get_unmatched_data_references()) == set([])
 
     # print(json.dumps(my_data_connector._data_references_cache, indent=2))
+
 
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
@@ -186,26 +193,34 @@ group_names:
 def test_get_batch_definition_list_from_batch_request():
     pass
 
+
 def test_build_batch_spec_from_batch_definition():
     pass
+
 
 def test_get_batch_data_and_metadata_from_batch_definition():
     pass
 
+
 def test_convert_in_memory_dataset_to_batch():
     pass
+
 
 def test_refresh_data_references_cache():
     pass
 
+
 def test_get_unmatched_data_references():
     pass
+
 
 def test_get_cached_data_reference_count():
     pass
 
+
 def test_available_data_asset_names():
     pass
+
 
 def test__batch_definition_matches_batch_request():
     my_data_connector = DictDataConnector(
@@ -285,7 +300,7 @@ def test__batch_definition_matches_batch_request():
                 "id": "B"
             }
         )
-    ) == False
+    ) is False
 
     assert my_data_connector._batch_definition_matches_batch_request(
         A,
