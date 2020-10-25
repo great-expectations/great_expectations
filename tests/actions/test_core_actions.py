@@ -1,4 +1,5 @@
 from unittest import mock
+
 from freezegun import freeze_time
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
@@ -8,8 +9,9 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.validation_operators import (
-    SlackNotificationAction,
+    MicrosoftTeamsNotificationAction,
     PagerdutyAlertAction,
+    SlackNotificationAction,
     StoreValidationResultAction,
 )
 
@@ -76,10 +78,10 @@ def test_StoreAction():
 
 
 def test_SlackNotificationAction(
-        data_context_parameterized_expectation_suite,
-        validation_result_suite,
-        validation_result_suite_id
-    ):
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
+):
     renderer = {
         "module_name": "great_expectations.render.renderer.slack_renderer",
         "class_name": "SlackRenderer",
@@ -104,13 +106,13 @@ def test_SlackNotificationAction(
 
 @mock.patch("pypd.EventV2")
 def test_PagerdutyAlertAction(
-        data_context_parameterized_expectation_suite,
-        validation_result_suite,
-        validation_result_suite_id
-    ):
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
+):
     api_key = "test"
     routing_key = "test"
-    
+
     pagerduty_action = PagerdutyAlertAction(
         data_context=data_context_parameterized_expectation_suite,
         api_key=api_key,
@@ -134,6 +136,45 @@ def test_PagerdutyAlertAction(
         validation_result_suite=validation_result_suite,
         data_asset=None,
     ) == {"pagerduty_alert_result": "none sent"}
+
+
+def test_MicrosoftTeamsNotificationAction(
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_extended_id,
+):
+    renderer = {
+        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+        "class_name": "MicrosoftTeamsRenderer",
+    }
+    teams_webhook = "https://webhook.site/700303fe-6398-4a22-96fb-837f90d019e9"
+    notify_on = "all"
+
+    teams_action = MicrosoftTeamsNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        microsoft_teams_webhook=teams_webhook,
+        notify_on=notify_on,
+    )
+
+    assert teams_action.run(
+        validation_result_suite_identifier=validation_result_suite_extended_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {
+        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
+    }
+
+    validation_result_suite.success = False
+
+    assert teams_action.run(
+        validation_result_suite_identifier=validation_result_suite_extended_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {
+        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
+    }
+
 
 # def test_ExtractAndStoreEvaluationParamsAction():
 #     fake_in_memory_store = ValidationsStore(
