@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] Add MicrosoftTeamsNotificationAction
 
 0.12.6
 -----------------
