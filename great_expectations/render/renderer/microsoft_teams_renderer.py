@@ -178,6 +178,13 @@ class MicrosoftTeamsRenderer(Renderer):
                 "horizontalAlignment": "left",
                 "color": "good",
             }
+        elif validation_result and not validation_result.success:
+            validation_result_element = {
+                "type": "TextBlock",
+                "text": "**{key}}:** {value}".format(key=key, value=value),
+                "horizontalAlignment": "left",
+                "color": "attention",
+            }
         else:
             validation_result_element = {
                 "type": "TextBlock",
