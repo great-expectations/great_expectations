@@ -17,7 +17,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from ..data_context.store.metric_store import MetricStore
 from ..data_context.types.resource_identifiers import ValidationResultIdentifier
 from ..exceptions import ClassInstantiationError, DataContextError
-from .util import send_slack_notification, send_microsoft_teams_notifications
+from .util import send_microsoft_teams_notifications, send_slack_notification
 
 logger = logging.getLogger(__name__)
 
@@ -362,13 +362,16 @@ MicrosoftTeamsNotificationAction sends a Microsoft Teams notification to a given
             or self.notify_on == "failure"
             and not validation_success
         ):
-            query = self.renderer.render(validation_result_suite, data_docs_pages)
+            query = self.renderer.render(
+                validation_result_suite,
+                validation_result_suite_identifier,
+                data_docs_pages,
+            )
             # this will actually sent the POST request to the Microsoft Teams webapp server
             teams_notif_result = send_microsoft_teams_notifications(
                 query, microsoft_teams_webhook=self.teams_webhook
             )
 
-            # sending payload back as dictionary
             return {"microsoft_teams_notification_result": teams_notif_result}
         else:
             return {"microsoft_teams_notification_result": ""}
