@@ -1,9 +1,10 @@
 from great_expectations.util import verify_dynamic_loading_support
 
 from .actions import (
+    MicrosoftTeamsNotificationAction,
     NoOpAction,
-    SlackNotificationAction,
     PagerdutyAlertAction,
+    SlackNotificationAction,
     StoreEvaluationParametersAction,
     StoreMetricsAction,
     StoreValidationResultAction,
