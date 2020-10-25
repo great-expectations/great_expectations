@@ -7,14 +7,74 @@ from .renderer import Renderer
 
 
 class MicrosoftTeamsRenderer(Renderer):
+
+    MICROSOFT_TEAMS_SCHEMA_URL = "http://adaptivecards.io/schemas/adaptive-card.json"
+
     def __init__(self):
         super().__init__()
 
     def render(
         self, validation_result=None, data_docs_pages=None,
     ):
+        default_text = (
+            "No validation occurred. Please ensure you passed a validation_result."
+        )
 
         status = "Failed :("
+
+        query = {
+            "type": "message",
+            "attachments": [
+                {
+                    "contentType": "application/vnd.microsoft.card.adaptive",
+                    "content": {
+                        "$schema": self.MICROSOFT_TEAMS_SCHEMA_URL,
+                        "type": "AdaptiveCard",
+                        "version": "1.0",
+                        "body": [
+                            {
+                                "type": "Container",
+                                "height": "auto",
+                                "separator": True,
+                                "items": [
+                                    {
+                                        "type": "ColumnSet",
+                                        "columns": [
+                                            {
+                                                "type": "Column",
+                                                "width": "stretch",
+                                                "items": [
+                                                    {
+                                                        "type": "TextBlock",
+                                                        "text": "Validation results",
+                                                        "weight": "bolder",
+                                                        "size": "large",
+                                                        "wrap": True,
+                                                    },
+                                                ],
+                                            }
+                                        ],
+                                    },
+                                ],
+                            },
+                            {
+                                "type": "Container",
+                                "height": "auto",
+                                "separator": True,
+                                "items": [
+                                    {
+                                        "type": "TextBlock",
+                                        "text": default_text,
+                                        "horizontalAlignment": "left",
+                                    }
+                                ],
+                            },
+                        ],
+                        "actions": [],
+                    },
+                }
+            ],
+        }
 
         if validation_result:
             expectation_suite_name = validation_result.meta.get(
@@ -46,73 +106,45 @@ class MicrosoftTeamsRenderer(Renderer):
             if validation_result.success:
                 status = "Success !!!"
 
-            summary_text = """*Batch validation status*: {}
-*Data asset name*: `{}`
-*Expectation suite name*: `{}`
-*Run name*: `{}`
-*Batch ID*: `{}`
-*Summary*: {}""".format(
-                status,
-                data_asset_name,
-                expectation_suite_name,
-                run_name,
-                batch_id,
-                check_details_text,
+            status_element = self._get_validation_result_element(
+                key="Batch validation status",
+                value=status,
+                validation_result=validation_result,
+            )
+            data_asset_name_element = self._get_validation_result_element(
+                key="Data asset name", value=data_asset_name
+            )
+            expectation_suite_name_element = self._get_validation_result_element(
+                key="Expectation suite name", value=expectation_suite_name
+            )
+            run_name_element = self._get_validation_result_element(
+                key="Run name", value=run_name
+            )
+            batch_id_element = self._get_validation_result_element(
+                key="Batch ID", value=batch_id
+            )
+            check_details_text_element = self._get_validation_result_element(
+                key="Summary", value=check_details_text
             )
 
-            query = {
-                "type": "message",
-                "attachments": [
-                    {
-                        "contentType": "application/vnd.microsoft.card.adaptive",
-                        "content": {
-                            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                            "type": "AdaptiveCard",
-                            "version": "1.0",
-                            "body": [
-                                {
-                                    "type": "Container",
-                                    "separator": True,
-                                    "items": [
-                                        {
-                                            "type": "TextBlock",
-                                            "text": "Great expectations validation results",
-                                            "weight": "bolder",
-                                            "size": "medium",
-                                        },
-                                        {
-                                            "type": "ColumnSet",
-                                            "columns": [
-                                                {
-                                                    "type": "Column",
-                                                    "width": "stretch",
-                                                    "items": [
-                                                        {
-                                                            "type": "TextBlock",
-                                                            "text": "Validation results",
-                                                            "weight": "bolder",
-                                                            "size": "medium",
-                                                        },
-                                                        {
-                                                            "type": "TextBlock",
-                                                            "spacing": "none",
-                                                            "text": "{{DATE(2017-02-14T06:08:39Z, SHORT)}}",
-                                                            "isSubtle": True,
-                                                            "wrap": True,
-                                                        },
-                                                    ],
-                                                }
-                                            ],
-                                        },
-                                    ],
-                                },
-                                {"type": "Container", "separator": True, "items": [{}, ], },
-                            ],
-                            "actions": [],
-                        },
-                    }
-                ],
+            query["attachments"][0]["content"]["body"][0]["items"][0]["columns"][0][
+                "items"
+            ][1] = {
+                "type": "TextBlock",
+                "spacing": "none",
+                "text": "{{DATE({run_time}, SHORT)}}".format(run_time=run_time),
+                "isSubtle": True,
+                "wrap": True,
             }
+
+            query["attachments"][0]["content"]["body"][1]["items"] = [
+                status_element,
+                data_asset_name_element,
+                expectation_suite_name_element,
+                run_name_element,
+                batch_id_element,
+                check_details_text_element,
+            ]
 
             if data_docs_pages:
                 for docs_link_key in data_docs_pages.keys():
@@ -135,3 +167,22 @@ class MicrosoftTeamsRenderer(Renderer):
             "url": docs_link,
         }
         return report_element
+
+    @staticmethod
+    def _get_validation_result_element(key, value, validation_result=None):
+
+        if validation_result and validation_result.success:
+            validation_result_element = {
+                "type": "TextBlock",
+                "text": "**{key}}:** {value}".format(key=key, value=value),
+                "horizontalAlignment": "left",
+                "color": "good",
+            }
+        else:
+            validation_result_element = {
+                "type": "TextBlock",
+                "text": "**{key}}:** {value}".format(key=key, value=value),
+                "horizontalAlignment": "left",
+            }
+
+        return validation_result_element
