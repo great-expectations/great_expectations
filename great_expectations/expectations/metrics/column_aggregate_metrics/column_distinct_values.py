@@ -16,6 +16,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
+from great_expectations.render.renderer.renderer import renderer
 
 
 class ColumnDistinctValues(ColumnAggregateMetric):
@@ -32,3 +33,9 @@ class ColumnDistinctValues(ColumnAggregateMetric):
     @column_aggregate_metric(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
         pass
+
+    @classmethod
+    @renderer(renderer_type="question")
+    def _question_renderer(cls, metric_configuration, result=None, language=None, runtime_configuration=None):
+        column = metric_configuration.metric_domain_kwargs.get("column")
+        return f'How many distinct values does column "{column}" have?'
