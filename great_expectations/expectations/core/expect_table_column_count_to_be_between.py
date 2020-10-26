@@ -84,7 +84,7 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
         "meta": None,
     }
 
-    """ A Metric Decorator for the Column Count"""
+    """ A MetricProvider Decorator for the Column Count"""
 
     # @PandasExecutionEngine.metric(
     #        metric_name="columns.count",
@@ -102,7 +102,7 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        """Column Count Metric Function"""
+        """Column Count MetricProvider Function"""
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )

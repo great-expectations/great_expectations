@@ -43,7 +43,7 @@ class ExpectColumnDistinctValuesToContainSet(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Mode metric"""
+    """ A Column Map MetricProvider Decorator for the Mode metric"""
 
     # @PandasExecutionEngine.metric(
     #        metric_name="column.value_counts",

@@ -155,7 +155,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
     def get_allowed_config_keys(cls):
         return cls.domain_keys + cls.success_keys + cls.runtime_keys
 
-    # TODO: revise signature; revise decorator
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -193,6 +192,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
         )
 
     def _build_evr(self, raw_response):
+        """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
+        fails to return an EVR but returns the necessary components in a dictionary."""
         if not isinstance(raw_response, ExpectationValidationResult):
             if isinstance(raw_response, dict):
                 return ExpectationValidationResult(**raw_response)
@@ -207,7 +208,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        """Construct the validation graph for this expectation."""
+        """Returns the result format and metrics required to validate this Expectation using the provided result format."""
         return {
             "result_format": parse_result_format(
                 self.get_runtime_kwargs(
@@ -217,16 +218,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
             ),
             "metrics": dict(),
         }
-
-    def __check_validation_kwargs_definition(self):
-        """As a convenience to implementers, we verify that validation kwargs are indeed always supersets of their
-        parent validation_kwargs"""
-        validation_kwargs_set = set(self.validation_kwargs)
-        for parent in self.mro():
-            assert validation_kwargs_set <= set(
-                getattr(parent, "validation_kwargs", set())
-            ), ("Invalid Expectation " "definition for : " + self.__class__.__name__)
-        return True
 
     def get_domain_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -373,20 +364,11 @@ class Expectation(ABC, metaclass=MetaExpectation):
             meta=meta,
         )
 
-    def get_validator_name(self):
-        """
-        This is just a placeholder for more complex logic to determine the validator_name
-        Returns:
-
-        """
-        return "default"
-
 
 class DatasetExpectation(Expectation, ABC):
     domain_keys = (
         "batch_id",
         "table",
-        "column",
         "row_condition",
         "condition_parser",
     )

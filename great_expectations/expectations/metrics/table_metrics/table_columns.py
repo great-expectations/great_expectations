@@ -9,19 +9,19 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnAggregateMetric,
+    ColumnAggregateMetricProvider,
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.expectations.metrics.table_metric import (
-    TableMetric,
+    TableMetricProvider,
     table_metric,
 )
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class TableColumns(TableMetric):
+class TableColumns(TableMetricProvider):
     metric_name = "table.columns"
 
     @table_metric(engine=PandasExecutionEngine)

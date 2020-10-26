@@ -5,12 +5,12 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetric,
+    ColumnMapMetricProvider,
     column_map_condition,
 )
 
 
-class ColumnValuesDecreasing(ColumnMapMetric):
+class ColumnValuesDecreasing(ColumnMapMetricProvider):
     condition_metric_name = "column_values.decreasing"
     condition_value_keys = ("strictly",)
 

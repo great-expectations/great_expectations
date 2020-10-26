@@ -115,7 +115,7 @@ class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        """Metric which returns all columns in a dataframe"""
+        """MetricProvider which returns all columns in a dataframe"""
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )

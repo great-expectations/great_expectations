@@ -11,7 +11,10 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
     sa,
 )
-from great_expectations.expectations.metrics.metric import Metric, metric
+from great_expectations.expectations.metrics.metric_provider import (
+    MetricProvider,
+    metric,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +158,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for column_aggregate_metric")
 
 
-class ColumnAggregateMetric(Metric):
+class ColumnAggregateMetricProvider(MetricProvider):
     domain_keys = (
         "batch_id",
         "table",

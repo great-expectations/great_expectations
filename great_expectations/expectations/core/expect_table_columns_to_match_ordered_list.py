@@ -73,7 +73,7 @@ class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
         "meta": None,
     }
 
-    """ A Metric Decorator for the table columns"""
+    """ A MetricProvider Decorator for the table columns"""
 
     # @PandasExecutionEngine.metric(
     #        metric_name="columns",
@@ -91,7 +91,7 @@ class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        """Metric which returns all columns in a DataFrame"""
+        """MetricProvider which returns all columns in a DataFrame"""
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )

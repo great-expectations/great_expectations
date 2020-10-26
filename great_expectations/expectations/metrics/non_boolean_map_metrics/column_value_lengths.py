@@ -6,13 +6,13 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetric,
+    ColumnMapMetricProvider,
     column_map_condition,
     column_map_function,
 )
 
 
-class ColumnValuesValueLengths(ColumnMapMetric):
+class ColumnValuesValueLengths(ColumnMapMetricProvider):
     function_metric_name = "column_values.value_lengths"
 
     @column_map_function(engine=PandasExecutionEngine)

@@ -68,7 +68,7 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
         "meta": None,
     }
 
-    """ A Metric Decorator for the Column Count"""
+    """ A MetricProvider Decorator for the Column Count"""
 
     # @PandasExecutionEngine.metric(
     #        metric_name="columns.count",

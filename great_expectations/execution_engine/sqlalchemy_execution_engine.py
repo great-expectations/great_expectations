@@ -654,7 +654,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             Args:
                 metric_fn_bundle (Iterable[Tuple[MetricConfiguration, Callable, dict]): \
-                    A Dictionary containing a Metric's MetricConfiguration (its unique identifier), its metric provider function
+                    A Dictionary containing a MetricProvider's MetricConfiguration (its unique identifier), its metric provider function
                     (the function that actually executes the metric), and the arguments to pass to the metric provider function.
                 metrics (Dict[Tuple, Any]): \
                     A dictionary of metrics defined in the registry and corresponding arguments

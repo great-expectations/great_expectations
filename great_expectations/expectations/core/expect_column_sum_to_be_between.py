@@ -96,7 +96,7 @@ class ExpectColumnSumToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Sum"""
+    """ A Column Map MetricProvider Decorator for the Sum"""
 
     # @PandasExecutionEngine.metric(
     #        metric_name="column.aggregate.sum",
@@ -114,7 +114,7 @@ class ExpectColumnSumToBeBetween(DatasetExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        """Sum Metric Function"""
+        """Sum MetricProvider Function"""
         series = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )

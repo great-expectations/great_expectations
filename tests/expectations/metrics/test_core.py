@@ -225,7 +225,11 @@ def test_map_metric_pd():
     engine._batches = {"batch_id": df}
     # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert results == {desired_metric.id: 1}
+    # assert results == {desired_metric.id: 1}
+    ser_expected_lengths = pd.Series([1, 3, 4, 5])
+    assert ser_expected_lengths.equals(
+        results[("column_values.value_lengths", "column=a", "value_set=[1]")]
+    )
 
 
 def test_map_unique_pd():

@@ -86,7 +86,7 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
         "meta": None,
     }
 
-    """ A Map Metric Decorator for the Row Count"""
+    """ A Map MetricProvider Decorator for the Row Count"""
     # TODO: Confirm - given that this uses the same metric as expect_table_row_count_to_equal, is it ok to have this
     #    expectation without any metrics?
     # @PandasExecutionEngine.metric(
@@ -106,7 +106,7 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
     #     runtime_configuration: dict = None,
     #     filter_column_isnull: bool = False,
     # ):
-    #     """Row Count Metric Function"""
+    #     """Row Count MetricProvider Function"""
     #     df = execution_engine.get_domain_dataframe(
     #         domain_kwargs=metric_domain_kwargs, batches=batches
     #     )

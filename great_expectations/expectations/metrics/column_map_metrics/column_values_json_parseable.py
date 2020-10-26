@@ -7,12 +7,12 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetric,
+    ColumnMapMetricProvider,
     column_map_condition,
 )
 
 
-class ColumnValuesJsonParseable(ColumnMapMetric):
+class ColumnValuesJsonParseable(ColumnMapMetricProvider):
     condition_metric_name = "column_values.json_parseable"
 
     @column_map_condition(engine=PandasExecutionEngine)

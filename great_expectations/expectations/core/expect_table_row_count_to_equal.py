@@ -72,7 +72,7 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         "meta": None,
     }
 
-    # """ A Metric Decorator for the Row Count"""
+    # """ A MetricProvider Decorator for the Row Count"""
     #
     # @PandasExecutionEngine.metric(
     #     metric_name="rows.count",

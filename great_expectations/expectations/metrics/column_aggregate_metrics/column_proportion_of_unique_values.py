@@ -10,7 +10,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnAggregateMetric,
+    ColumnAggregateMetricProvider,
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
@@ -27,7 +27,7 @@ def unique_proportion(self, _metrics):
         return 0
 
 
-class ColumnUniqueProportion(ColumnAggregateMetric):
+class ColumnUniqueProportion(ColumnAggregateMetricProvider):
     metric_name = "column.aggregate.unique_proportion"
 
     @column_aggregate_metric(engine=PandasExecutionEngine)

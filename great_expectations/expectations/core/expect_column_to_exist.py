@@ -83,7 +83,7 @@ class ExpectColumnToExist(DatasetExpectation):
         "meta": None,
     }
 
-    """ A Metric Decorator for the Columns"""
+    """ A MetricProvider Decorator for the Columns"""
 
     # @PandasExecutionEngine.metric(
     #        metric_name="columns",
@@ -101,7 +101,7 @@ class ExpectColumnToExist(DatasetExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        """Metric which returns all columns in a dataframe"""
+        """MetricProvider which returns all columns in a dataframe"""
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )

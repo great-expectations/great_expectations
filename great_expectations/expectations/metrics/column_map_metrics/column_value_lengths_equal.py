@@ -8,13 +8,13 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetric,
+    ColumnMapMetricProvider,
     column_map_condition,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnValuesValueLengthsEqual(ColumnMapMetric):
+class ColumnValuesValueLengthsEqual(ColumnMapMetricProvider):
     condition_metric_name = "column_values.value_lengths_equal"
     condition_value_keys = ("value",)
 

@@ -97,7 +97,7 @@ class ExpectColumnUniqueValueCountToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Aggregate Metric Decorator for the Unique Value Count"""
+    """ A Column Aggregate MetricProvider Decorator for the Unique Value Count"""
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

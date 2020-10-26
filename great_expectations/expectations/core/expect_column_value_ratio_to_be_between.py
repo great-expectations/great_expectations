@@ -83,7 +83,7 @@ class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Value ratio"""
+    """ A Column Map MetricProvider Decorator for the Value ratio"""
 
     def _pandas_value_ratio(
         self,
@@ -94,7 +94,7 @@ class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        """Value Ratio Metric Function, extracts nonnull count to use for obtaining the value ratio"""
+        """Value Ratio MetricProvider Function, extracts nonnull count to use for obtaining the value ratio"""
         # Column Extraction
         series = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches

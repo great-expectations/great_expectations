@@ -89,7 +89,7 @@ def register_metric(
     metric_domain_keys: Tuple[str, ...],
     metric_value_keys: Tuple[str, ...],
     execution_engine: Type["ExecutionEngine"],
-    metric_class: Type["Metric"],
+    metric_class: Type["MetricProvider"],
     metric_provider: Callable,
     bundle_metric: bool = False,
 ) -> dict:

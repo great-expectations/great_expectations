@@ -94,7 +94,7 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Mode metric"""
+    """ A Column Map MetricProvider Decorator for the Mode metric"""
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """Validating that user has inputted a value set and that configuration has been initialized"""

@@ -14,7 +14,10 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
     sa,
 )
-from great_expectations.expectations.metrics.metric import Metric, metric
+from great_expectations.expectations.metrics.metric_provider import (
+    MetricProvider,
+    metric,
+)
 from great_expectations.expectations.registry import register_metric
 from great_expectations.validator.validation_graph import MetricConfiguration
 
@@ -662,7 +665,7 @@ def _spark_column_map_rows(
         return filtered.limit(result_format["partial_unexpected_count"]).collect()
 
 
-class ColumnMapMetric(Metric):
+class ColumnMapMetricProvider(MetricProvider):
     condition_domain_keys = (
         "batch_id",
         "table",
@@ -698,7 +701,7 @@ class ColumnMapMetric(Metric):
                     )
                 if not hasattr(cls, "condition_metric_name"):
                     raise ValueError(
-                        "A ColumnMapMetric must have a metric_condition_name to have a decorated column_map_condition method."
+                        "A ColumnMapMetricProvider must have a metric_condition_name to have a decorated column_map_condition method."
                     )
 
                 # rename for readability
@@ -865,7 +868,7 @@ class ColumnMapMetric(Metric):
                     )
                 if not hasattr(cls, "function_metric_name"):
                     raise ValueError(
-                        "A ColumnMapMetric must have a function_metric_name to have a decorated column_map_function method."
+                        "A ColumnMapMetricProvider must have a function_metric_name to have a decorated column_map_function method."
                     )
                 # rename for readability
                 map_function_provider = candidate_metric_fn
