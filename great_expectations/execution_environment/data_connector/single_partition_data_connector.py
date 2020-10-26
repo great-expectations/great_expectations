@@ -124,6 +124,19 @@ class SinglePartitionDataConnector(DataConnector):
         data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
         return data_connector_obj
 
+    def refresh_data_references_cache(
+        self,
+    ):
+        """
+        """
+        #Map data_references to batch_definitions
+        self._data_references_cache = {}
+
+        for data_reference in self._get_data_reference_list():
+            mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
+                data_reference,
+            )
+            self._data_references_cache[data_reference] = mapped_batch_definition_list
 
 class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
     def __init__(
@@ -176,6 +189,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         base_directory_len = len(str(self.base_directory))
         path_list = [path[base_directory_len:] for path in path_list]
         return path_list
+
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
 
