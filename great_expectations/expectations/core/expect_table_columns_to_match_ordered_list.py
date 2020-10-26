@@ -11,8 +11,8 @@ from great_expectations.execution_engine import ExecutionEngine, PandasExecution
 from ..expectation import (
     DatasetExpectation,
     Expectation,
-    InvalidExpectationConfigurationError, renderer,
-)
+    InvalidExpectationConfigurationError, )
+from ...render.renderer.renderer import renderer
 from ..registry import extract_metrics
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing
@@ -127,7 +127,7 @@ class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_name="descriptive")
+    @renderer(renderer_type="descriptive")
     def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
         params = substitute_none_for_missing(expectation_configuration.kwargs, ["column_list"])
 

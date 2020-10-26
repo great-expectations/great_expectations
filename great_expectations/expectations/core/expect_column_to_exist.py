@@ -13,8 +13,8 @@ from ..expectation import (
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output, renderer,
-)
+    _format_map_output, )
+from ...render.renderer.renderer import renderer
 from ..registry import extract_metrics
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing, ordinal
@@ -137,7 +137,7 @@ class ExpectColumnToExist(DatasetExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_name="descriptive")
+    @renderer(renderer_type="descriptive")
     def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs, ["column", "column_index"],

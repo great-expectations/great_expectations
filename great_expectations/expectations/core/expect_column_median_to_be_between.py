@@ -19,8 +19,8 @@ from ..expectation import (
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
-    renderer,
 )
+from ...render.renderer.renderer import renderer
 from ..registry import extract_metrics
 
 
@@ -159,7 +159,7 @@ class ExpectColumnMedianToBeBetween(DatasetExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_name="descriptive")
+    @renderer(renderer_type="descriptive")
     def _descriptive_renderer(
         cls, expectation_configuration, styling=None, include_column_name=True
     ):

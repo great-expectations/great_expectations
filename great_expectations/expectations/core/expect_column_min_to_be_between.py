@@ -12,8 +12,8 @@ from ..expectation import (
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output, renderer,
-)
+    _format_map_output, )
+from ...render.renderer.renderer import renderer
 from ..registry import extract_metrics
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import parse_row_condition_string_pandas_engine, handle_strict_min_max, substitute_none_for_missing
@@ -157,7 +157,7 @@ class ExpectColumnMinToBeBetween(DatasetExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_name="descriptive")
+    @renderer(renderer_type="descriptive")
     def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,

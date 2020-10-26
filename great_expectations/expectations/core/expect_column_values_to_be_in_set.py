@@ -4,8 +4,8 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 
 from ..expectation import (
     ColumnMapDatasetExpectation,
-    InvalidExpectationConfigurationError, renderer,
-)
+    InvalidExpectationConfigurationError, )
+from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing, num_to_str, parse_row_condition_string_pandas_engine
 
@@ -92,7 +92,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
     default_kwarg_values = {"value_set": None, "parse_strings_as_datetimes": False}
 
     @classmethod
-    @renderer(renderer_name="descriptive")
+    @renderer(renderer_type="descriptive")
     def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,

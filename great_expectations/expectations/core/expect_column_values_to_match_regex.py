@@ -17,8 +17,8 @@ from ..expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output, renderer,
-)
+    _format_map_output, )
+from ...render.renderer.renderer import renderer
 from ..registry import extract_metrics, get_metric_kwargs
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing, num_to_str, parse_row_condition_string_pandas_engine
@@ -109,7 +109,27 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_name="descriptive")
+    @renderer(renderer_type="question")
+    def _question_renderer(cls, configuration, result=None, language=None, runtime_configuration=None):
+        column = configuration.kwargs.get("column")
+        mostly = configuration.kwargs.get("mostly")
+        regex = configuration.kwargs.get("regex")
+
+        return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'
+
+    @classmethod
+    @renderer(renderer_type="answer")
+    def _answer_renderer(cls, configuration=None, result=None, language=None, runtime_configuration=None):
+        column = result.expectation_config.kwargs.get("column")
+        mostly = result.expectation_config.kwargs.get("mostly")
+        regex = result.expectation_config.kwargs.get("regex")
+        if result.success:
+            return f'At least {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
+        else:
+            return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
+
+    @classmethod
+    @renderer(renderer_type="descriptive")
     def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,

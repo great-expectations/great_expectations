@@ -16,8 +16,8 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.expectations.expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
-    _format_map_output, renderer,
-)
+    _format_map_output, )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.expectations.registry import extract_metrics
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import substitute_none_for_missing, num_to_str, \
@@ -87,7 +87,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_name="descriptive")
+    @renderer(renderer_type="descriptive")
     def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,

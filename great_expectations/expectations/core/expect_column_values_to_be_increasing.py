@@ -11,7 +11,8 @@ from great_expectations.execution_engine import (
 )
 
 from ...data_asset.util import parse_result_format
-from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output, renderer
+from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output
+from ...render.renderer.renderer import renderer
 from ..registry import extract_metrics, get_metric_kwargs
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing, num_to_str, parse_row_condition_string_pandas_engine
@@ -129,7 +130,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     # )
 
     @classmethod
-    @renderer(renderer_name="descriptive")
+    @renderer(renderer_type="descriptive")
     def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,
