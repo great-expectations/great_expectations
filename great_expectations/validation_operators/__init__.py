@@ -4,6 +4,7 @@ from .actions import (
     NoOpAction,
     SlackNotificationAction,
     PagerdutyAlertAction,
+    OpsgenieAlertAction,
     StoreEvaluationParametersAction,
     StoreMetricsAction,
     StoreValidationResultAction,
