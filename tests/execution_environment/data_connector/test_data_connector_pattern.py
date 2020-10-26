@@ -194,7 +194,6 @@ def test_alpha(tmp_path_factory):
     )
 
     self_check_report = my_data_connector.self_check()
-    # TODO: This report is wrong; replace with something correct.
     print(json.dumps(self_check_report, indent=2))
 
     assert self_check_report["class_name"] == "FilesDataConnector"
@@ -308,6 +307,7 @@ def test_foxtrot(tmp_path_factory):
     # TODO: This report is wrong; replace with something correct.
     print(json.dumps(self_check_report, indent=2))
 
+# TODO: Put this back in once we've trimmed the base_directory off of data_references.
     self_check_report.pop("example_unmatched_data_references")
     assert self_check_report == {
       "class_name": "FilesDataConnector",
