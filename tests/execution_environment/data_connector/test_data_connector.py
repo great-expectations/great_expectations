@@ -96,8 +96,8 @@ def test__DictDataConnector():
     ]
 
     # TODO: <Alex>This statement seems to have no effect.  What is its purpose?</Alex>
-    # with pytest.raises(ValueError):
-    #     set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
+    with pytest.raises(ValueError):
+        set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 
     # TODO: <Alex>This statement causes the error "great_expectations.exceptions.exceptions.DataConnectorError: Default Partitioner has not been set for data_connector"
     # to be raised by DataConnector._map_data_reference_to_batch_definition_list() because the instantiation of DictDataConnector above does include partitioners and default_partitioner_name
