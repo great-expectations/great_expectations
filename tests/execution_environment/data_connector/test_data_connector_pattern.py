@@ -86,7 +86,6 @@ def test_name_date_price_list(tmp_path_factory):
     )
 
     self_check_report = my_data_connector.self_check()
-    # TODO: This report is wrong; replace with something correct.
     print(json.dumps(self_check_report, indent=2))
 
     assert self_check_report["class_name"] == "FilesDataConnector"
