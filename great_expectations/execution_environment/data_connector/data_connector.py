@@ -610,7 +610,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
         # process assets to populate data_asset_name in batch_definition:
         else:
             data_asset_name = "FAKE_DATA_ASSET_NAME"
-        # TODO: <Alex>Note: this is so far the list containing exactly one element.  Abe: was this intended?</Alex>
+        # TODO: <Alex>Note: currently this list contains exactly one element. Once splitters are implemented, it will need to handle multiples.</Alex>
         return [
             BatchDefinition(
                 execution_environment_name=self.execution_environment_name,
