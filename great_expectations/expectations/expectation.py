@@ -1,15 +1,10 @@
 import logging
 import re
-import string
 from abc import ABC, ABCMeta
 from collections import Counter
 from copy import deepcopy
-from functools import wraps
 from inspect import isabstract
-from typing import Any, Callable, Dict, List, Optional, Type, Union
-
-import pandas as pd
-from dateutil.parser import parse
+from typing import Any, Dict, Optional
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -34,13 +29,11 @@ from ..data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
 )
-from ..exceptions.metric_exceptions import MetricError
 from ..execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
 )
-from ..execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from ..render.renderer.renderer import renderer
 from ..render.types import RenderedStringTemplateContent
 from ..validator.validation_graph import MetricConfiguration
 from ..validator.validator import Validator
@@ -77,18 +70,6 @@ class MetaExpectation(ABCMeta):
         return newclass
 
 
-def renderer(renderer_name):
-    def wrapper(renderer_fn):
-        @wraps(renderer_fn)
-        def inner_func(*args, **kwargs):
-            return renderer_fn(*args, **kwargs)
-
-        inner_func._renderer_name = renderer_name
-        return inner_func
-
-    return wrapper
-
-
 class Expectation(ABC, metaclass=MetaExpectation):
     """Base class for all Expectations."""
 
@@ -118,12 +99,12 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
         for candidate_renderer_fn_name in dir(cls):
             attr_obj = getattr(cls, candidate_renderer_fn_name)
-            if not hasattr(attr_obj, "_renderer_name"):
+            if not hasattr(attr_obj, "_renderer_type"):
                 continue
-            register_renderer(expectation_type=expectation_type, renderer_fn=attr_obj)
+            register_renderer(ge_type=expectation_type, parent_class=cls, renderer_fn=attr_obj)
 
     @classmethod
-    @renderer(renderer_name="descriptive")
+    @renderer(renderer_type="descriptive")
     def _descriptive_renderer(
         cls, expectation_configuration, styling=None, include_column_name=True
     ):
