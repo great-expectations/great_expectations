@@ -130,7 +130,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         else:
             expectation_type = cls._get_expectation_type(render_object)
 
-            content_block_fn = get_renderer_impl(expectation_type=expectation_type, renderer_name="descriptive")
+            content_block_fn = get_renderer_impl(ge_type=expectation_type, renderer_type="descriptive")
             if content_block_fn is not None:
                 try:
                     result = content_block_fn(
@@ -274,7 +274,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
-        return get_renderer_impl(expectation_type=expectation_type, renderer_name="descriptive")
+        return get_renderer_impl(ge_type=expectation_type, renderer_type="descriptive")
 
     @classmethod
     def list_available_expectations(cls):

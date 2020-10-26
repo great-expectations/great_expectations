@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
@@ -24,33 +24,37 @@ _registered_renderers = dict()
 """
 
 
-def register_renderer(expectation_type: str, renderer_fn: Callable):
-    renderer_name = renderer_fn._renderer_name
-    if expectation_type not in _registered_renderers:
-        logger.debug(f"Registering {renderer_name} for expectation_type {expectation_type}.")
-        _registered_renderers[expectation_type] = {
-            renderer_name: renderer_fn
+def register_renderer(
+        ge_type: str,
+        parent_class: Type[Union["Expectation", "Metric"]],
+        renderer_fn: Callable
+):
+    renderer_name = renderer_fn._renderer_type
+    if ge_type not in _registered_renderers:
+        logger.debug(f"Registering {renderer_name} for expectation_type {ge_type}.")
+        _registered_renderers[ge_type] = {
+            renderer_name: (parent_class, renderer_fn)
         }
         return
 
-    if renderer_name in _registered_renderers[expectation_type]:
-        if _registered_renderers[expectation_type][renderer_name] == renderer_fn:
-            logger.info(f"Multiple declarations of {renderer_name} renderer for expectation_type {expectation_type} "
+    if renderer_name in _registered_renderers[ge_type]:
+        if _registered_renderers[ge_type][renderer_name] == (parent_class, renderer_fn):
+            logger.info(f"Multiple declarations of {renderer_name} renderer for expectation_type {ge_type} "
                         f"found.")
             return
         else:
             logger.warning(f"Overwriting declaration of {renderer_name} renderer for expectation_type "
-                           f"{expectation_type}.")
-            _registered_renderers[expectation_type][renderer_name] = renderer_fn
+                           f"{ge_type}.")
+            _registered_renderers[ge_type][renderer_name] = (parent_class, renderer_fn)
         return
     else:
-        logger.debug(f"Registering {renderer_name} for expectation_type {expectation_type}.")
-        _registered_renderers[expectation_type][renderer_name] = renderer_fn
+        logger.debug(f"Registering {renderer_name} for expectation_type {ge_type}.")
+        _registered_renderers[ge_type][renderer_name] = (parent_class, renderer_fn)
         return
 
 
-def get_renderer_impl(expectation_type, renderer_name):
-    return _registered_renderers.get(expectation_type, {}).get(renderer_name)
+def get_renderer_impl(ge_type, renderer_type):
+    return _registered_renderers.get(ge_type, {}).get(renderer_type)
 
 
 def register_expectation(expectation: Type["Expectation"]) -> None:

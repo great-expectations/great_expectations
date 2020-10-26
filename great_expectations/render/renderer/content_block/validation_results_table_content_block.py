@@ -483,7 +483,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
-        expectation_string_fn = get_renderer_impl(expectation_type=expectation_type, renderer_name="descriptive")
+        expectation_string_fn = get_renderer_impl(ge_type=expectation_type, renderer_type="descriptive")
         if expectation_string_fn is None:
             expectation_string_fn = getattr(cls, "_missing_content_block_fn")
 
