@@ -44,13 +44,13 @@ class RegexPartitioner(Partitioner):
         self._pattern = pattern
         self._group_names = group_names
 
-    # TODO: <Alex>See PyCharm warnings as to the method signature.  Abe: Do we need "kwargs" in this method?</Alex>
     def convert_data_reference_to_batch_request(
         self,
         data_reference: Any = None
-    ) -> BatchRequest:
+    ) -> Union[BatchRequest, None]:
         matches: Union[re.Match, None] = re.match(self._pattern, data_reference)
         if matches is None:
+            # TODO: <Alex>Do we need this commented out line?</Alex>
             #raise ValueError(f'No match found for data_reference: "{data_reference}".')
             return None
         groups: tuple = matches.groups()
