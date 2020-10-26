@@ -58,7 +58,7 @@ def test_base_partitioner_with_bad_sorter_config():
         test_partitioner_with_sorter.get_sorter("price")
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_base_partitioner_find_or_create_partitions():
 #     # test sorter config
 #     price_sorter_config = [{"module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter", "orderby": "desc",

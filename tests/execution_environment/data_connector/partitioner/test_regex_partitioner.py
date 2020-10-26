@@ -55,7 +55,7 @@ def test_regex_partitioner_regex_groups_named():
     assert regex_partitioner._group_names == ["name", "timestamp", "price"]
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_regex_partitioner_find_or_create_partitions_with_no_params():
 #     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
 #     group_names = ["name", "timestamp", "price"]
@@ -68,7 +68,7 @@ def test_regex_partitioner_regex_groups_named():
 #     assert regex_partitioner.find_or_create_partitions() == []
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_regex_partitioner_regex_does_not_match_paths():
 #     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
 #     group_names = ["name", "timestamp", "price"]
@@ -87,7 +87,7 @@ def test_regex_partitioner_regex_groups_named():
 #     assert partitions == []
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_no_data_asset_name():
 #     regex_partitioner = RegexPartitioner(name="test_regex_partitioner")
 #     paths: list = [
@@ -111,7 +111,7 @@ def test_regex_partitioner_regex_groups_named():
 #     ]
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_autodiscover_assets():
 #     regex_partitioner = RegexPartitioner(name="test_regex_partitioner")
 #     paths: list = [
@@ -135,7 +135,7 @@ def test_regex_partitioner_regex_groups_named():
 #     ]
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_data_asset_name_configured():
 #     regex_partitioner = RegexPartitioner(name="test_regex_partitioner")
 #     paths: list = [
@@ -159,7 +159,7 @@ def test_regex_partitioner_regex_groups_named():
 #     ]
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
 #     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
 #     group_names = ["name", "timestamp", "price"]
@@ -189,7 +189,7 @@ def test_regex_partitioner_regex_groups_named():
 #     ]
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_regex_partitioner_compute_partitions_auto_discover_assets_false_no_data_asset_name():
 #     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
 #     group_names = ["name", "timestamp", "price"]
@@ -217,7 +217,7 @@ def test_regex_partitioner_regex_groups_named():
 #     ]
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_regex_partitioner_compute_partitions_auto_discover_assets_false_data_asset_name_included():
 #     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
 #     group_names = ["name", "timestamp", "price"]
@@ -247,7 +247,7 @@ def test_regex_partitioner_regex_groups_named():
 #     ]
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_regex_partitioner_compute_partitions_adding_sorters():
 #     sorters = [
 #         {
@@ -299,7 +299,7 @@ def test_regex_partitioner_regex_groups_named():
 #     ]
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_regex_partitioner_compute_partitions_sorters_and_groups_names_do_not_match():
 #     sorters = [
 #         {
@@ -340,7 +340,7 @@ def test_regex_partitioner_regex_groups_named():
 #         regex_partitioner.find_or_create_partitions(paths=paths, data_asset_name="test_asset_0")
 
 
-# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 # def test_regex_partitioner_compute_partitions_sorters_too_many_sorters():
 #     sorters = [
 #         {

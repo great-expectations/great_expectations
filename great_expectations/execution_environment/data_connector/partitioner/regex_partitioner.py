@@ -50,8 +50,6 @@ class RegexPartitioner(Partitioner):
     ) -> Union[BatchRequest, None]:
         matches: Union[re.Match, None] = re.match(self._pattern, data_reference)
         if matches is None:
-            # TODO: <Alex>Do we need this commented out line?</Alex>
-            #raise ValueError(f'No match found for data_reference: "{data_reference}".')
             return None
         groups: tuple = matches.groups()
         group_names: list = [

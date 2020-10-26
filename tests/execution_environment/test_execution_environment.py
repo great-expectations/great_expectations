@@ -112,7 +112,7 @@ def test_get_batch_with_caching():
 
 
 def test_get_batch_with_pipeline_style_batch_request():
-    # TODO: <Alex></Alex>
+    # TODO: <Alex>A test must be written for the equivalent functionality.</Alex>
     # test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     execution_environment_name: str = "test_execution_environment"
@@ -137,6 +137,8 @@ def test_get_batch_with_pipeline_style_batch_request():
         "execution_environment_name": execution_environment_name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
+        # TODO: <Alex>We must resolve the way the "in_memory_dataset" is processed.</Alex>
+        # "in_memory_dataset": test_df,
         "partition_request": None,
         "limit": None,
     }
