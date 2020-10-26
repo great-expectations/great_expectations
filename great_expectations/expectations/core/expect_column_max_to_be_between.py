@@ -115,7 +115,7 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Maximum"""
+    """ A Column Map MetricProvider Decorator for the Maximum"""
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

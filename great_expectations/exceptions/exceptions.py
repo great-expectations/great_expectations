@@ -292,6 +292,12 @@ class InvalidConfigValueTypeError(DataContextError):
     pass
 
 
+class ExecutionEnvironmentError(DataContextError):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
 class DataConnectorError(DataContextError):
     def __init__(self, message):
         self.message = message

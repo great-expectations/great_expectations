@@ -6,7 +6,7 @@ import random
 import string
 from functools import wraps
 from types import ModuleType
-from typing import Union
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -17,6 +17,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationConfigurationSchema,
     ExpectationSuite,
+    ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
@@ -44,6 +45,7 @@ from great_expectations.validator.validator import Validator
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
 expectationConfigurationSchema = ExpectationConfigurationSchema()
+expectationSuiteSchema = ExpectationSuiteSchema()
 
 try:
     from sqlalchemy import create_engine
@@ -644,7 +646,7 @@ def get_test_batch(
 
         return PandasExecutionEngine(caching=caching).load_batch(
             in_memory_dataset=df,
-            batch_definition={"data_asset_name": "test", "partition_name": table_name},
+            batch_request={"data_asset_name": "test", "partition_name": table_name},
             batch_spec=BatchSpec(
                 {
                     "ge_load_time": datetime.datetime.now(
@@ -1015,7 +1017,7 @@ def get_test_batch(
 
         return SparkDFExecutionEngine(caching=caching).load_batch(
             in_memory_dataset=spark_df,
-            batch_definition={"data_asset_name": "test", "partition_name": table_name},
+            batch_request={"data_asset_name": "test", "partition_name": table_name},
             batch_spec=BatchSpec(
                 {
                     "ge_load_time": datetime.datetime.now(
@@ -1125,7 +1127,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_not_match_regex_list",
             # "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
-            # "expect_column_values_to_be_json_parseable",
+            "expect_column_values_to_be_json_parseable",
             # "expect_column_values_to_match_json_schema",
             # "expect_column_mean_to_be_between",
             # "expect_column_median_to_be_between",
@@ -1631,7 +1633,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
                 "class_name": "DateTimeSorter",
                 "orderby": "desc",
-                "config_params": {"datetime_format": "%Y%m%d",},
+                "datetime_format": "%Y%m%d",
             },
             {
                 "name": "price",
@@ -1656,41 +1658,45 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "test_pipeline_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
                     "class_name": "PipelineDataConnector",
+                    "partitioners": {
+                        "test_pipeline_partitioner": {
+                            "module_name": "great_expectations.execution_environment.data_connector.partitioner",
+                            "class_name": "PipelinePartitioner",
+                            "allow_multipart_partitions": False,
+                            "runtime_keys": ["run_id", "custom_key_0",],
+                        }
+                    },
+                    "default_partitioner_name": "test_pipeline_partitioner",
                     "assets": {
                         "test_asset_1": {
-                            "config_params": {
-                                "partition_name": "spark_check_dataframe",
-                            },
+                            "module_name": "great_expectations.execution_environment.data_connector.asset",
+                            "partitioner_name": "test_pipeline_partitioner",
                         }
                     },
                 },
                 "test_filesystem_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
                     "class_name": "FilesDataConnector",
-                    "config_params": {
-                        "base_directory": default_base_directory,
-                        "glob_directive": "*",
-                    },
+                    "base_directory": default_base_directory,
+                    "glob_directive": "*",
                     "partitioners": {
                         "test_regex_partitioner": {
                             "module_name": "great_expectations.execution_environment.data_connector.partitioner",
                             "class_name": "RegexPartitioner",
-                            "config_params": {
-                                "regex": {
-                                    "pattern": r".+\/(.+)_(.+)_(.+)\.csv",
-                                    "group_names": group_names,
-                                },
-                            },
+                            "pattern": r"(.+)_(.+)_(.+)\.csv",
+                            "group_names": group_names,
                             "allow_multipart_partitions": False,
                             "sorters": sorters,
+                            "runtime_keys": ["run_id", "custom_key_0",],
                         }
                     },
-                    "default_partitioner": "test_regex_partitioner",
+                    "default_partitioner_name": "test_regex_partitioner",
                     "assets": {
                         "test_asset_0": {
-                            "config_params": {"glob_directive": "alex*",},
-                            "partitioner": "test_regex_partitioner",
+                            "module_name": "great_expectations.execution_environment.data_connector.asset",
+                            "partitioner_name": "test_regex_partitioner",
                             "base_directory": data_asset_base_directory,
+                            "glob_directive": "alex*",
                         }
                     },
                 },
@@ -1734,3 +1740,26 @@ def create_files_for_regex_partitioner(
                 with open(file_path, "w") as fp:
                     fp.writelines([f'The name of this file is: "{file_path}".\n'])
             base_directories.append(base_dir)
+
+
+def create_files_in_directory(
+    directory: str, file_name_list: List[str], file_content_fn=lambda: "x,y\n1,2\n2,3"
+):
+    subdirectories = []
+    for file_name in file_name_list:
+        splits = file_name.split("/")
+        for i in range(1, len(splits)):
+            subdirectories.append(os.path.join(*splits[:i]))
+    subdirectories = set(subdirectories)
+
+    for subdirectory in subdirectories:
+        os.makedirs(os.path.join(directory, subdirectory), exist_ok=True)
+
+    for file_name in file_name_list:
+        file_path = os.path.join(directory, file_name)
+        with open(file_path, "w") as f_:
+            f_.write(file_content_fn())
+
+
+def create_fake_data_frame():
+    return pd.DataFrame({"x": range(10), "y": list("ABCDEFGHIJ"),})

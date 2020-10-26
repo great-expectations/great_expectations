@@ -1,3 +1,6 @@
+import random
+
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
@@ -139,3 +142,59 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
 
     def deserialize(self, key, value):
         return self._expectationSuiteSchema.loads(value)
+
+    def self_check(self, pretty_print):
+        return_obj = {}
+
+        if pretty_print:
+            print("Checking for existing keys...")
+
+        return_obj["keys"] = self.list_keys()
+        return_obj["len_keys"] = len(return_obj["keys"])
+        len_keys = return_obj["len_keys"]
+
+        if pretty_print:
+            if return_obj["len_keys"] == 0:
+                print(f"\t{len_keys} keys found")
+            else:
+                print(f"\t{len_keys} keys found:")
+                for key in return_obj["keys"][:10]:
+                    print("\t\t" + str(key))
+            if len_keys > 10:
+                print("\t\t...")
+            print()
+
+        test_key_name = "test-key-" + "".join(
+            [random.choice(list("0123456789ABCDEF")) for i in range(20)]
+        )
+        test_key = self._key_class(test_key_name)
+        test_value = ExpectationSuite(test_key_name)
+
+        if pretty_print:
+            print(f"Attempting to add a new test key: {test_key}...")
+        self.set(key=test_key, value=test_value)
+        if pretty_print:
+            print("\tTest key successfully added.")
+            print()
+
+        if pretty_print:
+            print(
+                f"Attempting to retrieve the test value associated with key: {test_key}..."
+            )
+        test_value = self.get(key=test_key,)
+        if pretty_print:
+            print("\tTest value successfully retreived.")
+            print()
+
+        if pretty_print:
+            print(f"Cleaning up test key and value: {test_key}...")
+
+        test_value = self.remove_key(
+            # key=self.key_to_tuple(test_key),
+            key=self.key_to_tuple(test_key),
+        )
+        if pretty_print:
+            print("\tTest key and value successfully removed.")
+            print()
+
+        return return_obj

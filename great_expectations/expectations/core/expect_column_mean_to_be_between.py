@@ -102,7 +102,7 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Aggregate Metric Decorator for the Mean"""
+    """ A Column Aggregate MetricProvider Decorator for the Mean"""
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

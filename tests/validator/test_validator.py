@@ -51,7 +51,7 @@ def test_parse_validation_graph():
     assert len(ready_metrics) == 4 and len(needed_metrics) == 5
 
 
-# Should be passing tests even if given incorrect Metric data
+# Should be passing tests even if given incorrect MetricProvider data
 def test_parse_validation_graph_with_bad_metrics_args():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     expectationConfiguration = ExpectationConfiguration(

@@ -114,11 +114,23 @@ class ExecutionEngine:
         """The current dictionary of batches."""
         return self._batches
 
-    def load_batch(self, batch_definition):
-        """
-        Load a Batch specified by the batch_definition.
+    def process_batch_request(self, batch_request, batch_spec):
+        """Use ExecutionEngine-specific configuration to translate any batch_request keys into batch_spec keys
 
-        :param batch_definition:
+        Args:
+            batch_request (dict): batch_request to process
+            batch_spec (dict): batch_spec to map processed batch_request keys to
+
+        Returns:
+            batch_spec (dict)
+        """
+        raise NotImplementedError
+
+    def load_batch(self, batch_request):
+        """
+        Load a Batch specified by the batch_request.
+
+        :param batch_request:
         :return:
         """
         raise NotImplementedError

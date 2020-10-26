@@ -19,7 +19,10 @@ from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
-from tests.test_utils import expectationSuiteValidationResultSchema
+from tests.test_utils import (
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
+)
 
 
 @pytest.fixture(scope="module")
@@ -50,7 +53,7 @@ def titanic_dataset_profiler_expectations():
         ),
     ) as infile:
         return expectationSuiteSchema.load(
-            json.load(infile, object_pairs_hook=OrderedDict)
+            json.load(fp=infile, object_pairs_hook=OrderedDict)
         )
 
 
@@ -63,7 +66,7 @@ def titanic_dataset_profiler_expectations_with_distribution():
         ),
     ) as infile:
         return expectationSuiteSchema.load(
-            json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict)
+            json.load(fp=infile, encoding="utf-8", object_pairs_hook=OrderedDict)
         )
 
 

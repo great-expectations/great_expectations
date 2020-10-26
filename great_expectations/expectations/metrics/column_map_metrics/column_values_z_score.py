@@ -14,14 +14,14 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import F
 from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetric,
+    ColumnMapMetricProvider,
     column_map_condition,
     column_map_function,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnValuesZScore(ColumnMapMetric):
+class ColumnValuesZScore(ColumnMapMetricProvider):
     condition_metric_name = "column_values.z_score.under_threshold"
     condition_value_keys = (
         "double_sided",

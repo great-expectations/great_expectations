@@ -32,7 +32,7 @@ from great_expectations.marshmallow__shade import (
 logger = logging.getLogger(__name__)
 
 
-class ExpectationSuite(object):
+class ExpectationSuite:
     """
     This ExpectationSuite object has create, read, update, and delete functionality for its expectations:
         -create: self.add_expectation()

@@ -165,10 +165,10 @@ class ValidationResultsPageRenderer(Renderer):
                 )
             )
 
-        if validation_results["meta"].get("batch_definition"):
+        if validation_results["meta"].get("batch_request"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_definition"),
+                    input_dict=validation_results["meta"].get("batch_request"),
                     header="Batch Definition",
                 )
             )

@@ -2601,7 +2601,6 @@ def execution_environment_files_data_connector_regex_partitioner_with_groups_wit
     execution_environment_name: str = "test_execution_environment"
     data_context.add_execution_environment(
         name=execution_environment_name,
-        use_group_names=True,
         initialize=True,
         **execution_environment_files_data_connector_regex_partitioner_config(
             use_group_names=True,

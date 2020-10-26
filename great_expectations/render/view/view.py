@@ -479,9 +479,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
             ]
 
         else:
-            return super(DefaultMarkdownPageView, self).render(
-                document=document, template=template, **kwargs
-            )
+            return super().render(document=document, template=template, **kwargs)
 
     def render_string_template(self, template: pTemplate) -> pTemplate:
         """

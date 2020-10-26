@@ -104,7 +104,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Aggregate Metric Decorator for the Unique Proportion"""
+    """ A Column Aggregate MetricProvider Decorator for the Unique Proportion"""
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

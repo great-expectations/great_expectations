@@ -8,7 +8,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnAggregateMetric,
+    ColumnAggregateMetricProvider,
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
@@ -32,8 +32,8 @@ from scipy import stats
 from great_expectations.expectations.metrics.column_aggregate_metric import F as F
 
 
-class ColumnParameterizedDistributionKSTestPValue(ColumnAggregateMetric):
-    """Metric Class for Aggregate Standard Deviation metric"""
+class ColumnParameterizedDistributionKSTestPValue(ColumnAggregateMetricProvider):
+    """MetricProvider Class for Aggregate Standard Deviation metric"""
 
     metric_name = "column.aggregate.parameterized_distribution_ks_test_p_value"
     value_keys = ("distribution", "p_value", "params")

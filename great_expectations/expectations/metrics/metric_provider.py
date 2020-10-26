@@ -10,8 +10,8 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 logger = logging.getLogger(__name__)
 
 
-class MetaMetric(type):
-    """MetaMetric registers metrics as they are defined."""
+class MetaMetricProvider(type):
+    """MetaMetricProvider registers metrics as they are defined."""
 
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
@@ -34,7 +34,7 @@ def metric(engine: Type[ExecutionEngine], **kwargs):
     return wrapper
 
 
-class Metric(metaclass=MetaMetric):
+class Metric(metaclass=MetaMetricProvider):
     domain_keys = tuple()
     value_keys = tuple()
     bundle_metric = False

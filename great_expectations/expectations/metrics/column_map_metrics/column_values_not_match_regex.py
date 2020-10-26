@@ -5,7 +5,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetric,
+    ColumnMapMetricProvider,
     column_map_condition,
 )
 from great_expectations.expectations.metrics.util import get_dialect_regex_expression
@@ -13,7 +13,7 @@ from great_expectations.expectations.metrics.util import get_dialect_regex_expre
 logger = logging.getLogger(__name__)
 
 
-class ColumnValuesNotMatchRegex(ColumnMapMetric):
+class ColumnValuesNotMatchRegex(ColumnMapMetricProvider):
     condition_metric_name = "column_values.not_match_regex_list"
     condition_value_keys = ("regex",)
 

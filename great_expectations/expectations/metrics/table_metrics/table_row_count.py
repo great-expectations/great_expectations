@@ -7,12 +7,12 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.expectations.metrics.table_metric import (
-    TableMetric,
+    TableMetricProvider,
     table_metric,
 )
 
 
-class TableRowCount(TableMetric):
+class TableRowCount(TableMetricProvider):
     metric_name = "table.row_count"
 
     @table_metric(engine=PandasExecutionEngine)

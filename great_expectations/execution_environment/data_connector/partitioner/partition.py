@@ -1,6 +1,8 @@
 import logging
 from typing import Any
 
+from great_expectations.core.id_dict import PartitionDefinition
+
 logger = logging.getLogger(__name__)
 
 
@@ -9,7 +11,7 @@ class Partition:
         self,
         name: str = None,
         data_asset_name: str = None,
-        definition: dict = None,
+        definition: PartitionDefinition = None,
         data_reference: Any = None,
     ):
         self._name = name
@@ -26,7 +28,7 @@ class Partition:
         return self._data_asset_name
 
     @property
-    def definition(self) -> dict:
+    def definition(self) -> PartitionDefinition:
         return self._definition
 
     @property
@@ -49,8 +51,9 @@ class Partition:
     def __hash__(self) -> int:
         """Overrides the default implementation"""
         _result_hash: int = hash(self.name) ^ hash(self.data_asset_name)
-        for key, value in self.definition.items():
-            _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
+        if self.definition is not None:
+            for key, value in self.definition.items():
+                _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
         return _result_hash
 
     def __repr__(self) -> str:

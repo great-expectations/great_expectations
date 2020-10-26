@@ -1,14 +1,8 @@
 import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.execution_environment.data_connector.data_connector import (
-    DataConnector,
-)
 from great_expectations.execution_environment.data_connector.partitioner import (
     Partitioner,
-)
-from great_expectations.execution_environment.data_connector.partitioner.partition import (
-    Partition,
 )
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import (
     Sorter,
@@ -17,23 +11,17 @@ from great_expectations.marshmallow__shade.exceptions import ValidationError
 
 
 def test_base_partitioner():
-    temp_data_connector = DataConnector(name="test")
-    test_partitioner = Partitioner(
-        name="test_base_partitioner", data_connector=temp_data_connector
-    )
+    test_partitioner = Partitioner(name="test_base_partitioner")
     # properties
     assert test_partitioner.name == "test_base_partitioner"
-    assert test_partitioner.data_connector == temp_data_connector
     assert test_partitioner.sorters == None
     assert test_partitioner.allow_multipart_partitions == False
-    assert test_partitioner.config_params == None
     # no sorters
     with pytest.raises(ge_exceptions.SorterError):
         test_partitioner.get_sorter("i_dont_exist")
 
 
 def test_base_partitioner_with_sorter():
-    temp_data_connector = DataConnector(name="test")
     # test sorter config
     price_sorter_config = [
         {
@@ -44,9 +32,7 @@ def test_base_partitioner_with_sorter():
         }
     ]
     test_partitioner_with_sorter = Partitioner(
-        name="test_base_partitioner",
-        data_connector=temp_data_connector,
-        sorters=price_sorter_config,
+        name="test_base_partitioner", sorters=price_sorter_config
     )
     # configured sorter exists
     assert test_partitioner_with_sorter.sorters.__repr__() == str(
@@ -69,16 +55,12 @@ def test_base_partitioner_with_sorter():
 
 
 def test_base_partitioner_with_bad_sorter_config():
-    temp_data_connector = DataConnector(name="test")
-
     # 1. class_name is bad
     price_sorter_config = [
         {"orderby": "desc", "class_name": "IDontExist", "name": "price"}
     ]
     test_partitioner_with_sorter = Partitioner(
-        name="test_base_partitioner",
-        data_connector=temp_data_connector,
-        sorters=price_sorter_config,
+        name="test_base_partitioner", sorters=price_sorter_config
     )
     with pytest.raises(ge_exceptions.PluginClassNotFoundError):
         test_partitioner_with_sorter.get_sorter("price")
@@ -88,11 +70,9 @@ def test_base_partitioner_with_bad_sorter_config():
         {"orderby": "desc", "module_name": "not_a_real_module", "name": "price"}
     ]
     test_partitioner_with_sorter = Partitioner(
-        name="test_base_partitioner",
-        data_connector=temp_data_connector,
-        sorters=price_sorter_config,
+        name="test_base_partitioner", sorters=price_sorter_config
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(FileNotFoundError):
         test_partitioner_with_sorter.get_sorter("price")
 
     # 3. orderby : not a real order
@@ -100,16 +80,13 @@ def test_base_partitioner_with_bad_sorter_config():
         {"orderby": "not_a_real_order", "class_name": "NumericSorter", "name": "price"}
     ]
     test_partitioner_with_sorter = Partitioner(
-        name="test_base_partitioner",
-        data_connector=temp_data_connector,
-        sorters=price_sorter_config,
+        name="test_base_partitioner", sorters=price_sorter_config
     )
     with pytest.raises(ge_exceptions.SorterError):
         test_partitioner_with_sorter.get_sorter("price")
 
 
-def test_base_partitioner_get_available_partitions():
-    temp_data_connector = DataConnector(name="test")
+def test_base_partitioner_find_or_create_partitions():
     # test sorter config
     price_sorter_config = [
         {
@@ -120,14 +97,12 @@ def test_base_partitioner_get_available_partitions():
         }
     ]
     test_partitioner_with_sorter = Partitioner(
-        name="test_base_partitioner",
-        data_connector=temp_data_connector,
-        sorters=price_sorter_config,
+        name="test_base_partitioner", sorters=price_sorter_config
     )
     # on its own this will return a NotImplementedError.
-    # get_available_partitions() calls _compute_partitions_for_data_asset() which is implemented by subclass of base Partitioner
+    # find_or_create_partitions() calls _compute_partitions_for_data_asset() which is implemented by subclass of base Partitioner
     with pytest.raises(NotImplementedError):
-        test_partitioner_with_sorter.get_available_partitions()
+        test_partitioner_with_sorter.find_or_create_partitions()
     # with repartition
     with pytest.raises(NotImplementedError):
-        test_partitioner_with_sorter.get_available_partitions(repartition=True)
+        test_partitioner_with_sorter.find_or_create_partitions(repartition=True)
