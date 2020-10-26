@@ -176,19 +176,21 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         base_directory_len = len(str(self.base_directory))
         path_list = [path[base_directory_len:] for path in path_list]
         return path_list
+
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
 
         Returns:
             A list of available names
         """
-        if self._data_references_cache == None:
+        if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
         available_data_asset_names = []
 
-        for k,v in self._data_references_cache.items():
-            if v != None:
-                available_data_asset_names.append(v.data_asset_name)
+        for k, v in self._data_references_cache.items():
+            if v is not None:
+                batch_definition: BatchDefinition = v[0]
+                available_data_asset_names.append(batch_definition.data_asset_name)
 
         return list(set(available_data_asset_names))

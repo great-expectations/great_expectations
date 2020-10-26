@@ -23,6 +23,7 @@ import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
+
 class DictDataConnector(DataConnector):
     """This DataConnector is meant to closely mimic the FilesDataConnector, but without requiring an actual filesystem.
 
@@ -38,12 +39,14 @@ class DictDataConnector(DataConnector):
         self,
         name: str,
         execution_environment_name: str,
-        data_reference_dict: {},
-        partitioners: dict = {},
+        data_reference_dict: dict,
+        partitioners: dict = None,
         default_partitioner_name: str = None,
         assets: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        if data_reference_dict is None:
+            data_reference_dict = {}
         logger.debug(f'Constructing DictDataConnector "{name}".')
         super().__init__(
             name=name,

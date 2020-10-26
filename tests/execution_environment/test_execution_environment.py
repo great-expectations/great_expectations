@@ -8,6 +8,7 @@ from typing import Union, List
 
 
 from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment.data_connector.files_data_connector import FilesDataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.batch import (
     Batch,
@@ -29,9 +30,9 @@ from tests.test_utils import (
 
 @pytest.fixture
 def basic_execution_environment(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("basic_execution_environment__filesystem_data_connector"))
+    base_directory: str = str(tmp_path_factory.mktemp("basic_execution_environment_filesystem_data_connector"))
 
-    basic_execution_environment = instantiate_class_from_config(yaml.load(f"""
+    basic_execution_environment: ExecutionEnvironment = instantiate_class_from_config(yaml.load(f"""
 class_name: ExecutionEnvironment
 
 execution_engine:
@@ -42,6 +43,10 @@ data_connectors:
         class_name: FilesDataConnector
         base_directory: {base_directory}
         glob_directive: '*.csv'
+        
+        assets:
+            Titanic:
+                partitioner_name: default_partitioner_name
             
         default_partitioner_name: my_regex_partitioner
         partitioners:
@@ -62,13 +67,18 @@ data_connectors:
 
 
 def test_get_batch_list_from_batch_request(basic_execution_environment):
-    execution_environment_name: str = "test_execution_environment"
-    data_connector_name: str = "test_filesystem_data_connector"
+    execution_environment_name: str = "my_execution_environment"
+    data_connector_name: str = "my_filesystem_data_connector"
     data_asset_name: str = "Titanic"
+    # TODO: <Alex>Do we need the commented out lines?</Alex>
     # base_dir_path = str(tmp_path_factory.mktemp("project_dirs"))
     # project_dir_path = os.path.join(base_dir_path, "project_path")
     # titanic_csv_destination_file_path: str = str(os.path.join(project_dir_path, "data/titanic/Titanic.csv"))
-    
+    titanic_csv_source_file_path: str = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    base_directory: str = basic_execution_environment.get_data_connector(name=data_connector_name).base_directory
+    titanic_csv_destination_file_path: str = str(os.path.join(base_directory, "Titanic_19120414.csv"))
+    shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
+
     batch_request: dict = {
         "execution_environment_name": execution_environment_name,
         "data_connector_name": data_connector_name,
@@ -76,6 +86,7 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
         "partition_request": {
             "key": "Titanic.csv"
         },
+        # TODO: <Alex>We need to get a definitive resolution on whether or not we will allow "limit" and "batch_spec_passthrough" in batch_request.</Alex>
         # "limit": None,
         # "batch_spec_passthrough": {
         #     "path": titanic_csv_destination_file_path,
@@ -85,10 +96,11 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
         # }
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
-    batch: Batch = basic_execution_environment.get_batch_list_from_batch_request(
+    batch_list: List[Batch] = basic_execution_environment.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
-
+    # TODO: <Alex>Commenting out these assertions for now, because the new code computes batch_list (not a single batch).  We also do not have the computation of batch_spec completed as of yet.  Must revisit/implement before merge.</Alex>
+    # TODO: <Alex>What can we test for here?</Alex>
     assert batch.batch_spec is not None
     assert batch.batch_spec["data_asset_name"] == data_asset_name
     assert isinstance(batch.data, pd.DataFrame)
@@ -100,14 +112,16 @@ def test_get_batch_with_caching():
 
 
 def test_get_batch_with_pipeline_style_batch_request():
+    # TODO: <Alex>A test must be written for the equivalent functionality.</Alex>
     test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     execution_environment_name: str = "test_execution_environment"
     execution_environment_config: dict = execution_environment_files_data_connector_regex_partitioner_config(
         use_group_names=False,
         use_sorters=False,
-        default_base_directory=None,
-        data_asset_base_directory=None
+        # TODO: <Alex></Alex>
+        # default_base_directory=None,
+        # data_asset_base_directory=None
     )[execution_environment_name]
     execution_environment_config.pop("class_name")
 
@@ -123,13 +137,17 @@ def test_get_batch_with_pipeline_style_batch_request():
         "execution_environment_name": execution_environment_name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
+        # TODO: <Alex>We must resolve the way the "in_memory_dataset" is processed.</Alex>
+        "in_memory_dataset": test_df,
         "partition_request": None,
         "limit": None,
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
-    batch: Batch = execution_environment.get_batch_list_from_batch_request(
+    batch_list: List[Batch] = execution_environment.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
+    # TODO: <Alex>Commenting out these assertions for now, because the new code computes batch_list (not a single batch).  We also do not have the computation of batch_spec completed as of yet.  Must revisit/implement before merge.</Alex>
+    # TODO: <Alex>What can we test for here?</Alex>
     assert batch.batch_spec is not None
     assert batch.batch_spec["data_asset_name"] == data_asset_name
     assert isinstance(batch.data, pd.DataFrame)
@@ -261,6 +279,7 @@ def test_get_available_data_asset_names_with_caching():
     pass
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_get_available_partitions(tmp_path_factory):
     base_dir_path = str(tmp_path_factory.mktemp("project_dirs"))
     project_dir_path = os.path.join(base_dir_path, "project_path")
@@ -313,7 +332,9 @@ def test_get_available_partitions_with_caching():
 
 
 def test_some_very_basic_stuff(basic_execution_environment):
-    my_data_connector = basic_execution_environment.get_data_connector("my_filesystem_data_connector")
+    my_data_connector: FilesDataConnector = basic_execution_environment.get_data_connector(
+        name="my_filesystem_data_connector"
+    )
     create_files_in_directory(
         my_data_connector.base_directory,
         ["A1.csv", "A2.csv", "A3.csv", "B1.csv", "B2.csv", "B3.csv"],
@@ -326,6 +347,7 @@ def test_some_very_basic_stuff(basic_execution_environment):
         )
     )) == 6
 
+    # TODO: <Alex>This call leads to NotImplementedError, because it involves FilesDataConnector._get_available_partitions() which was commented out.</Alex>
     batch = basic_execution_environment.get_batch_from_batch_definition(BatchDefinition(
         "my_execution_environment",
         "my_filesystem_data_connector",
@@ -336,7 +358,7 @@ def test_some_very_basic_stuff(basic_execution_environment):
         })
     ))
 
-    assert batch.batch_request == None
+    assert batch.batch_request is None
     assert type(batch.data) == pd.DataFrame
     assert batch.batch_definition == BatchDefinition(
         "my_execution_environment",
@@ -369,4 +391,4 @@ def test_some_very_basic_stuff(basic_execution_environment):
             "some_random_id": 1
         })
     ), in_memory_dataset=my_df)
-    assert batch.batch_request == None
+    assert batch.batch_request is None
