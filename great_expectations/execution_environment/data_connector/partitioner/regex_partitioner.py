@@ -46,7 +46,7 @@ class RegexPartitioner(Partitioner):
 
     def convert_data_reference_to_batch_request(
         self,
-        data_reference: Any = None
+        data_reference: Any
     ) -> Union[BatchRequest, None]:
         matches: Union[re.Match, None] = re.match(self._pattern, data_reference)
         if matches is None:
@@ -114,13 +114,13 @@ class RegexPartitioner(Partitioner):
 
     def convert_batch_request_to_data_reference(
         self,
-        batch_request: BatchRequest = None,
+        batch_request: BatchRequest
     ) -> str:
         if not isinstance(batch_request, BatchRequest):
             raise TypeError("batch_request is not of an instance of type BatchRequest")
 
         template_arguments = batch_request.partition_request
-        if batch_request.data_asset_name != None:
+        if batch_request.data_asset_name is not None:
             template_arguments["data_asset_name"] = batch_request.data_asset_name
 
         filepath_template = self._invert_regex_to_data_reference_template()

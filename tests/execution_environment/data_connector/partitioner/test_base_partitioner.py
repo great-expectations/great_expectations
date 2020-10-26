@@ -11,7 +11,7 @@ def test_base_partitioner():
     # properties
     assert test_partitioner.name == "test_base_partitioner"
     assert test_partitioner.sorters == None
-    assert test_partitioner.allow_multipart_partitions == False
+    assert not test_partitioner.allow_multipart_partitions
     # no sorters
     with pytest.raises(ge_exceptions.SorterError):
         test_partitioner.get_sorter("i_dont_exist")

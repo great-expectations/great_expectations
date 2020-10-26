@@ -117,13 +117,13 @@ configuration.
 
     def convert_batch_request_to_data_reference(
         self,
-        batch_request: BatchRequest = None,
+        batch_request: BatchRequest
     ) -> Any:
         raise NotImplementedError
 
     def convert_data_reference_to_batch_request(
         self,
-        data_reference: Any = None,
+        data_reference: Any
     ) -> BatchRequest:
         raise NotImplementedError
 
