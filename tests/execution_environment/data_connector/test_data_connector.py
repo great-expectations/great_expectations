@@ -95,7 +95,7 @@ def test__DictDataConnector():
         "pretend/path/A-101.csv",
     ]
 
-    # TODO: <Alex>This statement seems to have no effect.  What is its purpose?</Alex>
+    # TODO: <Alex>This statement seems to have no effect.  However, this is an IMPORTANT check -- it must be fixed.</Alex>
     with pytest.raises(ValueError):
         set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
 

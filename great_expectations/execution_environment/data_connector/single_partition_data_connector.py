@@ -183,7 +183,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         Returns:
             A list of available names
         """
-        if self._data_references_cache is not None:
+        if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
         available_data_asset_names = []
