@@ -1366,7 +1366,7 @@ def test_get_batch_when_passed_a_suite(titanic_data_context):
 
 
 # TODO: <Alex>If "batch_spec_passthrough" is decomissioned, the name of this method will need to change to reflect this (i.e., no "explicit_path").</Alex>
-def test_get_batch_from_new_style_datasource_explicit_path(
+def test_get_batch_list_from_new_style_datasource_based_on_explicit_data_reference_path(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
     execution_environment_name: str = "test_execution_environment"
@@ -1398,7 +1398,7 @@ def test_get_batch_from_new_style_datasource_explicit_path(
         #     "limit": 2000
         # }
     }
-    batch_list: List[Batch] = data_context.get_batch_from_new_style_datasource(
+    batch_list: List[Batch] = data_context.get_batch_list_from_new_style_datasource(
         batch_request=batch_request
     )
 

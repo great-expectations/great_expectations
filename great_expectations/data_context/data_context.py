@@ -1123,8 +1123,8 @@ class BaseDataContext:
         )
         return batch_kwargs
 
-    # new get_batch
-    def get_batch_from_new_style_datasource(
+    # New get_batch (note: it returns the List of Batch objects, not a single Batch object).
+    def get_batch_list_from_new_style_datasource(
         self,
         batch_request: dict
     ) -> List[Batch]:

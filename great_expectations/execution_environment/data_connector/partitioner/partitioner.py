@@ -124,8 +124,6 @@ configuration.
     def convert_data_reference_to_batch_request(
         self,
         data_reference: Any = None,
-        # TODO: <Alex>Abe, is "kwargs" supposed to be in the signature?</Alex>
-        # **kwargs,
     ) -> BatchRequest:
         raise NotImplementedError
 

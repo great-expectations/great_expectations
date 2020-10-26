@@ -99,6 +99,7 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
     batch_list: List[Batch] = basic_execution_environment.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
+    # TODO: <Alex>Commenting out these assertions for now, because the new code computes batch_list (not a single batch).  We also do not have the computation of batch_spec completed as of yet.  Must revisit/implement before merge.</Alex>
     # TODO: <Alex>What can we test for here?</Alex>
     # assert batch.batch_spec is not None
     # assert batch.batch_spec["data_asset_name"] == data_asset_name
@@ -143,6 +144,7 @@ def test_get_batch_with_pipeline_style_batch_request():
     batch_list: List[Batch] = execution_environment.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
+    # TODO: <Alex>Commenting out these assertions for now, because the new code computes batch_list (not a single batch).  We also do not have the computation of batch_spec completed as of yet.  Must revisit/implement before merge.</Alex>
     # TODO: <Alex>What can we test for here?</Alex>
     # assert batch.batch_spec is not None
     # assert batch.batch_spec["data_asset_name"] == data_asset_name
