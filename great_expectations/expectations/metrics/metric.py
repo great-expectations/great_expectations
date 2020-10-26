@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, Optional, Tuple, Type
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.registry import register_metric
+from great_expectations.expectations.registry import register_metric, register_renderer
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -34,19 +34,6 @@ def metric(engine: Type[ExecutionEngine], **kwargs):
     return wrapper
 
 
-def renders(mode: str, **kwargs):
-    def wrapper(render_fn: Callable):
-        @wraps(render_fn)
-        def inner_func(*args, **kwargs):
-            return render_fn(*args, **kwargs)
-
-        inner_func._renders_mode = mode
-        inner_func._renders_definition_kwargs = kwargs
-        return inner_func
-
-    return wrapper
-
-
 class Metric(metaclass=MetaMetric):
     domain_keys = tuple()
     value_keys = tuple()
@@ -62,34 +49,42 @@ class Metric(metaclass=MetaMetric):
         metric_domain_keys = cls.domain_keys
         metric_value_keys = cls.value_keys
 
-        for attr, candidate_metric_fn in cls.__dict__.items():
-            if not hasattr(candidate_metric_fn, "metric_fn_engine"):
-                # This is not a metric
+        for attr_name in dir(cls):
+            attr_obj = getattr(cls, attr_name)
+            if not hasattr(attr_obj, "metric_fn_engine") and not hasattr(attr_obj, "_renderer_type"):
+                # This is not a metric or renderer
                 continue
-            engine = getattr(candidate_metric_fn, "metric_fn_engine")
-            if not issubclass(engine, ExecutionEngine):
-                raise ValueError(
-                    "metric functions must be defined with an Execution Engine"
+            elif hasattr(attr_obj, "metric_fn_engine"):
+                engine = getattr(attr_obj, "metric_fn_engine")
+                if not issubclass(engine, ExecutionEngine):
+                    raise ValueError(
+                        "metric functions must be defined with an Execution Engine"
+                    )
+                metric_fn = attr_obj
+                metric_definition_kwargs = getattr(
+                    metric_fn, "metric_definition_kwargs", dict()
                 )
-            metric_fn = getattr(cls, attr)
-            metric_definition_kwargs = getattr(
-                metric_fn, "metric_definition_kwargs", dict()
-            )
-            declared_metric_name = metric_name + metric_definition_kwargs.get(
-                "metric_name_suffix", ""
-            )
-            bundle_metric = metric_definition_kwargs.get(
-                "bundle_metric", getattr(cls, "bundle_metric", False)
-            )
-            register_metric(
-                metric_name=declared_metric_name,
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=metric_value_keys,
-                execution_engine=engine,
-                metric_class=cls,
-                metric_provider=metric_fn,
-                bundle_metric=bundle_metric,
-            )
+                declared_metric_name = metric_name + metric_definition_kwargs.get(
+                    "metric_name_suffix", ""
+                )
+                bundle_metric = metric_definition_kwargs.get(
+                    "bundle_metric", getattr(cls, "bundle_metric", False)
+                )
+                register_metric(
+                    metric_name=declared_metric_name,
+                    metric_domain_keys=metric_domain_keys,
+                    metric_value_keys=metric_value_keys,
+                    execution_engine=engine,
+                    metric_class=cls,
+                    metric_provider=metric_fn,
+                    bundle_metric=bundle_metric,
+                )
+            elif hasattr(attr_obj, "_renderer_type"):
+                register_renderer(
+                    ge_type=metric_name,
+                    parent_class=cls,
+                    renderer_fn=attr_obj
+                )
 
     @classmethod
     def get_evaluation_dependencies(
