@@ -124,6 +124,19 @@ class SinglePartitionDataConnector(DataConnector):
         data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
         return data_connector_obj
 
+    def refresh_data_references_cache(
+        self,
+    ):
+        """
+        """
+        #Map data_references to batch_definitions
+        self._data_references_cache = {}
+
+        for data_reference in self._get_data_reference_list():
+            mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
+                data_reference,
+            )
+            self._data_references_cache[data_reference] = mapped_batch_definition_list
 
 class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
     def __init__(

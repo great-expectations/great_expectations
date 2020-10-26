@@ -305,3 +305,22 @@ def test__batch_definition_matches_batch_request():
             }
         )
     )
+
+    assert my_data_connector._batch_definition_matches_batch_request(
+        batch_definition=BatchDefinition(**{
+            "execution_environment_name": "FAKE_EXECUTION_ENVIRONMENT",
+            "data_connector_name": "TEST_DATA_CONNECTOR",
+            "data_asset_name": "DEFAULT_ASSET_NAME",
+            "partition_definition": PartitionDefinition(**{
+                "index": "3"
+            })
+        }),
+        batch_request=BatchRequest(**{
+            "execution_environment_name": "FAKE_EXECUTION_ENVIRONMENT",
+            "data_connector_name": "TEST_DATA_CONNECTOR",
+            "data_asset_name": "DEFAULT_ASSET_NAME",
+            "partition_request": None
+        })
+    )
+
+    # TODO : Test cases to exercise ranges, etc.

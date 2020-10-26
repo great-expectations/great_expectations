@@ -469,6 +469,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
     ) -> bool:
         assert isinstance(batch_definition, BatchDefinition)
         assert isinstance(batch_request, BatchRequest)
+
         if batch_request.execution_environment_name:
             if batch_request.execution_environment_name != batch_definition.execution_environment_name:
                 return False
@@ -478,11 +479,13 @@ connector and the default_partitioner_name is set to the name of one of the conf
         if batch_request.data_asset_name:
             if batch_request.data_asset_name != batch_definition.data_asset_name:
                 return False
+        
         #FIXME: This is too rigid. Needs to take into account ranges and stuff.
-        if batch_request.partition_request:
+        if batch_request.partition_request and batch_request.partition_request is not None:
             for k,v in batch_request.partition_request.items():
                 if (k not in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
                     return False
+        
         return True
 
     def get_batch_definition_list_from_batch_request(
@@ -566,16 +569,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
     def refresh_data_references_cache(
         self,
     ):
-        """
-        """
-        # Map data_references to batch_definitions
-        self._data_references_cache = {}
-
-        for data_reference in self._get_data_reference_list():
-            mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
-                data_reference=data_reference,
-            )
-            self._data_references_cache[data_reference] = mapped_batch_definition_list
+        raise NotImplementedError
 
     def get_unmatched_data_references(self):
         if self._data_references_cache is None:
