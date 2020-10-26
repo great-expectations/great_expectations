@@ -8,16 +8,17 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
+from ...render.renderer.renderer import renderer
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import handle_strict_min_max, substitute_none_for_missing
 from ..expectation import (
     ColumnMapDatasetExpectation,
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output, )
-from ...render.renderer.renderer import renderer
+    _format_map_output,
+)
 from ..registry import extract_metrics
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing, handle_strict_min_max
 
 
 class ExpectTableColumnCountToBeBetween(DatasetExpectation):
@@ -159,9 +160,12 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
 
     @classmethod
     @renderer(renderer_type="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         params = substitute_none_for_missing(
-            expectation_configuration.kwargs, ["min_value", "max_value", "strict_min", "strict_max"]
+            expectation_configuration.kwargs,
+            ["min_value", "max_value", "strict_min", "strict_max"],
         )
         if params["min_value"] is None and params["max_value"] is None:
             template_str = "May have any number of columns."

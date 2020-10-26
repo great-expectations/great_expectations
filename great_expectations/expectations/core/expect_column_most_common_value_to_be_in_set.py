@@ -7,16 +7,20 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
+from ...render.renderer.renderer import renderer
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     ColumnMapDatasetExpectation,
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output, )
-from ...render.renderer.renderer import renderer
+    _format_map_output,
+)
 from ..registry import extract_metrics
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing, parse_row_condition_string_pandas_engine
 
 
 class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
@@ -108,7 +112,9 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
 
     @classmethod
     @renderer(renderer_type="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,
             ["column", "value_set", "ties_okay", "row_condition", "condition_parser"],

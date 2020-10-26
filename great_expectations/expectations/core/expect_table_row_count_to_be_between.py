@@ -8,15 +8,20 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
+from ...render.renderer.renderer import renderer
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    handle_strict_min_max,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output, )
-from ...render.renderer.renderer import renderer
+    _format_map_output,
+)
 from ..registry import extract_metrics
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing, handle_strict_min_max, parse_row_condition_string_pandas_engine
 
 
 class ExpectTableRowCountToBeBetween(DatasetExpectation):
@@ -150,7 +155,9 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
 
     @classmethod
     @renderer(renderer_type="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,
             [

@@ -7,6 +7,7 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
+from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
     handle_strict_min_max,
@@ -20,7 +21,6 @@ from ..expectation import (
     InvalidExpectationConfigurationError,
     _format_map_output,
 )
-from ...render.renderer.renderer import renderer
 from ..registry import extract_metrics
 
 

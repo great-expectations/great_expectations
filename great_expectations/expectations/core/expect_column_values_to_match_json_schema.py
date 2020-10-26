@@ -15,6 +15,7 @@ from great_expectations.execution_engine import (
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
     num_to_str,
@@ -27,7 +28,6 @@ from ..expectation import (
     InvalidExpectationConfigurationError,
     _format_map_output,
 )
-from ...render.renderer.renderer import renderer
 from ..registry import extract_metrics, get_metric_kwargs
 
 try:

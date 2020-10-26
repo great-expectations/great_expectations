@@ -36,6 +36,12 @@ class ColumnDistinctValues(ColumnAggregateMetric):
 
     @classmethod
     @renderer(renderer_type="question")
-    def _question_renderer(cls, metric_configuration, result=None, language=None, runtime_configuration=None):
+    def _question_renderer(
+        cls,
+        metric_configuration,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+    ):
         column = metric_configuration.metric_domain_kwargs.get("column")
         return f'How many distinct values does column "{column}" have?'

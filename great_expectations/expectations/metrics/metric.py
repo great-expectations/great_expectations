@@ -51,7 +51,9 @@ class Metric(metaclass=MetaMetric):
 
         for attr_name in dir(cls):
             attr_obj = getattr(cls, attr_name)
-            if not hasattr(attr_obj, "metric_fn_engine") and not hasattr(attr_obj, "_renderer_type"):
+            if not hasattr(attr_obj, "metric_fn_engine") and not hasattr(
+                attr_obj, "_renderer_type"
+            ):
                 # This is not a metric or renderer
                 continue
             elif hasattr(attr_obj, "metric_fn_engine"):
@@ -81,9 +83,7 @@ class Metric(metaclass=MetaMetric):
                 )
             elif hasattr(attr_obj, "_renderer_type"):
                 register_renderer(
-                    ge_type=metric_name,
-                    parent_class=cls,
-                    renderer_fn=attr_obj
+                    ge_type=metric_name, parent_class=cls, renderer_fn=attr_obj
                 )
 
     @classmethod

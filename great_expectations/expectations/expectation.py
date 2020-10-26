@@ -29,10 +29,7 @@ from ..data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
 )
-from ..execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-)
+from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..render.renderer.renderer import renderer
 from ..render.types import RenderedStringTemplateContent
 from ..validator.validation_graph import MetricConfiguration
@@ -101,7 +98,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
             attr_obj = getattr(cls, candidate_renderer_fn_name)
             if not hasattr(attr_obj, "_renderer_type"):
                 continue
-            register_renderer(ge_type=expectation_type, parent_class=cls, renderer_fn=attr_obj)
+            register_renderer(
+                ge_type=expectation_type, parent_class=cls, renderer_fn=attr_obj
+            )
 
     @classmethod
     @renderer(renderer_type="descriptive")

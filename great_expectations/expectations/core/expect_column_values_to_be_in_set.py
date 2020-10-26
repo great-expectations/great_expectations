@@ -2,12 +2,17 @@ from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
-from ..expectation import (
-    ColumnMapDatasetExpectation,
-    InvalidExpectationConfigurationError, )
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing, num_to_str, parse_row_condition_string_pandas_engine
+from ...render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
+from ..expectation import (
+    ColumnMapDatasetExpectation,
+    InvalidExpectationConfigurationError,
+)
 
 try:
     import sqlalchemy as sa
@@ -93,7 +98,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
 
     @classmethod
     @renderer(renderer_type="descriptive")
-    def _descriptive_renderer(cls, expectation_configuration, styling=None, include_column_name=True):
+    def _descriptive_renderer(
+        cls, expectation_configuration, styling=None, include_column_name=True
+    ):
         params = substitute_none_for_missing(
             expectation_configuration.kwargs,
             [

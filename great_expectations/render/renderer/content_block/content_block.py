@@ -5,7 +5,10 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.expectations.registry import get_renderer_impl, get_expectation_impl
+from great_expectations.expectations.registry import (
+    get_expectation_impl,
+    get_renderer_impl,
+)
 from great_expectations.render.types import (
     CollapseContent,
     RenderedMarkdownContent,
@@ -130,7 +133,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
         else:
             expectation_type = cls._get_expectation_type(render_object)
 
-            content_block_fn = get_renderer_impl(ge_type=expectation_type, renderer_type="descriptive")
+            content_block_fn = get_renderer_impl(
+                ge_type=expectation_type, renderer_type="descriptive"
+            )
             if content_block_fn is not None:
                 try:
                     result = content_block_fn(

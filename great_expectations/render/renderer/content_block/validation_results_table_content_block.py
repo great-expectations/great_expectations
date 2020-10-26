@@ -2,8 +2,9 @@ import logging
 import traceback
 from copy import deepcopy
 
-from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import \
-    ExpectColumnKlDivergenceToBeLessThan
+from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (
+    ExpectColumnKlDivergenceToBeLessThan,
+)
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
@@ -483,7 +484,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
-        expectation_string_fn = get_renderer_impl(ge_type=expectation_type, renderer_type="descriptive")
+        expectation_string_fn = get_renderer_impl(
+            ge_type=expectation_type, renderer_type="descriptive"
+        )
         if expectation_string_fn is None:
             expectation_string_fn = getattr(cls, "_missing_content_block_fn")
 
