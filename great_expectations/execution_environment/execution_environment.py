@@ -144,12 +144,14 @@ class ExecutionEnvironment(object):
     def get_batch_from_batch_definition(
         self,
         batch_definition: BatchDefinition,
+        # TODO: <Alex>We need to finalize how "in_memory_dataset" is being passed from be "batch_request" to "batch_definition" (assuming that "in_memory_dataset" will be part of "batch_request").</Alex>
         in_memory_dataset: Any = None,
     ) -> Batch:
         """
         Note: this method should *not* be used when getting a Batch from a BatchRequest, since it does not capture BatchRequest metadata.
         """
 
+        # TODO: <Alex>There must be a cleaner way of making this check, which will also accomplish the requirement of being more careful (per Abe below).</Alex>
         if type(in_memory_dataset) != type(None):
             #NOTE Abe 20201014: Maybe do more careful type checking here?
             #Seems like we should verify that in_memory_dataset is compatible with the execution_engine...?

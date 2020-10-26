@@ -136,8 +136,8 @@ class BatchRequest(DictDot):
         execution_environment_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        in_memory_dataset: Any = None,
         partition_request: dict = None,
+        in_memory_dataset: Any = None,
         limit: Union[int, None] = None,
         # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
         sampling: Union[dict, None] = None
@@ -153,8 +153,8 @@ class BatchRequest(DictDot):
         self._execution_environment_name = execution_environment_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
-        self._in_memory_dataset = in_memory_dataset
         self._partition_request = partition_request
+        self._in_memory_dataset = in_memory_dataset
         self._limit = limit
         self._sampling = sampling
 
@@ -171,12 +171,12 @@ class BatchRequest(DictDot):
         return self._data_asset_name
 
     @property
-    def in_memory_dataset(self) -> Any:
-        return self._in_memory_dataset
-
-    @property
     def partition_request(self) -> dict: #PartitionRequest:
         return self._partition_request
+
+    @property
+    def in_memory_dataset(self) -> Any:
+        return self._in_memory_dataset
 
     @property
     def limit(self) -> int:

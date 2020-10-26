@@ -1150,6 +1150,7 @@ class BaseDataContext:
         self,
         batch_request,
         expectation_suite_name: Union[str, ExpectationSuite],
+        # TODO: <Alex>Per most recent conversation, "in_memory_dataset" should be part of "batch_request" -- this must be confirmed.</Alex>
         in_memory_dataset: Any = None
     ):
         # execution_environment_name: str = batch_request.get("execution_environment")

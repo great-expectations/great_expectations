@@ -423,6 +423,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
         """
         raise NotImplementedError
 
+    # TODO: <Alex>Per most recent conversation, "get_available_partitions()" was being decomissioned.</Alex>
     def get_available_partitions(
         self,
         data_asset_name: str = None,
@@ -448,6 +449,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
             repartition=repartition
         )
 
+    # TODO: <Alex>Per most recent conversation, "_get_available_partitions()" was being decomissioned.</Alex>
     def _get_available_partitions(
         self,
         partitioner: Partitioner,

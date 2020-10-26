@@ -22,18 +22,21 @@ from great_expectations.core.batch import (
     PartitionDefinition,
 )
 
+
 @pytest.fixture
 def basic_data_connector(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
 
-    basic_data_connector = instantiate_class_from_config(yaml.load(f"""
+    basic_data_connector = instantiate_class_from_config(yaml.load(
+        f"""
 class_name: FilesDataConnector
 base_directory: {base_directory}
 glob_directive: '*.csv'
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
     
 default_partitioner_name: my_regex_partitioner
-    """, Loader=yaml.FullLoader),
+        """, Loader=yaml.FullLoader
+    ),
         runtime_environment={
             "name": "my_data_connector"
         },
@@ -42,6 +45,7 @@ default_partitioner_name: my_regex_partitioner
         }
     )
     return basic_data_connector
+
 
 def test_basic_instantiation(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
@@ -229,61 +233,12 @@ def test__batch_definition_matches_batch_request():
         data_reference_dict={},
     )
 
+    # TODO: <Alex>We need to cleanup PyCharm warnings.</Alex>
     A = BatchDefinition(
-        "A",
-        "a",
-        "aaa",
-        PartitionDefinition({
-            "id": "A"
-        })
-    )
-
-    assert my_data_connector._batch_definition_matches_batch_request(
-        A,
-        BatchRequest(
-            "A"
-        )
-    )
-
-    assert my_data_connector._batch_definition_matches_batch_request(
-        A,
-        BatchRequest(
-            "B"
-        )
-    ) == False
-
-    assert my_data_connector._batch_definition_matches_batch_request(
-        A,
-        BatchRequest(
-            "A",
-            "a",
-        )
-    )
-
-    assert my_data_connector._batch_definition_matches_batch_request(
-        A,
-        BatchRequest(
-            "A",
-            "a",
-            "aaa",
-        )
-    )
-
-    assert my_data_connector._batch_definition_matches_batch_request(
-        A,
-        BatchRequest(
-            "A",
-            "a",
-            "bbb"
-        )
-    ) == False
-
-    assert my_data_connector._batch_definition_matches_batch_request(
-        A,
-        BatchRequest(
-            "A",
-            "a",
-            "aaa",
+        execution_environment_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+        partition_definition=PartitionDefinition(
             {
                 "id": "A"
             }
@@ -291,21 +246,61 @@ def test__batch_definition_matches_batch_request():
     )
 
     assert my_data_connector._batch_definition_matches_batch_request(
-        A,
-        BatchRequest(
-            "A",
-            "a",
-            "aaa",
-            {
+        batch_definition=A,
+        batch_request=BatchRequest(
+            execution_environment_name="A"
+        )
+    )
+
+    assert not my_data_connector._batch_definition_matches_batch_request(
+        batch_definition=A,
+        batch_request=BatchRequest(
+            execution_environment_name="B"
+        )
+    )
+
+    assert my_data_connector._batch_definition_matches_batch_request(
+        batch_definition=A,
+        batch_request=BatchRequest(
+            execution_environment_name="A",
+            data_connector_name="a",
+        )
+    )
+
+    assert my_data_connector._batch_definition_matches_batch_request(
+        batch_definition=A,
+        batch_request=BatchRequest(
+            execution_environment_name="A",
+            data_connector_name="a",
+            data_asset_name="aaa",
+        )
+    )
+
+    assert not my_data_connector._batch_definition_matches_batch_request(
+        batch_definition=A,
+        batch_request=BatchRequest(
+            execution_environment_name="A",
+            data_connector_name="a",
+            data_asset_name="bbb",
+        )
+    )
+
+    assert not my_data_connector._batch_definition_matches_batch_request(
+        batch_definition=A,
+        batch_request=BatchRequest(
+            execution_environment_name="A",
+            data_connector_name="a",
+            data_asset_name="aaa",
+            partition_request={
                 "id": "B"
             }
         )
-    ) is False
+    )
 
     assert my_data_connector._batch_definition_matches_batch_request(
-        A,
-        BatchRequest(
-            partition_request= {
+        batch_definition=A,
+        batch_request=BatchRequest(
+            partition_request={
                 "id": "A"
             }
         )
@@ -313,6 +308,7 @@ def test__batch_definition_matches_batch_request():
 
     # TODO : Test cases to exercise ranges, etc.
 
+# TODO: <Alex>Is the code below useful, or should it be deleted?</Alex>
 # ### FOR DEVELOPMENT ###
 # def test__batch_request_to_batch_definition_simple(tmp_path_factory):
 #     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
