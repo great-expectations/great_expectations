@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 _anonymizers = dict()
 
 
-class UsageStatisticsHandler(object):
+class UsageStatisticsHandler:
     def __init__(self, data_context, data_context_id, usage_statistics_url):
         self._url = usage_statistics_url
 
@@ -264,7 +264,7 @@ def usage_statistics_enabled_method(
                 if handler is not None:
                     handler.emit(message)
             # except Exception:
-            except Exception as e:
+            except Exception:
                 message["success"] = False
                 handler = get_usage_statistics_handler(args)
                 if handler:
@@ -310,15 +310,17 @@ def run_validation_operator_usage_statistics(
         logger.debug(
             "run_validation_operator_usage_statistics: Unable to create validation_operator_name hash"
         )
-    try:
-        batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
-        payload["anonymized_batches"] = [
-            batch_anonymizer.anonymize_batch_info(batch) for batch in assets_to_validate
-        ]
-    except Exception:
-        logger.debug(
-            "run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
-        )
+    if data_context._usage_statistics_handler:
+        try:
+            batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
+            payload["anonymized_batches"] = [
+                batch_anonymizer.anonymize_batch_info(batch)
+                for batch in assets_to_validate
+            ]
+        except Exception:
+            logger.debug(
+                "run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
+            )
     return payload
 
 
@@ -372,6 +374,8 @@ def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name
 
 
 def add_datasource_usage_statistics(data_context, name, **kwargs):
+    if not data_context._usage_statistics_handler:
+        return dict()
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:

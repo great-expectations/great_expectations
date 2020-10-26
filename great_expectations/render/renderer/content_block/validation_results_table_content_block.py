@@ -156,13 +156,13 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             sampled_values_set = set()
             for unexpected_value in result.get("partial_unexpected_list"):
                 if unexpected_value:
-                    string_unexpected_value = unexpected_value
+                    string_unexpected_value = str(unexpected_value)
                 elif unexpected_value == "":
                     string_unexpected_value = "EMPTY"
                 else:
                     string_unexpected_value = "null"
                 if string_unexpected_value not in sampled_values_set:
-                    table_rows.append([string_unexpected_value])
+                    table_rows.append([unexpected_value])
                     sampled_values_set.add(string_unexpected_value)
 
         unexpected_table_content_block = RenderedTableContent(
@@ -309,6 +309,44 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         )
 
     @classmethod
+    def _get_cramers_phi_value_crosstab(cls, evr):
+        observed_value = evr.result.get("observed_value")
+        column_A = evr.expectation_config.kwargs["column_A"]
+        column_B = evr.expectation_config.kwargs["column_B"]
+        crosstab = evr.result.get("details", {}).get("crosstab")
+
+        if observed_value is not None:
+            observed_value = num_to_str(observed_value, precision=3, use_locale=True)
+            if crosstab is not None:
+                table = [[""] + list(crosstab.columns)]
+                for col in range(len(crosstab)):
+                    table.append([crosstab.index[col]] + list(crosstab.iloc[col, :]))
+
+                return RenderedTableContent(
+                    **{
+                        "content_block_type": "table",
+                        "header": f"Observed cramers phi of {observed_value}. \n"
+                        f"Crosstab between {column_A} (rows) and {column_B} (columns):",
+                        "table": table,
+                        "styling": {
+                            "body": {
+                                "classes": [
+                                    "table",
+                                    "table-sm",
+                                    "table-unbordered",
+                                    "col-4",
+                                    "mt-2",
+                                ],
+                            }
+                        },
+                    }
+                )
+            else:
+                return observed_value
+        else:
+            return "--"
+
+    @classmethod
     def _get_quantile_values_observed_value(cls, evr):
         if evr.result is None or evr.result.get("observed_value") is None:
             return "--"
@@ -377,6 +415,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return cls._get_kl_divergence_observed_value(evr)
         elif expectation_type == "expect_column_quantile_values_to_be_between":
             return cls._get_quantile_values_observed_value(evr)
+        elif expectation_type == "expect_column_pair_cramers_phi_value_to_be_less_than":
+            return cls._get_cramers_phi_value_crosstab(evr)
         elif expectation_type == "expect_table_row_count_to_equal_other_table":
             return cls._get_expect_table_row_count_to_equal_other_table_observed_value(
                 evr

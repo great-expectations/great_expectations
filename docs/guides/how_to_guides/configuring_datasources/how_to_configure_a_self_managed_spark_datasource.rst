@@ -9,7 +9,7 @@ When you use a managed Spark Datasource, the validation is done in Spark itself.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - Installed the pyspark package (``pip install pyspark``)
   - Setup `SPARK_HOME` and `JAVA_HOME` variables for runtime environment
 

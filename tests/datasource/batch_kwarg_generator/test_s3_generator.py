@@ -148,7 +148,7 @@ def test_s3_generator_get_directories(s3_generator):
         kwargs for kwargs in s3_generator.get_iterator(data_asset_name="data_dirs")
     ]
     assert 3 == len(batch_kwargs_list)
-    paths = set([batch_kwargs["s3"] for batch_kwargs in batch_kwargs_list])
+    paths = {batch_kwargs["s3"] for batch_kwargs in batch_kwargs_list}
     assert {
         "s3a://test_bucket/data/for/",
         "s3a://test_bucket/data/to/",
@@ -196,3 +196,10 @@ def test_s3_generator_misconfigured_directory_asset(s3_generator):
     with pytest.raises(BatchKwargsError) as exc:
         _ = s3_generator.build_batch_kwargs("dir_misconfigured")
     assert "The asset may not be configured correctly." in str(exc.value)
+
+
+def test_s3_get_available_partition_ids(s3_generator):
+    assert s3_generator.get_available_partition_ids(data_asset_name="data") == [
+        "me",
+        "you",
+    ]

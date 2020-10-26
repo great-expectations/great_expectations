@@ -29,7 +29,7 @@ FALSEY_YAML_STRINGS = [
 ]
 
 
-class SiteBuilder(object):
+class SiteBuilder:
     """SiteBuilder builds data documentation for the project defined by a
     DataContext.
 
@@ -276,7 +276,7 @@ class SiteBuilder(object):
         (ExpectationSuiteIdentifier,
                             ValidationResultIdentifier). If specified,
                             rebuild HTML(or other views the data docs
-                            site renders) only forthe resources in this list.
+                            site renders) only for the resources in this list.
                             This supports incremental build of data docs sites
                             (e.g., when a new validation result is created)
                             and avoids full rebuild.
@@ -302,7 +302,7 @@ class SiteBuilder(object):
 
         :param resource_identifier: ExpectationSuiteIdentifier,
         ValidationResultIdentifier or any other type's identifier. The
-        argument is optional - whennot supplied, the method returns the URL of
+        argument is optional - when not supplied, the method returns the URL of
         the index page.
         :return: URL (string)
         """
@@ -312,7 +312,7 @@ class SiteBuilder(object):
         )
 
 
-class DefaultSiteSectionBuilder(object):
+class DefaultSiteSectionBuilder:
     def __init__(
         self,
         name,
@@ -386,14 +386,22 @@ class DefaultSiteSectionBuilder(object):
                 source_store_keys, key=lambda x: x.run_id.run_time, reverse=True
             )[: self.validation_results_limit]
 
+        expectation_suite_identifier_exists: bool = any(
+            [isinstance(ri, ExpectationSuiteIdentifier) for ri in resource_identifiers]
+        ) if resource_identifiers is not None else False
+
         for resource_key in source_store_keys:
-            # if no resource_identifiers are passed, the section
-            # builder will build
-            # a page for every keys in its source store.
-            # if the caller did pass resource_identifiers, the section builder
-            # will build pages only for the specified resources
-            if resource_identifiers and resource_key not in resource_identifiers:
-                continue
+
+            # All expectation suites are always rendered unless resource_identifiers contains ExpectationSuiteIdentifier(s).
+            if expectation_suite_identifier_exists or (self.name != "expectations"):
+
+                # if no resource_identifiers are passed, the section
+                # builder will build
+                # a page for every keys in its source store.
+                # if the caller did pass resource_identifiers, the section builder
+                # will build pages only for the specified resources
+                if resource_identifiers and resource_key not in resource_identifiers:
+                    continue
 
             if self.run_name_filter:
                 if not resource_key_passes_run_name_filter(
@@ -446,6 +454,13 @@ class DefaultSiteSectionBuilder(object):
                     data_context_id=self.data_context_id,
                     show_how_to_buttons=self.show_how_to_buttons,
                 )
+
+                self.target_store.set(
+                    SiteSectionIdentifier(
+                        site_section_name=self.name, resource_identifier=resource_key,
+                    ),
+                    viewable_content,
+                )
             except Exception as e:
                 exception_message = f"""\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
@@ -459,15 +474,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 )
                 logger.error(exception_message, e, exc_info=True)
 
-            self.target_store.set(
-                SiteSectionIdentifier(
-                    site_section_name=self.name, resource_identifier=resource_key,
-                ),
-                viewable_content,
-            )
 
-
-class DefaultSiteIndexBuilder(object):
+class DefaultSiteIndexBuilder:
     def __init__(
         self,
         name,
@@ -642,7 +650,7 @@ class DefaultSiteIndexBuilder(object):
         create_expectations = CallToActionButton(
             "How to Create Expectations",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations.html",
+            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations.html",
         )
         see_glossary = CallToActionButton(
             "See More Kinds of Expectations",
@@ -651,15 +659,15 @@ class DefaultSiteIndexBuilder(object):
         validation_playground = CallToActionButton(
             "How to Validate Data",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/how_to_guides/validation.html",
+            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation.html",
         )
         customize_data_docs = CallToActionButton(
             "How to Customize Data Docs",
-            "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs",
+            "https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#data-docs",
         )
         team_site = CallToActionButton(
             "How to Set Up a Team Site",
-            "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs.html",
+            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs.html",
         )
         # TODO gallery does not yet exist
         # gallery = CallToActionButton(
@@ -809,7 +817,7 @@ class DefaultSiteIndexBuilder(object):
                         batch_kwargs=batch_kwargs,
                     )
                 except Exception:
-                    error_msg = "Profiling result not found: {0:s} - skipping".format(
+                    error_msg = "Profiling result not found: {:s} - skipping".format(
                         str(profiling_result_key.to_tuple())
                     )
                     logger.warning(error_msg)
@@ -863,7 +871,7 @@ class DefaultSiteIndexBuilder(object):
                         batch_kwargs=batch_kwargs,
                     )
                 except Exception:
-                    error_msg = "Validation result not found: {0:s} - skipping".format(
+                    error_msg = "Validation result not found: {:s} - skipping".format(
                         str(validation_result_key.to_tuple())
                     )
                     logger.warning(error_msg)
@@ -890,7 +898,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return (self.target_store.write_index_page(viewable_content), index_links_dict)
 
 
-class CallToActionButton(object):
+class CallToActionButton:
     def __init__(self, title, link):
         self.title = title
         self.link = link

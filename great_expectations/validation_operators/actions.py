@@ -7,6 +7,11 @@ The only requirement from an action is for it to have a take_action method.
 import logging
 import warnings
 
+try:
+    import pypd
+except ImportError:
+    pypd = None
+
 from great_expectations.data_context.util import instantiate_class_from_config
 
 from ..data_context.store.metric_store import MetricStore
@@ -17,7 +22,7 @@ from .util import send_slack_notification
 logger = logging.getLogger(__name__)
 
 
-class ValidationAction(object):
+class ValidationAction:
     """
     This is the base class for all actions that act on validation results
     and are aware of a Data Context namespace structure.
@@ -33,7 +38,7 @@ class ValidationAction(object):
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
-        **kwargs
+        **kwargs,
     ):
         """
 
@@ -47,7 +52,7 @@ class ValidationAction(object):
             validation_result_suite,
             validation_result_suite_identifier,
             data_asset,
-            **kwargs
+            **kwargs,
         )
 
     def _run(
@@ -82,6 +87,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
       # put the actual webhook URL in the uncommitted/config_variables.yml file
       slack_webhook: ${validation_notification_slack_webhook}
       notify_on: all # possible values: "all", "failure", "success"
+      notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
       renderer:
         # the class that implements the message to be sent
         # this is the default implementation, but you can
@@ -92,7 +98,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
     """
 
     def __init__(
-        self, data_context, renderer, slack_webhook, notify_on="all",
+        self, data_context, renderer, slack_webhook, notify_on="all", notify_with=None,
     ):
         """Construct a SlackNotificationAction
 
@@ -121,6 +127,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
         self.slack_webhook = slack_webhook
         assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
+        self.notify_with = notify_with
 
     def _run(
         self,
@@ -138,7 +145,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             validation_result_suite_identifier, ValidationResultIdentifier
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier, not {0}".format(
+                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -159,7 +166,9 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             or self.notify_on == "failure"
             and not validation_success
         ):
-            query = self.renderer.render(validation_result_suite, data_docs_pages)
+            query = self.renderer.render(
+                validation_result_suite, data_docs_pages, self.notify_with
+            )
             # this will actually sent the POST request to the Slack webapp server
             slack_notif_result = send_slack_notification(
                 query, slack_webhook=self.slack_webhook
@@ -169,6 +178,95 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             return {"slack_notification_result": slack_notif_result}
         else:
             return {"slack_notification_result": ""}
+
+
+class PagerdutyAlertAction(ValidationAction):
+    """
+PagerdutyAlertAction sends a pagerduty event
+
+**Configuration**
+
+.. code-block:: yaml
+
+    - name: send_pagerduty_alert_on_validation_result
+    action:
+      class_name: PagerdutyAlertAction
+      # put the actual webhook URL in the uncommitted/config_variables.yml file
+      api_key: ${pagerduty_api_key} # Events API v2 key
+      routing_key: # The 32 character Integration Key for an integration on a service or on a global ruleset.
+      notify_on: failure # possible values: "all", "failure", "success"
+
+    """
+
+    def __init__(
+        self, data_context, api_key, routing_key, notify_on="failure",
+    ):
+        """Construct a PagerdutyAlertAction
+
+        Args:
+            data_context:
+            api_key: Events API v2 key for pagerduty.
+            routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
+            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
+        """
+        super().__init__(data_context)
+        if not pypd:
+            raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
+        self.api_key = api_key
+        assert api_key, "No Pagerduty api_key found in action config."
+        self.routing_key = routing_key
+        assert routing_key, "No Pagerduty routing_key found in action config."
+        self.notify_on = notify_on
+
+    def _run(
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset=None,
+        payload=None,
+    ):
+        logger.debug("PagerdutyAlertAction.run")
+
+        if validation_result_suite is None:
+            return
+
+        if not isinstance(
+            validation_result_suite_identifier, ValidationResultIdentifier
+        ):
+            raise TypeError(
+                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
+
+        validation_success = validation_result_suite.success
+
+        if (
+            self.notify_on == "all"
+            or self.notify_on == "success"
+            and validation_success
+            or self.notify_on == "failure"
+            and not validation_success
+        ):
+            expectation_suite_name = validation_result_suite.meta.get(
+                "expectation_suite_name", "__no_expectation_suite_name__"
+            )
+            pypd.api_key = self.api_key
+            pypd.EventV2.create(
+                data={
+                    "routing_key": self.routing_key,
+                    "dedup_key": expectation_suite_name,
+                    "event_action": "trigger",
+                    "payload": {
+                        "summary": f"Great Expectations suite check {expectation_suite_name} has failed",
+                        "severity": "critical",
+                        "source": "Great Expectations",
+                    },
+                }
+            )
+
+            return {"pagerduty_alert_result": "success"}
+        return {"pagerduty_alert_result": "none sent"}
 
 
 class StoreValidationResultAction(ValidationAction):
@@ -220,7 +318,7 @@ class StoreValidationResultAction(ValidationAction):
             validation_result_suite_identifier, ValidationResultIdentifier
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -282,7 +380,7 @@ in the process of validating other prior expectations.
             validation_result_suite_identifier, ValidationResultIdentifier
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -357,7 +455,7 @@ in a metrics store.
             validation_result_suite_identifier, ValidationResultIdentifier
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -427,7 +525,7 @@ list of sites to update:
             validation_result_suite_identifier, ValidationResultIdentifier
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -440,7 +538,8 @@ list of sites to update:
 
         # get the URL for the validation result
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
-            resource_identifier=validation_result_suite_identifier
+            resource_identifier=validation_result_suite_identifier,
+            site_names=self._site_names,
         )
         # process payload
         data_docs_validation_results = {}

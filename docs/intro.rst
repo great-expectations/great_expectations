@@ -56,11 +56,11 @@ Key features
 
 **Data Contexts and Data Sources**
 
-    ...allow you to configure connections to your :ref:`Datasources`, using names you’re already familiar with: “the ml_training_results bucket in S3,” “the Users table in Redshift.” Great Expectations provides convenience libraries to introspect most common data stores (Ex: SQL databases, data directories and S3 buckets.) We are also working to integrate with pipeline execution frameworks (Ex: Airflow, dbt, Dagster, Prefect). The Great Expectations framework lets you fetch, validate, profile, and document your data in a way that’s meaningful within your existing infrastructure and work environment.
+    ...allow you to configure connections to your :ref:`Datasources <reference__core_concepts__datasources>`, using names you’re already familiar with: “the ml_training_results bucket in S3,” “the Users table in Redshift.” Great Expectations provides convenience libraries to introspect most common data stores (Ex: SQL databases, data directories and S3 buckets.) We are also working to integrate with pipeline execution frameworks (Ex: Airflow, dbt, Dagster, Prefect). The Great Expectations framework lets you fetch, validate, profile, and document your data in a way that’s meaningful within your existing infrastructure and work environment.
 
 **Tooling for validation**
 
-    Evaluating Expectations against data is just one step in a typical validation workflow. :ref:`Checkpoints` make the followup steps simple, too: storing validation results to a shared bucket, summarizing results and posting notifications to slack, handling differences between warnings and errors, etc.
+    Evaluating Expectations against data is just one step in a typical validation workflow. :ref:`Checkpoints <reference__core_concepts__validation__checkpoints>` make the followup steps simple, too: storing validation results to a shared bucket, summarizing results and posting notifications to slack, handling differences between warnings and errors, etc.
 
     Great Expectations also provides robust concepts of Batches and Runs. Although we sometimes talk informally about validating "dataframes" or "tables," it’s much more common to validate batches of new data—subsets of tables, rather than whole tables. Data Contexts provide simple, universal syntax to generate, fetch, and validate Batches of data from any of your DataSources.
 
@@ -112,10 +112,10 @@ How do I get started?
 *********************
 
 
-Check out :ref:`Getting started` to set up your first deployment of Great Expectations, and learn important concepts along the way.
+Check out :ref:`tutorials__getting_started` to set up your first local deployment of Great Expectations, and learn important concepts along the way.
 
-If you'd like to contribute to Great Expectations, please start :ref:`here <Contribute to Great Expectations>`.
+If you'd like to contribute to Great Expectations, please start :ref:`here <contributing>`.
 
-If you're interested in a paid support contract or consulting services for Great Expectations, please see options `here <https://greatexpectations.io/blog/how-do-we-engage/>`__
+If you're interested in a paid support contract or consulting services for Great Expectations, please see options `here <https://superconductive.com/>`__
 
-For other questions and resources, please visit :ref:`Community resources`.
+For other questions and resources, please visit :ref:`community`.

@@ -5,6 +5,8 @@
 How-to guides
 #############
 
+The how-to guides in this section contain (mostly bite-size) instructions that will explain specific aspects of using and deploying Great Expectations.
+
 .. warning::
 
    We are working on improving our How-to guides, but many of them are just stubs. Please check the "spare parts" sections or feel free to review older versions of documentation while we migrate content.

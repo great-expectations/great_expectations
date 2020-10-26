@@ -22,6 +22,7 @@ Table shape
 
 * :func:`expect_column_to_exist <great_expectations.dataset.dataset.Dataset.expect_column_to_exist>`
 * :func:`expect_table_columns_to_match_ordered_list <great_expectations.dataset.dataset.Dataset.expect_table_columns_to_match_ordered_list>`
+* :func:`expect_table_columns_to_match_set <great_expectations.dataset.dataset.Dataset.expect_table_columns_to_match_set>`
 * :func:`expect_table_row_count_to_be_between <great_expectations.dataset.dataset.Dataset.expect_table_row_count_to_be_between>`
 * :func:`expect_table_row_count_to_equal <great_expectations.dataset.dataset.Dataset.expect_table_row_count_to_equal>`
 * :func:`expect_table_row_count_to_equal_other_table <great_expectations.dataset.sqlalchemy_dataset.SqlAlchemyDataset.expect_table_row_count_to_equal_other_table>`
@@ -89,8 +90,10 @@ Multi-column
 * :func:`expect_column_pair_values_A_to_be_greater_than_B <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_A_to_be_greater_than_B>`
 * :func:`expect_column_pair_values_to_be_equal <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_to_be_equal>`
 * :func:`expect_column_pair_values_to_be_in_set <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_to_be_in_set>`
-* :func:`expect_multicolumn_values_to_be_unique <great_expectations.dataset.dataset.Dataset.expect_multicolumn_values_to_be_unique>`
+* :func:`expect_select_column_values_to_be_unique_within_record <great_expectations.dataset.dataset.Dataset.expect_select_column_values_to_be_unique_within_record>`
 * :func:`expect_multicolumn_sum_to_equal <great_expectations.dataset.dataset.Dataset.expect_multicolumn_sum_to_equal>`
+* :func:`expect_column_pair_cramers_phi_value_to_be_less_than <great_expectations.dataset.dataset.Dataset.expect_column_pair_cramers_phi_value_to_be_less_than>`
+* :func:`expect_compound_columns_to_be_unique <great_expectations.dataset.dataset.Dataset.expect_compound_columns_to_be_unique>`
 
 Distributional functions
 ========================

@@ -321,8 +321,8 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
         return options, create_engine_kwargs, drivername
 
     def _get_sqlalchemy_key_pair_auth_url(self, drivername, credentials):
-        from cryptography.hazmat.primitives import serialization
         from cryptography.hazmat.backends import default_backend
+        from cryptography.hazmat.primitives import serialization
 
         private_key_path = credentials.pop("private_key_path")
         private_key_passphrase = credentials.pop("private_key_passphrase")
@@ -400,6 +400,12 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
             limit = batch_kwargs.get("limit")
             offset = batch_kwargs.get("offset")
             if limit is not None or offset is not None:
+                # AWS Athena does not support offset
+                if (
+                    offset is not None
+                    and self.engine.dialect.name.lower() == "awsathena"
+                ):
+                    raise NotImplementedError("AWS Athena does not support OFFSET.")
                 logger.info(
                     "Generating query from table batch_kwargs based on limit and offset"
                 )

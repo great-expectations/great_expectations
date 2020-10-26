@@ -1,6 +1,7 @@
 import inspect
 import json
 import logging
+import warnings
 from datetime import datetime
 from functools import wraps
 from typing import List
@@ -62,23 +63,17 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
-            if row_condition:
-                if condition_parser not in ["python", "pandas"]:
-                    raise ValueError(
-                        "condition_parser is required when setting a row_condition,"
-                        " and must be 'python' or 'pandas'"
-                    )
-                else:
-                    data = self.query(
-                        row_condition, parser=condition_parser
-                    ).reset_index(drop=True)
+            if row_condition and self._supports_row_condition:
+                data = self._apply_row_condition(
+                    row_condition=row_condition, condition_parser=condition_parser
+                )
             else:
                 data = self
 
@@ -183,7 +178,7 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -287,7 +282,7 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -393,6 +388,7 @@ Notes:
         "discard_subset_failing_expectations",
     ]
     _internal_names_set = set(_internal_names)
+    _supports_row_condition = True
 
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
@@ -421,6 +417,17 @@ Notes:
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
+
+    def _apply_row_condition(self, row_condition, condition_parser):
+        if condition_parser not in ["python", "pandas"]:
+            raise ValueError(
+                "condition_parser is required when setting a row_condition,"
+                " and must be 'python' or 'pandas'"
+            )
+        else:
+            return self.query(row_condition, parser=condition_parser).reset_index(
+                drop=True
+            )
 
     def get_row_count(self):
         return self.shape[0]
@@ -520,6 +527,83 @@ Notes:
             else:
                 result = result[result <= max_val]
         return len(result)
+
+    def get_crosstab(
+        self,
+        column_A,
+        column_B,
+        bins_A=None,
+        bins_B=None,
+        n_bins_A=None,
+        n_bins_B=None,
+    ):
+        """Get crosstab of column_A and column_B, binning values if necessary"""
+        series_A = self.get_binned_values(self[column_A], bins_A, n_bins_A)
+        series_B = self.get_binned_values(self[column_B], bins_B, n_bins_B)
+        return pd.crosstab(series_A, columns=series_B)
+
+    def get_binned_values(self, series, bins, n_bins):
+        """
+        Get binned values of series.
+
+        Args:
+            Series (pd.Series): Input series
+            bins (list):
+                Bins for the series. List of numeric if series is numeric or list of list
+                of series values else.
+            n_bins (int): Number of bins. Ignored if bins is not None.
+        """
+        if n_bins is None:
+            n_bins = 10
+
+        if series.dtype in ["int", "float"]:
+            if bins is not None:
+                bins = sorted(np.unique(bins))
+                if np.min(series) < bins[0]:
+                    bins = [np.min(series)] + bins
+                if np.max(series) > bins[-1]:
+                    bins = bins + [np.max(series)]
+
+            if bins is None:
+                bins = np.histogram_bin_edges(series[series.notnull()], bins=n_bins)
+
+            # Make sure max of series is included in rightmost bin
+            bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
+
+            # Create labels for returned series
+            # Used in e.g. crosstab that is printed as observed value in data docs.
+            precision = int(np.log10(min(bins[1:] - bins[:-1]))) + 2
+            labels = [
+                f"[{round(lower, precision)}, {round(upper, precision)})"
+                for lower, upper in zip(bins[:-1], bins[1:])
+            ]
+            if any(np.isnan(series)):
+                # Missings get digitized into bin = n_bins+1
+                labels += ["(missing)"]
+
+            return pd.Categorical.from_codes(
+                codes=np.digitize(series, bins=bins) - 1,
+                categories=labels,
+                ordered=True,
+            )
+
+        else:
+            if bins is None:
+                value_counts = series.value_counts(sort=True)
+                if len(value_counts) < n_bins + 1:
+                    return series.fillna("(missing)")
+                else:
+                    other_values = sorted(value_counts.index[n_bins:])
+                    replace = {value: "(other)" for value in other_values}
+            else:
+                replace = dict()
+                for x in bins:
+                    replace.update({value: ", ".join(x) for value in x})
+            return (
+                series.replace(to_replace=replace)
+                .fillna("(missing)")
+                .astype("category")
+            )
 
     ### Expectation methods ###
 
@@ -1770,15 +1854,42 @@ Notes:
 
         return pd.Series(results, temp_df.index)
 
-    @DocInherit
-    @MetaPandasDataset.multicolumn_map_expectation
     def expect_multicolumn_values_to_be_unique(
         self,
         column_list,
+        mostly=None,
         ignore_row_if="all_values_are_missing",
         result_format=None,
-        row_condition=None,
-        condition_parser=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        deprecation_warning = (
+            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
+            "expect_select_column_values_to_be_unique_within_record instead."
+        )
+        warnings.warn(
+            deprecation_warning, DeprecationWarning,
+        )
+
+        return self.expect_select_column_values_to_be_unique_within_record(
+            column_list=column_list,
+            mostly=mostly,
+            ignore_row_if=ignore_row_if,
+            result_format=result_format,
+            include_config=include_config,
+            catch_exceptions=catch_exceptions,
+            meta=meta,
+        )
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_select_column_values_to_be_unique_within_record(
+        self,
+        column_list,
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1809,3 +1920,19 @@ Notes:
                 expected sum of columns
         """
         return column_list.sum(axis=1) == sum_total
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_compound_columns_to_be_unique(
+        self,
+        column_list,
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # Do not dropna here, since we have separately dealt with na in decorator
+        # Invert boolean so that duplicates are False and non-duplicates are True
+        return ~column_list.duplicated(keep=False)

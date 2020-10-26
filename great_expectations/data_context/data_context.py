@@ -14,7 +14,6 @@ import webbrowser
 from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
-from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
@@ -63,6 +62,7 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
+from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
@@ -81,7 +81,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-class BaseDataContext(object):
+class BaseDataContext:
     """
     This class implements most of the functionality of DataContext, with a few exceptions.
 
@@ -510,6 +510,7 @@ class BaseDataContext(object):
         resource_identifier=None,
         site_name: Optional[str] = None,
         only_if_exists=True,
+        site_names: Optional[List[str]] = None,
     ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
@@ -524,12 +525,24 @@ class BaseDataContext(object):
                 the URLs of the index page.
             site_name: Optionally specify which site to open. If not specified,
                 return all urls in the project.
+            site_names: Optionally specify which sites are active. Sites not in
+                this list are not processed, even if specified in site_name.
 
         Returns:
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        sites = self._project_config_with_variables_substituted.data_docs_sites
+        unfiltered_sites = (
+            self._project_config_with_variables_substituted.data_docs_sites
+        )
+
+        # Filter out sites that are not in site_names
+        sites = (
+            {k: v for k, v in unfiltered_sites.items() if k in site_names}
+            if site_names
+            else unfiltered_sites
+        )
+
         if not sites:
             logger.debug("Found no data_docs_sites.")
             return []
@@ -689,7 +702,7 @@ class BaseDataContext(object):
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
                     return yaml.load(config_variables_file) or {}
-            except IOError as e:
+            except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
                 logger.debug("Generating empty config variables file.")
@@ -764,9 +777,11 @@ class BaseDataContext(object):
         else:
             datasource = self.get_datasource(datasource_name)
             if datasource:
-                # remove key until we have a delete method on project_config
-                # self._project_config_with_variables_substituted.datasources[datasource_name].remove()
-                # del self._project_config["datasources"][datasource_name]
+                # delete datasources project config
+                del self._project_config_with_variables_substituted.datasources[
+                    datasource_name
+                ]
+                del self._project_config.datasources[datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError("Datasource {} not found".format(datasource_name))
@@ -1546,7 +1561,7 @@ class BaseDataContext(object):
             for site_name, site_config in sites.items():
                 logger.debug("Building Data Docs Site %s" % site_name,)
 
-                if (site_names and site_name in site_names) or not site_names:
+                if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
                     module_name = "great_expectations.render.renderer.site_builder"
                     site_builder = instantiate_class_from_config(
@@ -1661,7 +1676,7 @@ class BaseDataContext(object):
 
         if not dry_run:
             logger.info(
-                "Profiling '%s' with '%s'" % (datasource_name, profiler.__name__)
+                "Profiling '{}' with '{}'".format(datasource_name, profiler.__name__)
             )
 
         profiling_results = {}
@@ -1817,7 +1832,7 @@ class BaseDataContext(object):
 
                 except ge_exceptions.ProfilerError as err:
                     logger.warning(err.message)
-                except IOError as err:
+                except OSError as err:
                     logger.warning(
                         "IOError while profiling %s. (Perhaps a loading error?) Skipping."
                         % name[1]
@@ -1913,7 +1928,9 @@ class BaseDataContext(object):
             run_name = run_name or "profiling"
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
-        logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+        logger.info(
+            "Profiling '{}' with '{}'".format(datasource_name, profiler.__name__)
+        )
 
         if not additional_batch_kwargs:
             additional_batch_kwargs = {}
@@ -2009,13 +2026,11 @@ class BaseDataContext(object):
             row_count = batch.get_row_count()
             total_rows += row_count
             new_column_count = len(
-                set(
-                    [
-                        exp.kwargs["column"]
-                        for exp in expectation_suite.expectations
-                        if "column" in exp.kwargs
-                    ]
-                )
+                {
+                    exp.kwargs["column"]
+                    for exp in expectation_suite.expectations
+                    if "column" in exp.kwargs
+                }
             )
             total_columns += new_column_count
 
@@ -2284,7 +2299,7 @@ class DataContext(BaseDataContext):
             raise ge_exceptions.InvalidConfigurationYamlError(
                 "Error: duplicate key found in project YAML file."
             )
-        except IOError:
+        except OSError:
             raise ge_exceptions.ConfigNotFoundError()
 
         try:
@@ -2312,7 +2327,7 @@ class DataContext(BaseDataContext):
             self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
         )
         try:
-            with open(checkpoint_path, "r") as f:
+            with open(checkpoint_path) as f:
                 checkpoint = yaml.load(f.read())
                 return self._validate_checkpoint(checkpoint, checkpoint_name)
         except FileNotFoundError:
@@ -2347,6 +2362,14 @@ class DataContext(BaseDataContext):
         self._save_project_config()
 
         return new_datasource
+
+    def delete_datasource(self, name, **kwargs):
+        logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
+
+        delete_datasource = super().delete_datasource(name, **kwargs)
+        self._save_project_config()
+
+        return delete_datasource
 
     @classmethod
     def find_context_root_dir(cls):

@@ -7,7 +7,7 @@ This guide will explain how to use a Validation Action to update Data Docs sites
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - :ref:`Added a Validation Operator <how_to_guides__validation__how_to_add_a_validation_operator>`
     - Set up an :py:class:`~great_expectations.validation_operators.validation_operators.ActionListValidationOperator` **or**
     - Set up a :py:class:`~great_expectations.validation_operators.validation_operators.WarningAndFailureExpectationSuitesValidationOperator`
@@ -64,6 +64,12 @@ Steps
     1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the name of the Validation Operator you added the ``UpdateDataDocs`` action to. The details of Checkpoint configuration can be found in this :ref:`guide<how_to_guides__validation__how_to_add_validations_data_or_suites_to_a_checkpoint>`.
     2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained :ref:`here<how_to_guides__validation__how_to_run_a_checkpoint_in_terminal>` or from Python, as explained :ref:`here<how_to_guides__validation__how_to_run_a_checkpoint_in_python>`.
     3. Check your configured Data Docs sites to confirm that a new Validation Result has been added.
+
+Additional notes
+----------------
+
+The ``UpdateDataDocsAction`` generates an HTML file for the latest validation result and updates the index page to link to the new file, and re-renders expectation suite pages. It does not perform a full rebuild of Data Docs sites. This means that if you wish to render older Validation Results, you should run full Data Docs rebuild (via CLI's ``great_expectations docs build`` command or by calling ``context.build_data_docs()``).
+
 
 Additional resources
 --------------------

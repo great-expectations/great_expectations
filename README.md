@@ -117,7 +117,7 @@ You can also test out profiling on your own data [here]().
 Every component of the framework is designed to be extensible: Expectations, storage, profilers, renderers for documentation, actions taken after validation, etc.  This design choice gives a lot of creative freedom to developers working with Great Expectations.
 
 Recent extensions include:
-* [Renderers for data dictionaries](https://greatexpectations.io/blog/20191004_data_dictionary_plugin)
+* [Renderers for data dictionaries](https://greatexpectations.io/blog/20200731_data_dictionary_plugin/)
 * [BigQuery and GCS integration](https://github.com/great-expectations/great_expectations/pull/841)
 * [Notifications to MatterMost](https://github.com/great-expectations/great_expectations/issues/902)
 
@@ -163,7 +163,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://spark.apache.org/images/spark-logo-trademark.png" />                             </td><td style="width: 200px;">Spark                    </td><td>Good for really big data.</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://wiki.postgresql.org/images/3/30/PostgreSQL_logo.3colors.120x120.png" />          </td><td style="width: 200px;">Postgres                 </td><td>Leading open source database</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://upload.wikimedia.org/wikipedia/commons/8/89/Google-BigQuery-Logo.svg" /></td><td style="width: 200px;">BigQuery</td><td>Google serverless massive-scale SQL analytics platform</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://upload.wikimedia.org/wikipedia/en/0/09/Databricks_logo.png" /></td><td style="width: 200px;">Databricks</td><td>Managed Spark Analytics Platform</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://upload.wikimedia.org/wikipedia/commons/6/63/Databricks_Logo.png" /></td><td style="width: 200px;">Databricks</td><td>Managed Spark Analytics Platform</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.mysql.com/common/logos/powered-by-mysql-167x86.png" />                       </td><td style="width: 200px;">MySQL                    </td><td>Leading open source database</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.blazeclan.com/wp-content/uploads/2013/08/Amazon-Redshift-%E2%80%93-11-Key-Points-to-Remember.png" />                 </td><td style="width: 200px;">AWS Redshift             </td><td>Cloud-based data warehouse</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://braze-marketing-assets.s3.amazonaws.com/images/partner_logos/amazon-s3.png" />   </td><td style="width: 200px;">AWS S3                   </td><td>Cloud based blob storage</td></tr>

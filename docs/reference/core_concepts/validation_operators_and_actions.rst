@@ -22,19 +22,22 @@ Each Validation Operator encodes a particular set of business rules around valid
 
 The classes that implement them are in :py:mod:`great_expectations.validation_operators` module.
 
+.. _action_list_validation_operator:
 
 ActionListValidationOperator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ActionListValidationOperator validates each batch in the list that is passed as `assets_to_validate` argument to its `run` method against the expectation suite included within that batch and then invokes a list of configured actions on every validation result.
 
-Actions are Python classes with a `run` method that takes a result of validating a batch against an expectation suite and does something with it (e.g., save validation results to the disk or send a Slack notification). Classes that implement this API can be configured to be added to the list of actions for this operator (and other operators that use actions). Read more about actions here: :ref:`validation_actions`.
+Actions are Python classes with a `run` method that takes a result of validating a batch against an expectation suite and does something with it (e.g., save validation results to the disk or send a Slack notification). Classes that implement this API can be configured to be added to the list of actions for this operator (and other operators that use actions). Read more about actions here: :py:class:`great_expectations.validation_operators.actions.ValidationAction`.
 
 An instance of this operator is included in the default configuration file `great_expectations.yml` that `great_expectations init` command creates.
 
 A user can choose the actions to perform in their instance of the operator.
 
-Read more about ActionListValidationOperator here: :ref:`action_list_validation_operator`.
+Read more about ActionListValidationOperator here: :py:class:`great_expectations.validation_operators.ActionListValidationOperator`.
+
+.. warning_and_failure_expectation_suites_validation_operator:
 
 WarningAndFailureExpectationSuitesValidationOperator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,9 +52,10 @@ WarningAndFailureExpectationSuitesValidationOperator retrieves two expectation s
 
 After completing all the validations, it sends a Slack notification with the success status. Note that it doesn't use an Action to send its Slack notification, because the notification has also been customized to summarize information from both suites.
 
-Read more about WarningAndFailureExpectationSuitesValidationOperator here: :ref:`warning_and_failure_expectation_suites_validation_operator`
+Read more about the :py:class:`~great_expectations.validation_operators.validation_operators.WarningAndFailureExpectationSuitesValidationOperator` here.
 
 .. _validation_actions:
+
 *****************
 ValidationActions
 *****************
