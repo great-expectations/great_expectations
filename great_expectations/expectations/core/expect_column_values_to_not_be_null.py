@@ -93,7 +93,12 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -156,8 +161,8 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
         try:
             null_percent = result_dict["unexpected_percent"]
             return (
-                    num_to_str(100 - null_percent, precision=5, use_locale=True)
-                    + "% not null"
+                num_to_str(100 - null_percent, precision=5, use_locale=True)
+                + "% not null"
             )
         except KeyError:
             return "unknown % not null"

@@ -58,22 +58,35 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
-        expectation_string_fn = get_renderer_impl(object_name=expectation_type, renderer_type="renderer.prescriptive")
-        expectation_string_fn = expectation_string_fn[1] if expectation_string_fn else None
+        expectation_string_fn = get_renderer_impl(
+            object_name=expectation_type, renderer_type="renderer.prescriptive"
+        )
+        expectation_string_fn = (
+            expectation_string_fn[1] if expectation_string_fn else None
+        )
         if expectation_string_fn is None:
             expectation_string_fn = getattr(cls, "_missing_content_block_fn")
 
         # This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
-        def row_generator_fn(configuration=None, result=None, language=None, runtime_configuration=None, **kwargs):
+        def row_generator_fn(
+            configuration=None,
+            result=None,
+            language=None,
+            runtime_configuration=None,
+            **kwargs,
+        ):
             expectation = result.expectation_config
             expectation_string_cell = expectation_string_fn(
                 configuration=expectation, runtime_configuration=runtime_configuration
             )
 
-            status_icon_renderer = get_renderer_impl(object_name=expectation_type,
-                                                     renderer_type="renderer.diagnostic.status_icon")
-            status_cell = [status_icon_renderer[1](result=result)] if \
-                status_icon_renderer else []
+            status_icon_renderer = get_renderer_impl(
+                object_name=expectation_type,
+                renderer_type="renderer.diagnostic.status_icon",
+            )
+            status_cell = (
+                [status_icon_renderer[1](result=result)] if status_icon_renderer else []
+            )
             unexpected_statement = []
             unexpected_table = None
             observed_value = ["--"]
@@ -84,10 +97,15 @@ not be rendered properly and/or may not appear altogether.  Please use the trace
 diagnose and repair the underlying issue.  Detailed information follows:
             """
             try:
-                unexpected_statement_renderer = get_renderer_impl(object_name=expectation_type,
-                                                                  renderer_type="renderer.diagnostic.unexpected_statement")
-                unexpected_statement = unexpected_statement_renderer[1](result=result) if \
-                    unexpected_statement_renderer else []
+                unexpected_statement_renderer = get_renderer_impl(
+                    object_name=expectation_type,
+                    renderer_type="renderer.diagnostic.unexpected_statement",
+                )
+                unexpected_statement = (
+                    unexpected_statement_renderer[1](result=result)
+                    if unexpected_statement_renderer
+                    else []
+                )
             except Exception as e:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
@@ -96,10 +114,15 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 )
                 logger.error(exception_message, e, exc_info=True)
             try:
-                unexpected_table_renderer = get_renderer_impl(object_name=expectation_type,
-                                                              renderer_type="renderer.diagnostic.unexpected_table")
-                unexpected_table = unexpected_table_renderer[1](result=result) if \
-                    unexpected_table_renderer else None
+                unexpected_table_renderer = get_renderer_impl(
+                    object_name=expectation_type,
+                    renderer_type="renderer.diagnostic.unexpected_table",
+                )
+                unexpected_table = (
+                    unexpected_table_renderer[1](result=result)
+                    if unexpected_table_renderer
+                    else None
+                )
             except Exception as e:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
@@ -108,10 +131,15 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 )
                 logger.error(exception_message, e, exc_info=True)
             try:
-                observed_value_renderer = get_renderer_impl(object_name=expectation_type,
-                                                            renderer_type="renderer.diagnostic.observed_value")
-                observed_value = [observed_value_renderer[1](result=result) if \
-                    observed_value_renderer else "--"]
+                observed_value_renderer = get_renderer_impl(
+                    object_name=expectation_type,
+                    renderer_type="renderer.diagnostic.observed_value",
+                )
+                observed_value = [
+                    observed_value_renderer[1](result=result)
+                    if observed_value_renderer
+                    else "--"
+                ]
             except Exception as e:
                 exception_traceback = traceback.format_exc()
                 exception_message = (

@@ -1,14 +1,12 @@
 from great_expectations.expectations.expectation import DatasetExpectation
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import substitute_none_for_missing, num_to_str
+from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 
 class ExpectTableRowCountToEqualOtherTable(DatasetExpectation):
     metric_dependencies = tuple()
-    success_keys = (
-        "other_table_name"
-    )
+    success_keys = "other_table_name"
     default_kwarg_values = {
         "other_table_name": None,
         "result_format": "BASIC",
@@ -19,14 +17,17 @@ class ExpectTableRowCountToEqualOtherTable(DatasetExpectation):
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["other_table_name"]
-        )
+        params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
         template_str = "Row count must equal the row count of table $other_table_name."
 
         return [

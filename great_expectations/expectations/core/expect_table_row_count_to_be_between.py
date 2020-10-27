@@ -156,7 +156,12 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)

@@ -24,15 +24,24 @@ _registered_renderers = dict()
 """
 
 
-def register_renderer(object_name: str, parent_class: Type[Union["Expectation", "Metric"]], renderer_fn: Callable):
+def register_renderer(
+    object_name: str,
+    parent_class: Type[Union["Expectation", "Metric"]],
+    renderer_fn: Callable,
+):
     renderer_name = renderer_fn._renderer_type
     if object_name not in _registered_renderers:
         logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
-        _registered_renderers[object_name] = {renderer_name: (parent_class, renderer_fn)}
+        _registered_renderers[object_name] = {
+            renderer_name: (parent_class, renderer_fn)
+        }
         return
 
     if renderer_name in _registered_renderers[object_name]:
-        if _registered_renderers[object_name][renderer_name] == (parent_class, renderer_fn):
+        if _registered_renderers[object_name][renderer_name] == (
+            parent_class,
+            renderer_fn,
+        ):
             logger.info(
                 f"Multiple declarations of {renderer_name} renderer for expectation_type {object_name} "
                 f"found."
@@ -43,7 +52,10 @@ def register_renderer(object_name: str, parent_class: Type[Union["Expectation", 
                 f"Overwriting declaration of {renderer_name} renderer for expectation_type "
                 f"{object_name}."
             )
-            _registered_renderers[object_name][renderer_name] = (parent_class, renderer_fn)
+            _registered_renderers[object_name][renderer_name] = (
+                parent_class,
+                renderer_fn,
+            )
         return
     else:
         logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")

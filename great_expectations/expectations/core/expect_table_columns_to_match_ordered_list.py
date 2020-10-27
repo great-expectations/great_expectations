@@ -130,14 +130,17 @@ class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["column_list"]
-        )
+        params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
 
         if params["column_list"] is None:
             template_str = "Must have a list of columns in a specific order, but that order is not specified."

@@ -3,8 +3,11 @@ import pandas as pd
 
 from great_expectations.expectations.expectation import DatasetExpectation
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedGraphContent, RenderedStringTemplateContent, \
-    RenderedContentBlockContainer
+from great_expectations.render.types import (
+    RenderedContentBlockContainer,
+    RenderedGraphContent,
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -222,7 +225,12 @@ class ExpectColumnKlDivergenceToBeLessThan(DatasetExpectation):
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -285,9 +293,7 @@ class ExpectColumnKlDivergenceToBeLessThan(DatasetExpectation):
             return "--"
 
         observed_partition_object = result.result["details"]["observed_partition"]
-        observed_distribution = cls._get_kl_divergence_chart(
-            observed_partition_object
-        )
+        observed_distribution = cls._get_kl_divergence_chart(observed_partition_object)
 
         observed_value = (
             num_to_str(result.result.get("observed_value"))

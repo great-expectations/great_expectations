@@ -31,7 +31,11 @@ from ..data_asset.util import (
 )
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..render.renderer.renderer import renderer
-from ..render.types import RenderedStringTemplateContent, CollapseContent, RenderedTableContent
+from ..render.types import (
+    CollapseContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+)
 from ..render.util import num_to_str
 from ..validator.validation_graph import MetricConfiguration
 from ..validator.validator import Validator
@@ -100,12 +104,19 @@ class Expectation(ABC, metaclass=MetaExpectation):
             attr_obj = getattr(cls, candidate_renderer_fn_name)
             if not hasattr(attr_obj, "_renderer_type"):
                 continue
-            register_renderer(object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj)
+            register_renderer(
+                object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj
+            )
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
         return [
             RenderedStringTemplateContent(
@@ -133,12 +144,12 @@ class Expectation(ABC, metaclass=MetaExpectation):
     @classmethod
     @renderer(renderer_type="renderer.diagnostic.status_icon")
     def _diagnostic_status_icon_renderer(
-            cls,
-            configuration=None,
-            result=None,
-            language=None,
-            runtime_configuration=None,
-            **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
         assert result, "Must provide a result object."
         if result.exception_info["raised_exception"]:
@@ -218,7 +229,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         assert result, "Must provide a result object."
         success = result.success
@@ -319,7 +330,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         try:
             result_dict = result.result
@@ -401,7 +412,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         result_dict = result.result
         if result_dict is None:

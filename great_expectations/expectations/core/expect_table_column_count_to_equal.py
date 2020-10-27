@@ -126,14 +126,17 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["value"]
-        )
+        params = substitute_none_for_missing(configuration.kwargs, ["value"])
         template_str = "Must have exactly $value columns."
         return [
             RenderedStringTemplateContent(

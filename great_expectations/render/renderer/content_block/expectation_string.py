@@ -12,7 +12,12 @@ from great_expectations.render.util import (
 class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def _missing_content_block_fn(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
         return [
             RenderedStringTemplateContent(

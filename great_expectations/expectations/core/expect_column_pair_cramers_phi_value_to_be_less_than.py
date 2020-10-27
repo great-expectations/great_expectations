@@ -1,7 +1,10 @@
 from great_expectations.expectations.expectation import DatasetExpectation
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent, RenderedTableContent
-from great_expectations.render.util import substitute_none_for_missing, num_to_str
+from great_expectations.render.types import (
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+)
+from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 
 class ExpectColumnPairCramersPhiValueToBeLessThan(DatasetExpectation):
@@ -27,7 +30,12 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(DatasetExpectation):
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -60,7 +68,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(DatasetExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         observed_value = result.result.get("observed_value")
         column_A = result.expectation_config.kwargs["column_A"]
@@ -78,7 +86,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(DatasetExpectation):
                     **{
                         "content_block_type": "table",
                         "header": f"Observed cramers phi of {observed_value}. \n"
-                                  f"Crosstab between {column_A} (rows) and {column_B} (columns):",
+                        f"Crosstab between {column_A} (rows) and {column_B} (columns):",
                         "table": table,
                         "styling": {
                             "body": {
