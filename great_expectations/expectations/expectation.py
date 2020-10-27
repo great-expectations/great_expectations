@@ -1,3 +1,4 @@
+import decimal
 import logging
 import re
 from abc import ABC, ABCMeta
@@ -692,7 +693,14 @@ class ColumnMapExpectation(AggregateExpectation, ABC):
 
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     success_keys = ("mostly",)
-    default_kwarg_values = {"mostly": 1}
+    default_kwarg_values = {
+        "row_condition": None,
+        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "mostly": 1,
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": True,
+    }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if not super().validate_configuration(configuration):
@@ -780,9 +788,7 @@ class ColumnMapExpectation(AggregateExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-        # TODO:
-        #
-        # if ".unexpected_index_list" is a registered metric **for this engine**
+
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
 
@@ -796,6 +802,7 @@ class ColumnMapExpectation(AggregateExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
+
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
                 self.map_metric + ".unexpected_index_list",
@@ -834,17 +841,16 @@ class ColumnMapExpectation(AggregateExpectation, ABC):
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
-        null_count = metrics["column_values.nonnull.unexpected_count"]
-        if null_count is not None and null_count > 0:
-            success = (
-                1
-                - (
-                    metrics[self.map_metric + ".unexpected_count"]
-                    / metrics["column_values.nonnull.unexpected_count"]
-                )
-            ) >= mostly
-        else:
-            success = None
+        total_count = metrics.get("table.row_count")
+        null_count = metrics.get("column_values.nonnull.unexpected_count")
+        unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
+
+        success = None
+        if (total_count - null_count) != 0:
+            success_ratio = (total_count - unexpected_count - null_count) / (
+                total_count - null_count
+            )
+            success = success_ratio > mostly
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
@@ -858,40 +864,6 @@ class ColumnMapExpectation(AggregateExpectation, ABC):
                 self.map_metric + ".unexpected_index_list"
             ),
         )
-
-
-def _calc_map_expectation_success(success_count, nonnull_count, mostly):
-    """Calculate success and percent_success for column_map_expectations
-
-    Args:
-        success_count (int): \
-            The number of successful values in the column
-        nonnull_count (int): \
-            The number of nonnull values in the column
-        mostly (float or None): \
-            A value between 0 and 1 (or None), indicating the fraction of successes required to pass the \
-            expectation as a whole. If mostly=None, then all values must succeed in order for the expectation as \
-            a whole to succeed.
-
-    Returns:
-        success (boolean), percent_success (float)
-    """
-
-    if nonnull_count > 0:
-        # percent_success = float(success_count)/nonnull_count
-        percent_success = success_count / nonnull_count
-
-        if mostly is not None:
-            success = bool(percent_success >= mostly)
-
-        else:
-            success = bool(nonnull_count - success_count == 0)
-
-    else:
-        success = True
-        percent_success = None
-
-    return success, percent_success
 
 
 def _format_map_output(

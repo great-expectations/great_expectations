@@ -17,7 +17,7 @@ from great_expectations.expectations.expectation import (
     Expectation,
     _format_map_output,
 )
-from great_expectations.expectations.registry import extract_metrics
+from great_expectations.expectations.registry import extract_metrics, get_metric_kwargs
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -25,6 +25,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class ExpectColumnValuesToBeNull(ColumnMapExpectation):
@@ -70,22 +71,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     """
 
     map_metric = "column_values.null"
-    metric_dependencies = ("column_values.null.count",)
-    success_keys = ("mostly",)
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
-    }
-
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-        return True
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -161,58 +146,58 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         except TypeError:
             return "NaN% null"
 
-    # @PandasExecutionEngine.column_map_metric(
-    #     metric_name=map_metric,
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=tuple(),
-    #     metric_dependencies=tuple(),
-    #     filter_column_isnull=False,
-    # )
-    # TODO: shouldn't this be null count?
-    def _null_count(
+    def get_validation_dependencies(
         self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
     ):
-        return pd.DataFrame({"column_values.null": series.isnull()})
+        dependencies = super().get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )
+        metric_dependencies = dependencies["metrics"]
+        # We do not need this metric for a null metric
+        del metric_dependencies["column_values.nonnull.unexpected_count"]
 
-    # @SqlAlchemyExecutionEngine.column_map_metric(
-    #     metric_name=map_metric,
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=tuple(),
-    #     metric_dependencies=tuple(),
-    #     filter_column_isnull=False,
-    # )
-    def _sqlalchemy_null_map_metric(
+    def _validate(
         self,
-        column,
+        configuration: ExpectationConfiguration,
         metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
+        execution_engine: ExecutionEngine = None,
     ):
-        import sqlalchemy as sa
 
-        return column.is_(None)
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration.kwargs.get(
+                    "result_format", self.default_kwarg_values.get("result_format")
+                ),
+            )
+        else:
+            result_format = configuration.kwargs.get(
+                "result_format", self.default_kwarg_values.get("result_format")
+            )
+        mostly = self.get_success_kwargs().get(
+            "mostly", self.default_kwarg_values.get("mostly")
+        )
+        total_count = metrics.get("table.row_count")
+        unexpected_count = metrics.get("column_values.null.unexpected_values")
 
-    # @SparkDFExecutionEngine.column_map_metric(
-    #     metric_name=map_metric,
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=tuple(),
-    #     metric_dependencies=tuple(),
-    # )
-    def _spark_null_map_metric(
-        self,
-        column: "pyspark.sql.Column",
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        return column.isNull()
+        success = None
+        if total_count != 0:
+            success_ratio = (total_count - unexpected_count) / (total_count)
+            success = success_ratio > mostly
+
+        return _format_map_output(
+            result_format=parse_result_format(result_format),
+            success=success,
+            element_count=metrics.get("table.row_count"),
+            nonnull_count=metrics.get("table.row_count")
+            - metrics.get("column_values.nonnull.unexpected_count"),
+            unexpected_count=metrics.get("column_values.null.unexpected_count"),
+            unexpected_list=metrics.get("column_values.null.unexpected_values"),
+            unexpected_index_list=metrics.get(
+                self.map_metric + ".unexpected_index_list"
+            ),
+        )

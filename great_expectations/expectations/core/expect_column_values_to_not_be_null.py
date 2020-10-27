@@ -74,21 +74,6 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     """
 
     map_metric = "column_values.nonnull"
-    success_keys = ("mostly",)
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
-    }
-
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-        return True
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -169,3 +154,46 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         except TypeError:
             return "NaN% not null"
         return "--"
+
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration.kwargs.get(
+                    "result_format", self.default_kwarg_values.get("result_format")
+                ),
+            )
+        else:
+            result_format = configuration.kwargs.get(
+                "result_format", self.default_kwarg_values.get("result_format")
+            )
+        mostly = self.get_success_kwargs().get(
+            "mostly", self.default_kwarg_values.get("mostly")
+        )
+        total_count = metrics.get("table.row_count")
+        unexpected_count = metrics.get("column_values.nonnull.unexpected_values")
+
+        success = None
+        if total_count != 0:
+            success_ratio = (total_count - unexpected_count) / (total_count)
+            success = success_ratio > mostly
+
+        return _format_map_output(
+            result_format=parse_result_format(result_format),
+            success=success,
+            element_count=metrics.get("table.row_count"),
+            nonnull_count=metrics.get("table.row_count")
+            - metrics.get("column_values.nonnull.unexpected_count"),
+            unexpected_count=metrics.get("column_values.nonnull.unexpected_count"),
+            unexpected_list=metrics.get("column_values.nonnull.unexpected_values"),
+            unexpected_index_list=metrics.get(
+                self.map_metric + ".unexpected_index_list"
+            ),
+        )
