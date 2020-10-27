@@ -12,7 +12,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetricProvider,
+    MapMetricProvider,
     column_map_condition,
     map_condition,
 )
@@ -20,7 +20,7 @@ from great_expectations.expectations.metrics.metric_provider import metric
 from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 
 
-class ColumnPairValuesInSet(ColumnMapMetricProvider):
+class ColumnPairValuesInSet(MapMetricProvider):
     condition_metric_name = "column_pair_values.in_set"
     condition_value_keys = (
         "value_pairs_set",

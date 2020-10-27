@@ -6,12 +6,12 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetricProvider,
+    MapMetricProvider,
     column_map_condition,
 )
 
 
-class ColumnValuesNull(ColumnMapMetricProvider):
+class ColumnValuesNull(MapMetricProvider):
     condition_metric_name = "column_values.null"
     filter_column_isnull = False
 

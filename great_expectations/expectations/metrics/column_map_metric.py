@@ -696,7 +696,7 @@ def _spark_column_map_rows(
         return filtered.limit(result_format["partial_unexpected_count"]).collect()
 
 
-class ColumnMapMetricProvider(MetricProvider):
+class MapMetricProvider(MetricProvider):
     condition_domain_keys = (
         "batch_id",
         "table",
@@ -732,7 +732,7 @@ class ColumnMapMetricProvider(MetricProvider):
                     )
                 if not hasattr(cls, "condition_metric_name"):
                     raise ValueError(
-                        "A ColumnMapMetricProvider must have a metric_condition_name to have a decorated column_map_condition method."
+                        "A MapMetricProvider must have a metric_condition_name to have a decorated column_map_condition method."
                     )
 
                 # rename for readability
@@ -821,7 +821,6 @@ class ColumnMapMetricProvider(MetricProvider):
                         metric_fn_type="data",
                     )
                     if is_column_domain:
-
                         register_metric(
                             metric_name=metric_name + ".unexpected_values",
                             metric_domain_keys=metric_domain_keys,
@@ -904,7 +903,7 @@ class ColumnMapMetricProvider(MetricProvider):
                     )
                 if not hasattr(cls, "function_metric_name"):
                     raise ValueError(
-                        "A ColumnMapMetricProvider must have a function_metric_name to have a decorated column_map_function method."
+                        "A MapMetricProvider must have a function_metric_name to have a decorated column_map_function method."
                     )
                 # rename for readability
                 map_function_provider = candidate_metric_fn

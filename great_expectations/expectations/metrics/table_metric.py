@@ -52,8 +52,8 @@ except ImportError as e:
     )
 
 
-def table_metric(engine: Type[ExecutionEngine], **kwargs):
-    """Return the column aggregate metric decorator for the specified engine.
+def aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
+    """Return the aggregate metric decorator for the specified engine.
 
     Args:
         engine:
@@ -87,7 +87,7 @@ def table_metric(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SqlAlchemyExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric(engine=SqlAlchemyExecutionEngine, metric_fn_type="aggregate")
+            @metric(engine=SqlAlchemyExecutionEngine, metric_fn_type="aggregate_fn")
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -122,7 +122,7 @@ def table_metric(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SparkDFExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric(engine=SparkDFExecutionEngine, metric_fn_type="aggregate")
+            @metric(engine=SparkDFExecutionEngine, metric_fn_type="aggregate_fn")
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -149,109 +149,12 @@ def table_metric(engine: Type[ExecutionEngine], **kwargs):
         return wrapper
 
     else:
-        raise ValueError("Unsupported engine for table_metric")
+        raise ValueError("Unsupported engine for aggregate_metric")
 
 
-#
-# def table_metric(engine: Type[ExecutionEngine], **kwargs):
-#     """Return the column aggregate metric decorator for the specified engine.
-#
-#     Args:
-#         engine:
-#         **kwargs:
-#
-#     Returns:
-#
-#     """
-#     if issubclass(engine, PandasExecutionEngine):
-#
-#         def wrapper(metric_fn: Callable):
-#             @metric(engine=PandasExecutionEngine, metric_fn_type="aggregate")
-#             @wraps(metric_fn)
-#             def inner_func(
-#                 cls,
-#                 execution_engine: "PandasExecutionEngine",
-#                 metric_domain_kwargs: dict,
-#                 metric_value_kwargs: dict,
-#                 metrics: Dict[Tuple, Any],
-#                 runtime_configuration: dict,
-#             ):
-#                 table = execution_engine.get_domain_dataframe(
-#                     domain_kwargs=metric_domain_kwargs,
-#                 )
-#                 return metric_fn(cls, table, **metric_value_kwargs, _metrics=metrics)
-#
-#             return inner_func
-#
-#         return wrapper
-#
-#     elif issubclass(engine, SqlAlchemyExecutionEngine):
-#
-#         def wrapper(metric_fn: Callable):
-#             @metric(engine=SqlAlchemyExecutionEngine, metric_fn_type="aggregate")
-#             @wraps(metric_fn)
-#             def inner_func(
-#                 cls,
-#                 execution_engine: "SqlAlchemyExecutionEngine",
-#                 metric_domain_kwargs: dict,
-#                 metric_value_kwargs: dict,
-#                 metrics: Dict[Tuple, Any],
-#                 runtime_configuration: dict,
-#             ):
-#                 dialect = execution_engine.dialect
-#                 table = execution_engine._get_selectable(metric_domain_kwargs)
-#                 expected_condition = metric_fn(
-#                     cls,
-#                     table ** metric_value_kwargs,
-#                     _dialect=dialect,
-#                     _metrics=metrics,
-#                 )
-#                 return expected_condition, table
-#
-#             return inner_func
-#
-#         return wrapper
-#
-#     elif issubclass(engine, SparkDFExecutionEngine):
-#
-#         def wrapper(metric_fn: Callable):
-#             @metric(engine=SparkDFExecutionEngine, metric_fn_type="aggregate")
-#             @wraps(metric_fn)
-#             def inner_func(
-#                 cls,
-#                 execution_engine: "SparkDFExecutionEngine",
-#                 metric_domain_kwargs: dict,
-#                 metric_value_kwargs: dict,
-#                 metrics: Dict[Tuple, Any],
-#                 runtime_configuration: dict,
-#             ):
-#                 table = execution_engine.get_domain_dataframe(
-#                     domain_kwargs=metric_domain_kwargs
-#                 )
-#                 # eval_col = execution_engine._get_eval_column_name(
-#                 #     metric_domain_kwargs.get("column")
-#                 # )
-#                 expected_condition = metric_fn(
-#                     cls,
-#                     table=table,
-#                     metric_domain_kwargs=metric_domain_kwargs,
-#                     metric_value_kwargs=metric_value_kwargs,
-#                     metrics=metrics,
-#                     **kwargs,
-#                 )
-#                 return expected_condition
-#
-#             return inner_func
-#
-#         return wrapper
-#
-#     else:
-#         raise ValueError("Unsupported engine for column_aggregate_metric")
-
-
-class TableMetricProvider(MetricProvider):
+class AggregateMetricProvider(MetricProvider):
     domain_keys = (
         "batch_id",
         "table",
     )
-    metric_fn_type = "aggregate"
+    metric_fn_type = "aggregate_fn"

@@ -8,12 +8,12 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetricProvider,
+    MapMetricProvider,
     column_map_condition,
 )
 
 
-class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
+class ColumnValuesMatchJsonSchema(MapMetricProvider):
     condition_metric_name = "column_values.match_json_schema"
 
     @column_map_condition(engine=PandasExecutionEngine)

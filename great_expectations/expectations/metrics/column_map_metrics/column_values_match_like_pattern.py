@@ -5,7 +5,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetricProvider,
+    MapMetricProvider,
     column_map_condition,
 )
 from great_expectations.expectations.metrics.util import (
@@ -16,7 +16,7 @@ from great_expectations.expectations.metrics.util import (
 logger = logging.getLogger(__name__)
 
 
-class ColumnValuesMatchLikePattern(ColumnMapMetricProvider):
+class ColumnValuesMatchLikePattern(MapMetricProvider):
     condition_metric_name = "column_values.match_like_pattern"
     condition_value_keys = ("like_pattern",)
 
