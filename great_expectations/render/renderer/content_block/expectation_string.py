@@ -77,30 +77,6 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         ]
 
     @classmethod
-    def expect_column_pair_cramers_phi_value_to_be_less_than(
-        cls, expectation_configuration, styling=None, include_column_name=True
-    ):
-        params = substitute_none_for_missing(
-            expectation_configuration.kwargs, ["column_A", "column_B"]
-        )
-        if (params["column_A"] is None) or (params["column_B"] is None):
-            template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
-
-        template_str = "Values in $column_A and $column_B must be independent."
-        rendered_string_template_content = RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": template_str,
-                    "params": params,
-                    "styling": styling,
-                },
-            }
-        )
-
-        return [rendered_string_template_content]
-
-    @classmethod
     def expect_compound_columns_to_be_unique(
         cls, expectation_configuration, styling=None, include_column_name=True
     ):
@@ -271,28 +247,6 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 + template_str[1:]
             )
             params.update(conditional_params)
-
-        return [
-            RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
-            )
-        ]
-
-    @classmethod
-    def expect_table_row_count_to_equal_other_table(
-        cls, expectation_configuration, styling=None, include_column_name=True
-    ):
-        params = substitute_none_for_missing(
-            expectation_configuration.kwargs, ["other_table_name"]
-        )
-        template_str = "Row count must equal the row count of table $other_table_name."
 
         return [
             RenderedStringTemplateContent(
