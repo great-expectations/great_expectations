@@ -66,7 +66,7 @@ class RegexPartitioner(Partitioner):
             group_name: str = group_names[idx]
             partition_definition[group_name] = group_value
         # TODO: <Alex>Abe: Does PartitionDefinition have a role in the new design?  If so, what does it consist of?</Alex>
-        # partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
+        partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
         # TODO: <Alex>Do runtime_parameters have a role in the new design?  Otherwise, remove unused code.</Alex>
         # if runtime_parameters:
         #     partition_definition.update(runtime_parameters)
