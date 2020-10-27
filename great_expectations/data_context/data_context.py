@@ -740,6 +740,8 @@ class BaseDataContext:
             None
         """
         config_variables = self._load_config_variables_file()
+        # Escape $ if value is a str
+        value = value.replace("$", "$--") if isinstance(value, str) else value
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:

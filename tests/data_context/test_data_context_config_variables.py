@@ -99,6 +99,20 @@ def test_setting_config_variables_is_visible_immediately(
         "batch_kwargs_generators"
     ]["mygenerator"]["reader_options"]["test_variable_sub2"] == {"n1": "v1"}
 
+    # verify the same for escaped variables
+    context.save_config_variable(
+        "escaped_password", "this_is_$mypassword_escape_the_$signs"
+    )
+    context._project_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
+        "mygenerator"
+    ]["reader_options"]["test_variable_sub_escaped"] = "${escaped_password}"
+    assert (
+        context.get_config_with_variables_substituted().datasources["mydatasource"][
+            "batch_kwargs_generators"
+        ]["mygenerator"]["reader_options"]["test_variable_sub_escaped"]
+        == "this_is_$--mypassword_escape_the_$--signs"
+    )
+
     try:
         # verify that the value of the env var takes precedence over the one from the config variables file
         os.environ["replace_me_2"] = "value_from_env_var"
@@ -194,7 +208,11 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
 
 
 def test_substitute_config_variable():
-    config_variables_dict = {"arg0": "val_of_arg_0", "arg2": {"v1": 2}}
+    config_variables_dict = {
+        "arg0": "val_of_arg_0",
+        "arg2": {"v1": 2},
+        "aRg3": "val_of_aRg_3",
+    }
     assert (
         substitute_config_variable("abc${arg0}", config_variables_dict)
         == "abcval_of_arg_0"
@@ -223,11 +241,32 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
     )
     assert exc.value.missing_config_variable == "arg1"
 
+    # Test with mixed case
+    assert (
+        substitute_config_variable("abc${aRg3}", config_variables_dict)
+        == "abcval_of_aRg_3"
+    )
+
+    # Test with multiple substitutions
+    assert (
+        substitute_config_variable("abc${arg0}$aRg3", config_variables_dict)
+        == "abcval_of_arg_0val_of_aRg_3"
+    )
+
+    # Test with escaped $
+    assert (
+        substitute_config_variable("abc$--{arg0}$--aRg3", config_variables_dict)
+        == "abc$--{arg0}$--aRg3"
+    )
+
 
 def test_substitute_env_var_in_config_variable_file(
     monkeypatch, empty_data_context_with_config_variables
 ):
     monkeypatch.setenv("FOO", "correct_val_of_replace_me")
+    monkeypatch.setenv("DO_REPLACE_ME_ENV", "ive_been_replaced")
+    monkeypatch.setenv("AND_ME", "and_me_replaced")
+    monkeypatch.setenv("Also_Me", "also_me_replaced")
     context = empty_data_context_with_config_variables
     context_config = context.get_config_with_variables_substituted()
     assert (
@@ -245,11 +284,29 @@ def test_substitute_env_var_in_config_variable_file(
         context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
             "mygenerator"
         ]["reader_options"]["password"]
-        == "dont$replaceme"
+        == "dont$--replaceme"
     )
     assert (
         context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
             "mygenerator"
         ]["password"]
-        == "dont$replace$me$please$$$$thanks"
+        == "dont$--replace$--me$--please$$$$--thanksive_been_replaced"
+    )
+    assert (
+        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
+            "mygenerator"
+        ]["reader_options"]["test_variable_sub5"]
+        == "helloive_been_replaced/not_me"
+    )
+    assert (
+        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
+            "mygenerator"
+        ]["reader_options"]["test_variable_sub6"]
+        == "helloive_been_replaced/not_me"
+    )
+    assert (
+        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
+            "mygenerator"
+        ]["reader_options"]["test_variable_sub7"]
+        == "helloive_been_replacedand_me_replacedalso_me_replaced/not_me"
     )
