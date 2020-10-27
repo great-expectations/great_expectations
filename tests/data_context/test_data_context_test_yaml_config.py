@@ -138,6 +138,7 @@ data_connectors:
                     "DEFAULT_ASSET_NAME": {
                         "batch_definition_count": 10,
                         "example_data_references": [
+                           #To fix in a subsequent PR: these data_references shouldn't have leading slashes.
                             "/abe_20200809_1040.csv",
                             "/eugene_20200809_1500.csv",
                             "/james_20200810_1003.csv"
