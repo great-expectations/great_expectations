@@ -34,7 +34,7 @@ def metric(engine: Type[ExecutionEngine], **kwargs):
     return wrapper
 
 
-class Metric(metaclass=MetaMetricProvider):
+class MetricProvider(metaclass=MetaMetricProvider):
     domain_keys = tuple()
     value_keys = tuple()
     bundle_metric = False
