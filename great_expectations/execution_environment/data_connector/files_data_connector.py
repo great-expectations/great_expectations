@@ -288,7 +288,7 @@ configured runtime keys.
 
         unmatched_data_references = []
         for data_asset_name, sub_cache in self._data_references_cache.items():
-            unmatched_data_references += [k for k,v in sub_cache.items() if v == None]
+            unmatched_data_references += [k for k,v in sub_cache.items() if v is None]
 
         return unmatched_data_references
 
