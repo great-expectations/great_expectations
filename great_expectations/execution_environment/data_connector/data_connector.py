@@ -499,7 +499,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
 
         batch_definitions: List[BatchDefinition] = []
         for data_reference, batch_definition in self._data_references_cache.items():
-            # TODO: <Alex>The data_reference cache refreshing mechanism needs to be reviewed.  Right now, it returns exactly one BatchDefinition in the list.</Alex>
+            # TODO: <Alex>Note: this approach returns exactly one BatchDefinition in the list. We'll need to revamp once we implement Splitters.</Alex>
             if batch_definition is not None:
                 batch_definition: BatchDefinition = batch_definition[0]
                 if self._batch_definition_matches_batch_request(
