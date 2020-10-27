@@ -23,6 +23,7 @@ from great_expectations.core.batch import (
 )
 
 
+# TODO: Abe 20201026: This test currently fails. We need to implement sorters before we can fix it.
 def test_name_date_price_list(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
     create_files_in_directory(

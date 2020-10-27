@@ -47,15 +47,12 @@ data_connectors:
         assets:
             Titanic:
                 partitioner_name: default_partitioner_name
-            
-        default_partitioner_name: my_regex_partitioner
-        partitioners:
-            my_regex_partitioner:
-                class_name: RegexPartitioner
-                pattern: (.+)(\\d+)\\.csv
-                group_names:
-                    - letter
-                    - number
+
+        default_regex:
+            pattern: (.+)(\\d+)\\.csv
+            group_names:
+                - letter
+                - number
     """, Loader=yaml.FullLoader), runtime_environment={
             "name": "my_execution_environment"
         },
