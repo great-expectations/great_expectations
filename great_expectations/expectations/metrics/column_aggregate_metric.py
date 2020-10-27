@@ -165,4 +165,4 @@ class ColumnAggregateMetricProvider(AggregateMetricProvider):
         "table",
         "column",
     )
-    filter_column_isnull = True
+    filter_column_isnull = False

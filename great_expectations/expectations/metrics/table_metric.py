@@ -156,5 +156,7 @@ class AggregateMetricProvider(MetricProvider):
     domain_keys = (
         "batch_id",
         "table",
+        "row_condition",
+        "condition_parser",
     )
     metric_fn_type = "aggregate_fn"

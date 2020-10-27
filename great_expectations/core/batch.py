@@ -6,6 +6,7 @@ from typing import Union
 from great_expectations.core.id_dict import (
     BatchKwargs,
     BatchSpec,
+    IDDict,
     PartitionDefinition,
     PartitionRequest,
 )
@@ -277,13 +278,17 @@ class Batch(DictDot):
         batch_kwargs=None,
     ):
         self._data = data
+        if batch_request is None:
+            batch_request = dict()
         self._batch_request = batch_request
+        if batch_definition is None:
+            batch_definition = IDDict()
         self._batch_definition = batch_definition
         if batch_spec is None:
             batch_spec = BatchSpec()
         self._batch_spec = batch_spec
 
-        if not batch_markers:
+        if batch_markers is None:
             batch_markers = BatchMarkers(
                 {
                     "ge_load_time": datetime.datetime.now(
@@ -343,6 +348,10 @@ class Batch(DictDot):
     @property
     def batch_kwargs(self):
         return self._batch_kwargs
+
+    @property
+    def id(self):
+        return self._batch_definition.to_id()
 
     def __str__(self):
         json_dict = {

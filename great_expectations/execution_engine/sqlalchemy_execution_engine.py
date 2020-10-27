@@ -507,85 +507,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             create_engine_kwargs,
         )
 
-    def load_batch(
-        self, batch_request=None, batch_spec=None, in_memory_dataset=None
-    ) -> Batch:
-        """
-        With the help of the execution environment and data connector specified within the batch request,
-        builds a batch spec and utilizes it to load a batch using the appropriate file reader and the given file path.
-
-        Args:
-           batch_spec (dict): A dictionary specifying the parameters used to build the batch
-           in_memory_dataset (A Pandas DataFrame or None): Optional specification of an in memory Dataset used
-                                                            to load a batch. A Data Asset name and partition ID
-                                                            must still be passed via batch request.
-
-        """
-        # We need to build a batch_markers to be used in the dataframe
-        if not batch_spec and not batch_request:
-            raise ValueError("must provide a batch spec or batch request")
-
-        if batch_spec and batch_request:
-            raise ValueError("only provide either batch spec or batch request")
-
-        if batch_spec and not batch_request:
-            logger.info("loading a batch without a batch_request")
-            batch_request = {}
-        else:
-            execution_environment_name = batch_request.get("execution_environment")
-            if not self._data_context:
-                raise ValueError("Cannot use a batch request without a data context")
-            execution_environment = self._data_context.get_execution_environment(
-                execution_environment_name
-            )
-
-            data_connector_name = batch_request.get("data_connector")
-            assert data_connector_name, "Batch definition must specify a data_connector"
-
-            data_connector = execution_environment.get_data_connector(
-                data_connector_name
-            )
-            # noinspection PyProtectedMember
-            batch_spec = data_connector._build_batch_spec(batch_request=batch_request)
-
-        batch_markers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
-        )
-
-        if isinstance(batch_spec, SqlAlchemyDatasourceTableBatchSpec):
-            batch_reference = SqlAlchemyBatchData(
-                engine=self.engine,
-                table_name=batch_spec.get("table"),
-                schema=batch_spec.get("schema"),
-            )
-        elif isinstance(batch_spec, SqlAlchemyDatasourceQueryBatchSpec):
-            batch_reference = SqlAlchemyBatchData(
-                engine=self.engine,
-                query=batch_spec.get("query"),
-                schema=batch_spec.get("schema"),
-            )
-        else:
-            raise BatchSpecError("Unrecognized BatchSpec")
-
-        batch_id = batch_spec.to_id()
-        if not self.batches.get(batch_id):
-            batch = Batch(
-                execution_engine=self,
-                batch_spec=batch_spec,
-                data=batch_reference,
-                batch_request=batch_request,
-                batch_markers=batch_markers,
-                data_context=self._data_context,
-            )
-            self.batches[batch_id] = batch
-
-        self._active_batch_data_id = batch_id
-        return batch
-
     def get_compute_domain(
         self, domain_kwargs: dict = None
     ) -> Tuple[sa.sql.Selectable, dict, dict]:
@@ -628,12 +549,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             selectable = data_object.table
 
         if "row_condition" in domain_kwargs:
-            condition_engine = domain_kwargs["condition_engine"]
-            if condition_engine == "great_expectations__experimental__":
+            condition_parser = domain_kwargs["condition_parser"]
+            if condition_parser == "great_expectations__experimental__":
                 parsed_condition = parse_condition_to_sqlalchemy(
                     domain_kwargs["row_condition"]
                 )
-                selectable = selectable.where(parsed_condition)
+                selectable = sa.select(
+                    "*", from_obj=selectable, whereclause=parsed_condition
+                )
 
             else:
                 raise GreatExpectationsError(
@@ -675,9 +598,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             assert (
                 metric_provider.metric_fn_type == "aggregate_fn"
             ), "resolve_metric_bundle only supports aggregate metrics"
-            # batch_id and table are the only determining factors for bundled metrics
-            batch_id = metric_to_resolve.metric_domain_kwargs.get("batch_id")
-            table = metric_to_resolve.metric_domain_kwargs.get("table")
             statement, domain_kwargs = metric_provider(**metric_provider_kwargs)
             if not isinstance(domain_kwargs, IDDict):
                 domain_kwargs = IDDict(domain_kwargs)

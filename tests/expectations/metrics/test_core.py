@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import sqlalchemy as sa
 
@@ -121,13 +122,8 @@ def test_map_value_set_sa():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
-
-    batch_spec = SqlAlchemyDatasourceTableBatchSpec(table="test")
-    batch = engine.load_batch(batch_spec=batch_spec)
-
-    # engine._batches = {"batch_id": df}
-
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
+    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    engine.load_batch_data("", batch_data)
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     # Note: metric_dependencies is optional here in the config when called from a validator.
     desired_metric = MetricConfiguration(
@@ -136,12 +132,11 @@ def test_map_value_set_sa():
         metric_value_kwargs={"value_set": [1, 2, 3]},
         metric_dependencies={"expected_condition": desired_metric},
     )
-
     # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
-    assert results == {desired_metric.id: 4}
+    assert results == {desired_metric.id: 0}
 
 
 def test_map_of_type_sa():
@@ -184,33 +179,66 @@ def test_map_value_set_spark():
 
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(df)
+    df = spark.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in df.to_records(index=False)
+        ],
+        df.columns.tolist(),
+    )
 
     engine = SparkDFExecutionEngine()
-    batch = engine.load_batch(
-        batch_definition={"data_asset_name": "foo", "partition_name": "bar"},
-        batch_spec=BatchSpec({"blarg": "bah"}),
-        in_memory_dataset=df,
-    )
-    desired_metric = MetricConfiguration(
+    batch = Batch(data=df)
+    engine.load_batch_data(batch.id, batch.data)
+    condition_metric = MetricConfiguration(
         metric_name="column_values.in_set",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
 
-    metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
     desired_metric = MetricConfiguration(
         metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"expected_condition": desired_metric},
+        metric_dependencies={"unexpected_condition": condition_metric},
     )
 
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
-    assert results == {desired_metric.id: 4}
+    assert results == {desired_metric.id: 0}
+
+    # We run the same computation again, this time with None being replaced by nan instead of NULL
+    # to demonstrate this behavior
+    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+    spark = SparkSession.builder.getOrCreate()
+    df = spark.createDataFrame(df)
+
+    engine = SparkDFExecutionEngine()
+    batch = Batch(data=df)
+    engine.load_batch_data(batch.id, batch.data)
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.in_set",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"value_set": [1, 2, 3]},
+    )
+
+    metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.in_set.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"value_set": [1, 2, 3]},
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results == {desired_metric.id: 1}
 
 
 def test_map_metric_pd():

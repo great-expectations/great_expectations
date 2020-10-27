@@ -91,28 +91,3 @@ def test_invalid_urn():
             "urn:great_expectations:validations:foo:bar:baz:bin:barg:boo"
         )
     assert "urn:great_expectations:validations:foo:bar:baz:bin:barg:boo" in e.value.line
-
-
-def test_magic_urn():
-    res = ge_urn.parseString("$PREV.unexpected_percent")
-    assert res["urn_type"] == "$PREV"
-    assert res["metric_suffix"] == "unexpected_percent"
-
-    res = ge_urn.parseString("$PREV.observed_value")
-    assert res["urn_type"] == "$PREV"
-    assert res["metric_suffix"] == "observed_value"
-
-    res = ge_urn.parseString(
-        "$PREV_BATCH.expect_table_row_count_to_be_between.observed_value"
-    )
-    assert res["urn_type"] == "$PREV_BATCH"
-    assert res["metric_name"] == "expect_table_row_count_to_be_between"
-    assert res["metric_suffix"] == "observed_value"
-
-    with pytest.raises(ParseException) as e:
-        _ = ge_urn.parseString("$PREV_BATCH.unexpected_percent")
-    assert "$PREV_BATCH.unexpected_percent" in e.value.line
-
-    res = ge_urn.parseString("$PREV.unexpected_percent")
-    assert res["urn_type"] == "$PREV"
-    assert res["metric_suffix"] == "unexpected_percent"

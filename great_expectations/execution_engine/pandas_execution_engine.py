@@ -70,77 +70,6 @@ Notes:
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
 
-    def load_batch(self, batch_spec: BatchSpec = None) -> Batch:
-        """
-        Utilizes the provided batch spec to load a batch using the appropriate file reader and the given file path.
-        :arg batch_spec the parameters used to build the batch
-        :returns Batch
-        """
-        batch_spec._id_ignore_keys = {"dataset"}
-        batch_id = batch_spec.to_id()
-
-        # We need to build a batch_markers to be used in the dataframe
-        batch_markers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
-        )
-
-        if isinstance(batch_spec, InMemoryBatchSpec):
-            # We do not want to store the actual dataframe in batch_spec (mark that this is PandasInMemoryDF instead).
-            in_memory_dataset = batch_spec.pop("dataset")
-            batch_spec["PandasInMemoryDF"] = True
-            if in_memory_dataset is not None:
-                if batch_spec.get("data_asset_name"):
-                    df = in_memory_dataset
-                else:
-                    raise ValueError(
-                        "To pass an in_memory_dataset, you must also a data_asset_name as well."
-                    )
-        else:
-            reader_method = batch_spec.get("reader_method")
-            reader_options = batch_spec.get("reader_options") or {}
-            if isinstance(batch_spec, PathBatchSpec):
-                path = batch_spec["path"]
-                reader_fn = self._get_reader_fn(reader_method, path)
-                df = reader_fn(path, **reader_options)
-            elif isinstance(batch_spec, S3BatchSpec):
-                # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
-                # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
-                # url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
-                # reader_method = batch_spec.get("reader_method")
-                # reader_fn = self._get_reader_fn(reader_method, url.key)
-                # df = reader_fn(
-                #     StringIO(
-                #         s3_object["Body"]
-                #         .read()
-                #         .decode(s3_object.get("ContentEncoding", "utf-8"))
-                #     ),
-                #     **reader_options,
-                # )
-                pass
-            else:
-                raise BatchSpecError(
-                    "Invalid batch_spec: file path, s3 path, or df is required for a PandasExecutionEngine to operate."
-                )
-
-        if df.memory_usage().sum() < HASH_THRESHOLD:
-            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
-
-        if (
-            not self.batches.get(batch_id)
-            or self.batches.get(batch_id).batch_spec != batch_spec
-        ):
-            batch = Batch(data=df, batch_spec=batch_spec, batch_markers=batch_markers,)
-            self.batches[batch_id] = batch
-        else:
-            batch = self.batches.get(batch_id)
-
-        self._active_batch_data_id = batch_id
-        return batch
-
     @property
     def dataframe(self):
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
@@ -170,7 +99,7 @@ Notes:
                 "Unable to determine pandas reader function without reader_method or path."
             )
 
-        reader_options = None
+        reader_options = dict()
         if reader_method is None:
             path_guess = self.guess_reader_method_from_path(path)
             reader_method = path_guess["reader_method"]

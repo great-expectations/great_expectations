@@ -244,7 +244,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
                     **metric_value_kwargs,
                     _metrics=metrics,
                 )
-                return meets_expectation_series
+                return ~meets_expectation_series
 
             inner_func.column_domain = True
             return inner_func
@@ -287,12 +287,14 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
                     _metrics=metrics,
                 )
                 if filter_column_isnull:
-                    expected_condition = sa.and_(
-                        sa.not_(sa.column(column_name).is_(None)), expected_condition
+                    # If we "filter" (ignore) nulls then we allow null as part of our new expected condition
+                    unexpected_condition = sa.and_(
+                        sa.not_(sa.column(column_name).is_(None)),
+                        sa.not_(expected_condition),
                     )
                 else:
-                    expected_condition = expected_condition
-                return expected_condition, compute_domain_kwargs
+                    unexpected_condition = sa.not_(expected_condition)
+                return unexpected_condition, compute_domain_kwargs
 
             inner_func.column_domain = True
             return inner_func
@@ -328,8 +330,10 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
                     cls, column, **metric_value_kwargs, _metrics=metrics
                 )
                 if filter_column_isnull:
-                    expected_condition = column.isNotNull() & expected_condition
-                return expected_condition, compute_domain_kwargs
+                    unexpected_condition = column.isNotNull() & ~expected_condition
+                else:
+                    unexpected_condition = ~expected_condition
+                return unexpected_condition, compute_domain_kwargs
 
             inner_func.column_domain = True
             return inner_func
@@ -339,7 +343,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for column_map_condition")
 
 
-def _pandas_map_count(
+def _pandas_map_unexpected_count(
     cls,
     execution_engine: "PandasExecutionEngine",
     metric_domain_kwargs: dict,
@@ -348,7 +352,7 @@ def _pandas_map_count(
     **kwargs,
 ):
     """Returns unexpected count for MapExpectations"""
-    return np.count_nonzero(~metrics.get("expected_condition"))
+    return np.count_nonzero(~metrics.get("unexpected_condition"))
 
 
 def _pandas_column_map_values(
@@ -373,24 +377,24 @@ def _pandas_column_map_values(
 
     # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
-    boolean_mapped_success_values = metrics.get("expected_condition")
+    boolean_map_unexpected_values = metrics.get("unexpected_condition")
     if result_format["result_format"] == "COMPLETE":
         return list(
             data[
-                # boolean_mapped_success_values[
+                # boolean_map_unexpected_values[
                 #     metric_name[: -len(".unexpected_values")]
                 # ]
-                boolean_mapped_success_values
+                boolean_map_unexpected_values
                 == False
             ]
         )
     else:
         return list(
             data[
-                # boolean_mapped_success_values[
+                # boolean_map_unexpected_values[
                 #     metric_name[: -len(".unexpected_values")]
                 # ]
-                boolean_mapped_success_values
+                boolean_map_unexpected_values
                 == False
             ][: result_format["partial_unexpected_count"]]
         )
@@ -416,12 +420,12 @@ def _pandas_column_map_index(
     data = df[accessor_domain_kwargs["column"]]
     # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
-    boolean_mapped_success_values = metrics.get("expected_condition")
+    boolean_mapped_unexpected_values = metrics.get("unexpected_condition")
     if result_format["result_format"] == "COMPLETE":
-        return list(data[boolean_mapped_success_values == False].index)
+        return list(data[boolean_mapped_unexpected_values == False].index)
     else:
         return list(
-            data[boolean_mapped_success_values == False].index[
+            data[boolean_mapped_unexpected_values == False].index[
                 : result_format["partial_unexpected_count"]
             ]
         )
@@ -447,14 +451,16 @@ def _pandas_column_map_value_counts(
     data = df[accessor_domain_kwargs["column"]]
     # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
-    boolean_mapped_success_values = metrics.get("expected_condition")
+    boolean_mapped_unexpected_values = metrics.get("unexpected_condition")
     value_counts = None
     try:
-        value_counts = data[boolean_mapped_success_values == False].value_counts()
+        value_counts = data[boolean_mapped_unexpected_values == False].value_counts()
     except ValueError:
         try:
             value_counts = (
-                data[boolean_mapped_success_values == False].apply(tuple).value_counts()
+                data[boolean_mapped_unexpected_values == False]
+                .apply(tuple)
+                .value_counts()
             )
         except ValueError:
             pass
@@ -487,16 +493,16 @@ def _pandas_column_map_rows(
         df = df[df[accessor_domain_kwargs["column"]].notnull()]
     # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
-    boolean_mapped_success_values = metrics.get("expected_condition")
+    boolean_mapped_unexpected_values = metrics.get("unexpected_condition")
     if result_format["result_format"] == "COMPLETE":
-        return df[boolean_mapped_success_values == False]
+        return df[boolean_mapped_unexpected_values == False]
     else:
-        return df[boolean_mapped_success_values == False][
+        return df[boolean_mapped_unexpected_values == False][
             result_format["partial_unexpected_count"]
         ]
 
 
-def _sqlalchemy_map_count(
+def _sqlalchemy_map_unexpected_count(
     cls,
     execution_engine: "SqlAlchemyExecutionEngine",
     metric_domain_kwargs: dict,
@@ -505,9 +511,9 @@ def _sqlalchemy_map_count(
     **kwargs,
 ):
     """Returns unexpected count for MapExpectations"""
-    expected_condition, compute_domain_kwargs = metrics.get("expected_condition")
+    unexpected_condition, compute_domain_kwargs = metrics.get("unexpected_condition")
     return (
-        sa.func.sum(sa.case([(expected_condition, 0,)], else_=1,)),
+        sa.func.sum(sa.case([unexpected_condition, 1], else_=0,)),
         compute_domain_kwargs,
     )
 
@@ -532,8 +538,7 @@ def _sqlalchemy_column_map_values(
 
     # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
-    expected_condition = metrics.get("expected_condition")
-    unexpected_condition = sa.not_(expected_condition)
+    unexpected_condition = metrics.get("unexpected_condition")
 
     query = (
         sa.select([sa.column(accessor_domain_kwargs.get("column"))])
@@ -563,8 +568,7 @@ def _sqlalchemy_column_map_value_counts(
         accessor_domain_kwargs,
     ) = execution_engine.get_compute_domain(metric_domain_kwargs)
 
-    expected_condition = metrics.get("expected_condition")
-    unexpected_condition = sa.not_(expected_condition)
+    unexpected_condition = metrics.get("unexpected_condition")
     column = sa.column(accessor_domain_kwargs["column"])
     return execution_engine.engine.execute(
         sa.select([column, sa.func.count(column)])
@@ -593,8 +597,7 @@ def _sqlalchemy_column_map_rows(
     ) = execution_engine.get_compute_domain(metric_domain_kwargs)
 
     result_format = metric_value_kwargs["result_format"]
-    expected_condition = metrics.get("expected_condition")
-    unexpected_condition = sa.not_(expected_condition)
+    unexpected_condition = metrics.get("unexpected_condition")
     query = (
         sa.select([sa.text("*")]).select_from(selectable).where(unexpected_condition)
     )
@@ -603,7 +606,7 @@ def _sqlalchemy_column_map_rows(
     return execution_engine.engine.execute(query).fetchall()
 
 
-def _spark_map_count(
+def _spark_map_unexpected_count(
     cls,
     execution_engine: "SparkDFExecutionEngine",
     metric_domain_kwargs: dict,
@@ -611,8 +614,8 @@ def _spark_map_count(
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
-    expected_condition, compute_domain_kwargs = metrics.get("expected_condition")
-    return F.sum(F.when(expected_condition, 0).otherwise(1)), compute_domain_kwargs
+    unexpected_condition, compute_domain_kwargs = metrics.get("unexpected_condition")
+    return F.sum(F.when(unexpected_condition, 1).otherwise(0)), compute_domain_kwargs
 
 
 def _spark_column_map_values(
@@ -631,9 +634,9 @@ def _spark_column_map_values(
 
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     result_format = metric_value_kwargs["result_format"]
-    condition = metrics.get("expected_condition")
+    condition = metrics.get("unexpected_condition")
     column_name = accessor_domain_kwargs["column"]
-    filtered = data.filter(~condition)
+    filtered = data.filter(condition)
     if result_format["result_format"] == "COMPLETE":
         return list(filtered.select(F.col(column_name)).collect())
     else:
@@ -660,9 +663,9 @@ def _spark_column_map_value_counts(
     """Returns all unique values in the column and their corresponding counts"""
     # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
-    condition = metrics.get("expected_condition")
+    condition = metrics.get("unexpected_condition")
     column_name = accessor_domain_kwargs["column"]
-    filtered = data.filter(~condition)
+    filtered = data.filter(condition)
     value_counts = filtered.groupBy(F.col(column_name)).count()
     if result_format["result_format"] == "COMPLETE":
         return value_counts
@@ -688,8 +691,8 @@ def _spark_column_map_rows(
 
     # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
-    condition = metrics.get("expected_condition")
-    filtered = data.filter(~condition)
+    condition = metrics.get("unexpected_condition")
+    filtered = data.filter(condition)
     if result_format["result_format"] == "COMPLETE":
         return filtered.collect()
     else:
@@ -700,10 +703,14 @@ class MapMetricProvider(MetricProvider):
     condition_domain_keys = (
         "batch_id",
         "table",
+        "row_condition",
+        "condition_parser",
     )
     function_domain_keys = (
         "batch_id",
         "table",
+        "row_condition",
+        "condition_parser",
     )
     condition_value_keys = tuple()
     function_value_keys = tuple()
@@ -758,7 +765,7 @@ class MapMetricProvider(MetricProvider):
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
                         metric_class=cls,
-                        metric_provider=_pandas_map_count,
+                        metric_provider=_pandas_map_unexpected_count,
                         metric_fn_type="data",
                     )
                     if is_column_domain:
@@ -810,13 +817,13 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type="map_condition",
                     )
                     register_metric(
-                        metric_name=metric_name + ".count",
+                        metric_name=metric_name + ".unexpected_count",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
                         metric_class=cls,
-                        metric_provider=_sqlalchemy_map_count,
-                        metric_fn_type="data",
+                        metric_provider=_sqlalchemy_map_unexpected_count,
+                        metric_fn_type="aggregate_fn",
                     )
                     if is_column_domain:
                         register_metric(
@@ -857,13 +864,13 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type="map_condition",
                     )
                     register_metric(
-                        metric_name=metric_name + ".count",
+                        metric_name=metric_name + ".unexpected_count",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
                         metric_class=cls,
-                        metric_provider=_spark_map_count,
-                        metric_fn_type="data",
+                        metric_provider=_spark_map_unexpected_count,
+                        metric_fn_type="aggregate_fn",
                     )
                     if is_column_domain:
                         register_metric(
@@ -943,7 +950,7 @@ class MapMetricProvider(MetricProvider):
 
         if metric_name.endswith(".unexpected_count"):
             return {
-                "expected_condition": MetricConfiguration(
+                "unexpected_condition": MetricConfiguration(
                     metric_name[: -len(".unexpected_count")],
                     metric.metric_domain_kwargs,
                     base_metric_value_kwargs,
@@ -952,7 +959,7 @@ class MapMetricProvider(MetricProvider):
 
         if metric_name.endswith(".unexpected_values"):
             return {
-                "expected_condition": MetricConfiguration(
+                "unexpected_condition": MetricConfiguration(
                     metric_name[: -len(".unexpected_values")],
                     metric.metric_domain_kwargs,
                     base_metric_value_kwargs,
@@ -961,7 +968,7 @@ class MapMetricProvider(MetricProvider):
 
         if metric_name.endswith(".unexpected_index_list"):
             return {
-                "expected_condition": MetricConfiguration(
+                "unexpected_condition": MetricConfiguration(
                     metric_name[: -len(".unexpected_index_list")],
                     metric.metric_domain_kwargs,
                     base_metric_value_kwargs,
@@ -970,7 +977,7 @@ class MapMetricProvider(MetricProvider):
 
         if metric_name.endswith(".unexpected_value_counts"):
             return {
-                "expected_condition": MetricConfiguration(
+                "unexpected_condition": MetricConfiguration(
                     metric_name[: -len(".unexpected_value_counts")],
                     metric.metric_domain_kwargs,
                     base_metric_value_kwargs,
@@ -979,7 +986,7 @@ class MapMetricProvider(MetricProvider):
 
         if metric_name.endswith(".unexpected_rows"):
             return {
-                "expected_condition": MetricConfiguration(
+                "unexpected_condition": MetricConfiguration(
                     metric_name[: -len(".unexpected_rows")],
                     metric.metric_domain_kwargs,
                     base_metric_value_kwargs,
@@ -990,7 +997,19 @@ class MapMetricProvider(MetricProvider):
 
 
 class ColumnMapMetricProvider(MapMetricProvider):
-    condition_domain_keys = ("batch_id", "table", "column")
-    function_domain_keys = ("batch_id", "table", "column")
+    condition_domain_keys = (
+        "batch_id",
+        "table",
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
+    function_domain_keys = (
+        "batch_id",
+        "table",
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
     condition_value_keys = tuple()
     function_value_keys = tuple()

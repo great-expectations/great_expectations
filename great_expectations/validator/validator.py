@@ -80,12 +80,14 @@ class Validator:
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
 
-        if batches is not None:
-            ####
-            # pending load_batch api
-            self._execution_engine._active_batch_data_id = "batch_id"
-            self._execution_engine._batches = {"batch_id": batches[0].data}
-            #####
+        if batches is None:
+            batches = tuple()
+
+        for batch in batches:
+            assert isinstance(
+                batch, Batch
+            ), "batches provided to Validator must be Great Expectations Batch objects"
+            self._execution_engine.load_batch_data(batch.id, batch.data)
 
         # TURN TO self.interactive_evaluation (single flag -> property)
         self._validator_config = {"interactive_evaluation": interactive_evaluation}

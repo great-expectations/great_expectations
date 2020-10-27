@@ -29,7 +29,7 @@ class ExecutionEngine:
         name=None,
         caching=True,
         batch_spec_defaults=None,
-        batches=None,
+        batch_data_dict=None,
         validator=None,
     ):
         self.name = name
@@ -59,13 +59,14 @@ class ExecutionEngine:
             if key in self.recognized_batch_spec_defaults
         }
 
-        if batches is None:
-            batches = dict()
-        self._batches = batches
+        if batch_data_dict is None:
+            batch_data_dict = dict()
+        self._batches = batch_data_dict
         self._active_batch_data_id = None
 
     def configure_validator(self, validator):
-        self._validator = validator
+        """Optionally configure the validator as appropriate for the execution engine."""
+        pass
 
     @property
     def _active_validation(self):
@@ -114,6 +115,13 @@ class ExecutionEngine:
         """The current dictionary of batches."""
         return self._batches
 
+    def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
+        """
+        Loads the specified batch_data into the execution engine
+        """
+        self._batches[batch_id] = batch_data
+        self._active_batch_data_id = batch_id
+
     def process_batch_request(self, batch_request, batch_spec):
         """Use ExecutionEngine-specific configuration to translate any batch_request keys into batch_spec keys
 
@@ -123,15 +131,6 @@ class ExecutionEngine:
 
         Returns:
             batch_spec (dict)
-        """
-        raise NotImplementedError
-
-    def load_batch(self, batch_request):
-        """
-        Load a Batch specified by the batch_request.
-
-        :param batch_request:
-        :return:
         """
         raise NotImplementedError
 
@@ -161,10 +160,13 @@ class ExecutionEngine:
             metric_class, metric_fn = get_metric_provider(
                 metric_name=metric_to_resolve.metric_name, execution_engine=self
             )
-            metric_dependencies = {
-                k: metrics[v.id]
-                for k, v in metric_to_resolve.metric_dependencies.items()
-            }
+            try:
+                metric_dependencies = {
+                    k: metrics[v.id]
+                    for k, v in metric_to_resolve.metric_dependencies.items()
+                }
+            except KeyError as e:
+                raise GreatExpectationsError(f"Missing metric dependency: {str(e)}")
             metric_provider_kwargs = {
                 "cls": metric_class,
                 "execution_engine": self,
