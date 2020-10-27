@@ -4,6 +4,10 @@
 Changelog
 #########
 
+develop
+-----------------
+* [BUGFIX] Fixed bug where slack messages cause stacktrace when data docs pages have issue
+
 0.12.6
 -----------------
 * [BUGFIX] replace black in requirements.txt
