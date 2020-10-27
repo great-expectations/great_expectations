@@ -478,7 +478,6 @@ connector and the default_partitioner_name is set to the name of one of the conf
         if batch_request.data_asset_name:
             if batch_request.data_asset_name != batch_definition.data_asset_name:
                 return False
-        # TODO: <Alex>We need a new entity that replaces the notion of a Partition (and PartitionRequest).</Alex>
         # FIXME: This is too rigid. Needs to take into account ranges and stuff.
         if batch_request.partition_request:
             for k, v in batch_request.partition_request.items():
