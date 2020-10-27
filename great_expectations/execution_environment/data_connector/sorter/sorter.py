@@ -30,11 +30,11 @@ class Sorter(object):
     def get_sorted_batch_definitions(self, batch_definitions: List[BatchDefinition]) -> List[BatchDefinition]:
         return sorted(batch_definitions, key=self._verify_sorting_directives_and_get_partition_key, reverse=self.reverse)
 
-    def _verify_sorting_directives_and_get_partition_key(self, batch_definitions: BatchDefinition) -> Any:
-        partition_definition: dict = batch_definitions.partition_definition
+    def _verify_sorting_directives_and_get_partition_key(self, batch_definition: BatchDefinition) -> Any:
+        partition_definition: dict = batch_definition.partition_definition
         if partition_definition.get(self.name) is None:
-            raise ge_exceptions.SorterError(f'Unable to sort batch_definition "{batch_definitions}" by attribute "{self.name}".')
-        return self.get_partition_key(batch_definition=batch_definitions)
+            raise ge_exceptions.SorterError(f'Unable to sort batch_definition "{batch_definition}" by attribute "{self.name}".')
+        return self.get_partition_key(batch_definition=batch_definition)
 
     def get_partition_key(self, batch_definition: BatchDefinition) -> Any:
         raise NotImplementedError
