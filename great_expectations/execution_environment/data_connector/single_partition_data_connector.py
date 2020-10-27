@@ -183,6 +183,13 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
             **kwargs
         )
 
+    def get_unmatched_data_references(self):
+        raise NotImplementedError
+        if self._data_references_cache is None:
+            raise ValueError("_data_references_cache is None. Have you called refresh_data_references_cache yet?")
+
+        return [k for k,v in self._data_references_cache.items() if v == None]
+
     def _get_data_reference_list(self):
         globbed_paths = Path(self.base_directory).glob(self.glob_directive)
         path_list = [

@@ -3,6 +3,7 @@ from pathlib import Path
 import itertools
 from typing import List, Union, Any, Dict
 import os
+import copy
 
 import logging
 
@@ -280,12 +281,25 @@ configured runtime keys.
     #             )
     #         )
     #     )
-    
-    def _get_data_reference_list(self):
-        globbed_paths = Path(self.base_directory).glob(self._glob_directive)
-        paths = [
-            os.path.relpath(str(posix_path), self.base_directory) for posix_path in globbed_paths
-        ]
+
+    def get_unmatched_data_references(self):
+        if self._data_references_cache is None:
+            raise ValueError("_data_references_cache is None. Have you called refresh_data_references_cache yet?")
+
+        unmatched_data_references = []
+        for data_asset_name, sub_cache in self._data_references_cache.items():
+            unmatched_data_references += [k for k,v in sub_cache.items() if v == None]
+
+        return unmatched_data_references
+
+    def _get_data_reference_list(self, data_asset_name):
+        if self.assets[data_asset_name].base_directory:
+            data_asset_path = os.path.join(self.base_directory, self.assets[data_asset_name].base_directory)
+        else:
+            data_asset_path = os.path.join(self.base_directory)
+
+        globbed_paths = Path(data_asset_path).glob(self._glob_directive)
+        paths = [os.path.relpath(str(posix_path), data_asset_path) for posix_path in globbed_paths]
         return paths
 
     def _build_batch_spec_from_partition(
@@ -353,7 +367,7 @@ configured runtime keys.
         for data_asset_name in self.get_available_data_asset_names():
             self._data_references_cache[data_asset_name] = {}
 
-            for data_reference in self._get_data_reference_list():
+            for data_reference in self._get_data_reference_list(data_asset_name):
                 mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
                     data_reference,
                     data_asset_name,
@@ -387,9 +401,16 @@ configured runtime keys.
         data_asset_name: str,
     ) -> List[BatchDefinition]:
     
-        # TODO: Need better logic here
-        regex_config = self._default_regex
+        regex_config = copy.deepcopy(self._default_regex)
 
+        # Override the defaults
+        asset = self.assets[data_asset_name]
+        if asset.pattern:
+            regex_config["pattern"] = asset.pattern
+
+        if asset.group_names:
+            regex_config["group_names"] = asset.group_names
+        
         batch_request: BatchRequest = self.convert_data_reference_to_batch_request(
             data_reference=data_reference,
             pattern=regex_config["pattern"],

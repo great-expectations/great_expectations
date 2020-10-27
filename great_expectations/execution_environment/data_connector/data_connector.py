@@ -531,10 +531,7 @@ class DataConnector(object):
         raise NotImplementedError
 
     def get_unmatched_data_references(self):
-        if self._data_references_cache is None:
-            raise ValueError("_data_references_cache is None. Have you called refresh_data_references_cache yet?")
-
-        return [k for k,v in self._data_references_cache.items() if v == None]
+        raise NotImplementedError
     
     def get_data_reference_list_count(self):
         raise NotImplementedError
@@ -579,11 +576,15 @@ class DataConnector(object):
             ))
             len_batch_definition_list = len(batch_definition_list)
 
-            print(batch_definition_list)
+            if self.assets[asset_name].pattern:
+                pattern = self.assets[asset_name].pattern
+            else:
+                pattern = self._default_regex["pattern"]
 
-            # TODO: This logic should differ by subclass
-            pattern = self._default_regex["pattern"]
-            group_names = self._default_regex["group_names"]
+            if self.assets[asset_name].group_names:
+                group_names = self.assets[asset_name].group_names
+            else:
+                group_names = self._default_regex["group_names"]
             
             example_data_references = [
                 self.convert_batch_request_to_data_reference(
