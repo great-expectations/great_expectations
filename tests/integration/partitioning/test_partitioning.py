@@ -10,6 +10,7 @@ from great_expectations.core.id_dict import PartitionDefinition
 import great_expectations.exceptions as ge_exceptions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_all_available_partitions_unsorted(
     execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
 ):
@@ -108,6 +109,7 @@ def test_return_all_available_partitions_unsorted(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_all_available_partitions_illegal_index_and_limit_combination(
     execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
 ):
@@ -135,6 +137,7 @@ def test_return_all_available_partitions_illegal_index_and_limit_combination(
         )
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_all_available_partitions_sorted(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -234,6 +237,7 @@ def test_return_all_available_partitions_sorted(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_filtered_by_custom_filter(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -314,6 +318,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_filtered_by_custom_filter_with_limit(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -391,6 +396,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_filtered_by_custom_filter_with_index_as_int(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -440,6 +446,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_index_as_int(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_filtered_by_custom_filter_with_index_as_str(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -489,6 +496,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_index_as_str(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_list(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -544,6 +552,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_list(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_tuple(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -599,6 +608,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_tuple(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_str(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -654,6 +664,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_str(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_obj(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -709,6 +720,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_obj(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_for_specific_data_asset_name(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -755,6 +767,7 @@ def test_return_partitions_sorted_for_specific_data_asset_name(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_queried_by_partition_name(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -801,6 +814,7 @@ def test_return_partitions_sorted_queried_by_partition_name(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_queried_by_partition_definition_dict_1_key(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -865,6 +879,7 @@ def test_return_partitions_sorted_queried_by_partition_definition_dict_1_key(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_queried_by_partition_definition_dict_2_keys(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
@@ -911,6 +926,7 @@ def test_return_partitions_sorted_queried_by_partition_definition_dict_2_keys(
     assert available_partitions == expected_returned_partitions
 
 
+# TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_partitions_sorted_queried_by_partition_definition_dict_1_key_with_index_as_int(
     execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):

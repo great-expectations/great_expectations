@@ -1123,11 +1123,11 @@ class BaseDataContext:
         )
         return batch_kwargs
 
-    # new get_batch
-    def get_batch_from_new_style_datasource(
+    # New get_batch (note: it returns the List of Batch objects, not a single Batch object).
+    def get_batch_list_from_new_style_datasource(
         self,
         batch_request: dict
-    ) -> Batch:
+    ) -> List[Batch]:
         execution_environment_name: str = batch_request.get("execution_environment_name")
         if not execution_environment_name:
             raise ge_exceptions.ExecutionEnvironmentError(
@@ -1138,7 +1138,11 @@ class BaseDataContext:
             execution_environment_name=execution_environment_name
         )
         batch_request: BatchRequest = BatchRequest(**batch_request)
-        return execution_environment.get_batch(
+        # TODO: <Alex>Remove old code</Alex>
+        # return execution_environment.get_batch(
+        #     batch_request=batch_request
+        # )
+        return execution_environment.get_batch_list_from_batch_request(
             batch_request=batch_request
         )
 
@@ -1146,6 +1150,7 @@ class BaseDataContext:
         self,
         batch_request,
         expectation_suite_name: Union[str, ExpectationSuite],
+        # TODO: <Alex>Per most recent conversation, "in_memory_dataset" should be part of "batch_request" -- this must be confirmed.</Alex>
         in_memory_dataset: Any = None
     ):
         # execution_environment_name: str = batch_request.get("execution_environment")
@@ -1556,28 +1561,29 @@ class BaseDataContext:
             )
         return execution_environment
 
-    def get_available_partitions(
-        self,
-        execution_environment_name: str,
-        data_connector_name: str,
-        data_asset_name: str = None,
-        partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
-        in_memory_dataset: Any = None,
-        runtime_parameters: Union[dict, None] = None,
-        repartition: bool = False
-    ) -> List[Partition]:
-        execution_environment: ExecutionEnvironment = self.get_execution_environment(
-            execution_environment_name=execution_environment_name
-        )
-        available_partitions: List[Partition] = execution_environment.get_available_partitions(
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            in_memory_dataset=in_memory_dataset,
-            runtime_parameters=runtime_parameters,
-            repartition=repartition
-        )
-        return available_partitions
+    # TODO: <Alex>ExecutionEnvironment.get_available_partitions() and Partitioner.get_available_partitions() have been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
+    # def get_available_partitions(
+    #     self,
+    #     execution_environment_name: str,
+    #     data_connector_name: str,
+    #     data_asset_name: str = None,
+    #     partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
+    #     in_memory_dataset: Any = None,
+    #     runtime_parameters: Union[dict, None] = None,
+    #     repartition: bool = False
+    # ) -> List[Partition]:
+    #     execution_environment: ExecutionEnvironment = self.get_execution_environment(
+    #         execution_environment_name=execution_environment_name
+    #     )
+    #     available_partitions: List[Partition] = execution_environment.get_available_partitions(
+    #         data_connector_name=data_connector_name,
+    #         data_asset_name=data_asset_name,
+    #         partition_request=partition_request,
+    #         in_memory_dataset=in_memory_dataset,
+    #         runtime_parameters=runtime_parameters,
+    #         repartition=repartition
+    #     )
+    #     return available_partitions
 
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""

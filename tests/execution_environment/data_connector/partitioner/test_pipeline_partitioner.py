@@ -7,6 +7,7 @@ from great_expectations.execution_environment.data_connector.partitioner.partiti
 import great_expectations.exceptions.exceptions as ge_exceptions
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_pipeline_partitioner():
     test_partitioner = PipelinePartitioner(name="test_pipeline_partitioner")
     # properties
@@ -35,6 +36,7 @@ def test_pipeline_partitioner():
     assert returned_partitions == []
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_pipeline_partitioner_single_df():
     test_partitioner = PipelinePartitioner(name="test_pipeline_partitioner")
     # test df

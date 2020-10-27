@@ -44,14 +44,12 @@ class RegexPartitioner(Partitioner):
         self._pattern = pattern
         self._group_names = group_names
 
-    # TODO: <Alex>See PyCharm warnings as to the method signature.</Alex>
     def convert_data_reference_to_batch_request(
         self,
-        data_reference
-    ) -> BatchRequest:
+        data_reference: Any
+    ) -> Union[BatchRequest, None]:
         matches: Union[re.Match, None] = re.match(self._pattern, data_reference)
         if matches is None:
-            #raise ValueError(f'No match found for data_reference: "{data_reference}".')
             return None
         groups: tuple = matches.groups()
         group_names: list = [
@@ -67,37 +65,45 @@ class RegexPartitioner(Partitioner):
         for idx, group_value in enumerate(groups):
             group_name: str = group_names[idx]
             partition_definition[group_name] = group_value
+        # TODO: <Alex>Abe: Does PartitionDefinition have a role in the new design?  If so, what does it consist of?</Alex>
         partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
+        # TODO: <Alex>Do runtime_parameters have a role in the new design?  Otherwise, remove unused code.</Alex>
         # if runtime_parameters:
         #     partition_definition.update(runtime_parameters)
-        partition_name: str = self.DEFAULT_DELIMITER.join(
-            [str(value) for value in partition_definition.values()]
-        )
+        # TODO: <Alex>Remove unused code.</Alex>
+        # partition_name: str = self.DEFAULT_DELIMITER.join(
+        #     [str(value) for value in partition_definition.values()]
+        # )
 
+        # TODO: <Alex>Given how partition_definition is created (above), this cannot work as is without additional development.</Alex>
+        # TODO: <Alex>The following code assumes that PartitionDefinition may contain "data_asset_name"; however, given how PartitionDefinition is computed (above), this is not the case.</Alex>
         if "data_asset_name" in partition_definition:
             data_asset_name = partition_definition.pop("data_asset_name")
         else:
+            # TODO: <Alex>This needs to be implemented more cleanly, such as for example in the DataConnector class hierarchy.</Alex>
             # adding this, so things don't crash
             data_asset_name = "DEFAULT_ASSET_NAME"
-            groups: tuple = matches.groups()
-            group_names: list = [
-                f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
-            ]
-            #
-            self._validate_sorters_configuration(
-                partition_keys=self._group_names,
-                num_actual_partition_keys=len(groups)
-            )
-            for idx, group_name in enumerate(self._group_names):
-                group_names[idx] = group_name
-            partition_definition: dict = {}
-            for idx, group_value in enumerate(groups):
-                group_name: str = group_names[idx]
-                partition_definition[group_name] = group_value
-            partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
-            partition_name: str = self.DEFAULT_DELIMITER.join(
-                [str(value) for value in partition_definition.values()]
-            )
+            # TODO: <Alex>The code below appears to have been copied accidentally (it is identical to code above) -- commenting out the copy below.</Alex>
+            # groups: tuple = matches.groups()
+            # group_names: list = [
+            #     f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}" for idx, group_value in enumerate(groups)
+            # ]
+            # #
+            # self._validate_sorters_configuration(
+            #     partition_keys=self._group_names,
+            #     num_actual_partition_keys=len(groups)
+            # )
+            # for idx, group_name in enumerate(self._group_names):
+            #     group_names[idx] = group_name
+            # partition_definition: dict = {}
+            # for idx, group_value in enumerate(groups):
+            #     group_name: str = group_names[idx]
+            #     partition_definition[group_name] = group_value
+            # partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
+            # TODO: <Alex>Remove unused code.</Alex>
+            # partition_name: str = self.DEFAULT_DELIMITER.join(
+            #     [str(value) for value in partition_definition.values()]
+            # )
 
         return BatchRequest(
             data_asset_name=data_asset_name,
@@ -105,14 +111,14 @@ class RegexPartitioner(Partitioner):
         )
 
     def convert_batch_request_to_data_reference(
-            self,
-            batch_request: BatchRequest,
+        self,
+        batch_request: BatchRequest
     ) -> str:
         if not isinstance(batch_request, BatchRequest):
             raise TypeError("batch_request is not of an instance of type BatchRequest")
 
         template_arguments = batch_request.partition_request
-        if batch_request.data_asset_name != None:
+        if batch_request.data_asset_name is not None:
             template_arguments["data_asset_name"] = batch_request.data_asset_name
 
         filepath_template = self._invert_regex_to_data_reference_template()
