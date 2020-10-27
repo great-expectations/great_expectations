@@ -55,6 +55,7 @@ def test_regex_partitioner_regex_groups_named():
     assert regex_partitioner._group_names == ["name", "timestamp", "price"]
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_regex_partitioner_find_or_create_partitions_with_no_params():
     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
     group_names = ["name", "timestamp", "price"]
@@ -67,6 +68,7 @@ def test_regex_partitioner_find_or_create_partitions_with_no_params():
     assert regex_partitioner.find_or_create_partitions() == []
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_regex_partitioner_regex_does_not_match_paths():
     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
     group_names = ["name", "timestamp", "price"]
@@ -85,6 +87,7 @@ def test_regex_partitioner_regex_does_not_match_paths():
     assert partitions == []
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_no_data_asset_name():
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner")
     paths: list = [
@@ -108,6 +111,7 @@ def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_no
     ]
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_autodiscover_assets():
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner")
     paths: list = [
@@ -131,6 +135,7 @@ def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_au
     ]
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_data_asset_name_configured():
     regex_partitioner = RegexPartitioner(name="test_regex_partitioner")
     paths: list = [
@@ -154,6 +159,7 @@ def test_regex_partitioner_compute_partitions_paths_with_default_regex_config_da
     ]
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
     group_names = ["name", "timestamp", "price"]
@@ -183,6 +189,7 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_true():
     ]
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_regex_partitioner_compute_partitions_auto_discover_assets_false_no_data_asset_name():
     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
     group_names = ["name", "timestamp", "price"]
@@ -210,6 +217,7 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_false_no_data
     ]
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_regex_partitioner_compute_partitions_auto_discover_assets_false_data_asset_name_included():
     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
     group_names = ["name", "timestamp", "price"]
@@ -239,28 +247,29 @@ def test_regex_partitioner_compute_partitions_auto_discover_assets_false_data_as
     ]
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_regex_partitioner_compute_partitions_adding_sorters():
     sorters = [
-                {
-                    "name": "name",
-                    "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                    "class_name": "LexicographicSorter",
-                    "orderby": "asc",
-                },
-                {
-                    "name": "timestamp",
-                    "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                    "class_name": "DateTimeSorter",
-                    "orderby": "desc",
-                    "datetime_format": "%Y%m%d",
-                },
-                {
-                    "name": "price",
-                    "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                    "class_name": "NumericSorter",
-                    "orderby": "desc",
-                },
-            ]
+        {
+            "name": "name",
+            "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            "class_name": "LexicographicSorter",
+            "orderby": "asc",
+        },
+        {
+            "name": "timestamp",
+            "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            "class_name": "DateTimeSorter",
+            "orderby": "desc",
+            "datetime_format": "%Y%m%d",
+        },
+        {
+            "name": "price",
+            "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            "class_name": "NumericSorter",
+            "orderby": "desc",
+        },
+    ]
 
     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
     group_names = ["name", "timestamp", "price"]
@@ -290,28 +299,29 @@ def test_regex_partitioner_compute_partitions_adding_sorters():
     ]
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_regex_partitioner_compute_partitions_sorters_and_groups_names_do_not_match():
     sorters = [
-                {
-                    "name": "name",
-                    "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                    "class_name": "LexicographicSorter",
-                    "orderby": "asc",
-                },
-                {
-                    "name": "timestamp",
-                    "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                    "class_name": "DateTimeSorter",
-                    "orderby": "desc",
-                    "datetime_format": "%Y%m%d",
-                },
-                {
-                    "name": "price",
-                    "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                    "class_name": "NumericSorter",
-                    "orderby": "desc",
-                },
-            ]
+        {
+            "name": "name",
+            "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            "class_name": "LexicographicSorter",
+            "orderby": "asc",
+        },
+        {
+            "name": "timestamp",
+            "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            "class_name": "DateTimeSorter",
+            "orderby": "desc",
+            "datetime_format": "%Y%m%d",
+        },
+        {
+            "name": "price",
+            "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            "class_name": "NumericSorter",
+            "orderby": "desc",
+        },
+    ]
     # the group named price -> not_price
     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
     group_names = ["name", "timestamp", "not_price"]
@@ -330,34 +340,35 @@ def test_regex_partitioner_compute_partitions_sorters_and_groups_names_do_not_ma
         regex_partitioner.find_or_create_partitions(paths=paths, data_asset_name="test_asset_0")
 
 
+# TODO: <Alex>Partitioner.find_or_create_partitions() has been deprecated.  We must develop a test for an equivalent functionality (e.g., "get_batch_list_from_batch_request()").</Alex>
 def test_regex_partitioner_compute_partitions_sorters_too_many_sorters():
     sorters = [
-                {
-                    "name": "name",
-                    "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                    "class_name": "LexicographicSorter",
-                    "orderby": "asc",
-                },
-                {
-                    "name": "timestamp",
-                    "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                    "class_name": "DateTimeSorter",
-                    "orderby": "desc",
-                    "datetime_format": "%Y%m%d",
-                },
-                {
-                    "name": "price",
-                    "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                    "class_name": "NumericSorter",
-                    "orderby": "desc",
-                },
-                {
-                    "name": "extra_sorter",
-                    "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                    "class_name": "NumericSorter",
-                    "orderby": "desc",
-                },
-            ]
+        {
+            "name": "name",
+            "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            "class_name": "LexicographicSorter",
+            "orderby": "asc",
+        },
+        {
+            "name": "timestamp",
+            "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            "class_name": "DateTimeSorter",
+            "orderby": "desc",
+            "datetime_format": "%Y%m%d",
+        },
+        {
+            "name": "price",
+            "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            "class_name": "NumericSorter",
+            "orderby": "desc",
+        },
+        {
+            "name": "extra_sorter",
+            "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
+            "class_name": "NumericSorter",
+            "orderby": "desc",
+        },
+    ]
 
     pattern = r".+\/(.+)_(.+)_(.+)\.csv"
     group_names = ["name", "timestamp", "price"]
@@ -527,8 +538,12 @@ def test_convert_data_reference_to_batch_request():
         group_names=["name", "timestamp", "price"]
     )
 
-    print(regex_partitioner.convert_data_reference_to_batch_request("alex_20200809_1000.csv"))
-    assert regex_partitioner.convert_data_reference_to_batch_request("alex_20200809_1000.csv") == BatchRequest(
+    assert regex_partitioner.convert_data_reference_to_batch_request(
+        data_reference="alex_20200809_1000.csv"
+    ) == BatchRequest(
+        execution_environment_name=None,
+        data_connector_name=None,
+        data_asset_name="DEFAULT_ASSET_NAME",
         partition_request=PartitionDefinition(**{
             "name": "alex",
             "timestamp": "20200809",
@@ -536,7 +551,12 @@ def test_convert_data_reference_to_batch_request():
         })
     )
 
-    assert regex_partitioner.convert_data_reference_to_batch_request("eugene_20200810_1500.csv") == BatchRequest(
+    assert regex_partitioner.convert_data_reference_to_batch_request(
+        data_reference="eugene_20200810_1500.csv"
+    ) == BatchRequest(
+        execution_environment_name=None,
+        data_connector_name=None,
+        data_asset_name="DEFAULT_ASSET_NAME",
         partition_request=PartitionDefinition(**{
             "name": "eugene",
             "timestamp": "20200810",
@@ -544,10 +564,12 @@ def test_convert_data_reference_to_batch_request():
         })
     )
 
-    assert regex_partitioner.convert_data_reference_to_batch_request("DOESNT_MATCH_CAPTURING_GROUPS.csv") is None
+    assert regex_partitioner.convert_data_reference_to_batch_request(
+        data_reference="DOESNT_MATCH_CAPTURING_GROUPS.csv"
+    ) is None
 
     assert regex_partitioner.convert_data_reference_to_batch_request(
-        "eugene_DOESNT_MATCH_ALL_CAPTURING_GROUPS_1500.csv"
+        data_reference="eugene_DOESNT_MATCH_ALL_CAPTURING_GROUPS_1500.csv"
     ) is None
 
     # TODO ABE 20201017 : Future case to handle

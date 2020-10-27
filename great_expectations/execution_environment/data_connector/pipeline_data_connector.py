@@ -28,7 +28,7 @@ class PipelineDataConnector(DataConnector):
         default_partitioner_name: str = None,
         assets: dict = None,
         execution_engine: ExecutionEngine = None,
-        data_context_root_directory:str = None
+        data_context_root_directory: str = None
     ):
         logger.debug(f'Constructing PipelineDataConnector "{name}".')
         super().__init__(
@@ -41,6 +41,7 @@ class PipelineDataConnector(DataConnector):
             data_context_root_directory=data_context_root_directory
         )
 
+    # TODO: <Alex>Per most recent conversation, "_get_available_partitions()" was being decomissioned.</Alex>
     def _get_available_partitions(
         self,
         partitioner: Partitioner,
@@ -74,6 +75,7 @@ class PipelineDataConnector(DataConnector):
             partition_config=partition_config
         )
 
+    # TODO: <Alex>Per most recent conversation, "_build_batch_spec_from_partition()" was no longer in used and is being decomissioned.</Alex>
     def _build_batch_spec_from_partition(
         self,
         partition: Partition,

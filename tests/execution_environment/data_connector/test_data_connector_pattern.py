@@ -2,6 +2,8 @@ import pytest
 import yaml
 import json
 
+from typing import List
+
 from great_expectations.execution_environment.data_connector import (
     DataConnector
 )
@@ -25,23 +27,25 @@ def test_name_date_price_list(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
     create_files_in_directory(
         directory=base_directory,
-        file_name_list=["alex_20200809_1000.csv",
-                        "eugene_20200809_1500.csv",
-                        "james_20200811_1009.csv",
-                        "abe_20200809_1040.csv",
-                        "will_20200809_1002.csv",
-                        "james_20200713_1567.csv",
-                        "eugene_20201129_1900.csv",
-                        "will_20200810_1001.csv",
-                        "james_20200810_1003.csv",
-                        "alex_20200819_1300.csv", ]
+        file_name_list=[
+            "alex_20200809_1000.csv",
+            "eugene_20200809_1500.csv",
+            "james_20200811_1009.csv",
+            "abe_20200809_1040.csv",
+            "will_20200809_1002.csv",
+            "james_20200713_1567.csv",
+            "eugene_20201129_1900.csv",
+            "will_20200810_1001.csv",
+            "james_20200810_1003.csv",
+            "alex_20200819_1300.csv",
+        ]
     )
     my_data_connector_yaml = yaml.load(f"""
         module_name: great_expectations.execution_environment.data_connector
         class_name: FilesDataConnector
         base_directory: {base_directory}
         glob_directive: '*'
-        default_partitioner_name_name: my_standard_partitioner
+        default_partitioner_name: my_standard_partitioner
         assets:
           DEFAULT_ASSET_NAME:
             glob_directive: '*'
@@ -49,7 +53,7 @@ def test_name_date_price_list(tmp_path_factory):
         partitioners:
           my_standard_partitioner:
             class_name: RegexPartitioner
-            pattern: .+\/(.+)_(.+)_(.+)\.csv
+            pattern: .+\\/(.+)_(.+)_(.+)\\.csv
             group_names:
             - name
             - timestamp
@@ -59,7 +63,7 @@ def test_name_date_price_list(tmp_path_factory):
             - orderby: asc
               class_name: LexicographicSorter
               name: name
-              datetime_format: '%Y%m%d'
+            - datetime_format: '%Y%m%d'
               orderby: desc
               class_name: DateTimeSorter
               name: timestamp
@@ -83,10 +87,13 @@ def test_name_date_price_list(tmp_path_factory):
 
     self_check_report = my_data_connector.self_check()
     print(json.dumps(self_check_report, indent=2))
-    # TODO: This report is wrong; replace with something correct.
-    assert self_check_report == {}
 
-    my_batch_request = BatchRequest(
+    assert self_check_report["class_name"] == "FilesDataConnector"
+    assert self_check_report["data_asset_count"] == 1
+    assert self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"] == 10
+    assert self_check_report["unmatched_data_reference_count"] == 0
+
+    my_batch_request: BatchRequest = BatchRequest(
         execution_environment_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="DEFAULT_ASSET_NAME",
@@ -96,28 +103,42 @@ def test_name_date_price_list(tmp_path_factory):
             "price": "1567",
         }))
 
+    my_batch_definition_list: List[BatchDefinition]
+    my_batch_definition: BatchDefinition
 
     # TEST 1: Should only return the specified partition
-    my_batch_definition = my_data_connector.get_batch_definition_list_from_batch_request(my_batch_request)
-    assert len(my_batch_definition) == 1
-    expected_batch_definition = BatchDefinition(
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
+    )
+    assert len(my_batch_definition_list) == 1
+    my_batch_definition = my_batch_definition_list[0]
+    expected_batch_definition: BatchDefinition = BatchDefinition(
         execution_environment_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="DEFAULT_ASSET_NAME",
-        partition_definition=PartitionDefinition({"name": "james", "timestamp": "20200713", "price": "1567"}),
+        partition_definition=PartitionDefinition(
+            {
+                "name": "james",
+                "timestamp": "20200713",
+                "price": "1567",
+                "data_asset_name": "DEFAULT_ASSET_NAME",
+            }
+        ),
     )
-    assert my_batch_definition[0] == expected_batch_definition
+    assert my_batch_definition == expected_batch_definition
 
     # TEST 2: Without partition request, should return all 10
-    my_batch_request = BatchRequest(
+    my_batch_request: BatchRequest = BatchRequest(
         execution_environment_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="DEFAULT_ASSET_NAME",
-        partition_request=None)
+        partition_request=None
+    )
     # should return 10
-    my_batch_definition = my_data_connector.get_batch_definition_list_from_batch_request(my_batch_request)
-    assert len(my_batch_definition) == 10
-
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
+    )
+    assert len(my_batch_definition_list) == 10
 
 
 def test_alpha(tmp_path_factory):
@@ -125,10 +146,10 @@ def test_alpha(tmp_path_factory):
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
-        'test_dir_alpha/A.csv',
-        'test_dir_alpha/B.csv',
-        'test_dir_alpha/C.csv',
-        'test_dir_alpha/D.csv',
+            'test_dir_alpha/A.csv',
+            'test_dir_alpha/B.csv',
+            'test_dir_alpha/C.csv',
+            'test_dir_alpha/D.csv',
         ]
     )
 
@@ -154,7 +175,7 @@ def test_alpha(tmp_path_factory):
                 partitioners:
                   my_standard_partitioner:
                     class_name: RegexPartitioner
-                    pattern: .*/(.*).csv
+                    pattern: .*\\/(.*).csv
                     group_names:
                     - part_1
             """, Loader=yaml.FullLoader)
@@ -174,33 +195,42 @@ def test_alpha(tmp_path_factory):
 
     self_check_report = my_data_connector.self_check()
     print(json.dumps(self_check_report, indent=2))
-    # TODO: This report is wrong; replace with something correct.
-    assert self_check_report == {}
+
+    assert self_check_report["class_name"] == "FilesDataConnector"
+    assert self_check_report["data_asset_count"] == 4
+    assert set(list(self_check_report["data_assets"].keys())) == {"A", "B", "C"}
+    assert self_check_report["unmatched_data_reference_count"] == 0
+
+    my_batch_definition_list: List[BatchDefinition]
+    my_batch_definition: BatchDefinition
 
     # TODO : What should work
-    my_batch_request = BatchRequest(
+    my_batch_request: BatchRequest = BatchRequest(
         execution_environment_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="B",
-        partition_request=None)
+        partition_request=None
+    )
 
-    my_batch_definition = my_data_connector.get_batch_definition_list_from_batch_request(my_batch_request)
-    assert my_batch_definition == []
-
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
+    )
+    assert len(my_batch_definition_list) == 0
 
     # TODO : What actually works
-    my_batch_request = BatchRequest(
+    my_batch_request: BatchRequest = BatchRequest(
         execution_environment_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="DEFAULT_ASSET_NAME",
-        partition_request= PartitionRequest(**{
+        partition_request=PartitionRequest(**{
             "part_1": "B"
-        }))
+        })
+    )
 
-    my_batch_definition = my_data_connector.get_batch_definition_list_from_batch_request(my_batch_request)
-    print(my_batch_definition[0])
-
-
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
+    )
+    assert len(my_batch_definition_list) == 1
 
 
 def test_foxtrot(tmp_path_factory):
@@ -274,8 +304,11 @@ def test_foxtrot(tmp_path_factory):
     )
 
     self_check_report = my_data_connector.self_check()
-    print(json.dumps(self_check_report, indent=2))
     # TODO: This report is wrong; replace with something correct.
+    print(json.dumps(self_check_report, indent=2))
+
+# TODO: Put this back in once we've trimmed the base_directory off of data_references.
+    self_check_report.pop("example_unmatched_data_references")
     assert self_check_report == {
       "class_name": "FilesDataConnector",
       "data_asset_count": 4,
@@ -284,7 +317,7 @@ def test_foxtrot(tmp_path_factory):
         "B",
         "C"
       ],
-      "assets": {
+      "data_assets": {
         "A": {
           "batch_definition_count": 0,
           "example_data_references": []
@@ -299,19 +332,25 @@ def test_foxtrot(tmp_path_factory):
         }
       },
       "unmatched_data_reference_count": 4,
-      "example_unmatched_data_references": [
-        "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/A",
-        "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/C",
-        "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/D"
-      ]
+      # "example_unmatched_data_references": [
+      #   "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/A",
+      #   "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/C",
+      #   "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/D"
+      # ]
     }
+
+    my_batch_definition_list: List[BatchDefinition]
+    my_batch_definition: BatchDefinition
 
     # TODO : What should work
     my_batch_request = BatchRequest(
         execution_environment_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="A",
-        partition_request=None)
+        partition_request=None
+    )
 
-    my_batch_definition = my_data_connector.get_batch_definition_list_from_batch_request(my_batch_request)
-    assert my_batch_definition == []
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
+    )
+    assert len(my_batch_definition_list) == 0
