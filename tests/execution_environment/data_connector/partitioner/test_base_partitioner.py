@@ -1,8 +1,7 @@
 import pytest
 
-from great_expectations.marshmallow__shade.exceptions import ValidationError
 from great_expectations.execution_environment.data_connector.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
+from great_expectations.execution_environment.data_connector.sorter.sorter import Sorter
 import great_expectations.exceptions.exceptions as ge_exceptions
 
 

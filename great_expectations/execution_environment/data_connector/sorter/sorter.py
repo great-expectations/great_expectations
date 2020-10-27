@@ -4,7 +4,13 @@ from typing import List, Any
 
 import logging
 
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+#from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+
+
+from great_expectations.core.batch import (
+BatchDefinition
+)
+
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
@@ -21,16 +27,16 @@ class Sorter(object):
             raise ge_exceptions.SorterError(f'Illegal sort order "{orderby}" for attribute "{name}".')
         self._reverse = reverse
 
-    def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
-        return sorted(partitions, key=self._verify_sorting_directives_and_get_partition_key, reverse=self.reverse)
+    def get_sorted_batch_definitions(self, batch_definitions: List[BatchDefinition]) -> List[BatchDefinition]:
+        return sorted(batch_definitions, key=self._verify_sorting_directives_and_get_partition_key, reverse=self.reverse)
 
-    def _verify_sorting_directives_and_get_partition_key(self, partition: Partition) -> Any:
-        partition_definition: dict = partition.definition
+    def _verify_sorting_directives_and_get_partition_key(self, batch_definitions: BatchDefinition) -> Any:
+        partition_definition: dict = batch_definitions.partition_definition
         if partition_definition.get(self.name) is None:
-            raise ge_exceptions.SorterError(f'Unable to sort partition "{partition.name}" by attribute "{self.name}".')
-        return self.get_partition_key(partition=partition)
+            raise ge_exceptions.SorterError(f'Unable to sort batch_definition "{batch_definitions}" by attribute "{self.name}".')
+        return self.get_partition_key(batch_definition=batch_definitions)
 
-    def get_partition_key(self, partition: Partition) -> Any:
+    def get_partition_key(self, batch_definition: BatchDefinition) -> Any:
         raise NotImplementedError
 
     @property

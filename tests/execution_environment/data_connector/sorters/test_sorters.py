@@ -1,6 +1,6 @@
 import pytest
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.execution_environment.data_connector.partitioner.sorter import (
+from great_expectations.execution_environment.data_connector.sorter import (
     Sorter,
     LexicographicSorter,
     NumericSorter,
@@ -8,7 +8,7 @@ from great_expectations.execution_environment.data_connector.partitioner.sorter 
     DateTimeSorter,
 )
 from great_expectations.core.id_dict import PartitionDefinition
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.core.batch import BatchDefinition
 
 
 def test_sorter_instantiation_base():
@@ -51,6 +51,7 @@ def test_sorter_instantiation_numeric():
     assert my_num.reverse is False
 
 
+
 def test_sorter_instantiation_custom_list():
     # CustomListSorter
     sorter_params: dict = {
@@ -91,20 +92,21 @@ def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_
     # noinspection PyProtectedMember
     assert my_custom._reference_list == periodic_table_of_elements
     # This element exists : Hydrogen
-    test_partition = Partition(
-        name="test",
-        data_asset_name="fake",
-        definition=PartitionDefinition({"element": "Hydrogen"}),
-        data_reference="nowhere"
+    test_batch_def = BatchDefinition(
+        execution_environment_name="test",
+        data_connector_name="fake",
+        data_asset_name="nowhere",
+        partition_definition=PartitionDefinition({"element": "Hydrogen"}),
     )
-    returned_partition_key = my_custom.get_partition_key(test_partition)
+    returned_partition_key = my_custom.get_partition_key(test_batch_def)
     assert returned_partition_key == 0
+
     # This element does not : Vibranium
-    test_partition = Partition(
-        name="test",
-        data_asset_name="fake",
-        definition=PartitionDefinition({"element": "Vibranium"}),
-        data_reference="nowhere"
+    test_batch_def = BatchDefinition(
+        execution_environment_name="test",
+        data_connector_name="fake",
+        data_asset_name="nowhere",
+        partition_definition=PartitionDefinition({"element": "Vibranium"}),
     )
     with pytest.raises(ge_exceptions.SorterError):
-        my_custom.get_partition_key(test_partition)
+        my_custom.get_partition_key(test_batch_def)
