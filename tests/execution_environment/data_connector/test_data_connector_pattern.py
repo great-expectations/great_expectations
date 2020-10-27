@@ -142,7 +142,7 @@ def test_name_date_price_list(tmp_path_factory):
 
 
 def test_alpha(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector__alpha"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -157,21 +157,13 @@ def test_alpha(tmp_path_factory):
                 module_name: great_expectations.execution_environment.data_connector
                 class_name: FilesDataConnector
                 base_directory: {base_directory + "/test_dir_alpha"}
+
                 assets:
                   A:
                     glob_directive: '*.csv'
-                    partitioner_name: my_standard_partitioner
-                  B:
-                    glob_directive: '*.csv'
-                    partitioner_name: my_standard_partitioner
-                  C:
-                    glob_directive: '*.csv'
-                    partitioner_name: my_standard_partitioner
-                  D:
-                    glob_directive: '*.csv'
-                    partitioner_name: my_standard_partitioner
+
                 default_regex:
-                    pattern: .*\\/(.*).csv
+                    pattern: (.*).csv
                     group_names:
                     - part_1
             """, Loader=yaml.FullLoader)
@@ -193,14 +185,14 @@ def test_alpha(tmp_path_factory):
     print(json.dumps(self_check_report, indent=2))
 
     assert self_check_report["class_name"] == "FilesDataConnector"
-    assert self_check_report["data_asset_count"] == 4
-    assert set(list(self_check_report["data_assets"].keys())) == {"A", "B", "C"}
+    assert self_check_report["data_asset_count"] == 1
+    assert set(list(self_check_report["data_assets"].keys())) == {"A"}
     assert self_check_report["unmatched_data_reference_count"] == 0
 
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
 
-    # TODO : What should work
+    # Try to fetch a batch from a nonexistent asset
     my_batch_request: BatchRequest = BatchRequest(
         execution_environment_name="BASE",
         data_connector_name="general_filesystem_data_connector",
@@ -213,11 +205,10 @@ def test_alpha(tmp_path_factory):
     )
     assert len(my_batch_definition_list) == 0
 
-    # TODO : What actually works
     my_batch_request: BatchRequest = BatchRequest(
         execution_environment_name="BASE",
         data_connector_name="general_filesystem_data_connector",
-        data_asset_name="DEFAULT_ASSET_NAME",
+        data_asset_name="A",
         partition_request=PartitionRequest(**{
             "part_1": "B"
         })
