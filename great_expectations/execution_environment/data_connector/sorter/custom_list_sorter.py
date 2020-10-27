@@ -4,8 +4,8 @@ from typing import Any, List
 
 import logging
 
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
+from great_expectations.core.batch import BatchDefinition
+from great_expectations.execution_environment.data_connector.sorter.sorter import Sorter
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
@@ -34,8 +34,8 @@ class CustomListSorter(Sorter):
                 )
         return reference_list
 
-    def get_partition_key(self, partition: Partition) -> Any:
-        partition_definition: dict = partition.definition
+    def get_partition_key(self, batch_definition: BatchDefinition) -> Any:
+        partition_definition: dict = batch_definition.partition_definition
         partition_value: Any = partition_definition[self.name]
         if partition_value in self._reference_list:
             return self._reference_list.index(partition_value)
