@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import itertools
-from typing import List, Union, Any
+from typing import List, Union, Any, Dict
 import os
 
 import logging
@@ -22,6 +22,7 @@ from great_expectations.core.batch import (
     BatchDefinition,
 )
 from great_expectations.execution_environment.types import PathBatchSpec
+from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
@@ -65,9 +66,9 @@ class FilesDataConnector(DataConnector):
             execution_environment_name=execution_environment_name,
             # partitioners=partitioners,
             # default_partitioner_name=default_partitioner_name,
-            assets=assets,
+            # assets=assets,
             execution_engine=execution_engine,
-            data_context_root_directory=data_context_root_directory
+            # data_context_root_directory=data_context_root_directory
         )
         self._glob_directive = glob_directive
 
@@ -90,6 +91,13 @@ class FilesDataConnector(DataConnector):
 
         # self._reader_method = reader_method
 
+        if assets is None:
+            assets = {}
+        _assets: Dict[str, Union[dict, Asset]] = assets
+        self._assets = _assets
+        self._build_assets_from_config(config=assets)
+
+
     @property
     def base_directory(self) -> str:
         return str(self._base_directory)
@@ -110,6 +118,42 @@ class FilesDataConnector(DataConnector):
     # def known_extensions(self) -> List[str]:
     #     return self._known_extensions
 
+    def _build_assets_from_config(self, config: Dict[str, dict]):
+        for name, asset_config in config.items():
+            if asset_config is None:
+                raise ValueError("Asset config should not be None.")
+            for property in asset_config.keys():
+                if asset_config[property] is None:
+                    raise ValueError(
+                        f'If Asset config defines the property "{property}", then its value must be specified.'
+                    )
+            new_asset: Asset = self._build_asset_from_config(
+                name=name,
+                config=asset_config,
+            )
+            self.assets[name] = new_asset
+
+    def _build_asset_from_config(self, name: str, config: dict):
+        """Build an Asset using the provided configuration and return the newly-built Asset."""
+        runtime_environment: dict = {
+            "name": name,
+            "data_connector": self
+        }
+        asset: Asset = instantiate_class_from_config(
+            config=config,
+            runtime_environment=runtime_environment,
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector.asset",
+                "class_name": "Asset"
+            },
+        )
+        if not asset:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name="great_expectations.execution_environment.data_connector.asset",
+                package_name=None,
+                class_name=config["class_name"],
+            )
+        return asset
 
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.

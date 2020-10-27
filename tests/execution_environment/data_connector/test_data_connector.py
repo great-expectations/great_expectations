@@ -33,8 +33,15 @@ def basic_data_connector(tmp_path_factory):
 class_name: FilesDataConnector
 base_directory: {base_directory}
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
-    
-        """, Loader=yaml.FullLoader
+
+default_regex:
+    pattern: "(.*)"
+    group_names:
+        - file_name
+
+assets:
+    my_asset_name: {{}}
+""", Loader=yaml.FullLoader
     ),
         runtime_environment={
             "name": "my_data_connector"
@@ -54,6 +61,13 @@ def test_basic_instantiation(tmp_path_factory):
         base_directory=base_directory,
         glob_directive='*.csv',
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
+        default_regex={
+            "pattern": "(.*)",
+            "group_names": ["file_name"],
+        },
+        assets={
+            "my_asset_name": {}
+        }
     )
     
 # default_partitioner_name: my_regex_partitioner

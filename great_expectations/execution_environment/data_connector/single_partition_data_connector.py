@@ -40,13 +40,13 @@ class SinglePartitionDataConnector(DataConnector):
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
-            assets=assets,
-            partitioners={
-                "ONE_AND_ONLY_PARTITIONER" : partitioner
-            },
-            default_partitioner_name="ONE_AND_ONLY_PARTITIONER",
+            # assets=assets,
+            # partitioners={
+            #     "ONE_AND_ONLY_PARTITIONER" : partitioner
+            # },
+            # default_partitioner_name="ONE_AND_ONLY_PARTITIONER",
             execution_engine=None,
-            data_context_root_directory=None
+            # data_context_root_directory=None
         )
 
     def get_available_data_asset_names(self):
