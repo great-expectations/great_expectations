@@ -382,7 +382,6 @@ class ExecutionEnvironment(object):
     #     return available_partitions
 
     def self_check(self, pretty_print=True, max_examples=3):
-        
         return_object = {
             "execution_engine": {
                 "class_name" : self._execution_engine.__class__.__name__,
@@ -402,8 +401,6 @@ class ExecutionEnvironment(object):
         }
 
         for data_connector in data_connector_list:
-            print(f'\n[ALEX_TEST] EXECUTION_ENVIRONMENT::self_check ; DATA_CONNECTOR_CONFIG: {data_connector} ;\nTYPE: {str(type(data_connector))}')
-            # data_connector_obj: DataConnector = self._build_data_connector_from_config(config=data_connector)
             data_connector_obj: DataConnector = self.get_data_connector(name=data_connector["name"])
             data_connector_return_obj = data_connector_obj.self_check(
                 pretty_print=pretty_print,
