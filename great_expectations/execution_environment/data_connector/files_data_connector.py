@@ -76,6 +76,8 @@ class FilesDataConnector(DataConnector):
         )
         self._glob_directive = glob_directive
 
+        self._data_context_root_directory = data_context_root_directory
+
         # TODO: <Alex>This trailing slash appears to be unnecessary; in addition, the path must be normalized internally.</Alex>
         # self._base_directory = os.path.join(base_directory, '') #Add trailing slash if it's not there already
         self._base_directory = self._normalize_directory_path(dir_path=base_directory)
@@ -125,12 +127,13 @@ class FilesDataConnector(DataConnector):
     def _build_assets_from_config(self, config: Dict[str, dict]):
         for name, asset_config in config.items():
             if asset_config is None:
-                raise ValueError("Asset config should not be None.")
-            for property in asset_config.keys():
-                if asset_config[property] is None:
-                    raise ValueError(
-                        f'If Asset config defines the property "{property}", then its value must be specified.'
-                    )
+                asset_config = {}
+            #     raise ValueError("Asset config should not be None.")
+            # for property in asset_config.keys():
+            #     if asset_config[property] is None:
+            #         raise ValueError(
+            #             f'If Asset config defines the property "{property}", then its value must be specified.'
+            #         )
             new_asset: Asset = self._build_asset_from_config(
                 name=name,
                 config=asset_config,
@@ -302,7 +305,7 @@ configured runtime keys.
             data_asset_path = self.base_directory
 
         globbed_paths = Path(data_asset_path).glob(self._glob_directive)
-        paths = [os.path.relpath(str(posix_path), data_asset_path) for posix_path in globbed_paths]
+        paths: List[str] = [os.path.relpath(str(posix_path), data_asset_path) for posix_path in globbed_paths]
 
         return paths
 
@@ -433,8 +436,8 @@ configured runtime keys.
 
             for data_reference in self._get_data_reference_list(data_asset_name):
                 mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
-                    data_reference,
-                    data_asset_name,
+                    data_reference=data_reference,
+                    data_asset_name=data_asset_name,
                 )
                 self._data_references_cache[data_asset_name][data_reference] = mapped_batch_definition_list
 
@@ -447,7 +450,7 @@ configured runtime keys.
 
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
-        
+
         batch_definition_list: List[BatchDefinition] = []
         for data_asset_name, sub_cache in self._data_references_cache.items():
             for data_reference, batch_definition in sub_cache.items():

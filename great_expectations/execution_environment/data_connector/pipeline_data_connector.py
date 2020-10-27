@@ -24,21 +24,21 @@ class PipelineDataConnector(DataConnector):
         self,
         name: str,
         execution_environment_name: str,
-        partitioners: dict = None,
-        default_partitioner_name: str = None,
-        assets: dict = None,
+        # partitioners: dict = None,
+        # default_partitioner_name: str = None,
+        # assets: dict = None,
         execution_engine: ExecutionEngine = None,
-        data_context_root_directory: str = None
+        # data_context_root_directory: str = None
     ):
         logger.debug(f'Constructing PipelineDataConnector "{name}".')
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
-            partitioners=partitioners,
-            default_partitioner_name=default_partitioner_name,
-            assets=assets,
+            # partitioners=partitioners,
+            # default_partitioner_name=default_partitioner_name,
+            # assets=assets,
             execution_engine=execution_engine,
-            data_context_root_directory=data_context_root_directory
+            # data_context_root_directory=data_context_root_directory
         )
 
     # TODO: <Alex>Per most recent conversation, "_get_available_partitions()" was being decomissioned.</Alex>

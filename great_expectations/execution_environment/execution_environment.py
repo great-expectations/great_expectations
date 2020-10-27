@@ -383,9 +383,10 @@ class ExecutionEnvironment(object):
 
     def self_check(self, pretty_print=True, max_examples=3):
         
-        return_object = {}
-        return_object["execution_engine"] = {
-            "class_name" : self._execution_engine.__class__.__name__,
+        return_object = {
+            "execution_engine": {
+                "class_name" : self._execution_engine.__class__.__name__,
+            }
         }
 
         if pretty_print:
@@ -397,11 +398,14 @@ class ExecutionEnvironment(object):
         data_connector_list = self.list_data_connectors()
         data_connector_list.sort()
         return_object["data_connectors"] = {
-            "count" : len(data_connector_list)
+            "count": len(data_connector_list)
         }
 
         for data_connector in data_connector_list:
-            data_connector_return_obj = data_connector.self_check(
+            print(f'\n[ALEX_TEST] EXECUTION_ENVIRONMENT::self_check ; DATA_CONNECTOR_CONFIG: {data_connector} ;\nTYPE: {str(type(data_connector))}')
+            # data_connector_obj: DataConnector = self._build_data_connector_from_config(config=data_connector)
+            data_connector_obj: DataConnector = self.get_data_connector(name=data_connector["name"])
+            data_connector_return_obj = data_connector_obj.self_check(
                 pretty_print=pretty_print,
                 max_examples=max_examples
             )

@@ -278,6 +278,7 @@ class BatchMarkers(BatchKwargs):
     def ge_load_time(self):
         return self.get("ge_load_time")
 
+
 # TODO: <Alex>This module needs to be cleaned up.
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
@@ -287,10 +288,10 @@ class Batch(DictDot):
     def __init__(
         self,
         data,
-        batch_request: BatchRequest=None,
-        batch_definition: BatchDefinition=None,
-        batch_spec: BatchSpec=None,
-        batch_markers: BatchMarkers=None,
+        batch_request: BatchRequest = None,
+        batch_definition: BatchDefinition = None,
+        batch_spec: BatchSpec = None,
+        batch_markers: BatchMarkers = None,
         # The remaining parameters are for backward compatibility.
         data_context=None,
         datasource_name=None,

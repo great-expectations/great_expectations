@@ -32,24 +32,24 @@ DEFAULT_USAGE_STATISTICS_URL = (
 class AssetConfig(DictDot):
     def __init__(
         self,
-        partitioner_name=None,
+        # partitioner_name=None,
         **kwargs,
     ):
-        if partitioner_name is not None:
-            self._partitioner_name = partitioner_name
+        # if partitioner_name is not None:
+        #     self._partitioner_name = partitioner_name
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-    @property
-    def partitioner_name(self):
-        return self._partitioner_name
+    # @property
+    # def partitioner_name(self):
+    #     return self._partitioner_name
 
 
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    partitioner_name = fields.String(required=False, allow_none=True)
+    # partitioner_name = fields.String(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -193,34 +193,35 @@ class PartitionerConfigSchema(Schema):
         return PartitionerConfig(**data)
 
 
+# TODO: <Alex></Alex>
 class DataConnectorConfig(DictDot):
     def __init__(
         self,
         class_name,
         module_name=None,
-        partitioners=None,
-        default_partitioner_name=None,
+        # partitioners=None,
+        # default_partitioner_name=None,
         assets=None,
         **kwargs
     ):
         self._class_name = class_name
         self._module_name = module_name
-        if partitioners is not None:
-            self._partitioners = partitioners
-        if default_partitioner_name is not None:
-            self._default_partitioner_name = default_partitioner_name
+        # if partitioners is not None:
+        #     self._partitioners = partitioners
+        # if default_partitioner_name is not None:
+        #     self._default_partitioner_name = default_partitioner_name
         if assets is not None:
             self._assets = assets
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-    @property
-    def partitioners(self):
-        return self._partitioners
+    # @property
+    # def partitioners(self):
+    #     return self._partitioners
 
-    @property
-    def default_partitioner_name(self):
-        return self._default_partitioner_name
+    # @property
+    # def default_partitioner_name(self):
+    #     return self._default_partitioner_name
 
     @property
     def assets(self):
@@ -249,17 +250,18 @@ class DataConnectorConfigSchema(Schema):
         allow_none=True,
     )
 
-    partitioners = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(PartitionerConfigSchema),
-        required=False,
-        allow_none=True,
-    )
+    # TODO: <Alex></Alex>
+    # partitioners = fields.Dict(
+    #     keys=fields.Str(),
+    #     values=fields.Nested(PartitionerConfigSchema),
+    #     required=False,
+    #     allow_none=True,
+    # )
 
-    default_partitioner_name = fields.String(
-        required=False,
-        allow_none=True,
-    )
+    # default_partitioner_name = fields.String(
+    #     required=False,
+    #     allow_none=True,
+    # )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):

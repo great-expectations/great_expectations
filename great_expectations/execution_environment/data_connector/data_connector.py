@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import copy
 import itertools
-from typing import List, Dict, Union, Callable, Any, Tuple
+from typing import List, Dict, Union, Callable, Any, Tuple, Optional
 from ruamel.yaml.comments import CommentedMap
 import json
 import re
@@ -538,8 +538,8 @@ class DataConnector(object):
     def _map_data_reference_to_batch_definition_list(
         self,
         data_reference: Any,
-        data_asset_name: str
-    ) -> Union[List[BatchDefinition], None]:
+        data_asset_name: Optional[str]
+    ) -> Optional[List[BatchDefinition]]:
         raise NotImplementedError
         # # FIXME: Make this smarter about choosing the right partitioner
         # try:
