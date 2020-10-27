@@ -66,3 +66,8 @@ class DictDataConnector(DataConnector):
         data_reference_keys = list(self.data_reference_dict.keys())
         data_reference_keys.sort()
         return data_reference_keys
+
+    def refresh_data_references_cache(
+        self,
+    ):
+        pass

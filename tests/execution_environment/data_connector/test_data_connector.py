@@ -31,10 +31,8 @@ def basic_data_connector(tmp_path_factory):
         f"""
 class_name: FilesDataConnector
 base_directory: {base_directory}
-glob_directive: '*.csv'
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
     
-default_partitioner_name: my_regex_partitioner
         """, Loader=yaml.FullLoader
     ),
         runtime_environment={
@@ -146,52 +144,25 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         base_directory=base_directory,
         glob_directive='*/*/*.csv',
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
+        default_regex={
+            "pattern" : "(.*).csv",
+            "group_names" : ["name"],
+        },
+        assets={
+            "stuff": {}
+        }
     )
 
-    # assert my_data_connector.get_data_reference_list_count() == 0
-    # with pytest.raises(ValueError):
-    #     set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
+    with pytest.raises(ValueError):
+        my_data_connector.get_data_reference_list_count()
+
+    with pytest.raises(ValueError):
+        my_data_connector.get_unmatched_data_references()
 
     my_data_connector.refresh_data_references_cache()
 
-    # Since we don't have a Partitioner yet, all keys should be unmatched
-    assert len(my_data_connector.get_unmatched_data_references()) == 4
-
-    my_data_connector.add_partitioner(
-        "my_first_partitioner",
-        yaml.load("""
-class_name: RegexPartitioner
-pattern: pretend/path/(.+)-(\\d+)\\.csv
-group_names:
-    - letter
-    - number
-        """, Loader=yaml.FullLoader)
-    )
-    my_data_connector._default_partitioner_name = "my_first_partitioner"
-
-    my_data_connector.refresh_data_references_cache()
-
-    assert len(my_data_connector.get_unmatched_data_references()) == 4
-
-    my_data_connector.add_partitioner(
-        "my_second_partitioner",
-        yaml.load("""
-class_name: RegexPartitioner
-pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
-group_names:
-    - first_dir
-    - second_dir
-    - letter
-    - number
-        """, Loader=yaml.FullLoader)
-    )
-    my_data_connector._default_partitioner_name = "my_second_partitioner"
-    
-    my_data_connector.refresh_data_references_cache()
-
-    assert set(my_data_connector.get_unmatched_data_references()) == set([])
-
-    print(my_data_connector._data_references_cache)
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_data_reference_list_count() == 4
 
 
 def test_get_batch_definition_list_from_batch_request():

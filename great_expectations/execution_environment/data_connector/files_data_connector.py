@@ -289,6 +289,9 @@ configured runtime keys.
         }
 
     def get_data_reference_list_count(self):
+        if self._data_references_cache == None:
+            raise ValueError(f"data references cache for {self.__class__.__name__} {self.name} has not yet been populated.")
+
         total_references = 0
         for data_asset_name in self._data_references_cache:
             total_references += len(self._data_references_cache[data_asset_name])
