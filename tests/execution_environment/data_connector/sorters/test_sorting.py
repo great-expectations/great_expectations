@@ -158,7 +158,6 @@ def test_custom_list(periodic_table_of_elements):
     assert sorted_batch_list == [Lithium, Helium, Hydrogen]
 
 
-# <WILL> TODO
 def test_combination_of_sorters():
 
     a = BatchDefinition(
@@ -230,12 +229,21 @@ def test_combination_of_sorters():
 
     sorters_list = [name_sorter, timestamp_sorter, price_sorter]
 
-    # WILL :
+    #<WILL> this code used to live in partitioner.py and is how the sorting is 'actually'. May need to move to data_connector
     sorters: Iterator[Sorter] = reversed(sorters_list)
     for sorter in sorters:
         sorted_batch_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_list)
 
-    for i in sorted_batch_list:
-        print(i.data_asset_name)
+    assert sorted_batch_list == [f, h, a, i, j, c, g, d, e, b]
 
-
+    # <WILL> Just some notes
+    # will_20200810_1001 = f
+    # will_20200809_1002 = h
+    # james_20200810_1003 = a
+    # james_20200811_1009 = i
+    # james_20200713_1567 = j
+    # eugene_20200809_1500 = c
+    # eugene_20201129_1900 = g
+    # alex_20200819_1300 = d
+    # alex_20200809_1000 = e
+    # abe_20200809_1040 = b
