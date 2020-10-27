@@ -582,7 +582,7 @@ class DataConnector(object):
         return [k for k,v in self._data_references_cache.items() if v == None]
     
     def get_data_reference_list_count(self):
-        return len(self._data_references_cache)
+        raise NotImplementedError
 
     def _map_data_reference_to_batch_definition_list(
         self,

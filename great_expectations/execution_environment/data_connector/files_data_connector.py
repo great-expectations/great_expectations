@@ -288,6 +288,13 @@ configured runtime keys.
             "path": path
         }
 
+    def get_data_reference_list_count(self):
+        total_references = 0
+        for data_asset_name in self._data_references_cache:
+            total_references += len(self._data_references_cache[data_asset_name])
+            
+        return  total_references
+
     def refresh_data_references_cache(
         self,
     ):

@@ -138,6 +138,10 @@ class SinglePartitionDataConnector(DataConnector):
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
+    def get_data_reference_list_count(self):
+        return len(self._data_references_cache)
+
+
 class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
     def __init__(
         self,
