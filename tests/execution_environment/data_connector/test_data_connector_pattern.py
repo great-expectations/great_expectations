@@ -4,9 +4,7 @@ import json
 
 from typing import List
 
-from great_expectations.execution_environment.data_connector import (
-    DataConnector
-)
+from great_expectations.execution_environment.data_connector import DataConnector
 
 from great_expectations.data_context.util import (
     instantiate_class_from_config,

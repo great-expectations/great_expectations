@@ -209,7 +209,7 @@ class SinglePartitionDataConnector(DataConnector):
         if self._data_references_cache is None:
             raise ValueError("_data_references_cache is None. Have you called refresh_data_references_cache yet?")
 
-        return [k for k,v in self._data_references_cache.items() if v == None]
+        return [k for k, v in self._data_references_cache.items() if v is None]
 
 
 class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
