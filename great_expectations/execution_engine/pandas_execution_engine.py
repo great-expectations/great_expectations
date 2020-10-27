@@ -201,8 +201,8 @@ Notes:
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.batches:
-                data = self.batches[batch_id]
+            if batch_id in self.loaded_batch_data:
+                data = self.loaded_batch_data[batch_id]
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 

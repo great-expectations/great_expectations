@@ -11,13 +11,28 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_environment.types import (
-    BatchSpec,
-    SqlAlchemyDatasourceTableBatchSpec,
-)
 from great_expectations.expectations.metrics import *
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.validation_graph import MetricConfiguration
+
+
+def _build_spark_engine(df):
+    from pyspark.sql import SparkSession
+
+    spark = SparkSession.builder.getOrCreate()
+    df = spark.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in df.to_records(index=False)
+        ],
+        df.columns.tolist(),
+    )
+    batch = Batch(data=df)
+    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
+    return engine
 
 
 def test_metric_loads():
@@ -28,8 +43,8 @@ def test_metric_loads():
 
 def test_basic_metric():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-
-    engine = PandasExecutionEngine(batch_data_dict={"": df})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.max",
         metric_domain_kwargs={"column": "a"},
@@ -41,8 +56,8 @@ def test_basic_metric():
 
 def test_mean_metric_pd():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
-
-    engine = PandasExecutionEngine(batch_data_dict={"": df})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.mean",
         metric_domain_kwargs={"column": "a"},
@@ -54,8 +69,8 @@ def test_mean_metric_pd():
 
 def test_stdev_metric_pd():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
-
-    engine = PandasExecutionEngine(batch_data_dict={"": df})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.standard_deviation",
         metric_domain_kwargs={"column": "a"},
@@ -72,8 +87,10 @@ def test_max_metric_sa():
     df = pd.DataFrame({"a": [1, 2, 1]})
     df.to_sql("test", eng)
     batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-
-    engine = SqlAlchemyExecutionEngine(engine=eng, batch_data_dict={"": batch_data})
+    batch = Batch(data=batch_data)
+    engine = SqlAlchemyExecutionEngine(
+        engine=eng, batch_data_dict={batch.id: batch_data}
+    )
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.max",
         metric_domain_kwargs={"column": "a"},
@@ -85,23 +102,12 @@ def test_max_metric_sa():
 
 
 def test_max_metric_spark():
-    from pyspark.sql import DataFrame, SparkSession
-
-    df = pd.DataFrame({"a": [1, 2, 1]})
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(df)
-
-    engine = SparkDFExecutionEngine()
-    engine._batches = {"batch_id": df}
-    engine._active_batch_data_id = "batch_id"
-
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}))
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
-
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 2}
 
@@ -112,21 +118,24 @@ def test_map_value_set_sa():
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     df.to_sql("test", eng)
-    engine = SqlAlchemyExecutionEngine(engine=eng)
+    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    batch = Batch(data=batch_data)
+    engine = SqlAlchemyExecutionEngine(
+        engine=eng, batch_data_dict={batch.id: batch_data}
+    )
     desired_metric = MetricConfiguration(
         metric_name="column_values.in_set",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    engine.load_batch_data("", batch_data)
+
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     # Note: metric_dependencies is optional here in the config when called from a validator.
     desired_metric = MetricConfiguration(
         metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"expected_condition": desired_metric},
+        metric_dependencies={"unexpected_condition": desired_metric},
     )
     # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(
@@ -141,29 +150,26 @@ def test_map_of_type_sa():
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     df.to_sql("test", eng)
-    engine = SqlAlchemyExecutionEngine(engine=eng)
+    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    batch = Batch(data=batch_data)
+    engine = SqlAlchemyExecutionEngine(
+        engine=eng, batch_data_dict={batch.id: batch_data}
+    )
     desired_metric = MetricConfiguration(
         metric_name="column_values.of_type",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"type_": int},
     )
 
-    batch_spec = SqlAlchemyDatasourceTableBatchSpec(table="test")
-    batch = engine.load_batch(batch_spec=batch_spec)
-
-    # engine._batches = {"batch_id": df}
-
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     # Note: metric_dependencies is optional here in the config when called from a validator.
     desired_metric = MetricConfiguration(
         metric_name="column_values.of_type.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"type": int},
-        metric_dependencies={"expected_condition": desired_metric},
+        metric_dependencies={"unexpected_condition": desired_metric},
     )
 
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -171,24 +177,8 @@ def test_map_of_type_sa():
 
 
 def test_map_value_set_spark():
-    from pyspark.sql import DataFrame, SparkSession
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
 
-    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in df.to_records(index=False)
-        ],
-        df.columns.tolist(),
-    )
-
-    engine = SparkDFExecutionEngine()
-    batch = Batch(data=df)
-    engine.load_batch_data(batch.id, batch.data)
     condition_metric = MetricConfiguration(
         metric_name="column_values.in_set",
         metric_domain_kwargs={"column": "a"},
@@ -211,12 +201,13 @@ def test_map_value_set_spark():
     # We run the same computation again, this time with None being replaced by nan instead of NULL
     # to demonstrate this behavior
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+    from pyspark.sql import SparkSession
+
     spark = SparkSession.builder.getOrCreate()
     df = spark.createDataFrame(df)
-
-    engine = SparkDFExecutionEngine()
     batch = Batch(data=df)
-    engine.load_batch_data(batch.id, batch.data)
+    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
+
     condition_metric = MetricConfiguration(
         metric_name="column_values.in_set",
         metric_domain_kwargs={"column": "a"},
@@ -238,15 +229,14 @@ def test_map_value_set_spark():
 
 
 def test_map_metric_pd():
-    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": ["a", "aaa", "bcbc", "defgh", None]})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="column_values.value_lengths",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1]},
     )
-    df = pd.DataFrame({"a": ["a", "aaa", "bcbc", "defgh", None]})
-    engine._active_batch_data_id = "batch_id"
-    engine._batches = {"batch_id": df}
     # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     # assert results == {desired_metric.id: 1}
@@ -257,58 +247,108 @@ def test_map_metric_pd():
 
 
 def test_map_unique_pd():
-    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1]},
     )
-    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    engine._batches = {"batch_id": df}
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
+
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert list(results[desired_metric.id]) == [True, True, False, False]
+    assert list(results[desired_metric.id]) == [False, False, True, True]
 
 
 def test_map_unique_sa():
     import sqlalchemy as sa
 
     eng = sa.create_engine("sqlite://")
-    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    df.to_sql("test", eng)
-    engine = SqlAlchemyExecutionEngine(engine=eng)
-    desired_metric = MetricConfiguration(
+    df = pd.DataFrame(
+        {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
+    )
+    df.to_sql("test", eng, index=False)
+    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    batch = Batch(data=batch_data)
+    engine = SqlAlchemyExecutionEngine(
+        engine=eng, batch_data_dict={batch.id: batch_data}
+    )
+    condition_metric = MetricConfiguration(
         metric_name="column_values.unique",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs={"value_set": [1]},
     )
+    metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
 
-    batch_spec = SqlAlchemyDatasourceTableBatchSpec(table="test")
-    batch = engine.load_batch(batch_spec=batch_spec)
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert list(results[desired_metric.id]) == [True, True, False, False]
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == 2
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [3, 3]
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_value_counts",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [(3, 2)]
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [(3, "baz"), (3, "qux")]
 
 
 def test_map_column_value_lengths_between_pd():
-    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": ["a", "aa", "aaa", "aaaa", None]})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
-        metric_name="column_value_lengths_between",
+        metric_name="column_values.value_lengths",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"min_value": 1, "max_value": 2},
     )
-    df = pd.DataFrame({"a": ["a", "aa", "aaa", "aaaa", None]})
-    batch = engine.load_batch(in_memory_dataset=df)
     # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert list(results[desired_metric.id]) == [True, True, False, False]
+    assert list(results[desired_metric.id]) == [1, 2, 3, 4]
 
 
 def test_z_score_under_threshold_pd():
-    engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, None]})
-    engine._active_batch_data_id = "batch_id"
-    engine._batches = {"batch_id": df}
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     mean = MetricConfiguration(
         metric_name="column.aggregate.mean",
         metric_domain_kwargs={"column": "a"},
@@ -344,13 +384,13 @@ def test_z_score_under_threshold_pd():
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
-    assert list(results[desired_metric.id]) == [True, True, True]
+    assert list(results[desired_metric.id]) == [False, False, False]
     metrics.update(results)
     desired_metric = MetricConfiguration(
         metric_name="column_values.z_score.under_threshold.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"expected_condition": desired_metric},
+        metric_dependencies={"unexpected_condition": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -359,11 +399,14 @@ def test_z_score_under_threshold_pd():
 
 
 def test_z_score_under_threshold_sa():
-    engine = sa.create_engine("sqlite://")
+    eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, None]})
-    df.to_sql("test", engine)
-    engine._active_batch_data_id = "batch_id"
-    engine._batches = {"batch_id": df}
+    df.to_sql("test")
+    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    batch = Batch(data=batch_data)
+    engine = SqlAlchemyExecutionEngine(
+        engine=eng, batch_data_dict={batch.id: batch_data}
+    )
     mean = MetricConfiguration(
         metric_name="column.aggregate.mean",
         metric_domain_kwargs={"column": "a"},
@@ -405,7 +448,7 @@ def test_z_score_under_threshold_sa():
         metric_name="column_values.z_score.under_threshold.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"expected_condition": desired_metric},
+        metric_dependencies={"unexpected_condition": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -414,15 +457,7 @@ def test_z_score_under_threshold_sa():
 
 
 def test_z_score_under_threshold_spark():
-    from pyspark.sql import DataFrame, SparkSession
-
-    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(df)
-
-    engine = SparkDFExecutionEngine()
-    engine._active_batch_data_id = "batch_id"
-    engine._batches = {"batch_id": df}
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
     mean = MetricConfiguration(
         metric_name="column.aggregate.mean",
         metric_domain_kwargs={"column": "a"},
@@ -458,13 +493,12 @@ def test_z_score_under_threshold_spark():
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
-    assert list(results[desired_metric.id]) == [True, True, True]
     metrics.update(results)
     desired_metric = MetricConfiguration(
         metric_name="column_values.z_score.under_threshold.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"expected_condition": desired_metric},
+        metric_dependencies={"unexpected_condition": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -472,53 +506,36 @@ def test_z_score_under_threshold_spark():
     assert results[desired_metric.id] == 0
 
 
-def test_table_metric():
-    engine = PandasExecutionEngine()
+def test_table_metric_pd():
+    df = pd.DataFrame({"a": [1, 2, 3, 3, None], "b": [1, 2, 3, 3, None]})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="table.row_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
-    df = pd.DataFrame({"a": [1, 2, 3, 3, None], "b": [1, 2, 3, 3, None]})
-    engine._active_batch_data_id = "batch_id"
-    engine._batches = {"batch_id": df}
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 5}
 
 
 def test_column_pairs_equal_metric_pd():
-    engine = PandasExecutionEngine()
-    desired_metric = MetricConfiguration(
-        metric_name="column_pair_values.equal",
-        metric_domain_kwargs={"column_a": "a", "column_b": "b"},
-        metric_value_kwargs=dict(),
-    )
     df = pd.DataFrame({"a": [1, 2, 3, 3], "b": [1, 2, 3, 3]})
-    engine._active_batch_data_id = "batch_id"
-    engine._batches = {"batch_id": df}
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert list(results.values())[0].equals(pd.Series([True, True, True, True]))
-
-
-def test_column_pairs_equal_metric_pd():
-    engine = PandasExecutionEngine()
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="column_pair_values.equal",
         metric_domain_kwargs={"column_a": "a", "column_b": "b"},
         metric_value_kwargs=dict(),
     )
-    df = pd.DataFrame({"a": [1, 2, 3, 3, None], "b": [1, 2, 3, 3, None]})
-    engine._active_batch_data_id = "batch_id"
-    engine._batches = {"batch_id": df}
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert list(results.values())[0].equals(pd.Series([True, True, True, True]))
 
 
 def test_column_pairs_greater_metric_pd():
-    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": [2, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="column_pair_values.a_greater_than_b",
         metric_domain_kwargs={"column_a": "a", "column_b": "b"},
@@ -527,10 +544,6 @@ def test_column_pairs_greater_metric_pd():
             "ignore_row_if": "either_value_is_missing",
         },
     )
-    df = pd.DataFrame({"a": [2, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
-    engine._active_batch_data_id = "batch_id"
-    engine._batches = {"batch_id": df}
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert (
         list(results.values())[0]
@@ -540,7 +553,9 @@ def test_column_pairs_greater_metric_pd():
 
 
 def test_column_pairs_in_set_metric_pd():
-    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="column_pair_values.in_set",
         metric_domain_kwargs={"column_a": "a", "column_b": "b"},
@@ -549,10 +564,6 @@ def test_column_pairs_in_set_metric_pd():
             "ignore_row_if": "either_value_is_missing",
         },
     )
-    df = pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
-    engine._active_batch_data_id = "batch_id"
-    engine._batches = {"batch_id": df}
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert (
         list(results.values())[0]
@@ -562,15 +573,7 @@ def test_column_pairs_in_set_metric_pd():
 
 
 def test_table_metric_spark():
-    from pyspark.sql import DataFrame, SparkSession
-
-    df = pd.DataFrame({"a": [1, 2, 1]})
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(df)
-
-    engine = SparkDFExecutionEngine()
-    engine._batches = {"batch_id": df}
-    engine._active_batch_data_id = "batch_id"
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}))
 
     desired_metric = MetricConfiguration(
         metric_name="table.row_count",
@@ -580,19 +583,11 @@ def test_table_metric_spark():
 
     # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert results == {desired_metric.id: 2}
+    assert results == {desired_metric.id: 3}
 
 
 def test_median_metric_spark():
-    from pyspark.sql import DataFrame, SparkSession
-
-    df = pd.DataFrame({"a": [1, 2, 3]})
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(df)
-
-    engine = SparkDFExecutionEngine()
-    engine._batches = {"batch_id": df}
-    engine._active_batch_data_id = "batch_id"
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3]}))
 
     row_count = MetricConfiguration(
         metric_name="table.row_count",
@@ -604,33 +599,25 @@ def test_median_metric_spark():
     metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.median",
+        metric_name="column.aggregate.median",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={"table_row_count": row_count,},
+        metric_dependencies={"table.row_count": row_count},
     )
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
     assert results == {desired_metric.id: 2}
 
 
 def test_distinct_metric_spark():
-    from pyspark.sql import DataFrame, SparkSession
-
-    df = pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]})
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(df)
-
-    engine = SparkDFExecutionEngine()
-    engine._batches = {"batch_id": df}
-    engine._active_batch_data_id = "batch_id"
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
 
     desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.distinct_values",
+        metric_name="column.distinct_values",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
 
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert set(list(results.values())[0].reset_index(drop=True)) == {1, 2, 3}

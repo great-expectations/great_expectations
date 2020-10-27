@@ -375,7 +375,6 @@ def _pandas_column_map_values(
 
     data = df[accessor_domain_kwargs["column"]]
 
-    # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
     boolean_map_unexpected_values = metrics.get("unexpected_condition")
     if result_format["result_format"] == "COMPLETE":
@@ -418,7 +417,6 @@ def _pandas_column_map_index(
     if filter_column_isnull:
         df = df[df[accessor_domain_kwargs["column"]].notnull()]
     data = df[accessor_domain_kwargs["column"]]
-    # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
     boolean_mapped_unexpected_values = metrics.get("unexpected_condition")
     if result_format["result_format"] == "COMPLETE":
@@ -449,7 +447,6 @@ def _pandas_column_map_value_counts(
     if filter_column_isnull:
         df = df[df[accessor_domain_kwargs["column"]].notnull()]
     data = df[accessor_domain_kwargs["column"]]
-    # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
     boolean_mapped_unexpected_values = metrics.get("unexpected_condition")
     value_counts = None
@@ -491,7 +488,6 @@ def _pandas_column_map_rows(
     )
     if filter_column_isnull:
         df = df[df[accessor_domain_kwargs["column"]].notnull()]
-    # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
     boolean_mapped_unexpected_values = metrics.get("unexpected_condition")
     if result_format["result_format"] == "COMPLETE":
@@ -511,10 +507,10 @@ def _sqlalchemy_map_unexpected_count(
     **kwargs,
 ):
     """Returns unexpected count for MapExpectations"""
-    unexpected_condition, compute_domain_kwargs = metrics.get("unexpected_condition")
+    unexpected_condition, fn_domain_kwargs = metrics.get("unexpected_condition")
     return (
-        sa.func.sum(sa.case([unexpected_condition, 1], else_=0,)),
-        compute_domain_kwargs,
+        sa.func.sum(sa.case([(unexpected_condition, 1)], else_=0,)),
+        fn_domain_kwargs,
     )
 
 
@@ -536,18 +532,24 @@ def _sqlalchemy_column_map_values(
         accessor_domain_kwargs,
     ) = execution_engine.get_compute_domain(metric_domain_kwargs)
 
-    # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
-    unexpected_condition = metrics.get("unexpected_condition")
-
+    unexpected_condition, fn_domain_kwargs = metrics.get("unexpected_condition")
+    assert (
+        fn_domain_kwargs == compute_domain_kwargs
+    ), "compute domain should be equivalent to the function domain"
     query = (
-        sa.select([sa.column(accessor_domain_kwargs.get("column"))])
+        sa.select(
+            [sa.column(accessor_domain_kwargs.get("column")).label("unexpected_values")]
+        )
         .select_from(selectable)
         .where(unexpected_condition)
     )
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
-    return execution_engine.engine.execute(query).fetchall()
+    return [
+        val.unexpected_values
+        for val in execution_engine.engine.execute(query).fetchall()
+    ]
 
 
 def _sqlalchemy_column_map_value_counts(
@@ -568,13 +570,16 @@ def _sqlalchemy_column_map_value_counts(
         accessor_domain_kwargs,
     ) = execution_engine.get_compute_domain(metric_domain_kwargs)
 
-    unexpected_condition = metrics.get("unexpected_condition")
+    unexpected_condition, fn_domain_kwargs = metrics.get("unexpected_condition")
+    assert (
+        fn_domain_kwargs == compute_domain_kwargs
+    ), "compute domain should be equivalent to the function domain"
     column = sa.column(accessor_domain_kwargs["column"])
     return execution_engine.engine.execute(
         sa.select([column, sa.func.count(column)])
         .select_from(selectable)
         .where(unexpected_condition)
-        .groupby(column)
+        .group_by(column)
     ).fetchall()
 
 
@@ -597,7 +602,10 @@ def _sqlalchemy_column_map_rows(
     ) = execution_engine.get_compute_domain(metric_domain_kwargs)
 
     result_format = metric_value_kwargs["result_format"]
-    unexpected_condition = metrics.get("unexpected_condition")
+    unexpected_condition, fn_domain_kwargs = metrics.get("unexpected_condition")
+    assert (
+        fn_domain_kwargs == compute_domain_kwargs
+    ), "compute domain should be equivalent to the function domain"
     query = (
         sa.select([sa.text("*")]).select_from(selectable).where(unexpected_condition)
     )
@@ -634,8 +642,10 @@ def _spark_column_map_values(
 
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     result_format = metric_value_kwargs["result_format"]
-    condition, expected_domain = metrics.get("unexpected_condition")
-    assert compute_domain_kwargs == expected_domain, "Compute Domain Kwargs should be equivalent to the expected domain"
+    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
+    assert (
+        fn_domain_kwargs == compute_domain_kwargs
+    ), "compute domain should be equivalent to the function domain"
     column_name = accessor_domain_kwargs["column"]
     filtered = data.filter(condition)
     if result_format["result_format"] == "COMPLETE":
@@ -662,9 +672,11 @@ def _spark_column_map_value_counts(
         accessor_domain_kwargs,
     ) = execution_engine.get_compute_domain(metric_domain_kwargs)
     """Returns all unique values in the column and their corresponding counts"""
-    # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
-    condition = metrics.get("unexpected_condition")
+    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
+    assert (
+        fn_domain_kwargs == compute_domain_kwargs
+    ), "compute domain should be equivalent to the function domain"
     column_name = accessor_domain_kwargs["column"]
     filtered = data.filter(condition)
     value_counts = filtered.groupBy(F.col(column_name)).count()
@@ -690,9 +702,11 @@ def _spark_column_map_rows(
         accessor_domain_kwargs,
     ) = execution_engine.get_compute_domain(row_domain)
 
-    # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
     result_format = metric_value_kwargs["result_format"]
-    condition = metrics.get("unexpected_condition")
+    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
+    assert (
+        fn_domain_kwargs == compute_domain_kwargs
+    ), "compute domain should be equivalent to the function domain"
     filtered = data.filter(condition)
     if result_format["result_format"] == "COMPLETE":
         return filtered.collect()

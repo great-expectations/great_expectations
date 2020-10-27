@@ -65,7 +65,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
     @column_map_condition(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy_condition(cls, column, _metrics, threshold, double_sided, **kwargs):
 
-        z_score = _metrics["column_values.z_score.map_function"]
+        z_score, _ = _metrics["column_values.z_score.map_function"]
         if double_sided:
             under_threshold = sa.func.abs(z_score) < abs(threshold)
         else:
@@ -84,7 +84,6 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
         mean = _metrics["column.aggregate.mean"]
         standard_deviation = _metrics["column.aggregate.standard_deviation"]
 
-        # Check this for validity
         return (column - mean) / standard_deviation
 
     @column_map_condition(engine=SparkDFExecutionEngine)

@@ -530,8 +530,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.batches:
-                data_object = self.batches[batch_id]
+            if batch_id in self.loaded_batch_data:
+                data_object = self.loaded_batch_data[batch_id]
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
@@ -549,7 +549,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             selectable = data_object.table
 
-        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"] is not None:
+        if (
+            "row_condition" in domain_kwargs
+            and domain_kwargs["row_condition"] is not None
+        ):
             condition_parser = domain_kwargs["condition_parser"]
             if condition_parser == "great_expectations__experimental__":
                 parsed_condition = parse_condition_to_sqlalchemy(

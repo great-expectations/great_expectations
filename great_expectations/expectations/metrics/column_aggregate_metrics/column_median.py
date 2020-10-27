@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
@@ -19,10 +19,14 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
+from great_expectations.expectations.metrics.metric_provider import (
+    MetricProvider,
+    metric,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnMedian(ColumnAggregateMetricProvider):
+class ColumnMedian(MetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.aggregate.median"
@@ -32,19 +36,35 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         """Pandas Median Implementation"""
         return column.median()
 
-    @column_aggregate_metric(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column, _table, _dialect, _engine, _metrics, **kwargs):
+    @metric(engine=SqlAlchemyExecutionEngine, metric_fn_type="data")
+    def _sqlalchemy(
+        cls,
+        execution_engine: "SqlAlchemyExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: dict,
+    ):
+        (
+            selectable,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs)
+        column_name = accessor_domain_kwargs["column"]
+        column = sa.column(column_name)
+        sqlalchemy_engine = execution_engine.engine
+        dialect = sqlalchemy_engine.dialect
         """SqlAlchemy Median Implementation"""
-        if _dialect.name.lower() == "awsathena":
+        if dialect.name.lower() == "awsathena":
             raise NotImplementedError("AWS Athena does not support OFFSET.")
-        nonnull_count = _metrics.get("column_values.nonnull.count")
-        element_values = _engine.execute(
+        nonnull_count = metrics.get("column_values.nonnull.count")
+        element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)
             .where(column != None)
             .offset(max(nonnull_count // 2 - 1, 0))
             .limit(2)
-            .select_from(_table)
+            .select_from(selectable)
         )
 
         column_values = list(element_values.fetchall())
@@ -65,11 +85,33 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    @column_aggregate_metric(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, _table, _metrics, **kwargs):
+    @metric(engine=SparkDFExecutionEngine, metric_fn_type="data")
+    def _spark(
+        cls,
+        execution_engine: "SqlAlchemyExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: dict,
+    ):
+        (
+            df,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs)
+        column = accessor_domain_kwargs["column"]
+        # We will get the two middle values by choosing an epsilon to add
+        # to the 50th percentile such that we always get exactly the middle two values
+        # (i.e. 0 < epsilon < 1 / (2 * values))
+
+        # Note that this can be an expensive computation; we are not exposing
+        # spark's ability to estimate.
+        # We add two to 2 * n_values to maintain a legitimate quantile
+        # in the degnerate case when n_values = 0
+
         """Spark Median Implementation"""
-        table_row_count = _metrics.get("table.row_count")
-        result = _table.approxQuantile(
+        table_row_count = metrics.get("table.row_count")
+        result = df.approxQuantile(
             column, [0.5, 0.5 + (1 / (2 + (2 * table_row_count)))], 0
         )
         return np.mean(result)

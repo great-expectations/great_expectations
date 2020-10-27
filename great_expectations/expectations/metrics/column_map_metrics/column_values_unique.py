@@ -17,12 +17,12 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         return ~column.duplicated(keep=False)
 
     @column_map_condition(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column, **kwargs):
+    def _sqlalchemy(cls, column, _table, **kwargs):
         dup_query = (
             sa.select([column])
-            .select_from(column)
+            .select_from(_table)
             .group_by(column)
             .having(sa.func.count(column) > 1)
         )
 
-        return column.notin_(dup_query).get_children()
+        return column.notin_(dup_query)

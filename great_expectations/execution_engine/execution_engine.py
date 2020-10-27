@@ -69,29 +69,6 @@ class ExecutionEngine:
         pass
 
     @property
-    def _active_validation(self):
-        """Given that the active_validation property is present, returns it"""
-        if not self.validator:
-            raise AttributeError(
-                f"'{type(self).__name__}' object has no attribute `_active_validation` - please set "
-                f"_validator attribute first."
-            )
-        else:
-            return self.validator._active_validation
-
-    @_active_validation.setter
-    def _active_validation(self, active_validation):
-        """A setter for the active_validation property"""
-        if not self.validator:
-            raise AttributeError(
-                f"'{type(self).__name__}' object cannot set `_active_validation` attribute - please "
-                f"set "
-                f"_validator attribute first."
-            )
-        else:
-            self.validator._active_validation = active_validation
-
-    @property
     def active_batch_data_id(self):
         """The batch id for the default batch data.
 
@@ -99,7 +76,12 @@ class ExecutionEngine:
         not include a specific batch_id, then the data associated with the
         active_batch_data_id will be used as the default.
         """
-        return self._active_batch_data_id
+        if self._active_batch_data_id is not None:
+            return self._active_batch_data_id
+        elif len(self.loaded_batch_data) == 1:
+            return list(self.loaded_batch_data.keys())[0]
+        else:
+            return None
 
     @property
     def active_batch_data(self):
