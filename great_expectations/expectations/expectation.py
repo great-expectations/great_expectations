@@ -31,7 +31,8 @@ from ..data_asset.util import (
 )
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..render.renderer.renderer import renderer
-from ..render.types import RenderedStringTemplateContent
+from ..render.types import RenderedStringTemplateContent, CollapseContent, RenderedTableContent
+from ..render.util import num_to_str
 from ..validator.validation_graph import MetricConfiguration
 from ..validator.validator import Validator
 
@@ -104,9 +105,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
             )
 
     @classmethod
-    @renderer(renderer_type="descriptive")
-    def _descriptive_renderer(
-        cls, expectation_configuration, styling=None, include_column_name=True
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
     ):
         return [
             RenderedStringTemplateContent(
@@ -116,8 +117,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
                     "string_template": {
                         "template": "$expectation_type(**$kwargs)",
                         "params": {
-                            "expectation_type": expectation_configuration.expectation_type,
-                            "kwargs": expectation_configuration.kwargs,
+                            "expectation_type": configuration.expectation_type,
+                            "kwargs": configuration.kwargs,
                         },
                         "styling": {
                             "params": {
@@ -130,6 +131,298 @@ class Expectation(ABC, metaclass=MetaExpectation):
                 }
             )
         ]
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.status_icon")
+    def _diagnostic_status_icon_renderer(
+            cls,
+            configuration=None,
+            result=None,
+            language=None,
+            runtime_configuration=None,
+            **kwargs
+    ):
+        assert result, "Must provide a result object."
+        if result.exception_info["raised_exception"]:
+            return RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "❗"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-exclamation-triangle",
+                                        "text-warning",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                }
+            )
+
+        if result.success:
+            return RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": ["hide-succeeded-validation-target-child"]
+                        }
+                    },
+                }
+            )
+        else:
+            return RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "❌"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "tag": "i",
+                                    "classes": ["fas", "fa-times", "text-danger"],
+                                }
+                            }
+                        },
+                    },
+                }
+            )
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.unexpected_statement")
+    def _diagnostic_unexpected_statement_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        assert result, "Must provide a result object."
+        success = result.success
+        result_dict = result.result
+
+        if result.exception_info["raised_exception"]:
+            exception_message_template_str = (
+                "\n\n$expectation_type raised an exception:\n$exception_message"
+            )
+
+            exception_message = RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": exception_message_template_str,
+                        "params": {
+                            "expectation_type": result.expectation_config.expectation_type,
+                            "exception_message": result.exception_info[
+                                "exception_message"
+                            ],
+                        },
+                        "tag": "strong",
+                        "styling": {
+                            "classes": ["text-danger"],
+                            "params": {
+                                "exception_message": {"tag": "code"},
+                                "expectation_type": {
+                                    "classes": ["badge", "badge-danger", "mb-2"]
+                                },
+                            },
+                        },
+                    },
+                }
+            )
+
+            exception_traceback_collapse = CollapseContent(
+                **{
+                    "collapse_toggle_link": "Show exception traceback...",
+                    "collapse": [
+                        RenderedStringTemplateContent(
+                            **{
+                                "content_block_type": "string_template",
+                                "string_template": {
+                                    "template": result.exception_info[
+                                        "exception_traceback"
+                                    ],
+                                    "tag": "code",
+                                },
+                            }
+                        )
+                    ],
+                }
+            )
+
+            return [exception_message, exception_traceback_collapse]
+
+        if success or not result_dict.get("unexpected_count"):
+            return []
+        else:
+            unexpected_count = num_to_str(
+                result_dict["unexpected_count"], use_locale=True, precision=20
+            )
+            unexpected_percent = (
+                num_to_str(result_dict["unexpected_percent"], precision=4) + "%"
+            )
+            element_count = num_to_str(
+                result_dict["element_count"], use_locale=True, precision=20
+            )
+
+            template_str = (
+                "\n\n$unexpected_count unexpected values found. "
+                "$unexpected_percent of $element_count total rows."
+            )
+
+            return [
+                RenderedStringTemplateContent(
+                    **{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": template_str,
+                            "params": {
+                                "unexpected_count": unexpected_count,
+                                "unexpected_percent": unexpected_percent,
+                                "element_count": element_count,
+                            },
+                            "tag": "strong",
+                            "styling": {"classes": ["text-danger"]},
+                        },
+                    }
+                )
+            ]
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.unexpected_table")
+    def _diagnostic_unexpected_table_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        try:
+            result_dict = result.result
+        except KeyError:
+            return None
+
+        if result_dict is None:
+            return None
+
+        if not result_dict.get("partial_unexpected_list") and not result_dict.get(
+            "partial_unexpected_counts"
+        ):
+            return None
+
+        table_rows = []
+
+        if result_dict.get("partial_unexpected_counts"):
+            # We will check to see whether we have *all* of the unexpected values
+            # accounted for in our count, and include counts if we do. If we do not,
+            # we will use this as simply a better (non-repeating) source of
+            # "sampled" unexpected values
+            total_count = 0
+            for unexpected_count_dict in result_dict.get("partial_unexpected_counts"):
+                if not isinstance(unexpected_count_dict, dict):
+                    # handles case: "partial_exception_counts requires a hashable type"
+                    # this case is also now deprecated (because the error is moved to an errors key
+                    # the error also *should have* been updated to "partial_unexpected_counts ..." long ago.
+                    # NOTE: JPC 20200724 - Consequently, this codepath should be removed by approximately Q1 2021
+                    continue
+                value = unexpected_count_dict.get("value")
+                count = unexpected_count_dict.get("count")
+                total_count += count
+                if value is not None and value != "":
+                    table_rows.append([value, count])
+                elif value == "":
+                    table_rows.append(["EMPTY", count])
+                else:
+                    table_rows.append(["null", count])
+
+            # Check to see if we have *all* of the unexpected values accounted for. If so,
+            # we show counts. If not, we only show "sampled" unexpected values.
+            if total_count == result_dict.get("unexpected_count"):
+                header_row = ["Unexpected Value", "Count"]
+            else:
+                header_row = ["Sampled Unexpected Values"]
+                table_rows = [[row[0]] for row in table_rows]
+        else:
+            header_row = ["Sampled Unexpected Values"]
+            sampled_values_set = set()
+            for unexpected_value in result_dict.get("partial_unexpected_list"):
+                if unexpected_value:
+                    string_unexpected_value = str(unexpected_value)
+                elif unexpected_value == "":
+                    string_unexpected_value = "EMPTY"
+                else:
+                    string_unexpected_value = "null"
+                if string_unexpected_value not in sampled_values_set:
+                    table_rows.append([unexpected_value])
+                    sampled_values_set.add(string_unexpected_value)
+
+        unexpected_table_content_block = RenderedTableContent(
+            **{
+                "content_block_type": "table",
+                "table": table_rows,
+                "header_row": header_row,
+                "styling": {
+                    "body": {"classes": ["table-bordered", "table-sm", "mt-3"]}
+                },
+            }
+        )
+
+        return unexpected_table_content_block
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    def _diagnostic_observed_value_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        result_dict = result.result
+        if result_dict is None:
+            return "--"
+
+        if result_dict.get("observed_value"):
+            observed_value = result_dict.get("observed_value")
+            if isinstance(observed_value, (int, float)) and not isinstance(
+                observed_value, bool
+            ):
+                return num_to_str(observed_value, precision=10, use_locale=True)
+            return str(observed_value)
+        elif result_dict.get("unexpected_percent") is not None:
+            return (
+                num_to_str(result_dict.get("unexpected_percent"), precision=5)
+                + "% unexpected"
+            )
+        else:
+            return "--"
 
     @classmethod
     def get_allowed_config_keys(cls):
