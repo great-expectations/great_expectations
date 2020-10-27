@@ -7,6 +7,7 @@ from collections import namedtuple
 
 from pyparsing import (
     CaselessKeyword,
+    Combine,
     Forward,
     Group,
     Literal,
@@ -94,6 +95,10 @@ class EvaluationParameterParser:
             # or use provided pyparsing_common.number, but convert back to str:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
             fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
+            ge_urn = Combine(
+                Literal("urn:great_expectations:")
+                + Word(alphas, alphanums + "_$:?=%.&")
+            )
             variable = Word(alphas, alphanums + "_$")
             ident = ge_urn | variable
 
@@ -304,15 +309,7 @@ def parse_evaluation_parameter(
                 return store.get_query_result(
                     res["metric_name"], res.get("metric_kwargs", {})
                 )
-            elif res["urn_type"] == "$PREV":
-                return {
-                    "metric_name": None,
-                    "metric_domain_kwargs": {
-                        "batch_request": {"partition_index": "previous"}
-                    },
-                    "metric_value_kwargs": None,
-                }
-            elif res["urn_type"] == "$PREV_BATCH":
+            else:
                 logger.error(
                     "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
                 )
