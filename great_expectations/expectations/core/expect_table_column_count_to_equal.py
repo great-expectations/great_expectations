@@ -12,8 +12,8 @@ from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    AggregateExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -21,7 +21,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectTableColumnCountToEqual(DatasetExpectation):
+class ExpectTableColumnCountToEqual(AggregateExpectation):
     """Expect the number of columns to equal a value.
 
     expect_table_column_count_to_equal is a :func:`expectation \
@@ -72,7 +72,7 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
 
     # @PandasExecutionEngine.metric(
     #        metric_name="columns.count",
-    #        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #        metric_domain_keys=ColumnMapExpectation.domain_keys,
     #        metric_value_keys=(),
     #        metric_dependencies=tuple(),
     #        filter_column_isnull=False,

@@ -21,7 +21,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -34,7 +34,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToNotMatchRegexList(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
     """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can
     be anywhere in the string.
 

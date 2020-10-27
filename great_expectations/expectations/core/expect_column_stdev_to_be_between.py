@@ -6,7 +6,11 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import DatasetExpectation, Expectation
+from great_expectations.expectations.expectation import (
+    AggregateExpectation,
+    Expectation,
+    renderer,
+)
 from great_expectations.expectations.registry import extract_metrics
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
@@ -17,7 +21,7 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectColumnStdevToBeBetween(DatasetExpectation):
+class ExpectColumnStdevToBeBetween(AggregateExpectation):
     """Expect the column standard deviation to be between a minimum value and a maximum value.
             Uses sample standard deviation (normalized by N-1).
 
@@ -119,7 +123,7 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
 
     # @PandasExecutionEngine.metric(
     #        metric_name="column.aggregate.standard_deviation",
-    #        metric_domain_keys=DatasetExpectation.domain_keys,
+    #        metric_domain_keys=AggregateExpectation.domain_keys,
     #        metric_value_keys=tuple(),
     #        metric_dependencies=tuple(),
     #        filter_column_isnull=False,

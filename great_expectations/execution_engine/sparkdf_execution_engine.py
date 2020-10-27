@@ -382,8 +382,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             metric_provider_kwargs,
         ) in metric_fn_bundle:
             assert (
-                metric_provider._bundle_metric
-            ), "resolve_metric_bundle only supports metrics designed for bundled computation"
+                metric_provider.metric_fn_type == "aggregate_fn"
+            ), "resolve_metric_bundle only supports aggregate metrics"
             # batch_id and table are the only determining factors for bundled metrics
             column_aggregate, domain_kwargs = metric_provider(**metric_provider_kwargs)
             if not isinstance(domain_kwargs, IDDict):

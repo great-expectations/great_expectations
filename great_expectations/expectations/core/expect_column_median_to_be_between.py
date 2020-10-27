@@ -15,8 +15,8 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    AggregateExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -24,7 +24,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnMedianToBeBetween(DatasetExpectation):
+class ExpectColumnMedianToBeBetween(AggregateExpectation):
     """Expect the column median to be between a minimum value and a maximum value.
 
             expect_column_median_to_be_between is a \

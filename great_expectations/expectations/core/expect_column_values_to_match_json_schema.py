@@ -23,7 +23,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -36,7 +36,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     """Expect column entries to be JSON objects matching a given JSON schema.
 
     expect_column_values_to_match_json_schema is a \
@@ -162,7 +162,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
 
     # @SqlAlchemyExecutionEngine.column_map_metric(
     #     metric_name="column_values.match_json_schema",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=("json",),
     #     metric_dependencies=tuple(),
     # )
@@ -189,7 +189,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
     #
     # @SparkDFExecutionEngine.column_map_metric(
     #     metric_name="column_values.match_json_schema",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=("json",),
     #     metric_dependencies=tuple(),
     # )

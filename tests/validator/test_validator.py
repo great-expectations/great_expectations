@@ -44,7 +44,7 @@ def test_parse_validation_graph():
             Validator(execution_engine=engine)._populate_dependencies(
                 graph, metric_configuration, configuration, execution_engine=engine
             )
-    ready_metrics, needed_metrics = Validator()._parse_validation_graph(
+    ready_metrics, needed_metrics = Validator(engine)._parse_validation_graph(
         validation_graph=graph, metrics=dict()
     )
 
@@ -141,7 +141,6 @@ def test_graph_validate():
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={"column": "b", "mostly": 0.9, "threshold": 4, "double_sided": True,},
     )
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
     result = Validator(
         execution_engine=PandasExecutionEngine(), batches=[batch]

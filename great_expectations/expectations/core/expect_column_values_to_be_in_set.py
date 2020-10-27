@@ -10,7 +10,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     InvalidExpectationConfigurationError,
 )
 
@@ -20,7 +20,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     """Expect each column value to be in a given set.
 
     For example:

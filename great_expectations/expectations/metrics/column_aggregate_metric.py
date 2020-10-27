@@ -15,6 +15,7 @@ from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric,
 )
+from great_expectations.expectations.metrics.table_metric import AggregateMetricProvider
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
     if issubclass(engine, PandasExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric(engine=PandasExecutionEngine, bundle_metric=True)
+            @metric(engine=PandasExecutionEngine, metric_fn_type="aggregate_fn")
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -65,7 +66,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SqlAlchemyExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric(engine=SqlAlchemyExecutionEngine, bundle_metric=True)
+            @metric(engine=SqlAlchemyExecutionEngine, metric_fn_type="aggregate_fn")
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -111,7 +112,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SparkDFExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric(engine=SparkDFExecutionEngine, bundle_metric=True)
+            @metric(engine=SparkDFExecutionEngine, metric_fn_type="aggregate_fn")
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -158,11 +159,10 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for column_aggregate_metric")
 
 
-class ColumnAggregateMetricProvider(MetricProvider):
+class ColumnAggregateMetricProvider(AggregateMetricProvider):
     domain_keys = (
         "batch_id",
         "table",
         "column",
     )
-    bundle_metric = True
     filter_column_isnull = True

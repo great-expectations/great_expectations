@@ -1,13 +1,11 @@
 import sqlalchemy as sa
 
-from great_expectations.core.metric import Metric
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetricProvider,
-    column_map_condition,
     column_map_function,
 )
 

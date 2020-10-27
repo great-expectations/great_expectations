@@ -15,8 +15,8 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    AggregateExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -24,7 +24,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectTableRowCountToEqual(DatasetExpectation):
+class ExpectTableRowCountToEqual(AggregateExpectation):
     """Expect the number of rows to equal a value.
 
     expect_table_row_count_to_equal is a :func:`expectation \
@@ -76,7 +76,7 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
     #
     # @PandasExecutionEngine.metric(
     #     metric_name="rows.count",
-    #     metric_domain_keys=DatasetExpectation.domain_keys,
+    #     metric_domain_keys=AggregateExpectation.domain_keys,
     #     metric_value_keys=(),
     #     metric_dependencies=tuple(),
     #     filter_column_isnull=False,

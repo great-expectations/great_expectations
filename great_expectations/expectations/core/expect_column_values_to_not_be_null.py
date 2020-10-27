@@ -14,7 +14,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     _format_map_output,
 )
@@ -28,7 +28,7 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     """Expect column values to not be null.
 
     To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an

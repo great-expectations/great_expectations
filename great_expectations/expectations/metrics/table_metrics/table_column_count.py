@@ -14,21 +14,21 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.expectations.metrics.table_metric import (
-    TableMetricProvider,
-    table_metric,
+    AggregateMetricProvider,
+    aggregate_metric,
 )
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class TableColumnCount(TableMetricProvider):
+class TableColumnCount(AggregateMetricProvider):
     metric_name = "table.column_count"
 
-    @table_metric(engine=PandasExecutionEngine)
+    @aggregate_metric(engine=PandasExecutionEngine)
     def _pandas(cls, table, **kwargs):
         return table.shape[1]
 
-    @table_metric(engine=SqlAlchemyExecutionEngine)
+    @aggregate_metric(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, table, _dialect, _sqlalchemy_engine, _metrics, **kwargs):
         columns = _metrics.get("columns")
         return len(columns)

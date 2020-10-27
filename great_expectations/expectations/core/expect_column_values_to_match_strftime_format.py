@@ -22,7 +22,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -35,7 +35,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
     """Expect column entries to be strings representing a date or time with a given format.
 
     expect_column_values_to_match_strftime_format is a \

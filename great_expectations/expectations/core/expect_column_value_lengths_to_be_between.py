@@ -16,7 +16,11 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output
+from ..expectation import (
+    ColumnMapExpectation,
+    Expectation,
+    _format_map_output,
+)
 from ..registry import extract_metrics
 
 try:
@@ -25,7 +29,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
+class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     """Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
@@ -207,7 +211,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
 
     # @PandasExecutionEngine.column_map_metric(
     #     metric_name="column_values.value_length_between",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
     #     metric_dependencies=tuple(),
     #     filter_column_isnull=True,
@@ -260,7 +264,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
 
     # @SqlAlchemyExecutionEngine.column_map_metric(
     #     metric_name="column_values.value_length_between",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
     #     metric_dependencies=tuple(),
     #     filter_column_isnull=True,

@@ -8,20 +8,19 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetricProvider,
-    column_map_condition,
+    MapMetricProvider,
     map_condition,
 )
 from great_expectations.expectations.metrics.metric_provider import metric
 from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 
 
-class ColumnPairValuesEqual(ColumnMapMetricProvider):
+class ColumnPairValuesEqual(MapMetricProvider):
     condition_metric_name = "column_pair_values.equal"
     condition_value_keys = ("ignore_row_if",)
     domain_keys = ("batch_id", "table", "column_a", "column_b")
 
-    @map_condition(engine=PandasExecutionEngine, bundle_metric=False)
+    @map_condition(engine=PandasExecutionEngine)
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",

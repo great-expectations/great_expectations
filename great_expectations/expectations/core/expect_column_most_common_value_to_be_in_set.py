@@ -14,8 +14,8 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    AggregateExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -23,7 +23,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
+class ExpectColumnMostCommonValueToBeInSet(AggregateExpectation):
     """Expect the most common value to be within the designated value set
 
             expect_column_most_common_value_to_be_in_set is a \

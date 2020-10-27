@@ -19,7 +19,7 @@ class MetaMetricProvider(type):
         return newclass
 
 
-def metric(engine: Type[ExecutionEngine], **kwargs):
+def metric(engine: Type[ExecutionEngine], metric_fn_type: str = "data", **kwargs):
     """The metric decorator annotates a method """
 
     def wrapper(metric_fn: Callable):
@@ -28,6 +28,7 @@ def metric(engine: Type[ExecutionEngine], **kwargs):
             return metric_fn(*args, **kwargs)
 
         inner_func.metric_fn_engine = engine
+        inner_func.metric_fn_type = metric_fn_type
         inner_func.metric_definition_kwargs = kwargs
         return inner_func
 
@@ -37,7 +38,7 @@ def metric(engine: Type[ExecutionEngine], **kwargs):
 class MetricProvider(metaclass=MetaMetricProvider):
     domain_keys = tuple()
     value_keys = tuple()
-    bundle_metric = False
+    metric_fn_type = "data"
 
     @classmethod
     def _register_metric_functions(cls):
@@ -69,8 +70,8 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 declared_metric_name = metric_name + metric_definition_kwargs.get(
                     "metric_name_suffix", ""
                 )
-                bundle_metric = metric_definition_kwargs.get(
-                    "bundle_metric", getattr(cls, "bundle_metric", False)
+                metric_fn_type = getattr(
+                    metric_fn, "metric_fn_type", getattr(cls, "metric_fn_type", "data")
                 )
                 register_metric(
                     metric_name=declared_metric_name,
@@ -79,7 +80,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     execution_engine=engine,
                     metric_class=cls,
                     metric_provider=metric_fn,
-                    bundle_metric=bundle_metric,
+                    metric_fn_type=metric_fn_type,
                 )
             elif hasattr(attr_obj, "_renderer_type"):
                 register_renderer(
