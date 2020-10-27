@@ -352,7 +352,7 @@ def _pandas_map_unexpected_count(
     **kwargs,
 ):
     """Returns unexpected count for MapExpectations"""
-    return np.count_nonzero(~metrics.get("unexpected_condition"))
+    return np.count_nonzero(metrics.get("unexpected_condition"))
 
 
 def _pandas_column_map_values(
@@ -385,7 +385,7 @@ def _pandas_column_map_values(
                 #     metric_name[: -len(".unexpected_values")]
                 # ]
                 boolean_map_unexpected_values
-                == False
+                == True
             ]
         )
     else:
@@ -395,7 +395,7 @@ def _pandas_column_map_values(
                 #     metric_name[: -len(".unexpected_values")]
                 # ]
                 boolean_map_unexpected_values
-                == False
+                == True
             ][: result_format["partial_unexpected_count"]]
         )
 
@@ -425,7 +425,7 @@ def _pandas_column_map_index(
         return list(data[boolean_mapped_unexpected_values == False].index)
     else:
         return list(
-            data[boolean_mapped_unexpected_values == False].index[
+            data[boolean_mapped_unexpected_values == True].index[
                 : result_format["partial_unexpected_count"]
             ]
         )
@@ -454,11 +454,11 @@ def _pandas_column_map_value_counts(
     boolean_mapped_unexpected_values = metrics.get("unexpected_condition")
     value_counts = None
     try:
-        value_counts = data[boolean_mapped_unexpected_values == False].value_counts()
+        value_counts = data[boolean_mapped_unexpected_values == True].value_counts()
     except ValueError:
         try:
             value_counts = (
-                data[boolean_mapped_unexpected_values == False]
+                data[boolean_mapped_unexpected_values == True]
                 .apply(tuple)
                 .value_counts()
             )
@@ -495,9 +495,9 @@ def _pandas_column_map_rows(
     result_format = metric_value_kwargs["result_format"]
     boolean_mapped_unexpected_values = metrics.get("unexpected_condition")
     if result_format["result_format"] == "COMPLETE":
-        return df[boolean_mapped_unexpected_values == False]
+        return df[boolean_mapped_unexpected_values == True]
     else:
-        return df[boolean_mapped_unexpected_values == False][
+        return df[boolean_mapped_unexpected_values == True][
             result_format["partial_unexpected_count"]
         ]
 

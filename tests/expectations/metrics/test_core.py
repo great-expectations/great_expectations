@@ -27,43 +27,40 @@ def test_metric_loads():
 
 
 def test_basic_metric():
-    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+
+    engine = PandasExecutionEngine(batch_data_dict={"": df})
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
-    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    engine._active_batch_data_id = "batch_id"
-    engine._batches = {"batch_id": df}
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 3}
 
 
 def test_mean_metric_pd():
-    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": [1, 2, 3, None]})
+
+    engine = PandasExecutionEngine(batch_data_dict={"": df})
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
-    df = pd.DataFrame({"a": [1, 1, 3, 3, None]})
-    engine._batches = {"batch_id": df}
-    engine._active_batch_data_id = "batch_id"
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 2}
 
 
 def test_stdev_metric_pd():
-    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": [1, 2, 3, None]})
+
+    engine = PandasExecutionEngine(batch_data_dict={"": df})
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
-    df = pd.DataFrame({"a": [1, 2, 3, None]})
-    engine._batches = {"batch_id": df}
-    engine._active_batch_data_id = "batch_id"
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 1}
 
@@ -74,16 +71,15 @@ def test_max_metric_sa():
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 1]})
     df.to_sql("test", eng)
-    engine = SqlAlchemyExecutionEngine(engine=eng)
+    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+
+    engine = SqlAlchemyExecutionEngine(engine=eng, batch_data_dict={"": batch_data})
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
 
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    engine._batches = {"batch_id": batch_data}
-    engine._active_batch_data_id = "batch_id"
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 2}
 

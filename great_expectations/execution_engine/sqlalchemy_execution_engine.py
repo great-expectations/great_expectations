@@ -330,6 +330,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         engine=None,
         connection_string=None,
         url=None,
+        batch_data_dict=None,
         **kwargs,
     ):
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
@@ -357,7 +358,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     a url can be used to access the data. This will be overridden by all other configuration
                     options if any are provided.
         """
-        super().__init__(name=name)
+        super().__init__(name=name, batch_data_dict=batch_data_dict, **kwargs)
         self._name = name
         if engine is not None:
             if credentials is not None:
