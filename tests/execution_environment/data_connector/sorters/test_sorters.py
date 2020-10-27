@@ -51,7 +51,6 @@ def test_sorter_instantiation_numeric():
     assert my_num.reverse is False
 
 
-
 def test_sorter_instantiation_custom_list():
     # CustomListSorter
     sorter_params: dict = {
@@ -88,9 +87,9 @@ def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_
     sorter_params: dict = {
         'reference_list': periodic_table_of_elements,
     }
-    my_custom = CustomListSorter(name="element", orderby="asc", **sorter_params)
+    my_custom_sorter = CustomListSorter(name="element", orderby="asc", **sorter_params)
     # noinspection PyProtectedMember
-    assert my_custom._reference_list == periodic_table_of_elements
+    assert my_custom_sorter._reference_list == periodic_table_of_elements
     # This element exists : Hydrogen
     test_batch_def = BatchDefinition(
         execution_environment_name="test",
@@ -98,7 +97,7 @@ def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_
         data_asset_name="nowhere",
         partition_definition=PartitionDefinition({"element": "Hydrogen"}),
     )
-    returned_partition_key = my_custom.get_partition_key(test_batch_def)
+    returned_partition_key = my_custom_sorter.get_partition_key(test_batch_def)
     assert returned_partition_key == 0
 
     # This element does not : Vibranium
@@ -109,4 +108,4 @@ def test_sorter_instantiation_custom_list_with_periodic_table(periodic_table_of_
         partition_definition=PartitionDefinition({"element": "Vibranium"}),
     )
     with pytest.raises(ge_exceptions.SorterError):
-        my_custom.get_partition_key(test_batch_def)
+        my_custom_sorter.get_partition_key(test_batch_def)
