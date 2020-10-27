@@ -42,7 +42,7 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
         if _dialect.name.lower() == "mssql":
             standard_deviation = sa.func.stdev(column)
         else:
-            standard_deviation = sa.func.stdev_samp(column)
+            standard_deviation = sa.func.stddev_samp(column)
         return standard_deviation
 
     @column_aggregate_metric(engine=SparkDFExecutionEngine)

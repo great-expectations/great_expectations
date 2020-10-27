@@ -222,7 +222,7 @@ class ExecutionEngine:
 
         Add a row condition for handling null filter.
         """
-        if "row_condition" in domain_kwargs:
+        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
             raise GreatExpectationsError(
                 "ExecutionEngine does not support updating existing row_conditions."
             )

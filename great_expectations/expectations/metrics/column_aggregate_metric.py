@@ -92,8 +92,8 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(compute_domain_kwargs)
                 column_name = accessor_domain_kwargs["column"]
-                dialect = execution_engine.dialect
                 sqlalchemy_engine = execution_engine.engine
+                dialect = sqlalchemy_engine.dialect
                 metric_aggregate = metric_fn(
                     cls,
                     column=sa.column(column_name),

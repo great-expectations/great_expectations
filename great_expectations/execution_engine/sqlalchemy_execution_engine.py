@@ -537,8 +537,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
-        if "table" in domain_kwargs:
-            if domain_kwargs["table_name"] != data_object.table_name:
+        if "table" in domain_kwargs and domain_kwargs["table"] is not None:
+            if domain_kwargs["table"] != data_object.table:
                 raise ValueError("Unrecognized table name.")
             else:
                 selectable = data_object.table
@@ -549,7 +549,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             selectable = data_object.table
 
-        if "row_condition" in domain_kwargs:
+        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"] is not None:
             condition_parser = domain_kwargs["condition_parser"]
             if condition_parser == "great_expectations__experimental__":
                 parsed_condition = parse_condition_to_sqlalchemy(

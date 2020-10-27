@@ -6,7 +6,10 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import PandasExecutionEngine, SparkDFExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine, \
+    SqlAlchemyBatchData
+from great_expectations.execution_environment.types import SqlAlchemyDatasourceTableBatchSpec
 from great_expectations.expectations.core.expect_column_value_z_scores_to_be_less_than import (
     ExpectColumnValueZScoresToBeLessThan,
 )
@@ -24,3 +27,43 @@ def test_expect_column_value_z_scores_to_be_less_than_impl():
         batches=[batch], execution_engine=PandasExecutionEngine()
     )
     assert result == ExpectationValidationResult(success=True,)
+
+
+def test_sa_expect_column_value_z_scores_to_be_less_than_impl():
+    import sqlalchemy as sa
+
+    eng = sa.create_engine("sqlite://")
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
+    df.to_sql("test", eng)
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+    )
+    expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
+    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    batch = Batch(data=batch_data)
+    engine = SqlAlchemyExecutionEngine(engine=eng, batch_data_dict={batch.id: batch_data})
+    result = expectation.validate(
+        batches=[batch], execution_engine=engine
+    )
+    assert result == ExpectationValidationResult(success=True,)
+
+
+def test_spark_expect_column_value_z_scores_to_be_less_than_impl():
+    from pyspark.sql import DataFrame, SparkSession
+
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
+    spark = SparkSession.builder.getOrCreate()
+    df = spark.createDataFrame(df)
+
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+    )
+    expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
+    batch = Batch(data=df)
+    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
+    result = expectation.validate(
+        batches=[batch], execution_engine=engine
+    )
+    assert result == ExpectationValidationResult(success=True, )

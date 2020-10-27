@@ -10,6 +10,7 @@ from great_expectations.expectations.metrics.table_metric import (
     AggregateMetricProvider,
     aggregate_metric,
 )
+import pyspark.sql.functions as F
 
 
 class TableRowCount(AggregateMetricProvider):
@@ -25,4 +26,4 @@ class TableRowCount(AggregateMetricProvider):
 
     @aggregate_metric(engine=SparkDFExecutionEngine)
     def _spark(cls, table, **kwargs):
-        return table.count()
+        return F.count(F.lit(1))

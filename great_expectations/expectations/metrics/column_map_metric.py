@@ -634,7 +634,8 @@ def _spark_column_map_values(
 
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     result_format = metric_value_kwargs["result_format"]
-    condition = metrics.get("unexpected_condition")
+    condition, expected_domain = metrics.get("unexpected_condition")
+    assert compute_domain_kwargs == expected_domain, "Compute Domain Kwargs should be equivalent to the expected domain"
     column_name = accessor_domain_kwargs["column"]
     filtered = data.filter(condition)
     if result_format["result_format"] == "COMPLETE":
