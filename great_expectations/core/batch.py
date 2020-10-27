@@ -126,16 +126,15 @@ class BatchDefinition(DictDot):
             indent=2
         )
 
-    # Pulled over from `partition.py` 20201026
     def __hash__(self) -> int:
         """Overrides the default implementation"""
-        _result_hash: int = hash(self.name) ^ hash(self.data_asset_name)
+        _result_hash: int = hash(self.execution_environment_name) ^ \
+                            hash(self.data_connector_name) ^ \
+                            hash(self.data_asset_name)
         if self.definition is not None:
-            for key, value in self.definition.items():
+            for key, value in self.partition_definition.items():
                 _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
         return _result_hash
-
-
 
 
 class BatchRequest(DictDot):

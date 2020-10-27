@@ -108,26 +108,26 @@ def test_date_time():
 
 def test_custom_list(periodic_table_of_elements):
     Hydrogen = BatchDefinition(
-        "A",
-        "a",
-        "aaa",
-        PartitionDefinition({
+        execution_environment_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+        partition_definition=PartitionDefinition({
             "element": "Hydrogen"
         })
     )
     Helium = BatchDefinition(
-        "B",
-        "b",
-        "bbb",
-        PartitionDefinition({
+        execution_environment_name="B",
+        data_connector_name="b",
+        data_asset_name="bbb",
+        partition_definition=PartitionDefinition({
             "element": "Helium"
         })
     )
     Lithium = BatchDefinition(
-        "B",
-        "b",
-        "bbb",
-        PartitionDefinition({
+        execution_environment_name="C",
+        data_connector_name="c",
+        data_asset_name="ccc",
+        partition_definition=PartitionDefinition({
             "element": "Lithium"
         })
     )
@@ -136,4 +136,6 @@ def test_custom_list(periodic_table_of_elements):
     my_sorter = CustomListSorter(name="element", orderby="desc", reference_list=periodic_table_of_elements)
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [Lithium, Helium, Hydrogen]
+
+
 
