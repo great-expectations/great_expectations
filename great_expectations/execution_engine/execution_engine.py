@@ -61,7 +61,7 @@ class ExecutionEngine:
 
         if batch_data_dict is None:
             batch_data_dict = dict()
-        self._batches = batch_data_dict
+        self._batch_data = batch_data_dict
         self._active_batch_data_id = None
 
     def configure_validator(self, validator):
@@ -108,18 +108,18 @@ class ExecutionEngine:
         if self.active_batch_data_id is None:
             return None
         else:
-            return self.batches.get(self.active_batch_data_id)
+            return self.loaded_batch_data.get(self.active_batch_data_id)
 
     @property
-    def batches(self):
+    def loaded_batch_data(self):
         """The current dictionary of batches."""
-        return self._batches
+        return self._batch_data
 
     def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
         """
         Loads the specified batch_data into the execution engine
         """
-        self._batches[batch_id] = batch_data
+        self._batch_data[batch_id] = batch_data
         self._active_batch_data_id = batch_id
 
     def process_batch_request(self, batch_request, batch_spec):

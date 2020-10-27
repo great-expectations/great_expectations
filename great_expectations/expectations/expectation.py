@@ -4,7 +4,10 @@ from abc import ABC, ABCMeta
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union
+
+import pandas as pd
+from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -573,16 +576,20 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
     def validate(
         self,
-        batches: Dict[str, Batch],
+        batches: Iterable[Batch],
         execution_engine: ExecutionEngine,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration=None,
     ):
         if configuration is None:
             configuration = self.configuration
-        return Validator(execution_engine=execution_engine).graph_validate(
+        return Validator(
+            execution_engine=execution_engine, batches=batches
+        ).graph_validate(
             configurations=[configuration], runtime_configuration=runtime_configuration,
-        )[0]
+        )[
+            0
+        ]
 
     @property
     def configuration(self):

@@ -75,7 +75,6 @@ class Validator:
 
         """
 
-        self._batches = batches
         self._data_context = data_context
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
@@ -83,11 +82,14 @@ class Validator:
         if batches is None:
             batches = tuple()
 
+        self._batches = dict()
+
         for batch in batches:
             assert isinstance(
                 batch, Batch
             ), "batches provided to Validator must be Great Expectations Batch objects"
             self._execution_engine.load_batch_data(batch.id, batch.data)
+            self._batches[batch.id] = batch
 
         # TURN TO self.interactive_evaluation (single flag -> property)
         self._validator_config = {"interactive_evaluation": interactive_evaluation}
