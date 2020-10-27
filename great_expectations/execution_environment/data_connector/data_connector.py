@@ -686,7 +686,7 @@ class DataConnector(object):
         data_reference: Any,
         pattern,
         group_names,
-    ) -> Union[BatchRequest, None]:
+    ) -> Optional[BatchRequest]:
 
         matches: Union[re.Match, None] = re.match(pattern, data_reference)
         if matches is None:
