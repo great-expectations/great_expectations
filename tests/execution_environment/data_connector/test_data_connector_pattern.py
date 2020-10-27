@@ -23,6 +23,7 @@ from great_expectations.core.batch import (
 )
 
 
+# TODO: Abe 20201026: This test currently fails. We need to implement sorters before we can fix it.
 def test_name_date_price_list(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
     create_files_in_directory(
@@ -142,7 +143,7 @@ def test_name_date_price_list(tmp_path_factory):
 
 
 def test_alpha(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector__alpha"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -157,25 +158,13 @@ def test_alpha(tmp_path_factory):
                 module_name: great_expectations.execution_environment.data_connector
                 class_name: FilesDataConnector
                 base_directory: {base_directory + "/test_dir_alpha"}
-                glob_directive: '*'
-                default_partitioner_name: my_standard_partitioner
+
                 assets:
                   A:
                     glob_directive: '*.csv'
-                    partitioner_name: my_standard_partitioner
-                  B:
-                    glob_directive: '*.csv'
-                    partitioner_name: my_standard_partitioner
-                  C:
-                    glob_directive: '*.csv'
-                    partitioner_name: my_standard_partitioner
-                  D:
-                    glob_directive: '*.csv'
-                    partitioner_name: my_standard_partitioner
-                partitioners:
-                  my_standard_partitioner:
-                    class_name: RegexPartitioner
-                    pattern: .*\\/(.*).csv
+
+                default_regex:
+                    pattern: (.*).csv
                     group_names:
                     - part_1
             """, Loader=yaml.FullLoader)
@@ -197,14 +186,14 @@ def test_alpha(tmp_path_factory):
     print(json.dumps(self_check_report, indent=2))
 
     assert self_check_report["class_name"] == "FilesDataConnector"
-    assert self_check_report["data_asset_count"] == 4
-    assert set(list(self_check_report["data_assets"].keys())) == {"A", "B", "C"}
+    assert self_check_report["data_asset_count"] == 1
+    assert set(list(self_check_report["data_assets"].keys())) == {"A"}
     assert self_check_report["unmatched_data_reference_count"] == 0
 
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
 
-    # TODO : What should work
+    # Try to fetch a batch from a nonexistent asset
     my_batch_request: BatchRequest = BatchRequest(
         execution_environment_name="BASE",
         data_connector_name="general_filesystem_data_connector",
@@ -217,11 +206,10 @@ def test_alpha(tmp_path_factory):
     )
     assert len(my_batch_definition_list) == 0
 
-    # TODO : What actually works
     my_batch_request: BatchRequest = BatchRequest(
         execution_environment_name="BASE",
         data_connector_name="general_filesystem_data_connector",
-        data_asset_name="DEFAULT_ASSET_NAME",
+        data_asset_name="A",
         partition_request=PartitionRequest(**{
             "part_1": "B"
         })
@@ -262,29 +250,23 @@ def test_foxtrot(tmp_path_factory):
             module_name: great_expectations.execution_environment.data_connector
             class_name: FilesDataConnector
             base_directory: {base_directory + "/test_dir_foxtrot"}
-            glob_directive: '*'
-            default_partitioner_name: my_standard_partitioner
             assets:
               A:
-                glob_directive: '*'
                 base_directory: A/
-                partitioner_name: my_standard_partitioner
               B:
-                glob_directive: '*'
                 base_directory: B/
-                partitioner_name: my_standard_partitioner
+                pattern: (.*)-(.*)\.txt
+                group_names:
+                - part_1
+                - part_2
               C:
                 glob_directive: '*'
                 base_directory: C/
-                partitioner_name: my_standard_partitioner
               D:
                 glob_directive: '*'
                 base_directory: D/
-                partitioner_name: my_standard_partitioner
-            partitioners:
-              my_standard_partitioner:
-                class_name: RegexPartitioner
-                pattern: (.*)-(.*).csv
+            default_regex:
+                pattern: (.*)-(.*)\.csv
                 group_names:
                 - part_1
                 - part_2
@@ -307,8 +289,6 @@ def test_foxtrot(tmp_path_factory):
     # TODO: This report is wrong; replace with something correct.
     print(json.dumps(self_check_report, indent=2))
 
-# TODO: Put this back in once we've trimmed the base_directory off of data_references.
-    self_check_report.pop("example_unmatched_data_references")
     assert self_check_report == {
       "class_name": "FilesDataConnector",
       "data_asset_count": 4,
@@ -319,24 +299,32 @@ def test_foxtrot(tmp_path_factory):
       ],
       "data_assets": {
         "A": {
-          "batch_definition_count": 0,
-          "example_data_references": []
+          "batch_definition_count": 3,
+          "example_data_references": [
+            "A-1.csv",
+            "A-2.csv",
+            "A-3.csv",
+          ]
         },
         "B": {
-          "batch_definition_count": 0,
-          "example_data_references": []
+          "batch_definition_count": 3,
+          "example_data_references": [
+            "B-1.txt",
+            "B-2.txt",
+            "B-3.txt",
+          ]
         },
         "C": {
-          "batch_definition_count": 0,
-          "example_data_references": []
+          "batch_definition_count": 3,
+          "example_data_references": [
+            "C-2017.csv",
+            "C-2018.csv",
+            "C-2019.csv",
+          ]
         }
       },
-      "unmatched_data_reference_count": 4,
-      # "example_unmatched_data_references": [
-      #   "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/A",
-      #   "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/C",
-      #   "/private/var/folders/tc/579dj32d3pjdkx1vbxdm3ss80000gn/T/pytest-of-abe/pytest-1435/basic_data_connector__filesystem_data_connector2/test_dir_foxtrot/D"
-      # ]
+      "unmatched_data_reference_count": 0,
+      "example_unmatched_data_references": []
     }
 
     my_batch_definition_list: List[BatchDefinition]
@@ -353,4 +341,4 @@ def test_foxtrot(tmp_path_factory):
     my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=my_batch_request
     )
-    assert len(my_batch_definition_list) == 0
+    assert len(my_batch_definition_list) == 3
