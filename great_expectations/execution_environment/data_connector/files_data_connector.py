@@ -314,8 +314,8 @@ configured runtime keys.
     def _get_data_reference_list(self):
         globbed_paths = Path(self.base_directory).glob(self._glob_directive)
         paths = [
-            str(posix_path) for posix_path in globbed_paths
-        ]        
+            os.path.relpath(str(posix_path), self.base_directory) for posix_path in globbed_paths
+        ]
         return paths
 
     # TODO: <Alex>Deprecated</Alex>
@@ -354,3 +354,49 @@ configured runtime keys.
         return {
             "path": path
         }
+
+    def refresh_data_references_cache(
+        self,
+    ):
+        """
+        """
+        #Map data_references to batch_definitions
+        self._data_references_cache = {}
+
+        for data_asset_name in self.get_available_data_asset_names():
+            self._data_references_cache[data_asset_name] = {}
+
+            for data_reference in self._get_data_reference_list():
+                mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
+                    data_reference,
+                )
+                self._data_references_cache[data_asset_name][data_reference] = mapped_batch_definition_list
+
+    def get_batch_definition_list_from_batch_request(
+        self,
+        batch_request: BatchRequest,
+    ) -> List[BatchDefinition]:
+        print(batch_request)
+        if batch_request.data_connector_name != self.name:
+            raise ValueError(f"data_connector_name {batch_request.data_connector_name} does not match name {self.name}.")
+
+        if self._data_references_cache == None:
+            self.refresh_data_references_cache()
+        
+        batches = []
+        for data_asset_name, sub_cache in self._data_references_cache.items():
+            print("AAA")
+            print(data_asset_name)
+            print(sub_cache)
+            for data_reference, batch_definition in sub_cache.items():
+                print(data_reference)
+                print(batch_definition)
+                if batch_definition == None:
+                    # The data_reference is unmatched.
+                    print("here")
+                    continue
+                if self._batch_definition_matches_batch_request(batch_definition, batch_request):
+                    print("there")
+                    batches.append(batch_definition)
+
+        return batches
