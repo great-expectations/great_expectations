@@ -33,6 +33,7 @@ def test_batch_definition_id():
 
     assert A.id != B.id
 
+
 def test_batch_definition_instantiation():
     with pytest.raises(TypeError):
         A = BatchDefinition(

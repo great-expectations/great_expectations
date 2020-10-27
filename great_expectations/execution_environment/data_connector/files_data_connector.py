@@ -285,7 +285,7 @@ configured runtime keys.
             )
         return path_list
 
-    #NOTE Abe 20201015: This looks like dead code.
+    # NOTE Abe 20201015: This looks like dead code. <Alex>Not yet -- but it will need to be combined with another method.</Alex>
     def _get_valid_file_paths(self, base_directory: str = None) -> list:
         if base_directory is None:
             base_directory = self.base_directory
@@ -318,46 +318,39 @@ configured runtime keys.
         ]        
         return paths
 
-    def _build_batch_spec_from_partition(
-        self,
-        partition: Partition,
-        batch_request: BatchRequest,
-        batch_spec: BatchSpec
-    ) -> PathBatchSpec:
-        """
-        Args:
-            partition:
-            batch_request:
-            batch_spec:
-        Returns:
-            batch_spec
-        """
-        if not batch_spec.get("path"):
-            path: str = os.path.join(self._base_directory, partition.data_reference)
-            batch_spec["path"] = path
-        return PathBatchSpec(batch_spec)
+    # TODO: <Alex>Deprecated</Alex>
+    # def _build_batch_spec_from_partition(
+    #     self,
+    #     partition: Partition,
+    #     batch_request: BatchRequest,
+    #     batch_spec: BatchSpec
+    # ) -> PathBatchSpec:
+    #     """
+    #     Args:
+    #         partition:
+    #         batch_request:
+    #         batch_spec:
+    #     Returns:
+    #         batch_spec
+    #     """
+    #     if not batch_spec.get("path"):
+    #         path: str = os.path.join(self._base_directory, partition.data_reference)
+    #         batch_spec["path"] = path
+    #     return PathBatchSpec(batch_spec)
 
     def _generate_batch_spec_parameters_from_batch_definition(
         self,
         batch_definition: BatchDefinition
     ) -> dict:
-
-        # TODO Will - convert to use batch_request_to_data_reference()
-        # TODO Abe 20201018: This is an absolutely horrible way to get a path from a single partition_definition, but AFIACT it's the only method currently supported by our Partitioner.
-        # Update: Abe 20201026: We should be able re-implement this now, with a call to RegexPartitioner.convert_batch_definition_to_data_reference
-        # TODO: <Alex>This call is deprecated -- it leeds to _get_available_partitions() above, which was commented out.</Alex>
-        available_partitions = self.get_available_partitions(
-            data_asset_name=batch_definition.data_asset_name,
-        )
-        for partition in available_partitions:
-            if partition.definition == batch_definition.partition_definition:
-                path = os.path.join(self._base_directory, partition.data_reference)
-                continue
-        try:
-            path
-        except UnboundLocalError:
-            raise ValueError(f"No partition in {available_partitions} matches the given partition definition {batch_definition.partition_definition} from batch definition {batch_definition}")
-
+        path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
+        if path:
+            path = os.path.join(self._base_directory, path)
+        else:
+            raise ValueError(
+                f"""No partition for {batch_definition.data_asset_name} matches the given partition definition
+{batch_definition.partition_definition} from batch definition {batch_definition}.
+                """
+            )
         return {
             "path": path
         }

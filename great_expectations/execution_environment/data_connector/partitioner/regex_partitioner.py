@@ -66,7 +66,7 @@ class RegexPartitioner(Partitioner):
             group_name: str = group_names[idx]
             partition_definition[group_name] = group_value
         # TODO: <Alex>Abe: Does PartitionDefinition have a role in the new design?  If so, what does it consist of?</Alex>
-        partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
+        # partition_definition: PartitionDefinition = PartitionDefinition(partition_definition)
         # TODO: <Alex>Do runtime_parameters have a role in the new design?  Otherwise, remove unused code.</Alex>
         # if runtime_parameters:
         #     partition_definition.update(runtime_parameters)
@@ -105,6 +105,7 @@ class RegexPartitioner(Partitioner):
             #     [str(value) for value in partition_definition.values()]
             # )
 
+        # TODO: <Alex>Note: we are using BatchRequest instead of BatchDefinition here, because the latter requires all fields.</Alex>
         return BatchRequest(
             data_asset_name=data_asset_name,
             partition_request=partition_definition,
@@ -117,12 +118,12 @@ class RegexPartitioner(Partitioner):
         if not isinstance(batch_request, BatchRequest):
             raise TypeError("batch_request is not of an instance of type BatchRequest")
 
-        template_arguments = batch_request.partition_request
+        template_arguments: dict = batch_request.partition_request
         if batch_request.data_asset_name is not None:
             template_arguments["data_asset_name"] = batch_request.data_asset_name
 
         filepath_template = self._invert_regex_to_data_reference_template()
-        converted_string = filepath_template.format(
+        converted_string: str = filepath_template.format(
             **template_arguments
         )
 
@@ -169,6 +170,6 @@ class RegexPartitioner(Partitioner):
                 raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
 
         #Collapse adjacent wildcards into a single wildcard
-        data_reference_template = re.sub("\*+", "*", data_reference_template)
+        data_reference_template = re.sub("\\*+", "*", data_reference_template)
 
         return data_reference_template

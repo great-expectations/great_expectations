@@ -348,29 +348,31 @@ def test_some_very_basic_stuff(basic_execution_environment):
     )) == 6
 
     # TODO: <Alex>This call leads to NotImplementedError, because it involves FilesDataConnector._get_available_partitions() which was commented out.</Alex>
-    batch = basic_execution_environment.get_batch_from_batch_definition(BatchDefinition(
-        "my_execution_environment",
-        "my_filesystem_data_connector",
-        "B1",
-        partition_definition=PartitionDefinition({
-            "letter": "B",
-            "number": "1",
-        })
-    ))
+    batch = basic_execution_environment.get_batch_from_batch_definition(
+        batch_definition=BatchDefinition(
+            execution_environment_name="my_execution_environment",
+            data_connector_name="my_filesystem_data_connector",
+            data_asset_name="B1",
+            partition_definition=PartitionDefinition({
+                "letter": "B",
+                "number": "1",
+            })
+        )
+    )
 
     assert batch.batch_request is None
     assert type(batch.data) == pd.DataFrame
     assert batch.batch_definition == BatchDefinition(
-        "my_execution_environment",
-        "my_filesystem_data_connector",
-        "B1",
+        execution_environment_name="my_execution_environment",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="B1",
         partition_definition=PartitionDefinition({
             "letter": "B",
             "number": "1",
         })
     )
 
-    batch_list = basic_execution_environment.get_batch_list_from_batch_request(BatchRequest(
+    batch_list: List[Batch] = basic_execution_environment.get_batch_list_from_batch_request(batch_request=BatchRequest(
         execution_environment_name="my_execution_environment",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="B1",
@@ -382,8 +384,8 @@ def test_some_very_basic_stuff(basic_execution_environment):
     assert len(batch_list) == 1
     assert type(batch_list[0].data) == pd.DataFrame
 
-    my_df = pd.DataFrame({"x": range(10), "y": range(10)})
-    batch = basic_execution_environment.get_batch_from_batch_definition(BatchDefinition(
+    my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
+    batch: Batch = basic_execution_environment.get_batch_from_batch_definition(batch_definition=BatchDefinition(
         "my_execution_environment",
         "_pipeline",
         "_pipeline",

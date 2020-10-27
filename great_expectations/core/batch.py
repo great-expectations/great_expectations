@@ -14,6 +14,7 @@ from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot
 import great_expectations.exceptions as ge_exceptions
 
+
 class BatchDefinition(DictDot):
     def __init__(
         self,
@@ -29,12 +30,22 @@ class BatchDefinition(DictDot):
             partition_definition=partition_definition,
             # limit=limit,
         )
+
         assert type(partition_definition) == PartitionDefinition
-        
+
         self._execution_environment_name = execution_environment_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_definition = partition_definition
+
+    def __repr__(self) -> str:
+        doc_fields_dict: dict = {
+            "execution_environment_name": self._execution_environment_name,
+            "data_connector_name": self._data_connector_name,
+            "data_asset_name": self.data_asset_name,
+            "partition_definition": repr(self._partition_definition),
+        }
+        return str(doc_fields_dict)
 
     @staticmethod
     def _validate_batch_definition(

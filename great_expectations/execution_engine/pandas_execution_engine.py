@@ -554,12 +554,14 @@ Notes:
     def get_batch_data_and_markers(
         self,
         path: str,
-        reader_method:str="read_csv",
-        reader_options:dict={}
+        reader_method: str = "read_csv",
+        reader_options: dict = None
     ) -> Tuple[
         Any, #batch_data
         BatchMarkers
     ]:
+        if reader_options is None:
+            reader_options = {}
 
         reader_fn = self._get_reader_fn(reader_method, path)
         batch_data = reader_fn(path, **reader_options)
@@ -573,7 +575,6 @@ Notes:
         )
 
         return batch_data, batch_markers
-
 
     @property
     def dataframe(self):

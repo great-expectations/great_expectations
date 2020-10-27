@@ -424,43 +424,43 @@ connector and the default_partitioner_name is set to the name of one of the conf
         raise NotImplementedError
 
     # TODO: <Alex>Per most recent conversation, "get_available_partitions()" was being decomissioned.</Alex>
-    def get_available_partitions(
-        self,
-        data_asset_name: str = None,
-        batch_request: BatchRequest = None,
-        partition_request: Union[
-            Dict[str, Union[int, list, tuple, slice, str, Union[Dict, PartitionDefinitionSubset], Callable, None]], None
-        ] = None,
-        in_memory_dataset: Any = None,
-        runtime_parameters: Union[dict, None] = None,
-        repartition: bool = False
-    ) -> List[Partition]:
-        partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
-        partition_request_obj: PartitionRequest = build_partition_request(partition_request_dict=partition_request)
-        if runtime_parameters is not None:
-            runtime_parameters: PartitionDefinitionSubset = PartitionDefinitionSubset(runtime_parameters)
-        return self._get_available_partitions(
-            partitioner=partitioner,
-            data_asset_name=data_asset_name,
-            batch_request=batch_request,
-            partition_request=partition_request_obj,
-            in_memory_dataset=in_memory_dataset,
-            runtime_parameters=runtime_parameters,
-            repartition=repartition
-        )
+    # def get_available_partitions(
+    #     self,
+    #     data_asset_name: str = None,
+    #     batch_request: BatchRequest = None,
+    #     partition_request: Union[
+    #         Dict[str, Union[int, list, tuple, slice, str, Union[Dict, PartitionDefinitionSubset], Callable, None]], None
+    #     ] = None,
+    #     in_memory_dataset: Any = None,
+    #     runtime_parameters: Union[dict, None] = None,
+    #     repartition: bool = False
+    # ) -> List[Partition]:
+    #     partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
+    #     partition_request_obj: PartitionRequest = build_partition_request(partition_request_dict=partition_request)
+    #     if runtime_parameters is not None:
+    #         runtime_parameters: PartitionDefinitionSubset = PartitionDefinitionSubset(runtime_parameters)
+    #     return self._get_available_partitions(
+    #         partitioner=partitioner,
+    #         data_asset_name=data_asset_name,
+    #         batch_request=batch_request,
+    #         partition_request=partition_request_obj,
+    #         in_memory_dataset=in_memory_dataset,
+    #         runtime_parameters=runtime_parameters,
+    #         repartition=repartition
+    #     )
 
     # TODO: <Alex>Per most recent conversation, "_get_available_partitions()" was being decomissioned.</Alex>
-    def _get_available_partitions(
-        self,
-        partitioner: Partitioner,
-        data_asset_name: str = None,
-        batch_request: BatchRequest = None,
-        partition_request: Union[PartitionRequest, None] = None,
-        in_memory_dataset: Any = None,
-        runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
-        repartition: bool = False
-    ) -> List[Partition]:
-        raise NotImplementedError
+    # def _get_available_partitions(
+    #     self,
+    #     partitioner: Partitioner,
+    #     data_asset_name: str = None,
+    #     batch_request: BatchRequest = None,
+    #     partition_request: Union[PartitionRequest, None] = None,
+    #     in_memory_dataset: Any = None,
+    #     runtime_parameters: Union[PartitionDefinitionSubset, None] = None,
+    #     repartition: bool = False
+    # ) -> List[Partition]:
+    #     raise NotImplementedError
 
     @staticmethod
     def _batch_definition_matches_batch_request(
@@ -478,9 +478,10 @@ connector and the default_partitioner_name is set to the name of one of the conf
         if batch_request.data_asset_name:
             if batch_request.data_asset_name != batch_definition.data_asset_name:
                 return False
-        #FIXME: This is too rigid. Needs to take into account ranges and stuff.
+        # TODO: <Alex>We need a new entity that replaces the notion of a Partition (and PartitionRequest).</Alex>
+        # FIXME: This is too rigid. Needs to take into account ranges and stuff.
         if batch_request.partition_request:
-            for k,v in batch_request.partition_request.items():
+            for k, v in batch_request.partition_request.items():
                 if (k not in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
                     return False
         return True
@@ -499,16 +500,14 @@ connector and the default_partitioner_name is set to the name of one of the conf
 
         batch_definitions: List[BatchDefinition] = []
         for data_reference, batch_definition in self._data_references_cache.items():
-            # TODO: <Alex>The data_reference cach refreshing mechanism needs to be reviwed.  Right now, it returns exactly one BatchDefinition in the list.</Alex>
-            if batch_definition is None:
-                # The data_reference is unmatched.
-                continue
-            batch_definition: BatchDefinition = batch_definition[0]
-            if self._batch_definition_matches_batch_request(
-                batch_definition=batch_definition,
-                batch_request=batch_request
-            ):
-                batch_definitions.append(batch_definition)
+            # TODO: <Alex>The data_reference cache refreshing mechanism needs to be reviewed.  Right now, it returns exactly one BatchDefinition in the list.</Alex>
+            if batch_definition is not None:
+                batch_definition: BatchDefinition = batch_definition[0]
+                if self._batch_definition_matches_batch_request(
+                    batch_definition=batch_definition,
+                    batch_request=batch_request
+                ):
+                    batch_definitions.append(batch_definition)
 
         return batch_definitions
 
@@ -520,7 +519,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
         BatchSpec,
         BatchMarkers,
     ]:
-        batch_spec = self._build_batch_spec_from_batch_definition(batch_definition)
+        batch_spec: BatchSpec = self._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             **batch_spec
         )
@@ -535,11 +534,11 @@ connector and the default_partitioner_name is set to the name of one of the conf
         self,
         batch_definition: BatchDefinition
     ) -> BatchSpec:
-        batch_spec_params = self._generate_batch_spec_parameters_from_batch_definition(
-            batch_definition
+        batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
+            batch_definition=batch_definition
         )
         # TODO Abe 20201018: Decide if we want to allow batch_spec_passthrough parameters anywhere.
-        batch_spec = BatchSpec(
+        batch_spec: BatchSpec = BatchSpec(
             **batch_spec_params
         )
 
@@ -572,7 +571,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
         self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
-            mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
+            mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(
                 data_reference=data_reference,
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
@@ -590,7 +589,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
     def _map_data_reference_to_batch_definition_list(
         self,
         data_reference: Any,
-    ) -> List[BatchDefinition]:
+    ) -> Union[List[BatchDefinition], None]:
         # FIXME: Make this smarter about choosing the right partitioner
         try:
             # TODO: <Alex>We have a method for getting the correct partitioner for a given data_asset_name (it must be given).</Alex>
@@ -616,9 +615,31 @@ connector and the default_partitioner_name is set to the name of one of the conf
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,
                 data_asset_name=data_asset_name,
-                partition_definition=batch_request.partition_request,
+                partition_definition=PartitionDefinition(**batch_request.partition_request),
             )
         ]
+
+    def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> Any:
+        # FIXME: Make this smarter about choosing the right partitioner
+        try:
+            # TODO: <Alex>We have a method for getting the correct partitioner for a given data_asset_name (it must be given).</Alex>
+            self.default_partitioner
+        except ValueError:
+            raise ge_exceptions.DataConnectorError("Default Partitioner has not been set for data_connector")
+
+        # TODO: <Alex></Alex>
+        # data_asset_name: str = batch_definition.data_asset_name
+        partition_definition: PartitionDefinition = batch_definition.partition_definition
+        batch_request: BatchRequest = BatchRequest(
+            # data_asset_name=data_asset_name,
+            partition_request=partition_definition,
+        )
+        data_reference: Any = self.default_partitioner.convert_batch_request_to_data_reference(
+            batch_request=batch_request
+        )
+
+        return data_reference
+
 
     def self_check(self,
         pretty_print=True,
@@ -655,7 +676,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
             len_batch_definition_list = len(batch_definition_list)
             
             example_data_references = [
-                self.default_partitioner.convert_batch_request_to_data_reference(BatchRequest(
+                self.default_partitioner.convert_batch_request_to_data_reference(batch_request=BatchRequest(
                     execution_environment_name=batch_definition.execution_environment_name,
                     data_connector_name=batch_definition.data_connector_name,
                     data_asset_name=batch_definition.data_asset_name,
