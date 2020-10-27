@@ -170,6 +170,7 @@ class FilesDataConnector(DataConnector):
         """
         return list(self.assets.keys())
 
+    # TODO: <Alex>This code is broken; it is used only by deprecated classes and methods.</Alex>
     def _validate_sorters_configuration(self, partition_keys: List[str], num_actual_partition_keys: int):
         if self.sorters and len(self.sorters) > 0:
             if any([sorter.name not in partition_keys for sorter in self.sorters]):
@@ -186,6 +187,7 @@ class FilesDataConnector(DataConnector):
                     '''
                 )
 
+    # TODO: <Alex>This code is broken; it is used only by deprecated classes and methods.</Alex>
     def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
         if runtime_keys and len(runtime_keys) > 0:
             if not (self.runtime_keys and set(runtime_keys) <= set(self.runtime_keys)):
