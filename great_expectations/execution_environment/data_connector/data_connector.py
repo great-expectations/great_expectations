@@ -77,6 +77,7 @@ class DataConnector(object):
 
         self.execution_environment_name = execution_environment_name
 
+        # TODO: <Alex>Delete deprecated/unused code.</Alex>
         # if partitioners is None:
         #     partitioners = {}
         # _partitioners: Dict[str, Union[dict, Partitioner]] = partitioners
