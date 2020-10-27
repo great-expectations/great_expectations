@@ -101,9 +101,9 @@ class DataConnector(object):
     def name(self) -> str:
         return self._name
 
-    @property
-    def assets(self) -> Dict[str, Union[dict, Asset]]:
-        return self._assets
+    # @property
+    # def assets(self) -> Dict[str, Union[dict, Asset]]:
+    #     return self._assets
 
     # @property
     # def partitioners(self) -> Dict[str, Union[dict, Partitioner]]:

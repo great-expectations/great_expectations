@@ -103,6 +103,9 @@ class FilesDataConnector(DataConnector):
         self._assets = _assets
         self._build_assets_from_config(config=assets)
 
+    @property
+    def assets(self) -> Dict[str, Union[dict, Asset]]:
+        return self._assets
 
     @property
     def base_directory(self) -> str:
