@@ -91,12 +91,15 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_type="descriptive")
-    def _descriptive_renderer(
-        cls, expectation_configuration, styling=None, include_column_name=True
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
     ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            expectation_configuration.kwargs,
+            configuration.kwargs,
             ["column", "mostly", "row_condition", "condition_parser"],
         )
 
@@ -137,3 +140,27 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
                 }
             )
         ]
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    def _diagnostic_observed_value_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        result_dict = result.result
+
+        try:
+            null_percent = result_dict["unexpected_percent"]
+            return (
+                    num_to_str(100 - null_percent, precision=5, use_locale=True)
+                    + "% not null"
+            )
+        except KeyError:
+            return "unknown % not null"
+        except TypeError:
+            return "NaN% not null"
+        return "--"

@@ -3,7 +3,8 @@ import pandas as pd
 
 from great_expectations.expectations.expectation import DatasetExpectation
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedGraphContent
+from great_expectations.render.types import RenderedGraphContent, RenderedStringTemplateContent, \
+    RenderedContentBlockContainer
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -219,12 +220,15 @@ class ExpectColumnKlDivergenceToBeLessThan(DatasetExpectation):
             }
 
     @classmethod
-    @renderer(renderer_type="descriptive")
-    def _descriptive_renderer(
-        cls, expectation_configuration, styling=None, include_column_name=True
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
     ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            expectation_configuration.kwargs,
+            configuration.kwargs,
             [
                 "column",
                 "partition_object",
@@ -266,3 +270,49 @@ class ExpectColumnKlDivergenceToBeLessThan(DatasetExpectation):
             return [expectation_string_obj, expected_distribution]
         else:
             return [expectation_string_obj]
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    def _diagnostic_observed_value_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        if not result.result.get("details"):
+            return "--"
+
+        observed_partition_object = result.result["details"]["observed_partition"]
+        observed_distribution = cls._get_kl_divergence_chart(
+            observed_partition_object
+        )
+
+        observed_value = (
+            num_to_str(result.result.get("observed_value"))
+            if result.result.get("observed_value")
+            else result.result.get("observed_value")
+        )
+
+        observed_value_content_block = RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "KL Divergence: $observed_value",
+                    "params": {
+                        "observed_value": str(observed_value)
+                        if observed_value
+                        else "None (-infinity, infinity, or NaN)",
+                    },
+                    "styling": {"classes": ["mb-2"]},
+                },
+            }
+        )
+
+        return RenderedContentBlockContainer(
+            **{
+                "content_block_type": "content_block_container",
+                "content_blocks": [observed_value_content_block, observed_distribution],
+            }
+        )

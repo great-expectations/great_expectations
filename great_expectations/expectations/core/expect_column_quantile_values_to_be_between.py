@@ -10,6 +10,7 @@ from great_expectations.execution_engine import ExecutionEngine, PandasExecution
 from great_expectations.expectations.expectation import DatasetExpectation, Expectation
 from great_expectations.expectations.registry import extract_metrics
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedTableContent
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -182,12 +183,15 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_type="descriptive")
-    def _descriptive_renderer(
-        cls, expectation_configuration, styling=None, include_column_name=True
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
     ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            expectation_configuration["kwargs"],
+            configuration["kwargs"],
             ["column", "quantile_ranges", "row_condition", "condition_parser"],
         )
         template_str = "quantiles must be within the following value ranges."
@@ -250,6 +254,49 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
         }
 
         return [expectation_string_obj, quantile_range_table]
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    def _diagnostic_observed_value_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        if result.result is None or result.result.get("observed_value") is None:
+            return "--"
+
+        quantiles = result.result.get("observed_value", {}).get("quantiles", [])
+        value_ranges = result.result.get("observed_value", {}).get("values", [])
+
+        table_header_row = ["Quantile", "Value"]
+        table_rows = []
+
+        quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
+
+        for idx, quantile in enumerate(quantiles):
+            quantile_string = quantile_strings.get(quantile)
+            table_rows.append(
+                [
+                    quantile_string if quantile_string else "{:3.2f}".format(quantile),
+                    str(value_ranges[idx]),
+                ]
+            )
+
+        return RenderedTableContent(
+            **{
+                "content_block_type": "table",
+                "header_row": table_header_row,
+                "table": table_rows,
+                "styling": {
+                    "body": {
+                        "classes": ["table", "table-sm", "table-unbordered", "col-4"],
+                    }
+                },
+            }
+        )
 
     # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
