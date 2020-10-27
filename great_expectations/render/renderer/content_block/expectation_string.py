@@ -12,7 +12,7 @@ from great_expectations.render.util import (
 class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def _missing_content_block_fn(
-        cls, expectation_configuration, styling=None, include_column_name=True
+        cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs
     ):
         return [
             RenderedStringTemplateContent(
@@ -22,8 +22,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     "string_template": {
                         "template": "$expectation_type(**$kwargs)",
                         "params": {
-                            "expectation_type": expectation_configuration.expectation_type,
-                            "kwargs": expectation_configuration.kwargs,
+                            "expectation_type": configuration.expectation_type,
+                            "kwargs": configuration.kwargs,
                         },
                         "styling": {
                             "params": {

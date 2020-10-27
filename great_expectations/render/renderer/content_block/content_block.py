@@ -287,7 +287,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return expectations
 
     @classmethod
-    def _missing_content_block_fn(cls, obj, styling, **kwargs):
+    def _missing_content_block_fn(cls, configuration=None, result=None, language=None, runtime_configuration=None, **kwargs):
         return []
 
     @classmethod
