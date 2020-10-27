@@ -100,9 +100,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
             attr_obj = getattr(cls, candidate_renderer_fn_name)
             if not hasattr(attr_obj, "_renderer_type"):
                 continue
-            register_renderer(
-                ge_type=expectation_type, parent_class=cls, renderer_fn=attr_obj
-            )
+            register_renderer(object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

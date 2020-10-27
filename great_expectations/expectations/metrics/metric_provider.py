@@ -82,9 +82,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     bundle_metric=bundle_metric,
                 )
             elif hasattr(attr_obj, "_renderer_type"):
-                register_renderer(
-                    ge_type=metric_name, parent_class=cls, renderer_fn=attr_obj
-                )
+                register_renderer(object_name=metric_name, parent_class=cls, renderer_fn=attr_obj)
 
     @classmethod
     def get_evaluation_dependencies(

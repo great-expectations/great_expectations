@@ -155,9 +155,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         else:
             expectation_type = cls._get_expectation_type(render_object)
 
-            content_block_fn = get_renderer_impl(
-                ge_type=expectation_type, renderer_type="renderer.prescriptive"
-            )
+            content_block_fn = get_renderer_impl(object_name=expectation_type, renderer_type="renderer.prescriptive")
             content_block_fn = content_block_fn[1] if content_block_fn else None
             if content_block_fn is not None:
                 try:
@@ -319,7 +317,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
-        content_block_fn = get_renderer_impl(ge_type=expectation_type, renderer_type="renderer.prescriptive")
+        content_block_fn = get_renderer_impl(object_name=expectation_type, renderer_type="renderer.prescriptive")
         return content_block_fn[1] if content_block_fn else None
 
     @classmethod
