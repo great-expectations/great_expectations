@@ -6,7 +6,7 @@ from typing import Union, List, Iterator, Any
 import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
+from great_expectations.execution_environment.data_connector.sorter.sorter import Sorter
 from great_expectations.core.batch import BatchRequest
 import great_expectations.exceptions as ge_exceptions
 
