@@ -8,6 +8,8 @@ from great_expectations.execution_environment.data_connector.partitioner.partiti
 logger = logging.getLogger(__name__)
 
 
+# TODO: <Alex>Abe, this class needs to implement "convert_batch_request_to_data_reference".</Alex>
+# TODO: <Alex>Abe, this class needs to implement "convert_data_reference_to_batch_request".</Alex>
 class PipelinePartitioner(Partitioner):
     DEFAULT_PARTITION_NAME: str = "IN_MEMORY_PARTITION"
 

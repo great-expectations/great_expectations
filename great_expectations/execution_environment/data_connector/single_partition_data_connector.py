@@ -196,13 +196,14 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         Returns:
             A list of available names
         """
-        if self._data_references_cache == None:
+        if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
         available_data_asset_names = []
 
-        for k,v in self._data_references_cache.items():
-            if v != None:
-                available_data_asset_names.append(v.data_asset_name)
+        for k, v in self._data_references_cache.items():
+            if v is not None:
+                batch_definition: BatchDefinition = v[0]
+                available_data_asset_names.append(batch_definition.data_asset_name)
 
         return list(set(available_data_asset_names))

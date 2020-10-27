@@ -1605,8 +1605,8 @@ def safe_remove(path):
 def execution_environment_files_data_connector_regex_partitioner_config(
     use_group_names: bool = False,
     use_sorters: bool = False,
-    default_base_directory = "data",
-    data_asset_base_directory = None,
+    default_base_directory="data",
+    data_asset_base_directory=None,
 ):
     if not use_group_names and use_sorters:
         raise ValueError("The presently available data_connector and partitioner tests match sorters with group names.")
@@ -1647,6 +1647,14 @@ def execution_environment_files_data_connector_regex_partitioner_config(
     else:
         sorters = None
 
+    test_asset_0 = {
+        "module_name": "great_expectations.execution_environment.data_connector.asset",
+        "partitioner_name": "test_regex_partitioner",
+        "glob_directive": "alex*",
+    }
+    if data_asset_base_directory is not None:
+        test_asset_0["base_directory"] = data_asset_base_directory
+
     execution_environments_config: dict = {
         "test_execution_environment": {
             "class_name": "ExecutionEnvironment",
@@ -1674,7 +1682,6 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                     "default_partitioner_name": "test_pipeline_partitioner",
                     "assets": {
                         "test_asset_1": {
-                            "module_name": "great_expectations.execution_environment.data_connector.asset",
                             "partitioner_name": "test_pipeline_partitioner"
                         }
                     }
@@ -1700,12 +1707,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                     },
                     "default_partitioner_name": "test_regex_partitioner",
                     "assets": {
-                        "test_asset_0": {
-                            "module_name": "great_expectations.execution_environment.data_connector.asset",
-                            "partitioner_name": "test_regex_partitioner",
-                            "base_directory": data_asset_base_directory,
-                            "glob_directive": "alex*",
-                        }
+                        "test_asset_0": test_asset_0,
                     }
                 }
             }
