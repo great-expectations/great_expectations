@@ -4,8 +4,9 @@
 Changelog
 #########
 
-Develop
+develop
 -----------------
+* [BUGFIX] Fixed bug where slack messages cause stacktrace when data docs pages have issue
 
 0.12.6
 -----------------
