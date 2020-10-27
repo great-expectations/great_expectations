@@ -5,7 +5,6 @@ from great_expectations.core.batch import (
 )
 
 from great_expectations.execution_environment.data_connector.sorter import(
-Sorter,
 LexicographicSorter,
 NumericSorter,
 DateTimeSorter,
@@ -14,158 +13,101 @@ CustomListSorter
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 
-def test_create_two_batch_definitions_sort_lexicographically():
-    A = BatchDefinition(
-        "A",
-        "a",
-        "aaa",
-        PartitionDefinition({
-            "id": "A"
-        })
+
+def test_create_three_batch_definitions_sort_lexicographically():
+    a = BatchDefinition(
+        execution_environment_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+        partition_definition=PartitionDefinition({"id": "A"}),
     )
-    B = BatchDefinition(
-        "B",
-        "b",
-        "bbb",
-        PartitionDefinition({
-            "id": "B"
-        })
+    b = BatchDefinition(
+        execution_environment_name="B",
+        data_connector_name="b",
+        data_asset_name="bbb",
+        partition_definition=PartitionDefinition({"id": "B"}),
     )
-    C = BatchDefinition(
-        "C",
-        "c",
-        "ccc",
-        PartitionDefinition({
-            "id": "C"
-        })
-    )
-    D = BatchDefinition(
-        "D",
-        "d",
-        "ddd",
-        PartitionDefinition({
-            "id": "D"
-        })
+    c = BatchDefinition(
+        execution_environment_name="C",
+        data_connector_name="c",
+        data_asset_name="ccc",
+        partition_definition=PartitionDefinition({"id": "C"}),
     )
 
-    batch_list = [A, B, C, D]
-    #print(batch_list)
-    #print("hi will see if we can do this in the next hour")
-    for batch in batch_list:
-        print(batch.data_asset_name)
+    batch_list = [a, b, c]
 
-    # attach a sorter to this list?
-    # how do you compare?
-    # how do you take a list
-    print("-"*40)
+    # sorting by "id" reverse alphabetically
     my_sorter = LexicographicSorter(name="id", orderby="desc")
-    sorted_list = my_sorter.get_sorted_batch_definitions(batch_list,)
-    for batch in sorted_list:
-        print(batch.data_asset_name)
-
-    # list of batch_definitions
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list,)
+    assert sorted_batch_list == [c, b, a]
 
 
-# batch definition has a data_reference?
-#
-
-def test_create_two_batch_definitions_sort_numeric():
+def test_create_three_batch_definitions_sort_numerically():
     one = BatchDefinition(
-        "A",
-        "a",
-        "aaa",
-        PartitionDefinition({
-            "id": 1
-        })
+        execution_environment_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+        partition_definition=PartitionDefinition({"id": 1}),
     )
     two = BatchDefinition(
-        "B",
-        "b",
-        "bbb",
-        PartitionDefinition({
-            "id": 2
-        })
+        execution_environment_name="B",
+        data_connector_name="b",
+        data_asset_name="bbb",
+        partition_definition=PartitionDefinition({"id": 2}),
     )
     three = BatchDefinition(
-        "C",
-        "c",
-        "ccc",
-        PartitionDefinition({
-            "id": 3
-        })
-    )
-    four = BatchDefinition(
-        "D",
-        "d",
-        "ddd",
-        PartitionDefinition({
-            "id": 4
-        })
+        execution_environment_name="C",
+        data_connector_name="c",
+        data_asset_name="ccc",
+        partition_definition=PartitionDefinition({"id": 3}),
     )
 
-    batch_list = [one, two, three, four]
-    for batch in batch_list:
-        print(batch.data_asset_name)
-
-    # attach a sorter to this list?
-    # how do you compare?
-    # how do you take a list
-    print("-"*40)
+    batch_list = [one, two, three]
     my_sorter = NumericSorter(name="id", orderby="desc")
-    sorted_list = my_sorter.get_sorted_batch_definitions(batch_list,)
-    for batch in sorted_list:
-        print(batch.data_asset_name)
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
+    assert sorted_batch_list == [three, two, one]
 
-    # this works well
-
-    # test error
-
-    this_should_break = BatchDefinition(
-        "D",
-        "d",
-        "ddd",
-        PartitionDefinition({
-            "id": 'aaa'
-        })
+    # testing a non-numeric, which should throw an error
+    i_should_not_work = BatchDefinition(
+        execution_environment_name="C",
+        data_connector_name="c",
+        data_asset_name="ccc",
+        partition_definition=PartitionDefinition({"id": "aaa"}),
     )
 
-    batch_list = [one, two, three, four, this_should_break]
+    batch_list = [one, two, three, i_should_not_work]
     with pytest.raises(ge_exceptions.SorterError):
-        sorted_list = my_sorter.get_sorted_batch_definitions(batch_list)
+        sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
 
 
 def test_date_time():
-    one = BatchDefinition(
-        "A",
-        "a",
-        "aaa",
-        PartitionDefinition({
-            "date": "20201026"
-        })
+    first = BatchDefinition(
+        execution_environment_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+        partition_definition=PartitionDefinition({"date": "20210101"}),
     )
-    two = BatchDefinition(
-        "B",
-        "b",
-        "bbb",
-        PartitionDefinition({
-            "date": "20201027"
-        })
+    second = BatchDefinition(
+        execution_environment_name="B",
+        data_connector_name="b",
+        data_asset_name="bbb",
+        partition_definition=PartitionDefinition({"date": "20210102"}),
     )
-    batch_list = [one, two]
-    for batch in batch_list:
-        print(batch.data_asset_name)
-    print("-"*40)
+    third = BatchDefinition(
+        execution_environment_name="C",
+        data_connector_name="c",
+        data_asset_name="ccc",
+        partition_definition=PartitionDefinition({"date": "20210103"}),
+    )
+
+    batch_list = [first, second, third]
     my_sorter = DateTimeSorter(name="date", datetime_format="%Y%m%d", orderby="desc")
-    sorted_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    for batch in sorted_list:
-        print(batch.data_asset_name)
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
+    assert sorted_batch_list == [third, second, first]
 
-    # two exceptions:
-    # date_time_string having a string type
-    # data_time_format_string being a string type
 
-def test_custom_list():
-    one = BatchDefinition(
+def test_custom_list(periodic_table_of_elements):
+    Hydrogen = BatchDefinition(
         "A",
         "a",
         "aaa",
@@ -173,7 +115,7 @@ def test_custom_list():
             "element": "Hydrogen"
         })
     )
-    two = BatchDefinition(
+    Helium = BatchDefinition(
         "B",
         "b",
         "bbb",
@@ -181,17 +123,17 @@ def test_custom_list():
             "element": "Helium"
         })
     )
+    Lithium = BatchDefinition(
+        "B",
+        "b",
+        "bbb",
+        PartitionDefinition({
+            "element": "Lithium"
+        })
+    )
 
-    batch_list = [one, two]
-    for batch in batch_list:
-        print(batch.data_asset_name)
+    batch_list = [Hydrogen, Helium, Lithium]
+    my_sorter = CustomListSorter(name="element", orderby="desc", reference_list=periodic_table_of_elements)
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
+    assert sorted_batch_list == [Lithium, Helium, Hydrogen]
 
-    print("-"*40)
-    ref = ["Hydrogen", "Helium"]
-    my_sorter = CustomListSorter(name="element", orderby="desc", reference_list=ref)
-    sorted_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    for batch in sorted_list:
-        print(batch.data_asset_name)
-
-
-def test_combination_of_sorters():

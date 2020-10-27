@@ -4,7 +4,6 @@ from typing import Any
 
 import logging
 
-#from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.batch import BatchDefinition
 
 from great_expectations.execution_environment.data_connector.sorter.sorter import (
