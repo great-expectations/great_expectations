@@ -1143,13 +1143,16 @@ We could not determine the format of the file. What is it?
 
     path = None
     while True:
+        # do not use Click to check if the file exists - the get_batch
+        # logic will check this
         path = click.prompt(
             msg_prompt_file_path,
-            type=click.Path(exists=True, dir_okay=dir_okay),
+            type=click.Path(dir_okay=dir_okay),
             default=path,
         )
 
-        path = os.path.abspath(path)
+        if not path.startswith("gs:") and not path.startswith("s3"):
+            path = os.path.abspath(path)
 
         batch_kwargs = {"path": path, "datasource": datasource_name}
 
