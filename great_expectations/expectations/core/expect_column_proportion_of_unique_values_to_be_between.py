@@ -14,8 +14,8 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    AggregateExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -24,7 +24,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
+class ExpectColumnProportionOfUniqueValuesToBeBetween(AggregateExpectation):
     """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
     For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \

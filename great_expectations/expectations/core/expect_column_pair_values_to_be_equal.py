@@ -18,8 +18,8 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    AggregateExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -33,7 +33,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
+class ExpectColumnPairValuesToBeEqual(AggregateExpectation):
     """
     Expect the values in column A to be the same as column B.
 
@@ -101,7 +101,7 @@ class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
 
     # @PandasExecutionEngine.metric(
     #        metric_name="equal_columns",
-    #        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #        metric_domain_keys=ColumnMapExpectation.domain_keys,
     #        metric_value_keys=("column_A", "column_B"),
     #        metric_dependencies=tuple(),
     #        filter_column_isnull=False,

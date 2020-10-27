@@ -365,7 +365,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         )
 
 
-class DatasetExpectation(Expectation, ABC):
+class AggregateExpectation(Expectation, ABC):
     domain_keys = (
         "batch_id",
         "table",
@@ -398,9 +398,10 @@ class DatasetExpectation(Expectation, ABC):
         return dependencies
 
 
-class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
+class ColumnMapExpectation(AggregateExpectation, ABC):
     map_metric = None
 
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     success_keys = ("mostly",)
     default_kwarg_values = {"mostly": 1}
 
@@ -432,8 +433,10 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         )
         assert isinstance(
             self.map_metric, str
-        ), "ColumnMapDatasetExpectation must override get_validation_dependencies or declare exactly one map_metric"
-
+        ), "ColumnMapExpectation must override get_validation_dependencies or declare exactly one map_metric"
+        assert (
+            self.metric_dependencies == tuple()
+        ), "ColumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
         # convenient name for updates
         metric_dependencies = dependencies["metrics"]
         metric_kwargs = get_metric_kwargs(

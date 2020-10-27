@@ -26,8 +26,8 @@ except ImportError:
 
 
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    AggregateExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -36,7 +36,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnMaxToBeBetween(DatasetExpectation):
+class ExpectColumnMaxToBeBetween(AggregateExpectation):
     """Expect the column max to be between an min and max value
 
            expect_column_max_to_be_between is a \

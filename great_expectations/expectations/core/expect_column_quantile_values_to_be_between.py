@@ -8,7 +8,7 @@ from great_expectations.core.batch import Batch
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import (
-    DatasetExpectation,
+    AggregateExpectation,
     Expectation,
     renderer,
 )
@@ -19,7 +19,7 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
+class ExpectColumnQuantileValuesToBeBetween(AggregateExpectation):
     """Expect specific provided column quantiles to be between provided minimum and maximum values.
 
            ``quantile_ranges`` must be a dictionary with two keys:

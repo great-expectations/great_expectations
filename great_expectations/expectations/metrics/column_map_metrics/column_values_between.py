@@ -9,13 +9,13 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    MapMetricProvider,
+    ColumnMapMetricProvider,
     column_map_condition,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnValuesBetween(MapMetricProvider):
+class ColumnValuesBetween(ColumnMapMetricProvider):
     condition_metric_name = "column_values.between"
     condition_value_keys = (
         "min_value",

@@ -7,7 +7,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    MapMetricProvider,
+    ColumnMapMetricProvider,
     column_map_condition,
 )
 from great_expectations.expectations.metrics.util import (
@@ -18,7 +18,7 @@ from great_expectations.expectations.metrics.util import (
 logger = logging.getLogger(__name__)
 
 
-class ColumnValuesNotMatchLikePatternList(MapMetricProvider):
+class ColumnValuesNotMatchLikePatternList(ColumnMapMetricProvider):
     condition_metric_name = "column_values.not_match_like_pattern_list"
     condition_value_keys = ("like_pattern_list", "match_on")
 

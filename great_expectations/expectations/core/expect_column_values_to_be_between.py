@@ -15,7 +15,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -24,7 +24,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     """Expect column entries to be between a minimum value and a maximum value (inclusive).
 
     expect_column_values_to_be_between is a \

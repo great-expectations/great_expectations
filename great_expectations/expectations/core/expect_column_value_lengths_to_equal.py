@@ -20,7 +20,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -34,7 +34,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
+class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     """Expect column entries to be strings with length equal to the provided value.
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
@@ -158,7 +158,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
 
     # @PandasExecutionEngine.column_map_metric(
     #     metric_name="column_values.length_equals",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=("value",),
     #     metric_dependencies=("column.value_lengths",),
     #     filter_column_isnull=True,
@@ -181,7 +181,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
 
     # @PandasExecutionEngine.metric(
     #     metric_name="column.value_lengths",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=(),
     #     metric_dependencies=tuple(),
     # )

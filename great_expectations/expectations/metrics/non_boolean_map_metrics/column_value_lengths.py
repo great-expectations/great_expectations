@@ -1,18 +1,16 @@
 import sqlalchemy as sa
 
-from great_expectations.core.metric import Metric
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    MapMetricProvider,
-    column_map_condition,
+    ColumnMapMetricProvider,
     column_map_function,
 )
 
 
-class ColumnValuesValueLengths(MapMetricProvider):
+class ColumnValuesValueLengths(ColumnMapMetricProvider):
     function_metric_name = "column_values.value_lengths"
 
     @column_map_function(engine=PandasExecutionEngine)

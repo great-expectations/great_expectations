@@ -19,8 +19,8 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    AggregateExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -34,7 +34,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnPairValuesAToBeGreaterThanB(DatasetExpectation):
+class ExpectColumnPairValuesAToBeGreaterThanB(AggregateExpectation):
     """
     Expect values in column A to be greater than column B.
 
@@ -111,7 +111,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(DatasetExpectation):
 
     # @PandasExecutionEngine.metric(
     #     metric_name="column_a_greater_than_b",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=("column_A", "column_B"),
     #     metric_dependencies=tuple(),
     # )

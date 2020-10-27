@@ -20,7 +20,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -34,7 +34,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToNotMatchRegex(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     """Expect column entries to be strings that do NOT match a given regular expression. The regex must not match \
     any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
     "fish", "dog", and the following as unexpected: "cat", "hat".

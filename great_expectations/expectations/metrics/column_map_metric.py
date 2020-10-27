@@ -700,12 +700,10 @@ class MapMetricProvider(MetricProvider):
     condition_domain_keys = (
         "batch_id",
         "table",
-        "column",
     )
     function_domain_keys = (
         "batch_id",
         "table",
-        "column",
     )
     condition_value_keys = tuple()
     function_value_keys = tuple()
@@ -989,3 +987,10 @@ class MapMetricProvider(MetricProvider):
             }
 
         return dict()
+
+
+class ColumnMapMetricProvider(MapMetricProvider):
+    condition_domain_keys = ("batch_id", "table", "column")
+    function_domain_keys = ("batch_id", "table", "column")
+    condition_value_keys = tuple()
+    function_value_keys = tuple()

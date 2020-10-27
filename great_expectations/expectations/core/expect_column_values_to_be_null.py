@@ -13,7 +13,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     _format_map_output,
     renderer,
@@ -27,7 +27,7 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     """Expect column values to be null.
 
     expect_column_values_to_be_null is a \
@@ -132,7 +132,7 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
 
     # @PandasExecutionEngine.column_map_metric(
     #     metric_name=map_metric,
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=tuple(),
     #     metric_dependencies=tuple(),
     #     filter_column_isnull=False,
@@ -151,7 +151,7 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
 
     # @SqlAlchemyExecutionEngine.column_map_metric(
     #     metric_name=map_metric,
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=tuple(),
     #     metric_dependencies=tuple(),
     #     filter_column_isnull=False,
@@ -171,7 +171,7 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
 
     # @SparkDFExecutionEngine.column_map_metric(
     #     metric_name=map_metric,
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=tuple(),
     #     metric_dependencies=tuple(),
     # )

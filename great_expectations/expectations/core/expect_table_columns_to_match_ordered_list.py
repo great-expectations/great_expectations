@@ -11,7 +11,7 @@ from great_expectations.execution_engine import ExecutionEngine, PandasExecution
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing
 from ..expectation import (
-    DatasetExpectation,
+    AggregateExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     renderer,
@@ -19,7 +19,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
+class ExpectTableColumnsToMatchOrderedList(AggregateExpectation):
     """Expect the columns to exactly match a specified list.
 
     expect_table_columns_to_match_ordered_list is a :func:`expectation \

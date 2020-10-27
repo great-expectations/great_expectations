@@ -3,13 +3,13 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
-    MapMetricProvider,
+    ColumnMapMetricProvider,
     column_map_condition,
 )
 from great_expectations.expectations.metrics.column_map_metric import sa as sa
 
 
-class ColumnValuesUnique(MapMetricProvider):
+class ColumnValuesUnique(ColumnMapMetricProvider):
     condition_metric_name = "column_values.unique"
 
     @column_map_condition(engine=PandasExecutionEngine)

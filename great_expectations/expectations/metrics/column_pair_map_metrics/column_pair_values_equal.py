@@ -9,7 +9,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_map_metric import (
     MapMetricProvider,
-    column_map_condition,
     map_condition,
 )
 from great_expectations.expectations.metrics.metric_provider import metric

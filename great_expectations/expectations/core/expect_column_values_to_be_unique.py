@@ -20,7 +20,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -34,7 +34,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     """Expect each column value to be unique.
 
     This expectation detects duplicates. All duplicated values are counted as exceptions.

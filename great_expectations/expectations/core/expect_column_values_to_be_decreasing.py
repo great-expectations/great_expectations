@@ -13,7 +13,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     _format_map_output,
     renderer,
@@ -21,7 +21,7 @@ from ..expectation import (
 from ..registry import extract_metrics, get_metric_kwargs
 
 
-class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     """Expect column values to be decreasing.
 
     By default, this expectation only works for numeric or datetime data.

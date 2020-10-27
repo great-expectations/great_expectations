@@ -23,7 +23,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -37,7 +37,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToBeDateutilParseable(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
     """Expect column entries to be parsable using dateutil.
 
     expect_column_values_to_be_dateutil_parseable is a \

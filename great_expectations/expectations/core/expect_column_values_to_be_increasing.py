@@ -18,7 +18,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     _format_map_output,
     renderer,
@@ -59,7 +59,7 @@ except ImportError as e:
     )
 
 
-class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     """Expect column values to be increasing.
 
     By default, this expectation only works for numeric or datetime data.
@@ -131,7 +131,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
 
     # @PandasExecutionEngine.column_map_metric(
     #     metric_name="column_values.increasing",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=("strictly",),
     #     metric_dependencies=tuple(),
     #     filter_column_isnull=True,

@@ -20,7 +20,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -34,7 +34,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     """Expect column entries to not be in the set.
 
     For example:
@@ -191,7 +191,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
 
     # @PandasExecutionEngine.column_map_metric(
     #     metric_name="column_values.not_in_set",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
     #     metric_value_keys=("value_set",),
     #     metric_dependencies=tuple(),
     #     filter_column_isnull=True,

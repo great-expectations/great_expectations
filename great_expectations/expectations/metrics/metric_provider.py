@@ -79,8 +79,8 @@ class MetricProvider(metaclass=MetaMetricProvider):
             declared_metric_name = metric_name + metric_definition_kwargs.get(
                 "metric_name_suffix", ""
             )
-            metric_fn_type = metric_fn.get(
-                "metric_fn_type", getattr(cls, "metric_fn_type", "data")
+            metric_fn_type = getattr(
+                metric_fn, "metric_fn_type", getattr(cls, "metric_fn_type", "data")
             )
             register_metric(
                 metric_name=declared_metric_name,

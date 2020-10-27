@@ -11,8 +11,8 @@ from ...data_asset.util import parse_result_format
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import ordinal, substitute_none_for_missing
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    AggregateExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -21,7 +21,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnToExist(DatasetExpectation):
+class ExpectColumnToExist(AggregateExpectation):
     """Expect the specified column to exist.
 
     expect_column_to_exist is a :func:`expectation \
