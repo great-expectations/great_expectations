@@ -9,10 +9,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
-)
+from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
 
 try:
     import sqlalchemy as sa
