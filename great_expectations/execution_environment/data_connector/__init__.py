@@ -3,7 +3,7 @@ from .single_partition_data_connector import (
     SinglePartitionDictDataConnector,
     SinglePartitionFileDataConnector,
 )
-from .dict_data_connector import DictDataConnector
+# from .dict_data_connector import DictDataConnector
 from .files_data_connector import FilesDataConnector
 from .pipeline_data_connector import PipelineDataConnector
 from .data_connector import DataConnector
