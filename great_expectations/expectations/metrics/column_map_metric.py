@@ -14,22 +14,23 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
     sa,
 )
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric,
-)
+from great_expectations.expectations.metrics.metric_provider import MetricProvider
 from great_expectations.expectations.registry import register_metric
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 def column_map_function(engine: Type[ExecutionEngine], **kwargs):
-    """Return the column aggregate metric decorator for the specified engine.
+    """Provides engine-specific support for authing a metric_fn with a simplified signature.
+
+    A metric function that is decorated as a column_map_function will be called with the engine-specific column type
+    and any value_kwargs associated with the Metric for which the provider function is being declared.
 
     Args:
         engine:
         **kwargs:
 
     Returns:
+        An annotated metric_function which will be called with a simplified signature.
 
     """
     if issubclass(engine, PandasExecutionEngine):
@@ -63,6 +64,8 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
 
             inner_func.map_function_metric_engine = engine
             inner_func.map_function_metric_kwargs = kwargs
+            inner_func.metric_fn_type = "map_fn"
+            inner_func.column_domain = True
             return inner_func
 
         return wrapper
@@ -108,6 +111,8 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
 
             inner_func.map_function_metric_engine = engine
             inner_func.map_function_metric_kwargs = kwargs
+            inner_func.metric_fn_type = "map_fn"
+            inner_func.column_domain = True
             return inner_func
 
         return wrapper
@@ -154,6 +159,8 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
 
             inner_func.map_function_metric_engine = engine
             inner_func.map_function_metric_kwargs = kwargs
+            inner_func.metric_fn_type = "map_fn"
+            inner_func.column_domain = True
             return inner_func
 
         return wrapper
@@ -163,31 +170,55 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
 
 
 def map_condition(engine: Type[ExecutionEngine], **kwargs):
-    def wrapper(metric_fn: Callable):
-        def inner_func(*args, **kwargs):
-            return metric_fn(*args, **kwargs)
+    """Annotates a metric provider with the "map" metric_fn_type and associated engine.
 
-        inner_func.map_condition_metric_engine = engine
-        inner_func.map_condition_metric_kwargs = kwargs
-        return inner_func
-
-    return wrapper
-
-
-def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
-    """Return the column aggregate metric decorator for the specified engine.
+    The MapMetricProvider class provides engine-specific support for authoring metrics that operate on rows/records
+    of a dataset, where intermediate values may not be returned.
 
     Args:
         engine:
         **kwargs:
 
     Returns:
+        An annotated metric_function which will be used to construct map-related metrics, such as unexpected_count.
+
+    """
+
+    def wrapper(metric_fn: Callable):
+        def inner_func(*args, **kwargs):
+            return metric_fn(*args, **kwargs)
+
+        inner_func.map_condition_metric_engine = engine
+        inner_func.map_condition_metric_kwargs = kwargs
+        inner_func.metric_fn_type = "map_condition"
+
+        return inner_func
+
+    return wrapper
+
+
+def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
+    """Provides engine-specific support for authing a metric_fn with a simplified signature. A column_map_condition
+    must provide a map function that evalues to a boolean value; it will be used to provide supplemental metrics, such
+    as the unexpected_value count, unexpected_values, and unexpected_rows.
+
+    A metric function that is decorated as a column_map_condition will be called with the engine-specific column type
+    and any value_kwargs associated with the Metric for which the provider function is being declared.
+
+
+
+    Args:
+        engine:
+        **kwargs:
+
+    Returns:
+        An annotated metric_function which will be called with a simplified signature.
 
     """
     if issubclass(engine, PandasExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @map_condition(engine)
+            @map_condition(engine, **kwargs)
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -215,6 +246,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
                 )
                 return meets_expectation_series
 
+            inner_func.column_domain = True
             return inner_func
 
         return wrapper
@@ -222,7 +254,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SqlAlchemyExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @map_condition(engine)
+            @map_condition(engine, **kwargs)
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -262,6 +294,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
                     expected_condition = expected_condition
                 return expected_condition, compute_domain_kwargs
 
+            inner_func.column_domain = True
             return inner_func
 
         return wrapper
@@ -269,7 +302,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SparkDFExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @map_condition(engine)
+            @map_condition(engine, **kwargs)
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -298,8 +331,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
                     expected_condition = column.isNotNull() & expected_condition
                 return expected_condition, compute_domain_kwargs
 
-            inner_func.map_condition_metric_engine = engine
-            inner_func.map_condition_metric_kwags = kwargs
+            inner_func.column_domain = True
             return inner_func
 
         return wrapper
@@ -307,7 +339,7 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for column_map_condition")
 
 
-def _pandas_column_map_count(
+def _pandas_map_count(
     cls,
     execution_engine: "PandasExecutionEngine",
     metric_domain_kwargs: dict,
@@ -315,7 +347,7 @@ def _pandas_column_map_count(
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
-    """Return the count of nonzero values from the map-style metric in the metrics dictionary"""
+    """Returns unexpected count for MapExpectations"""
     return np.count_nonzero(~metrics.get("expected_condition"))
 
 
@@ -464,7 +496,7 @@ def _pandas_column_map_rows(
         ]
 
 
-def _sqlalchemy_column_map_count(
+def _sqlalchemy_map_count(
     cls,
     execution_engine: "SqlAlchemyExecutionEngine",
     metric_domain_kwargs: dict,
@@ -472,7 +504,7 @@ def _sqlalchemy_column_map_count(
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
-    """Returns column nonnull count for ColumnMapExpectations"""
+    """Returns unexpected count for MapExpectations"""
     expected_condition, compute_domain_kwargs = metrics.get("expected_condition")
     return (
         sa.func.sum(sa.case([(expected_condition, 0,)], else_=1,)),
@@ -571,7 +603,7 @@ def _sqlalchemy_column_map_rows(
     return execution_engine.engine.execute(query).fetchall()
 
 
-def _spark_column_map_count(
+def _spark_map_count(
     cls,
     execution_engine: "SparkDFExecutionEngine",
     metric_domain_kwargs: dict,
@@ -601,7 +633,6 @@ def _spark_column_map_values(
     result_format = metric_value_kwargs["result_format"]
     condition = metrics.get("expected_condition")
     column_name = accessor_domain_kwargs["column"]
-    # column = self._get_eval_column_name(metric_domain_kwargs["column"])
     filtered = data.filter(~condition)
     if result_format["result_format"] == "COMPLETE":
         return list(filtered.select(F.col(column_name)).collect())
@@ -712,6 +743,7 @@ class ColumnMapMetricProvider(MetricProvider):
                 map_condition_metric_kwags = getattr(
                     condition_provider, "map_condition_metric_kwags", dict()
                 )
+                is_column_domain = getattr(condition_provider, "column_domain", False)
                 if issubclass(engine, PandasExecutionEngine):
                     register_metric(
                         metric_name=metric_name,
@@ -720,7 +752,7 @@ class ColumnMapMetricProvider(MetricProvider):
                         execution_engine=engine,
                         metric_class=cls,
                         metric_provider=condition_provider,
-                        bundle_metric=False,
+                        metric_fn_type="map_condition",
                     )
                     register_metric(
                         metric_name=metric_name + ".unexpected_count",
@@ -728,45 +760,46 @@ class ColumnMapMetricProvider(MetricProvider):
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
                         metric_class=cls,
-                        metric_provider=_pandas_column_map_count,
-                        bundle_metric=True,
+                        metric_provider=_pandas_map_count,
+                        metric_fn_type="data",
                     )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_values",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=(*metric_value_keys, "result_format"),
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_pandas_column_map_values,
-                        bundle_metric=False,
-                    )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_index_list",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=(*metric_value_keys, "result_format"),
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_pandas_column_map_index,
-                        bundle_metric=False,
-                    )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_value_counts",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=(*metric_value_keys, "result_format"),
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_pandas_column_map_value_counts,
-                        bundle_metric=False,
-                    )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_rows",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=(*metric_value_keys, "result_format"),
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_pandas_column_map_rows,
-                        bundle_metric=False,
-                    )
+                    if is_column_domain:
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_pandas_column_map_values,
+                            metric_fn_type="data",
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_index_list",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_pandas_column_map_index,
+                            metric_fn_type="data",
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_value_counts",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_pandas_column_map_value_counts,
+                            metric_fn_type="data",
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_rows",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_pandas_column_map_rows,
+                            metric_fn_type="data",
+                        )
 
                 if issubclass(engine, SqlAlchemyExecutionEngine):
                     register_metric(
@@ -776,7 +809,7 @@ class ColumnMapMetricProvider(MetricProvider):
                         execution_engine=engine,
                         metric_class=cls,
                         metric_provider=condition_provider,
-                        bundle_metric=False,
+                        metric_fn_type="map_condition",
                     )
                     register_metric(
                         metric_name=metric_name + ".count",
@@ -784,36 +817,38 @@ class ColumnMapMetricProvider(MetricProvider):
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
                         metric_class=cls,
-                        metric_provider=_sqlalchemy_column_map_count,
-                        bundle_metric=True,
+                        metric_provider=_sqlalchemy_map_count,
+                        metric_fn_type="data",
                     )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_values",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=(*metric_value_keys, "result_format"),
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_sqlalchemy_column_map_values,
-                        bundle_metric=False,
-                    )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_value_counts",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=(*metric_value_keys, "result_format"),
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_sqlalchemy_column_map_value_counts,
-                        bundle_metric=False,
-                    )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_rows",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=(*metric_value_keys, "result_format"),
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_sqlalchemy_column_map_rows,
-                        bundle_metric=False,
-                    )
+                    if is_column_domain:
+
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_column_map_values,
+                            metric_fn_type="data",
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_value_counts",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_column_map_value_counts,
+                            metric_fn_type="data",
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_rows",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_column_map_rows,
+                            metric_fn_type="data",
+                        )
                 elif issubclass(engine, SparkDFExecutionEngine):
                     register_metric(
                         metric_name=metric_name,
@@ -822,7 +857,7 @@ class ColumnMapMetricProvider(MetricProvider):
                         execution_engine=engine,
                         metric_class=cls,
                         metric_provider=condition_provider,
-                        bundle_metric=False,
+                        metric_fn_type="map_condition",
                     )
                     register_metric(
                         metric_name=metric_name + ".count",
@@ -830,36 +865,37 @@ class ColumnMapMetricProvider(MetricProvider):
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
                         metric_class=cls,
-                        metric_provider=_spark_column_map_count,
-                        bundle_metric=True,
+                        metric_provider=_spark_map_count,
+                        metric_fn_type="data",
                     )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_values",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=(*metric_value_keys, "result_format"),
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_spark_column_map_values,
-                        bundle_metric=False,
-                    )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_value_counts",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=(*metric_value_keys, "result_format"),
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_spark_column_map_value_counts,
-                        bundle_metric=False,
-                    )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_rows",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=(*metric_value_keys, "result_format"),
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_spark_column_map_rows,
-                        bundle_metric=False,
-                    )
+                    if is_column_domain:
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_column_map_values,
+                            metric_fn_type="data",
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_value_counts",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_column_map_value_counts,
+                            metric_fn_type="data",
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_rows",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_column_map_rows,
+                            metric_fn_type="data",
+                        )
             if hasattr(candidate_metric_fn, "map_function_metric_engine"):
                 engine = candidate_metric_fn.map_function_metric_engine
                 if not issubclass(engine, ExecutionEngine):
@@ -885,7 +921,7 @@ class ColumnMapMetricProvider(MetricProvider):
                     execution_engine=engine,
                     metric_class=cls,
                     metric_provider=map_function_provider,
-                    bundle_metric=False,
+                    metric_fn_type="map_fn",
                 )
 
     @classmethod

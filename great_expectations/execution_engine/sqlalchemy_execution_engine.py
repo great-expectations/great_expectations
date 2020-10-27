@@ -673,12 +673,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ) in metric_fn_bundle:
             # We have different semantics for bundled metric providers, so ensure we actually are working only with those.
             assert (
-                metric_provider._bundle_metric
-            ), "resolve_metric_bundle only supports metrics that support bundled computation"
+                metric_provider.metric_fn_type == "aggregate_fn"
+            ), "resolve_metric_bundle only supports aggregate metrics"
             # batch_id and table are the only determining factors for bundled metrics
             batch_id = metric_to_resolve.metric_domain_kwargs.get("batch_id")
             table = metric_to_resolve.metric_domain_kwargs.get("table")
-            select, domain_kwargs = metric_provider(**metric_provider_kwargs)
+            statement, domain_kwargs = metric_provider(**metric_provider_kwargs)
             if not isinstance(domain_kwargs, IDDict):
                 domain_kwargs = IDDict(domain_kwargs)
             domain_id = domain_kwargs.to_id()
@@ -689,7 +689,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "domain_kwargs": domain_kwargs,
                 }
             queries[domain_id]["select"].append(
-                select.label(metric_to_resolve.metric_name)
+                statement.label(metric_to_resolve.metric_name)
             )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():

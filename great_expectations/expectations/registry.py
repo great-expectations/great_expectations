@@ -91,12 +91,12 @@ def register_metric(
     execution_engine: Type["ExecutionEngine"],
     metric_class: Type["MetricProvider"],
     metric_provider: Callable,
-    bundle_metric: bool = False,
+    metric_fn_type: str,
 ) -> dict:
     res = dict()
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
-    metric_provider._bundle_metric = bundle_metric
+    metric_provider.metric_fn_type = metric_fn_type
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]
         current_dependencies = metric_definition.get("metric_dependencies", set())

@@ -173,9 +173,16 @@ class ExecutionEngine:
                 "metrics": metric_dependencies,
                 "runtime_configuration": runtime_configuration,
             }
-            if getattr(metric_fn, "_bundle_metric", False) is True:
+            metric_fn_type = getattr(metric_fn, "metric_fn_type", "data")
+            if metric_fn_type in ["aggregate_fn"]:
                 metric_fn_bundle.append(
-                    (metric_to_resolve, metric_fn, metric_provider_kwargs,)
+                    (metric_to_resolve, metric_fn, metric_provider_kwargs)
+                )
+            elif metric_fn_type in ["map_fn", "map_condition"]:
+                # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
+                # than data to optimize compute in the future
+                resolved_metrics[metric_to_resolve.id] = metric_fn(
+                    **metric_provider_kwargs
                 )
             else:
                 resolved_metrics[metric_to_resolve.id] = metric_fn(

@@ -65,7 +65,7 @@ def table_metric(engine: Type[ExecutionEngine], **kwargs):
     if issubclass(engine, PandasExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric(engine=PandasExecutionEngine, bundle_metric=True)
+            @metric(engine=PandasExecutionEngine, metric_fn_type="data")
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -87,7 +87,7 @@ def table_metric(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SqlAlchemyExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric(engine=SqlAlchemyExecutionEngine, bundle_metric=True)
+            @metric(engine=SqlAlchemyExecutionEngine, metric_fn_type="aggregate")
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -122,7 +122,7 @@ def table_metric(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SparkDFExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric(engine=SparkDFExecutionEngine, bundle_metric=True)
+            @metric(engine=SparkDFExecutionEngine, metric_fn_type="aggregate")
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -166,7 +166,7 @@ def table_metric(engine: Type[ExecutionEngine], **kwargs):
 #     if issubclass(engine, PandasExecutionEngine):
 #
 #         def wrapper(metric_fn: Callable):
-#             @metric(engine=PandasExecutionEngine, bundle_metric=True)
+#             @metric(engine=PandasExecutionEngine, metric_fn_type="aggregate")
 #             @wraps(metric_fn)
 #             def inner_func(
 #                 cls,
@@ -188,7 +188,7 @@ def table_metric(engine: Type[ExecutionEngine], **kwargs):
 #     elif issubclass(engine, SqlAlchemyExecutionEngine):
 #
 #         def wrapper(metric_fn: Callable):
-#             @metric(engine=SqlAlchemyExecutionEngine, bundle_metric=True)
+#             @metric(engine=SqlAlchemyExecutionEngine, metric_fn_type="aggregate")
 #             @wraps(metric_fn)
 #             def inner_func(
 #                 cls,
@@ -215,7 +215,7 @@ def table_metric(engine: Type[ExecutionEngine], **kwargs):
 #     elif issubclass(engine, SparkDFExecutionEngine):
 #
 #         def wrapper(metric_fn: Callable):
-#             @metric(engine=SparkDFExecutionEngine, bundle_metric=True)
+#             @metric(engine=SparkDFExecutionEngine, metric_fn_type="aggregate")
 #             @wraps(metric_fn)
 #             def inner_func(
 #                 cls,
@@ -254,4 +254,4 @@ class TableMetricProvider(MetricProvider):
         "batch_id",
         "table",
     )
-    bundle_metric = True
+    metric_fn_type = "aggregate"

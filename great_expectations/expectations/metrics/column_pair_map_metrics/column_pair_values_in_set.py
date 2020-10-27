@@ -28,7 +28,7 @@ class ColumnPairValuesInSet(ColumnMapMetricProvider):
     )
     domain_keys = ("batch_id", "table", "column_a", "column_b")
 
-    @map_condition(engine=PandasExecutionEngine, bundle_metric=False)
+    @map_condition(engine=PandasExecutionEngine)
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
