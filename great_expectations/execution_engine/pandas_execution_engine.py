@@ -194,7 +194,7 @@ Notes:
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.active_batch_data_id:
+            if self.active_batch_data_id is not None:
                 data = self.active_batch_data
             else:
                 raise ValidationError(

@@ -21,6 +21,6 @@ def test_expect_column_value_z_scores_to_be_less_than_impl():
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
     result = expectation.validate(
-        batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
+        batches=[batch], execution_engine=PandasExecutionEngine()
     )
     assert result == ExpectationValidationResult(success=True,)
