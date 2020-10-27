@@ -497,7 +497,7 @@ configured runtime keys.
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,
                 data_asset_name=data_asset_name,
-                partition_definition=PartitionDefinition(**batch_request.partition_request),
+                partition_definition=PartitionDefinition(batch_request.partition_request),
             )
         ]
 
