@@ -5,7 +5,8 @@ import json
 
 from great_expectations.execution_environment.data_connector import (
     FilesDataConnector,
-    DictDataConnector,
+    SinglePartitionDictDataConnector,
+    # DictDataConnector,
 )
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
@@ -70,61 +71,45 @@ def test__get_instantiation_through_instantiate_class_from_config(basic_data_con
     assert data_references == []
 
 
-def test__DictDataConnector():
-    data_reference_dict = {
-        "pretend/path/A-100.csv": create_fake_data_frame(),
-        "pretend/path/A-101.csv": create_fake_data_frame(),
-        "pretend/directory/B-1.csv": create_fake_data_frame(),
-        "pretend/directory/B-2.csv": create_fake_data_frame(),
-    }
+# def test__DictDataConnector():
+#     data_reference_dict = {
+#         "pretend/path/A-100.csv": create_fake_data_frame(),
+#         "pretend/path/A-101.csv": create_fake_data_frame(),
+#         "pretend/directory/B-1.csv": create_fake_data_frame(),
+#         "pretend/directory/B-2.csv": create_fake_data_frame(),
+#     }
 
-    my_data_connector = DictDataConnector(
-        name="my_data_connector",
-        data_reference_dict=data_reference_dict,
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
-    )
+#     my_data_connector = DictDataConnector(
+#         name="my_data_connector",
+#         data_reference_dict=data_reference_dict,
+#         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
+#         pattern="(.+)/(.+)/(.+)-(\\d+)\\.csv",
+#         group_names=[
+#             "first_dir",
+#             "second_dir",
+#             "letter",
+#             "number",
+#         ]
+#     )
 
-    # Peer into internals to make sure things have loaded properly
-    data_references = my_data_connector._get_data_reference_list()
-    assert data_references == [
-        "pretend/directory/B-1.csv",
-        "pretend/directory/B-2.csv",
-        "pretend/path/A-100.csv",
-        "pretend/path/A-101.csv",
-    ]
+#     # Peer into internals to make sure things have loaded properly
+#     data_references = my_data_connector._get_data_reference_list()
+#     assert data_references == [
+#         "pretend/directory/B-1.csv",
+#         "pretend/directory/B-2.csv",
+#         "pretend/path/A-100.csv",
+#         "pretend/path/A-101.csv",
+#     ]
 
-    # TODO: <Alex>This statement seems to have no effect.  However, this is an IMPORTANT check -- it must be fixed.</Alex>
-    with pytest.raises(ValueError):
-        set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
+#     # If the cache hasn't been refreshed yet, get_unmatched_data_references (and most other methods) throw ValueErrors
+#     with pytest.raises(ValueError):
+#         my_data_connector.get_unmatched_data_references()
 
-    # TODO: <Alex>This statement causes the error "great_expectations.exceptions.exceptions.DataConnectorError: Default Partitioner has not been set for data_connector"
-    # to be raised by DataConnector._map_data_reference_to_batch_definition_list() because the instantiation of DictDataConnector above does include partitioners and default_partitioner_name
-    # The behavior of the above method must be fixed for this test to continue.
-    # </Alex>
-    my_data_connector.refresh_data_references_cache()
+#     my_data_connector.refresh_data_references_cache()
 
-    # Since we don't have a Partitioner yet, all keys should be unmatched
-    assert set(my_data_connector.get_unmatched_data_references()) == data_reference_dict.keys()
+#     assert set(my_data_connector.get_unmatched_data_references()) == set([])
 
-    my_data_connector.add_partitioner(
-        "my_partitioner",
-        yaml.load("""
-class_name: RegexPartitioner
-pattern: (.+)/(.+)/(.+)-(\\d+)\\.csv
-group_names:
-    - first_dir
-    - second_dir
-    - letter
-    - number
-        """, Loader=yaml.FullLoader)
-    )
-    my_data_connector._default_partitioner_name = "my_partitioner"
-    
-    my_data_connector.refresh_data_references_cache()
-
-    assert set(my_data_connector.get_unmatched_data_references()) == set([])
-
-    # print(json.dumps(my_data_connector._data_references_cache, indent=2))
+#     # print(json.dumps(my_data_connector._data_references_cache, indent=2))
 
 
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
@@ -198,7 +183,7 @@ def test_available_data_asset_names():
 
 
 def test__batch_definition_matches_batch_request():
-    my_data_connector = DictDataConnector(
+    my_data_connector = SinglePartitionDictDataConnector(
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         data_reference_dict={},
