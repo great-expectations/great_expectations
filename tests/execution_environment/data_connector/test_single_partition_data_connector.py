@@ -29,11 +29,10 @@ def test_basic_instantiation(tmp_path_factory):
     my_data_connector = SinglePartitionDictDataConnector(
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        partitioner={
-            "class_name": "RegexPartitioner",
-            "pattern": "(.*)/(.+)-(\\d+)\\.csv",
-            "group_names": ["data_asset_name", "letter", "number"],
-    },
+        default_regex={
+            "pattern" : "(.*)/(.+)-(\\d+)\\.csv",
+            "group_names" : ["data_asset_name", "letter", "number"],
+        },
         data_reference_dict = data_reference_dict,
     )
 
@@ -41,11 +40,15 @@ def test_basic_instantiation(tmp_path_factory):
     assert my_data_connector.get_data_reference_list_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
-    print(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="something",
-        data_connector_name="my_data_connector",
-        data_asset_name="something",
-    )))
+    print(
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                execution_environment_name="something",
+                data_connector_name="my_data_connector",
+                data_asset_name="something",
+            )
+        )
+    )
 
 
 def test_example_with_implicit_data_asset_names():
@@ -67,8 +70,7 @@ class_name: SinglePartitionDictDataConnector
 base_directory: my_base_directory/
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
 
-partitioner:
-    class_name: RegexPartitioner
+default_regex:
     pattern: (\\d{4})/(\\d{2})/(.+)-\\d+\\.csv
     group_names:
         - year_dir
@@ -117,72 +119,72 @@ partitioner:
     )]
 
 
-def test_example_with_explicit_data_asset_names(tmp_path_factory):
-    data_reference_dict = dict([
-        (data_reference, create_fake_data_frame)
-        for data_reference in [
-            "my_base_directory/alpha/files/go/here/alpha-202001.csv",
-            "my_base_directory/alpha/files/go/here/alpha-202002.csv",
-            "my_base_directory/alpha/files/go/here/alpha-202003.csv",
-            "my_base_directory/beta_here/beta-202001.txt",
-            "my_base_directory/beta_here/beta-202002.txt",
-            "my_base_directory/beta_here/beta-202003.txt",
-            "my_base_directory/beta_here/beta-202004.txt",
-            "my_base_directory/gamma-202001.csv",
-            "my_base_directory/gamma-202002.csv",
-            "my_base_directory/gamma-202003.csv",
-            "my_base_directory/gamma-202004.csv",
-            "my_base_directory/gamma-202005.csv",
-        ]
-    ])
+# TODO: Abe 20201028 : This test should actually be implemented with a FilesDataConnector, not a SinglePartitionDataConnector
+# def test_example_with_explicit_data_asset_names(tmp_path_factory):
+#     data_reference_dict = dict([
+#         (data_reference, create_fake_data_frame)
+#         for data_reference in [
+#             "my_base_directory/alpha/files/go/here/alpha-202001.csv",
+#             "my_base_directory/alpha/files/go/here/alpha-202002.csv",
+#             "my_base_directory/alpha/files/go/here/alpha-202003.csv",
+#             "my_base_directory/beta_here/beta-202001.txt",
+#             "my_base_directory/beta_here/beta-202002.txt",
+#             "my_base_directory/beta_here/beta-202003.txt",
+#             "my_base_directory/beta_here/beta-202004.txt",
+#             "my_base_directory/gamma-202001.csv",
+#             "my_base_directory/gamma-202002.csv",
+#             "my_base_directory/gamma-202003.csv",
+#             "my_base_directory/gamma-202004.csv",
+#             "my_base_directory/gamma-202005.csv",
+#         ]
+#     ])
 
-    yaml_string = """
-class_name: SinglePartitionDictDataConnector
-execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
-base_directory: my_base_directory/
-# glob_directive: '*.csv'
-partitioner:
-    class_name: RegexPartitioner
-    pattern: ^.*\\/(.+)-(\\d{4})(\\d{2})\\.(csv|txt)$
-    group_names:
-        - data_asset_name
-        - year_dir
-        - month_dir
-assets:
-    alpha:
-        base_directory: alpha/files/go/here/
-    beta:
-        base_directory: beta_here/
-        # glob_directive: '*.txt'
-    gamma:
-        base_directory: ""
+#     yaml_string = """
+# class_name: SinglePartitionDictDataConnector
+# execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
+# base_directory: my_base_directory/
+# # glob_directive: '*.csv'
+# default_regex:
+#     pattern: ^.*\\/(.+)-(\\d{4})(\\d{2})\\.(csv|txt)$
+#     group_names:
+#         - data_asset_name
+#         - year_dir
+#         - month_dir
+# assets:
+#     alpha:
+#         base_directory: alpha/files/go/here/
+#     beta:
+#         base_directory: beta_here/
+#         # glob_directive: '*.txt'
+#     gamma:
+#         base_directory: ""
         
-    """
-    config = yaml.load(yaml_string, Loader=yaml.FullLoader)
-    config["data_reference_dict"] = data_reference_dict
-    my_data_connector = instantiate_class_from_config(
-        config,
-        config_defaults={"module_name": "great_expectations.execution_environment.data_connector"},
-        runtime_environment={"name": "my_data_connector"},
-    )
+#     """
+#     config = yaml.load(yaml_string, Loader=yaml.FullLoader)
+#     config["data_reference_dict"] = data_reference_dict
+#     my_data_connector = instantiate_class_from_config(
+#         config,
+#         config_defaults={"module_name": "great_expectations.execution_environment.data_connector"},
+#         runtime_environment={"name": "my_data_connector"},
+#     )
 
-    my_data_connector.refresh_data_references_cache()
+#     my_data_connector.refresh_data_references_cache()
 
-    # I'm starting to think we might want to separate out this behavior into a different class.
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
-    assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-    ))) == 3
+#     # I'm starting to think we might want to separate out this behavior into a different class.
+#     assert len(my_data_connector.get_unmatched_data_references()) == 0
+#     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+#         data_connector_name="my_data_connector",
+#         data_asset_name="alpha",
+#     ))) == 3
 
-    assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        data_connector_name="my_data_connector",
-        data_asset_name="beta",
-    ))) == 4
-    assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        data_connector_name="my_data_connector",
-        data_asset_name="gamma",
-    ))) == 5
+#     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+#         data_connector_name="my_data_connector",
+#         data_asset_name="beta",
+#     ))) == 4
+#     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+#         data_connector_name="my_data_connector",
+#         data_asset_name="gamma",
+#     ))) == 5
 
 
 def test_test_yaml_config_(empty_data_context, tmp_path_factory):
@@ -209,8 +211,7 @@ name: TEST_DATA_CONNECTOR
 base_directory: {base_directory}/
 glob_directive: "*/*/*.csv"
 
-partitioner:
-    class_name: RegexPartitioner
+default_regex:
     pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
     group_names:
         - year_dir
@@ -268,8 +269,7 @@ name: TEST_DATA_CONNECTOR
 base_directory: {base_directory}/
 glob_directive: "*/*/*.csv"
 
-partitioner:
-    class_name: RegexPartitioner
+default_regex:
     pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
     group_names:
         - year_dir
@@ -311,8 +311,7 @@ def test_self_check():
         name="my_data_connector",
         data_reference_dict=data_reference_dict,
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
-        partitioner={
-            "class_name": "RegexPartitioner",
+        default_regex={
             "pattern": "(.+)-(\\d+)\\.csv",
             "group_names": ["data_asset_name", "number"]
         }
@@ -355,8 +354,7 @@ def test_that_needs_a_better_name():
         name="my_data_connector",
         data_reference_dict=data_reference_dict,
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
-        partitioner={
-            "class_name": "RegexPartitioner",
+        default_regex={
             "pattern": "(.+)-(\\d+)\\.csv",
             "group_names": ["data_asset_name", "number"]
         }
@@ -414,8 +412,7 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
     name: TEST_DATA_CONNECTOR
     base_directory: {base_directory}/
     glob_directive: "*/*.csv"
-    partitioner:
-        class_name: RegexPartitioner
+    default_regex:
         group_names:
             - data_asset_name
             - letter
@@ -472,8 +469,7 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
           glob_directive: "*/*/*/*.txt.gz"
-          partitioner:
-              class_name: RegexPartitioner
+          default_regex:
               group_names:
                 - year
                 - month
@@ -587,8 +583,7 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
           glob_directive: "*.txt.gz"
-          partitioner:
-              class_name: RegexPartitioner
+          default_regex:
               group_names:
                 - data_asset_name
                 - year
@@ -635,8 +630,7 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context, t
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
           glob_directive: "*/*/*/*/*.txt.gz"
-          partitioner:
-              class_name: RegexPartitioner
+          default_regex:
               group_names:
                   - data_asset_name
                   - year

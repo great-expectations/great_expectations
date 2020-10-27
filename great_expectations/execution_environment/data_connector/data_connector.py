@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-
 import copy
 import itertools
 from typing import List, Dict, Union, Callable, Any, Tuple
 from ruamel.yaml.comments import CommentedMap
 import json
+import re
+from string import Template
+import sre_parse
+import sre_constants
 
 import logging
 
@@ -30,7 +33,6 @@ from great_expectations.core.batch import (
     BatchMarkers,
     BatchDefinition,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
@@ -65,33 +67,27 @@ class DataConnector(object):
         self,
         name: str,
         execution_environment_name: str,
-        assets: dict = None,
-        partitioners: dict = None,
-        default_partitioner_name: str = None,
+        # assets: dict = None,
+        # partitioners: dict = None,
+        # default_partitioner_name: str = None,
         execution_engine: ExecutionEngine = None,
-        data_context_root_directory: str = None
+        # data_context_root_directory: str = None
     ):
         self._name = name
 
         self.execution_environment_name = execution_environment_name
 
-        if assets is None:
-            assets = {}
-        _assets: Dict[str, Union[dict, Asset]] = assets
-        self._assets = _assets
-        self._build_assets_from_config(config=assets)
+        # if partitioners is None:
+        #     partitioners = {}
+        # _partitioners: Dict[str, Union[dict, Partitioner]] = partitioners
+        # self._partitioners = _partitioners
+        # self._build_partitioners_from_config(config=partitioners)
 
-        if partitioners is None:
-            partitioners = {}
-        _partitioners: Dict[str, Union[dict, Partitioner]] = partitioners
-        self._partitioners = _partitioners
-        self._build_partitioners_from_config(config=partitioners)
-
-        self._default_partitioner_name = default_partitioner_name
+        # self._default_partitioner_name = default_partitioner_name
 
         self._execution_engine = execution_engine
 
-        self._data_context_root_directory = data_context_root_directory
+        # self._data_context_root_directory = data_context_root_directory
 
         # TODO: <Alex>The next 2 lines should be deleted once the user of the Partion object has been deprecated.</Alex>
         # The partitions cache is a dictionary, which maintains lists of partitions for a data_asset_name as the key.
@@ -108,16 +104,16 @@ class DataConnector(object):
     def assets(self) -> Dict[str, Union[dict, Asset]]:
         return self._assets
 
-    @property
-    def partitioners(self) -> Dict[str, Union[dict, Partitioner]]:
-        return self._partitioners
+    # @property
+    # def partitioners(self) -> Dict[str, Union[dict, Partitioner]]:
+    #     return self._partitioners
 
-    @property
-    def default_partitioner(self) -> Union[str, Partitioner]:
-        try:
-            return self.partitioners[self._default_partitioner_name]
-        except KeyError:
-            raise ValueError("No default partitioner has been set")
+    # @property
+    # def default_partitioner(self) -> Union[str, Partitioner]:
+    #     try:
+    #         return self.partitioners[self._default_partitioner_name]
+    #     except KeyError:
+    #         raise ValueError("No default partitioner has been set")
 
 #     def _get_cached_partitions(
 #         self,
@@ -297,95 +293,57 @@ class DataConnector(object):
     #
     #     return new_partitioner
 
-    # Replaces the asset configuration with the corresponding Asset object in the assets dictionary.
-    def _build_assets_from_config(self, config: Dict[str, dict]):
-        for name, asset_config in config.items():
-            if asset_config is None:
-                raise ValueError("Asset config should not be None.")
-            for property in asset_config.keys():
-                if asset_config[property] is None:
-                    raise ValueError(
-                        f'If Asset config defines the property "{property}", then its value must be specified.'
-                    )
-            new_asset: Asset = self._build_asset_from_config(
-                name=name,
-                config=asset_config,
-            )
-            self.assets[name] = new_asset
-
-    def _build_asset_from_config(self, name: str, config: dict):
-        """Build an Asset using the provided configuration and return the newly-built Asset."""
-        runtime_environment: dict = {
-            "name": name,
-            "data_connector": self
-        }
-        asset: Asset = instantiate_class_from_config(
-            config=config,
-            runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": "great_expectations.execution_environment.data_connector.asset",
-                "class_name": "Asset"
-            },
-        )
-        if not asset:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name="great_expectations.execution_environment.data_connector.asset",
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        return asset
-
     # Replaces the partitoiner configuration with the corresponding Partitioner object in the partitioners dictionary.
-    def _build_partitioners_from_config(self, config: Dict[str, dict]):
-        for name, partitioner_config in config.items():
-            new_partitioner = self._build_partitioner_from_config(
-                name,
-                partitioner_config,
-            )
-            self.partitioners[name] = new_partitioner
+    # def _build_partitioners_from_config(self, config: Dict[str, dict]):
+    #     for name, partitioner_config in config.items():
+    #         new_partitioner = self._build_partitioner_from_config(
+    #             name,
+    #             partitioner_config,
+    #         )
+    #         self.partitioners[name] = new_partitioner
 
-    def _build_partitioner_from_config(self, name: str, config: dict):
-        """Build a Partitioner using the provided configuration and return the newly-built Partitioner."""
-        runtime_environment: dict = {
-            "name": name,
-            "data_connector": self
-        }
-        partitioner: Partitioner = instantiate_class_from_config(
-            config=config,
-            runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": "great_expectations.execution_environment.data_connector.partitioner"
-            },
-        )
-        if not partitioner:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name="great_expectations.execution_environment.data_connector.partitioner",
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        return partitioner
+    # def _build_partitioner_from_config(self, name: str, config: dict):
+    #     """Build a Partitioner using the provided configuration and return the newly-built Partitioner."""
+    #     runtime_environment: dict = {
+    #         "name": name,
+    #         "data_connector": self
+    #     }
+    #     partitioner: Partitioner = instantiate_class_from_config(
+    #         config=config,
+    #         runtime_environment=runtime_environment,
+    #         config_defaults={
+    #             "module_name": "great_expectations.execution_environment.data_connector.partitioner"
+    #         },
+    #     )
+    #     if not partitioner:
+    #         raise ge_exceptions.ClassInstantiationError(
+    #             module_name="great_expectations.execution_environment.data_connector.partitioner",
+    #             package_name=None,
+    #             class_name=config["class_name"],
+    #         )
+    #     return partitioner
 
-    def get_partitioner_for_data_asset(self, data_asset_name: str = None) -> Partitioner:
-        partitioner_name: str
-        # data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
-        data_asset_config_exists: bool = data_asset_name is not None and isinstance(
-            self.assets.get(data_asset_name), Asset
-        )
-        if data_asset_config_exists and self.assets[data_asset_name].partitioner_name:
-            partitioner_name = self.assets[data_asset_name].partitioner_name
-        else:
-            partitioner_name = self.default_partitioner.name
-        partitioner: Partitioner
-        if partitioner_name is None:
-            raise ge_exceptions.BatchSpecError(
-                message=f'''
-No partitioners found for data connector "{self.name}" -- at least one partitioner must be configured for a data
-connector and the default_partitioner_name is set to the name of one of the configured partitioners.
-                '''
-            )
-        else:
-            partitioner = self.partitioners[partitioner_name]
-        return partitioner
+#     def get_partitioner_for_data_asset(self, data_asset_name: str = None) -> Partitioner:
+#         partitioner_name: str
+#         # data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
+#         data_asset_config_exists: bool = data_asset_name is not None and isinstance(
+#             self.assets.get(data_asset_name), Asset
+#         )
+#         if data_asset_config_exists and self.assets[data_asset_name].partitioner_name:
+#             partitioner_name = self.assets[data_asset_name].partitioner_name
+#         else:
+#             partitioner_name = self.default_partitioner.name
+#         partitioner: Partitioner
+#         if partitioner_name is None:
+#             raise ge_exceptions.BatchSpecError(
+#                 message=f'''
+# No partitioners found for data connector "{self.name}" -- at least one partitioner must be configured for a data
+# connector and the default_partitioner_name is set to the name of one of the configured partitioners.
+#                 '''
+#             )
+#         else:
+#             partitioner = self.partitioners[partitioner_name]
+#         return partitioner
 
     # def _build_batch_spec(self, batch_request: BatchRequest, partition: Partition) -> BatchSpec:
     #     if not batch_request.data_asset_name:
@@ -423,7 +381,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
         """
         raise NotImplementedError
 
-    # TODO: <Alex>Per most recent conversation, "get_available_partitions()" was being decomissioned.</Alex>
+    # # TODO: <Alex>Per most recent conversation, "get_available_partitions()" was being decomissioned.</Alex>
     # def get_available_partitions(
     #     self,
     #     data_asset_name: str = None,
@@ -449,7 +407,7 @@ connector and the default_partitioner_name is set to the name of one of the conf
     #         repartition=repartition
     #     )
 
-    # TODO: <Alex>Per most recent conversation, "_get_available_partitions()" was being decomissioned.</Alex>
+    # # TODO: <Alex>Per most recent conversation, "_get_available_partitions()" was being decomissioned.</Alex>
     # def _get_available_partitions(
     #     self,
     #     partitioner: Partitioner,
@@ -480,38 +438,40 @@ connector and the default_partitioner_name is set to the name of one of the conf
             if batch_request.data_asset_name != batch_definition.data_asset_name:
                 return False
         # FIXME: This is too rigid. Needs to take into account ranges and stuff.
-        # TODO: <Alex>Why do e need both conditions?</Alex>
-        if batch_request.partition_request and batch_request.partition_request is not None:
+        if batch_request.partition_request is not None:
             for k, v in batch_request.partition_request.items():
                 if (k not in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
                     return False
-        
+
         return True
 
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-        if batch_request.data_connector_name != self.name:
-            raise ValueError(
-                f"data_connector_name {batch_request.data_connector_name} does not match name {self.name}."
-            )
+        raise NotImplementedError
+        # if batch_request.data_connector_name != self.name:
+        #     raise ValueError(
+        #         f"data_connector_name {batch_request.data_connector_name} does not match name {self.name}."
+        #     )
 
-        if self._data_references_cache is None:
-            self.refresh_data_references_cache()
+        # if self._data_references_cache is None:
+        #     self.refresh_data_references_cache()
 
-        batch_definitions: List[BatchDefinition] = []
-        for data_reference, batch_definition in self._data_references_cache.items():
-            # TODO: <Alex>Note: this approach returns exactly one BatchDefinition in the list. We'll need to revamp once we implement Splitters.</Alex>
-            if batch_definition is not None:
-                batch_definition: BatchDefinition = batch_definition[0]
-                if self._batch_definition_matches_batch_request(
-                    batch_definition=batch_definition,
-                    batch_request=batch_request
-                ):
-                    batch_definitions.append(batch_definition)
+        # batch_definitions: List[BatchDefinition] = []
+        # for data_reference, batch_definition in self._data_references_cache.items():
+        #     # TODO: <Alex>The data_reference cach refreshing mechanism needs to be reviwed.  Right now, it returns exactly one BatchDefinition in the list.</Alex>
+        #     if batch_definition is None:
+        #         # The data_reference is unmatched.
+        #         continue
+        #     batch_definition: BatchDefinition = batch_definition[0]
+        #     if self._batch_definition_matches_batch_request(
+        #         batch_definition=batch_definition,
+        #         batch_request=batch_request
+        #     ):
+        #         batch_definitions.append(batch_definition)
 
-        return batch_definitions
+        # return batch_definitions
 
     def get_batch_data_and_metadata_from_batch_definition(
         self,
@@ -570,68 +530,67 @@ connector and the default_partitioner_name is set to the name of one of the conf
         raise NotImplementedError
 
     def get_unmatched_data_references(self):
-        if self._data_references_cache is None:
-            raise ValueError("_data_references_cache is None. Have you called refresh_data_references_cache yet?")
-
-        return [k for k,v in self._data_references_cache.items() if v == None]
+        raise NotImplementedError
     
     def get_data_reference_list_count(self):
-        return len(self._data_references_cache)
+        raise NotImplementedError
 
-    # TODO Abe 20201015: This method is still somewhat janky. Needs better supporting methods, plus more thought and hardening.
     def _map_data_reference_to_batch_definition_list(
         self,
         data_reference: Any,
-    ) -> Union[List[BatchDefinition], None]:
-        # FIXME: Make this smarter about choosing the right partitioner
-        try:
-            # TODO: <Alex>We have a method for getting the correct partitioner for a given data_asset_name (it must be given).</Alex>
-            self.default_partitioner
-        except ValueError:
-            raise ge_exceptions.DataConnectorError("Default Partitioner has not been set for data_connector")
-
-        # TODO: <Alex>How can the system figure out the data_asset_name just from the data_reference value?</Alex>
-        batch_request: BatchRequest = self.default_partitioner.convert_data_reference_to_batch_request(
-            data_reference=data_reference
-        )
-        if batch_request is None:
-            return None
         data_asset_name: str
-        if batch_request.data_asset_name:
-            data_asset_name = batch_request.data_asset_name
-        # process assets to populate data_asset_name in batch_definition:
-        else:
-            data_asset_name = "FAKE_DATA_ASSET_NAME"
-        # TODO: <Alex>Note: currently this list contains exactly one element. Once splitters are implemented, it will need to handle multiples.</Alex>
-        return [
-            BatchDefinition(
-                execution_environment_name=self.execution_environment_name,
-                data_connector_name=self.name,
-                data_asset_name=data_asset_name,
-                partition_definition=PartitionDefinition(**batch_request.partition_request),
-            )
-        ]
+    ) -> Union[List[BatchDefinition], None]:
+        raise NotImplementedError
+        # # FIXME: Make this smarter about choosing the right partitioner
+        # try:
+        #     # TODO: <Alex>We have a method for getting the correct partitioner for a given data_asset_name (it must be given).</Alex>
+        #     self.default_partitioner
+        # except ValueError:
+        #     raise ge_exceptions.DataConnectorError("Default Partitioner has not been set for data_connector")
+        #
+        # # TODO: <Alex>How can the system figure out the data_asset_name just from the data_reference value?</Alex>
+        # batch_request: BatchRequest = self.default_partitioner.convert_data_reference_to_batch_request(
+        #     data_reference=data_reference
+        # )
+        # if batch_request is None:
+        #     return None
+        # data_asset_name: str
+        # if batch_request.data_asset_name:
+        #     data_asset_name = batch_request.data_asset_name
+        # # process assets to populate data_asset_name in batch_definition:
+        # else:
+        #     data_asset_name = "FAKE_DATA_ASSET_NAME"
+        # # TODO: <Alex>Note: currently this list contains exactly one element. Once splitters are implemented, it will need to handle multiples.</Alex>
+        # return [
+        #     BatchDefinition(
+        #         execution_environment_name=self.execution_environment_name,
+        #         data_connector_name=self.name,
+        #         data_asset_name=data_asset_name,
+        #         partition_definition=PartitionDefinition(**batch_request.partition_request),
+        #     )
+        # ]
 
     def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> Any:
-        # FIXME: Make this smarter about choosing the right partitioner
-        try:
-            # TODO: <Alex>We have a method for getting the correct partitioner for a given data_asset_name (it must be given).</Alex>
-            self.default_partitioner
-        except ValueError:
-            raise ge_exceptions.DataConnectorError("Default Partitioner has not been set for data_connector")
-
-        # TODO: <Alex></Alex>
-        # data_asset_name: str = batch_definition.data_asset_name
-        partition_definition: PartitionDefinition = batch_definition.partition_definition
-        batch_request: BatchRequest = BatchRequest(
-            # data_asset_name=data_asset_name,
-            partition_request=partition_definition,
-        )
-        data_reference: Any = self.default_partitioner.convert_batch_request_to_data_reference(
-            batch_request=batch_request
-        )
-
-        return data_reference
+        raise NotImplementedError
+        # # FIXME: Make this smarter about choosing the right partitioner
+        # try:
+        #     # TODO: <Alex>We have a method for getting the correct partitioner for a given data_asset_name (it must be given).</Alex>
+        #     self.default_partitioner
+        # except ValueError:
+        #     raise ge_exceptions.DataConnectorError("Default Partitioner has not been set for data_connector")
+        #
+        # # TODO: <Alex></Alex>
+        # # data_asset_name: str = batch_definition.data_asset_name
+        # partition_definition: PartitionDefinition = batch_definition.partition_definition
+        # batch_request: BatchRequest = BatchRequest(
+        #     # data_asset_name=data_asset_name,
+        #     partition_request=partition_definition,
+        # )
+        # data_reference: Any = self.default_partitioner.convert_batch_request_to_data_reference(
+        #     batch_request=batch_request
+        # )
+        #
+        # return data_reference
 
 
     def self_check(self,
@@ -667,14 +626,28 @@ connector and the default_partitioner_name is set to the name of one of the conf
                 data_asset_name=asset_name,
             ))
             len_batch_definition_list = len(batch_definition_list)
+
+            if self.assets[asset_name].pattern:
+                pattern = self.assets[asset_name].pattern
+            else:
+                pattern = self._default_regex["pattern"]
+
+            if self.assets[asset_name].group_names:
+                group_names = self.assets[asset_name].group_names
+            else:
+                group_names = self._default_regex["group_names"]
             
             example_data_references = [
-                self.default_partitioner.convert_batch_request_to_data_reference(batch_request=BatchRequest(
-                    execution_environment_name=batch_definition.execution_environment_name,
-                    data_connector_name=batch_definition.data_connector_name,
-                    data_asset_name=batch_definition.data_asset_name,
-                    partition_request=batch_definition.partition_definition,
-                ))
+                self.convert_batch_request_to_data_reference(
+                    batch_request=BatchRequest(
+                        execution_environment_name=batch_definition.execution_environment_name,
+                        data_connector_name=batch_definition.data_connector_name,
+                        data_asset_name=batch_definition.data_asset_name,
+                        partition_request=batch_definition.partition_definition,
+                    ),
+                    pattern=pattern,
+                    group_names=group_names,
+                )
                 for batch_definition in batch_definition_list
             ][:max_examples]
             example_data_references.sort()
@@ -697,5 +670,102 @@ connector and the default_partitioner_name is set to the name of one of the conf
 
         return data_connector_obj
 
-    def _get_data_reference_list(self):
+    def _get_data_reference_list(self, data_asset_name: str) -> List[Any]:
         raise NotImplementedError
+
+    @staticmethod
+    def convert_data_reference_to_batch_request(
+        data_reference: Any,
+        pattern,
+        group_names,
+    ) -> Union[BatchRequest, None]:
+
+        matches: Union[re.Match, None] = re.match(pattern, data_reference)
+        if matches is None:
+            return None
+
+        groups = list(matches.groups())
+        partition_definition: PartitionDefinition = PartitionDefinition(
+            dict(zip(group_names, groups))
+        )
+
+        if "data_asset_name" in partition_definition:
+            data_asset_name = partition_definition.pop("data_asset_name")
+        else:
+            data_asset_name = "DEFAULT_ASSET_NAME"
+
+        return BatchRequest(
+            data_asset_name=data_asset_name,
+            partition_request=partition_definition,
+        )
+
+    def convert_batch_request_to_data_reference(
+        self,
+        batch_request: BatchRequest,
+        pattern,
+        group_names,
+    ) -> str:
+        if not isinstance(batch_request, BatchRequest):
+            raise TypeError("batch_request is not of an instance of type BatchRequest")
+
+        template_arguments = batch_request.partition_request
+        if batch_request.data_asset_name is not None:
+            template_arguments["data_asset_name"] = batch_request.data_asset_name
+
+        filepath_template = self._invert_regex_to_data_reference_template(
+            pattern,
+            group_names,
+        )
+        converted_string = filepath_template.format(
+            **template_arguments
+        )
+
+        return converted_string
+
+    @staticmethod
+    def _invert_regex_to_data_reference_template(
+        pattern,
+        group_names,
+    ):
+        """
+        NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
+        """
+        data_reference_template = ""
+        group_name_index = 0
+
+        #print("-"*80)
+        parsed_sre = sre_parse.parse(pattern)
+        for token, value in parsed_sre:
+            #print(type(token), token, value)
+
+            if token == sre_constants.LITERAL:
+                #Transcribe the character directly into the template
+                data_reference_template += chr(value)
+
+            elif token == sre_constants.SUBPATTERN:
+                #Replace the captured group with "{next_group_name}" in the template
+                data_reference_template += "{"+group_names[group_name_index]+"}"
+                group_name_index += 1
+
+            elif token in [
+                sre_constants.MAX_REPEAT,
+                sre_constants.IN,
+                sre_constants.BRANCH,
+                sre_constants.ANY,
+            ]:
+                #Replace the uncaptured group a wildcard in the template
+                data_reference_template += "*"
+
+            elif token in [
+                sre_constants.AT,
+                sre_constants.ASSERT_NOT,
+                sre_constants.ASSERT,
+            ]:
+                pass
+            else:
+                raise ValueError(f"Unrecognized regex token {token} in regex pattern {pattern}.")
+
+        #Collapse adjacent wildcards into a single wildcard
+        data_reference_template = re.sub("\*+", "*", data_reference_template)
+
+        return data_reference_template

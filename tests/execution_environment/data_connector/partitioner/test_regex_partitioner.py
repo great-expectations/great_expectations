@@ -1,3 +1,4 @@
+# TODO: <Alex>The functionality fro RegexPartitioner has now been absorbed by DataConnector -- adjust tests accordingly.</Alex>
 import pytest
 # from string import Template
 import re

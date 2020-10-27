@@ -47,15 +47,12 @@ data_connectors:
         assets:
             Titanic:
                 partitioner_name: default_partitioner_name
-            
-        default_partitioner_name: my_regex_partitioner
-        partitioners:
-            my_regex_partitioner:
-                class_name: RegexPartitioner
-                pattern: (.+)(\\d+)\\.csv
-                group_names:
-                    - letter
-                    - number
+
+        default_regex:
+            pattern: (.+)(\\d+)\\.csv
+            group_names:
+                - letter
+                - number
     """, Loader=yaml.FullLoader), runtime_environment={
             "name": "my_execution_environment"
         },
@@ -348,7 +345,7 @@ def test_some_very_basic_stuff(basic_execution_environment):
     )) == 6
 
     # TODO: <Alex>This call leads to NotImplementedError, because it involves FilesDataConnector._get_available_partitions() which was commented out.</Alex>
-    batch = basic_execution_environment.get_batch_from_batch_definition(
+    batch: Batch = basic_execution_environment.get_batch_from_batch_definition(
         batch_definition=BatchDefinition(
             execution_environment_name="my_execution_environment",
             data_connector_name="my_filesystem_data_connector",
@@ -376,6 +373,17 @@ def test_some_very_basic_stuff(basic_execution_environment):
         execution_environment_name="my_execution_environment",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="B1",
+        partition_request={
+            "letter": "B",
+            "number": "1",
+        }
+    ))
+    assert len(batch_list) == 0
+
+    batch_list: List[Batch] = basic_execution_environment.get_batch_list_from_batch_request(batch_request=BatchRequest(
+        execution_environment_name="my_execution_environment",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="Titanic",
         partition_request={
             "letter": "B",
             "number": "1",
