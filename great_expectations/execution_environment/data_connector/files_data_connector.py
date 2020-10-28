@@ -9,9 +9,7 @@ import logging
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
-# from great_expectations.execution_environment.data_connector.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partition_request import PartitionRequest
-# from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import BatchRequest
 # TODO: <Alex>Deprecate PartitionDefinitionSubset throughout the codebase.</Alex>
@@ -168,90 +166,6 @@ configured runtime keys.
         else:
             return Path(self._data_context_root_directory).joinpath(dir_path)
 
-    # def _get_file_paths_for_data_asset(self, data_asset_name: str = None) -> list:
-    #     """
-    #     Returns:
-    #         paths (list)
-    #     """
-    #     base_directory: str
-    #     glob_directive: str
-
-    #     data_asset_directives: dict = self._get_data_asset_directives(data_asset_name=data_asset_name)
-    #     base_directory = data_asset_directives["base_directory"]
-    #     glob_directive = data_asset_directives["glob_directive"]
-
-    #     if Path(base_directory).is_dir():
-    #         path_list: list
-    #         if glob_directive:
-    #             path_list = self._get_data_reference_list()
-    #         else:
-    #             path_list = [
-    #                 str(posix_path) for posix_path in self._get_valid_file_paths(base_directory=base_directory)
-    #             ]
-
-    #         # Trim paths to exclude the base_directory
-    #         base_directory_len = len(str(base_directory))
-    #         path_list = [path[base_directory_len:] for path in path_list]
-
-    #         return self._verify_file_paths(path_list=path_list)
-    #     raise ge_exceptions.DataConnectorError(f'Expected a directory, but path "{base_directory}" is not a directory.')
-
-    # def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
-    #     base_directory: str
-    #     glob_directive: str
-    #     if (
-    #         data_asset_name is not None
-    #         and isinstance(self.assets.get(data_asset_name), Asset)
-    #     ):
-    #         asset = self.assets[data_asset_name]
-    #         base_directory = asset.base_directory
-    #         if not base_directory:
-    #             base_directory = self.base_directory
-    #         base_directory = self._normalize_directory_path(dir_path=base_directory)
-
-    #         glob_directive: str = asset.glob_directive
-    #         if not glob_directive:
-    #             glob_directive = self.glob_directive
-    #     else:
-    #         base_directory = self.base_directory
-    #         glob_directive = self.glob_directive
-    #     return {"base_directory": base_directory, "glob_directive": glob_directive}
-
-    # @staticmethod
-    # def _verify_file_paths(path_list: list) -> list:
-    #     if not all(
-    #         [not Path(path).is_dir() for path in path_list]
-    #     ):
-    #         raise ge_exceptions.DataConnectorError(
-    #             "All paths for a configured data asset must be files (a directory was detected)."
-    #         )
-    #     return path_list
-
-    # #NOTE Abe 20201015: This looks like dead code.
-    # def _get_valid_file_paths(self, base_directory: str = None) -> list:
-    #     if base_directory is None:
-    #         base_directory = self.base_directory
-    #     path_list: list = list(Path(base_directory).iterdir())
-    #     for path in path_list:
-    #         for extension in self.known_extensions:
-    #             if path.endswith(extension) and not path.startswith("."):
-    #                 path_list.append(path)
-    #             elif Path(path).is_dir:
-    #                 # Make sure there is at least one valid file inside the subdirectory.
-    #                 subdir_path_list: list = self._get_valid_file_paths(base_directory=path)
-    #                 if len(subdir_path_list) > 0:
-    #                     path_list.append(subdir_path_list)
-    #     return list(
-    #         set(
-    #             list(
-    #                 itertools.chain.from_iterable(
-    #                     [
-    #                         element for element in path_list
-    #                     ]
-    #                 )
-    #             )
-    #         )
-    #     )
     def refresh_data_references_cache(
         self,
     ):
@@ -284,9 +198,9 @@ configured runtime keys.
                 data_asset_path = os.path.join(self.base_directory, asset.base_directory)
 
         globbed_paths = Path(data_asset_path).glob(self._glob_directive)
-        paths: List[str] = [os.path.relpath(str(posix_path), data_asset_path) for posix_path in globbed_paths]
+        path_list: List[str] = [os.path.relpath(str(posix_path), data_asset_path) for posix_path in globbed_paths]
 
-        return paths
+        return path_list
 
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """
@@ -450,63 +364,4 @@ configured runtime keys.
         return {
             "path": path
         }
-
-    # TODO: <Alex>Check and Cleanup</Alex>
-    # @staticmethod
-    # def _verify_file_paths(path_list: list) -> list:
-    #     if not all(
-    #         [not Path(path).is_dir() for path in path_list]
-    #     ):
-    #         raise ge_exceptions.DataConnectorError(
-    #             "All paths for a configured data asset must be files (a directory was detected)."
-    #         )
-    #     return path_list
-
-    # TODO: <Alex>Check and Cleanup</Alex>
-    # # NOTE Abe 20201015: This looks like dead code. <Alex>Not yet -- but it will need to be combined with another method.</Alex>
-    # def _get_valid_file_paths(self, base_directory: str = None) -> list:
-    #     if base_directory is None:
-    #         base_directory = self.base_directory
-    #     path_list: list = list(Path(base_directory).iterdir())
-    #     for path in path_list:
-    #         for extension in self.known_extensions:
-    #             if path.endswith(extension) and not path.startswith("."):
-    #                 path_list.append(path)
-    #             elif Path(path).is_dir:
-    #                 # Make sure there is at least one valid file inside the subdirectory.
-    #                 subdir_path_list: list = self._get_valid_file_paths(base_directory=path)
-    #                 if len(subdir_path_list) > 0:
-    #                     path_list.append(subdir_path_list)
-    #     return list(
-    #         set(
-    #             list(
-    #                 itertools.chain.from_iterable(
-    #                     [
-    #                         element for element in path_list
-    #                     ]
-    #                 )
-    #             )
-    #         )
-    #     )
-    
-    # TODO: <Alex>Deprecated</Alex>
-    # def _build_batch_spec_from_partition(
-    #     self,
-    #     partition: Partition,
-    #     batch_request: BatchRequest,
-    #     batch_spec: BatchSpec
-    # ) -> PathBatchSpec:
-    #     """
-    #     Args:
-    #         partition:
-    #         batch_request:
-    #         batch_spec:
-    #     Returns:
-    #         batch_spec
-    #     """
-    #     if not batch_spec.get("path"):
-    #         path: str = os.path.join(self._base_directory, partition.data_reference)
-    #         batch_spec["path"] = path
-    #     return PathBatchSpec(batch_spec)
-
 

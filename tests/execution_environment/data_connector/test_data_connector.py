@@ -153,13 +153,6 @@ def test_available_data_asset_names():
 
 
 def test__batch_definition_matches_batch_request():
-    # TODO: <Alex></Alex>
-    # my_data_connector = SinglePartitionDictDataConnector(
-    #     name="my_data_connector",
-    #     execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-    #     data_reference_dict={},
-    # )
-
     # TODO: <Alex>We need to cleanup PyCharm warnings.</Alex>
     A = BatchDefinition(
         execution_environment_name="A",

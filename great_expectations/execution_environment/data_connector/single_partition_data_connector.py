@@ -1,7 +1,9 @@
-import logging
+import os
 from typing import Union, List, Any, Optional
 from pathlib import Path
 import copy
+
+import logging
 
 from great_expectations.core.id_dict import (
     PartitionRequest,
@@ -40,9 +42,6 @@ class SinglePartitionDataConnector(DataConnector):
         self,
         name: str,
         execution_environment_name: str,
-        # TODO: <Alex>Delete deprecated/unused code.</Alex>
-        # assets: dict = None,
-        # partitioner: dict = None,
         default_regex: dict = None,
         base_directory: str = None,
         glob_directive: str = "*",
@@ -55,20 +54,10 @@ class SinglePartitionDataConnector(DataConnector):
             default_regex = {}
         self._default_regex = default_regex
 
-        # TODO: <Alex>Delete deprecated/unused code.</Alex>
-        # if partitioner is None:
-        #     partitioner = {}
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
-            # TODO: <Alex>Delete deprecated/unused code.</Alex>
-            # assets=assets,
-            # partitioners={
-            #     "ONE_AND_ONLY_PARTITIONER" : partitioner
-            # },
-            # default_partitioner_name="ONE_AND_ONLY_PARTITIONER",
             execution_engine=None,
-            # data_context_root_directory=None
         )
 
     def refresh_data_references_cache(self):
@@ -257,12 +246,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         This method is used to refresh the cache.
         """
         globbed_paths = Path(self.base_directory).glob(self.glob_directive)
-        # TODO: <Alex>Clean up to use os.path.relpath()</Alex>
-        path_list: List[str] = [str(posix_path) for posix_path in globbed_paths]
-
-        # Trim paths to exclude the base_directory
-        base_directory_len: int = len(str(self.base_directory))
-        path_list: List[str] = [path[base_directory_len:] for path in path_list]
+        path_list: List[str] = [os.path.relpath(str(posix_path), self.base_directory) for posix_path in globbed_paths]
 
         return path_list
 

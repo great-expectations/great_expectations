@@ -17,8 +17,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
-# from great_expectations.execution_environment.data_connector.partitioner import Partitioner
-# from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partition_request import (
     PartitionRequest,
     build_partition_request
