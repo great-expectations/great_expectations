@@ -16,55 +16,17 @@ from great_expectations.core.batch import (
     PartitionDefinition,
 )
 
-def generate_ascending_list_of_datetimes(
-    k,
-    start_date=datetime.date(2020,1,1),
-    end_date=datetime.date(2020,12,31)
-):
-    start_time = datetime.datetime(start_date.year, start_date.month, start_date.day)
-    days_between_dates = (end_date - start_date).total_seconds()
-    
-    datetime_list = [start_time + datetime.timedelta(seconds=random.randrange(days_between_dates)) for i in range(k)]
-    datetime_list.sort()
-    return datetime_list
-
 class SqlDataConnector(DataConnector):
     def __init__(self,
         name:str,
         execution_environment_name: str,
+        execution_engine,
         assets: List[Dict],
     ):
         self._assets = assets
         
-        self.db = sqlite3.connect("file::memory:")
-
-        k = 120
-        random.seed(1)
-
-        timestamp_list = generate_ascending_list_of_datetimes(k, end_date=datetime.date(2020,1,31))
-        date_list = [datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list]
-
-        batch_ids = [random.randint(0,10) for i in range(k)]
-        batch_ids.sort()
-
-        session_ids = [random.randint(2,60) for i in range(k)]
-        session_ids.sort()
-        session_ids = [i-random.randint(0,2) for i in session_ids]
-
-        events_df = pd.DataFrame({
-            "id" : range(k),
-            "batch_id" : batch_ids,
-            "date" : date_list,
-            "y" : [d.year for d in date_list],
-            "m" : [d.month for d in date_list],
-            "d" : [d.day for d in date_list],
-            "timestamp" : timestamp_list,
-            "session_id" : session_ids,
-            "event_type" : [random.choice(["start", "stop", "continue"]) for i in range(k)],
-            "favorite_color" : ["#"+"".join([random.choice(list("0123456789ABCDEF")) for j in range(6)]) for i in range(k)]
-        })
-
-        # events_df.to_sql("events_df", self.db)
+        # !!!
+        self.db = execution_engine
 
         super(SqlDataConnector, self).__init__(
             name=name,
@@ -90,19 +52,6 @@ class SqlDataConnector(DataConnector):
             splits = list(pd.read_sql(f"SELECT DISTINCT({splitter_column}) FROM {table_name}", self.db)[splitter_column])
 
             self._data_references_cache[data_asset_name] = splits
-            # batch_definitions = []
-            # for split in splits:
-            #     batch_definitions.append(BatchDefinition(
-            #         execution_environment_name=self.execution_environment_name,
-            #         data_connector_name=self.name,
-            #         data_asset_name=data_asset_name,
-            #         partition_definition=PartitionDefinition({
-            #             splitter_column: split,
-            #         })
-            #     ))
-            
-            # #Maybe make this a list of BatchRequests...?
-            # self._data_references_cache[data_asset_name] = batch_definitions
             
     def get_available_data_asset_names(self):
         return list(self.assets.keys())
