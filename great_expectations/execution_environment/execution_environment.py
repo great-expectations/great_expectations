@@ -266,7 +266,7 @@ class ExecutionEnvironment:
         return data_connector
 
     def _build_data_connector_from_config(
-        self, name: str, config: dict,
+        self, name: str, config: Dict,
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         data_connector: DataConnector = instantiate_class_from_config(

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import pandas as pd
 
@@ -215,10 +215,10 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     def _pandas_value_length_between(
         self,
         series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
+        metrics: Dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        runtime_configuration: Dict = None,
         filter_column_isnull: bool = True,
     ):
         min_value = metric_value_kwargs["min_value"]
@@ -268,9 +268,9 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     def _sqlalchemy_value_length_between(
         self,
         column: sa.column,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metrics: Dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         runtime_configuration: dict = None,
         filter_column_isnull: bool = True,
     ):

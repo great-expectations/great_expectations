@@ -174,7 +174,7 @@ Notes:
         return batch_spec
 
     def get_compute_domain(
-        self, domain_kwargs: dict,
+        self, domain_kwargs: Dict,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,

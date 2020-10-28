@@ -444,14 +444,14 @@ class Expectation(ABC, metaclass=MetaExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict[str, Any],
-        runtime_configuration: dict,
+        runtime_configuration: Dict,
         execution_engine: ExecutionEngine,
     ):
         raise NotImplementedError
 
     def metrics_validate(
         self,
-        metrics: dict,
+        metrics: Dict,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
@@ -821,7 +821,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
     def _validate(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):

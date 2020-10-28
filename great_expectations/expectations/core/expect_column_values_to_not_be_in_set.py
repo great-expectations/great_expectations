@@ -211,9 +211,9 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     def _pandas_column_values_not_in_set(
         self,
         series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metrics: Dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         runtime_configuration: dict = None,
         filter_column_isnull: bool = True,
     ):

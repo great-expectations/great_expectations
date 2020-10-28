@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 
 import pandas as pd
 
@@ -202,9 +202,9 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     def _spark_column_values_increasing(
         self,
         column: "pyspark.sql.Column",
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metrics: Dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         runtime_configuration: dict = None,
         filter_column_isnull: bool = True,
     ):

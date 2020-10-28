@@ -100,9 +100,9 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     #     self,
     #     batches: Dict[str, Batch],
     #     execution_engine: PandasExecutionEngine,
-    #     metric_domain_kwargs: dict,
-    #     metric_value_kwargs: dict,
-    #     metrics: dict,
+    #     metric_domain_kwargs: Dict,
+    #     metric_value_kwargs: Dict,
+    #     metrics: Dict,
     #     runtime_configuration: dict = None,
     #     filter_column_isnull: bool = False,
     # ):

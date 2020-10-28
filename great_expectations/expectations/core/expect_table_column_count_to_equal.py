@@ -81,9 +81,9 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         self,
         batches: Dict[str, Batch],
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
     ):
         """Column count metric function"""
@@ -155,7 +155,7 @@ class ExpectTableColumnCountToEqual(TableExpectation):
     def _validates(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):

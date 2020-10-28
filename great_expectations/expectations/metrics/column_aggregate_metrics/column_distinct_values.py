@@ -34,10 +34,10 @@ class ColumnDistinctValues(ColumnMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
-        runtime_configuration: dict,
+        runtime_configuration: Dict,
     ):
         observed_value_counts = metrics["column.value_counts"]
         return set(observed_value_counts.index)
@@ -46,10 +46,10 @@ class ColumnDistinctValues(ColumnMetricProvider):
     def _spark(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
-        runtime_configuration: dict,
+        runtime_configuration: Dict,
     ):
         observed_value_counts = metrics["column.value_counts"]
         return set(observed_value_counts.index)
@@ -88,10 +88,10 @@ class ColumnDistinctValueCounts(ColumnMetricProvider):
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
-        runtime_configuration: dict,
+        runtime_configuration: Dict,
     ):
         sort = metric_value_kwargs["sort"]
         collate = metric_value_kwargs["collate"]
@@ -129,10 +129,10 @@ class ColumnDistinctValueCounts(ColumnMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
-        runtime_configuration: dict,
+        runtime_configuration: Dict,
     ):
         sort = metric_value_kwargs["sort"]
         collate = metric_value_kwargs["collate"]
@@ -185,10 +185,10 @@ class ColumnDistinctValueCounts(ColumnMetricProvider):
     def _spark(
         cls,
         execution_engine: "SparkDFExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
-        runtime_configuration: dict,
+        runtime_configuration: Dict,
     ):
         sort = metric_value_kwargs["sort"]
         collate = metric_value_kwargs["collate"]

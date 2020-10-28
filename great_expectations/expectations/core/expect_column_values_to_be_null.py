@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_configuration import parse_result_format
@@ -151,7 +151,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     def _validate(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):

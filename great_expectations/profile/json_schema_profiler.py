@@ -62,7 +62,7 @@ class JsonSchemaProfiler(Profiler):
         validator.check_schema(schema)
         return True
 
-    def _profile(self, schema: dict, suite_name: str = None) -> ExpectationSuite:
+    def _profile(self, schema: Dict, suite_name: str = None) -> ExpectationSuite:
         if not suite_name:
             raise ValueError("Please provide a suite name when using this profiler.")
         expectations = []

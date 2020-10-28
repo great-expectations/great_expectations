@@ -219,6 +219,17 @@ class SqlAlchemyBatchData:
         """Returns a table of the data inside the sqlalchemy_execution_engine"""
         return self._table
 
+    @property
+    def schema(self):
+        return self._schema
+
+    @property
+    def selectable(self):
+        if self._table is not None:
+            return self._table
+        else:
+            return sa.text(self._query)
+
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
@@ -526,14 +537,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if self.active_batch_data:
                 data_object = self.active_batch_data
             else:
-                raise ValidationError(
+                raise GreatExpectationsError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.loaded_batch_data:
                 data_object = self.loaded_batch_data[batch_id]
             else:
-                raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
+                raise GreatExpectationsError(
+                    f"Unable to find batch with batch_id {batch_id}"
+                )
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()

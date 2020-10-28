@@ -382,7 +382,7 @@ class Validator:
         self,
         execution_engine: "ExecutionEngine",
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
     ):
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are

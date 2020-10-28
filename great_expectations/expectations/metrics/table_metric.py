@@ -70,10 +70,10 @@ def aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
             def inner_func(
                 cls,
                 execution_engine: "PandasExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 df, _, _ = execution_engine.get_compute_domain(
                     domain_kwargs=metric_domain_kwargs,
@@ -92,10 +92,10 @@ def aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
             def inner_func(
                 cls,
                 execution_engine: "SqlAlchemyExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 (
                     selectable,
@@ -127,10 +127,10 @@ def aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
             def inner_func(
                 cls,
                 execution_engine: "SparkDFExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 (
                     data,

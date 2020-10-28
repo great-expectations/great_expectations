@@ -234,7 +234,7 @@ class ExpectColumnUniqueValueCountToBeBetween(TableExpectation):
     def _validates(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
