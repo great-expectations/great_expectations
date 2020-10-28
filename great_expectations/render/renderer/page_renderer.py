@@ -777,7 +777,7 @@ class ProfilingResultsPageRenderer(Renderer):
             column_section_renderer = {
                 "class_name": "ProfilingResultsColumnSectionRenderer"
             }
-        module_name = "great_expectations.render.renderer.other_section_renderer"
+        module_name = "great_expectations.render.renderer.profiling_results_overview_section_renderer"
         self._overview_section_renderer = instantiate_class_from_config(
             config=overview_section_renderer,
             runtime_environment={},

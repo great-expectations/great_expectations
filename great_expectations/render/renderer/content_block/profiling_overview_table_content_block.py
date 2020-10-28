@@ -6,7 +6,7 @@ from great_expectations.render.types import (
 from .content_block import ContentBlockRenderer
 
 
-class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
+class ProfilingColumnPropertiesTableContentBlockRenderer(ContentBlockRenderer):
     @classmethod
     def render(cls, ge_object, header_row=None):
         """Each expectation method should return a list of rows"""

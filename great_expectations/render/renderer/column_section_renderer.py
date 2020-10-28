@@ -63,46 +63,30 @@ class ColumnSectionRenderer(Renderer):
 
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
-    def __init__(
-        self,
-        overview_table_renderer=None,
-        expectation_string_renderer=None,
-        runtime_environment=None,
-    ):
+    def __init__(self, properties_table_renderer=None, expectation_string_renderer=None, runtime_environment=None):
         super().__init__()
-        if overview_table_renderer is None:
-            overview_table_renderer = {
-                "class_name": "ProfilingOverviewTableContentBlockRenderer"
+        if properties_table_renderer is None:
+            properties_table_renderer = {
+                "class_name": "ProfilingColumnPropertiesTableContentBlockRenderer"
             }
         if expectation_string_renderer is None:
             expectation_string_renderer = {"class_name": "ExpectationStringRenderer"}
         module_name = "great_expectations.render.renderer.content_block"
-        self._overview_table_renderer = instantiate_class_from_config(
-            config=overview_table_renderer,
+        self._properties_table_renderer = instantiate_class_from_config(
+            config=properties_table_renderer,
             runtime_environment=runtime_environment,
             config_defaults={"module_name": module_name},
         )
-        if not self._overview_table_renderer:
+        if not self._properties_table_renderer:
             raise ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=overview_table_renderer["class_name"],
-            )
-        self._expectation_string_renderer = instantiate_class_from_config(
-            config=expectation_string_renderer,
-            runtime_environment=runtime_environment,
-            config_defaults={"module_name": module_name},
-        )
-        if not self._expectation_string_renderer:
-            raise ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=expectation_string_renderer["class_name"],
+                class_name=properties_table_renderer["class_name"],
             )
 
         self.content_block_function_names = [
             "_render_header",
-            "_render_overview_table",
+            "_render_properties_table",
             "_render_quantile_table",
             "_render_stats_table",
             "_render_values_set",
@@ -270,7 +254,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
         )
 
-    def _render_overview_table(self, evrs):
+    def _render_properties_table(self, evrs):
         evr_list = [
             self._find_evr_by_type(evrs, "expect_column_unique_value_count_to_be_between"),
             self._find_evr_by_type(evrs, "expect_column_proportion_of_unique_values_to_be_between"),
@@ -285,7 +269,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         ]
 
         if len(evrs) > 0:
-            new_content_block = self._overview_table_renderer.render(evrs)
+            new_content_block = self._properties_table_renderer.render(evrs)
             new_content_block.header = RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",

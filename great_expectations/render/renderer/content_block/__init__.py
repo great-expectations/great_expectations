@@ -6,5 +6,5 @@ from .bullet_list_content_block import ExpectationSuiteBulletListContentBlockRen
 from .exception_list_content_block import ExceptionListContentBlockRenderer
 from .expectation_string import ExpectationStringRenderer
 from .profiling_overview_table_content_block import (
-    ProfilingOverviewTableContentBlockRenderer,
+    ProfilingColumnPropertiesTableContentBlockRenderer,
 )
