@@ -39,7 +39,7 @@ def _build_spark_engine(df):
 def _build_sa_engine(df):
     import sqlalchemy as sa
 
-    eng = sa.create_engine("sqlite://", echo=True)
+    eng = sa.create_engine("sqlite://", echo=False)
     df.to_sql("test", eng)
     batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
     batch = Batch(data=batch_data)
@@ -256,6 +256,35 @@ def test_map_unique_pd():
     assert list(results[desired_metric.id]) == [False, False, True, True]
 
 
+def test_map_unique_spark():
+    engine = _build_spark_engine(
+        pd.DataFrame(
+            {
+                "a": [1, 2, 3, 3, 4, None],
+                "b": [None, "foo", "bar", "baz", "qux", "fish"],
+            }
+        )
+    )
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.unique",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == 2
+
+
 def test_map_unique_sa():
     engine = _build_sa_engine(
         pd.DataFrame(
@@ -265,7 +294,7 @@ def test_map_unique_sa():
     condition_metric = MetricConfiguration(
         metric_name="column_values.unique",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"value_set": [1]},
+        metric_value_kwargs=dict(),
     )
     metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
 
