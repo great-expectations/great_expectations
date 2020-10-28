@@ -99,7 +99,9 @@ def format_dict_for_error_message(dict_):
     return "\n\t".join("\t\t".join((str(key), str(dict_[key]))) for key in dict_)
 
 
-def substitute_config_variable(template_str, config_variables_dict):
+def substitute_config_variable(
+    template_str, config_variables_dict, dollar_sign_escape_string: str = r"\$"
+):
     """
     This method takes a string, and if it contains a pattern ${SOME_VARIABLE} or $SOME_VARIABLE,
     returns a string where the pattern is replaced with the value of SOME_VARIABLE,
@@ -113,22 +115,26 @@ def substitute_config_variable(template_str, config_variables_dict):
 
     If the value to substitute is not a string, it is returned as-is.
 
-    If the value to substitute begins with DOLLAR_SIGN_ESCAPE_STRING it is not substituted.
+    If the value to substitute begins with dollar_sign_escape_string it is not substituted.
 
     :param template_str: a string that might or might not be of the form ${SOME_VARIABLE}
             or $SOME_VARIABLE
     :param config_variables_dict: a dictionary of config variables. It is loaded from the
             config variables store (by default, "uncommitted/config_variables.yml file)
-    :return:
+    :param dollar_sign_escape_string: a string that will be used in place of a `$` when substitution
+            is not desired.
+
+    :return: a string with values substituted, or the same object if template_str is not a string.
     """
-    DOLLAR_SIGN_ESCAPE_STRING = "$--"
 
     if template_str is None:
         return template_str
 
     # 1. Make substitutions for non-escaped patterns
     try:
-        match = re.finditer(r"\$\{(.*?)\}|\$([_a-zA-Z][_a-zA-Z0-9]*)", template_str)
+        match = re.finditer(
+            r"(?<!\\)\$\{(.*?)\}|(?<!\\)\$([_a-zA-Z][_a-zA-Z0-9]*)", template_str
+        )
     except TypeError:
         # If the value is not a string (e.g., a boolean), we should return it as is
         return template_str
@@ -138,27 +144,25 @@ def substitute_config_variable(template_str, config_variables_dict):
         config_variable_name = m.group(1) or m.group(2)
         config_variable_value = config_variables_dict.get(config_variable_name)
 
-        # Do not substitute if substitution string is preceded by DOLLAR_SIGN_ESCAPE_STRING
-        # The escape string should also not be picked up by the regex so this may
-        # be belt and suspenders.
-        if not config_variable_name.startswith(DOLLAR_SIGN_ESCAPE_STRING):
-            if config_variable_value is not None:
-                if not isinstance(config_variable_value, str):
-                    return config_variable_value
-                template_str = template_str.replace(m.group(), config_variable_value)
-            else:
-                raise MissingConfigVariableError(
-                    f"""\n\nUnable to find a match for config substitution variable: `{config_variable_name}`.
+        if config_variable_value is not None:
+            if not isinstance(config_variable_value, str):
+                return config_variable_value
+            template_str = template_str.replace(m.group(), config_variable_value)
+        else:
+            raise MissingConfigVariableError(
+                f"""\n\nUnable to find a match for config substitution variable: `{config_variable_name}`.
 Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
 See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets""",
-                    missing_config_variable=config_variable_name,
-                )
+                missing_config_variable=config_variable_name,
+            )
 
     # 2. Replace the "$"'s that had been escaped
-    return template_str.replace(DOLLAR_SIGN_ESCAPE_STRING, "$")
+    return template_str.replace(dollar_sign_escape_string, "$")
 
 
-def substitute_all_config_variables(data, replace_variables_dict):
+def substitute_all_config_variables(
+    data, replace_variables_dict, dollar_sign_escape_string: str = r"\$"
+):
     """
     Substitute all config variables of the form ${SOME_VARIABLE} in a dictionary-like
     config object for their values.
@@ -181,7 +185,9 @@ def substitute_all_config_variables(data, replace_variables_dict):
         return [
             substitute_all_config_variables(v, replace_variables_dict) for v in data
         ]
-    return substitute_config_variable(data, replace_variables_dict)
+    return substitute_config_variable(
+        data, replace_variables_dict, dollar_sign_escape_string
+    )
 
 
 def file_relative_path(dunderfile, relative_path):

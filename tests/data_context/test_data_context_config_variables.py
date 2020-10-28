@@ -116,7 +116,7 @@ def test_setting_config_variables_is_visible_immediately(
     config_variables_with_escaped_vars = context._load_config_variables_file()
     assert (
         config_variables_with_escaped_vars["escaped_password"]
-        == "this_is_$--mypassword_escape_the_$--signs"
+        == r"this_is_\$mypassword_escape_the_\$signs"
     )
     # Ensure that when reading the escaped config variable, the escaping should be removed
     assert (
@@ -188,6 +188,7 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
 
 def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypatch):
     monkeypatch.setenv("FOO", "BAR")
+    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", r"ive_been_\$replaced")
     value_from_environment = "from_environment"
     os.environ["replace_me"] = value_from_environment
 
@@ -290,14 +291,14 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
 
     # Escaped `$` (don't substitute, but return un-escaped string)
     assert (
-        substitute_config_variable("abc$--{arg0}$--aRg3", config_variables_dict)
+        substitute_config_variable(r"abc\${arg0}\$aRg3", config_variables_dict)
         == "abc${arg0}$aRg3"
     )
 
     # Multiple configurations together
     assert (
         substitute_config_variable(
-            "prefix$ARG4.$arg0/$aRg3:${ARG4}/$--dontsub${arg0}:${aRg3}.suffix",
+            r"prefix$ARG4.$arg0/$aRg3:${ARG4}/\$dontsub${arg0}:${aRg3}.suffix",
             config_variables_dict,
         )
         == "prefixval_of_ARG_4.val_of_arg_0/val_of_aRg_3:val_of_ARG_4/$dontsubval_of_arg_0:val_of_aRg_3.suffix"
@@ -308,7 +309,7 @@ def test_substitute_env_var_in_config_variable_file(
     monkeypatch, empty_data_context_with_config_variables
 ):
     monkeypatch.setenv("FOO", "correct_val_of_replace_me")
-    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
+    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", r"ive_been_\$replaced")
     context = empty_data_context_with_config_variables
     context_config = context.get_config_with_variables_substituted()
     my_generator = context_config["datasources"]["mydatasource"][

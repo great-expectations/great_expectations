@@ -209,6 +209,7 @@ class BaseDataContext:
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
+    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     @classmethod
     def validate_config(cls, project_config):
@@ -716,7 +717,9 @@ class BaseDataContext:
             config = self._project_config
 
         substituted_config_variables = substitute_all_config_variables(
-            dict(self._load_config_variables_file()), dict(os.environ)
+            dict(self._load_config_variables_file()),
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
         substitutions = {
@@ -726,7 +729,9 @@ class BaseDataContext:
         }
 
         return DataContextConfig(
-            **substitute_all_config_variables(config, substitutions)
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
         )
 
     def save_config_variable(self, config_variable_name, value):
@@ -741,7 +746,11 @@ class BaseDataContext:
         """
         config_variables = self._load_config_variables_file()
         # Escape $ if value is a str
-        value = value.replace("$", "$--") if isinstance(value, str) else value
+        value = (
+            value.replace("$", self.DOLLAR_SIGN_ESCAPE_STRING)
+            if isinstance(value, str)
+            else value
+        )
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:
