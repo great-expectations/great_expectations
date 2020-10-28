@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
-    condition_metric_name = "column_values.not_match_regex_list"
+    condition_metric_name = "column_values.match_regex_list"
     condition_value_keys = ("regex_list",)
 
     @column_map_condition(engine=PandasExecutionEngine)
