@@ -133,7 +133,7 @@ class ValidationResultsPageRenderer(Renderer):
             self._render_validation_info(validation_results=validation_results)
         ]
 
-        if validation_results["meta"].get("batch_markers"):
+        if validation_results.meta.get("batch_markers"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
                     input_dict=validation_results["meta"].get("batch_markers"),
@@ -141,34 +141,34 @@ class ValidationResultsPageRenderer(Renderer):
                 )
             )
 
-        if validation_results["meta"].get("batch_kwargs"):
+        if validation_results.meta.get("batch_kwargs"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_kwargs"),
+                    input_dict=validation_results.meta.get("batch_kwargs"),
                     header="Batch Kwargs",
                 )
             )
 
-        if validation_results["meta"].get("batch_parameters"):
+        if validation_results.meta.get("batch_parameters"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_parameters"),
+                    input_dict=validation_results.meta.get("batch_parameters"),
                     header="Batch Parameters",
                 )
             )
 
-        if validation_results["meta"].get("batch_spec"):
+        if validation_results.meta.get("batch_spec"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_spec"),
+                    input_dict=validation_results.meta.get("batch_spec"),
                     header="Batch Spec",
                 )
             )
 
-        if validation_results["meta"].get("batch_request"):
+        if validation_results.meta.get("batch_request"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_request"),
+                    input_dict=validation_results.meta.get("batch_request"),
                     header="Batch Definition",
                 )
             )
@@ -472,7 +472,7 @@ class ValidationResultsPageRenderer(Renderer):
 
     @classmethod
     def _render_validation_statistics(cls, validation_results):
-        statistics = validation_results["statistics"]
+        statistics = validation_results.statistics
         statistics_dict = OrderedDict(
             [
                 ("evaluated_expectations", "Evaluated Expectations"),
