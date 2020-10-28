@@ -65,10 +65,10 @@ def convert_data_reference_string_to_batch_request_using_regex(
         dict(zip(group_names, groups))
     )
 
-    # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition is problematic; idea: resurrect the Partition class.  If this is only a precautionary step, then it should not be here; otherwise, it might conceal an underlying problem.</Alex>
+    # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; idea: resurrect the Partition class.</Alex>
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
-    # if "data_asset_name" in partition_definition:
-    #     data_asset_name = partition_definition.pop("data_asset_name")
+    if "data_asset_name" in partition_definition:
+        data_asset_name = partition_definition.pop("data_asset_name")
 
     return BatchRequest(
         data_asset_name=data_asset_name,

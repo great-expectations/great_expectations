@@ -313,6 +313,7 @@ def test_self_check():
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         default_regex={
             "pattern": "(.+)-(\\d+)\\.csv",
+            # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; idea: resurrect the Partition class.</Alex>
             "group_names": ["data_asset_name", "number"]
         }
     )
