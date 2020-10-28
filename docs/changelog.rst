@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [BUGFIX] Escape $ characters in configuration, support multiple substitutions #2015
 
 0.12.6
 -----------------
