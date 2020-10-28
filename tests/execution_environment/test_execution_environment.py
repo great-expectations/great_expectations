@@ -51,8 +51,8 @@ data_connectors:
 
         default_regex:
             # TODO: <Alex>Investigate: this potentially breaks the data_reference centric design.</Alex>
-            # pattern: (.+)_(\\d+)\\.csv
-            pattern: (.+)_(\\d+)\\.[a-z][a-z][a-z]
+            pattern: (.+)_(\\d+)\\.csv
+            # pattern: (.+)_(\\d+)\\.[a-z][a-z][a-z]
             group_names:
             - letter
             - number
