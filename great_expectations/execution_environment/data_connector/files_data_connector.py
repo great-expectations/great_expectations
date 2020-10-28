@@ -28,7 +28,9 @@ from great_expectations.core.batch import (
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
+    map_data_reference_string_to_batch_definition_list_using_regex,
     convert_data_reference_string_to_batch_request_using_regex,
+    map_batch_definition_to_data_reference_string_using_regex,
     convert_batch_request_to_data_reference_string_using_regex
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -258,31 +260,65 @@ configured runtime keys.
         # Map data_references to batch_definitions
         self._data_references_cache = {}
 
+        print(f'\n[ALEX_TEST] FILES_DATA_CONNECTOR::refresh_data_references_cache ; AVAILABLE_DATA_ASSET_NAMES: {self.get_available_data_asset_names()}')
         for data_asset_name in self.get_available_data_asset_names():
             self._data_references_cache[data_asset_name] = {}
 
-            for data_reference in self._get_data_reference_list(data_asset_name):
+            for data_reference in self._get_data_reference_list_from_cache_by_data_asset_name(
+                data_asset_name=data_asset_name
+            ):
                 mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(
                     data_reference=data_reference,
                     data_asset_name=data_asset_name,
                 )
                 self._data_references_cache[data_asset_name][data_reference] = mapped_batch_definition_list
 
-    def _get_data_reference_list(self, data_asset_name: str) -> List[str]:
+    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
         """
+        batch_definition_list = self.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                execution_environment_name=self.execution_environment_name,
+                data_connector_name=self.name,
+                data_asset_name=data_asset_name,
+            )
+        )
 
-        if self.assets[data_asset_name].base_directory:
-            data_asset_path = os.path.join(self.base_directory, self.assets[data_asset_name].base_directory)
-        else:
-            data_asset_path = self.base_directory
+        regex_config: dict = copy.deepcopy(self._default_regex)
+        # Override the defaults
+        if self.assets and data_asset_name in self.assets:
+            asset: Asset = self.assets[data_asset_name]
+            if asset.pattern:
+                regex_config["pattern"] = asset.pattern
+            if asset.group_names:
+                regex_config["group_names"] = asset.group_names
+        pattern: str = regex_config["pattern"]
+        group_names: List[str] = regex_config["group_names"]
 
-        globbed_paths = Path(data_asset_path).glob(self._glob_directive)
-        paths: List[str] = [os.path.relpath(str(posix_path), data_asset_path) for posix_path in globbed_paths]
+        path_list: List[str] = [
+            convert_batch_request_to_data_reference_string_using_regex(
+                batch_request=BatchRequest(
+                    execution_environment_name=batch_definition.execution_environment_name,
+                    data_connector_name=batch_definition.data_connector_name,
+                    data_asset_name=batch_definition.data_asset_name,
+                    partition_request=batch_definition.partition_definition,
+                ),
+                regex_pattern=pattern,
+                group_names=group_names,
+            )
+            for batch_definition in batch_definition_list
+        ]
 
-        return paths
+        #TODO: Sort with a real sorter here
+        path_list.sort()
+
+        return path_list
+
+    # TODO: <Alex>Do we leave this like this, or call the one above with a NULL data_asset_name passed to it?</Alex>
+    def _get_data_reference_list(self) -> List[str]:
+        pass
 
     def get_data_reference_list_count(self) -> int:
         if self._data_references_cache is None:
@@ -296,11 +332,11 @@ configured runtime keys.
 
         return total_references
 
-    def get_unmatched_data_references(self):
+    def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
-            raise ValueError("_data_references_cache is None. Have you called refresh_data_references_cache yet?")
+            raise ValueError('_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?')
 
-        unmatched_data_references = []
+        unmatched_data_references: List[str] = []
         for data_asset_name, sub_cache in self._data_references_cache.items():
             unmatched_data_references += [k for k, v in sub_cache.items() if v is None]
 
@@ -319,18 +355,22 @@ configured runtime keys.
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         if batch_request.data_connector_name != self.name:
-            raise ValueError(f"data_connector_name {batch_request.data_connector_name} does not match name {self.name}.")
+            raise ValueError(
+                f'data_connector_name "{batch_request.data_connector_name}" does not match name "{self.name}".'
+            )
 
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
+        print(f'\n[ALEX_TEST] FILES_DATA_CONNECTOR::get_batch_definition_list_from_batch_request ; BATCH_REQUEST: {batch_request} ; DATA_REFERENCE_CACHE: {self._data_references_cache} ; TYPE: {str(type(self._data_references_cache))}')
 
         batch_definition_list: List[BatchDefinition] = []
         for data_asset_name, sub_cache in self._data_references_cache.items():
+            # TODO: <Alex>A cleaner implementation would be a filter on sub_cache.values() with "batch_definition_matches_batch_request()" as condition, since "data_reference" is not involved.</Alex>
             for data_reference, batch_definition in sub_cache.items():
                 if batch_definition is not None:
                     if batch_definition_matches_batch_request(
-                            batch_definition=batch_definition[0],
-                            batch_request=batch_request
+                        batch_definition=batch_definition[0],
+                        batch_request=batch_request
                     ):
                         batch_definition_list.extend(batch_definition)
 
@@ -339,7 +379,7 @@ configured runtime keys.
     def _map_data_reference_to_batch_definition_list(
         self,
         data_reference: str,
-        data_asset_name: str
+        data_asset_name: str = None
     ) -> Optional[List[BatchDefinition]]:
         regex_config: dict = copy.deepcopy(self._default_regex)
         # Override the defaults
@@ -352,23 +392,13 @@ configured runtime keys.
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
 
-        # TODO: <Alex>The two-steps process involving a BatchRequest intermediary can be simplified by introducing a common class.</Alex>
-        batch_request: BatchRequest = convert_data_reference_string_to_batch_request_using_regex(
+        return map_data_reference_string_to_batch_definition_list_using_regex(
+            execution_environment_name=self.execution_environment_name,
+            data_connector_name=self.name,
             data_reference=data_reference,
             regex_pattern=pattern,
-            group_names=group_names,
+            group_names=group_names
         )
-        if batch_request is None:
-            return None
-
-        return [
-            BatchDefinition(
-                execution_environment_name=self.execution_environment_name,
-                data_connector_name=self.name,
-                data_asset_name=data_asset_name,
-                partition_definition=PartitionDefinition(batch_request.partition_request),
-            )
-        ]
 
     def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
         data_asset_name: str = batch_definition.data_asset_name
@@ -379,27 +409,16 @@ configured runtime keys.
             asset: Asset = self.assets[data_asset_name]
             if asset.pattern:
                 regex_config["pattern"] = asset.pattern
-
             if asset.group_names:
                 regex_config["group_names"] = asset.group_names
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
 
-        partition_definition: PartitionDefinition = batch_definition.partition_definition
-        partition_request: dict = partition_definition
-        batch_request: BatchRequest = BatchRequest(
-            # TODO: <Alex>Incorporating data_asset_name results in failed search.</Alex>
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-        )
-
-        data_reference: str = convert_batch_request_to_data_reference_string_using_regex(
-            batch_request=batch_request,
+        return map_batch_definition_to_data_reference_string_using_regex(
+            batch_definition=batch_definition,
             regex_pattern=pattern,
             group_names=group_names
         )
-
-        return data_reference
 
     def _generate_batch_spec_parameters_from_batch_definition(
         self,
@@ -476,168 +495,4 @@ configured runtime keys.
     #         batch_spec["path"] = path
     #     return PathBatchSpec(batch_spec)
 
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition
-    ) -> dict:
-        path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
-        if path:
-            path = os.path.join(self._base_directory, path)
-        else:
-            raise ValueError(
-                f"""No partition for {batch_definition.data_asset_name} matches the given partition definition
-{batch_definition.partition_definition} from batch definition {batch_definition}.
-                """
-            )
-        return {
-            "path": path
-        }
 
-    def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
-        data_asset_name: str = batch_definition.data_asset_name
-        partition_definition: PartitionDefinition = batch_definition.partition_definition
-        batch_request: BatchRequest = BatchRequest(
-            partition_request=partition_definition,
-        )
-
-        regex_config: dict = copy.deepcopy(self._default_regex)
-
-        # Override the defaults
-        if self.assets and data_asset_name in self.assets:
-            asset: Asset = self.assets[data_asset_name]
-            if asset.pattern:
-                regex_config["pattern"] = asset.pattern
-
-            if asset.group_names:
-                regex_config["group_names"] = asset.group_names
-
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-
-        data_reference: Any = self.convert_batch_request_to_data_reference(
-            batch_request=batch_request,
-            pattern=pattern,
-            group_names=group_names
-        )
-
-        return data_reference
-
-    def get_data_reference_list_count(self):
-        if self._data_references_cache is None:
-            raise ValueError(f"data references cache for {self.__class__.__name__} {self.name} has not yet been populated.")
-
-        total_references = 0
-        for data_asset_name in self._data_references_cache:
-            total_references += len(self._data_references_cache[data_asset_name])
-            
-        return total_references
-
-    def refresh_data_references_cache(
-        self,
-    ):
-        """
-        """
-        #Map data_references to batch_definitions
-        self._data_references_cache = {}
-
-        for data_asset_name in self.get_available_data_asset_names():
-            self._data_references_cache[data_asset_name] = {}
-
-            for data_reference in self._get_data_reference_list(data_asset_name):
-                mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
-                    data_reference=data_reference,
-                    data_asset_name=data_asset_name,
-                )
-                self._data_references_cache[data_asset_name][data_reference] = mapped_batch_definition_list
-
-    def get_batch_definition_list_from_batch_request(
-        self,
-        batch_request: BatchRequest,
-    ) -> List[BatchDefinition]:
-        if batch_request.data_connector_name != self.name:
-            raise ValueError(f"data_connector_name {batch_request.data_connector_name} does not match name {self.name}.")
-
-        if self._data_references_cache is None:
-            self.refresh_data_references_cache()
-
-        batch_definition_list: List[BatchDefinition] = []
-        for data_asset_name, sub_cache in self._data_references_cache.items():
-            for data_reference, batch_definition in sub_cache.items():
-                if batch_definition is not None:
-                    if self._batch_definition_matches_batch_request(
-                        batch_definition=batch_definition[0],
-                        batch_request=batch_request
-                    ):
-                        batch_definition_list.extend(batch_definition)
-
-        return batch_definition_list
-
-    def _map_data_reference_to_batch_definition_list(
-        self,
-        data_reference: Any,
-        data_asset_name: str
-    ) -> Union[List[BatchDefinition], None]:
-    
-        regex_config = copy.deepcopy(self._default_regex)
-
-        # Override the defaults
-        asset = self.assets[data_asset_name]
-        if asset.pattern:
-            regex_config["pattern"] = asset.pattern
-
-        if asset.group_names:
-            regex_config["group_names"] = asset.group_names
-        
-        batch_request: BatchRequest = self.convert_data_reference_to_batch_request(
-            data_reference=data_reference,
-            pattern=regex_config["pattern"],
-            group_names=regex_config["group_names"],
-        )
-        if batch_request is None:
-            return None
-
-        return [
-            BatchDefinition(
-                execution_environment_name=self.execution_environment_name,
-                data_connector_name=self.name,
-                data_asset_name=data_asset_name,
-                partition_definition=PartitionDefinition(batch_request.partition_request),
-            )
-        ]
-
-    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name:str) -> List[Any]:
-        batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name=self.execution_environment_name,
-            data_connector_name=self.name,
-            data_asset_name=data_asset_name,
-        ))
-        len_batch_definition_list = len(batch_definition_list)
-
-        if self.assets[data_asset_name].pattern:
-            pattern = self.assets[data_asset_name].pattern
-        else:
-            pattern = self._default_regex["pattern"]
-
-        if self.assets[data_asset_name].group_names:
-            group_names = self.assets[data_asset_name].group_names
-        else:
-            group_names = self._default_regex["group_names"]
-
-        data_reference_list = [
-            self.convert_batch_request_to_data_reference(
-                batch_request=BatchRequest(
-                    execution_environment_name=batch_definition.execution_environment_name,
-                    data_connector_name=batch_definition.data_connector_name,
-                    data_asset_name=batch_definition.data_asset_name,
-                    partition_request=batch_definition.partition_definition,
-                ),
-                pattern=pattern,
-                group_names=group_names,
-            )
-            for batch_definition in batch_definition_list
-        ]
-
-        #TODO: Sort with a real sorter here
-        data_reference_list.sort()
-
-        return data_reference_list

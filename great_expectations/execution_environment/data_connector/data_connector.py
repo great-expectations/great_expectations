@@ -127,13 +127,22 @@ class DataConnector(object):
     ):
         raise NotImplementedError
 
-    def _get_data_reference_list(self, data_asset_name: str) -> List[Any]:
+    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[Any]:
+        """Fetch data_references corresponding to data_asset_name from the cache.
+        """
         raise NotImplementedError
 
-    def get_data_reference_list_count(self):
+    def _get_data_reference_list(self) -> List[Any]:
+        """List objects in the underlying data store to create a list of data_references.
+
+        This method is used to refresh the cache.
+        """
         raise NotImplementedError
 
-    def get_unmatched_data_references(self):
+    def get_data_reference_list_count(self) -> int:
+        raise NotImplementedError
+
+    def get_unmatched_data_references(self) -> List[Any]:
         raise NotImplementedError
 
     def get_available_data_asset_names(self) -> List[str]:
@@ -145,15 +154,15 @@ class DataConnector(object):
         raise NotImplementedError
 
     def get_batch_definition_list_from_batch_request(
-            self,
-            batch_request: BatchRequest,
+        self,
+        batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         raise NotImplementedError
 
     def _map_data_reference_to_batch_definition_list(
         self,
         data_reference: Any,
-        data_asset_name: Optional[str]
+        data_asset_name: Optional[str] = None
     ) -> Optional[List[BatchDefinition]]:
         raise NotImplementedError
 
@@ -215,15 +224,3 @@ class DataConnector(object):
         data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
     
         return data_connector_obj
-
-    def _get_data_reference_list(self) -> List[Any]:
-        """List objects in the underlying data store to create a list of data_references.
-
-        This method is used to refresh the cache.
-        """
-        raise NotImplementedError
-
-    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name:str) -> List[Any]:
-        """Fetch data_references corresponding to data_asset_name from the cache.
-        """
-        raise NotImplementedError

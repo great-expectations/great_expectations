@@ -50,6 +50,32 @@ def batch_definition_matches_batch_request(
     return True
 
 
+def map_data_reference_string_to_batch_definition_list_using_regex(
+    execution_environment_name: str,
+    data_connector_name: str,
+    data_reference: str,
+    regex_pattern: str,
+    group_names: List[str],
+) -> Optional[List[BatchDefinition]]:
+    # TODO: <Alex>The two-steps process involving a BatchRequest intermediary can be simplified by introducing a common class.</Alex>
+    batch_request: BatchRequest = convert_data_reference_string_to_batch_request_using_regex(
+        data_reference=data_reference,
+        regex_pattern=regex_pattern,
+        group_names=group_names,
+    )
+    if batch_request is None:
+        return None
+
+    return [
+        BatchDefinition(
+            execution_environment_name=execution_environment_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=batch_request.data_asset_name,
+            partition_definition=PartitionDefinition(batch_request.partition_request),
+        )
+    ]
+
+
 def convert_data_reference_string_to_batch_request_using_regex(
     data_reference: str,
     regex_pattern: str,
@@ -70,10 +96,33 @@ def convert_data_reference_string_to_batch_request_using_regex(
     if "data_asset_name" in partition_definition:
         data_asset_name = partition_definition.pop("data_asset_name")
 
-    return BatchRequest(
+    batch_request: BatchRequest = BatchRequest(
         data_asset_name=data_asset_name,
         partition_request=partition_definition,
     )
+
+    return batch_request
+
+
+def map_batch_definition_to_data_reference_string_using_regex(
+    batch_definition: BatchDefinition,
+    regex_pattern: str,
+    group_names: List[str],
+) -> str:
+    # TODO: <Alex>The two-steps process involving a BatchRequest intermediary can be simplified by introducing a common class.</Alex>
+    data_asset_name: str = batch_definition.data_asset_name
+    partition_definition: PartitionDefinition = batch_definition.partition_definition
+    partition_request: dict = partition_definition
+    batch_request: BatchRequest = BatchRequest(
+        data_asset_name=data_asset_name,
+        partition_request=partition_request,
+    )
+    data_reference: str = convert_batch_request_to_data_reference_string_using_regex(
+        batch_request=batch_request,
+        regex_pattern=regex_pattern,
+        group_names=group_names
+    )
+    return data_reference
 
 
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>

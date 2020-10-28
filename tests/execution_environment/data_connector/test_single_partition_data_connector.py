@@ -227,13 +227,13 @@ default_regex:
             "beta"
         ],
         "data_assets": {
-            'alpha': {
-                'example_data_references': ['2020/01/alpha-*.csv', '2020/02/alpha-*.csv', '2020/03/alpha-*.csv'],
-                'batch_definition_count': 3
+            "alpha": {
+                "example_data_references": ["2020/01/alpha-*.csv", "2020/02/alpha-*.csv", "2020/03/alpha-*.csv"],
+                "batch_definition_count": 3
             },
-            'beta': {
-                'example_data_references': ['2020/01/beta-*.csv', '2020/02/beta-*.csv', '2020/03/beta-*.csv'],
-                'batch_definition_count': 4
+            "beta": {
+                "example_data_references": ["2020/01/beta-*.csv", "2020/02/beta-*.csv", "2020/03/beta-*.csv"],
+                "batch_definition_count": 4
             }
         },
         "example_unmatched_data_references": [],
@@ -285,13 +285,13 @@ default_regex:
             "beta"
         ],
         "data_assets": {
-            'alpha': {
-                'example_data_references': ['2020/01/alpha-*.csv', '2020/02/alpha-*.csv', '2020/03/alpha-*.csv'],
-                'batch_definition_count': 3
+            "alpha": {
+                "example_data_references": ["2020/01/alpha-*.csv", "2020/02/alpha-*.csv", "2020/03/alpha-*.csv"],
+                "batch_definition_count": 3
             },
-            'beta': {
-                'example_data_references': ['2020/01/beta-*.csv', '2020/02/beta-*.csv', '2020/03/beta-*.csv'],
-                'batch_definition_count': 4
+            "beta": {
+                "example_data_references": ["2020/01/beta-*.csv", "2020/02/beta-*.csv", "2020/03/beta-*.csv"],
+                "batch_definition_count": 4
             }
         },
         "example_unmatched_data_references": [],
@@ -328,9 +328,9 @@ def test_self_check():
             "B"
         ],
         "data_assets": {
-            'A': {
-                'example_data_references': ['A-100.csv', 'A-101.csv'],
-                'batch_definition_count': 2
+            "A": {
+                "example_data_references": ["A-100.csv", "A-101.csv"],
+                "batch_definition_count": 2
             },
             "B": {
                 "example_data_references": ["B-1.csv", "B-2.csv"],
@@ -371,9 +371,9 @@ def test_that_needs_a_better_name():
             "B"
         ],
         "data_assets": {
-            'A': {
-                'example_data_references': ['A-100.csv', 'A-101.csv'],
-                'batch_definition_count': 2
+            "A": {
+                "example_data_references": ["A-100.csv", "A-101.csv"],
+                "batch_definition_count": 2
             },
             "B": {
                 "example_data_references": ["B-1.csv", "B-2.csv"],
@@ -430,9 +430,9 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
              "C"
         ],
         "data_assets": {
-            'A': {
-                'batch_definition_count': 3,
-                'example_data_references': ['A/A-1.csv', 'A/A-2.csv', 'A/A-3.csv']
+            "A": {
+                "batch_definition_count": 3,
+                "example_data_references": ["A/A-1.csv", "A/A-2.csv", "A/A-3.csv"]
             },
             "B": {
                 "batch_definition_count": 3,
@@ -487,11 +487,11 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
             "log_file"
         ],
         "data_assets": {
-            'log_file': {
-                'batch_definition_count': 7,
-                'example_data_references': ['2021/01/01/log_file-*.txt.gz',
-                                            '2021/01/02/log_file-*.txt.gz',
-                                            '2021/01/03/log_file-*.txt.gz']
+            "log_file": {
+                "batch_definition_count": 7,
+                "example_data_references": ["2021/01/01/log_file-*.txt.gz",
+                                            "2021/01/02/log_file-*.txt.gz",
+                                            "2021/01/03/log_file-*.txt.gz"]
             }
         },
         "unmatched_data_reference_count": 0,
@@ -544,9 +544,9 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
 #             "2021/01/03"
 #         ],
 #         "data_assets": {
-#             '2021/01/01': {
-#                 'batch_definition_count': 2,
-#                 'example_data_references': ['2021/01/01/log_file-*.txt.gz', '2021/01/01/log_file-*.txt.gz']
+#             "2021/01/01": {
+#                 "batch_definition_count": 2,
+#                 "example_data_references": ["2021/01/01/log_file-*.txt.gz", "2021/01/01/log_file-*.txt.gz"]
 #             },
 #             "2021/01/02": {
 #                 "batch_definition_count": 2,
@@ -599,9 +599,11 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
             "log_file"
         ],
         "data_assets": {
-            'log_file': {
-                'batch_definition_count': 7,
-                'example_data_references': ['log_file-2021-01-01-*.txt.gz', 'log_file-2021-01-02-*.txt.gz', 'log_file-2021-01-03-*.txt.gz']
+            "log_file": {
+                "batch_definition_count": 7,
+                "example_data_references": [
+                    "log_file-2021-01-01-*.txt.gz", "log_file-2021-01-02-*.txt.gz", "log_file-2021-01-03-*.txt.gz"
+                ]
             }
         },
         "unmatched_data_reference_count": 0,
@@ -646,13 +648,13 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context, t
         "example_data_asset_names": [
             "some_bucket"
         ],
-        'data_assets': {
-            'some_bucket': {
-                'batch_definition_count': 7,
-                'example_data_references': [
-                    'some_bucket/2021/01/01/log_file-*.txt.gz',
-                    'some_bucket/2021/01/02/log_file-*.txt.gz',
-                    'some_bucket/2021/01/03/log_file-*.txt.gz'
+        "data_assets": {
+            "some_bucket": {
+                "batch_definition_count": 7,
+                "example_data_references": [
+                    "some_bucket/2021/01/01/log_file-*.txt.gz",
+                    "some_bucket/2021/01/02/log_file-*.txt.gz",
+                    "some_bucket/2021/01/03/log_file-*.txt.gz"
                 ]
             }
         },
