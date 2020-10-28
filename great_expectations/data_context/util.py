@@ -126,6 +126,7 @@ def substitute_config_variable(template_str, config_variables_dict):
     if template_str is None:
         return template_str
 
+    # 1. Make substitutions for non-escaped patterns
     try:
         match = re.finditer(r"\$\{(.*?)\}|\$([_a-zA-Z][_a-zA-Z0-9]*)", template_str)
     except TypeError:
@@ -138,21 +139,23 @@ def substitute_config_variable(template_str, config_variables_dict):
         config_variable_value = config_variables_dict.get(config_variable_name)
 
         # Do not substitute if substitution string is preceded by DOLLAR_SIGN_ESCAPE_STRING
-        if config_variable_value is not None and not config_variable_name.startswith(
-            DOLLAR_SIGN_ESCAPE_STRING
-        ):
-            if not isinstance(config_variable_value, str):
-                return config_variable_value
-            template_str = template_str.replace(m.group(), config_variable_value)
-        else:
-            raise MissingConfigVariableError(
-                f"""\n\nUnable to find a match for config substitution variable: `{config_variable_name}`.
+        # The escape string should also not be picked up by the regex so this may
+        # be belt and suspenders.
+        if not config_variable_name.startswith(DOLLAR_SIGN_ESCAPE_STRING):
+            if config_variable_value is not None:
+                if not isinstance(config_variable_value, str):
+                    return config_variable_value
+                template_str = template_str.replace(m.group(), config_variable_value)
+            else:
+                raise MissingConfigVariableError(
+                    f"""\n\nUnable to find a match for config substitution variable: `{config_variable_name}`.
 Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
 See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets""",
-                missing_config_variable=config_variable_name,
-            )
+                    missing_config_variable=config_variable_name,
+                )
 
-    return template_str
+    # 2. Replace the "$"'s that had been escaped
+    return template_str.replace(DOLLAR_SIGN_ESCAPE_STRING, "$")
 
 
 def substitute_all_config_variables(data, replace_variables_dict):

@@ -107,10 +107,31 @@ def test_setting_config_variables_is_visible_immediately(
         "mygenerator"
     ]["reader_options"]["test_variable_sub_escaped"] = "${escaped_password}"
     assert (
+        context.get_config().datasources["mydatasource"]["batch_kwargs_generators"][
+            "mygenerator"
+        ]["reader_options"]["test_variable_sub_escaped"]
+        == "${escaped_password}"
+    )
+    # Ensure that the value saved in config variables has escaped the $
+    config_variables_with_escaped_vars = context._load_config_variables_file()
+    assert (
+        config_variables_with_escaped_vars["escaped_password"]
+        == "this_is_$--mypassword_escape_the_$--signs"
+    )
+    # Ensure that when reading the escaped config variable, the escaping should be removed
+    assert (
         context.get_config_with_variables_substituted().datasources["mydatasource"][
             "batch_kwargs_generators"
         ]["mygenerator"]["reader_options"]["test_variable_sub_escaped"]
-        == "this_is_$--mypassword_escape_the_$--signs"
+        == "this_is_$mypassword_escape_the_$signs"
+    )
+    assert (
+        context.get_config_with_variables_substituted().datasources["mydatasource"][
+            "batch_kwargs_generators"
+        ]["mygenerator"]["reader_options"][
+            "test_escaped_manually_entered_value_from_config"
+        ]
+        == "correct_hor$e_battery_$taple"
     )
 
     try:
@@ -212,6 +233,7 @@ def test_substitute_config_variable():
         "arg0": "val_of_arg_0",
         "arg2": {"v1": 2},
         "aRg3": "val_of_aRg_3",
+        "ARG4": "val_of_ARG_4",
     }
     assert (
         substitute_config_variable("abc${arg0}", config_variables_dict)
@@ -241,22 +263,44 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
     )
     assert exc.value.missing_config_variable == "arg1"
 
+    # Null cases
+    assert substitute_config_variable("", config_variables_dict) == ""
+    assert substitute_config_variable(None, config_variables_dict) == None
+
     # Test with mixed case
     assert (
-        substitute_config_variable("abc${aRg3}", config_variables_dict)
-        == "abcval_of_aRg_3"
+        substitute_config_variable("prefix_${aRg3}_suffix", config_variables_dict)
+        == "prefix_val_of_aRg_3_suffix"
     )
+    assert (
+        substitute_config_variable("${aRg3}", config_variables_dict) == "val_of_aRg_3"
+    )
+    # Test with upper case
+    assert (
+        substitute_config_variable("prefix_$ARG4/suffix", config_variables_dict)
+        == "prefix_val_of_ARG_4/suffix"
+    )
+    assert substitute_config_variable("$ARG4", config_variables_dict) == "val_of_ARG_4"
 
     # Test with multiple substitutions
     assert (
-        substitute_config_variable("abc${arg0}$aRg3", config_variables_dict)
-        == "abcval_of_arg_0val_of_aRg_3"
+        substitute_config_variable("prefix${arg0}$aRg3", config_variables_dict)
+        == "prefixval_of_arg_0val_of_aRg_3"
     )
 
-    # Test with escaped $
+    # Escaped `$` (don't substitute, but return un-escaped string)
     assert (
         substitute_config_variable("abc$--{arg0}$--aRg3", config_variables_dict)
-        == "abc$--{arg0}$--aRg3"
+        == "abc${arg0}$aRg3"
+    )
+
+    # Multiple configurations together
+    assert (
+        substitute_config_variable(
+            "prefix$ARG4.$arg0/$aRg3:${ARG4}/$--dontsub${arg0}:${aRg3}.suffix",
+            config_variables_dict,
+        )
+        == "prefixval_of_ARG_4.val_of_arg_0/val_of_aRg_3:val_of_ARG_4/$dontsubval_of_arg_0:val_of_aRg_3.suffix"
     )
 
 
@@ -264,49 +308,26 @@ def test_substitute_env_var_in_config_variable_file(
     monkeypatch, empty_data_context_with_config_variables
 ):
     monkeypatch.setenv("FOO", "correct_val_of_replace_me")
-    monkeypatch.setenv("DO_REPLACE_ME_ENV", "ive_been_replaced")
-    monkeypatch.setenv("AND_ME", "and_me_replaced")
-    monkeypatch.setenv("Also_Me", "also_me_replaced")
+    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
     context = empty_data_context_with_config_variables
     context_config = context.get_config_with_variables_substituted()
-    assert (
-        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["reader_options"]["test_variable_sub3"]
-        == "correct_val_of_replace_me"
-    )
-    assert context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
-        "mygenerator"
-    ]["reader_options"]["test_variable_sub4"] == {
+    my_generator = context_config["datasources"]["mydatasource"][
+        "batch_kwargs_generators"
+    ]["mygenerator"]
+    reader_options = my_generator["reader_options"]
+
+    assert reader_options["test_variable_sub3"] == "correct_val_of_replace_me"
+    assert reader_options["test_variable_sub4"] == {
         "inner_env_sub": "correct_val_of_replace_me"
     }
+    assert reader_options["password"] == "dont$replaceme"
+
+    # Escaped variables (variables containing `$` that have been escaped)
     assert (
-        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["reader_options"]["password"]
-        == "dont$--replaceme"
+        reader_options["test_escaped_env_var_from_config"]
+        == "prefixive_been_$replaced/suffix"
     )
     assert (
-        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["password"]
-        == "dont$--replace$--me$--please$$$$--thanksive_been_replaced"
-    )
-    assert (
-        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["reader_options"]["test_variable_sub5"]
-        == "helloive_been_replaced/not_me"
-    )
-    assert (
-        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["reader_options"]["test_variable_sub6"]
-        == "helloive_been_replaced/not_me"
-    )
-    assert (
-        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["reader_options"]["test_variable_sub7"]
-        == "helloive_been_replacedand_me_replacedalso_me_replaced/not_me"
+        my_generator["test_variable_escaped"]
+        == "dont$replace$me$please$$$$thanksive_been_$replaced"
     )

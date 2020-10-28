@@ -5,7 +5,5 @@ replace_me_2:
   inner_env_sub: ${FOO}
 arg1:
   v1: 2
-DO_REPLACE_ME: ive_been_replaced
-DO_REPLACE_ME_ENV: ive_been_replaced
-AND_ME: and_me_replaced
-Also_Me: also_me_replaced
+REPLACE_ME_FROM_ESCAPED_ENV: ${REPLACE_ME_ESCAPED_ENV}
+escaped_password_already_in_config_yml: correct_hor$--e_battery_$--taple
