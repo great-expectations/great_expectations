@@ -8,17 +8,23 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
+from ...render.renderer.renderer import renderer
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectTableRowCountToEqual(DatasetExpectation):
+class ExpectTableRowCountToEqual(TableExpectation):
     """Expect the number of rows to equal a value.
 
     expect_table_row_count_to_equal is a :func:`expectation \
@@ -53,7 +59,6 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         expect_table_row_count_to_be_between
     """
 
-    metric_dependencies = ("column_values.count",)
     success_keys = ("value",)
 
     default_kwarg_values = {
@@ -71,7 +76,7 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
     #
     # @PandasExecutionEngine.metric(
     #     metric_name="rows.count",
-    #     metric_domain_keys=DatasetExpectation.domain_keys,
+    #     metric_domain_keys=TableExpectation.domain_keys,
     #     metric_value_keys=(),
     #     metric_dependencies=tuple(),
     #     filter_column_isnull=False,
@@ -121,7 +126,51 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
 
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs, ["value", "row_condition", "condition_parser"],
+        )
+        template_str = "Must have exactly $value rows."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

@@ -1,13 +1,16 @@
+import copy
 import logging
+import sre_constants
+import sre_parse
 from pathlib import Path
-from typing import List, Union
+from string import Template
+from typing import Any, List, Union
 
 import regex as re
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.execution_environment.data_connector.data_connector import (
-    DataConnector,
-)
+from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.execution_environment.data_connector.partitioner.partition import (
     Partition,
 )
@@ -20,130 +23,152 @@ logger = logging.getLogger(__name__)
 
 class RegexPartitioner(Partitioner):
     DEFAULT_GROUP_NAME_PATTERN: str = "group_"
-    DEFAULT_DELIMITER: str = "-"
 
     def __init__(
         self,
         name: str,
-        data_connector: DataConnector,
         sorters: list = None,
         allow_multipart_partitions: bool = False,
-        config_params: dict = None,
-        **kwargs,
+        runtime_keys: list = None,
+        pattern: str = r"(.*)",
+        group_names: List[str] = None,
     ):
         logger.debug(f'Constructing RegexPartitioner "{name}".')
         super().__init__(
             name=name,
-            data_connector=data_connector,
             sorters=sorters,
             allow_multipart_partitions=allow_multipart_partitions,
-            config_params=config_params,
-            **kwargs,
+            runtime_keys=runtime_keys,
         )
 
-        self._regex = self._process_regex_config()
+        self._pattern = pattern
+        self._group_names = group_names
 
-    def _process_regex_config(self) -> dict:
-        regex: Union[dict, None]
-        if self.config_params:
-            regex = self.config_params.get("regex")
-            # check if dictionary
-            if not isinstance(regex, dict):
-                raise ge_exceptions.PartitionerError(
-                    f"""RegexPartitioner "{self.name}" requires a regex pattern configured as a dictionary.
-                    It is currently of type "{type(regex)}. Please check your configuration."""
-                )
-            # check if correct key exists
-            if not ("pattern" in regex.keys()):
-                raise ge_exceptions.PartitionerError(
-                    f"""RegexPartitioner "{self.name}" requires a regex pattern to be specified in its configuration.
-                    """
-                )
-            # check if group_names exists in regex config, if not add empty list
-            if not (
-                "group_names" in regex.keys() and isinstance(regex["group_names"], list)
-            ):
-                regex["group_names"] = []
-        else:
-            # if no configuration exists at all, set defaults
-            regex = {"pattern": r"(.*)", "group_names": ["group_0",]}
-        return regex
+    # TODO: <Alex>See PyCharm warnings as to the method signature.</Alex>
+    def convert_data_reference_to_batch_request(self, data_reference) -> BatchRequest:
+        matches: Union[re.Match, None] = re.match(self._pattern, data_reference)
 
-    @property
-    def regex(self) -> dict:
-        return self._regex
-
-    def _compute_partitions_for_data_asset(
-        self,
-        data_asset_name: str = None,
-        *,
-        paths: list = None,
-        auto_discover_assets: bool = False,
-    ) -> List[Partition]:
-        if not paths or len(paths) == 0:
-            return []
-        partitions: List[Partition] = []
-        partitioned_path: Partition
-        if auto_discover_assets:
-            for path in paths:
-                partitioned_path = self._find_partitions_for_path(
-                    path=path, data_asset_name=Path(path).stem
-                )
-                if partitioned_path is not None:
-                    partitions.append(partitioned_path)
-        else:
-            for path in paths:
-                partitioned_path = self._find_partitions_for_path(
-                    path=path, data_asset_name=data_asset_name
-                )
-                if partitioned_path is not None:
-                    partitions.append(partitioned_path)
-        return partitions
-
-    def _find_partitions_for_path(
-        self, path: str, data_asset_name: str = None
-    ) -> Union[Partition, None]:
-        matches: Union[re.Match, None] = re.match(self.regex["pattern"], path)
+        # print("\n\n\nlet's get this regex right")
+        # print(self._pattern, data_reference)
+        # print(matches)
+        # print("\n^^ this is matches")
         if matches is None:
-            logger.warning(f'No match found for path: "{path}".')
+            # raise ValueError(f'No match found for data_reference: "{data_reference}".')
             return None
+        groups: tuple = matches.groups()
+        group_names: list = [
+            f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}"
+            for idx, group_value in enumerate(groups)
+        ]
+        self._validate_sorters_configuration(
+            partition_keys=self._group_names, num_actual_partition_keys=len(groups)
+        )
+        for idx, group_name in enumerate(self._group_names):
+            group_names[idx] = group_name
+        partition_definition: dict = {}
+        for idx, group_value in enumerate(groups):
+            group_name: str = group_names[idx]
+            partition_definition[group_name] = group_value
+        partition_definition: PartitionDefinition = PartitionDefinition(
+            partition_definition
+        )
+        # if runtime_parameters:
+        #     partition_definition.update(runtime_parameters)
+        partition_name: str = self.DEFAULT_DELIMITER.join(
+            [str(value) for value in partition_definition.values()]
+        )
+
+        if "data_asset_name" in partition_definition:
+            data_asset_name = partition_definition.pop("data_asset_name")
         else:
+            # adding this, so things don't crash
+            data_asset_name = "DEFAULT_ASSET_NAME"
             groups: tuple = matches.groups()
             group_names: list = [
                 f"{RegexPartitioner.DEFAULT_GROUP_NAME_PATTERN}{idx}"
                 for idx, group_value in enumerate(groups)
             ]
-            for idx, group_name in enumerate(self.regex["group_names"]):
+            #
+            self._validate_sorters_configuration(
+                partition_keys=self._group_names, num_actual_partition_keys=len(groups)
+            )
+            for idx, group_name in enumerate(self._group_names):
                 group_names[idx] = group_name
-            if self.sorters and len(self.sorters) > 0:
-                if any(
-                    [
-                        sorter.name not in self.regex["group_names"]
-                        for sorter in self.sorters
-                    ]
-                ):
-                    raise ge_exceptions.PartitionerError(
-                        f"""RegexPartitioner "{self.name}" specifies one or more sort keys that do not appear among
-configured match group names.
-                        """
-                    )
-                if len(group_names) < len(self.sorters):
-                    raise ge_exceptions.PartitionerError(
-                        f"""RegexPartitioner "{self.name}", configured with {len(group_names)}, matches {len(groups)}
-group names, which is fewer than number of sorters specified is {len(self.sorters)}.
-                        """
-                    )
             partition_definition: dict = {}
             for idx, group_value in enumerate(groups):
                 group_name: str = group_names[idx]
                 partition_definition[group_name] = group_value
-            partition_name: str = RegexPartitioner.DEFAULT_DELIMITER.join(
-                partition_definition.values()
+            partition_definition: PartitionDefinition = PartitionDefinition(
+                partition_definition
+            )
+            partition_name: str = self.DEFAULT_DELIMITER.join(
+                [str(value) for value in partition_definition.values()]
             )
 
-        return Partition(
-            name=partition_name,
-            data_asset_name=data_asset_name,
-            definition=partition_definition,
-            data_reference=path,
+        return BatchRequest(
+            data_asset_name=data_asset_name, partition_request=partition_definition,
         )
+
+    def convert_batch_request_to_data_reference(
+        self, batch_request: BatchRequest,
+    ) -> str:
+        if not isinstance(batch_request, BatchRequest):
+            raise TypeError("batch_request is not of an instance of type BatchRequest")
+
+        template_arguments = batch_request.partition_request
+        if batch_request.data_asset_name != None:
+            template_arguments["data_asset_name"] = batch_request.data_asset_name
+
+        filepath_template = self._invert_regex_to_data_reference_template()
+        converted_string = filepath_template.format(**template_arguments)
+
+        return converted_string
+
+    def _invert_regex_to_data_reference_template(self):
+        """
+        NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
+        """
+        regex_pattern = self._pattern
+        data_reference_template = ""
+        group_name_index = 0
+
+        # print("-"*80)
+        parsed_sre = sre_parse.parse(regex_pattern)
+        for token, value in parsed_sre:
+            # print(type(token), token, value)
+
+            if token == sre_constants.LITERAL:
+                # Transcribe the character directly into the template
+                data_reference_template += chr(value)
+
+            elif token == sre_constants.SUBPATTERN:
+                # Replace the captured group with "{next_group_name}" in the template
+                data_reference_template += (
+                    "{" + self._group_names[group_name_index] + "}"
+                )
+                group_name_index += 1
+
+            elif token in [
+                sre_constants.MAX_REPEAT,
+                sre_constants.IN,
+                sre_constants.BRANCH,
+                sre_constants.ANY,
+            ]:
+                # Replace the uncaptured group a wildcard in the template
+                data_reference_template += "*"
+
+            elif token in [
+                sre_constants.AT,
+                sre_constants.ASSERT_NOT,
+                sre_constants.ASSERT,
+            ]:
+                pass
+            else:
+                raise ValueError(
+                    f"Unrecognized regex token {token} in regex pattern {regex_pattern}."
+                )
+
+        # Collapse adjacent wildcards into a single wildcard
+        data_reference_template = re.sub(r"\*+", "*", data_reference_template)
+
+        return data_reference_template

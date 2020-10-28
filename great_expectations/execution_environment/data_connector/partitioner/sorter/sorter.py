@@ -10,9 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class Sorter:
-    def __init__(
-        self, name: str, orderby: str = "asc", config_params: dict = None, **kwargs
-    ):
+    def __init__(self, name: str, orderby: str = "asc"):
         self._name = name
         if orderby is None or orderby == "asc":
             reverse: bool = False
@@ -23,7 +21,6 @@ class Sorter:
                 f'Illegal sort order "{orderby}" for attribute "{name}".'
             )
         self._reverse = reverse
-        self._config_params = config_params
 
     def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
         return sorted(
@@ -52,10 +49,6 @@ class Sorter:
     @property
     def reverse(self) -> bool:
         return self._reverse
-
-    @property
-    def config_params(self) -> dict:
-        return self._config_params
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {"name": self.name, "reverse": self.reverse}

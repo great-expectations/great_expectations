@@ -37,7 +37,7 @@ def test_expect_column_values_to_be_in_set_int_impl():
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=False,)
+    assert result == ExpectationValidationResult(success=False)
 
 
 def test_expect_column_values_to_be_in_set_str_impl():
@@ -88,7 +88,7 @@ def test_spark_expect_column_values_to_be_in_set_impl():
     expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
     myengine = SparkDFExecutionEngine()
     batch = myengine.load_batch(
-        batch_definition={"data_asset_name": "foo", "partition_name": "bar"},
+        batch_request={"data_asset_name": "foo", "partition_name": "bar"},
         batch_spec=BatchSpec({"blarg": "bah"}),
         in_memory_dataset=df,
     )
@@ -109,7 +109,7 @@ def test_spark_expect_column_values_to_be_in_set_impl():
     expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
     myengine = SparkDFExecutionEngine()
     batch = myengine.load_batch(
-        batch_definition={"data_asset_name": "foo", "partition_name": "bar"},
+        batch_request={"data_asset_name": "foo", "partition_name": "bar"},
         batch_spec=BatchSpec({"blarg": "bah"}),
         in_memory_dataset=df,
     )

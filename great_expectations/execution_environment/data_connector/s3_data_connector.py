@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class S3GlobReaderDataConnector(DataConnector):
-    """
+    r"""
     S3 DataConnector provides support for generating batches of data from an S3 bucket. For the S3 data connector, assets must
     be individually defined using a prefix and glob, although several additional configuration parameters are available
     for assets (see below).
@@ -53,7 +53,7 @@ class S3GlobReaderDataConnector(DataConnector):
                     max_keys: 100
     """
 
-    recognized_batch_definition_keys = {
+    recognized_batch_request_keys = {
         "execution_environment" "data_asset_name",
         "partition_id",
         "reader_method",
@@ -184,7 +184,7 @@ class S3GlobReaderDataConnector(DataConnector):
             )
 
         partition_id = batch_parameters.pop("partition_id", None)
-        batch_kwargs = self._execution_environment.execution_engine.process_batch_definition(
+        batch_kwargs = self._execution_environment.execution_engine.process_batch_request(
             reader_method=batch_parameters.get("reader_method") or self.reader_method,
             reader_options=batch_parameters.get("reader_options")
             or self.reader_options,
@@ -318,14 +318,12 @@ class S3GlobReaderDataConnector(DataConnector):
                 keys,
             )
         ]
-        for key in keys:
-            yield key
+        yield from keys
 
         if asset_options["IsTruncated"]:
             iterator_dict["continuation_token"] = asset_options["NextContinuationToken"]
             # Recursively fetch more
-            for key in self._get_asset_options(asset_config, iterator_dict):
-                yield key
+            yield from self._get_asset_options(asset_config, iterator_dict)
         elif "continuation_token" in iterator_dict:
             # Make sure we clear the token once we've gotten fully through
             del iterator_dict["continuation_token"]
@@ -411,7 +409,9 @@ class S3GlobReaderDataConnector(DataConnector):
         engine = self._execution_environment.execution_engine
         reader_method = batch_kwargs.get("reader_method")
         url = S3Url(raw_url)
-        logger.debug("Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key))
+        logger.debug(
+            "Fetching s3 object. Bucket: {} Key: {}".format(url.bucket, url.key)
+        )
         s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
 
         # try:

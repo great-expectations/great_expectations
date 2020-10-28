@@ -19,12 +19,10 @@ class CustomListSorter(Sorter):
     """
 
     def __init__(
-        self, name: str, orderby: str = "asc", config_params: dict = None, **kwargs
+        self, name: str, orderby: str = "asc", reference_list: List[str] = None
     ):
-        super().__init__(
-            name=name, orderby=orderby, config_params=config_params, **kwargs
-        )
-        reference_list: list = self.config_params.get("reference_list")
+        super().__init__(name=name, orderby=orderby)
+
         self._reference_list = self._validate_reference_list(
             reference_list=reference_list
         )
@@ -45,13 +43,9 @@ class CustomListSorter(Sorter):
     def get_partition_key(self, partition: Partition) -> Any:
         partition_definition: dict = partition.definition
         partition_value: Any = partition_definition[self.name]
-        if partition_value in self.reference_list:
-            return self.reference_list.index(partition_value)
+        if partition_value in self._reference_list:
+            return self._reference_list.index(partition_value)
         else:
             raise ge_exceptions.SorterError(
                 f"Source {partition_value} was not found in Reference list.  Try again..."
             )
-
-    @property
-    def reference_list(self) -> list:
-        return self._reference_list

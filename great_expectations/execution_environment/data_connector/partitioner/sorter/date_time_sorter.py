@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_string_to_datetime(
-    datetime_string: str, datetime_format_string: str = "%Y%m%d"
+    datetime_string: str, datetime_format_string: str
 ) -> datetime.date:
     if not isinstance(datetime_string, str):
         raise ge_exceptions.SorterError(
@@ -35,23 +35,16 @@ def datetime_to_int(dt: datetime.date) -> int:
 
 
 class DateTimeSorter(Sorter):
-    def __init__(
-        self, name: str, orderby: str = "asc", config_params: dict = None, **kwargs
-    ):
-        super().__init__(
-            name=name, orderby=orderby, config_params=config_params, **kwargs
-        )
+    def __init__(self, name: str, orderby: str = "asc", datetime_format="%Y%m%d"):
+        super().__init__(name=name, orderby=orderby)
 
-        self._datetime_format = self.config_params.get("datetime_format")
+        self._datetime_format = datetime_format
 
     def get_partition_key(self, partition: Partition) -> Any:
         partition_definition: dict = partition.definition
         partition_value: Any = partition_definition[self.name]
         dt: datetime.date = parse_string_to_datetime(
-            datetime_string=partition_value, datetime_format_string=self.datetime_format
+            datetime_string=partition_value,
+            datetime_format_string=self._datetime_format,
         )
         return datetime_to_int(dt=dt)
-
-    @property
-    def datetime_format(self) -> str:
-        return self._datetime_format

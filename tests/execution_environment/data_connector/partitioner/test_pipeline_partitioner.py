@@ -2,9 +2,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.execution_environment.data_connector.data_connector import (
-    DataConnector,
-)
+from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.execution_environment.data_connector.partitioner import (
     PipelinePartitioner,
 )
@@ -14,43 +12,58 @@ from great_expectations.execution_environment.data_connector.partitioner.partiti
 
 
 def test_pipeline_partitioner():
-    temp_data_connector = DataConnector(name="test")
-    test_partitioner = PipelinePartitioner(
-        name="test_pipeline_partitioner", data_connector=temp_data_connector
-    )
+    test_partitioner = PipelinePartitioner(name="test_pipeline_partitioner")
     # properties
     assert test_partitioner.name == "test_pipeline_partitioner"
-    assert test_partitioner.data_connector == temp_data_connector
-    assert test_partitioner.sorters == None
-    assert test_partitioner.allow_multipart_partitions == False
-    assert test_partitioner.config_params == None
+    assert test_partitioner.sorters is None
+    assert not test_partitioner.allow_multipart_partitions
     # no sorters
     with pytest.raises(ge_exceptions.SorterError):
         test_partitioner.get_sorter("i_dont_exist")
 
+    partition_config: dict = {
+        "name": "my_test_partition",
+        "data_asset_name": "test_asset_0",
+        "definition": {},
+        "data_reference": None,
+    }
     # no pipeline_datasets configured, so no partitions returned
-    returned_partitions = test_partitioner.get_available_partitions(
-        pipeline_data_asset_name="test_asset_0", pipeline_datasets=None
+    returned_partitions = test_partitioner.find_or_create_partitions(
+        data_asset_name=None,
+        partition_request=None,
+        runtime_parameters=None,
+        repartition=False,
+        partition_config=partition_config,
     )
+
     assert returned_partitions == []
 
 
 def test_pipeline_partitioner_single_df():
-    temp_data_connector = DataConnector(name="test")
-    test_partitioner = PipelinePartitioner(
-        name="test_pipeline_partitioner", data_connector=temp_data_connector
-    )
+    test_partitioner = PipelinePartitioner(name="test_pipeline_partitioner")
     # test df
     d = {"col1": [1, 2], "col2": [3, 4]}
     test_df = pd.DataFrame(data=d)
-    pipeline_datasets = [{"partition_name": "partition_1", "data_reference": test_df}]
-    returned_partitions = test_partitioner.get_available_partitions(
-        pipeline_data_asset_name="test_asset_0", pipeline_datasets=pipeline_datasets
+
+    partition_config: dict = {
+        "name": "partition_1",
+        "data_asset_name": "test_asset_0",
+        "definition": {"run_id": 1234567890},
+        "data_reference": test_df,
+    }
+    returned_partitions = test_partitioner.find_or_create_partitions(
+        data_asset_name=None,
+        partition_request=None,
+        runtime_parameters=None,
+        repartition=False,
+        partition_config=partition_config,
     )
-    partition_to_compare = Partition(
+
+    expected_partition = Partition(
         name="partition_1",
         data_asset_name="test_asset_0",
-        definition={"partition_1": test_df},
+        definition=PartitionDefinition({"run_id": 1234567890}),
         data_reference=test_df,
     )
-    assert returned_partitions == [partition_to_compare]
+
+    assert returned_partitions == [expected_partition]

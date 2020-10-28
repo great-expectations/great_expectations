@@ -8,16 +8,23 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
+from ...render.renderer.renderer import renderer
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    handle_strict_min_max,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
-    DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectTableRowCountToBeBetween(DatasetExpectation):
+class ExpectTableRowCountToBeBetween(TableExpectation):
     """Expect the number of rows to be between two values.
 
     expect_table_row_count_to_be_between is a :func:`expectation \
@@ -61,7 +68,6 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
         expect_table_row_count_to_equal
     """
 
-    metric_dependencies = ("column_values.count",)
     success_keys = (
         "min_value",
         "max_value",
@@ -85,7 +91,7 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
     #    expectation without any metrics?
     # @PandasExecutionEngine.metric(
     #     metric_name="rows.count",
-    #     metric_domain_keys=DatasetExpectation.domain_keys,
+    #     metric_domain_keys=TableExpectation.domain_keys,
     #     metric_value_keys=(),
     #     metric_dependencies=tuple(),
     #     filter_column_isnull=False
@@ -147,54 +153,65 @@ class ExpectTableRowCountToBeBetween(DatasetExpectation):
 
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
-        """Validates the given data against the set minimum and maximum value thresholds for the row Count"""
-        # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "min_value",
+                "max_value",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
         )
 
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
+        if params["min_value"] is None and params["max_value"] is None:
+            template_str = "May have any number of rows."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
+            elif params["min_value"] is None:
+                template_str = f"Must have {at_most_str} $max_value rows."
+            elif params["max_value"] is None:
+                template_str = f"Must have {at_least_str} $min_value rows."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
             )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
             )
-
-        row_count = metric_vals.get("column_values.count")
-
-        # Obtaining components needed for validation
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
-
-        # Checking if mean lies between thresholds
-        if min_value is not None:
-            above_min = row_count >= min_value
-        else:
-            above_min = True
-
-        if max_value is not None:
-            below_max = row_count <= max_value
-        else:
-            below_max = True
-
-        success = above_min and below_max
-
-        return {"success": success, "result": {"observed_value": row_count}}
+        ]

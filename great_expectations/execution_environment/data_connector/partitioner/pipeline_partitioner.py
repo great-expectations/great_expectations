@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Union
+from typing import List, Union
 
 from great_expectations.execution_environment.data_connector.partitioner.partition import (
     Partition,
@@ -12,44 +12,37 @@ logger = logging.getLogger(__name__)
 
 
 class PipelinePartitioner(Partitioner):
+    DEFAULT_PARTITION_NAME: str = "IN_MEMORY_PARTITION"
+
     def __init__(
         self,
         name: str,
-        data_connector,
         sorters: list = None,
         allow_multipart_partitions: bool = False,
-        config_params: dict = None,
-        **kwargs,
+        runtime_keys: list = None,
     ):
         logger.debug(f'Constructing PipelinePartitioner "{name}".')
         super().__init__(
             name=name,
-            data_connector=data_connector,
             sorters=sorters,
             allow_multipart_partitions=allow_multipart_partitions,
-            config_params=config_params,
-            **kwargs,
+            runtime_keys=runtime_keys,
         )
 
     def _compute_partitions_for_data_asset(
         self,
         data_asset_name: str = None,
         *,
-        pipeline_data_asset_name: str = None,
-        pipeline_datasets: List[Dict[str, Union[str, Any]]] = None,
+        runtime_parameters: Union[dict, None] = None,
+        partition_config: dict = None,
     ) -> Union[List[Partition], None]:
-        if pipeline_datasets is None:
-            return None
-        return [
-            Partition(
-                name=pipeline_dataset["partition_name"],
-                data_asset_name=data_asset_name or pipeline_data_asset_name,
-                definition={
-                    pipeline_dataset["partition_name"]: pipeline_dataset[
-                        "data_reference"
-                    ]
-                },
-                data_reference=pipeline_dataset["data_reference"],
-            )
-            for pipeline_dataset in pipeline_datasets
-        ]
+        if partition_config["data_reference"] is None:
+            return []
+        if partition_config["name"] is None:
+            if runtime_parameters:
+                partition_config["name"] = self.DEFAULT_DELIMITER.join(
+                    [str(value) for value in partition_config["definition"].values()]
+                )
+            else:
+                partition_config["name"] = self.DEFAULT_PARTITION_NAME
+        return [Partition(**partition_config)]

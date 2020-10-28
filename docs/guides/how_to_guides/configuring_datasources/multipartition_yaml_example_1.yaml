@@ -1,0 +1,11 @@
+class_name: SinglePartitionFileDataConnector
+base_directory: my_directory/
+
+partitioner:
+    class_name: RegexPartitioner
+    group_names:
+        - data_asset_name
+        - year
+        - month
+        - day
+    pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv

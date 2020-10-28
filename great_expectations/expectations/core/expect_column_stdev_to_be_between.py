@@ -6,11 +6,22 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import DatasetExpectation, Expectation
+from great_expectations.expectations.expectation import (
+    Expectation,
+    TableExpectation,
+    renderer,
+)
 from great_expectations.expectations.registry import extract_metrics
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
+    handle_strict_min_max,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
-class ExpectColumnStdevToBeBetween(DatasetExpectation):
+class ExpectColumnStdevToBeBetween(TableExpectation):
     """Expect the column standard deviation to be between a minimum value and a maximum value.
             Uses sample standard deviation (normalized by N-1).
 
@@ -78,12 +89,6 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
         "max_value",
         "strict_max",
     )
-    success_keys = (
-        "min_value",
-        "strict_min",
-        "max_value",
-        "strict_max",
-    )
     default_kwarg_values = {
         "min_value": None,
         "strict_min": False,
@@ -116,13 +121,13 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.standard_deviation",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
+    # @PandasExecutionEngine.metric(
+    #        metric_name="column.aggregate.standard_deviation",
+    #        metric_domain_keys=TableExpectation.domain_keys,
+    #        metric_value_keys=tuple(),
+    #        metric_dependencies=tuple(),
+    #        filter_column_isnull=False,
+    #    )
     def _standard_deviation(
         self,
         batches: Dict[str, Batch],
@@ -137,7 +142,69 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
         )
         return series.std()
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "standard deviation may have any numerical value."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."
+            elif params["min_value"] is None:
+                template_str = f"standard deviation must be {at_most_str} $max_value."
+            elif params["max_value"] is None:
+                template_str = f"standard deviation must be {at_least_str} $min_value."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

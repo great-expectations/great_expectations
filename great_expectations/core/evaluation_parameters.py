@@ -194,8 +194,9 @@ def build_evaluation_parameters(
             # If not, try to parse the evaluation parameter and substitute, which will raise
             # an exception if we do not have a value
             else:
+                raw_value = value["$PARAMETER"]
                 parameter_value = parse_evaluation_parameter(
-                    value["$PARAMETER"],
+                    raw_value,
                     evaluation_parameters=evaluation_parameters,
                     data_context=data_context,
                 )
@@ -327,6 +328,8 @@ def parse_evaluation_parameter(
     elif len(L) == 1:
         # In this case, we *do* have a substitution for a single type. We treat this specially because in this
         # case, we allow complex type substitutions (i.e. do not coerce to string as part of parsing)
+        # NOTE: 20201023 - JPC - to support MetricDefinition as an evaluation parameter type, we need to handle that
+        # case here; is the evaluation parameter provided here in fact a metric definition?
         return evaluation_parameters[L[0]]
 
     elif len(L) == 0 or L[0] != "Parse Failure":

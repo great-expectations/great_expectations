@@ -4,22 +4,26 @@ from typing import List, Optional, Set, Tuple, Union
 from great_expectations.core.id_dict import IDDict
 
 
-class MetricEdgeKey:
+class MetricConfiguration:
     def __init__(
         self,
         metric_name: str,
         metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        filter_column_isnull: bool = True,
+        metric_value_kwargs: dict = None,
+        metric_dependencies: dict = None,
     ):
         self._metric_name = metric_name
         if not isinstance(metric_domain_kwargs, IDDict):
             metric_domain_kwargs = IDDict(metric_domain_kwargs)
         self._metric_domain_kwargs = metric_domain_kwargs
         if not isinstance(metric_value_kwargs, IDDict):
+            if metric_value_kwargs is None:
+                metric_value_kwargs = dict()
             metric_value_kwargs = IDDict(metric_value_kwargs)
         self._metric_value_kwargs = metric_value_kwargs
-        self._filter_column_isnull = filter_column_isnull
+        if metric_dependencies is None:
+            metric_dependencies = dict()
+        self.metric_dependencies = metric_dependencies
 
     @property
     def metric_name(self):
@@ -49,16 +53,14 @@ class MetricEdgeKey:
             self.metric_value_kwargs_id,
         )
 
-    @property
-    def filter_column_isnull(self) -> bool:
-        return self._filter_column_isnull
-
     # def __hash__(self):
     #     return self.id.__hash__()
 
 
 class MetricEdge:
-    def __init__(self, left: MetricEdgeKey, right: Union[MetricEdgeKey, None]):
+    def __init__(
+        self, left: MetricConfiguration, right: Union[MetricConfiguration, None]
+    ):
         self._left = left
         self._right = right
 
@@ -89,6 +91,7 @@ class ValidationGraph:
     def add(self, edge: MetricEdge):
         if edge.id not in self._edge_ids:
             self._edges.append(edge)
+            self._edge_ids.add(edge.id)
 
     @property
     def edges(self):
