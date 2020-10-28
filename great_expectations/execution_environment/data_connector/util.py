@@ -67,8 +67,8 @@ def convert_data_reference_string_to_batch_request_using_regex(
 
     # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition is problematic; idea: resurrect the Partition class.  If this is only a precautionary step, then it should not be here; otherwise, it might conceal an underlying problem.</Alex>
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
-    if "data_asset_name" in partition_definition:
-        data_asset_name = partition_definition.pop("data_asset_name")
+    # if "data_asset_name" in partition_definition:
+    #     data_asset_name = partition_definition.pop("data_asset_name")
 
     return BatchRequest(
         data_asset_name=data_asset_name,

@@ -42,7 +42,7 @@ data_connectors:
     my_filesystem_data_connector:
         class_name: FilesDataConnector
         base_directory: {base_directory}
-        # TODO: <Alex>Investigate</Alex>
+        # TODO: <Alex>Investigate: this potentially breaks the data_reference centric design.</Alex>
         glob_directive: "*.csv"
         # glob_directive: "*"
         
@@ -50,9 +50,9 @@ data_connectors:
             Titanic: {{}}
 
         default_regex:
-            # TODO: <Alex>Investigate</Alex>
-            pattern: (.+)_(\\d+)\\.csv
-            # pattern: (.+)_(\\d+)\\.[a-z]{3}
+            # TODO: <Alex>Investigate: this potentially breaks the data_reference centric design.</Alex>
+            # pattern: (.+)_(\\d+)\\.csv
+            pattern: (.+)_(\\d+)\\.[a-z][a-z][a-z]
             group_names:
             - letter
             - number
@@ -343,12 +343,14 @@ def test_some_very_basic_stuff(basic_execution_environment):
         ["A_1.csv", "A_2.csv", "A_3.csv", "B_1.csv", "B_2.csv", "B_3.csv"],
     )
 
-    assert len(basic_execution_environment.get_available_batch_definitions(
-        BatchRequest(
-            execution_environment_name="my_execution_environment",
-            data_connector_name="my_filesystem_data_connector",
+    assert len(
+        basic_execution_environment.get_available_batch_definitions(
+            batch_request=BatchRequest(
+                execution_environment_name="my_execution_environment",
+                data_connector_name="my_filesystem_data_connector",
+            )
         )
-    )) == 6
+    ) == 6
 
     batch: Batch = basic_execution_environment.get_batch_from_batch_definition(
         batch_definition=BatchDefinition(
