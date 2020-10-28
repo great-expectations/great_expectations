@@ -139,7 +139,7 @@ class PartitionRequest(object):
         partition_name: str = None,
         partition_definition: Optional[PartitionDefinitionSubset] = None,
         data_asset_name: str = None,
-        partition_index: Optional[int, slice] = None,
+        partition_index: Optional[Union[int, slice]] = None,
         limit: int = None,
     ):
         self._custom_filter = custom_filter

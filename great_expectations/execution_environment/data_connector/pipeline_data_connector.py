@@ -3,9 +3,9 @@ from typing import Union, List, Any
 import logging
 
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition_request import PartitionRequest
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+# from great_expectations.execution_environment.data_connector.partitioner import Partitioner
+from great_expectations.execution_environment.data_connector.partition_request import PartitionRequest
+# from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.id_dict import (

@@ -7,20 +7,22 @@ from great_expectations.execution_environment.data_connector import (
     FilesDataConnector,
     SinglePartitionDictDataConnector,
 )
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-)
 from tests.test_utils import (
     create_files_in_directory,
     create_fake_data_frame,
 )
-
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
     PartitionRequest,
     PartitionDefinition,
 )
+from great_expectations.execution_environment.data_connector.util import (
+    batch_definition_matches_batch_request,
+    convert_data_reference_string_to_batch_request_using_regex,
+    convert_batch_request_to_data_reference_string_using_regex
+)
+from great_expectations.data_context.util import instantiate_class_from_config
 
 
 @pytest.fixture
@@ -149,11 +151,12 @@ def test_available_data_asset_names():
 
 
 def test__batch_definition_matches_batch_request():
-    my_data_connector = SinglePartitionDictDataConnector(
-        name="my_data_connector",
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        data_reference_dict={},
-    )
+    # TODO: <Alex></Alex>
+    # my_data_connector = SinglePartitionDictDataConnector(
+    #     name="my_data_connector",
+    #     execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+    #     data_reference_dict={},
+    # )
 
     # TODO: <Alex>We need to cleanup PyCharm warnings.</Alex>
     A = BatchDefinition(
@@ -167,24 +170,21 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert my_data_connector._batch_definition_matches_batch_request(
+    assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="A"
         )
     )
 
-    # noinspection PyProtectedMember
-    assert not my_data_connector._batch_definition_matches_batch_request(
+    assert not batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="B"
         )
     )
 
-    # noinspection PyProtectedMember
-    assert my_data_connector._batch_definition_matches_batch_request(
+    assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="A",
@@ -192,8 +192,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert my_data_connector._batch_definition_matches_batch_request(
+    assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="A",
@@ -202,8 +201,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert not my_data_connector._batch_definition_matches_batch_request(
+    assert not batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="A",
@@ -212,8 +210,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert not my_data_connector._batch_definition_matches_batch_request(
+    assert not batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="A",
@@ -225,8 +222,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert my_data_connector._batch_definition_matches_batch_request(
+    assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             partition_request={
@@ -235,8 +231,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert my_data_connector._batch_definition_matches_batch_request(
+    assert batch_definition_matches_batch_request(
         batch_definition=BatchDefinition(**{
             "execution_environment_name": "FAKE_EXECUTION_ENVIRONMENT",
             "data_connector_name": "TEST_DATA_CONNECTOR",

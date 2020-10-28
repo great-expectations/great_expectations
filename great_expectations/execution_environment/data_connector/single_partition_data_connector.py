@@ -14,6 +14,11 @@ from great_expectations.core.batch import (
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector.util import (
+    batch_definition_matches_batch_request,
+    convert_data_reference_string_to_batch_request_using_regex,
+    convert_batch_request_to_data_reference_string_using_regex
+)
 
 logger = logging.getLogger(__name__)
 
@@ -115,14 +120,14 @@ class SinglePartitionDataConnector(DataConnector):
             ))
             len_batch_definition_list = len(batch_definition_list)
             example_data_references = [
-                self.convert_batch_request_to_data_reference(
+                convert_batch_request_to_data_reference_string_using_regex(
                     batch_request=BatchRequest(
                         execution_environment_name=batch_definition.execution_environment_name,
                         data_connector_name=batch_definition.data_connector_name,
                         data_asset_name=batch_definition.data_asset_name,
                         partition_request=batch_definition.partition_definition,
                     ),
-                    pattern=self._default_regex["pattern"],
+                    regex_pattern=self._default_regex["pattern"],
                     group_names=self._default_regex["group_names"],
                 )
                 for batch_definition in batch_definition_list
@@ -170,9 +175,9 @@ class SinglePartitionDataConnector(DataConnector):
     ) -> Optional[List[BatchDefinition]]:
         regex_config = copy.deepcopy(self._default_regex)
 
-        batch_request: BatchRequest = self.convert_data_reference_to_batch_request(
+        batch_request: BatchRequest = convert_data_reference_string_to_batch_request_using_regex(
             data_reference=data_reference,
-            pattern=regex_config["pattern"],
+            regex_pattern=regex_config["pattern"],
             group_names=regex_config["group_names"],
         )
         if batch_request is None:
@@ -196,13 +201,17 @@ class SinglePartitionDataConnector(DataConnector):
 
         if self._data_references_cache == None:
             self.refresh_data_references_cache()
-        
+
+        # TODO: <Alex>Copy cleaner implementation.</Alex>
         batches = []
         for data_reference, batch_definition in self._data_references_cache.items():
-            if batch_definition == None:
+            if batch_definition is None:
                 # The data_reference is unmatched.
                 continue
-            if self._batch_definition_matches_batch_request(batch_definition[0], batch_request):
+            if batch_definition_matches_batch_request(
+                batch_definition=batch_definition[0],
+                batch_request=batch_request
+            ):
                 batches += batch_definition
 
         return batches
