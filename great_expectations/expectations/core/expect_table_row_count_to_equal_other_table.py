@@ -1,10 +1,10 @@
-from great_expectations.expectations.expectation import DatasetExpectation
+from great_expectations.expectations.expectation import AggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 
-class ExpectTableRowCountToEqualOtherTable(DatasetExpectation):
+class ExpectTableRowCountToEqualOtherTable(AggregateExpectation):
     metric_dependencies = tuple()
     success_keys = "other_table_name"
     default_kwarg_values = {
