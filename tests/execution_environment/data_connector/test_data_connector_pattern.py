@@ -127,7 +127,6 @@ def test_name_date_price_list(tmp_path_factory):
                 "name": "james",
                 "timestamp": "20200713",
                 "price": "1567",
-                "data_asset_name": "DEFAULT_ASSET_NAME",
             }
         ),
     )

@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import itertools
-from typing import List, Union, Any, Dict
+from typing import List, Union, Any, Dict, Optional
 import os
 import copy
 
@@ -262,7 +262,7 @@ configured runtime keys.
             self._data_references_cache[data_asset_name] = {}
 
             for data_reference in self._get_data_reference_list(data_asset_name):
-                mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
+                mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(
                     data_reference=data_reference,
                     data_asset_name=data_asset_name,
                 )
@@ -335,22 +335,23 @@ configured runtime keys.
         self,
         data_reference: str,
         data_asset_name: str
-    ) -> Union[List[BatchDefinition], None]:
-
-        regex_config = copy.deepcopy(self._default_regex)
-
+    ) -> Optional[List[BatchDefinition]]:
+        regex_config: dict = copy.deepcopy(self._default_regex)
         # Override the defaults
-        asset = self.assets[data_asset_name]
-        if asset.pattern:
-            regex_config["pattern"] = asset.pattern
+        if self.assets and data_asset_name in self.assets:
+            asset: Asset = self.assets[data_asset_name]
+            if asset.pattern:
+                regex_config["pattern"] = asset.pattern
+            if asset.group_names:
+                regex_config["group_names"] = asset.group_names
+        pattern: str = regex_config["pattern"]
+        group_names: List[str] = regex_config["group_names"]
 
-        if asset.group_names:
-            regex_config["group_names"] = asset.group_names
-
+        # TODO: <Alex>The two-steps process involving a BatchRequest intermediary can be simplified by introducing a common class.</Alex>
         batch_request: BatchRequest = convert_data_reference_string_to_batch_request_using_regex(
             data_reference=data_reference,
-            regex_pattern=regex_config["pattern"],
-            group_names=regex_config["group_names"],
+            regex_pattern=pattern,
+            group_names=group_names,
         )
         if batch_request is None:
             return None
@@ -366,13 +367,8 @@ configured runtime keys.
 
     def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
         data_asset_name: str = batch_definition.data_asset_name
-        partition_definition: PartitionDefinition = batch_definition.partition_definition
-        batch_request: BatchRequest = BatchRequest(
-            partition_request=partition_definition,
-        )
 
         regex_config: dict = copy.deepcopy(self._default_regex)
-
         # Override the defaults
         if self.assets and data_asset_name in self.assets:
             asset: Asset = self.assets[data_asset_name]
@@ -381,9 +377,16 @@ configured runtime keys.
 
             if asset.group_names:
                 regex_config["group_names"] = asset.group_names
-
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
+
+        partition_definition: PartitionDefinition = batch_definition.partition_definition
+        partition_request: dict = partition_definition
+        batch_request: BatchRequest = BatchRequest(
+            # TODO: <Alex>Incorporating data_asset_name results in failed search.</Alex>
+            data_asset_name=data_asset_name,
+            partition_request=partition_request,
+        )
 
         data_reference: str = convert_batch_request_to_data_reference_string_using_regex(
             batch_request=batch_request,

@@ -346,7 +346,6 @@ def test_some_very_basic_stuff(basic_execution_environment):
         )
     )) == 6
 
-    # TODO: <Alex>This call leads to NotImplementedError, because it involves FilesDataConnector._get_available_partitions() which was commented out.</Alex>
     batch: Batch = basic_execution_environment.get_batch_from_batch_definition(
         batch_definition=BatchDefinition(
             execution_environment_name="my_execution_environment",

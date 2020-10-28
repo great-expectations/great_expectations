@@ -3,6 +3,7 @@
 # Utility methods for dealing with DataConnector objects
 
 from typing import List, Dict, Union, Callable, Any, Tuple, Optional
+import copy
 import re
 import sre_parse
 import sre_constants
@@ -51,10 +52,9 @@ def batch_definition_matches_batch_request(
 
 def convert_data_reference_string_to_batch_request_using_regex(
     data_reference: str,
-    regex_pattern,
-    group_names,
+    regex_pattern: str,
+    group_names: List[str],
 ) -> Optional[BatchRequest]:
-
     # noinspection PyUnresolvedReferences
     matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
     if matches is None:
@@ -65,7 +65,7 @@ def convert_data_reference_string_to_batch_request_using_regex(
         dict(zip(group_names, groups))
     )
 
-    # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition is problematic; idea: resurrect the Partition class.</Alex>
+    # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition is problematic; idea: resurrect the Partition class.  If this is only a precautionary step, then it should not be here; otherwise, it might conceal an underlying problem.</Alex>
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
     if "data_asset_name" in partition_definition:
         data_asset_name = partition_definition.pop("data_asset_name")
@@ -76,16 +76,17 @@ def convert_data_reference_string_to_batch_request_using_regex(
     )
 
 
-# TODO: <Alex>How are we able to recover the full file path, including the file extension?</Alex>
+# TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
 def convert_batch_request_to_data_reference_string_using_regex(
     batch_request: BatchRequest,
-    regex_pattern,
-    group_names,
+    regex_pattern: str,
+    group_names: List[str],
 ) -> str:
     if not isinstance(batch_request, BatchRequest):
         raise TypeError("batch_request is not of an instance of type BatchRequest")
 
-    template_arguments: dict = batch_request.partition_request
+    template_arguments: dict = copy.deepcopy(batch_request.partition_request)
+    # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>
     if batch_request.data_asset_name is not None:
         template_arguments["data_asset_name"] = batch_request.data_asset_name
 
