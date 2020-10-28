@@ -4,6 +4,7 @@ from .column_section_renderer import (
     ProfilingResultsColumnSectionRenderer,
     ValidationResultsColumnSectionRenderer,
 )
+from .microsoft_teams_renderer import MicrosoftTeamsRenderer
 from .other_section_renderer import ProfilingResultsOverviewSectionRenderer
 from .page_renderer import (
     ExpectationSuitePageRenderer,
