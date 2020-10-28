@@ -347,6 +347,11 @@ configured runtime keys.
         return unmatched_data_references
 
     def _get_data_reference_list(self, data_asset_name: str) -> List[str]:
+        """List objects in the underlying data store to create a list of data_references.
+
+        This method is used to refresh the cache.
+        """
+
         if self.assets[data_asset_name].base_directory:
             data_asset_path = os.path.join(self.base_directory, self.assets[data_asset_name].base_directory)
         else:
@@ -565,29 +570,13 @@ configured runtime keys.
             )
         ]
 
-    def self_check(
-        self,
-        pretty_print=True,
-        max_examples=3
-    ):
-        if self._data_references_cache is None:
-            self.refresh_data_references_cache()
-
-        if pretty_print:
-            print("\t"+self.name, ":", self.__class__.__name__)
-            print()
-
-        asset_names = self.get_available_data_asset_names()
-        asset_names.sort()
-        len_asset_names = len(asset_names)
-
-        data_connector_obj = {
-            "class_name": self.__class__.__name__,
-            "data_asset_count": len_asset_names,
-            "example_data_asset_names": asset_names[:max_examples],
-            "data_assets": {}
-            # "data_reference_count": self.
-        }
+    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name:str) -> List[Any]:
+        batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
+            execution_environment_name=self.execution_environment_name,
+            data_connector_name=self.name,
+            data_asset_name=data_asset_name,
+        ))
+        len_batch_definition_list = len(batch_definition_list)
 
         if pretty_print:
             print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
@@ -634,12 +623,26 @@ configured runtime keys.
                 "example_data_references": example_data_references
             }
 
-        unmatched_data_references = self.get_unmatched_data_references()
-        len_unmatched_data_references = len(unmatched_data_references)
-        if pretty_print:
-            print(f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):", unmatched_data_references[:max_examples])
+        if self.assets[data_asset_name].group_names:
+            group_names = self.assets[data_asset_name].group_names
+        else:
+            group_names = self._default_regex["group_names"]
 
-        data_connector_obj["unmatched_data_reference_count"] = len_unmatched_data_references
-        data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
+        data_reference_list = [
+            self.convert_batch_request_to_data_reference(
+                batch_request=BatchRequest(
+                    execution_environment_name=batch_definition.execution_environment_name,
+                    data_connector_name=batch_definition.data_connector_name,
+                    data_asset_name=batch_definition.data_asset_name,
+                    partition_request=batch_definition.partition_definition,
+                ),
+                pattern=pattern,
+                group_names=group_names,
+            )
+            for batch_definition in batch_definition_list
+        ]
 
-        return data_connector_obj
+        #TODO: Sort with a real sorter here
+        data_reference_list.sort()
+
+        return data_reference_list
