@@ -66,7 +66,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 if content_block_fn is not None:
                     try:
                         if isinstance(obj_, ExpectationValidationResult):
+                            expectation_config = obj_.expectation_config
                             result = content_block_fn(
+                                configuration=expectation_config,
                                 result=obj_,
                                 runtime_configuration=runtime_configuration,
                                 **kwargs,
@@ -89,7 +91,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             content_block_fn = cls._get_content_block_fn(
                                 "_missing_content_block_fn"
                             )
+                            expectation_config = obj_.expectation_config
                             result = content_block_fn(
+                                configuration=expectation_config,
                                 result=obj_,
                                 runtime_configuration=runtime_configuration,
                                 **kwargs,
@@ -106,7 +110,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         content_block_fn = cls._get_content_block_fn(
                             "_missing_content_block_fn"
                         )
+                        expectation_config = obj_.expectation_config
                         result = content_block_fn(
+                            configuration=expectation_config,
                             result=obj_,
                             runtime_configuration=runtime_configuration,
                             **kwargs,
