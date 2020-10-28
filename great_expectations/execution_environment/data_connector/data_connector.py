@@ -532,7 +532,7 @@ class DataConnector(object):
 
     def get_unmatched_data_references(self):
         raise NotImplementedError
-    
+
     def get_data_reference_list_count(self):
         raise NotImplementedError
 

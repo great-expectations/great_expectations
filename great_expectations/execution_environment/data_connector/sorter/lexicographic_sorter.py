@@ -18,3 +18,11 @@ class LexicographicSorter(Sorter):
         partition_definition: dict = batch_definition.partition_definition
         partition_value: Any = partition_definition[self.name]
         return partition_value
+
+    def __repr__(self) -> str:
+        doc_fields_dict: dict = {
+            "name": self.name,
+            "reverse": self.reverse,
+            "type": "LexicographicSorter"
+        }
+        return str(doc_fields_dict)

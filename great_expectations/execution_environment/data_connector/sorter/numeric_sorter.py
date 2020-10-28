@@ -30,3 +30,11 @@ class NumericSorter(Sorter):
             return int(partition_value)
         # The case of strings having floating point number format used as references to partitions should be rare.
         return round(float(partition_value))
+
+    def __repr__(self) -> str:
+        doc_fields_dict: dict = {
+            "name": self.name,
+            "reverse": self.reverse,
+            "type": "NumericSorter"
+        }
+        return str(doc_fields_dict)

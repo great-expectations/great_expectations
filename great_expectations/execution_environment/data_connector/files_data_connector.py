@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import itertools
-from typing import List, Union, Any, Dict
+from typing import List, Union, Any, Dict, Iterator
 import os
 import copy
 
@@ -24,6 +24,10 @@ from great_expectations.core.batch import (
     BatchMarkers,
     BatchDefinition,
     Batch
+)
+
+from great_expectations.execution_environment.data_connector.sorter import(
+Sorter,
 )
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -56,6 +60,7 @@ class FilesDataConnector(DataConnector):
         assets: dict,
 
         glob_directive: str = "*",
+        sorters: list = None,
         # partitioners: dict = {},
         # default_partitioner_name: str = None,
         # known_extensions: list = None,
@@ -103,6 +108,10 @@ class FilesDataConnector(DataConnector):
         self._assets = _assets
         self._build_assets_from_config(config=assets)
 
+        _sorters: Dict[str, Sorter] = {}
+        self._sorters = _sorters
+        self._build_sorters_from_config(config_list=sorters)
+
     @property
     def assets(self) -> Dict[str, Union[dict, Asset]]:
         return self._assets
@@ -114,6 +123,10 @@ class FilesDataConnector(DataConnector):
     @property
     def glob_directive(self) -> str:
         return self._glob_directive
+
+    @property
+    def sorters(self) -> List[Sorter]:
+        return self._sorters
 
     # @property
     # def reader_options(self) -> dict:
@@ -164,6 +177,36 @@ class FilesDataConnector(DataConnector):
                 class_name=config["class_name"],
             )
         return asset
+
+    # Any because we can pass in a reference list in the case of custom_list_sorter
+    def _build_sorters_from_config(self, config_list):
+        #config: List[Dict[str, Any]]):
+        for sorter_config in config_list:
+            # if sorters were not configured
+            if sorter_config is None:
+                return
+            # <WILL> will need to be refactored
+            if 'name' not in sorter_config:
+                raise ValueError("Sorter config should have a name")
+
+            sorter_name = sorter_config['name']
+            new_sorter: Sorter = self._build_sorter_from_config(sorter_config=sorter_config)
+            self._sorters[sorter_name] = new_sorter
+
+    def _build_sorter_from_config(self, sorter_config) -> Sorter:
+        """Build a Sorter using the provided configuration and return the newly-built Sorter."""
+        runtime_environment: dict = {
+            "name": sorter_config['name']
+        }
+        sorter: Sorter = instantiate_class_from_config(
+            config=sorter_config,
+            runtime_environment=runtime_environment,
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector.sorter"
+           },
+        )
+        return sorter
+
 
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
@@ -351,7 +394,7 @@ configured runtime keys.
     #             )
     #         )
     #     )
-    
+
     # TODO: <Alex>Deprecated</Alex>
     # def _build_batch_spec_from_partition(
     #     self,
@@ -425,7 +468,7 @@ configured runtime keys.
         total_references = 0
         for data_asset_name in self._data_references_cache:
             total_references += len(self._data_references_cache[data_asset_name])
-            
+
         return total_references
 
     def refresh_data_references_cache(
@@ -466,14 +509,35 @@ configured runtime keys.
                     ):
                         batch_definition_list.extend(batch_definition)
 
-        return batch_definition_list
+        if len(self.sorters) > 0:
+            sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
+            #print("---- unsorted ----")
+            #print(batch_definition_list)
+            #print("---- sorted ----")
+            #print(sorted_batch_definition_list)
+            return sorted_batch_definition_list
+        else:
+            return batch_definition_list
+
+
+    def _sort_batch_definition_list(self, batch_definition_list):
+        sorters_list = []
+        # this is not going to be the right order all the time. there must be a way.
+        #
+        for sorter in self.sorters.values():
+            sorters_list.append(sorter)
+        sorters: Iterator[Sorter] = reversed(sorters_list)
+        for sorter in sorters:
+            batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
+        return(batch_definition_list)
+
 
     def _map_data_reference_to_batch_definition_list(
         self,
         data_reference: Any,
         data_asset_name: str
     ) -> Union[List[BatchDefinition], None]:
-    
+
         regex_config = copy.deepcopy(self._default_regex)
 
         # Override the defaults
@@ -483,7 +547,7 @@ configured runtime keys.
 
         if asset.group_names:
             regex_config["group_names"] = asset.group_names
-        
+
         batch_request: BatchRequest = self.convert_data_reference_to_batch_request(
             data_reference=data_reference,
             pattern=regex_config["pattern"],
@@ -559,6 +623,7 @@ configured runtime keys.
                 )
                 for batch_definition in batch_definition_list
             ][:max_examples]
+
             example_data_references.sort()
 
             if pretty_print:
