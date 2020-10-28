@@ -79,7 +79,7 @@ class FilesDataConnector(DataConnector):
         self._glob_directive = glob_directive
 
         # TODO: Maybe make this a typed object?
-        self._default_regex: dict = default_regex
+        self._default_regex = default_regex
 
         if assets is None:
             assets = {}
