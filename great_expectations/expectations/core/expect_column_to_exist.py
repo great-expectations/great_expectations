@@ -12,16 +12,16 @@ from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import ordinal, substitute_none_for_missing
 from ..expectation import (
-    AggregateExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectColumnToExist(AggregateExpectation):
+class ExpectColumnToExist(TableExpectation):
     """Expect the specified column to exist.
 
     expect_column_to_exist is a :func:`expectation \

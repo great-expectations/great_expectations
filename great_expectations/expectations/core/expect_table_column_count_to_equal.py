@@ -12,16 +12,16 @@ from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing
 from ..expectation import (
-    AggregateExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectTableColumnCountToEqual(AggregateExpectation):
+class ExpectTableColumnCountToEqual(TableExpectation):
     """Expect the number of columns to equal a value.
 
     expect_table_column_count_to_equal is a :func:`expectation \

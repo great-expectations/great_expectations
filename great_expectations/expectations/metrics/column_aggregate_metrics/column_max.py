@@ -6,7 +6,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnAggregateMetricProvider,
+    ColumnMetricProvider,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import F as F
 from great_expectations.expectations.metrics.column_aggregate_metric import (
@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 
 
-class ColumnMax(ColumnAggregateMetricProvider):
+class ColumnMax(ColumnMetricProvider):
     metric_name = "column.aggregate.max"
 
     @column_aggregate_metric(engine=PandasExecutionEngine)

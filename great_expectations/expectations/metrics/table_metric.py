@@ -152,7 +152,7 @@ def aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for aggregate_metric")
 
 
-class AggregateMetricProvider(MetricProvider):
+class TableMetricProvider(MetricProvider):
     domain_keys = (
         "batch_id",
         "table",

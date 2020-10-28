@@ -8,16 +8,16 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ..expectation import (
-    AggregateExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics, get_domain_metrics_dict_by_name
 
 
-class ExpectColumnValueRatioToBeBetween(AggregateExpectation):
+class ExpectColumnValueRatioToBeBetween(TableExpectation):
     """
        Expect the Ratio of a value in a Column to be between a Minimum and Maximum Threshold
 

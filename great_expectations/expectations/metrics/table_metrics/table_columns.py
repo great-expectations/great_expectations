@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Dict, Optional, Tuple
 
 from sqlalchemy.engine import reflection
 
@@ -9,38 +9,31 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnAggregateMetricProvider,
+    ColumnMetricProvider,
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
+from great_expectations.expectations.metrics.metric_provider import metric
 from great_expectations.expectations.metrics.table_metric import (
-    AggregateMetricProvider,
+    TableMetricProvider,
     aggregate_metric,
 )
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class TableColumns(AggregateMetricProvider):
+class TableColumns(TableMetricProvider):
     metric_name = "table.columns"
 
-    @aggregate_metric(engine=PandasExecutionEngine)
-    def _pandas(cls, table, **kwargs):
-        cols = table.columns
+    @metric(engine=PandasExecutionEngine)
+    def _pandas(
+        cls,
+        execution_engine: PandasExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: dict,
+    ):
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs)
+        cols = df.columns
         return cols.tolist()
-
-    @aggregate_metric(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, table, _dialect, _sqlalchemy_engine, **kwargs):
-        try:
-            insp = reflection.Inspector.from_engine(_sqlalchemy_engine)
-            columns = insp.get_columns(table)
-        except KeyError:
-            # we will get a KeyError for temporary tables, since
-            # reflection will not find the temporary schema
-            columns = column_reflection_fallback()
-
-        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
-        if len(columns) == 0:
-            columns = column_reflection_fallback(table, _dialect, _sqlalchemy_engine)
-
-        return columns

@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric,
 )
-from great_expectations.expectations.metrics.table_metric import AggregateMetricProvider
+from great_expectations.expectations.metrics.table_metric import TableMetricProvider
 
 logger = logging.getLogger(__name__)
 
@@ -159,10 +159,12 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for column_aggregate_metric")
 
 
-class ColumnAggregateMetricProvider(AggregateMetricProvider):
+class ColumnMetricProvider(TableMetricProvider):
     domain_keys = (
         "batch_id",
         "table",
         "column",
+        "row_condition",
+        "condition_parser",
     )
     filter_column_isnull = False

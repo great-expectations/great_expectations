@@ -162,9 +162,11 @@ def register_metric(
         else:
             providers[execution_engine_name] = metric_class, metric_provider
     else:
+        default_metric_kwargs = getattr(metric_class, "default_metric_kwargs", dict())
         metric_definition = {
             "metric_domain_keys": metric_domain_keys,
             "metric_value_keys": metric_value_keys,
+            "default_metric_kwargs": default_metric_kwargs,
             "providers": {execution_engine_name: (metric_class, metric_provider)},
         }
         _registered_metrics[metric_name] = metric_definition
@@ -191,6 +193,7 @@ def get_metric_kwargs(
 ) -> dict():
     try:
         metric_definition = _registered_metrics.get(metric_name, dict())
+        metric_default_kwargs = metric_definition["metric_default_kwargs"]
         metric_kwargs = {
             "metric_domain_keys": metric_definition["metric_domain_keys"],
             "metric_value_keys": metric_definition["metric_value_keys"],
@@ -203,7 +206,7 @@ def get_metric_kwargs(
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {
-                        k: configuration_kwargs.get(k)
+                        k: configuration_kwargs.get(k, metric_default_kwargs.get(k))
                         for k in metric_kwargs["metric_domain_keys"]
                     }
                 )
@@ -212,7 +215,7 @@ def get_metric_kwargs(
             if len(metric_kwargs["metric_value_keys"]) > 0:
                 metric_value_kwargs = IDDict(
                     {
-                        k: configuration_kwargs.get(k)
+                        k: configuration_kwargs.get(k, metric_default_kwargs.get(k))
                         for k in metric_kwargs["metric_value_keys"]
                     }
                 )

@@ -39,6 +39,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
     domain_keys = tuple()
     value_keys = tuple()
     metric_fn_type = "data"
+    default_kwarg_values = dict()
 
     @classmethod
     def _register_metric_functions(cls):

@@ -1,3 +1,5 @@
+import pyspark.sql.functions as F
+
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -7,13 +9,12 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.expectations.metrics.table_metric import (
-    AggregateMetricProvider,
+    TableMetricProvider,
     aggregate_metric,
 )
-import pyspark.sql.functions as F
 
 
-class TableRowCount(AggregateMetricProvider):
+class TableRowCount(TableMetricProvider):
     metric_name = "table.row_count"
 
     @aggregate_metric(engine=PandasExecutionEngine)

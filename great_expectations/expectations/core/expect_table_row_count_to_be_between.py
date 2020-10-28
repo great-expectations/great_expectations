@@ -16,15 +16,15 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    AggregateExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectTableRowCountToBeBetween(AggregateExpectation):
+class ExpectTableRowCountToBeBetween(TableExpectation):
     """Expect the number of rows to be between two values.
 
     expect_table_row_count_to_be_between is a :func:`expectation \
@@ -91,7 +91,7 @@ class ExpectTableRowCountToBeBetween(AggregateExpectation):
     #    expectation without any metrics?
     # @PandasExecutionEngine.metric(
     #     metric_name="rows.count",
-    #     metric_domain_keys=AggregateExpectation.domain_keys,
+    #     metric_domain_keys=TableExpectation.domain_keys,
     #     metric_value_keys=(),
     #     metric_dependencies=tuple(),
     #     filter_column_isnull=False

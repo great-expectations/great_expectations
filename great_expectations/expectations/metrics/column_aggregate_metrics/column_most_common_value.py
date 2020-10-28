@@ -6,13 +6,13 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnAggregateMetricProvider,
+    ColumnMetricProvider,
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 
 
-class ColumnMostCommonValue(ColumnAggregateMetricProvider):
+class ColumnMostCommonValue(ColumnMetricProvider):
     metric_name = "column.aggregate.most_common_value"
 
     @column_aggregate_metric(engine=PandasExecutionEngine)

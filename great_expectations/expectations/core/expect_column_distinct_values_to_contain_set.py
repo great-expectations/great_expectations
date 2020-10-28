@@ -14,16 +14,16 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    AggregateExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectColumnDistinctValuesToContainSet(AggregateExpectation):
+class ExpectColumnDistinctValuesToContainSet(TableExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.value_counts",)
     success_keys = (
@@ -47,7 +47,7 @@ class ExpectColumnDistinctValuesToContainSet(AggregateExpectation):
 
     # @PandasExecutionEngine.metric(
     #        metric_name="column.value_counts",
-    #        metric_domain_keys=AggregateExpectation.domain_keys,
+    #        metric_domain_keys=TableExpectation.domain_keys,
     #        metric_value_keys=(),
     #        metric_dependencies=tuple(),
     #        filter_column_isnull=True,

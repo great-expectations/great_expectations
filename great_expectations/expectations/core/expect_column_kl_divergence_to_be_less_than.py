@@ -1,7 +1,7 @@
 import altair as alt
 import pandas as pd
 
-from great_expectations.expectations.expectation import AggregateExpectation
+from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     RenderedContentBlockContainer,
@@ -15,7 +15,7 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectColumnKlDivergenceToBeLessThan(AggregateExpectation):
+class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
     metric_dependencies = tuple()
     success_keys = (
         "partition_object",

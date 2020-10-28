@@ -12,14 +12,14 @@ from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing
 from ..expectation import (
-    AggregateExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
 )
 from ..registry import extract_metrics
 
 
-class ExpectTableColumnsToMatchOrderedList(AggregateExpectation):
+class ExpectTableColumnsToMatchOrderedList(TableExpectation):
     """Expect the columns to exactly match a specified list.
 
     expect_table_columns_to_match_ordered_list is a :func:`expectation \

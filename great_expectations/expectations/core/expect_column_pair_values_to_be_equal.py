@@ -19,10 +19,10 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    AggregateExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics, get_metric_kwargs
@@ -33,7 +33,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnPairValuesToBeEqual(AggregateExpectation):
+class ExpectColumnPairValuesToBeEqual(TableExpectation):
     """
     Expect the values in column A to be the same as column B.
 

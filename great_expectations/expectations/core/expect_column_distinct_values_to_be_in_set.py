@@ -14,16 +14,16 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    AggregateExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectColumnDistinctValuesToBeInSet(AggregateExpectation):
+class ExpectColumnDistinctValuesToBeInSet(TableExpectation):
     """Expect the set of distinct column values to be contained by a given set.
 
             The success value for this expectation will match that of expect_column_values_to_be_in_set. However,

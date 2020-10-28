@@ -15,16 +15,16 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    AggregateExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectColumnMinToBeBetween(AggregateExpectation):
+class ExpectColumnMinToBeBetween(TableExpectation):
     """Expect the column minimum to be between an min and max value
 
             expect_column_min_to_be_between is a \

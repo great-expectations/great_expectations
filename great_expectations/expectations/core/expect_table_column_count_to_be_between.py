@@ -12,16 +12,16 @@ from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import handle_strict_min_max, substitute_none_for_missing
 from ..expectation import (
-    AggregateExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectTableColumnCountToBeBetween(AggregateExpectation):
+class ExpectTableColumnCountToBeBetween(TableExpectation):
     """Expect the number of columns to be between two values.
 
     expect_table_column_count_to_be_between is a :func:`expectation \

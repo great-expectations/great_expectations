@@ -3,6 +3,7 @@ import pandas as pd
 import sqlalchemy as sa
 
 from great_expectations.core.batch import Batch
+from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -35,6 +36,25 @@ def _build_spark_engine(df):
     return engine
 
 
+def _build_sa_engine(df):
+    import sqlalchemy as sa
+
+    eng = sa.create_engine("sqlite://", echo=True)
+    df.to_sql("test", eng)
+    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    batch = Batch(data=batch_data)
+    engine = SqlAlchemyExecutionEngine(
+        engine=eng, batch_data_dict={batch.id: batch_data}
+    )
+    return engine
+
+
+def _build_pandas_engine(df):
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    return engine
+
+
 def test_metric_loads():
     assert (
         get_metric_provider("column.aggregate.max", PandasExecutionEngine()) is not None
@@ -55,9 +75,7 @@ def test_basic_metric():
 
 
 def test_mean_metric_pd():
-    df = pd.DataFrame({"a": [1, 2, 3, None]})
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.mean",
         metric_domain_kwargs={"column": "a"},
@@ -68,9 +86,7 @@ def test_mean_metric_pd():
 
 
 def test_stdev_metric_pd():
-    df = pd.DataFrame({"a": [1, 2, 3, None]})
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.standard_deviation",
         metric_domain_kwargs={"column": "a"},
@@ -81,16 +97,7 @@ def test_stdev_metric_pd():
 
 
 def test_max_metric_sa():
-    import sqlalchemy as sa
-
-    eng = sa.create_engine("sqlite://")
-    df = pd.DataFrame({"a": [1, 2, 1]})
-    df.to_sql("test", eng)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    batch = Batch(data=batch_data)
-    engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={batch.id: batch_data}
-    )
+    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 1]}))
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.max",
         metric_domain_kwargs={"column": "a"},
@@ -113,16 +120,7 @@ def test_max_metric_spark():
 
 
 def test_map_value_set_sa():
-    import sqlalchemy as sa
-
-    eng = sa.create_engine("sqlite://")
-    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    df.to_sql("test", eng)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    batch = Batch(data=batch_data)
-    engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={batch.id: batch_data}
-    )
+    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
     desired_metric = MetricConfiguration(
         metric_name="column_values.in_set",
         metric_domain_kwargs={"column": "a"},
@@ -229,9 +227,9 @@ def test_map_value_set_spark():
 
 
 def test_map_metric_pd():
-    df = pd.DataFrame({"a": ["a", "aaa", "bcbc", "defgh", None]})
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = _build_pandas_engine(
+        pd.DataFrame({"a": ["a", "aaa", "bcbc", "defgh", None]})
+    )
     desired_metric = MetricConfiguration(
         metric_name="column_values.value_lengths",
         metric_domain_kwargs={"column": "a"},
@@ -247,9 +245,7 @@ def test_map_metric_pd():
 
 
 def test_map_unique_pd():
-    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique",
         metric_domain_kwargs={"column": "a"},
@@ -261,17 +257,10 @@ def test_map_unique_pd():
 
 
 def test_map_unique_sa():
-    import sqlalchemy as sa
-
-    eng = sa.create_engine("sqlite://")
-    df = pd.DataFrame(
-        {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
-    )
-    df.to_sql("test", eng, index=False)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    batch = Batch(data=batch_data)
-    engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={batch.id: batch_data}
+    engine = _build_sa_engine(
+        pd.DataFrame(
+            {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
+        )
     )
     condition_metric = MetricConfiguration(
         metric_name="column_values.unique",
@@ -399,14 +388,7 @@ def test_z_score_under_threshold_pd():
 
 
 def test_z_score_under_threshold_sa():
-    eng = sa.create_engine("sqlite://")
-    df = pd.DataFrame({"a": [1, 2, 3, None]})
-    df.to_sql("test")
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    batch = Batch(data=batch_data)
-    engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={batch.id: batch_data}
-    )
+    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
     mean = MetricConfiguration(
         metric_name="column.aggregate.mean",
         metric_domain_kwargs={"column": "a"},
@@ -614,10 +596,133 @@ def test_distinct_metric_spark():
     engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
 
     desired_metric = MetricConfiguration(
+        metric_name="column.value_counts",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"sort": "value", "collate": None},
+    )
+
+    metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
+
+    desired_metric = MetricConfiguration(
         metric_name="column.distinct_values",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
+        metric_dependencies={"column.value_counts": desired_metric},
     )
 
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert set(list(results.values())[0].reset_index(drop=True)) == {1, 2, 3}
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results == {desired_metric.id: {1, 2, 3}}
+
+
+def test_distinct_metric_sa():
+    engine = _build_sa_engine(
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
+    )
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.value_counts",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"sort": "value", "collate": None},
+    )
+    desired_metric_b = MetricConfiguration(
+        metric_name="column.value_counts",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={"sort": "value", "collate": None},
+    )
+
+    metrics = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric, desired_metric_b)
+    )
+    assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
+    assert pd.Series(index=[4], data=[6]).equals(metrics[desired_metric_b.id])
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.distinct_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"column.value_counts": desired_metric},
+    )
+    desired_metric_b = MetricConfiguration(
+        metric_name="column.distinct_values",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"column.value_counts": desired_metric_b},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric, desired_metric_b), metrics=metrics
+    )
+    assert results[desired_metric.id] == {1, 2, 3}
+    assert results[desired_metric_b.id] == {4}
+
+
+def test_distinct_metric_pd():
+    engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.value_counts",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"sort": "value", "collate": None},
+    )
+
+    metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.distinct_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"column.value_counts": desired_metric},
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results == {desired_metric.id: {1, 2, 3}}
+
+
+def test_sa_batch_aggregate_metrics():
+    import datetime
+
+    engine = _build_sa_engine(
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
+    )
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.aggregate.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.aggregate.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.aggregate.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.aggregate.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+    )
+    start = datetime.datetime.now()
+    res = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        )
+    )
+    end = datetime.datetime.now()
+    print("t1")
+    print(end - start)
+    assert res[desired_metric_1.id] == 3
+    assert res[desired_metric_2.id] == 1
+    assert res[desired_metric_3.id] == 4
+    assert res[desired_metric_4.id] == 4

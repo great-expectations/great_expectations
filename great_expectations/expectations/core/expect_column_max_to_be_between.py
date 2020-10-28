@@ -27,16 +27,16 @@ except ImportError:
 
 from ...render.renderer.renderer import renderer
 from ..expectation import (
-    AggregateExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectColumnMaxToBeBetween(AggregateExpectation):
+class ExpectColumnMaxToBeBetween(TableExpectation):
     """Expect the column max to be between an min and max value
 
            expect_column_max_to_be_between is a \

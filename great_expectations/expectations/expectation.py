@@ -654,7 +654,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         )
 
 
-class AggregateExpectation(Expectation, ABC):
+class TableExpectation(Expectation, ABC):
     domain_keys = (
         "batch_id",
         "table",
@@ -687,7 +687,7 @@ class AggregateExpectation(Expectation, ABC):
         return dependencies
 
 
-class ColumnMapExpectation(AggregateExpectation, ABC):
+class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
 
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
