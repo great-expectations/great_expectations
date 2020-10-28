@@ -658,7 +658,7 @@ def _spark_map_unexpected_count_data(
         fn_domain_kwargs
     )
     data = data.withColumn("__unexpected", condition)
-    filtered = data.filter(F.col("__unexpected") == True)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     return filtered.count()
 
 
@@ -670,28 +670,25 @@ def _spark_column_map_values(
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
-    (
-        data,
-        compute_domain_kwargs,
-        accessor_domain_kwargs,
-    ) = execution_engine.get_compute_domain(metric_domain_kwargs)
+    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
+    (data, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
+        fn_domain_kwargs
+    )
 
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     result_format = metric_value_kwargs["result_format"]
-    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
-    assert (
-        fn_domain_kwargs == compute_domain_kwargs
-    ), "compute domain should be equivalent to the function domain"
     column_name = accessor_domain_kwargs["column"]
-    filtered = data.filter(condition)
+    data = data.withColumn("__unexpected", condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     if result_format["result_format"] == "COMPLETE":
-        return list(filtered.select(F.col(column_name)).collect())
+        rows = filtered.select(F.col(column_name)).collect()
     else:
-        return list(
+        rows = (
             filtered.select(F.col(column_name))
             .limit(result_format["partial_unexpected_count"])
             .collect()
         )
+    return [row[column_name] for row in rows]
 
 
 def _spark_column_map_value_counts(
@@ -702,24 +699,21 @@ def _spark_column_map_value_counts(
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
-    (
-        data,
-        compute_domain_kwargs,
-        accessor_domain_kwargs,
-    ) = execution_engine.get_compute_domain(metric_domain_kwargs)
+    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
+    (data, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
+        fn_domain_kwargs
+    )
     """Returns all unique values in the column and their corresponding counts"""
     result_format = metric_value_kwargs["result_format"]
-    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
-    assert (
-        fn_domain_kwargs == compute_domain_kwargs
-    ), "compute domain should be equivalent to the function domain"
     column_name = accessor_domain_kwargs["column"]
-    filtered = data.filter(condition)
+    data = data.withColumn("__unexpected", condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     value_counts = filtered.groupBy(F.col(column_name)).count()
     if result_format["result_format"] == "COMPLETE":
-        return value_counts
+        rows = value_counts.collect()
     else:
-        return value_counts[result_format["partial_unexpected_count"]]
+        rows = value_counts.collect()[: result_format["partial_unexpected_count"]]
+    return rows
 
 
 def _spark_column_map_rows(
@@ -730,18 +724,14 @@ def _spark_column_map_rows(
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
-    (
-        data,
-        compute_domain_kwargs,
-        accessor_domain_kwargs,
-    ) = execution_engine.get_compute_domain(metric_domain_kwargs)
-
-    result_format = metric_value_kwargs["result_format"]
     condition, fn_domain_kwargs = metrics.get("unexpected_condition")
-    assert (
-        fn_domain_kwargs == compute_domain_kwargs
-    ), "compute domain should be equivalent to the function domain"
-    filtered = data.filter(condition)
+
+    (data, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
+        fn_domain_kwargs
+    )
+    result_format = metric_value_kwargs["result_format"]
+    data = data.withColumn("__unexpected", condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     if result_format["result_format"] == "COMPLETE":
         return filtered.collect()
     else:

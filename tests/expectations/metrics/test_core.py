@@ -284,6 +284,45 @@ def test_map_unique_spark():
     )
     assert results[desired_metric.id] == 2
 
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [3, 3]
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_value_counts",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [(3, 2)]
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [(3, "bar"), (3, "baz")]
+
 
 def test_map_unique_sa():
     engine = _build_sa_engine(
