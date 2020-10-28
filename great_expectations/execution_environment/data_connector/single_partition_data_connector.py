@@ -86,69 +86,33 @@ class SinglePartitionDataConnector(DataConnector):
             data_asset_names.add(batch_definition.data_asset_name)
         return list(data_asset_names)
 
-    def self_check(
-        self,
-        pretty_print=True,
-        max_examples=3
-    ):
-        if self._data_references_cache is None:
-            self.refresh_data_references_cache()
+    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name:str) -> List[Any]:
+        """Fetch data_references corresponding to data_asset_name from the cache.
+        """
+        batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
+            execution_environment_name=self.execution_environment_name,
+            data_connector_name=self.name,
+            data_asset_name=data_asset_name,
+        ))
 
-        if pretty_print:
-            print("\t"+self.name, ":", self.__class__.__name__)
-            print()
+        data_reference_list = [
+            self.convert_batch_request_to_data_reference(
+                batch_request=BatchRequest(
+                    execution_environment_name=batch_definition.execution_environment_name,
+                    data_connector_name=batch_definition.data_connector_name,
+                    data_asset_name=batch_definition.data_asset_name,
+                    partition_request=batch_definition.partition_definition,
+                ),
+                pattern=self._default_regex["pattern"],
+                group_names=self._default_regex["group_names"],
+            )
+            for batch_definition in batch_definition_list
+        ]
 
-        asset_names = self.get_available_data_asset_names()
-        asset_names.sort()
-        len_asset_names = len(asset_names)
+        #TODO: Sort with a real sorter here
+        data_reference_list.sort()
 
-        data_connector_obj = {
-            "class_name": self.__class__.__name__,
-            "data_asset_count": len_asset_names,
-            "example_data_asset_names": asset_names[:max_examples],
-            "assets": {}
-            # "data_reference_count": self.
-        }
-
-        if pretty_print:
-            print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
-        for asset_name in asset_names[:max_examples]:
-            batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
-                execution_environment_name=self.execution_environment_name,
-                data_connector_name=self.name,
-                data_asset_name=asset_name,
-            ))
-            len_batch_definition_list = len(batch_definition_list)
-            example_data_references = [
-                convert_batch_request_to_data_reference_string_using_regex(
-                    batch_request=BatchRequest(
-                        execution_environment_name=batch_definition.execution_environment_name,
-                        data_connector_name=batch_definition.data_connector_name,
-                        data_asset_name=batch_definition.data_asset_name,
-                        partition_request=batch_definition.partition_definition,
-                    ),
-                    regex_pattern=self._default_regex["pattern"],
-                    group_names=self._default_regex["group_names"],
-                )
-                for batch_definition in batch_definition_list
-            ][:max_examples]
-            example_data_references.sort()
-
-            if pretty_print:
-                print(f"\t\t{asset_name} ({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):", example_data_references)
-
-            data_connector_obj["assets"][asset_name] = {
-                "batch_definition_count": len_batch_definition_list,
-                "example_data_references": example_data_references
-            }
-
-        unmatched_data_references = self.get_unmatched_data_references()
-        len_unmatched_data_references = len(unmatched_data_references)
-        if pretty_print:
-            print(f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):", unmatched_data_references[:max_examples])
-        data_connector_obj["unmatched_data_reference_count"] = len_unmatched_data_references
-        data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
-        return data_connector_obj
+        return data_reference_list
 
     def refresh_data_references_cache(
         self,
@@ -244,6 +208,11 @@ class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
         self.data_reference_dict = data_reference_dict
 
     def _get_data_reference_list(self):
+        """List objects in the underlying data store to create a list of data_references.
+
+        This method is used to refresh the cache.
+        """
+
         data_reference_keys = list(self.data_reference_dict.keys())
         data_reference_keys.sort()
         return data_reference_keys
@@ -271,6 +240,10 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         )
 
     def _get_data_reference_list(self):
+        """List objects in the underlying data store to create a list of data_references.
+
+        This method is used to refresh the cache.
+        """
         globbed_paths = Path(self.base_directory).glob(self.glob_directive)
         path_list = [
             str(posix_path) for posix_path in globbed_paths
