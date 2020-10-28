@@ -180,6 +180,8 @@ class FilesDataConnector(DataConnector):
 
     # Any because we can pass in a reference list in the case of custom_list_sorter
     def _build_sorters_from_config(self, config_list):
+        if config_list is None:
+            return
         #config: List[Dict[str, Any]]):
         for sorter_config in config_list:
             # if sorters were not configured
@@ -570,7 +572,7 @@ configured runtime keys.
             )
         ]
 
-    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name:str) -> List[Any]:
+    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[Any]:
         batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
             execution_environment_name=self.execution_environment_name,
             data_connector_name=self.name,
@@ -578,50 +580,10 @@ configured runtime keys.
         ))
         len_batch_definition_list = len(batch_definition_list)
 
-        if pretty_print:
-            print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
-
-        for asset_name in asset_names[:max_examples]:
-            batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
-                execution_environment_name=self.execution_environment_name,
-                data_connector_name=self.name,
-                data_asset_name=asset_name,
-            ))
-            len_batch_definition_list = len(batch_definition_list)
-
-            if self.assets[asset_name].pattern:
-                pattern = self.assets[asset_name].pattern
-            else:
-                pattern = self._default_regex["pattern"]
-
-            if self.assets[asset_name].group_names:
-                group_names = self.assets[asset_name].group_names
-            else:
-                group_names = self._default_regex["group_names"]
-
-            example_data_references = [
-                self.convert_batch_request_to_data_reference(
-                    batch_request=BatchRequest(
-                        execution_environment_name=batch_definition.execution_environment_name,
-                        data_connector_name=batch_definition.data_connector_name,
-                        data_asset_name=batch_definition.data_asset_name,
-                        partition_request=batch_definition.partition_definition,
-                    ),
-                    pattern=pattern,
-                    group_names=group_names,
-                )
-                for batch_definition in batch_definition_list
-            ][:max_examples]
-
-            example_data_references.sort()
-
-            if pretty_print:
-                print(f"\t\t{asset_name} ({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):", example_data_references)
-
-            data_connector_obj["data_assets"][asset_name] = {
-                "batch_definition_count": len_batch_definition_list,
-                "example_data_references": example_data_references
-            }
+        if self.assets[data_asset_name].pattern:
+            pattern = self.assets[data_asset_name].pattern
+        else:
+            pattern = self._default_regex["pattern"]
 
         if self.assets[data_asset_name].group_names:
             group_names = self.assets[data_asset_name].group_names
@@ -642,7 +604,8 @@ configured runtime keys.
             for batch_definition in batch_definition_list
         ]
 
-        #TODO: Sort with a real sorter here
+        # TODO: Sort with a real sorter here
+        # Sorting is alread
         data_reference_list.sort()
 
         return data_reference_list
