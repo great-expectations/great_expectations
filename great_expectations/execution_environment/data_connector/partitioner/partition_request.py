@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import itertools
-from typing import List, Dict, Callable, Union
+from typing import List, Dict, Callable, Union, Optional
 
 import logging
 
@@ -137,9 +137,9 @@ class PartitionRequest(object):
         self,
         custom_filter: Callable = None,
         partition_name: str = None,
-        partition_definition: Union[PartitionDefinitionSubset, None] = None,
+        partition_definition: Optional[PartitionDefinitionSubset] = None,
         data_asset_name: str = None,
-        partition_index: Union[int, slice, None] = None,
+        partition_index: Optional[int, slice] = None,
         limit: int = None,
     ):
         self._custom_filter = custom_filter
