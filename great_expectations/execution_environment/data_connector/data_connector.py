@@ -688,19 +688,20 @@ class DataConnector(object):
         group_names,
     ) -> Optional[BatchRequest]:
 
-        matches: Union[re.Match, None] = re.match(pattern, data_reference)
+        # noinspection PyUnresolvedReferences
+        matches: Optional[re.Match] = re.match(pattern, data_reference)
         if matches is None:
             return None
 
-        groups = list(matches.groups())
+        groups: list = list(matches.groups())
         partition_definition: PartitionDefinition = PartitionDefinition(
             dict(zip(group_names, groups))
         )
 
+        # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition is problematic; idea: resurrect the Partition class.</Alex>
+        data_asset_name: str = "DEFAULT_ASSET_NAME"
         if "data_asset_name" in partition_definition:
             data_asset_name = partition_definition.pop("data_asset_name")
-        else:
-            data_asset_name = "DEFAULT_ASSET_NAME"
 
         return BatchRequest(
             data_asset_name=data_asset_name,
@@ -730,6 +731,7 @@ class DataConnector(object):
 
         return converted_string
 
+    # noinspection PyUnresolvedReferences
     @staticmethod
     def _invert_regex_to_data_reference_template(
         pattern,
@@ -773,7 +775,7 @@ class DataConnector(object):
             else:
                 raise ValueError(f"Unrecognized regex token {token} in regex pattern {pattern}.")
 
-        #Collapse adjacent wildcards into a single wildcard
-        data_reference_template = re.sub("\*+", "*", data_reference_template)
+        # Collapse adjacent wildcards into a single wildcard
+        data_reference_template = re.sub("\\*+", "*", data_reference_template)
 
         return data_reference_template
