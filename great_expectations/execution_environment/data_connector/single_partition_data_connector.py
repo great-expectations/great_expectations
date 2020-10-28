@@ -182,6 +182,7 @@ class SinglePartitionDataConnector(DataConnector):
         return map_data_reference_string_to_batch_definition_list_using_regex(
             execution_environment_name=self.execution_environment_name,
             data_connector_name=self.name,
+            data_asset_name=data_asset_name,
             data_reference=data_reference,
             regex_pattern=pattern,
             group_names=group_names
@@ -256,9 +257,8 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         This method is used to refresh the cache.
         """
         globbed_paths = Path(self.base_directory).glob(self.glob_directive)
-        path_list = [
-            str(posix_path) for posix_path in globbed_paths
-        ]
+        # TODO: <Alex>Clean up to use os.path.relpath()</Alex>
+        path_list: List[str] = [str(posix_path) for posix_path in globbed_paths]
 
         # Trim paths to exclude the base_directory
         base_directory_len: int = len(str(self.base_directory))

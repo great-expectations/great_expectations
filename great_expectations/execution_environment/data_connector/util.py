@@ -53,6 +53,7 @@ def batch_definition_matches_batch_request(
 def map_data_reference_string_to_batch_definition_list_using_regex(
     execution_environment_name: str,
     data_connector_name: str,
+    data_asset_name: str,
     data_reference: str,
     regex_pattern: str,
     group_names: List[str],
@@ -66,11 +67,14 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     if batch_request is None:
         return None
 
+    if data_asset_name is None:
+        data_asset_name = batch_request.data_asset_name
+
     return [
         BatchDefinition(
             execution_environment_name=execution_environment_name,
             data_connector_name=data_connector_name,
-            data_asset_name=batch_request.data_asset_name,
+            data_asset_name=data_asset_name,
             partition_definition=PartitionDefinition(batch_request.partition_request),
         )
     ]

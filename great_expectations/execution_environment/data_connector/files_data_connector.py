@@ -260,11 +260,10 @@ configured runtime keys.
         # Map data_references to batch_definitions
         self._data_references_cache = {}
 
-        print(f'\n[ALEX_TEST] FILES_DATA_CONNECTOR::refresh_data_references_cache ; AVAILABLE_DATA_ASSET_NAMES: {self.get_available_data_asset_names()}')
         for data_asset_name in self.get_available_data_asset_names():
             self._data_references_cache[data_asset_name] = {}
 
-            for data_reference in self._get_data_reference_list_from_cache_by_data_asset_name(
+            for data_reference in self._get_path_list_from_filesystem_by_data_asset_name(
                 data_asset_name=data_asset_name
             ):
                 mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(
@@ -273,10 +272,25 @@ configured runtime keys.
                 )
                 self._data_references_cache[data_asset_name][data_reference] = mapped_batch_definition_list
 
-    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
+    def _get_path_list_from_filesystem_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
+        """
+        data_asset_path: str = self.base_directory
+        if self.assets and data_asset_name in self.assets:
+            asset: Asset = self.assets[data_asset_name]
+            if asset.base_directory:
+                data_asset_path = os.path.join(self.base_directory, asset.base_directory)
+
+        globbed_paths = Path(data_asset_path).glob(self._glob_directive)
+        paths: List[str] = [os.path.relpath(str(posix_path), data_asset_path) for posix_path in globbed_paths]
+
+        return paths
+
+    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
+        """
+        Fetch data_references corresponding to data_asset_name from the cache.
         """
         batch_definition_list = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
@@ -361,7 +375,6 @@ configured runtime keys.
 
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
-        print(f'\n[ALEX_TEST] FILES_DATA_CONNECTOR::get_batch_definition_list_from_batch_request ; BATCH_REQUEST: {batch_request} ; DATA_REFERENCE_CACHE: {self._data_references_cache} ; TYPE: {str(type(self._data_references_cache))}')
 
         batch_definition_list: List[BatchDefinition] = []
         for data_asset_name, sub_cache in self._data_references_cache.items():
@@ -395,6 +408,7 @@ configured runtime keys.
         return map_data_reference_string_to_batch_definition_list_using_regex(
             execution_environment_name=self.execution_environment_name,
             data_connector_name=self.name,
+            data_asset_name=data_asset_name,
             data_reference=data_reference,
             regex_pattern=pattern,
             group_names=group_names

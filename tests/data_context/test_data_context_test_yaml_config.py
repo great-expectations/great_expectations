@@ -70,7 +70,6 @@ store_backend:
 
 
 def test_execution_environment_config(empty_data_context):
-
     temp_dir = str(tempfile.mkdtemp())
     create_files_in_directory(
         directory=temp_dir,
@@ -134,14 +133,14 @@ data_connectors:
                 "example_data_asset_names": [
                     "DEFAULT_ASSET_NAME"
                 ],
-                "assets": {
+                "data_assets": {
                     "DEFAULT_ASSET_NAME": {
                         "batch_definition_count": 10,
                         "example_data_references": [
-                           #To fix in a subsequent PR: these data_references shouldn't have leading slashes.
+                            # To fix in a subsequent PR: these data_references shouldn't have leading slashes.
                             "/abe_20200809_1040.csv",
-                            "/eugene_20200809_1500.csv",
-                            "/james_20200810_1003.csv"
+                            "/alex_20200809_1000.csv",
+                            "/alex_20200819_1300.csv"
                         ]
                     }
                 },

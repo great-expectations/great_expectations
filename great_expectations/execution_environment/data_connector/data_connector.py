@@ -128,14 +128,13 @@ class DataConnector(object):
         raise NotImplementedError
 
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[Any]:
-        """Fetch data_references corresponding to data_asset_name from the cache.
+        """
+        Fetch data_references corresponding to data_asset_name from the cache.
         """
         raise NotImplementedError
 
     def _get_data_reference_list(self) -> List[Any]:
-        """List objects in the underlying data store to create a list of data_references.
-
-        This method is used to refresh the cache.
+        """
         """
         raise NotImplementedError
 
