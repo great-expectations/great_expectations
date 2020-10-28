@@ -1,8 +1,11 @@
 from great_expectations.expectations.expectation import AggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import substitute_none_for_missing, num_to_str, \
-    parse_row_condition_string_pandas_engine
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ExpectCompoundColumnsToBeUnique(AggregateExpectation):
@@ -27,7 +30,7 @@ class ExpectCompoundColumnsToBeUnique(AggregateExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -71,10 +74,10 @@ class ExpectCompoundColumnsToBeUnique(AggregateExpectation):
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = (
-                    conditional_template_str
-                    + ", then "
-                    + template_str[0].lower()
-                    + template_str[1:]
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
             )
             params.update(conditional_params)
 

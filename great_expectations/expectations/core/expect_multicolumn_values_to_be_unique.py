@@ -1,8 +1,11 @@
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import substitute_none_for_missing, parse_row_condition_string_pandas_engine, \
-    num_to_str
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
@@ -24,12 +27,12 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
-            cls,
-            configuration=None,
-            result=None,
-            language=None,
-            runtime_configuration=None,
-            **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -74,10 +77,10 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = (
-                    conditional_template_str
-                    + ", then "
-                    + template_str[0].lower()
-                    + template_str[1:]
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
             )
             params.update(conditional_params)
 

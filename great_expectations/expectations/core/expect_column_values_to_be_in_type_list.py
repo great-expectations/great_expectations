@@ -1,8 +1,11 @@
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import substitute_none_for_missing, num_to_str, \
-    parse_row_condition_string_pandas_engine
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
@@ -22,12 +25,12 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
-            cls,
-            configuration=None,
-            result=None,
-            language=None,
-            runtime_configuration=None,
-            **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -51,26 +54,26 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if include_column_name:
                     template_str = (
-                            "$column value types must belong to this set: "
-                            + values_string
-                            + ", at least $mostly_pct % of the time."
+                        "$column value types must belong to this set: "
+                        + values_string
+                        + ", at least $mostly_pct % of the time."
                     )
                 else:
                     template_str = (
-                            "value types must belong to this set: "
-                            + values_string
-                            + ", at least $mostly_pct % of the time."
+                        "value types must belong to this set: "
+                        + values_string
+                        + ", at least $mostly_pct % of the time."
                     )
             else:
                 if include_column_name:
                     template_str = (
-                            "$column value types must belong to this set: "
-                            + values_string
-                            + "."
+                        "$column value types must belong to this set: "
+                        + values_string
+                        + "."
                     )
                 else:
                     template_str = (
-                            "value types must belong to this set: " + values_string + "."
+                        "value types must belong to this set: " + values_string + "."
                     )
         else:
             if include_column_name:
