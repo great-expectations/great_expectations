@@ -14,6 +14,7 @@ from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot
 import great_expectations.exceptions as ge_exceptions
 
+
 class BatchDefinition(DictDot):
     def __init__(
         self,
@@ -29,12 +30,22 @@ class BatchDefinition(DictDot):
             partition_definition=partition_definition,
             # limit=limit,
         )
+
         assert type(partition_definition) == PartitionDefinition
 
         self._execution_environment_name = execution_environment_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_definition = partition_definition
+
+    def __repr__(self) -> str:
+        doc_fields_dict: dict = {
+            "execution_environment_name": self._execution_environment_name,
+            "data_connector_name": self._data_connector_name,
+            "data_asset_name": self.data_asset_name,
+            "partition_definition": repr(self._partition_definition),
+        }
+        return str(doc_fields_dict)
 
     @staticmethod
     def _validate_batch_definition(
@@ -277,6 +288,7 @@ class BatchMarkers(BatchKwargs):
     def ge_load_time(self):
         return self.get("ge_load_time")
 
+
 # TODO: <Alex>This module needs to be cleaned up.
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
@@ -286,10 +298,10 @@ class Batch(DictDot):
     def __init__(
         self,
         data,
-        batch_request: BatchRequest=None,
-        batch_definition: BatchDefinition=None,
-        batch_spec: BatchSpec=None,
-        batch_markers: BatchMarkers=None,
+        batch_request: BatchRequest = None,
+        batch_definition: BatchDefinition = None,
+        batch_spec: BatchSpec = None,
+        batch_markers: BatchMarkers = None,
         # The remaining parameters are for backward compatibility.
         data_context=None,
         datasource_name=None,

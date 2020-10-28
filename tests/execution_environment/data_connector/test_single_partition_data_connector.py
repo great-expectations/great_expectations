@@ -40,11 +40,15 @@ def test_basic_instantiation(tmp_path_factory):
     assert my_data_connector.get_data_reference_list_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
-    print(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="something",
-        data_connector_name="my_data_connector",
-        data_asset_name="something",
-    )))
+    print(
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                execution_environment_name="something",
+                data_connector_name="my_data_connector",
+                data_asset_name="something",
+            )
+        )
+    )
 
 
 def test_example_with_implicit_data_asset_names():

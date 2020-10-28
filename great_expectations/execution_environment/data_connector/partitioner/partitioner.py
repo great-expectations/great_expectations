@@ -1,3 +1,4 @@
+# TODO: <Alex>The Partitioner class is being decommissioned.  Comment it out, update tests, then delete deprecated/unused code.</Alex>
 # -*- coding: utf-8 -*-
 
 import copy
@@ -6,7 +7,7 @@ from typing import Union, List, Iterator, Any
 import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.sorter.sorter import Sorter
+from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.core.batch import BatchRequest
 import great_expectations.exceptions as ge_exceptions
 
@@ -95,12 +96,12 @@ configuration.
             config=config,
             runtime_environment=runtime_environment,
             config_defaults={
-                "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter"
+                "module_name": "great_expectations.execution_environment.data_connector.sorter"
             },
         )
         if not sorter:
             raise ge_exceptions.ClassInstantiationError(
-                module_name="great_expectations.execution_environment.data_connector.partitioner.sorter",
+                module_name="great_expectations.execution_environment.data_connector.sorter",
                 package_name=None,
                 class_name=config["class_name"],
             )

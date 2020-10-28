@@ -45,14 +45,13 @@ data_connectors:
         glob_directive: '*.csv'
         
         assets:
-            Titanic:
-                partitioner_name: default_partitioner_name
+            Titanic: {{}}
 
         default_regex:
-            pattern: (.+)(\\d+)\\.csv
+            pattern: (.+)_(\\d+)\\.csv
             group_names:
-                - letter
-                - number
+            - letter
+            - number
     """, Loader=yaml.FullLoader), runtime_environment={
             "name": "my_execution_environment"
         },
@@ -81,7 +80,8 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
         "partition_request": {
-            "key": "Titanic.csv"
+            "letter": "Titanic",
+            "number": "19120414"
         },
         # TODO: <Alex>We need to get a definitive resolution on whether or not we will allow "limit" and "batch_spec_passthrough" in batch_request.</Alex>
         # "limit": None,
@@ -96,10 +96,11 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
     batch_list: List[Batch] = basic_execution_environment.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
-    # TODO: <Alex>Commenting out these assertions for now, because the new code computes batch_list (not a single batch).  We also do not have the computation of batch_spec completed as of yet.  Must revisit/implement before merge.</Alex>
-    # TODO: <Alex>What can we test for here?</Alex>
+    assert len(batch_list) == 1
+
+    batch: Batch = batch_list[0]
+
     assert batch.batch_spec is not None
-    assert batch.batch_spec["data_asset_name"] == data_asset_name
     assert isinstance(batch.data, pd.DataFrame)
     assert batch.data.shape[0] == 1313
 
@@ -108,6 +109,7 @@ def test_get_batch_with_caching():
     pass
 
 
+# TODO: <Alex>What is the future of the PipelineDataConnector?</Alex>
 def test_get_batch_with_pipeline_style_batch_request():
     # TODO: <Alex>A test must be written for the equivalent functionality.</Alex>
     test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -334,7 +336,7 @@ def test_some_very_basic_stuff(basic_execution_environment):
     )
     create_files_in_directory(
         my_data_connector.base_directory,
-        ["A1.csv", "A2.csv", "A3.csv", "B1.csv", "B2.csv", "B3.csv"],
+        ["A_1.csv", "A_2.csv", "A_3.csv", "B_1.csv", "B_2.csv", "B_3.csv"],
     )
 
     assert len(basic_execution_environment.get_available_batch_definitions(
@@ -345,29 +347,31 @@ def test_some_very_basic_stuff(basic_execution_environment):
     )) == 6
 
     # TODO: <Alex>This call leads to NotImplementedError, because it involves FilesDataConnector._get_available_partitions() which was commented out.</Alex>
-    batch = basic_execution_environment.get_batch_from_batch_definition(BatchDefinition(
-        "my_execution_environment",
-        "my_filesystem_data_connector",
-        "B1",
-        partition_definition=PartitionDefinition({
-            "letter": "B",
-            "number": "1",
-        })
-    ))
+    batch: Batch = basic_execution_environment.get_batch_from_batch_definition(
+        batch_definition=BatchDefinition(
+            execution_environment_name="my_execution_environment",
+            data_connector_name="my_filesystem_data_connector",
+            data_asset_name="B1",
+            partition_definition=PartitionDefinition({
+                "letter": "B",
+                "number": "1",
+            })
+        )
+    )
 
     assert batch.batch_request is None
     assert type(batch.data) == pd.DataFrame
     assert batch.batch_definition == BatchDefinition(
-        "my_execution_environment",
-        "my_filesystem_data_connector",
-        "B1",
+        execution_environment_name="my_execution_environment",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="B1",
         partition_definition=PartitionDefinition({
             "letter": "B",
             "number": "1",
         })
     )
 
-    batch_list = basic_execution_environment.get_batch_list_from_batch_request(BatchRequest(
+    batch_list: List[Batch] = basic_execution_environment.get_batch_list_from_batch_request(batch_request=BatchRequest(
         execution_environment_name="my_execution_environment",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="B1",
@@ -376,11 +380,22 @@ def test_some_very_basic_stuff(basic_execution_environment):
             "number": "1",
         }
     ))
+    assert len(batch_list) == 0
+
+    batch_list: List[Batch] = basic_execution_environment.get_batch_list_from_batch_request(batch_request=BatchRequest(
+        execution_environment_name="my_execution_environment",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="Titanic",
+        partition_request={
+            "letter": "B",
+            "number": "1",
+        }
+    ))
     assert len(batch_list) == 1
     assert type(batch_list[0].data) == pd.DataFrame
 
-    my_df = pd.DataFrame({"x": range(10), "y": range(10)})
-    batch = basic_execution_environment.get_batch_from_batch_definition(BatchDefinition(
+    my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
+    batch: Batch = basic_execution_environment.get_batch_from_batch_definition(batch_definition=BatchDefinition(
         "my_execution_environment",
         "_pipeline",
         "_pipeline",

@@ -6,7 +6,6 @@ import json
 from great_expectations.execution_environment.data_connector import (
     FilesDataConnector,
     SinglePartitionDictDataConnector,
-    # DictDataConnector,
 )
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
@@ -56,6 +55,7 @@ assets:
 def test_basic_instantiation(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
 
+    # noinspection PyUnusedLocal
     my_data_connector = FilesDataConnector(
         name="my_data_connector",
         base_directory=base_directory,
@@ -70,60 +70,12 @@ def test_basic_instantiation(tmp_path_factory):
         }
     )
     
-# default_partitioner_name: my_regex_partitioner
-# partitioners:
-#     my_regex_partitioner:
-#         class_name: RegexPartitioner
-#         pattern: {base_directory}/(.+)(\d+)\.csv
-#         group_names:
-#             - letter
-#             - number
-
 
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
-    data_references = basic_data_connector._get_data_reference_list()
+    # noinspection PyProtectedMember
+    data_references: list = basic_data_connector._get_data_reference_list(data_asset_name="my_asset_name")
+    assert len(data_references) == 0
     assert data_references == []
-
-
-# def test__DictDataConnector():
-#     data_reference_dict = {
-#         "pretend/path/A-100.csv": create_fake_data_frame(),
-#         "pretend/path/A-101.csv": create_fake_data_frame(),
-#         "pretend/directory/B-1.csv": create_fake_data_frame(),
-#         "pretend/directory/B-2.csv": create_fake_data_frame(),
-#     }
-
-#     my_data_connector = DictDataConnector(
-#         name="my_data_connector",
-#         data_reference_dict=data_reference_dict,
-#         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
-#         pattern="(.+)/(.+)/(.+)-(\\d+)\\.csv",
-#         group_names=[
-#             "first_dir",
-#             "second_dir",
-#             "letter",
-#             "number",
-#         ]
-#     )
-
-#     # Peer into internals to make sure things have loaded properly
-#     data_references = my_data_connector._get_data_reference_list()
-#     assert data_references == [
-#         "pretend/directory/B-1.csv",
-#         "pretend/directory/B-2.csv",
-#         "pretend/path/A-100.csv",
-#         "pretend/path/A-101.csv",
-#     ]
-
-#     # If the cache hasn't been refreshed yet, get_unmatched_data_references (and most other methods) throw ValueErrors
-#     with pytest.raises(ValueError):
-#         my_data_connector.get_unmatched_data_references()
-
-#     my_data_connector.refresh_data_references_cache()
-
-#     assert set(my_data_connector.get_unmatched_data_references()) == set([])
-
-#     # print(json.dumps(my_data_connector._data_references_cache, indent=2))
 
 
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
@@ -215,6 +167,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
+    # noinspection PyProtectedMember
     assert my_data_connector._batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
@@ -222,6 +175,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
+    # noinspection PyProtectedMember
     assert not my_data_connector._batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
@@ -229,6 +183,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
+    # noinspection PyProtectedMember
     assert my_data_connector._batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
@@ -237,6 +192,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
+    # noinspection PyProtectedMember
     assert my_data_connector._batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
@@ -246,6 +202,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
+    # noinspection PyProtectedMember
     assert not my_data_connector._batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
@@ -255,6 +212,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
+    # noinspection PyProtectedMember
     assert not my_data_connector._batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
@@ -267,6 +225,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
+    # noinspection PyProtectedMember
     assert my_data_connector._batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
@@ -276,12 +235,13 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
+    # noinspection PyProtectedMember
     assert my_data_connector._batch_definition_matches_batch_request(
         batch_definition=BatchDefinition(**{
             "execution_environment_name": "FAKE_EXECUTION_ENVIRONMENT",
             "data_connector_name": "TEST_DATA_CONNECTOR",
             "data_asset_name": "DEFAULT_ASSET_NAME",
-            "partition_definition": PartitionDefinition(**{
+            "partition_definition": PartitionDefinition({
                 "index": "3"
             })
         }),

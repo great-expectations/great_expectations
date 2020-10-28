@@ -4,9 +4,7 @@ import json
 
 from typing import List
 
-from great_expectations.execution_environment.data_connector import (
-    DataConnector
-)
+from great_expectations.execution_environment.data_connector import DataConnector
 
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
@@ -46,31 +44,37 @@ def test_name_date_price_list(tmp_path_factory):
         class_name: FilesDataConnector
         base_directory: {base_directory}
         glob_directive: '*'
-        default_partitioner_name: my_standard_partitioner
+        # default_partitioner_name: my_standard_partitioner
         assets:
           DEFAULT_ASSET_NAME:
             glob_directive: '*'
             partitioner_name: my_standard_partitioner
-        partitioners:
-          my_standard_partitioner:
-            class_name: RegexPartitioner
-            pattern: .+\\/(.+)_(.+)_(.+)\\.csv
+        # partitioners:
+        #   my_standard_partitioner:
+        #     class_name: RegexPartitioner
+        #     pattern: .+\\/(.+)_(.+)_(.+)\\.csv
+        #     group_names:
+        #     - name
+        #     - timestamp
+        #     - price
+        #     allow_multipart_partitions: false
+        #     sorters:
+        #     - orderby: asc
+        #       class_name: LexicographicSorter
+        #       name: name
+        #     - datetime_format: '%Y%m%d'
+        #       orderby: desc
+        #       class_name: DateTimeSorter
+        #       name: timestamp
+        #     - orderby: desc
+        #       class_name: NumericSorter
+        #       name: price
+        default_regex:
+            pattern: (.+)_(.+)_(.+)\\.csv
             group_names:
             - name
             - timestamp
             - price
-            allow_multipart_partitions: false
-            sorters:
-            - orderby: asc
-              class_name: LexicographicSorter
-              name: name
-            - datetime_format: '%Y%m%d'
-              orderby: desc
-              class_name: DateTimeSorter
-              name: timestamp
-            - orderby: desc
-              class_name: NumericSorter
-              name: price
     """, Loader=yaml.FullLoader)
 
     my_data_connector: DataConnector = instantiate_class_from_config(
@@ -255,7 +259,7 @@ def test_foxtrot(tmp_path_factory):
                 base_directory: A/
               B:
                 base_directory: B/
-                pattern: (.*)-(.*)\.txt
+                pattern: (.*)-(.*)\\.txt
                 group_names:
                 - part_1
                 - part_2
@@ -266,7 +270,7 @@ def test_foxtrot(tmp_path_factory):
                 glob_directive: '*'
                 base_directory: D/
             default_regex:
-                pattern: (.*)-(.*)\.csv
+                pattern: (.*)-(.*)\\.csv
                 group_names:
                 - part_1
                 - part_2

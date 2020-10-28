@@ -527,7 +527,7 @@ class BaseDataContext:
                 config,
                 runtime_environment={},
                 config_defaults={
-                    "name" : "my_temp_execution_environment",
+                    "name": "my_temp_execution_environment",
                     "module_name": "great_expectations.execution_environment",
                 }
             )
@@ -554,7 +554,6 @@ class BaseDataContext:
 
         else:
             raise ValueError(f"Unknown return_mode: {return_mode}.")
-
 
     def _normalize_absolute_or_relative_path(self, path):
         if path is None:

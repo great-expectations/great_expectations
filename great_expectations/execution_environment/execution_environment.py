@@ -162,10 +162,12 @@ class ExecutionEnvironment(object):
             data_connector: DataConnector = self.get_data_connector(
                 name=batch_definition.data_connector_name
             )
-            batch_data, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata_from_batch_definition(batch_definition)
+            batch_data, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata_from_batch_definition(
+                batch_definition=batch_definition
+            )
 
         new_batch = Batch(
-            data = batch_data,
+            data=batch_data,
             batch_request=None,
             batch_definition=batch_definition,
             batch_spec=batch_spec,
@@ -184,7 +186,7 @@ class ExecutionEnvironment(object):
         )
 
         batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
-            batch_request
+            batch_request=batch_request
         )
 
         batches: List[Batch] = []
@@ -341,9 +343,13 @@ class ExecutionEnvironment(object):
         # in_memory_dataset: Any = None,
         # runtime_parameters: Union[dict, None] = None,
         # repartition: bool = False
-    ) -> List[Partition]:
+    ) -> List[BatchDefinition]:
         if batch_request.execution_environment_name != self.name:
-            raise ValueError(f"execution_environment_name {batch_request.execution_environment_name} does not match name {self.name}.")
+            raise ValueError(
+                f"""execution_environment_name {batch_request.execution_environment_name} does not match name
+{self.name}.
+                """
+            )
 
         data_connector: DataConnector = self.get_data_connector(
             name=batch_request.data_connector_name
@@ -376,10 +382,10 @@ class ExecutionEnvironment(object):
     #     return available_partitions
 
     def self_check(self, pretty_print=True, max_examples=3):
-        
-        return_object = {}
-        return_object["execution_engine"] = {
-            "class_name" : self._execution_engine.__class__.__name__,
+        return_object = {
+            "execution_engine": {
+                "class_name" : self._execution_engine.__class__.__name__,
+            }
         }
 
         if pretty_print:
@@ -391,11 +397,12 @@ class ExecutionEnvironment(object):
         data_connector_list = self.list_data_connectors()
         data_connector_list.sort()
         return_object["data_connectors"] = {
-            "count" : len(data_connector_list)
+            "count": len(data_connector_list)
         }
 
         for data_connector in data_connector_list:
-            data_connector_return_obj = data_connector.self_check(
+            data_connector_obj: DataConnector = self.get_data_connector(name=data_connector["name"])
+            data_connector_return_obj = data_connector_obj.self_check(
                 pretty_print=pretty_print,
                 max_examples=max_examples
             )

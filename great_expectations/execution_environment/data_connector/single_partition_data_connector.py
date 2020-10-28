@@ -1,15 +1,19 @@
 import logging
-from typing import List, Any
+from typing import Union, List, Any, Optional
 from pathlib import Path
 import copy
 
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.core.id_dict import (
+    PartitionRequest,
+    PartitionDefinitionSubset,
+    PartitionDefinition
+)
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
-    PartitionRequest,
 )
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +33,10 @@ class SinglePartitionDataConnector(DataConnector):
         self,
         name: str,
         execution_environment_name: str,
+        # TODO: <Alex>Delete deprecated/unused code.</Alex>
         # assets: dict = None,
         # partitioner: dict = None,
-        default_regex: dict,
+        default_regex: dict = None,
         base_directory: str = None,
         glob_directive: str = "*",
     ):
@@ -39,13 +44,17 @@ class SinglePartitionDataConnector(DataConnector):
 
         self.base_directory = base_directory
         self.glob_directive = glob_directive
+        if default_regex is None:
+            default_regex = {}
         self._default_regex = default_regex
 
+        # TODO: <Alex>Delete deprecated/unused code.</Alex>
         # if partitioner is None:
         #     partitioner = {}
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
+            # TODO: <Alex>Delete deprecated/unused code.</Alex>
             # assets=assets,
             # partitioners={
             #     "ONE_AND_ONLY_PARTITIONER" : partitioner
@@ -60,10 +69,12 @@ class SinglePartitionDataConnector(DataConnector):
             self.refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
-        batch_definition_list = self.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name=self.execution_environment_name,
-            data_connector_name=self.name,
-        ))
+        batch_definition_list = self.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                execution_environment_name=self.execution_environment_name,
+                data_connector_name=self.name,
+            )
+        )
 
         data_asset_names = set()
         for batch_definition in batch_definition_list:
@@ -87,10 +98,10 @@ class SinglePartitionDataConnector(DataConnector):
         len_asset_names = len(asset_names)
 
         data_connector_obj = {
-            "class_name" : self.__class__.__name__,
-            "data_asset_count" : len_asset_names,
+            "class_name": self.__class__.__name__,
+            "data_asset_count": len_asset_names,
             "example_data_asset_names": asset_names[:max_examples],
-            "assets" : {}
+            "assets": {}
             # "data_reference_count": self.
         }
 
@@ -105,7 +116,7 @@ class SinglePartitionDataConnector(DataConnector):
             len_batch_definition_list = len(batch_definition_list)
             example_data_references = [
                 self.convert_batch_request_to_data_reference(
-                    BatchRequest(
+                    batch_request=BatchRequest(
                         execution_environment_name=batch_definition.execution_environment_name,
                         data_connector_name=batch_definition.data_connector_name,
                         data_asset_name=batch_definition.data_asset_name,
@@ -139,12 +150,13 @@ class SinglePartitionDataConnector(DataConnector):
     ):
         """
         """
-        #Map data_references to batch_definitions
+        # Map data_references to batch_definitions
         self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
             mapped_batch_definition_list = self._map_data_reference_to_batch_definition_list(
-                data_reference,
+                data_reference=data_reference,
+                data_asset_name=None
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
@@ -154,8 +166,8 @@ class SinglePartitionDataConnector(DataConnector):
     def _map_data_reference_to_batch_definition_list(
         self,
         data_reference: Any,
-    ) -> List[BatchDefinition]:
-    
+        data_asset_name: Optional[str]
+    ) -> Optional[List[BatchDefinition]]:
         regex_config = copy.deepcopy(self._default_regex)
 
         batch_request: BatchRequest = self.convert_data_reference_to_batch_request(
@@ -171,7 +183,7 @@ class SinglePartitionDataConnector(DataConnector):
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,
-                partition_definition=batch_request.partition_request,
+                partition_definition=PartitionDefinition(batch_request.partition_request),
             )
         ]
 
@@ -199,19 +211,23 @@ class SinglePartitionDataConnector(DataConnector):
         if self._data_references_cache is None:
             raise ValueError("_data_references_cache is None. Have you called refresh_data_references_cache yet?")
 
-        return [k for k,v in self._data_references_cache.items() if v == None]
+        return [k for k, v in self._data_references_cache.items() if v is None]
 
 
 class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
     def __init__(
         self,
         name: str,
-        data_reference_dict: {},
+        data_reference_dict: dict = None,
+        # TODO: <Alex>Are these "kwargs" needed here?</Alex>
         **kwargs,
     ):
+        if data_reference_dict is None:
+            data_reference_dict = {}
         logger.debug(f'Constructing SinglePartitionDictDataConnector "{name}".')
         super().__init__(
             name,
+            # TODO: <Alex>Are these "kwargs" needed here?</Alex>
             **kwargs
         )
 

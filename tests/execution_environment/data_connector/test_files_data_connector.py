@@ -15,10 +15,11 @@ from tests.test_utils import (
 
 from great_expectations.core.batch import (
     BatchRequest,
-#     BatchDefinition,
-#     PartitionRequest,
-#     PartitionDefinition,
+    # BatchDefinition,
+    # PartitionRequest,
+    # PartitionDefinition,
 )
+
 
 def test_basic_instantiation(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
@@ -34,30 +35,30 @@ def test_basic_instantiation(tmp_path_factory):
     my_data_connector = FilesDataConnector(
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        default_regex = {
-            "pattern": "alpha-(.*)\.csv",
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
         base_directory=base_directory,
-        assets = {
-            "alpha" : {}
+        assets={
+            "alpha": {}
         }
     )
 
     assert my_data_connector.self_check() == {
-        'class_name': 'FilesDataConnector',
-        'data_asset_count': 1,
-        'example_data_asset_names': [
-            'alpha',
+        "class_name": "FilesDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "alpha",
         ],
-        'data_assets': {
-            'alpha': {
-                'example_data_references': ['alpha-1.csv', 'alpha-2.csv', 'alpha-3.csv'],
-                'batch_definition_count': 3
+        "data_assets": {
+            "alpha": {
+                "example_data_references": ["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
+                "batch_definition_count": 3
             },
         },
-        'example_unmatched_data_references': [],
-        'unmatched_data_reference_count': 0,
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
     }
 
     my_data_connector.refresh_data_references_cache()
@@ -69,6 +70,7 @@ def test_basic_instantiation(tmp_path_factory):
         data_connector_name="my_data_connector",
         data_asset_name="something",
     )))
+
 
 def test_instantiation_from_a_config(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
@@ -102,17 +104,17 @@ assets:
     """, return_mode="return_object")
 
     assert return_object == {
-        'class_name': 'FilesDataConnector',
-        'data_asset_count': 1,
-        'example_data_asset_names': [
-            'alpha',
+        "class_name": "FilesDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "alpha",
         ],
-        'data_assets': {
-            'alpha': {
-                'example_data_references': ['alpha-1.csv', 'alpha-2.csv', 'alpha-3.csv'],
-                'batch_definition_count': 3
+        "data_assets": {
+            "alpha": {
+                "example_data_references": ["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
+                "batch_definition_count": 3
             },
         },
-        'example_unmatched_data_references': [],
-        'unmatched_data_reference_count': 0,
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
     }

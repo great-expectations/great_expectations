@@ -1,3 +1,4 @@
+# TODO: <Alex>The functionality fro RegexPartitioner has now been absorbed by DataConnector -- adjust tests accordingly.</Alex>
 import pytest
 # from string import Template
 import re
@@ -414,7 +415,7 @@ def test_convert_batch_request_to_data_reference():
 
     assert regex_partitioner.convert_batch_request_to_data_reference(
         BatchRequest(
-            partition_request=PartitionDefinition(**{
+            partition_request=PartitionDefinition({
                 "name": "alex",
                 "timestamp": "20200809",
                 "price": "1000",
@@ -431,7 +432,7 @@ def test_convert_batch_request_to_data_reference():
 
     assert regex_partitioner.convert_batch_request_to_data_reference(
         BatchRequest(
-            partition_request=PartitionDefinition(**{
+            partition_request=PartitionDefinition({
                 "timestamp": "20200809",
                 "price": "1000",
             })
@@ -544,7 +545,7 @@ def test_convert_data_reference_to_batch_request():
         execution_environment_name=None,
         data_connector_name=None,
         data_asset_name="DEFAULT_ASSET_NAME",
-        partition_request=PartitionDefinition(**{
+        partition_request=PartitionDefinition({
             "name": "alex",
             "timestamp": "20200809",
             "price": "1000",
@@ -557,7 +558,7 @@ def test_convert_data_reference_to_batch_request():
         execution_environment_name=None,
         data_connector_name=None,
         data_asset_name="DEFAULT_ASSET_NAME",
-        partition_request=PartitionDefinition(**{
+        partition_request=PartitionDefinition({
             "name": "eugene",
             "timestamp": "20200810",
             "price": "1500",
