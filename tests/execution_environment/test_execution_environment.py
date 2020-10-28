@@ -42,13 +42,15 @@ data_connectors:
     my_filesystem_data_connector:
         class_name: FilesDataConnector
         base_directory: {base_directory}
-        glob_directive: '*.csv'
+        glob_directive: "*.csv"
+        # glob_directive: "*"
         
         assets:
             Titanic: {{}}
 
         default_regex:
             pattern: (.+)_(\\d+)\\.csv
+            # pattern: (.+)_(\\d+)\\.[a-z]{3}
             group_names:
             - letter
             - number
@@ -224,11 +226,11 @@ def test_get_available_data_asset_names(tmp_path_factory):
     data_connector_names = ["test_filesystem_data_connector"]
 
     expected_data_asset_names: dict = {
-        'test_filesystem_data_connector': [
-            'test_asset_0',
-            'abe_20200809_1040', 'james_20200811_1009', 'eugene_20201129_1900',
-            'will_20200809_1002', 'eugene_20200809_1500', 'james_20200810_1003',
-            'alex_20200819_1300', 'james_20200713_1567', 'will_20200810_1001', 'alex_20200809_1000'
+        "test_filesystem_data_connector": [
+            "test_asset_0",
+            "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
+            "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
+            "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
         ]
     }
 
@@ -243,11 +245,11 @@ def test_get_available_data_asset_names(tmp_path_factory):
     data_connector_names = "test_filesystem_data_connector"
 
     expected_data_asset_names: dict = {
-        'test_filesystem_data_connector': [
-            'test_asset_0',
-            'abe_20200809_1040', 'james_20200811_1009', 'eugene_20201129_1900',
-            'will_20200809_1002', 'eugene_20200809_1500', 'james_20200810_1003',
-            'alex_20200819_1300', 'james_20200713_1567', 'will_20200810_1001', 'alex_20200809_1000'
+        "test_filesystem_data_connector": [
+            "test_asset_0",
+            "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
+            "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
+            "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
         ]
     }
 
@@ -262,7 +264,7 @@ def test_get_available_data_asset_names(tmp_path_factory):
     data_connector_names = ["test_pipeline_data_connector"]
 
     expected_data_asset_names: dict = {
-        'test_pipeline_data_connector': ['test_asset_1']
+        "test_pipeline_data_connector": ["test_asset_1"]
     }
 
     available_data_asset_names: dict = execution_environment.get_available_data_asset_names(
