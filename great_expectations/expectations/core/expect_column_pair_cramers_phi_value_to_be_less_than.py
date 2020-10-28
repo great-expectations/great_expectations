@@ -1,4 +1,4 @@
-from great_expectations.expectations.expectation import AggregateExpectation
+from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     RenderedStringTemplateContent,
@@ -7,7 +7,7 @@ from great_expectations.render.types import (
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 
-class ExpectColumnPairCramersPhiValueToBeLessThan(AggregateExpectation):
+class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
     metric_dependencies = tuple()
     success_keys = (
         "column_A",
