@@ -99,7 +99,11 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     """
 
     map_metric = "column_values.not_in_set"
-    success_keys = ("value_set", "mostly", "parse_strings_as_datetimes")
+    success_keys = (
+        "value_set",
+        "mostly",
+        "parse_strings_as_datetimes",
+    )
 
     default_kwarg_values = {
         "row_condition": None,
