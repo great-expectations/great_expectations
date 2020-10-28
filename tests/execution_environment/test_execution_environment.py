@@ -42,6 +42,7 @@ data_connectors:
     my_filesystem_data_connector:
         class_name: FilesDataConnector
         base_directory: {base_directory}
+        # TODO: <Alex>Investigate</Alex>
         glob_directive: "*.csv"
         # glob_directive: "*"
         
@@ -49,6 +50,7 @@ data_connectors:
             Titanic: {{}}
 
         default_regex:
+            # TODO: <Alex>Investigate</Alex>
             pattern: (.+)_(\\d+)\\.csv
             # pattern: (.+)_(\\d+)\\.[a-z]{3}
             group_names:
