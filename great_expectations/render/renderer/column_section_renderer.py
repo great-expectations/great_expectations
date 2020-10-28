@@ -260,8 +260,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
             self._find_evr_by_type(evrs, "expect_column_proportion_of_unique_values_to_be_between"),
             self._find_evr_by_type(evrs, "expect_column_values_to_not_be_null"),
             self._find_evr_by_type(evrs, "expect_column_values_to_not_match_regex"),
-            self._find_evr_by_type(evrs, "expect_column_max_to_be_between"),
-            self._find_evr_by_type(evrs, "expect_column_mean_to_be_between"),
             self._find_evr_by_type(evrs, "expect_column_values_to_be_null"),
         ]
         evrs = [
