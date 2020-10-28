@@ -271,15 +271,17 @@ diagnose and repair the underlying issue.  Detailed information follows:
         )
 
     def _render_overview_table(self, evrs):
-        unique_n = self._find_evr_by_type(
-            evrs, "expect_column_unique_value_count_to_be_between"
-        )
-        unique_proportion = self._find_evr_by_type(
-            evrs, "expect_column_proportion_of_unique_values_to_be_between"
-        )
-        null_evr = self._find_evr_by_type(evrs, "expect_column_values_to_not_be_null")
+        evr_list = [
+            self._find_evr_by_type(evrs, "expect_column_unique_value_count_to_be_between"),
+            self._find_evr_by_type(evrs, "expect_column_proportion_of_unique_values_to_be_between"),
+            self._find_evr_by_type(evrs, "expect_column_values_to_not_be_null"),
+            self._find_evr_by_type(evrs, "expect_column_values_to_not_match_regex"),
+            self._find_evr_by_type(evrs, "expect_column_max_to_be_between"),
+            self._find_evr_by_type(evrs, "expect_column_mean_to_be_between"),
+            self._find_evr_by_type(evrs, "expect_column_values_to_be_null"),
+        ]
         evrs = [
-            evr for evr in [unique_n, unique_proportion, null_evr] if (evr is not None)
+            evr for evr in evr_list if (evr is not None)
         ]
 
         if len(evrs) > 0:
