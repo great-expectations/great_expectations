@@ -33,7 +33,7 @@ try:
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
+    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup, quoted_name
     from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.operators import custom_op
     from sqlalchemy.sql.selectable import CTE, Select
@@ -167,6 +167,10 @@ class MetaSqlAlchemyDataset(Dataset):
         def inner_wrapper(
             self, column, mostly=None, result_format=None, *args, **kwargs
         ):
+            if self.engine.dialect.name.lower() == "snowflake" and self.batch_kwargs.get(
+                "case_sensitive"
+            ):
+                column = quoted_name(column, quote=True)
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -557,11 +561,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             if generated_table_name is not None:
                 if self.engine.dialect.name.lower() == "bigquery":
                     logger.warning(
-                        "Created permanent table {table_name}".format(table_name=table_name)
+                        "Created permanent table {table_name}".format(
+                            table_name=table_name
+                        )
                     )
                 if self.engine.dialect.name.lower() == "awsathena":
                     logger.warning(
-                        "Created permanent table default.{table_name}".format(table_name=table_name)
+                        "Created permanent table default.{table_name}".format(
+                            table_name=table_name
+                        )
                     )
 
         try:
@@ -1377,7 +1385,7 @@ WHERE
 
         return {
             "success": unexpected_count == 0,
-            "result": {"unexpected_percent": 100.0 * unexpected_count / total_count}
+            "result": {"unexpected_percent": 100.0 * unexpected_count / total_count},
         }
 
     ###

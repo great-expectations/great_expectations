@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy
     from sqlalchemy import create_engine
+    from sqlalchemy.sql.elements import quoted_name
+
 except ImportError:
     sqlalchemy = None
     create_engine = None
@@ -388,7 +390,8 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
                     batch_kwargs["query_parameters"]
                 )
             else:
-                query = batch_kwargs["query"]
+                query = quoted_name(batch_kwargs["query"], quote=True)
+
             batch_reference = SqlAlchemyBatchReference(
                 engine=self.engine,
                 query=query,
@@ -397,6 +400,14 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
             )
         elif "table" in batch_kwargs:
             table = batch_kwargs["table"]
+            if self.engine.dialect.name.lower() == "snowflake" and batch_kwargs.get(
+                "case_sensitive"
+            ):
+                table = quoted_name(table, quote=True)
+            # if self.engine.dialect.name.lower() == "snowflake":
+            #     if not table.isupper():
+            #         table = quoted_name(table, quote=True)
+
             limit = batch_kwargs.get("limit")
             offset = batch_kwargs.get("offset")
             if limit is not None or offset is not None:
@@ -409,9 +420,11 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
                 logger.info(
                     "Generating query from table batch_kwargs based on limit and offset"
                 )
+
                 # In BigQuery the table name is already qualified with its schema name
                 if self.engine.dialect.name.lower() == "bigquery":
                     schema = None
+
                 else:
                     schema = batch_kwargs.get("schema")
                 raw_query = (

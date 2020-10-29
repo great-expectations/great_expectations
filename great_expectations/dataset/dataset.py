@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
+from sqlalchemy.sql import quoted_name
 
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -107,6 +108,13 @@ class MetaDataset(DataAsset):
                 column = kwargs.get("column")
 
             if column is not None:
+                if (
+                    hasattr(self, "engine")
+                    and self.engine.dialect.name.lower() == "snowflake"
+                    and self.batch_kwargs.get("case_sensitive")
+                ):
+                    column = quoted_name(column, quote=True)
+
                 nonnull_count = self.get_column_nonnull_count(
                     kwargs.get("column", column)
                 )
