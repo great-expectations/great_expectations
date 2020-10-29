@@ -68,7 +68,8 @@ class SinglePartitionDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache.
         """
-        # TODO: <Alex>This needs to be looked at.</Alex>
+        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts the requirement arguments.</Alex>
+        # TODO: <Alex>See also the comment above batch_definition_matches_batch_request (in great_expectations/execution_environment/data_connector/util.py).</Alex>
         batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,

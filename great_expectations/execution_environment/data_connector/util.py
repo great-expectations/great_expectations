@@ -20,6 +20,9 @@ logger = logging.getLogger(__name__)
 DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
 
 
+# TODO: <Alex>The semantics of this method are too rigid (see below) and are incomplete.
+#  It should replaced with a rich query interface (see great_expectations/execution_environment/data_connector/partition_request.py).
+#  </Alex>
 def batch_definition_matches_batch_request(
     batch_definition: BatchDefinition,
     batch_request: BatchRequest,
