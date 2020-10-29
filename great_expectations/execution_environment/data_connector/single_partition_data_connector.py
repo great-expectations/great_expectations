@@ -311,7 +311,6 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         """
         globbed_paths = Path(self.base_directory).glob(self.glob_directive)
         path_list: List[str] = [os.path.relpath(str(posix_path), self.base_directory) for posix_path in globbed_paths]
-
         return path_list
 
     # TODO: <Alex>Why does this need to override SinglePartitionDataConnector.get_available_data_asset_names()?  The results must be identical.</Alex>

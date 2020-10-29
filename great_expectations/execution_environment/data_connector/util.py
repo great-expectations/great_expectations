@@ -32,11 +32,6 @@ def batch_definition_matches_batch_request(
     assert isinstance(batch_definition, BatchDefinition)
     assert isinstance(batch_request, BatchRequest)
 
-    #print("~BATCH_DEFINITION~")
-    #print(batch_definition)
-    #print("~BATCH_REQUEST~")
-    #print(batch_request)
-
     if batch_request.execution_environment_name:
         if batch_request.execution_environment_name != batch_definition.execution_environment_name:
             return False
