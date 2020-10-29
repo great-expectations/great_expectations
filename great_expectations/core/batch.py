@@ -1,7 +1,7 @@
 import datetime
 import json
 import hashlib
-from typing import Union, Any
+from typing import Union, Any, Optional
 
 from great_expectations.core.id_dict import (
     IDDict,
@@ -157,7 +157,7 @@ class BatchRequest(DictDot):
         execution_environment_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        partition_request: dict = None,
+        partition_request: Optional[dict] = None,
         in_memory_dataset: Any = None,
         limit: Union[int, None] = None,
         # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
@@ -192,7 +192,7 @@ class BatchRequest(DictDot):
         return self._data_asset_name
 
     @property
-    def partition_request(self) -> dict: #PartitionRequest:
+    def partition_request(self) -> dict:
         return self._partition_request
 
     @property

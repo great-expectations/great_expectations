@@ -42,13 +42,17 @@ data_connectors:
     my_filesystem_data_connector:
         class_name: FilesDataConnector
         base_directory: {base_directory}
-        glob_directive: '*.csv'
+        # TODO: <Alex>Investigate: this potentially breaks the data_reference centric design.</Alex>
+        glob_directive: "*.csv"
+        # glob_directive: "*"
         
         assets:
             Titanic: {{}}
 
         default_regex:
+            # TODO: <Alex>Investigate: this potentially breaks the data_reference centric design.</Alex>
             pattern: (.+)_(\\d+)\\.csv
+            # pattern: (.+)_(\\d+)\\.[a-z][a-z][a-z]
             group_names:
             - letter
             - number
@@ -224,11 +228,11 @@ def test_get_available_data_asset_names(tmp_path_factory):
     data_connector_names = ["test_filesystem_data_connector"]
 
     expected_data_asset_names: dict = {
-        'test_filesystem_data_connector': [
-            'test_asset_0',
-            'abe_20200809_1040', 'james_20200811_1009', 'eugene_20201129_1900',
-            'will_20200809_1002', 'eugene_20200809_1500', 'james_20200810_1003',
-            'alex_20200819_1300', 'james_20200713_1567', 'will_20200810_1001', 'alex_20200809_1000'
+        "test_filesystem_data_connector": [
+            "test_asset_0",
+            "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
+            "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
+            "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
         ]
     }
 
@@ -243,11 +247,11 @@ def test_get_available_data_asset_names(tmp_path_factory):
     data_connector_names = "test_filesystem_data_connector"
 
     expected_data_asset_names: dict = {
-        'test_filesystem_data_connector': [
-            'test_asset_0',
-            'abe_20200809_1040', 'james_20200811_1009', 'eugene_20201129_1900',
-            'will_20200809_1002', 'eugene_20200809_1500', 'james_20200810_1003',
-            'alex_20200819_1300', 'james_20200713_1567', 'will_20200810_1001', 'alex_20200809_1000'
+        "test_filesystem_data_connector": [
+            "test_asset_0",
+            "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
+            "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
+            "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
         ]
     }
 
@@ -262,7 +266,7 @@ def test_get_available_data_asset_names(tmp_path_factory):
     data_connector_names = ["test_pipeline_data_connector"]
 
     expected_data_asset_names: dict = {
-        'test_pipeline_data_connector': ['test_asset_1']
+        "test_pipeline_data_connector": ["test_asset_1"]
     }
 
     available_data_asset_names: dict = execution_environment.get_available_data_asset_names(
@@ -339,14 +343,15 @@ def test_some_very_basic_stuff(basic_execution_environment):
         ["A_1.csv", "A_2.csv", "A_3.csv", "B_1.csv", "B_2.csv", "B_3.csv"],
     )
 
-    assert len(basic_execution_environment.get_available_batch_definitions(
-        BatchRequest(
-            execution_environment_name="my_execution_environment",
-            data_connector_name="my_filesystem_data_connector",
+    assert len(
+        basic_execution_environment.get_available_batch_definitions(
+            batch_request=BatchRequest(
+                execution_environment_name="my_execution_environment",
+                data_connector_name="my_filesystem_data_connector",
+            )
         )
-    )) == 6
+    ) == 6
 
-    # TODO: <Alex>This call leads to NotImplementedError, because it involves FilesDataConnector._get_available_partitions() which was commented out.</Alex>
     batch: Batch = basic_execution_environment.get_batch_from_batch_definition(
         batch_definition=BatchDefinition(
             execution_environment_name="my_execution_environment",

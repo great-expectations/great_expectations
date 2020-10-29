@@ -355,7 +355,7 @@ class ExecutionEnvironment(object):
             name=batch_request.data_connector_name
         )
         batch_definition_list = data_connector.get_batch_definition_list_from_batch_request(
-            batch_request
+            batch_request=batch_request
         )
         return batch_definition_list
 
