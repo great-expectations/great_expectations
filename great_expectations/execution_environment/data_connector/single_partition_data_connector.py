@@ -52,7 +52,6 @@ class SinglePartitionDataConnector(DataConnector):
         base_directory: str = None,
         glob_directive: str = "*",
         sorters: list = None,
-
     ):
         logger.debug(f'Constructing SinglePartitionDataConnector "{name}".')
 
@@ -65,17 +64,15 @@ class SinglePartitionDataConnector(DataConnector):
         _sorters: Dict[str, Sorter] = {}
         self._sorters = _sorters
         self._build_sorters_from_config(config_list=sorters)
-
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=None,
         )
 
-
-    # <WILL> move to utils.py
+    # move to utils?
     # Any because we can pass in a reference list in the case of custom_list_sorter
-    def _build_sorters_from_config(self, config_list):
+    def _build_sorters_from_config(self, config_list: List[Dict[str, Any]]):
         if config_list is None:
             return
         # config: List[Dict[str, Any]]):
@@ -83,10 +80,8 @@ class SinglePartitionDataConnector(DataConnector):
             # if sorters were not configured
             if sorter_config is None:
                 return
-            # <WILL> will need to be refactored
             if 'name' not in sorter_config:
                 raise ValueError("Sorter config should have a name")
-
             sorter_name = sorter_config['name']
             new_sorter: Sorter = self._build_sorter_from_config(sorter_config=sorter_config)
             self._sorters[sorter_name] = new_sorter
@@ -209,14 +204,12 @@ class SinglePartitionDataConnector(DataConnector):
 
     def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list = []
-        # this is not going to be the right order all the time. there must be a way.
         for sorter in self._sorters.values():
             sorters_list.append(sorter)
         sorters: Iterator[Sorter] = reversed(sorters_list)
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
-        return (batch_definition_list)
-
+        return batch_definition_list
 
     # TODO: <Alex>Should this method be moved to SinglePartitionFileDataConnector?</Alex>
     def _map_data_reference_to_batch_definition_list(
@@ -288,13 +281,11 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         base_directory: str,
         default_regex: dict,
         glob_directive: str = "*",
-        sorters: Sorter=None,
+        sorters: Sorter = None,
     ):
         logger.debug(f'Constructing SinglePartitionFileDataConnector "{name}".')
 
         self.glob_directive = glob_directive
-        #self._sorters = None
-
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,

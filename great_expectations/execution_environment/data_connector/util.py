@@ -46,8 +46,6 @@ def batch_definition_matches_batch_request(
         for k, v in batch_request.partition_request.items():
             if (k not in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
                 return False
-    # shouldn't this work?
-    #print("TRUE TRUE TRUE")
     return True
 
 

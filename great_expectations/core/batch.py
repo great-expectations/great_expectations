@@ -131,7 +131,6 @@ class BatchDefinition(DictDot):
             return NotImplemented
         return self.id == other.id
 
-
     def __str__(self):
         return json.dumps(
             self.get_json_dict(),

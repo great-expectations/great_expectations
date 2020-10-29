@@ -354,13 +354,8 @@ configured runtime keys.
                         batch_request=batch_request
                     ):
                         batch_definition_list.extend(batch_definition)
-
         if len(self.sorters) > 0:
             sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
-            #print("---- unsorted ----")
-            #print(batch_definition_list)
-            #print("---- sorted ----")
-            #print(sorted_batch_definition_list)
             return sorted_batch_definition_list
         else:
             return batch_definition_list
