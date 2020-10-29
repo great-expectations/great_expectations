@@ -328,65 +328,66 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'abe', 'timestamp': '20200809', 'price': '1040',
-                             'data_asset_name': 'TestFiles'}
+                            {'name': 'abe', 'timestamp': '20200809', 'price': '1040'}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'alex', 'timestamp': '20200819', 'price': '1300',
-                             'data_asset_name': 'TestFiles'}
+                            {'name': 'alex', 'timestamp': '20200819', 'price': '1300'}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'alex', 'timestamp': '20200809', 'price': '1000', 'data_asset_name': 'TestFiles'}
+                            {'name': 'alex', 'timestamp': '20200809', 'price': '1000'}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'eugene', 'timestamp': '20201129', 'price': '1900', 'data_asset_name': 'TestFiles'}
+                            {'name': 'eugene', 'timestamp': '20201129', 'price': '1900'}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'eugene', 'timestamp': '20200809', 'price': '1500', 'data_asset_name': 'TestFiles'}
+                            {'name': 'eugene', 'timestamp': '20200809', 'price': '1500'}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'james', 'timestamp': '20200811', 'price': '1009', 'data_asset_name': 'TestFiles'}
+                            {'name': 'james', 'timestamp': '20200811', 'price': '1009'}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'james', 'timestamp': '20200810', 'price': '1003', 'data_asset_name': 'TestFiles'}
+                            {'name': 'james', 'timestamp': '20200810', 'price': '1003'}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'james', 'timestamp': '20200713', 'price': '1567', 'data_asset_name': 'TestFiles'}
+                            {'name': 'james', 'timestamp': '20200713', 'price': '1567'}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'will', 'timestamp': '20200810', 'price': '1001', 'data_asset_name': 'TestFiles'}
+                            {'name': 'will', 'timestamp': '20200810', 'price': '1001'}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'will', 'timestamp': '20200809', 'price': '1002', 'data_asset_name': 'TestFiles'}
+                            {'name': 'will', 'timestamp': '20200809', 'price': '1002'}
                         )),
     ]
+
+    # TEST 1: Sorting works
+    assert expected == sorted_batch_definition_list
 
     my_batch_request: BatchRequest = BatchRequest(
         execution_environment_name="test_environment",
@@ -401,7 +402,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
 
-    # TEST 1: Should only return the specified partition
+    # TEST 2: Should only return the specified partition
     my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=my_batch_request
     )
@@ -422,7 +423,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
     )
     assert my_batch_definition == expected_batch_definition
 
-    # TEST 2: Without partition request, should return all 10
+    # TEST 3: Without partition request, should return all 10
     my_batch_request: BatchRequest = BatchRequest(
         execution_environment_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
