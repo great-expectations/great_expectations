@@ -15,7 +15,6 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
     PartitionDefinition,
-    PartitionRequest,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -70,10 +69,6 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
     execution_environment_name: str = "my_execution_environment"
     data_connector_name: str = "my_filesystem_data_connector"
     data_asset_name: str = "Titanic"
-    # TODO: <Alex>Do we need the commented out lines?</Alex>
-    # base_dir_path = str(tmp_path_factory.mktemp("project_dirs"))
-    # project_dir_path = os.path.join(base_dir_path, "project_path")
-    # titanic_csv_destination_file_path: str = str(os.path.join(project_dir_path, "data/titanic/Titanic.csv"))
     titanic_csv_source_file_path: str = file_relative_path(__file__, "../test_sets/Titanic.csv")
     base_directory: str = basic_execution_environment.get_data_connector(name=data_connector_name).base_directory
     titanic_csv_destination_file_path: str = str(os.path.join(base_directory, "Titanic_19120414.csv"))
@@ -122,9 +117,6 @@ def test_get_batch_with_pipeline_style_batch_request():
     execution_environment_config: dict = execution_environment_files_data_connector_regex_partitioner_config(
         use_group_names=False,
         use_sorters=False,
-        # TODO: <Alex></Alex>
-        # default_base_directory=None,
-        # data_asset_base_directory=None
     )[execution_environment_name]
     execution_environment_config.pop("class_name")
 

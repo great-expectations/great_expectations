@@ -1,7 +1,5 @@
-import os
 from pathlib import Path
-import itertools
-from typing import List, Union, Any, Dict, Optional
+from typing import List, Union, Dict, Optional
 import os
 import copy
 
@@ -9,27 +7,13 @@ import logging
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
-from great_expectations.execution_environment.data_connector.partition_request import PartitionRequest
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import BatchRequest
-# TODO: <Alex>Deprecate PartitionDefinitionSubset throughout the codebase.</Alex>
-from great_expectations.core.id_dict import (
-    PartitionDefinitionSubset,
-    PartitionDefinition,
-    BatchSpec
-)
-from great_expectations.core.batch import (
-    BatchMarkers,
-    BatchDefinition,
-    Batch
-)
-from great_expectations.execution_environment.types import PathBatchSpec
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
-    convert_data_reference_string_to_batch_request_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
-    convert_batch_request_to_data_reference_string_using_regex
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
@@ -206,6 +190,8 @@ configured runtime keys.
         """
         Fetch data_references corresponding to data_asset_name from the cache.
         """
+        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts the requirement arguments.</Alex>
+        # TODO: <Alex>See also the comment above batch_definition_matches_batch_request (in great_expectations/execution_environment/data_connector/util.py).</Alex>
         batch_definition_list = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -226,15 +212,10 @@ configured runtime keys.
         group_names: List[str] = regex_config["group_names"]
 
         path_list: List[str] = [
-            convert_batch_request_to_data_reference_string_using_regex(
-                batch_request=BatchRequest(
-                    execution_environment_name=batch_definition.execution_environment_name,
-                    data_connector_name=batch_definition.data_connector_name,
-                    data_asset_name=batch_definition.data_asset_name,
-                    partition_request=batch_definition.partition_definition,
-                ),
+            map_batch_definition_to_data_reference_string_using_regex(
+                batch_definition=batch_definition,
                 regex_pattern=pattern,
-                group_names=group_names,
+                group_names=group_names
             )
             for batch_definition in batch_definition_list
         ]
@@ -265,8 +246,8 @@ configured runtime keys.
             raise ValueError('_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?')
 
         unmatched_data_references: List[str] = []
-        for data_asset_name, sub_cache in self._data_references_cache.items():
-            unmatched_data_references += [k for k, v in sub_cache.items() if v is None]
+        for data_asset_name, data_reference_sub_cache in self._data_references_cache.items():
+            unmatched_data_references += [k for k, v in data_reference_sub_cache.items() if v is None]
 
         return unmatched_data_references
 
@@ -290,16 +271,20 @@ configured runtime keys.
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
-        batch_definition_list: List[BatchDefinition] = []
-        for data_asset_name, sub_cache in self._data_references_cache.items():
-            # TODO: <Alex>A cleaner implementation would be a filter on sub_cache.values() with "batch_definition_matches_batch_request()" as condition, since "data_reference" is not involved.</Alex>
-            for data_reference, batch_definition in sub_cache.items():
-                if batch_definition is not None:
-                    if batch_definition_matches_batch_request(
-                        batch_definition=batch_definition[0],
-                        batch_request=batch_request
-                    ):
-                        batch_definition_list.extend(batch_definition)
+        batch_definition_list: List[BatchDefinition] = list(
+            filter(
+                lambda batch_definition: batch_definition_matches_batch_request(
+                    batch_definition=batch_definition,
+                    batch_request=batch_request
+                ),
+                [
+                    batch_definitions[0]
+                    for data_reference_sub_cache in self._data_references_cache.values()
+                    for batch_definitions in data_reference_sub_cache.values()
+                    if batch_definitions is not None
+                ]
+            )
+        )
 
         return batch_definition_list
 

@@ -1,23 +1,7 @@
-# import pytest
-# import pandas as pd
-# import yaml
-# import json
-
-from great_expectations.execution_environment.data_connector import (
-    FilesDataConnector,
-)
-# from great_expectations.data_context.util import (
-#     instantiate_class_from_config,
-# )
+from great_expectations.execution_environment.data_connector import FilesDataConnector
+from great_expectations.core.batch import BatchRequest
 from tests.test_utils import (
     create_files_in_directory,
-)
-
-from great_expectations.core.batch import (
-    BatchRequest,
-    # BatchDefinition,
-    # PartitionRequest,
-    # PartitionDefinition,
 )
 
 
