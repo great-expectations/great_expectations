@@ -132,7 +132,8 @@ class DataConnector(object):
         raise NotImplementedError
 
     def _get_data_reference_list(self) -> List[Any]:
-        """
+        """List objects in the underlying data store to create a list of data_references.	
+        This method is used to refresh the cache.
         """
         raise NotImplementedError
 
