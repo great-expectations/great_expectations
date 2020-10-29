@@ -104,21 +104,53 @@ def test_setting_config_variables_is_visible_immediately(
     context.save_config_variable(
         "escaped_password", "this_is_$mypassword_escape_the_$signs"
     )
+    dict_to_escape = {
+        "drivername": "po$tgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "$pas$wor$d1$",
+        "database": "postgres",
+    }
+    context.save_config_variable(
+        "escaped_password_dict", dict_to_escape,
+    )
+
     context._project_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
         "mygenerator"
     ]["reader_options"]["test_variable_sub_escaped"] = "${escaped_password}"
+    context._project_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
+        "mygenerator"
+    ]["reader_options"]["test_variable_sub_escaped_dict"] = "${escaped_password_dict}"
+
     assert (
         context.get_config().datasources["mydatasource"]["batch_kwargs_generators"][
             "mygenerator"
         ]["reader_options"]["test_variable_sub_escaped"]
         == "${escaped_password}"
     )
+    assert (
+        context.get_config().datasources["mydatasource"]["batch_kwargs_generators"][
+            "mygenerator"
+        ]["reader_options"]["test_variable_sub_escaped_dict"]
+        == "${escaped_password_dict}"
+    )
+
     # Ensure that the value saved in config variables has escaped the $
     config_variables_with_escaped_vars = context._load_config_variables_file()
     assert (
         config_variables_with_escaped_vars["escaped_password"]
         == r"this_is_\$mypassword_escape_the_\$signs"
     )
+    assert config_variables_with_escaped_vars["escaped_password_dict"] == {
+        "drivername": r"po\$tgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": r"\$pas\$wor\$d1\$",
+        "database": "postgres",
+    }
+
     # Ensure that when reading the escaped config variable, the escaping should be removed
     assert (
         context.get_config_with_variables_substituted().datasources["mydatasource"][
@@ -126,6 +158,13 @@ def test_setting_config_variables_is_visible_immediately(
         ]["mygenerator"]["reader_options"]["test_variable_sub_escaped"]
         == "this_is_$mypassword_escape_the_$signs"
     )
+    assert (
+        context.get_config_with_variables_substituted().datasources["mydatasource"][
+            "batch_kwargs_generators"
+        ]["mygenerator"]["reader_options"]["test_variable_sub_escaped_dict"]
+        == dict_to_escape
+    )
+
     assert (
         context.get_config_with_variables_substituted().datasources["mydatasource"][
             "batch_kwargs_generators"
