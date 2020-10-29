@@ -1,5 +1,5 @@
 import os
-from typing import Union, List, Any, Optional
+from typing import Union, List, Any, Optional, Dict, Iterator
 from pathlib import Path
 import copy
 
@@ -14,8 +14,14 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
 )
+
+from great_expectations.data_context.util import (
+instantiate_class_from_config
+)
+
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
@@ -45,6 +51,8 @@ class SinglePartitionDataConnector(DataConnector):
         default_regex: dict = None,
         base_directory: str = None,
         glob_directive: str = "*",
+        sorters: list = None,
+
     ):
         logger.debug(f'Constructing SinglePartitionDataConnector "{name}".')
 
@@ -54,11 +62,48 @@ class SinglePartitionDataConnector(DataConnector):
             default_regex = {}
         self._default_regex = default_regex
 
+        _sorters: Dict[str, Sorter] = {}
+        self._sorters = _sorters
+        self._build_sorters_from_config(config_list=sorters)
+
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=None,
         )
+
+
+    # <WILL> move to utils.py
+    # Any because we can pass in a reference list in the case of custom_list_sorter
+    def _build_sorters_from_config(self, config_list):
+        if config_list is None:
+            return
+        # config: List[Dict[str, Any]]):
+        for sorter_config in config_list:
+            # if sorters were not configured
+            if sorter_config is None:
+                return
+            # <WILL> will need to be refactored
+            if 'name' not in sorter_config:
+                raise ValueError("Sorter config should have a name")
+
+            sorter_name = sorter_config['name']
+            new_sorter: Sorter = self._build_sorter_from_config(sorter_config=sorter_config)
+            self._sorters[sorter_name] = new_sorter
+
+    def _build_sorter_from_config(self, sorter_config) -> Sorter:
+        """Build a Sorter using the provided configuration and return the newly-built Sorter."""
+        runtime_environment: dict = {
+            "name": sorter_config['name']
+        }
+        sorter: Sorter = instantiate_class_from_config(
+            config=sorter_config,
+            runtime_environment=runtime_environment,
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector.sorter"
+           },
+        )
+        return sorter
 
     def refresh_data_references_cache(self):
         """
@@ -154,9 +199,24 @@ class SinglePartitionDataConnector(DataConnector):
                     batch_definition=batch_definition[0],
                     batch_request=batch_request
                 ):
-                    batch_definition_list.extend(batch_definition)
+                    batch_definition_list.append(batch_definition[0])
 
-        return batch_definition_list
+        if len(self._sorters) > 0:
+            sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
+            return sorted_batch_definition_list
+        else:
+            return batch_definition_list
+
+    def _sort_batch_definition_list(self, batch_definition_list):
+        sorters_list = []
+        # this is not going to be the right order all the time. there must be a way.
+        for sorter in self._sorters.values():
+            sorters_list.append(sorter)
+        sorters: Iterator[Sorter] = reversed(sorters_list)
+        for sorter in sorters:
+            batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
+        return (batch_definition_list)
+
 
     # TODO: <Alex>Should this method be moved to SinglePartitionFileDataConnector?</Alex>
     def _map_data_reference_to_batch_definition_list(
@@ -195,15 +255,16 @@ class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
         name: str,
         data_reference_dict: dict = None,
         # TODO: <Alex>Are these "kwargs" needed here?</Alex>
+        sorters: Sorter = None,
         **kwargs,
     ):
         if data_reference_dict is None:
             data_reference_dict = {}
         logger.debug(f'Constructing SinglePartitionDictDataConnector "{name}".')
         super().__init__(
-            name,
-            # TODO: <Alex>Are these "kwargs" needed here?</Alex>
-            **kwargs
+            name=name,
+            sorters=sorters,
+            **kwargs,
         )
 
         # This simulates the underlying filesystem
@@ -227,10 +288,12 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         base_directory: str,
         default_regex: dict,
         glob_directive: str = "*",
+        sorters: Sorter=None,
     ):
         logger.debug(f'Constructing SinglePartitionFileDataConnector "{name}".')
 
         self.glob_directive = glob_directive
+        #self._sorters = None
 
         super().__init__(
             name=name,
@@ -238,6 +301,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
             base_directory=base_directory,
             glob_directive=glob_directive,
             default_regex=default_regex,
+            sorters=sorters,
         )
 
     def _get_data_reference_list(self):

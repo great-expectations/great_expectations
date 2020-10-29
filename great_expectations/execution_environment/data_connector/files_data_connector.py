@@ -11,6 +11,7 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.partition_request import PartitionRequest
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.core.batch import BatchRequest
 # TODO: <Alex>Deprecate PartitionDefinitionSubset throughout the codebase.</Alex>
 from great_expectations.core.id_dict import (
