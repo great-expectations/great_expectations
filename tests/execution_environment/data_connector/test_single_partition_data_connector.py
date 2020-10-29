@@ -1,24 +1,19 @@
 import yaml
-from great_expectations.execution_environment.data_connector import (
-    SinglePartitionDictDataConnector,
-)
 
+from great_expectations.execution_environment.data_connector import SinglePartitionDictDataConnector
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
     PartitionDefinition,
 )
-
-from great_expectations.data_context.util import (
-    instantiate_class_from_config
-)
 from tests.test_utils import (
     create_fake_data_frame,
     create_files_in_directory,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
 
 
-def test_basic_instantiation(tmp_path_factory):
+def test_basic_instantiation():
     data_reference_dict = {
         "path/A-100.csv": create_fake_data_frame(),
         "path/A-101.csv": create_fake_data_frame(),
@@ -385,7 +380,6 @@ def test_that_needs_a_better_name():
     }
 
 
-
 def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_dir_charlie"))
     create_files_in_directory(
@@ -499,7 +493,6 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
     }
 
 
-
 # def test_redundant_information_in_naming_convention_random_hash_asset_name_is_date(empty_data_context, tmp_path_factory):
 #     base_directory = str(tmp_path_factory.mktemp("logs"))
 #     create_files_in_directory(
@@ -560,7 +553,6 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
 #         "unmatched_data_reference_count": 0,
 #         "example_unmatched_data_references": []
 #     }
-
 
 def test_redundant_information_in_naming_convention_timestamp(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("logs"))

@@ -1,27 +1,19 @@
 import os
-from typing import Union, List, Any, Optional
+from typing import List, Optional
 from pathlib import Path
 import copy
 
 import logging
 
-from great_expectations.core.id_dict import (
-    PartitionRequest,
-    PartitionDefinitionSubset,
-    PartitionDefinition
-)
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
-    convert_data_reference_string_to_batch_request_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
-    convert_batch_request_to_data_reference_string_using_regex
 )
 
 logger = logging.getLogger(__name__)
@@ -76,6 +68,7 @@ class SinglePartitionDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache.
         """
+        # TODO: <Alex>This needs to be looked at.</Alex>
         batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -84,24 +77,23 @@ class SinglePartitionDataConnector(DataConnector):
             )
         )
 
-        data_reference_list: List[str] = [
-            convert_batch_request_to_data_reference_string_using_regex(
-                batch_request=BatchRequest(
-                    execution_environment_name=batch_definition.execution_environment_name,
-                    data_connector_name=batch_definition.data_connector_name,
-                    data_asset_name=batch_definition.data_asset_name,
-                    partition_request=batch_definition.partition_definition,
-                ),
-                regex_pattern=self._default_regex["pattern"],
-                group_names=self._default_regex["group_names"],
+        regex_config: dict = copy.deepcopy(self._default_regex)
+        pattern: str = regex_config["pattern"]
+        group_names: List[str] = regex_config["group_names"]
+
+        path_list: List[str] = [
+            map_batch_definition_to_data_reference_string_using_regex(
+                batch_definition=batch_definition,
+                regex_pattern=pattern,
+                group_names=group_names
             )
             for batch_definition in batch_definition_list
         ]
 
         # TODO: Sort with a real sorter here
-        data_reference_list.sort()
+        path_list.sort()
 
-        return data_reference_list
+        return path_list
 
     # TODO: <Alex>This method should be implemented in every subclass.</Alex>
     # def _get_data_reference_list(self) -> List[str]:
