@@ -5,20 +5,23 @@ import json
 from typing import List
 
 from great_expectations.execution_environment.data_connector import DataConnector
-
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-)
 from tests.test_utils import (
     create_files_in_directory,
 )
-
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
     PartitionRequest,
     PartitionDefinition,
 )
+from great_expectations.execution_environment.data_connector.util import (
+    batch_definition_matches_batch_request,
+    map_data_reference_string_to_batch_definition_list_using_regex,
+    convert_data_reference_string_to_batch_request_using_regex,
+    map_batch_definition_to_data_reference_string_using_regex,
+    convert_batch_request_to_data_reference_string_using_regex
+)
+from great_expectations.data_context.util import instantiate_class_from_config
 
 
 # TODO: Abe 20201026: This test currently fails. We need to implement sorters before we can fix it.
@@ -126,7 +129,6 @@ def test_name_date_price_list(tmp_path_factory):
                 "name": "james",
                 "timestamp": "20200713",
                 "price": "1567",
-                "data_asset_name": "DEFAULT_ASSET_NAME",
             }
         ),
     )
