@@ -244,8 +244,8 @@ configured runtime keys.
             raise ValueError('_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?')
 
         unmatched_data_references: List[str] = []
-        for data_asset_name, sub_cache in self._data_references_cache.items():
-            unmatched_data_references += [k for k, v in sub_cache.items() if v is None]
+        for data_asset_name, data_reference_sub_cache in self._data_references_cache.items():
+            unmatched_data_references += [k for k, v in data_reference_sub_cache.items() if v is None]
 
         return unmatched_data_references
 
@@ -269,16 +269,20 @@ configured runtime keys.
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
-        batch_definition_list: List[BatchDefinition] = []
-        for data_asset_name, sub_cache in self._data_references_cache.items():
-            # TODO: <Alex>A cleaner implementation would be a filter on sub_cache.values() with "batch_definition_matches_batch_request()" as condition, since "data_reference" is not involved.</Alex>
-            for data_reference, batch_definition in sub_cache.items():
-                if batch_definition is not None:
-                    if batch_definition_matches_batch_request(
-                        batch_definition=batch_definition[0],
-                        batch_request=batch_request
-                    ):
-                        batch_definition_list.extend(batch_definition)
+        batch_definition_list: List[BatchDefinition] = list(
+            filter(
+                lambda batch_definition: batch_definition_matches_batch_request(
+                    batch_definition=batch_definition,
+                    batch_request=batch_request
+                ),
+                [
+                    batch_definitions[0]
+                    for data_reference_sub_cache in self._data_references_cache.values()
+                    for batch_definitions in data_reference_sub_cache.values()
+                    if batch_definitions is not None
+                ]
+            )
+        )
 
         return batch_definition_list
 
