@@ -634,4 +634,3 @@ def test_foxtrot(tmp_path_factory):
         batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 3
-
