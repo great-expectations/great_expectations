@@ -10,7 +10,7 @@ from great_expectations.execution_engine import ExecutionEngine, PandasExecution
 from great_expectations.expectations.expectation import Expectation, TableExpectation
 from great_expectations.expectations.registry import extract_metrics
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedTableContent
+from great_expectations.render.types import RenderedTableContent, RenderedStringTemplateContent
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -299,6 +299,61 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
                     "body": {
                         "classes": ["table", "table-sm", "table-unbordered", "col-4"],
                     }
+                },
+            }
+        )
+
+    @classmethod
+    @renderer(renderer_type="renderer.descriptive.quantile_table")
+    def _descriptive_quantile_table_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        assert result, "Must pass in result."
+        table_rows = []
+        quantiles = result.result["observed_value"]["quantiles"]
+        quantile_ranges = result.result["observed_value"]["values"]
+
+        quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
+
+        for idx, quantile in enumerate(quantiles):
+            quantile_string = quantile_strings.get(quantile)
+            table_rows.append(
+                [
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": quantile_string
+                            if quantile_string
+                            else "{:3.2f}".format(quantile),
+                            "tooltip": {
+                                "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"
+                                if quantile == 0.50
+                                else "expect_column_quantile_values_to_be_between"
+                            },
+                        },
+                    },
+                    quantile_ranges[idx],
+                ]
+            )
+
+        return RenderedTableContent(
+            **{
+                "content_block_type": "table",
+                "header": RenderedStringTemplateContent(
+                    **{
+                        "content_block_type": "string_template",
+                        "string_template": {"template": "Quantiles", "tag": "h6"},
+                    }
+                ),
+                "table": table_rows,
+                "styling": {
+                    "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
+                    "body": {"classes": ["table", "table-sm", "table-unbordered"], },
                 },
             }
         )

@@ -322,3 +322,38 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 "content_blocks": [observed_value_content_block, observed_distribution],
             }
         )
+
+    @classmethod
+    @renderer(renderer_type="renderer.descriptive.histogram")
+    def _descriptive_histogram_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        assert result, "Must pass in result."
+        observed_partition_object = result.result["details"][
+            "observed_partition"
+        ]
+        weights = observed_partition_object["weights"]
+        if len(weights) > 60:
+            return None
+
+        header = RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Histogram",
+                    "tooltip": {
+                        "content": "expect_column_kl_divergence_to_be_less_than"
+                    },
+                    "tag": "h6",
+                },
+            }
+        )
+
+        return cls._get_kl_divergence_chart(
+            observed_partition_object, header
+        )

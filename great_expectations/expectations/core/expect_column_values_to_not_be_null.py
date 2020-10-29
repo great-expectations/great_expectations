@@ -155,6 +155,64 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             return "NaN% not null"
         return "--"
 
+    @classmethod
+    @renderer(renderer_type="renderer.descriptive.column_properties_table.missing_count_row")
+    def _descriptive_column_properties_table_missing_count_row_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        assert result, "Must pass in result."
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (n)",
+                        "tooltip": {
+                            "content": "expect_column_values_to_not_be_null"
+                        },
+                    },
+                }
+            ),
+            result.result["unexpected_count"]
+            if "unexpected_count" in result.result
+            and result.result["unexpected_count"] is not None
+            else "--",
+        ]
+
+    @classmethod
+    @renderer(renderer_type="renderer.descriptive.column_properties_table.missing_percent_row")
+    def _descriptive_column_properties_table_missing_percent_row_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        assert result, "Must pass in result."
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (%)",
+                        "tooltip": {
+                            "content": "expect_column_values_to_not_be_null"
+                        },
+                    },
+                }
+            ),
+            "%.1f%%" % result.result["unexpected_percent"]
+            if "unexpected_percent" in result.result
+            and result.result["unexpected_percent"] is not None
+            else "--",
+        ]
+
     def _validate(
         self,
         configuration: ExpectationConfiguration,

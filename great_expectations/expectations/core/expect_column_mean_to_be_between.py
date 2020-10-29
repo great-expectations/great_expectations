@@ -222,6 +222,28 @@ class ExpectColumnMeanToBeBetween(TableExpectation):
             )
         ]
 
+    @classmethod
+    @renderer(renderer_type="renderer.descriptive.stats_table.mean_row")
+    def _descriptive_stats_table_mean_row_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        assert result, "Must pass in result."
+        return [
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Mean",
+                    "tooltip": {"content": "expect_column_mean_to_be_between"},
+                },
+            },
+            "{:.2f}".format(result.result["observed_value"])
+        ]
+
     # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
