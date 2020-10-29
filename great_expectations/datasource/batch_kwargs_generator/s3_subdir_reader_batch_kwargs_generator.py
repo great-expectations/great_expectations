@@ -197,6 +197,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         file_options = self.fs.listdir(base_directory)
         for file_option in file_options:
             file_option = file_option['Key']
+            file_option = file_option.split('/')[-1] # fs.listdir with return full path unlike os.listdir
             for extension in self.known_extensions:
                 if (
                     file_option.endswith(extension)
@@ -280,7 +281,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             reader_options=reader_options or self.reader_options,
             limit=limit,
         )
-        batch_kwargs["s3"] = path
+        batch_kwargs["s3"] = "s3a://" +  path
         batch_kwargs["datasource"] = self._datasource.name
 
         return S3BatchKwargs(batch_kwargs)
