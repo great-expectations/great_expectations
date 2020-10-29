@@ -58,7 +58,12 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     regex_pattern: str,
     group_names: List[str],
 ) -> Optional[List[BatchDefinition]]:
-    # TODO: <Alex>The two-steps process involving a BatchRequest intermediary can be simplified by introducing a common class.</Alex>
+    # TODO: <Alex>Per Abe: The two-steps process involving a BatchRequest intermediary can be simplified by turning
+    # convert_data_reference_string_to_batch_request_using_regex() into convert_data_reference_string_to_batch_definition_using_regex()
+    # and passing it all the arguments it needs to create a BatchDefinition.
+    # We could not do it before, because the Partitioner difd not have all the required arguments. But the DataConnector does have them.
+    #</Alex>
+
     batch_request: BatchRequest = convert_data_reference_string_to_batch_request_using_regex(
         data_reference=data_reference,
         regex_pattern=regex_pattern,
@@ -113,7 +118,11 @@ def map_batch_definition_to_data_reference_string_using_regex(
     regex_pattern: str,
     group_names: List[str],
 ) -> str:
-    # TODO: <Alex>The two-steps process involving a BatchRequest intermediary can be simplified by introducing a common class.</Alex>
+    # TODO: <Alex>Per Abe: The two-steps process involving a BatchRequest intermediary can be simplified by turning
+    # convert_data_reference_string_to_batch_request_using_regex() into convert_data_reference_string_to_batch_definition_using_regex()
+    # and passing it all the arguments it needs to create a BatchDefinition.
+    # We could not do it before, because the Partitioner difd not have all the required arguments. But the DataConnector does have them.
+    #</Alex>
     data_asset_name: str = batch_definition.data_asset_name
     partition_definition: PartitionDefinition = batch_definition.partition_definition
     partition_request: dict = partition_definition
