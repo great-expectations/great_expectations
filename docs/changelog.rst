@@ -8,6 +8,7 @@ Develop
 -----------------
 * [ENHANCEMENT] CLI supports s3a:// or gs:// paths for Pandas Datasources (issue 2006)
 * [BUGFIX] Fixed bug where slack messages cause stacktrace when data docs pages have issue
+* [BUGFIX] Escape $ characters in configuration, support multiple substitutions #2015
 
 0.12.6
 -----------------
