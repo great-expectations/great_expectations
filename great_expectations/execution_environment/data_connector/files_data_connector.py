@@ -33,6 +33,7 @@ from great_expectations.execution_environment.data_connector.util import (
     map_data_reference_string_to_batch_definition_list_using_regex,
     #convert_data_reference_string_to_batch_request_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
+    build_sorters_from_config,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
@@ -89,10 +90,7 @@ class FilesDataConnector(DataConnector):
         _assets: Dict[str, Union[dict, Asset]] = assets
         self._assets = _assets
         self._build_assets_from_config(config=assets)
-
-        _sorters: Dict[str, Sorter] = {}
-        self._sorters = _sorters
-        self._build_sorters_from_config(config_list=sorters)
+        self._sorters = build_sorters_from_config(config_list=sorters)
 
     @property
     def assets(self) -> Dict[str, Union[dict, Asset]]:
@@ -141,34 +139,6 @@ class FilesDataConnector(DataConnector):
             )
         return asset
 
-    def _build_sorters_from_config(self, config_list: List[Dict[str, Any]]):
-        if config_list is None:
-            return
-        for sorter_config in config_list:
-            # if sorters were not configured
-            if sorter_config is None:
-                return
-            # <WILL> will need to be refactored
-            if 'name' not in sorter_config:
-                raise ValueError("Sorter config should have a name")
-
-            sorter_name = sorter_config['name']
-            new_sorter: Sorter = self._build_sorter_from_config(sorter_config=sorter_config)
-            self._sorters[sorter_name] = new_sorter
-
-    def _build_sorter_from_config(self, sorter_config) -> Sorter:
-        """Build a Sorter using the provided configuration and return the newly-built Sorter."""
-        runtime_environment: dict = {
-            "name": sorter_config['name']
-        }
-        sorter: Sorter = instantiate_class_from_config(
-            config=sorter_config,
-            runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": "great_expectations.execution_environment.data_connector.sorter"
-           },
-        )
-        return sorter
 
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.

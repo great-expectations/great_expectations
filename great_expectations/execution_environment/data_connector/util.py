@@ -19,6 +19,12 @@ from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.partition_request import PartitionRequest
 import great_expectations.exceptions as ge_exceptions
 
+from great_expectations.execution_environment.data_connector.sorter import Sorter
+
+from great_expectations.data_context.util import (
+    instantiate_class_from_config
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -209,3 +215,33 @@ def _invert_regex_to_data_reference_template(
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)
 
     return data_reference_template
+
+
+def build_sorters_from_config(config_list: List[Dict[str, Any]]):
+    sorter_dict: Dict[str, Sorter] = {}
+    if config_list is not None:
+        for sorter_config in config_list:
+            # if sorters were not configured
+            if sorter_config is None:
+                return
+            if 'name' not in sorter_config:
+                raise ValueError("Sorter config should have a name")
+            sorter_name = sorter_config['name']
+            new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)
+            sorter_dict[sorter_name] = new_sorter
+    return sorter_dict
+
+
+def _build_sorter_from_config(sorter_config) -> Sorter:
+    """Build a Sorter using the provided configuration and return the newly-built Sorter."""
+    runtime_environment: dict = {
+        "name": sorter_config['name']
+    }
+    sorter: Sorter = instantiate_class_from_config(
+        config=sorter_config,
+        runtime_environment=runtime_environment,
+        config_defaults={
+            "module_name": "great_expectations.execution_environment.data_connector.sorter"
+       },
+    )
+    return sorter

@@ -21,6 +21,7 @@ from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
+    build_sorters_from_config,
 )
 
 logger = logging.getLogger(__name__)
@@ -53,24 +54,19 @@ class SinglePartitionDataConnector(DataConnector):
         if default_regex is None:
             default_regex = {}
         self._default_regex = default_regex
+        self._sorters = build_sorters_from_config(config_list=sorters)
 
-        _sorters: Dict[str, Sorter] = {}
-        self._sorters = _sorters
-        self._build_sorters_from_config(config_list=sorters)
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=None,
         )
 
-    # move to utils?
     # Any because we can pass in a reference list in the case of custom_list_sorter
     def _build_sorters_from_config(self, config_list: List[Dict[str, Any]]):
         if config_list is None:
             return
-        # config: List[Dict[str, Any]]):
         for sorter_config in config_list:
-            # if sorters were not configured
             if sorter_config is None:
                 return
             if 'name' not in sorter_config:
@@ -185,9 +181,14 @@ class SinglePartitionDataConnector(DataConnector):
                 lambda batch_definition: batch_definition_matches_batch_request(
                     batch_definition=batch_definition,
                     batch_request=batch_request
-                ):
-                    batch_definition_list.append(batch_definition[0])
-
+                ),
+                [
+                    batch_definitions[0]
+                    for batch_definitions in self._data_references_cache.values()
+                    if batch_definitions is not None
+                ]
+            )
+        )
         if len(self._sorters) > 0:
             sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
             return sorted_batch_definition_list
