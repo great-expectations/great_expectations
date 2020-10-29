@@ -63,14 +63,12 @@ class ColumnSectionRenderer(Renderer):
 
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
-    def __init__(self, properties_table_renderer=None, expectation_string_renderer=None, runtime_environment=None):
+    def __init__(self, properties_table_renderer=None, runtime_environment=None):
         super().__init__()
         if properties_table_renderer is None:
             properties_table_renderer = {
                 "class_name": "ProfilingColumnPropertiesTableContentBlockRenderer"
             }
-        if expectation_string_renderer is None:
-            expectation_string_renderer = {"class_name": "ExpectationStringRenderer"}
         module_name = "great_expectations.render.renderer.content_block"
         self._properties_table_renderer = instantiate_class_from_config(
             config=properties_table_renderer,
