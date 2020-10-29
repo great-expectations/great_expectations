@@ -27,12 +27,13 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
         "double_sided",
         "threshold",
     )
+    default_kwarg_values = {"double_sided": True, "threshold": None}
 
     function_metric_name = "column_values.z_score.map_function"
     function_value_keys = tuple()
 
     @column_map_function(engine=PandasExecutionEngine)
-    def _pandas_function(self, column, _metrics):
+    def _pandas_function(self, column, _metrics, **kwargs):
         # return the z_score values
         mean = _metrics.get("column.aggregate.mean")
         std_dev = _metrics.get("column.aggregate.standard_deviation")
@@ -74,13 +75,13 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
         return under_threshold
 
     @column_map_function(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy_function(cls, column, _metrics, _dialect):
+    def _sqlalchemy_function(cls, column, _metrics, _dialect, **kwargs):
         mean = _metrics["column.aggregate.mean"]
         standard_deviation = _metrics["column.aggregate.standard_deviation"]
         return (column - mean) / standard_deviation
 
     @column_map_function(engine=SparkDFExecutionEngine)
-    def _spark_function(cls, column, _metrics):
+    def _spark_function(cls, column, _metrics, **kwargs):
         mean = _metrics["column.aggregate.mean"]
         standard_deviation = _metrics["column.aggregate.standard_deviation"]
 
