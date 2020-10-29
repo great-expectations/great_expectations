@@ -11,6 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
+from collections import OrderedDict
 from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
@@ -734,6 +735,35 @@ class BaseDataContext:
             )
         )
 
+    def escape_all_config_variables(
+        self,
+        value: Union[str, dict, list],
+        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+    ) -> Union[str, dict, list]:
+        """
+        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
+
+        Args:
+            value: config variable value
+            dollar_sign_escape_string: replaces instances of `$`
+
+        Returns:
+            input value with all `$` characters replaced with the escape string
+        """
+
+        if isinstance(value, dict) or isinstance(value, OrderedDict):
+            return {
+                k: self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for k, v in value.items()
+            }
+
+        elif isinstance(value, list):
+            return [
+                self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for v in value
+            ]
+        return value.replace("$", dollar_sign_escape_string)
+
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
 
@@ -745,12 +775,7 @@ class BaseDataContext:
             None
         """
         config_variables = self._load_config_variables_file()
-        # Escape $ if value is a str
-        value = (
-            value.replace("$", self.DOLLAR_SIGN_ESCAPE_STRING)
-            if isinstance(value, str)
-            else value
-        )
+        value = self.escape_all_config_variables(value, self.DOLLAR_SIGN_ESCAPE_STRING)
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:

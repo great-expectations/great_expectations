@@ -1,4 +1,5 @@
 import os
+from collections import OrderedDict
 
 import pytest
 from ruamel.yaml import YAML, YAMLError
@@ -331,4 +332,118 @@ def test_substitute_env_var_in_config_variable_file(
     assert (
         my_generator["test_variable_escaped"]
         == "dont$replace$me$please$$$$thanksive_been_$replaced"
+    )
+
+
+def test_escape_all_config_variables(empty_data_context_with_config_variables):
+    """
+    Make sure that all types of input to escape_all_config_variables are escaped properly: str, dict, OrderedDict, list
+    Make sure that changing the escape string works as expected.
+    """
+    context = empty_data_context_with_config_variables
+
+    # str
+    value_str = "pas$word1"
+    escaped_value_str = r"pas\$word1"
+    assert context.escape_all_config_variables(value=value_str) == escaped_value_str
+
+    value_str2 = "$pas$wor$d1$"
+    escaped_value_str2 = r"\$pas\$wor\$d1\$"
+    assert context.escape_all_config_variables(value=value_str2) == escaped_value_str2
+
+    # dict
+    value_dict = {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "pass$word1",
+        "database": "postgres",
+    }
+    escaped_value_dict = {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": r"pass\$word1",
+        "database": "postgres",
+    }
+    assert context.escape_all_config_variables(value=value_dict) == escaped_value_dict
+
+    # OrderedDict
+    value_ordered_dict = OrderedDict(
+        [
+            ("UNCOMMITTED", "uncommitted"),
+            ("docs_test_folder", "$test$folder"),
+            (
+                "test_db",
+                {
+                    "drivername": "postgresql",
+                    "host": "some_host",
+                    "port": "5432",
+                    "username": "postgres",
+                    "password": "pa$sword1",
+                    "database": "postgres",
+                },
+            ),
+        ]
+    )
+    escaped_value_ordered_dict = OrderedDict(
+        [
+            ("UNCOMMITTED", "uncommitted"),
+            ("docs_test_folder", r"\$test\$folder"),
+            (
+                "test_db",
+                {
+                    "drivername": "postgresql",
+                    "host": "some_host",
+                    "port": "5432",
+                    "username": "postgres",
+                    "password": r"pa\$sword1",
+                    "database": "postgres",
+                },
+            ),
+        ]
+    )
+    assert (
+        context.escape_all_config_variables(value=value_ordered_dict)
+        == escaped_value_ordered_dict
+    )
+
+    # list
+    value_list = [
+        "postgresql",
+        "localhost",
+        "5432",
+        "postgres",
+        "pass$word1",
+        "postgres",
+    ]
+    escaped_value_list = [
+        "postgresql",
+        "localhost",
+        "5432",
+        "postgres",
+        r"pass\$word1",
+        "postgres",
+    ]
+    assert context.escape_all_config_variables(value=value_list) == escaped_value_list
+
+    # Custom escape string
+    value_str_custom_escape_string = "pas$word1"
+    escaped_value_str_custom_escape_string = "pas@*&$word1"
+    assert (
+        context.escape_all_config_variables(
+            value=value_str_custom_escape_string, dollar_sign_escape_string="@*&$"
+        )
+        == escaped_value_str_custom_escape_string
+    )
+
+    value_str_custom_escape_string2 = "$pas$wor$d1$"
+    escaped_value_str_custom_escape_string2 = "@*&$pas@*&$wor@*&$d1@*&$"
+    assert (
+        context.escape_all_config_variables(
+            value=value_str_custom_escape_string2, dollar_sign_escape_string="@*&$"
+        )
+        == escaped_value_str_custom_escape_string2
     )
