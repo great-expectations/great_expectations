@@ -1,38 +1,37 @@
-import os
+#import os
 from pathlib import Path
-import itertools
+#import itertools
 from typing import List, Union, Any, Dict, Optional, Iterator
 import os
 import copy
-
 import logging
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
-from great_expectations.execution_environment.data_connector.partition_request import PartitionRequest
+#from great_expectations.execution_environment.data_connector.partition_request import PartitionRequest
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.data_connector.sorter import Sorter
+#from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.core.batch import BatchRequest
 # TODO: <Alex>Deprecate PartitionDefinitionSubset throughout the codebase.</Alex>
-from great_expectations.core.id_dict import (
-    PartitionDefinitionSubset,
-    PartitionDefinition,
-    BatchSpec
-)
+#from great_expectations.core.id_dict import (
+    #PartitionDefinitionSubset,
+    #PartitionDefinition,
+    #BatchSpec
+#)
 from great_expectations.core.batch import (
-    BatchMarkers,
+    #BatchMarkers,
     BatchDefinition,
-    Batch
+    #Batch
 )
 
 from great_expectations.execution_environment.data_connector.sorter import(
 Sorter,
 )
-from great_expectations.execution_environment.types import PathBatchSpec
+#from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
-    convert_data_reference_string_to_batch_request_using_regex,
+    #convert_data_reference_string_to_batch_request_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
     convert_batch_request_to_data_reference_string_using_regex
 )
@@ -40,7 +39,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
-
 
 # TODO: <Alex>Should we make this a "set" object?</Alex>
 KNOWN_EXTENSIONS = [
@@ -67,7 +65,6 @@ class FilesDataConnector(DataConnector):
 
         glob_directive: str = "*",
         sorters: list = None,
-
         execution_engine: ExecutionEngine = None,
         data_context_root_directory: str = None,
     ):
@@ -145,11 +142,9 @@ class FilesDataConnector(DataConnector):
             )
         return asset
 
-    # Any because we can pass in a reference list in the case of custom_list_sorter
-    def _build_sorters_from_config(self, config_list):
+    def _build_sorters_from_config(self, config_list: List[Dict[str, Any]]):
         if config_list is None:
             return
-        #config: List[Dict[str, Any]]):
         for sorter_config in config_list:
             # if sorters were not configured
             if sorter_config is None:
@@ -175,7 +170,6 @@ class FilesDataConnector(DataConnector):
            },
         )
         return sorter
-
 
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
@@ -360,7 +354,6 @@ configured runtime keys.
         else:
             return batch_definition_list
 
-
     def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list = []
         # this is not going to be the right order all the time. there must be a way.
@@ -371,7 +364,6 @@ configured runtime keys.
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
         return(batch_definition_list)
-
 
     def _map_data_reference_to_batch_definition_list(
         self,

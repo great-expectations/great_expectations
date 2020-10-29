@@ -267,5 +267,3 @@ def test_example_file_list_sorters(example_batch_def_list):
     for sorter in sorters:
         sorted_batch_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_list)
     assert sorted_batch_list == [g, j, c, d, b, i, a, h, f, e]
-
-
