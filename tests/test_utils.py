@@ -645,7 +645,7 @@ def get_test_batch(
             )
 
         return PandasExecutionEngine(caching=caching).load_batch(
-            in_memory_dataset=df,
+            batch_data=df,
             batch_request={"data_asset_name": "test", "partition_name": table_name},
             batch_spec=BatchSpec(
                 {
@@ -1016,7 +1016,7 @@ def get_test_batch(
             )
 
         return SparkDFExecutionEngine(caching=caching).load_batch(
-            in_memory_dataset=spark_df,
+            batch_data=spark_df,
             batch_request={"data_asset_name": "test", "partition_name": table_name},
             batch_spec=BatchSpec(
                 {

@@ -502,13 +502,13 @@ Notes:
 
         if isinstance(batch_spec, InMemoryBatchSpec):
             # We do not want to store the actual dataframe in batch_spec (mark that this is PandasInMemoryDF instead).
-            in_memory_dataset = batch_spec.pop("dataset")
+            batch_data = batch_spec.pop("batch_data")
             batch_spec["PandasInMemoryDF"] = True
-            if in_memory_dataset is not None:
+            if batch_data is not None:
                 if batch_spec.get("data_asset_name"):
-                    df = in_memory_dataset
+                    df = batch_data
                 else:
-                    raise ValueError("To pass an in_memory_dataset, you must also a data_asset_name as well.")
+                    raise ValueError("To pass an batch_data, you must also a data_asset_name as well.")
         else:
             reader_method = batch_spec.get("reader_method")
             reader_options = batch_spec.get("reader_options") or {}
@@ -585,10 +585,10 @@ Notes:
         Any,  # batch_data
         BatchMarkers
     ]:
-        batch_data = None
+        batch_data: Any = None
 
         # We need to build a batch_markers to be used in the dataframe
-        batch_markers = BatchMarkers(
+        batch_markers: BatchMarkers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
                     "%Y%m%dT%H%M%S.%fZ"
@@ -601,11 +601,11 @@ Notes:
             batch_data = batch_spec.pop("batch_data")
             batch_spec["PandasInMemoryDF"] = True
         else:
-            reader_method = batch_spec.get("reader_method")
-            reader_options = batch_spec.get("reader_options") or {}
+            reader_method: str = batch_spec.get("reader_method")
+            reader_options: dict = batch_spec.get("reader_options") or {}
             if isinstance(batch_spec, PathBatchSpec):
-                path = batch_spec["path"]
-                reader_fn = self._get_reader_fn(reader_method, path)
+                path: str = batch_spec["path"]
+                reader_fn: Callable = self._get_reader_fn(reader_method, path)
                 batch_data = reader_fn(path, **reader_options)
             elif isinstance(batch_spec, S3BatchSpec):
                 # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>

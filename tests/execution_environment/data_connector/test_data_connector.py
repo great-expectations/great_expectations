@@ -121,7 +121,7 @@ def test_get_batch_data_and_metadata_from_batch_definition():
     pass
 
 
-def test_convert_in_memory_dataset_to_batch():
+def test_convert_batch_data_to_batch():
     pass
 
 

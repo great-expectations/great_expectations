@@ -78,16 +78,15 @@ class ExecutionEnvironment(object):
     def get_batch_from_batch_definition(
         self,
         batch_definition: BatchDefinition,
-        in_memory_dataset: Any = None,
+        batch_data: Any = None,
     ) -> Batch:
         """
         Note: this method should *not* be used when getting a Batch from a BatchRequest, since it does not capture BatchRequest metadata.
         """
-        if not isinstance(in_memory_dataset, type(None)):
+        if not isinstance(batch_data, type(None)):
             # TODO: <Alex>Abe: Are the comments below still pertinent?  Or can they be deleted?</Alex>
             # NOTE Abe 20201014: Maybe do more careful type checking here?
-            # Seems like we should verify that in_memory_dataset is compatible with the execution_engine...?
-            batch_data = in_memory_dataset
+            # Seems like we should verify that batch_data is compatible with the execution_engine...?
             batch_spec, batch_markers = None, None
         else:
             data_connector: DataConnector = self.get_data_connector(
@@ -111,7 +110,7 @@ class ExecutionEnvironment(object):
     ) -> List[Batch]:
         data_connector: DataConnector
 
-        if batch_request.in_memory_dataset is not None:
+        if batch_request.batch_data is not None:
             partition_request: dict = batch_request.partition_request
             partition_definition: Optional[PartitionDefinition]
             if partition_request is None:
@@ -124,7 +123,7 @@ class ExecutionEnvironment(object):
                 execution_environment_name=batch_request.execution_environment_name,
                 execution_engine=self.execution_engine,
                 data_asset_name=batch_request.data_asset_name,
-                batch_data=batch_request.in_memory_dataset,
+                batch_data=batch_request.batch_data,
                 partition_definition=partition_definition
             )
             self._data_connectors_cache[data_connector_name] = data_connector
@@ -284,12 +283,6 @@ class ExecutionEnvironment(object):
     def get_available_batch_definitions(
         self,
         batch_request: BatchRequest
-        # data_connector_name: str,
-        # data_asset_name: str = None,
-        # partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
-        # in_memory_dataset: Any = None,
-        # runtime_parameters: Union[dict, None] = None,
-        # repartition: bool = False
     ) -> List[BatchDefinition]:
         if batch_request.execution_environment_name != self.name:
             raise ValueError(

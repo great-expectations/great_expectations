@@ -130,7 +130,7 @@ def test_get_batch_with_pipeline_style_batch_request():
         "execution_environment_name": execution_environment_name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "in_memory_dataset": test_df,
+        "batch_data": test_df,
         "partition_request": None,
         "limit": None,
     }
@@ -188,7 +188,7 @@ def test_get_available_data_asset_names(tmp_path_factory):
         "execution_environment_name": execution_environment_name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "in_memory_dataset": test_df,
+        "batch_data": test_df,
         "partition_request": None,
         "limit": None,
     }
@@ -436,5 +436,5 @@ def test_some_very_basic_stuff(basic_execution_environment):
         partition_definition=PartitionDefinition({
             "some_random_id": 1
         })
-    ), in_memory_dataset=my_df)
+    ), batch_data=my_df)
     assert batch.batch_request is None
