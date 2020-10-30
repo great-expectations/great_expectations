@@ -8,8 +8,11 @@ import logging
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.core.batch import BatchRequest
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.execution_environment.types import PathBatchSpec
+from great_expectations.core.batch import (
+    BatchRequest,
+    BatchDefinition,
+)
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
@@ -161,7 +164,7 @@ configured runtime keys.
         for data_asset_name in self.get_available_data_asset_names():
             self._data_references_cache[data_asset_name] = {}
 
-            for data_reference in self._get_path_list_from_filesystem_by_data_asset_name(
+            for data_reference in self._get_data_reference_list(
                 data_asset_name=data_asset_name
             ):
                 mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(
@@ -170,16 +173,16 @@ configured runtime keys.
                 )
                 self._data_references_cache[data_asset_name][data_reference] = mapped_batch_definition_list
 
-    def _get_path_list_from_filesystem_by_data_asset_name(self, data_asset_name: str) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
         """
         data_asset_path: str = self.base_directory
-        if self.assets and data_asset_name in self.assets:
+        if data_asset_name is not None and self.assets and data_asset_name in self.assets:
             asset: Asset = self.assets[data_asset_name]
             if asset.base_directory:
-                data_asset_path = os.path.join(self.base_directory, asset.base_directory)
+                data_asset_path = str(Path(self.base_directory).joinpath(asset.base_directory))
 
         globbed_paths = Path(data_asset_path).glob(self._glob_directive)
         path_list: List[str] = [os.path.relpath(str(posix_path), data_asset_path) for posix_path in globbed_paths]
@@ -190,8 +193,7 @@ configured runtime keys.
         """
         Fetch data_references corresponding to data_asset_name from the cache.
         """
-        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts the requirement arguments.</Alex>
-        # TODO: <Alex>See also the comment above batch_definition_matches_batch_request (in great_expectations/execution_environment/data_connector/util.py).</Alex>
+        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the requirement arguments.</Alex>
         batch_definition_list = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -202,7 +204,7 @@ configured runtime keys.
 
         regex_config: dict = copy.deepcopy(self._default_regex)
         # Override the defaults
-        if self.assets and data_asset_name in self.assets:
+        if data_asset_name is not None and self.assets and data_asset_name in self.assets:
             asset: Asset = self.assets[data_asset_name]
             if asset.pattern:
                 regex_config["pattern"] = asset.pattern
@@ -224,10 +226,6 @@ configured runtime keys.
         path_list.sort()
 
         return path_list
-
-    # TODO: <Alex>Do we leave this like this, or call the one above with a NULL data_asset_name passed to it?</Alex>
-    def _get_data_reference_list(self) -> List[str]:
-        pass
 
     def get_data_reference_list_count(self) -> int:
         if self._data_references_cache is None:
@@ -295,7 +293,7 @@ configured runtime keys.
     ) -> Optional[List[BatchDefinition]]:
         regex_config: dict = copy.deepcopy(self._default_regex)
         # Override the defaults
-        if self.assets and data_asset_name in self.assets:
+        if data_asset_name is not None and self.assets and data_asset_name in self.assets:
             asset: Asset = self.assets[data_asset_name]
             if asset.pattern:
                 regex_config["pattern"] = asset.pattern
@@ -318,7 +316,7 @@ configured runtime keys.
 
         regex_config: dict = copy.deepcopy(self._default_regex)
         # Override the defaults
-        if self.assets and data_asset_name in self.assets:
+        if data_asset_name is not None and self.assets and data_asset_name in self.assets:
             asset: Asset = self.assets[data_asset_name]
             if asset.pattern:
                 regex_config["pattern"] = asset.pattern
@@ -338,15 +336,20 @@ configured runtime keys.
         batch_definition: BatchDefinition
     ) -> dict:
         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
-        if path:
-            path = os.path.join(self._base_directory, path)
-        else:
+        if not path:
             raise ValueError(
-                f"""No partition for {batch_definition.data_asset_name} matches the given partition definition
-{batch_definition.partition_definition} from batch definition {batch_definition}.
-                """
+                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition
+definition {batch_definition.partition_definition} from batch definition {batch_definition}.
+                '''
             )
+        path = str(Path(self.base_directory).joinpath(path))
         return {
             "path": path
         }
 
+    def _build_batch_spec_from_batch_definition(
+        self,
+        batch_definition: BatchDefinition
+    ) -> PathBatchSpec:
+        batch_spec = super()._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
+        return PathBatchSpec(batch_spec)

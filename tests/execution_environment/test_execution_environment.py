@@ -4,7 +4,7 @@ import shutil
 import pandas as pd
 import yaml
 
-from typing import Union, List
+from typing import Union, List, Optional
 
 
 from great_expectations.execution_environment import ExecutionEnvironment
@@ -82,7 +82,6 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
             "letter": "Titanic",
             "number": "19120414"
         },
-        # TODO: <Alex>We need to get a definitive resolution on whether or not we will allow "limit" and "batch_spec_passthrough" in batch_request.</Alex>
         # "limit": None,
         # "batch_spec_passthrough": {
         #     "path": titanic_csv_destination_file_path,
@@ -95,6 +94,7 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
     batch_list: List[Batch] = basic_execution_environment.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
+
     assert len(batch_list) == 1
 
     batch: Batch = batch_list[0]
@@ -108,9 +108,7 @@ def test_get_batch_with_caching():
     pass
 
 
-# TODO: <Alex>What is the future of the PipelineDataConnector?</Alex>
 def test_get_batch_with_pipeline_style_batch_request():
-    # TODO: <Alex>A test must be written for the equivalent functionality.</Alex>
     test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     execution_environment_name: str = "test_execution_environment"
@@ -132,7 +130,6 @@ def test_get_batch_with_pipeline_style_batch_request():
         "execution_environment_name": execution_environment_name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        # TODO: <Alex>We must resolve the way the "in_memory_dataset" is processed.</Alex>
         "in_memory_dataset": test_df,
         "partition_request": None,
         "limit": None,
@@ -141,15 +138,19 @@ def test_get_batch_with_pipeline_style_batch_request():
     batch_list: List[Batch] = execution_environment.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
-    # TODO: <Alex>Commenting out these assertions for now, because the new code computes batch_list (not a single batch).  We also do not have the computation of batch_spec completed as of yet.  Must revisit/implement before merge.</Alex>
-    # TODO: <Alex>What can we test for here?</Alex>
+
+    assert len(batch_list) == 1
+
+    batch: Batch = batch_list[0]
+
     assert batch.batch_spec is not None
-    assert batch.batch_spec["data_asset_name"] == data_asset_name
+    assert batch.batch_definition["data_asset_name"] == data_asset_name
     assert isinstance(batch.data, pd.DataFrame)
     assert batch.data.shape == (2, 2)
     assert batch.data["col2"].values[1] == 4
 
 
+# TODO: <Alex>This test needs to be turned into several tests by replacing the all-purpose configuration with purpose-fit configuration sections using YAML.</Alex>
 def test_get_available_data_asset_names(tmp_path_factory):
     base_dir_path = str(tmp_path_factory.mktemp("project_dirs"))
     project_dir_path = os.path.join(base_dir_path, "project_path")
@@ -177,16 +178,39 @@ def test_get_available_data_asset_names(tmp_path_factory):
         **execution_environment_config,
         data_context_root_directory=project_dir_path
     )
-    data_connector_names: Union[List, str, None] = None
+    data_connector_names: Optional[Union[List, str]] = None
 
+    # TODO: <Alex>Calling "get_batch_list_from_batch_request" (with the unused batch_list reult) is temporary (to fill up the caches), until this test is turned into multiple purpose-fit tests.</Alex>
+    data_connector_name: str = "test_pipeline_data_connector"
+    data_asset_name: str = "test_asset_1"
+    test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    batch_request: dict = {
+        "execution_environment_name": execution_environment_name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+        "in_memory_dataset": test_df,
+        "partition_request": None,
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+    # noinspection PyUnusedLocal
+    batch_list: List[Batch] = execution_environment.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+
+    # TODO: <Alex>Update with richer tests.</Alex>
+    # expected_data_asset_names: dict = {
+    #     "test_pipeline_data_connector": ["test_asset_1"],
+    #     "test_filesystem_data_connector": [
+    #         "test_asset_0",
+    #         "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
+    #         "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
+    #         "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
+    #     ]
+    # }
     expected_data_asset_names: dict = {
         "test_pipeline_data_connector": ["test_asset_1"],
-        "test_filesystem_data_connector": [
-            "test_asset_0",
-            "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
-            "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
-            "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
-        ]
+        "test_filesystem_data_connector": ["test_asset_0"]
     }
 
     available_data_asset_names: dict = execution_environment.get_available_data_asset_names(
@@ -199,14 +223,19 @@ def test_get_available_data_asset_names(tmp_path_factory):
 
     data_connector_names = ["test_filesystem_data_connector", "test_pipeline_data_connector"]
 
+    # TODO: <Alex>Update with richer tests.</Alex>
+    # expected_data_asset_names: dict = {
+    #     "test_pipeline_data_connector": ["test_asset_1"],
+    #     "test_filesystem_data_connector": [
+    #         "test_asset_0",
+    #         "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
+    #         "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
+    #         "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
+    #     ]
+    # }
     expected_data_asset_names: dict = {
         "test_pipeline_data_connector": ["test_asset_1"],
-        "test_filesystem_data_connector": [
-            "test_asset_0",
-            "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
-            "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
-            "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
-        ]
+        "test_filesystem_data_connector": ["test_asset_0"]
     }
 
     available_data_asset_names: dict = execution_environment.get_available_data_asset_names(
@@ -219,13 +248,17 @@ def test_get_available_data_asset_names(tmp_path_factory):
 
     data_connector_names = ["test_filesystem_data_connector"]
 
+    # TODO: <Alex>Update with richer tests.</Alex>
+    # expected_data_asset_names: dict = {
+    #     "test_filesystem_data_connector": [
+    #         "test_asset_0",
+    #         "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
+    #         "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
+    #         "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
+    #     ]
+    # }
     expected_data_asset_names: dict = {
-        "test_filesystem_data_connector": [
-            "test_asset_0",
-            "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
-            "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
-            "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
-        ]
+        "test_filesystem_data_connector": ["test_asset_0"]
     }
 
     available_data_asset_names: dict = execution_environment.get_available_data_asset_names(
@@ -238,13 +271,17 @@ def test_get_available_data_asset_names(tmp_path_factory):
 
     data_connector_names = "test_filesystem_data_connector"
 
+    # TODO: <Alex>Update with richer tests.</Alex>
+    # expected_data_asset_names: dict = {
+    #     "test_filesystem_data_connector": [
+    #         "test_asset_0",
+    #         "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
+    #         "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
+    #         "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
+    #     ]
+    # }
     expected_data_asset_names: dict = {
-        "test_filesystem_data_connector": [
-            "test_asset_0",
-            "abe_20200809_1040", "james_20200811_1009", "eugene_20201129_1900",
-            "will_20200809_1002", "eugene_20200809_1500", "james_20200810_1003",
-            "alex_20200819_1300", "james_20200713_1567", "will_20200810_1001", "alex_20200809_1000"
-        ]
+        "test_filesystem_data_connector": ["test_asset_0"]
     }
 
     available_data_asset_names: dict = execution_environment.get_available_data_asset_names(
