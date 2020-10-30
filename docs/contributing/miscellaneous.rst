@@ -78,6 +78,7 @@ GE core team members use this checklist to ship releases.
   * If you need to re-run a failing build and don't have appropriate permissions or you don't have permissions to merge please refer to the Account Permissions Overview on the `internal wikiwiki <https://github.com/superconductive/wiki/wiki>`__ for who to ask. Your github username may need to be added to the following files: ``meta.yaml``, ``CODEOWNERS``, and ``README.md``.
 
 17. Check for open issues in the `GE conda-forge repository <https://github.com/conda-forge/great-expectations-feedstock/issues>`__. If there are open issues that do not have a corresponding issue in the main `GE repo <https://github.com/great-expectations/great_expectations/issues>`__, please create an issue in the GE repo with a link to the corresponding conda issue (e.g. issue `#2021 <https://github.com/great-expectations/great_expectations/issues/2021>`__). This allows us to internally triage and track the issue.
+18. Celebrate! You have successfully released a new version of Great Expectations!!
 
 Beta Release Notes
 
