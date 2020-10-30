@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 from sqlalchemy.engine import reflection
 from sqlalchemy.engine.default import DefaultDialect
 from sqlalchemy.sql import Select
-from sqlalchemy.sql.elements import TextClause
+from sqlalchemy.sql.elements import TextClause, quoted_name
 
 from great_expectations.core import IDDict
 from great_expectations.execution_environment.types import (
@@ -116,7 +116,9 @@ class SqlAlchemyBatchData:
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
 
-    def __init__(self, engine, table_name=None, schema=None, query=None):
+    def __init__(
+        self, engine, table_name=None, schema=None, query=None, use_quoted_name=False
+    ):
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
 
@@ -135,6 +137,7 @@ class SqlAlchemyBatchData:
         self._table_name = table_name
         self._schema = schema
         self._query = query
+        self._use_quoted_name = use_quoted_name
 
         if table_name is None and query is None:
             raise ValueError("Table_name or query must be specified")
@@ -157,6 +160,13 @@ class SqlAlchemyBatchData:
         if engine.dialect.name.lower() == "bigquery":
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
+
+        elif engine.dialect.name.lower() == "snowflake" and use_quoted_name:
+            # In BigQuery the table name is already qualified with its schema name
+            self._table = sa.Table(
+                quoted_name(table_name), sa.MetaData(), schema=schema
+            )
+
         else:
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
@@ -218,6 +228,11 @@ class SqlAlchemyBatchData:
     def table(self):
         """Returns a table of the data inside the sqlalchemy_execution_engine"""
         return self._table
+
+    @property
+    def use_quoted_name(self):
+        """Returns a table of the data inside the sqlalchemy_execution_engine"""
+        return self._use_quoted_name
 
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
         """
@@ -568,7 +583,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
 
         if "column" in compute_domain_kwargs:
-            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+            if (
+                self.engine.dialect.name.lower() == "snowflake"
+                and self.active_batch_data.use_quote_name
+            ):
+                accessor_domain_kwargs["column"] = quoted_name(
+                    compute_domain_kwargs.pop("column")
+                )
+            else:
+                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
 
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
