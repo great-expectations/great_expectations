@@ -4,6 +4,7 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
@@ -133,7 +134,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
     content_block_fn = ValidationResultsTableContentBlockRenderer._get_content_block_fn(
         "expect_table_row_count_to_be_between"
     )
-    content_block_fn_output = content_block_fn(evr_success)
+    content_block_fn_output = content_block_fn(result=evr_success)
 
     content_block_fn_expected_output = [
         [
@@ -240,23 +241,27 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     )
 
     # test _get_observed_value when evr.result["observed_value"] exists
-    output_1 = ValidationResultsTableContentBlockRenderer._get_observed_value(
-        evr_success
+    output_1 = get_renderer_impl(object_name=evr_success.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.observed_value")[1](
+        result=evr_success
     )
     assert output_1 == "1,313"
     # test _get_observed_value when evr.result does not exist
-    output_2 = ValidationResultsTableContentBlockRenderer._get_observed_value(
-        evr_no_result_key
+    output_2 = get_renderer_impl(object_name=evr_no_result_key.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.observed_value")[1](
+        result=evr_no_result_key
     )
     assert output_2 == "--"
     # test _get_observed_value for expect_column_values_to_not_be_null expectation type
-    output_3 = ValidationResultsTableContentBlockRenderer._get_observed_value(
-        evr_expect_column_values_to_not_be_null
+    output_3 = get_renderer_impl(object_name=evr_expect_column_values_to_not_be_null.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.observed_value")[1](
+        result=evr_expect_column_values_to_not_be_null
     )
     assert output_3 == "≈20.03% not null"
     # test _get_observed_value for expect_column_values_to_be_null expectation type
-    output_4 = ValidationResultsTableContentBlockRenderer._get_observed_value(
-        evr_expect_column_values_to_be_null
+    output_4 = get_renderer_impl(object_name=evr_expect_column_values_to_be_null.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.observed_value")[1](
+        result=evr_expect_column_values_to_be_null
     )
     assert output_4 == "100% null"
 
@@ -312,14 +317,16 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     )
 
     # test for succeeded evr
-    output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(
-        evr_success
+    output_1 = get_renderer_impl(object_name=evr_success.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.unexpected_statement")[1](
+        result=evr_success
     )
     assert output_1 == []
 
     # test for failed evr
-    output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(
-        evr_failed
+    output_2 = get_renderer_impl(object_name=evr_failed.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.unexpected_statement")[1](
+        result=evr_failed
     )
     assert output_2 == [
         RenderedStringTemplateContent(
@@ -340,15 +347,17 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     ]
 
     # test for evr with no "result" key
-    output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(
-        evr_no_result
+    output_3 = get_renderer_impl(object_name=evr_no_result.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.unexpected_statement")[1](
+        result=evr_no_result
     )
     print(json.dumps(output_3, indent=2))
     assert output_3 == []
 
     # test for evr with no unexpected count
-    output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(
-        evr_failed_no_unexpected_count
+    output_4 = get_renderer_impl(object_name=evr_failed_no_unexpected_count.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.unexpected_statement")[1](
+        result=evr_failed_no_unexpected_count
     )
     print(output_4)
     assert output_4 == []
@@ -371,8 +380,9 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
         ),
     )
 
-    output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(
-        evr_failed_exception
+    output_5 = get_renderer_impl(object_name=evr_failed_exception.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.unexpected_statement")[1](
+        result=evr_failed_exception
     )
     output_5 = [content.to_json_dict() for content in output_5]
     expected_output_5 = [
@@ -596,26 +606,30 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     )
 
     # test for succeeded evr
-    output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(
-        evr_success
+    output_1 = get_renderer_impl(object_name=evr_success.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.unexpected_table")[1](
+        result=evr_success
     )
     assert output_1 is None
 
     # test for failed evr with no "result" key
-    output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(
-        evr_failed_no_result
+    output_2 = get_renderer_impl(object_name=evr_failed_no_result.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.unexpected_table")[1](
+        result=evr_failed_no_result
     )
     assert output_2 is None
 
     # test for failed evr with no unexpected list or unexpected counts
-    output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(
-        evr_failed_no_unexpected_list_or_counts
+    output_3 = get_renderer_impl(object_name=evr_failed_no_unexpected_list_or_counts.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.unexpected_table")[1](
+        result=evr_failed_no_unexpected_list_or_counts
     )
     assert output_3 is None
 
     # test for failed evr with partial unexpected list
-    output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(
-        evr_failed_partial_unexpected_list
+    output_4 = get_renderer_impl(object_name=evr_failed_partial_unexpected_list.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.unexpected_table")[1](
+        result=evr_failed_partial_unexpected_list
     )
     assert output_4.to_json_dict() == {
         "content_block_type": "table",
@@ -646,8 +660,9 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     }
 
     # test for failed evr with partial unexpected counts
-    output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(
-        evr_failed_partial_unexpected_counts
+    output_5 = get_renderer_impl(object_name=evr_failed_partial_unexpected_counts.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.unexpected_table")[1](
+        result=evr_failed_partial_unexpected_counts
     )
     assert output_5.to_json_dict() == {
         "content_block_type": "table",
@@ -682,8 +697,9 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
     evr_failed_with_exception, evr_success, evr_failed
 ):
     # test for failed evr with exception
-    output_1 = ValidationResultsTableContentBlockRenderer._get_status_icon(
-        evr_failed_with_exception
+    output_1 = get_renderer_impl(object_name=evr_failed_with_exception.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.status_icon")[1](
+        result=evr_failed_with_exception
     )
     assert output_1.to_json_dict() == {
         "content_block_type": "string_template",
@@ -702,7 +718,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
     }
 
     # test for succeeded evr
-    output_2 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_success)
+    output_2 = get_renderer_impl(object_name=evr_success.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.status_icon")[1](result=evr_success)
     assert output_2.to_json_dict() == {
         "content_block_type": "string_template",
         "string_template": {
@@ -721,7 +738,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
     }
 
     # test for failed evr
-    output_3 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_failed)
+    output_3 = get_renderer_impl(object_name=evr_failed.expectation_config.expectation_type,
+                      renderer_type="renderer.diagnostic.status_icon")[1](result=evr_failed)
     assert output_3.to_json_dict() == {
         "content_block_type": "string_template",
         "string_template": {
