@@ -196,8 +196,10 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             base_directory = self.base_directory
         file_options = self.fs.listdir(base_directory)
         for file_option in file_options:
-            file_option = file_option['Key']
-            file_option = file_option.split('/')[-1] # fs.listdir with return full path unlike os.listdir
+            file_option = file_option["Key"]
+            file_option = file_option.split("/")[
+                -1
+            ]  # fs.listdir with return full path unlike os.listdir
             for extension in self.known_extensions:
                 if (
                     file_option.endswith(extension)
@@ -281,7 +283,9 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             reader_options=reader_options or self.reader_options,
             limit=limit,
         )
-        batch_kwargs["s3"] = "s3a://" +  path
+        if "s3a://" not in path:
+            path = "s3a://" + path
+        batch_kwargs["s3"] = path
         batch_kwargs["datasource"] = self._datasource.name
 
         return S3BatchKwargs(batch_kwargs)
@@ -296,7 +300,14 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
         s3_url = urlparse(path)
         s3_path = Path(s3_url.path)
-        s3_new_url = urlunparse((s3_url.scheme, s3_url.netloc, s3_path.as_posix(),
-                                 s3_url.params, s3_url.query, s3_url.fragment))
+        s3_new_url = urlunparse(
+            (
+                s3_url.scheme,
+                s3_url.netloc,
+                s3_path.as_posix(),
+                s3_url.params,
+                s3_url.query,
+                s3_url.fragment,
+            )
+        )
         return s3_new_url
-
