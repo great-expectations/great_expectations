@@ -400,12 +400,9 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
         elif "table" in batch_kwargs:
             table = batch_kwargs["table"]
             if self.engine.dialect.name.lower() == "snowflake" and batch_kwargs.get(
-                "case_sensitive"
+                "use_quoted_name"
             ):
                 table = quoted_name(table, quote=True)
-            # if self.engine.dialect.name.lower() == "snowflake":
-            #     if not table.isupper():
-            #         table = quoted_name(table, quote=True)
 
             limit = batch_kwargs.get("limit")
             offset = batch_kwargs.get("offset")
