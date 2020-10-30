@@ -50,10 +50,21 @@ class SqlDataConnector(DataConnector):
                 table_name = data_asset_name
             
             splitter_fn = getattr(self, data_asset["splitter_method"])
-            splits = splitter_fn(
+            split_query = splitter_fn(
                 table_name=table_name,
                 **data_asset["splitter_kwargs"]
             )
+
+            rows = self._execution_engine.engine.execute(split_query).fetchall()
+
+            # Zip up split parameters with column names
+            column_names : List[str] = []
+            if "column_names" in data_asset["splitter_kwargs"]:
+                column_names = data_asset["splitter_kwargs"]["column_names"]
+            elif "column_name" in data_asset["splitter_kwargs"]:
+                column_names = [data_asset["splitter_kwargs"]["column_name"]]
+            
+            splits = [dict(zip(column_names, row))  for row in rows]
 
             # TODO Abe 20201029 : Apply sorters to splits here
 
@@ -81,26 +92,22 @@ class SqlDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name:str) -> List[str]:
         return self._data_references_cache[data_asset_name]
 
+    ### Splitter methods ###
+
     def _split_on_column_value(
         self,
         table_name: str,
         column_name: str,
     ):
         # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
-        # splits = list(pd.read_sql(query, self.db)[self.column_name])
 
-        rows = self._execution_engine.engine.execute(
-            sa.select([
-                sa.func.distinct(
-                    sa.column(column_name)
-                )
-            ]).select_from(
-                sa.text(table_name)
+        return sa.select([
+            sa.func.distinct(
+                sa.column(column_name)
             )
-        ).fetchall()
-
-        splits = [row[0] for row in rows]
-        return splits
+        ]).select_from(
+            sa.text(table_name)
+        )
 
     def _split_on_converted_datetime(
         self,
@@ -109,23 +116,17 @@ class SqlDataConnector(DataConnector):
         date_format_string: str='%Y-%m-%d',
     ):
         # query = f"SELECT DISTINCT( strftime(\"{date_format_string}\", \"{self.column_name}\")) as my_var FROM {self.table_name}"
-        # splits = list(pd.read_sql(query, self.db)["my_var"])
 
-        rows = self._execution_engine.engine.execute(
-            sa.select([
-                sa.func.distinct(
-                    sa.func.strftime(
-                        date_format_string,
-                        sa.column(column_name),
-                    )
+        return sa.select([
+            sa.func.distinct(
+                sa.func.strftime(
+                    date_format_string,
+                    sa.column(column_name),
                 )
-            ]).select_from(
-                sa.text(table_name)
             )
-        ).fetchall()
-        splits = [row[0] for row in rows]
-
-        return splits
+        ]).select_from(
+            sa.text(table_name)
+        )
 
     def _split_on_divided_integer(
         self,
@@ -134,23 +135,17 @@ class SqlDataConnector(DataConnector):
         divisor:int
     ):
         # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
-        # splits = list(pd.read_sql(query, self.db)["my_var"])
 
-        rows = self._execution_engine.engine.execute(
-            sa.select([
-                sa.func.distinct(
-                    sa.cast(
-                        sa.column(column_name) / divisor,
-                        sa.Integer
-                    )
+        return sa.select([
+            sa.func.distinct(
+                sa.cast(
+                    sa.column(column_name) / divisor,
+                    sa.Integer
                 )
-            ]).select_from(
-                sa.text(table_name)
             )
-        ).fetchall()
-        splits = [row[0] for row in rows]
-
-        return splits
+        ]).select_from(
+            sa.text(table_name)
+        )
 
     def _split_on_divided_integer(
         self,
@@ -159,23 +154,17 @@ class SqlDataConnector(DataConnector):
         divisor:int
     ):
         # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
-        # splits = list(pd.read_sql(query, self.db)["my_var"])
 
-        rows = self._execution_engine.engine.execute(
-            sa.select([
-                sa.func.distinct(
-                    sa.cast(
-                        sa.column(column_name) / divisor,
-                        sa.Integer
-                    )
+        return sa.select([
+            sa.func.distinct(
+                sa.cast(
+                    sa.column(column_name) / divisor,
+                    sa.Integer
                 )
-            ]).select_from(
-                sa.text(table_name)
             )
-        ).fetchall()
-        splits = [row[0] for row in rows]
-
-        return splits
+        ]).select_from(
+            sa.text(table_name)
+        )
 
     def _split_on_multi_column_values(
         self,
@@ -185,23 +174,12 @@ class SqlDataConnector(DataConnector):
         # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
         # splits = list(pd.read_sql(query, self.db)[self.column_name])
 
-        rows = self._execution_engine.engine.execute(
-            # sa.select([
-            #     sa.distinct(
-            #         sa.tuple_(*[sa.column(column_name) for column_name in column_names])
-            #     )
-            # ]).distinct().select_from(
-            sa.select([
+        return sa.select([
                 sa.column(column_name) for column_name in column_names
             ]).distinct().select_from(
                 sa.text(table_name)
             )
-        ).fetchall()
-
-        splits = [dict(zip(column_names, row))  for row in rows]
-        print(splits)
-        return splits
-
+        
     def _split_on_hashed_column(
         self,
         table_name: str,
@@ -209,17 +187,11 @@ class SqlDataConnector(DataConnector):
         hash_digits: int,
     ):
         # query = f"SELECT MD5(\"{self.column_name}\") = {matching_hash}) AS hashed_var FROM {self.table_name}"
-        # splits = list(pd.read_sql(query, self.db)["hashed_var"])
 
-        rows = self._execution_engine.engine.execute(
-            sa.select([
-                sa.func.md5(
-                    sa.column(column_name)
-                )
-            ]).select_from(
-                sa.text(table_name)
+        return sa.select([
+            sa.func.md5(
+                sa.column(column_name)
             )
-        ).fetchall()
-        splits = [row[0] for row in rows]
-
-        return splits
+        ]).select_from(
+            sa.text(table_name)
+        )

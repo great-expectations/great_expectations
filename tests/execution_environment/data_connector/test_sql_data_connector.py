@@ -83,9 +83,9 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
             "table_partitioned_by_date_column__A": {
                 "batch_definition_count": 30,
                 "example_data_references": [
-                    "2020-01-01",
-                    "2020-01-02",
-                    "2020-01-03"
+                    {"date": "2020-01-01"},
+                    {"date": "2020-01-02"},
+                    {"date": "2020-01-03"},
                 ]
             }
         },
@@ -125,9 +125,9 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
             "table_partitioned_by_date_column__A": {
                 "batch_definition_count": 30,
                 "example_data_references": [
-                    "2020-01-01",
-                    "2020-01-02",
-                    "2020-01-03"
+                    {"date": "2020-01-01"},
+                    {"date": "2020-01-02"},
+                    {"date": "2020-01-03"},
                 ]
             }
         },
@@ -156,7 +156,6 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
-    # TODO: Flesh this out once the implementation actually works to this point
     assert report == {
         "class_name": "SqlDataConnector",
         "data_asset_count": 1,
@@ -167,9 +166,9 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
             "table_partitioned_by_timestamp_column__B": {
                 "batch_definition_count": 30,
                 "example_data_references": [
-                    "2020-01-01",
-                    "2020-01-02",
-                    "2020-01-03"
+                    {"timestamp": "2020-01-01"},
+                    {"timestamp": "2020-01-02"},
+                    {"timestamp": "2020-01-03"},
                 ]
             }
         },
@@ -198,7 +197,6 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
-    # TODO: Flesh this out once the implementation actually works to this point
     assert report == {
         "class_name": "SqlDataConnector",
         "data_asset_count": 1,
@@ -208,13 +206,10 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "data_assets": {
             "table_partitioned_by_regularly_spaced_incrementing_id_column__C": {
                 "batch_definition_count": 12,
-                #example_partition_definitions
-                    # {"index": 0 },
-                    # {"index__extract_val": 0 },
                 "example_data_references": [
-                    0,
-                    1,
-                    2,
+                    {"id": 0},
+                    {"id": 1},
+                    {"id": 2},
                 ]
             }
         },
@@ -243,7 +238,6 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
-    # TODO: Flesh this out once the implementation actually works to this point
     assert report == {
         "class_name": "SqlDataConnector",
         "data_asset_count": 1,
@@ -254,9 +248,9 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
             "table_partitioned_by_incrementing_batch_id__E": {
                 "batch_definition_count": 11,
                 "example_data_references": [
-                    0,
-                    1,
-                    2,
+                    {"batch_id": 0},
+                    {"batch_id": 1},
+                    {"batch_id": 2},
                 ]
             }
         },
@@ -284,7 +278,6 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
-    # TODO: Flesh this out once the implementation actually works to this point
     assert report == {
         "class_name": "SqlDataConnector",
         "data_asset_count": 1,
@@ -296,9 +289,9 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
                 "batch_definition_count": 49,
                 # TODO Abe 20201029 : These values should be sorted
                 "example_data_references": [
-                    3,
-                    2,
-                    4,
+                    {"session_id" : 3},
+                    {"session_id" : 2},
+                    {"session_id" : 4},
                 ]
             }
         },
@@ -329,7 +322,6 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
-    # TODO: Flesh this out once the implementation actually works to this point
     assert report == {
         "class_name": "SqlDataConnector",
         "data_asset_count": 1,
