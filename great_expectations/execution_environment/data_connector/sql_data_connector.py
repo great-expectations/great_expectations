@@ -62,20 +62,20 @@ class SqlDataConnector(DataConnector):
 
             # Zip up split parameters with column names
             column_names = self._get_column_names_from_splitter_kwargs(data_asset["splitter_kwargs"])
-            splits = [dict(zip(column_names, row))  for row in rows]
+            partition_definition_list = [dict(zip(column_names, row))  for row in rows]
 
-            batch_definition_list = [
-                BatchDefinition(
-                    execution_environment_name=self.execution_environment_name,
-                    data_connector_name=self.name,
-                    data_asset_name=data_asset_name,
-                    partition_definition=PartitionDefinition(split),
-                )
-            for split in splits]
+            # batch_definition_list = [
+            #     BatchDefinition(
+            #         execution_environment_name=self.execution_environment_name,
+            #         data_connector_name=self.name,
+            #         data_asset_name=data_asset_name,
+            #         partition_definition=PartitionDefinition(split),
+            #     )
+            # for split in splits]
 
-            # TODO Abe 20201029 : Apply sorters to batch_definition_list here
+            # TODO Abe 20201029 : Apply sorters to partition_definition_list here
 
-            self._data_references_cache[data_asset_name] = batch_definition_list
+            self._data_references_cache[data_asset_name] = partition_definition_list
     
     def _get_column_names_from_splitter_kwargs(
         self,
@@ -169,6 +169,9 @@ class SqlDataConnector(DataConnector):
         )
 
         # Choose an example data_reference
+        if pretty_print:
+            print("\n\tChoosing an example data reference...")
+
         example_data_reference =  None
         for data_asset_name, data_asset_return_obj in return_object["data_assets"].items():
             # print(data_asset_name)
@@ -177,20 +180,25 @@ class SqlDataConnector(DataConnector):
                 example_data_reference = random.choice(data_asset_return_obj["example_data_references"])
                 break
 
-        print(example_data_reference)
-
-        # batch_definition_list = self.get_batch_from_batch_definition_list_from_batch_request(BatchRequest(
-        #     data_asset_name=data_asset_name,
-        #     partition_request=PartitionRequest(
-        #         example_data_reference.partition_definition
-        #     )
-        # ))
+        if pretty_print:
+            print(f"\t\tReference chosen: {example_data_reference}")
 
         #...and fetch it.
+        print(f"\n\t\tFetching 5 rows..")
         batch_data, batch_spec, batch_markers = self.get_batch_data_and_metadata_from_batch_definition(
-            batch_definition=example_data_reference
+            BatchDefinition(
+                execution_environment_name=self.execution_environment_name,
+                data_connector_name=self.name,
+                data_asset_name=data_asset_name,
+                partition_definition=PartitionDefinition(example_data_reference),
+            )
         )
-        print(batch_data.fetchall())
+        rows = batch_data.fetchmany(5)
+
+        if pretty_print:
+            print(pd.DataFrame(rows))
+
+        return return_object
 
     ### Splitter methods ###
 
