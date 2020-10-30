@@ -22,7 +22,6 @@ class Asset(object):
         group_names: List[str] = None,
     ):
         self._name = name
-        self._partitioner_name = partitioner_name
         self._base_directory = base_directory
         self._glob_directive = glob_directive
         self._pattern = pattern
