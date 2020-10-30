@@ -55,6 +55,8 @@ class SqlDataConnector(DataConnector):
                 **data_asset["splitter_kwargs"]
             )
 
+            # TODO Abe 20201029 : Apply sorters to splits here
+
             self._data_references_cache[data_asset_name] = splits
             
     def get_available_data_asset_names(self):
@@ -173,6 +175,31 @@ class SqlDataConnector(DataConnector):
         ).fetchall()
         splits = [row[0] for row in rows]
 
+        return splits
+
+    def _split_on_multi_column_values(
+        self,
+        table_name: str,
+        column_names: List[str],
+    ):
+        # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
+        # splits = list(pd.read_sql(query, self.db)[self.column_name])
+
+        rows = self._execution_engine.engine.execute(
+            # sa.select([
+            #     sa.distinct(
+            #         sa.tuple_(*[sa.column(column_name) for column_name in column_names])
+            #     )
+            # ]).distinct().select_from(
+            sa.select([
+                sa.column(column_name) for column_name in column_names
+            ]).distinct().select_from(
+                sa.text(table_name)
+            )
+        ).fetchall()
+
+        splits = [dict(zip(column_names, row))  for row in rows]
+        print(splits)
         return splits
 
     def _split_on_hashed_column(

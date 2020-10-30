@@ -188,7 +188,7 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
         table_partitioned_by_regularly_spaced_incrementing_id_column__C:
             splitter_method: _split_on_divided_integer
             splitter_kwargs:
-                column_name: index
+                column_name: id
                 divisor: 10
     """, yaml.FullLoader)
     config["execution_engine"] = db
@@ -209,9 +209,9 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
             "table_partitioned_by_regularly_spaced_incrementing_id_column__C": {
                 "batch_definition_count": 12,
                 #example_partition_definitions
-                "example_data_references": [
                     # {"index": 0 },
                     # {"index__extract_val": 0 },
+                "example_data_references": [
                     0,
                     1,
                     2,
@@ -223,7 +223,7 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     }
 
 
-def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
+def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
@@ -231,11 +231,10 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
     execution_environment_name: FAKE_EE_NAME
 
     assets:
-        table_that_should_be_partitioned_by_random_hash__H:
-            splitter_method: _split_on_hashed_column
+        table_partitioned_by_incrementing_batch_id__E:
+            splitter_method: _split_on_column_value
             splitter_kwargs:
-                column_name: index
-                hash_digits: 1
+                column_name: batch_id
     """, yaml.FullLoader)
     config["execution_engine"] = db
 
@@ -249,11 +248,11 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "class_name": "SqlDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
-            "table_that_should_be_partitioned_by_random_hash__H"
+            "table_partitioned_by_incrementing_batch_id__E"
         ],
         "data_assets": {
-            "table_that_should_be_partitioned_by_random_hash__H": {
-                "batch_definition_count": 12,
+            "table_partitioned_by_incrementing_batch_id__E": {
+                "batch_definition_count": 11,
                 "example_data_references": [
                     0,
                     1,
@@ -265,91 +264,144 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "example_unmatched_data_references": []
     }
 
+def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-# ['table_partitioned_by_date_column__A',
-#  'table_partitioned_by_timestamp_column__B',
-#  'table_partitioned_by_regularly_spaced_incrementing_id_column__C',
+    config = yaml.load("""
+    name: my_sql_data_connector
+    execution_environment_name: FAKE_EE_NAME
+
+    assets:
+        table_partitioned_by_foreign_key__F:
+            splitter_method: _split_on_column_value
+            splitter_kwargs:
+                column_name: session_id
+    """, yaml.FullLoader)
+    config["execution_engine"] = db
+
+    my_data_connector = SqlDataConnector(**config)
+
+    report = my_data_connector.self_check()
+    print(json.dumps(report, indent=2))
+
+    # TODO: Flesh this out once the implementation actually works to this point
+    assert report == {
+        "class_name": "SqlDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "table_partitioned_by_foreign_key__F"
+        ],
+        "data_assets": {
+            "table_partitioned_by_foreign_key__F": {
+                "batch_definition_count": 49,
+                # TODO Abe 20201029 : These values should be sorted
+                "example_data_references": [
+                    3,
+                    2,
+                    4,
+                ]
+            }
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": []
+    }
+
+def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    config = yaml.load("""
+    name: my_sql_data_connector
+    execution_environment_name: FAKE_EE_NAME
+
+    assets:
+        table_partitioned_by_multiple_columns__G:
+            splitter_method: _split_on_multi_column_values
+            splitter_kwargs:
+                column_names:
+                    - y
+                    - m 
+                    - d
+    """, yaml.FullLoader)
+    config["execution_engine"] = db
+
+    my_data_connector = SqlDataConnector(**config)
+
+    report = my_data_connector.self_check()
+    print(json.dumps(report, indent=2))
+
+    # TODO: Flesh this out once the implementation actually works to this point
+    assert report == {
+        "class_name": "SqlDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "table_partitioned_by_multiple_columns__G"
+        ],
+        "data_assets": {
+            "table_partitioned_by_multiple_columns__G": {
+                "batch_definition_count": 30,
+                # TODO Abe 20201029 : These values should be sorted
+                "example_data_references": [
+                    { "y": 2020, "m": 1, "d": 1 },
+                    { "y": 2020, "m": 1, "d": 2 },
+                    { "y": 2020, "m": 1, "d": 3 },
+                ]
+            }
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": []
+    }
+
+
+def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    return
+    
+    # db = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    # config = yaml.load("""
+    # name: my_sql_data_connector
+    # execution_environment_name: FAKE_EE_NAME
+
+    # assets:
+    #     table_that_should_be_partitioned_by_random_hash__H:
+    #         splitter_method: _split_on_hashed_column
+    #         splitter_kwargs:
+    #             column_name: id
+    #             hash_digits: 1
+    # """, yaml.FullLoader)
+    # config["execution_engine"] = db
+
+    # my_data_connector = SqlDataConnector(**config)
+
+    # report = my_data_connector.self_check()
+    # print(json.dumps(report, indent=2))
+
+    # # TODO: Flesh this out once the implementation actually works to this point
+    # assert report == {
+    #     "class_name": "SqlDataConnector",
+    #     "data_asset_count": 1,
+    #     "example_data_asset_names": [
+    #         "table_that_should_be_partitioned_by_random_hash__H"
+    #     ],
+    #     "data_assets": {
+    #         "table_that_should_be_partitioned_by_random_hash__H": {
+    #             "batch_definition_count": 16,
+    #             "example_data_references": [
+    #                 0,
+    #                 1,
+    #                 2,
+    #             ]
+    #         }
+    #     },
+    #     "unmatched_data_reference_count": 0,
+    #     "example_unmatched_data_references": []
+    # }
+
+
 #  'table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D',
 #  'table_containing_id_spacers_for_D',
+
 #  'table_partitioned_by_incrementing_batch_id__E',
 #  'table_partitioned_by_foreign_key__F',
 #  'table_with_fk_reference_from_F',
 #  'table_partitioned_by_multiple_columns__G',
 #  'table_that_should_be_partitioned_by_random_hash__H']
-
-# def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
-#     db = test_cases_for_sql_data_connector_sqlite_execution_engine
-
-#     config = yaml.load("""
-#     name: my_sql_data_connector
-#     execution_environment_name: FAKE_EE_NAME
-
-#     assets:
-#         table_partitioned_by_date_column__A:
-#             #table_name: events # If table_name is omitted, then the table_name defaults to the asset name
-#             splitter:
-#                 column_name: date
-
-#         table_partitioned_by_timestamp_column__B:
-#             splitter:
-#                 column_name: timestamp
-
-#         table_partitioned_by_regularly_spaced_incrementing_id_column__C:
-#             splitter:
-#                 column_name: date
-
-#         table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D:
-#             splitter:
-#                 column_name: date
-
-#         table_containing_id_spacers_for_D:
-#             splitter:
-#                 column_name: date
-
-#         table_partitioned_by_incrementing_batch_id__E:
-#             splitter:
-#                 column_name: date
-
-#         table_partitioned_by_foreign_key__F:
-#             splitter:
-#                 column_name: date
-
-#         table_with_fk_reference_from_F:
-#             splitter:
-#                 column_name: date
-
-#         table_partitioned_by_multiple_columns__G:
-#             splitter:
-#                 column_name: date
-
-#         table_that_should_be_partitioned_by_random_hash__H':
-#             splitter:
-#                 column_name: date
-
-#     """, yaml.FullLoader)
-#     config["execution_engine"] = db
-
-#     my_data_connector = SqlDataConnector(**config)
-
-#     report = my_data_connector.self_check()
-#     print(json.dumps(report, indent=2))
-
-#     assert report == {
-#         "class_name": "SqlDataConnector",
-#         "data_asset_count": 1,
-#         "example_data_asset_names": [
-#             "table_partitioned_by_date_column__A"
-#         ],
-#         "data_assets": {
-#             "table_partitioned_by_date_column__A": {
-#                 "batch_definition_count": 30,
-#                 "example_data_references": [
-#                     "2020-01-01",
-#                     "2020-01-02",
-#                     "2020-01-03"
-#                 ]
-#             }
-#         },
-#         "unmatched_data_reference_count": 0,
-#         "example_unmatched_data_references": []
-#     }
