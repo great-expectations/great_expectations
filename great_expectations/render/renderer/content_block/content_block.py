@@ -356,7 +356,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def list_available_expectations(cls):
-        expectations = [attr for attr in dir(cls) if attr[:7] == "expect_"]
+        expectations = [object_name for object_name in _registered_renderers if object_name.startswith("expect_")]
         return expectations
 
     @classmethod
