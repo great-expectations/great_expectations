@@ -87,7 +87,9 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = include_column_name if include_column_name is not None else True
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -157,7 +159,9 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         return "--"
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.column_properties_table.missing_count_row")
+    @renderer(
+        renderer_type="renderer.descriptive.column_properties_table.missing_count_row"
+    )
     def _descriptive_column_properties_table_missing_count_row_renderer(
         cls,
         configuration=None,
@@ -173,9 +177,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "Missing (n)",
-                        "tooltip": {
-                            "content": "expect_column_values_to_not_be_null"
-                        },
+                        "tooltip": {"content": "expect_column_values_to_not_be_null"},
                     },
                 }
             ),
@@ -186,7 +188,9 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.column_properties_table.missing_percent_row")
+    @renderer(
+        renderer_type="renderer.descriptive.column_properties_table.missing_percent_row"
+    )
     def _descriptive_column_properties_table_missing_percent_row_renderer(
         cls,
         configuration=None,
@@ -202,9 +206,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "Missing (%)",
-                        "tooltip": {
-                            "content": "expect_column_values_to_not_be_null"
-                        },
+                        "tooltip": {"content": "expect_column_values_to_not_be_null"},
                     },
                 }
             ),

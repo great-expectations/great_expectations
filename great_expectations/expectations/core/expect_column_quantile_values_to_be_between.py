@@ -10,7 +10,10 @@ from great_expectations.execution_engine import ExecutionEngine, PandasExecution
 from great_expectations.expectations.expectation import Expectation, TableExpectation
 from great_expectations.expectations.registry import extract_metrics
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedTableContent, RenderedStringTemplateContent
+from great_expectations.render.types import (
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+)
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -194,7 +197,9 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = include_column_name if include_column_name is not None else True
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration["kwargs"],
@@ -354,7 +359,7 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
                 "table": table_rows,
                 "styling": {
                     "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
-                    "body": {"classes": ["table", "table-sm", "table-unbordered"], },
+                    "body": {"classes": ["table", "table-sm", "table-unbordered"],},
                 },
             }
         )

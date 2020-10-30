@@ -124,7 +124,9 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = include_column_name if include_column_name is not None else True
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -177,7 +179,9 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.column_properties_table.regex_count_row")
+    @renderer(
+        renderer_type="renderer.descriptive.column_properties_table.regex_count_row"
+    )
     def _descriptive_column_properties_table_regex_count_row_renderer(
         cls,
         configuration=None,

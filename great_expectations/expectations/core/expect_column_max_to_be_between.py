@@ -185,7 +185,9 @@ class ExpectColumnMaxToBeBetween(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = include_column_name if include_column_name is not None else True
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -248,7 +250,7 @@ class ExpectColumnMaxToBeBetween(TableExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         assert result, "Must pass in result."
         return [
@@ -259,7 +261,7 @@ class ExpectColumnMaxToBeBetween(TableExpectation):
                     "tooltip": {"content": "expect_column_max_to_be_between"},
                 },
             },
-            "{:.2f}".format(result.result["observed_value"])
+            "{:.2f}".format(result.result["observed_value"]),
         ]
 
     # @Expectation.validates(metric_dependencies=metric_dependencies)

@@ -234,7 +234,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = include_column_name if include_column_name is not None else True
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -335,9 +337,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         **kwargs
     ):
         assert result, "Must pass in result."
-        observed_partition_object = result.result["details"][
-            "observed_partition"
-        ]
+        observed_partition_object = result.result["details"]["observed_partition"]
         weights = observed_partition_object["weights"]
         if len(weights) > 60:
             return None
@@ -355,6 +355,4 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             }
         )
 
-        return cls._get_kl_divergence_chart(
-            observed_partition_object, header
-        )
+        return cls._get_kl_divergence_chart(observed_partition_object, header)

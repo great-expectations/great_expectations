@@ -6,8 +6,9 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
+    _registered_renderers,
     get_expectation_impl,
-    get_renderer_impl, _registered_renderers,
+    get_renderer_impl,
 )
 from great_expectations.render.types import (
     CollapseContent,
@@ -108,9 +109,11 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             )
                 else:
                     if isinstance(obj_, ExpectationValidationResult):
-                        content_block_fn = cls._get_content_block_fn(
-                            "_missing_content_block_fn"
-                        ) if not exception_list_content_block else cls._missing_content_block_fn
+                        content_block_fn = (
+                            cls._get_content_block_fn("_missing_content_block_fn")
+                            if not exception_list_content_block
+                            else cls._missing_content_block_fn
+                        )
                         expectation_config = obj_.expectation_config
                         result = content_block_fn(
                             configuration=expectation_config,
@@ -218,9 +221,11 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         )
             else:
                 if isinstance(render_object, ExpectationValidationResult):
-                    content_block_fn = cls._get_content_block_fn(
-                        "_missing_content_block_fn"
-                    ) if not exception_list_content_block else cls._missing_content_block_fn
+                    content_block_fn = (
+                        cls._get_content_block_fn("_missing_content_block_fn")
+                        if not exception_list_content_block
+                        else cls._missing_content_block_fn
+                    )
                     result = content_block_fn(
                         result=render_object,
                         runtime_configuration=runtime_configuration,
@@ -357,7 +362,11 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def list_available_expectations(cls):
-        expectations = [object_name for object_name in _registered_renderers if object_name.startswith("expect_")]
+        expectations = [
+            object_name
+            for object_name in _registered_renderers
+            if object_name.startswith("expect_")
+        ]
         return expectations
 
     @classmethod

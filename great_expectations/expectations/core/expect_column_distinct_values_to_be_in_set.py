@@ -9,7 +9,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent, RenderedGraphContent
+from ...render.types import RenderedGraphContent, RenderedStringTemplateContent
 from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -131,7 +131,9 @@ class ExpectColumnDistinctValuesToBeInSet(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = include_column_name if include_column_name is not None else True
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
 
         params = substitute_none_for_missing(
@@ -209,7 +211,7 @@ class ExpectColumnDistinctValuesToBeInSet(TableExpectation):
                 value_count_dict["count"] for value_count_dict in value_count_dicts
             ]
 
-        df = pd.DataFrame({"value": values, "count": counts, })
+        df = pd.DataFrame({"value": values, "count": counts,})
 
         if len(values) > 60:
             return None
@@ -231,9 +233,9 @@ class ExpectColumnDistinctValuesToBeInSet(TableExpectation):
 
         bars = (
             alt.Chart(df)
-                .mark_bar(**mark_bar_args)
-                .encode(y="count:Q", x="value:O", tooltip=["value", "count"])
-                .properties(height=400, width=chart_pixel_width, autosize="fit")
+            .mark_bar(**mark_bar_args)
+            .encode(y="count:Q", x="value:O", tooltip=["value", "count"])
+            .properties(height=400, width=chart_pixel_width, autosize="fit")
         )
 
         chart = bars.to_json()

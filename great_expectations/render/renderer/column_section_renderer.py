@@ -255,14 +255,16 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     def _render_properties_table(self, evrs):
         evr_list = [
-            self._find_evr_by_type(evrs, "expect_column_unique_value_count_to_be_between"),
-            self._find_evr_by_type(evrs, "expect_column_proportion_of_unique_values_to_be_between"),
+            self._find_evr_by_type(
+                evrs, "expect_column_unique_value_count_to_be_between"
+            ),
+            self._find_evr_by_type(
+                evrs, "expect_column_proportion_of_unique_values_to_be_between"
+            ),
             self._find_evr_by_type(evrs, "expect_column_values_to_not_be_null"),
             self._find_evr_by_type(evrs, "expect_column_values_to_not_match_regex"),
         ]
-        evrs = [
-            evr for evr in evr_list if (evr is not None)
-        ]
+        evrs = [evr for evr in evr_list if (evr is not None)]
 
         if len(evrs) > 0:
             new_content_block = self._properties_table_renderer.render(evrs)
@@ -292,7 +294,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         quantile_table_renderer = get_renderer_impl(
             object_name="expect_column_quantile_values_to_be_between",
-            renderer_type="renderer.descriptive.quantile_table"
+            renderer_type="renderer.descriptive.quantile_table",
         )[1]
         return quantile_table_renderer(result=quantile_evr)
 
@@ -310,8 +312,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             evr = cls._find_evr_by_type(evrs, expectation_type)
             if evr and not evr.exception_info["raised_exception"]:
                 renderer_impl = get_renderer_impl(
-                    object_name=expectation_type,
-                    renderer_type=renderer_type
+                    object_name=expectation_type, renderer_type=renderer_type
                 )[1]
                 table_rows.append(renderer_impl(result=evr))
 
@@ -341,13 +342,16 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         if not set_evr or set_evr.exception_info["raised_exception"]:
             return
-        if set_evr and "partial_unexpected_counts" not in set_evr.result and "partial_unexpected_list" not in \
-                set_evr.result:
+        if (
+            set_evr
+            and "partial_unexpected_counts" not in set_evr.result
+            and "partial_unexpected_list" not in set_evr.result
+        ):
             return
 
         return get_renderer_impl(
             object_name="expect_column_values_to_be_in_set",
-            renderer_type="renderer.descriptive.example_values_block"
+            renderer_type="renderer.descriptive.example_values_block",
         )[1](result=set_evr)
 
     def _render_histogram(self, evrs):
@@ -365,7 +369,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         return get_renderer_impl(
             object_name="expect_column_kl_divergence_to_be_less_than",
-            renderer_type="renderer.descriptive.histogram"
+            renderer_type="renderer.descriptive.histogram",
         )[1](result=kl_divergence_evr)
 
     @classmethod
@@ -381,7 +385,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         return get_renderer_impl(
             object_name="expect_column_distinct_values_to_be_in_set",
-            renderer_type="renderer.descriptive.value_counts_bar_chart"
+            renderer_type="renderer.descriptive.value_counts_bar_chart",
         )[1](result=distinct_values_set_evr)
 
     @classmethod

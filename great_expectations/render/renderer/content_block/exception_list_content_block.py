@@ -44,7 +44,9 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def render(cls, render_object, **kwargs):
-        return super().render(render_object=render_object, exception_list_content_block=True)
+        return super().render(
+            render_object=render_object, exception_list_content_block=True
+        )
 
     @classmethod
     def _missing_content_block_fn(
@@ -57,7 +59,9 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = include_column_name if include_column_name is not None else True
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         # Only render EVR objects for which an exception was raised
         if result.exception_info["raised_exception"] is True:
