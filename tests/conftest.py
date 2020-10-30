@@ -2772,14 +2772,14 @@ def evr_failed():
             "exception_message": None,
             "exception_traceback": None,
         },
-        expectation_config={
-            "expectation_type": "expect_column_values_to_not_match_regex",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_match_regex",
+            kwargs={
                 "column": "Name",
                 "regex": "^\\s+|\\s+$",
                 "result_format": "SUMMARY",
             },
-        },
+        ),
     )
 
 
