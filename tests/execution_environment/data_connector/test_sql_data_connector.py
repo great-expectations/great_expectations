@@ -7,6 +7,7 @@ import datetime
 import sqlite3
 
 import pandas as pd
+import sqlalchemy as sa
 
 from great_expectations.execution_environment.data_connector import (
     SqlDataConnector,
@@ -37,8 +38,17 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine():
     db_file = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "test_cases_for_sql_data_connector.db")
     )
-    db = sqlite3.connect(db_file)
-    return db
+    # db = sqlite3.connect(db_file)
+    # return db
+
+    engine = sa.create_engine(f"sqlite:////{db_file}")
+    conn = engine.connect()
+
+    # Build a SqlAlchemyDataset using that database
+    return SqlAlchemyExecutionEngine(
+        name="test_sql_execution_engine",
+        engine=conn,
+    )
 
 
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
@@ -105,26 +115,25 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
-    # TODO: Flesh this out once the implementation actually works to this point
-    # assert report == {
-    #     "class_name": "SqlDataConnector",
-    #     "data_asset_count": 1,
-    #     "example_data_asset_names": [
-    #         "table_partitioned_by_date_column__A"
-    #     ],
-    #     "data_assets": {
-    #         "table_partitioned_by_date_column__A": {
-    #             "batch_definition_count": 30,
-    #             "example_data_references": [
-    #                 "2020-01-01",
-    #                 "2020-01-02",
-    #                 "2020-01-03"
-    #             ]
-    #         }
-    #     },
-    #     "unmatched_data_reference_count": 0,
-    #     "example_unmatched_data_references": []
-    # }
+    assert report == {
+        "class_name": "SqlDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "table_partitioned_by_date_column__A"
+        ],
+        "data_assets": {
+            "table_partitioned_by_date_column__A": {
+                "batch_definition_count": 30,
+                "example_data_references": [
+                    "2020-01-01",
+                    "2020-01-02",
+                    "2020-01-03"
+                ]
+            }
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": []
+    }
 
 
 def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
@@ -139,9 +148,7 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
             splitter:
                 class_name: ColumnValueSplitter
                 column_name: timestamp
-                transformation_method: convert_datetime_to_date
-                transformation_method_kwargs:
-                    ???
+                transformation_method: _convert_datetime_to_date
     """, yaml.FullLoader)
     config["execution_engine"] = db
 
@@ -151,25 +158,25 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
     print(json.dumps(report, indent=2))
 
     # TODO: Flesh this out once the implementation actually works to this point
-    # assert report == {
-    #     "class_name": "SqlDataConnector",
-    #     "data_asset_count": 1,
-    #     "example_data_asset_names": [
-    #         "table_partitioned_by_date_column__A"
-    #     ],
-    #     "data_assets": {
-    #         "table_partitioned_by_date_column__A": {
-    #             "batch_definition_count": 30,
-    #             "example_data_references": [
-    #                 "2020-01-01",
-    #                 "2020-01-02",
-    #                 "2020-01-03"
-    #             ]
-    #         }
-    #     },
-    #     "unmatched_data_reference_count": 0,
-    #     "example_unmatched_data_references": []
-    # }
+    assert report == {
+        "class_name": "SqlDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "table_partitioned_by_timestamp_column__B"
+        ],
+        "data_assets": {
+            "table_partitioned_by_timestamp_column__B": {
+                "batch_definition_count": 30,
+                "example_data_references": [
+                    "2020-01-01",
+                    "2020-01-02",
+                    "2020-01-03"
+                ]
+            }
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": []
+    }
 
 def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
@@ -183,9 +190,9 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
             splitter:
                 class_name: ColumnValueSplitter
                 column_name: index
-                transformation_method: ???
+                transformation_method: _divide_int
                 transformation_method_kwargs:
-                    ???
+                    divisor: 10
     """, yaml.FullLoader)
     config["execution_engine"] = db
 
@@ -195,26 +202,71 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     print(json.dumps(report, indent=2))
 
     # TODO: Flesh this out once the implementation actually works to this point
-    # assert report == {
-    #     "class_name": "SqlDataConnector",
-    #     "data_asset_count": 1,
-    #     "example_data_asset_names": [
-    #         "table_partitioned_by_date_column__A"
-    #     ],
-    #     "data_assets": {
-    #         "table_partitioned_by_date_column__A": {
-    #             "batch_definition_count": 30,
-    #             "example_data_references": [
-    #                 "2020-01-01",
-    #                 "2020-01-02",
-    #                 "2020-01-03"
-    #             ]
-    #         }
-    #     },
-    #     "unmatched_data_reference_count": 0,
-    #     "example_unmatched_data_references": []
-    # }
+    assert report == {
+        "class_name": "SqlDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "table_partitioned_by_regularly_spaced_incrementing_id_column__C"
+        ],
+        "data_assets": {
+            "table_partitioned_by_regularly_spaced_incrementing_id_column__C": {
+                "batch_definition_count": 12,
+                #example_partition_definitions
+                "example_data_references": [
+                    # {"index": 0 },
+                    # {"index__extract_val": 0 },
+                    0,
+                    1,
+                    2,
+                ]
+            }
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": []
+    }
 
+
+# def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
+#     db = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+#     config = yaml.load("""
+#     name: my_sql_data_connector
+#     execution_environment_name: FAKE_EE_NAME
+
+#     assets:
+#         table_that_should_be_partitioned_by_random_hash__H:
+#             splitter:
+#                 class_name: ColumnValueSplitter
+#                 column_name: index
+#                 transformation_method: _random_hash
+#     """, yaml.FullLoader)
+#     config["execution_engine"] = db
+
+#     my_data_connector = SqlDataConnector(**config)
+
+#     report = my_data_connector.self_check()
+#     print(json.dumps(report, indent=2))
+
+#     # TODO: Flesh this out once the implementation actually works to this point
+#     assert report == {
+#         "class_name": "SqlDataConnector",
+#         "data_asset_count": 1,
+#         "example_data_asset_names": [
+#             "table_that_should_be_partitioned_by_random_hash__H"
+#         ],
+#         "data_assets": {
+#             "table_that_should_be_partitioned_by_random_hash__H": {
+#                 "batch_definition_count": 12,
+#                 "example_data_references": [
+#                     0,
+#                     1,
+#                     2,
+#                 ]
+#             }
+#         },
+#         "unmatched_data_reference_count": 0,
+#         "example_unmatched_data_references": []
+#     }
 
 
 # ['table_partitioned_by_date_column__A',

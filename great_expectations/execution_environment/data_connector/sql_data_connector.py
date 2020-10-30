@@ -6,6 +6,7 @@ import yaml
 from typing import List, Dict
 
 import pandas as pd
+import sqlalchemy as sa
 
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
@@ -25,8 +26,8 @@ class Splitter(object):
         execution_engine,
     ):
         # TODO: Replace with a real execution_engine
-        self.db = execution_engine
-        # self._execution_engine = execution_engine
+        # self.db = execution_engine
+        self._execution_engine = execution_engine
 
 
     @classmethod
@@ -39,17 +40,96 @@ class ColumnValueSplitter(Splitter):
         execution_engine,
         table_name: str,
         column_name: str,
-        transformation_method: str = None,
+        transformation_method: str = "_vanilla_splitter",
         transformation_method_kwargs: dict = None,
     ):
         self.table_name = table_name
         self.column_name = column_name
+        self.transformation_method = transformation_method
+        self.transformation_method_kwargs = transformation_method_kwargs or {}
 
         super().__init__(execution_engine)
     
-    def get_splits(self):
+    def get_splits(self) -> List[str]:
+        # NOTE: How do we feel about using getattr here?
+        transformation_fn = getattr(self, self.transformation_method)
+        splits = transformation_fn(**self.transformation_method_kwargs)
+        return splits
+
+
+    # Move these into the DataConnector, or into utility methods.
+    # Don't use raw SQL --> use SQLalchemy methods
+
+    def _vanilla_splitter(self):
+        # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
+        # splits = list(pd.read_sql(query, self.db)[self.column_name])
+
+        rows = self._execution_engine.engine.execute(
+            sa.select([
+                sa.func.distinct(
+                    sa.column(self.column_name)
+                )
+            ]).select_from(
+                sa.text(self.table_name)
+            )
+        ).fetchall()
+
+        splits = [row[0] for row in rows]
+        return splits
+
+    def _convert_datetime_to_date(
+        self,
+        date_format_string: str='%Y-%m-%d',
+    ):
         # TODO: Replace with real execution_engine methods
-        splits = list(pd.read_sql(f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}", self.db)[self.column_name])
+        # query = f"SELECT DISTINCT( strftime(\"{date_format_string}\", \"{self.column_name}\")) as my_var FROM {self.table_name}"
+        # splits = list(pd.read_sql(query, self.db)["my_var"])
+
+        rows = self._execution_engine.engine.execute(
+            sa.select([
+                sa.func.distinct(
+                    sa.func.strftime(
+                        date_format_string,
+                        sa.column(self.column_name),
+                    )
+                )
+            ]).select_from(
+                sa.text(self.table_name)
+            )
+        ).fetchall()
+        splits = [row[0] for row in rows]
+
+        return splits
+
+    def _divide_int(
+        self,
+        divisor:int
+    ):
+        # TODO: Replace with real execution_engine methods
+        # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
+        # splits = list(pd.read_sql(query, self.db)["my_var"])
+
+        rows = self._execution_engine.engine.execute(
+            sa.select([
+                sa.func.distinct(
+                    sa.cast(
+                        sa.column(self.column_name) / divisor,
+                        sa.Integer
+                    )
+                )
+            ]).select_from(
+                sa.text(self.table_name)
+            )
+        ).fetchall()
+        splits = [row[0] for row in rows]
+
+        return splits
+
+    def _random_hash(self, matching_hashes="0"):
+        # TODO: Replace with real execution_engine methods
+        query = f"SELECT MD5(\"{self.column_name}\") = {matching_hash}) AS hashed_var FROM {self.table_name}"
+        print(query)
+        splits = list(pd.read_sql(query, self.db)["hashed_var"])
 
         return splits
 
