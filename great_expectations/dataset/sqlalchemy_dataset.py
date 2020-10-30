@@ -168,7 +168,7 @@ class MetaSqlAlchemyDataset(Dataset):
             self, column, mostly=None, result_format=None, *args, **kwargs
         ):
             if self.engine.dialect.name.lower() == "snowflake" and self.batch_kwargs.get(
-                "case_sensitive"
+                "use_quoted_name"
             ):
                 column = quoted_name(column, quote=True)
             if result_format is None:
