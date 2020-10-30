@@ -99,6 +99,7 @@ class SqlDataConnector(DataConnector):
         table_name: str,
         column_name: str,
     ):
+        """Split using the values in the named column"""
         # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
 
         return sa.select([
@@ -115,6 +116,7 @@ class SqlDataConnector(DataConnector):
         column_name: str,
         date_format_string: str='%Y-%m-%d',
     ):
+        """Convert the values in the named column to the given date_format, and split on that"""
         # query = f"SELECT DISTINCT( strftime(\"{date_format_string}\", \"{self.column_name}\")) as my_var FROM {self.table_name}"
 
         return sa.select([
@@ -134,6 +136,7 @@ class SqlDataConnector(DataConnector):
         column_name: str,
         divisor:int
     ):
+        """Divide the values in the named column by `divisor`, and split on that"""
         # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
 
         return sa.select([
@@ -147,18 +150,19 @@ class SqlDataConnector(DataConnector):
             sa.text(table_name)
         )
 
-    def _split_on_divided_integer(
+    def _split_on_mod_integer(
         self,
         table_name: str,
         column_name: str,
-        divisor:int
+        mod:int
     ):
+        """Divide the values in the named column by `divisor`, and split on that"""
         # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
 
         return sa.select([
             sa.func.distinct(
                 sa.cast(
-                    sa.column(column_name) / divisor,
+                    sa.column(column_name) % mod,
                     sa.Integer
                 )
             )
@@ -171,14 +175,14 @@ class SqlDataConnector(DataConnector):
         table_name: str,
         column_names: List[str],
     ):
+        """Split on the joint values in the named columns"""
         # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
-        # splits = list(pd.read_sql(query, self.db)[self.column_name])
 
         return sa.select([
-                sa.column(column_name) for column_name in column_names
-            ]).distinct().select_from(
-                sa.text(table_name)
-            )
+            sa.column(column_name) for column_name in column_names
+        ]).distinct().select_from(
+            sa.text(table_name)
+        )
         
     def _split_on_hashed_column(
         self,
