@@ -53,7 +53,7 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine():
 
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
     # base_directory = str(tmp_path_factory.mktemp("test_basic_self_check"))
-    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
     name: my_sql_data_connector
@@ -62,11 +62,11 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
     assets:
         table_partitioned_by_date_column__A:
             #table_name: events # If table_name is omitted, then the table_name defaults to the asset name
-            splitter:
-                class_name: ColumnValueSplitter
+            splitter_method: _split_on_column_value
+            splitter_kwargs:
                 column_name: date
     """, yaml.FullLoader)
-    config["execution_engine"] = db
+    config["execution_engine"] = execution_engine
 
     my_data_connector = SqlDataConnector(**config)
 
@@ -103,8 +103,8 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
     assets:
         table_partitioned_by_date_column__A:
-            splitter:
-                class_name: ColumnValueSplitter
+            splitter_method: _split_on_column_value
+            splitter_kwargs:
                 column_name: date
 
     """, yaml.FullLoader)
@@ -145,10 +145,9 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
     assets:
         table_partitioned_by_timestamp_column__B:
-            splitter:
-                class_name: ColumnValueSplitter
+            splitter_method: _split_on_converted_datetime
+            splitter_kwargs:
                 column_name: timestamp
-                transformation_method: _convert_datetime_to_date
     """, yaml.FullLoader)
     config["execution_engine"] = db
 
@@ -187,12 +186,10 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
     assets:
         table_partitioned_by_regularly_spaced_incrementing_id_column__C:
-            splitter:
-                class_name: ColumnValueSplitter
+            splitter_method: _split_on_divided_integer
+            splitter_kwargs:
                 column_name: index
-                transformation_method: _divide_int
-                transformation_method_kwargs:
-                    divisor: 10
+                divisor: 10
     """, yaml.FullLoader)
     config["execution_engine"] = db
 
@@ -226,47 +223,47 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     }
 
 
-# def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
-#     db = test_cases_for_sql_data_connector_sqlite_execution_engine
+def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-#     config = yaml.load("""
-#     name: my_sql_data_connector
-#     execution_environment_name: FAKE_EE_NAME
+    config = yaml.load("""
+    name: my_sql_data_connector
+    execution_environment_name: FAKE_EE_NAME
 
-#     assets:
-#         table_that_should_be_partitioned_by_random_hash__H:
-#             splitter:
-#                 class_name: ColumnValueSplitter
-#                 column_name: index
-#                 transformation_method: _random_hash
-#     """, yaml.FullLoader)
-#     config["execution_engine"] = db
+    assets:
+        table_that_should_be_partitioned_by_random_hash__H:
+            splitter_method: _split_on_hashed_column
+            splitter_kwargs:
+                column_name: index
+                hash_digits: 1
+    """, yaml.FullLoader)
+    config["execution_engine"] = db
 
-#     my_data_connector = SqlDataConnector(**config)
+    my_data_connector = SqlDataConnector(**config)
 
-#     report = my_data_connector.self_check()
-#     print(json.dumps(report, indent=2))
+    report = my_data_connector.self_check()
+    print(json.dumps(report, indent=2))
 
-#     # TODO: Flesh this out once the implementation actually works to this point
-#     assert report == {
-#         "class_name": "SqlDataConnector",
-#         "data_asset_count": 1,
-#         "example_data_asset_names": [
-#             "table_that_should_be_partitioned_by_random_hash__H"
-#         ],
-#         "data_assets": {
-#             "table_that_should_be_partitioned_by_random_hash__H": {
-#                 "batch_definition_count": 12,
-#                 "example_data_references": [
-#                     0,
-#                     1,
-#                     2,
-#                 ]
-#             }
-#         },
-#         "unmatched_data_reference_count": 0,
-#         "example_unmatched_data_references": []
-#     }
+    # TODO: Flesh this out once the implementation actually works to this point
+    assert report == {
+        "class_name": "SqlDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "table_that_should_be_partitioned_by_random_hash__H"
+        ],
+        "data_assets": {
+            "table_that_should_be_partitioned_by_random_hash__H": {
+                "batch_definition_count": 12,
+                "example_data_references": [
+                    0,
+                    1,
+                    2,
+                ]
+            }
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": []
+    }
 
 
 # ['table_partitioned_by_date_column__A',
