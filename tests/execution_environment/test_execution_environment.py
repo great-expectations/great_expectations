@@ -131,7 +131,9 @@ def test_get_batch_with_pipeline_style_batch_request():
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
         "batch_data": test_df,
-        "partition_request": None,
+        "partition_request": {
+            "run_id": 1234567890,
+        },
         "limit": None,
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
@@ -148,6 +150,40 @@ def test_get_batch_with_pipeline_style_batch_request():
     assert isinstance(batch.data, pd.DataFrame)
     assert batch.data.shape == (2, 2)
     assert batch.data["col2"].values[1] == 4
+
+
+def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_error():
+    test_df = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    execution_environment_name: str = "test_execution_environment"
+    execution_environment_config: dict = execution_environment_files_data_connector_regex_partitioner_config(
+        use_group_names=False,
+        use_sorters=False,
+    )[execution_environment_name]
+    execution_environment_config.pop("class_name")
+
+    execution_environment: ExecutionEnvironment = ExecutionEnvironment(
+        name=execution_environment_name,
+        **execution_environment_config,
+        data_context_root_directory=None
+    )
+    data_connector_name: str = "test_pipeline_data_connector"
+    data_asset_name: str = "test_asset_1"
+
+    batch_request: dict = {
+        "execution_environment_name": execution_environment_name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+        "batch_data": test_df,
+        "partition_request": None,
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+    with pytest.raises(AttributeError):
+        # noinspection PyUnusedLocal
+        batch_list: List[Batch] = execution_environment.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
 
 
 # TODO: <Alex>This test needs to be turned into several tests by replacing the all-purpose configuration with purpose-fit configuration sections using YAML.</Alex>
@@ -189,7 +225,9 @@ def test_get_available_data_asset_names(tmp_path_factory):
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
         "batch_data": test_df,
-        "partition_request": None,
+        "partition_request": {
+            "run_id": 1234567890,
+        },
         "limit": None,
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)

@@ -28,14 +28,6 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_DATA_ASSET_NAME: str = "IN_MEMORY_DATA_ASSET"
 DEFAULT_DELIMITER: str = "-"
-GE_BATCH_DATA_TIMESTAMP_KEY: str = "GE_BATCH_DATA_TIMESTAMP"
-DEFAULT_PARTITION_DEFINITION: dict = PartitionDefinition(
-    {
-        GE_BATCH_DATA_TIMESTAMP_KEY: datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
-    }
-)
 
 
 class PipelineDataConnector(DataConnector):
@@ -58,10 +50,6 @@ class PipelineDataConnector(DataConnector):
 
         self._data_asset_name = data_asset_name
         self._batch_data = batch_data
-        if partition_definition is None:
-            partition_definition = copy.deepcopy(DEFAULT_PARTITION_DEFINITION)
-        else:
-            partition_definition.update(DEFAULT_PARTITION_DEFINITION)
         self._partition_definition = partition_definition
 
     def refresh_data_references_cache(self):

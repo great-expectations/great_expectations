@@ -108,27 +108,32 @@ class ExecutionEnvironment(object):
         self,
         batch_request: BatchRequest
     ) -> List[Batch]:
+        """
+        Processes batch_request and returns the (possibly empty) list of batch objects.
+
+        Args:
+            :batch_request encapsulation of request parameters necessary to identify the (possibly multiple) batches
+            :returns possibly empty list of batch objects; each batch object contains a dataset and associated metatada
+        """
         data_connector: DataConnector
 
+        if batch_request.execution_environment_name != self.name:
+            raise ValueError(
+                f'''execution_environment_name "{batch_request.execution_environment_name}" does not match name
+"{self.name}".
+                '''
+            )
+
         if batch_request.batch_data is not None:
-            partition_request: dict = batch_request.partition_request
-            partition_definition: Optional[PartitionDefinition]
-            if partition_request is None:
-                partition_definition = None
-            else:
-                partition_definition = PartitionDefinition(partition_request)
-            data_connector_name: str = batch_request.data_connector_name
-            data_connector = PipelineDataConnector(
-                name=data_connector_name,
-                execution_environment_name=batch_request.execution_environment_name,
-                execution_engine=self.execution_engine,
+            data_connector = self._get_pipeline_data_connector(
+                name=batch_request.data_connector_name,
+                execution_environment_name=self.name,
                 data_asset_name=batch_request.data_asset_name,
                 batch_data=batch_request.batch_data,
-                partition_definition=partition_definition
+                partition_request=batch_request.partition_request
             )
-            self._data_connectors_cache[data_connector_name] = data_connector
         else:
-            data_connector: DataConnector = self.get_data_connector(
+            data_connector = self.get_data_connector(
                 name=batch_request.data_connector_name
             )
 
@@ -152,6 +157,40 @@ class ExecutionEnvironment(object):
             batches.append(new_batch)
 
         return batches
+
+    def _get_pipeline_data_connector(
+        self,
+        name: str,
+        execution_environment_name: str,
+        data_asset_name: str,
+        batch_data: Any,
+        partition_request: dict
+    ):
+        """
+        If batch_request contains "in-line" batch_data, then the partition_request specifies the associated metatada,
+        and the PipelineDataConnector is instantiated as the dedicated DataConnector for this case.
+
+        While no configuration is needed, the PipelineDataConnector is still added to _data_connectors_cache (keyed by
+        the data_connector_name (provided by the user in batch_request) so that its attributes are available to
+        self_check(), get_available_data_asset_names(), and other execution_environment level operations.
+        """
+        partition_definition: Optional[PartitionDefinition]
+
+        if partition_request is None:
+            partition_definition = None
+        else:
+            partition_definition = PartitionDefinition(partition_request)
+        data_connector = PipelineDataConnector(
+            name=name,
+            execution_environment_name=execution_environment_name,
+            execution_engine=self.execution_engine,
+            data_asset_name=data_asset_name,
+            batch_data=batch_data,
+            partition_definition=partition_definition
+        )
+        self._data_connectors_cache[name] = data_connector
+
+        return data_connector
 
     @property
     def name(self):
@@ -286,9 +325,9 @@ class ExecutionEnvironment(object):
     ) -> List[BatchDefinition]:
         if batch_request.execution_environment_name != self.name:
             raise ValueError(
-                f"""execution_environment_name {batch_request.execution_environment_name} does not match name
-{self.name}.
-                """
+                f'''execution_environment_name "{batch_request.execution_environment_name}" does not match name
+"{self.name}".
+                '''
             )
 
         data_connector: DataConnector = self.get_data_connector(
