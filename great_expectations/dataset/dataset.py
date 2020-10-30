@@ -611,7 +611,12 @@ class Dataset(MetaDataset):
 
         """
         column_set = set(column_set) if column_set is not None else set()
-        dataset_columns_list = self.get_table_columns()
+
+        # Remove spark eval_col "__eval_col_" from dataset_columns_list TODO: Fix this hack
+        dataset_columns_list = [
+            c for c in self.get_table_columns() if not c.startswith("__eval_col_")
+        ]
+
         dataset_columns_set = set(dataset_columns_list)
 
         if (
