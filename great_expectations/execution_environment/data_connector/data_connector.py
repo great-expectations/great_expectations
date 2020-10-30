@@ -219,7 +219,7 @@ class DataConnector(object):
             or batch_request.execution_environment_name == self.execution_environment_name
         ):
             raise ValueError(
-                f'''data_connector_name "{batch_request.execution_environment_name}" does not match name
+                f'''execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not match DataConnector execution_environment_name:
 "{self.execution_environment_name}".
                 '''
             )
