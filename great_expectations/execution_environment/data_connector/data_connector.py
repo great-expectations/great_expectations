@@ -225,5 +225,5 @@ class DataConnector(object):
             )
         if not (batch_request.data_connector_name is None or batch_request.data_connector_name == self.name):
             raise ValueError(
-                f'data_connector_name "{batch_request.data_connector_name}" does not match name "{self.name}".'
+                f'data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match DataConnector name: "{self.name}".'
             )
