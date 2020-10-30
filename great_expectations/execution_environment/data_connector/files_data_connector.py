@@ -12,7 +12,6 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
 )
-# TODO: <Alex>Deprecate PartitionDefinitionSubset throughout the codebase.</Alex>
 from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
