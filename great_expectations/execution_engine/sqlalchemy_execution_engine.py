@@ -157,15 +157,12 @@ class SqlAlchemyBatchData:
         if table_name is None:
             raise ValueError("No table_name provided.")
 
+        if use_quoted_name:
+            table_name = quoted_name(table_name)
+
         if engine.dialect.name.lower() == "bigquery":
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
-
-        elif engine.dialect.name.lower() == "snowflake" and use_quoted_name:
-            # In BigQuery the table name is already qualified with its schema name
-            self._table = sa.Table(
-                quoted_name(table_name), sa.MetaData(), schema=schema
-            )
 
         else:
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
@@ -583,10 +580,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
 
         if "column" in compute_domain_kwargs:
-            if (
-                self.engine.dialect.name.lower() == "snowflake"
-                and self.active_batch_data.use_quote_name
-            ):
+            if self.active_batch_data.use_quoted_name:
                 accessor_domain_kwargs["column"] = quoted_name(
                     compute_domain_kwargs.pop("column")
                 )
