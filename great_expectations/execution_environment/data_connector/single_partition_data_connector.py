@@ -62,33 +62,6 @@ class SinglePartitionDataConnector(DataConnector):
             execution_engine=None,
         )
 
-    # Any because we can pass in a reference list in the case of custom_list_sorter
-    def _build_sorters_from_config(self, config_list: List[Dict[str, Any]]):
-        if config_list is None:
-            return
-        for sorter_config in config_list:
-            if sorter_config is None:
-                return
-            if 'name' not in sorter_config:
-                raise ValueError("Sorter config should have a name")
-            sorter_name = sorter_config['name']
-            new_sorter: Sorter = self._build_sorter_from_config(sorter_config=sorter_config)
-            self._sorters[sorter_name] = new_sorter
-
-    def _build_sorter_from_config(self, sorter_config) -> Sorter:
-        """Build a Sorter using the provided configuration and return the newly-built Sorter."""
-        runtime_environment: dict = {
-            "name": sorter_config['name']
-        }
-        sorter: Sorter = instantiate_class_from_config(
-            config=sorter_config,
-            runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": "great_expectations.execution_environment.data_connector.sorter"
-           },
-        )
-        return sorter
-
     def refresh_data_references_cache(self):
         """
         """
