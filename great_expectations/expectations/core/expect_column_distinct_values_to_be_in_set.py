@@ -279,7 +279,7 @@ class ExpectColumnDistinctValuesToBeInSet(TableExpectation):
     def validate(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):

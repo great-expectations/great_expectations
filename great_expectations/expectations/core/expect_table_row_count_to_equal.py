@@ -85,9 +85,9 @@ class ExpectTableRowCountToEqual(TableExpectation):
     #     self,
     #     batches: Dict[str, Batch],
     #     execution_engine: PandasExecutionEngine,
-    #     metric_domain_kwargs: dict,
-    #     metric_value_kwargs: dict,
-    #     metrics: dict,
+    #     metric_domain_kwargs: Dict,
+    #     metric_value_kwargs: Dict,
+    #     metrics: Dict,
     #     runtime_configuration: dict = None,
     #     filter_column_isnull: bool = False,
     # ):
@@ -175,7 +175,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
     def _validates(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):

@@ -175,9 +175,9 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     def _pandas_column_values_length_equals(
         self,
         series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metrics: Dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         runtime_configuration: dict = None,
         filter_column_isnull: bool = True,
     ):
@@ -198,9 +198,9 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         self,
         batches: Dict[str, Batch],
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
     ):
         """Extracts lengths of individual entries"""

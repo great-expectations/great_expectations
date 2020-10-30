@@ -111,6 +111,7 @@
 
 import os
 import sys
+from typing import Dict
 
 import click
 from ruamel.yaml import YAML
@@ -212,7 +213,7 @@ def _verify_checkpoint_does_not_exist(
 
 
 def _write_checkpoint_to_disk(
-    context: DataContext, checkpoint: dict, checkpoint_name: str
+    context: DataContext, checkpoint: Dict, checkpoint_name: str
 ) -> str:
     # TODO this should be the responsibility of the DataContext
     checkpoint_dir = os.path.join(context.root_directory, context.CHECKPOINTS_DIR,)
@@ -394,7 +395,7 @@ def checkpoint_script(checkpoint, directory):
 
 
 def _validate_at_least_one_suite_is_listed(
-    context: DataContext, batch: dict, checkpoint_file: str
+    context: DataContext, batch: Dict, checkpoint_file: str
 ) -> None:
     batch_kwargs = batch["batch_kwargs"]
     suites = batch["expectation_suite_names"]
