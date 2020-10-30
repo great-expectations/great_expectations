@@ -51,3 +51,12 @@ class DateTimeSorter(Sorter):
             datetime_string=partition_value, datetime_format_string=self._datetime_format
         )
         return datetime_to_int(dt=dt)
+
+    def __repr__(self) -> str:
+        doc_fields_dict: dict = {
+            "name": self.name,
+            "reverse": self.reverse,
+            "type": "DateTimeSorter",
+            "date_time_format": self._datetime_format,
+        }
+        return str(doc_fields_dict)

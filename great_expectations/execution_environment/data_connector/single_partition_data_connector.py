@@ -1,5 +1,5 @@
 import os
-from typing import List, Optional
+from typing import Union, List, Any, Optional, Dict, Iterator
 from pathlib import Path
 import copy
 
@@ -9,12 +9,20 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
 )
+
+from great_expectations.data_context.util import (
+instantiate_class_from_config
+)
+
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types import PathBatchSpec
+from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
+    build_sorters_from_config,
 )
 
 logger = logging.getLogger(__name__)
@@ -38,6 +46,7 @@ class SinglePartitionDataConnector(DataConnector):
         default_regex: dict = None,
         base_directory: str = None,
         glob_directive: str = "*",
+        sorters: list = None,
     ):
         logger.debug(f'Constructing SinglePartitionDataConnector "{name}".')
 
@@ -46,6 +55,7 @@ class SinglePartitionDataConnector(DataConnector):
         if default_regex is None:
             default_regex = {}
         self._default_regex = default_regex
+        self._sorters = build_sorters_from_config(config_list=sorters)
 
         super().__init__(
             name=name,
@@ -146,7 +156,19 @@ class SinglePartitionDataConnector(DataConnector):
                 ]
             )
         )
+        if len(self._sorters) > 0:
+            sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
+            return sorted_batch_definition_list
+        else:
+            return batch_definition_list
 
+    def _sort_batch_definition_list(self, batch_definition_list):
+        sorters_list = []
+        for sorter in self._sorters.values():
+            sorters_list.append(sorter)
+        sorters: Iterator[Sorter] = reversed(sorters_list)
+        for sorter in sorters:
+            batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
         return batch_definition_list
 
     # # TODO: <Alex>This method should be implemented in every subclass.</Alex>
@@ -176,14 +198,16 @@ class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
         self,
         name: str,
         data_reference_dict: dict = None,
+        sorters: List[dict] = None,
         **kwargs,
     ):
         if data_reference_dict is None:
             data_reference_dict = {}
         logger.debug(f'Constructing SinglePartitionDictDataConnector "{name}".')
         super().__init__(
-            name,
-            **kwargs
+            name=name,
+            sorters=sorters,
+            **kwargs,
         )
 
         # This simulates the underlying filesystem
@@ -226,17 +250,18 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         base_directory: str,
         default_regex: dict,
         glob_directive: str = "*",
+        sorters: List[dict] = None,
     ):
         logger.debug(f'Constructing SinglePartitionFileDataConnector "{name}".')
 
         self.glob_directive = glob_directive
-
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
             base_directory=base_directory,
             glob_directive=glob_directive,
             default_regex=default_regex,
+            sorters=sorters,
         )
 
     def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
@@ -246,7 +271,6 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         """
         globbed_paths = Path(self.base_directory).glob(self.glob_directive)
         path_list: List[str] = [os.path.relpath(str(posix_path), self.base_directory) for posix_path in globbed_paths]
-
         return path_list
 
     def _map_data_reference_to_batch_definition_list(

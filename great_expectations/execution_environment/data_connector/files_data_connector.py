@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import List, Union, Dict, Optional
+from typing import List, Union, Any, Dict, Optional, Iterator
 import os
 import copy
-
 import logging
 
 from great_expectations.execution_engine import ExecutionEngine
@@ -13,16 +12,18 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
 )
+# TODO: <Alex>Deprecate PartitionDefinitionSubset throughout the codebase.</Alex>
+from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
+    build_sorters_from_config,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
-
 
 # TODO: <Alex>Should we make this a "set" object?</Alex>
 KNOWN_EXTENSIONS = [
@@ -48,6 +49,7 @@ class FilesDataConnector(DataConnector):
         assets: dict,
 
         glob_directive: str = "*",
+        sorters: list = None,
         execution_engine: ExecutionEngine = None,
         data_context_root_directory: str = None,
     ):
@@ -73,6 +75,7 @@ class FilesDataConnector(DataConnector):
         _assets: Dict[str, Union[dict, Asset]] = assets
         self._assets = _assets
         self._build_assets_from_config(config=assets)
+        self._sorters = build_sorters_from_config(config_list=sorters)
 
     @property
     def assets(self) -> Dict[str, Union[dict, Asset]]:
@@ -86,6 +89,9 @@ class FilesDataConnector(DataConnector):
     def glob_directive(self) -> str:
         return self._glob_directive
 
+    @property
+    def sorters(self) -> List[Sorter]:
+        return self._sorters
     def _build_assets_from_config(self, config: Dict[str, dict]):
         for name, asset_config in config.items():
             if asset_config is None:
@@ -117,6 +123,15 @@ class FilesDataConnector(DataConnector):
                 class_name=config["class_name"],
             )
         return asset
+
+
+    def get_available_data_asset_names(self) -> List[str]:
+        """Return the list of asset names known by this data connector.
+
+        Returns:
+            A list of available names
+        """
+        return list(self.assets.keys())
 
     # TODO: <Alex>This code is broken; it is used only by deprecated classes and methods.</Alex>
     def _validate_sorters_configuration(self, partition_keys: List[str], num_actual_partition_keys: int):
@@ -269,22 +284,32 @@ configured runtime keys.
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
-        batch_definition_list: List[BatchDefinition] = list(
-            filter(
-                lambda batch_definition: batch_definition_matches_batch_request(
-                    batch_definition=batch_definition,
-                    batch_request=batch_request
-                ),
-                [
-                    batch_definitions[0]
-                    for data_reference_sub_cache in self._data_references_cache.values()
-                    for batch_definitions in data_reference_sub_cache.values()
-                    if batch_definitions is not None
-                ]
-            )
-        )
+        batch_definition_list: List[BatchDefinition] = []
+        for data_asset_name, sub_cache in self._data_references_cache.items():
+            # TODO: <Alex>A cleaner implementation would be a filter on sub_cache.values() with "batch_definition_matches_batch_request()" as condition, since "data_reference" is not involved.</Alex>
+            for data_reference, batch_definition in sub_cache.items():
+                if batch_definition is not None:
+                    if batch_definition_matches_batch_request(
+                        batch_definition=batch_definition[0],
+                        batch_request=batch_request
+                    ):
+                        batch_definition_list.extend(batch_definition)
+        if len(self.sorters) > 0:
+            sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
+            return sorted_batch_definition_list
+        else:
+            return batch_definition_list
 
-        return batch_definition_list
+    def _sort_batch_definition_list(self, batch_definition_list):
+        sorters_list = []
+        # this is not going to be the right order all the time. there must be a way.
+        #
+        for sorter in self.sorters.values():
+            sorters_list.append(sorter)
+        sorters: Iterator[Sorter] = reversed(sorters_list)
+        for sorter in sorters:
+            batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
+        return(batch_definition_list)
 
     def _map_data_reference_to_batch_definition_list(
         self,

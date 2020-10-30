@@ -166,15 +166,15 @@ class DataConnector(object):
     ):
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
-    
+
         if pretty_print:
             print("\t"+self.name, ":", self.__class__.__name__)
             print()
-    
+
         asset_names = self.get_available_data_asset_names()
         asset_names.sort()
         len_asset_names = len(asset_names)
-    
+
         data_connector_obj = {
             "class_name": self.__class__.__name__,
             "data_asset_count": len_asset_names,
@@ -182,29 +182,29 @@ class DataConnector(object):
             "data_assets": {}
             # "data_reference_count": self.
         }
-    
+
         if pretty_print:
             print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
-    
+
         for asset_name in asset_names[:max_examples]:
             data_reference_list = self._get_data_reference_list_from_cache_by_data_asset_name(asset_name)
             len_batch_definition_list = len(data_reference_list)
             example_data_references = data_reference_list[:max_examples]
-    
+
             if pretty_print:
                 print(f"\t\t{asset_name} ({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):", example_data_references)
-    
+
             data_connector_obj["data_assets"][asset_name] = {
                 "batch_definition_count": len_batch_definition_list,
                 "example_data_references": example_data_references
             }
-    
+
         unmatched_data_references = self.get_unmatched_data_references()
         len_unmatched_data_references = len(unmatched_data_references)
         if pretty_print:
             print(f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):", unmatched_data_references[:max_examples])
-    
+
         data_connector_obj["unmatched_data_reference_count"] = len_unmatched_data_references
         data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
-    
+
         return data_connector_obj
