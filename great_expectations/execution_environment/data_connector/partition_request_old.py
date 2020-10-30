@@ -6,7 +6,7 @@ from typing import List, Dict, Callable, Union, Optional
 import logging
 
 from great_expectations.core.id_dict import PartitionDefinitionSubset
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.util import is_int
 import great_expectations.exceptions as ge_exceptions
 
@@ -185,8 +185,11 @@ class PartitionRequest(object):
         return str(doc_fields_dict)
 
     def select_from_partition_request(self, batch_definition_list=None):
-        print("HI HI HI HI")
+        print("HERE WE ARE")
         print(batch_definition_list)
+
+
+
         if batch_definition_list is None:
             return []
         filter_function: Callable
@@ -196,12 +199,12 @@ class PartitionRequest(object):
             filter_function = self.best_effort_partition_matcher()
         selected_partitions = list(
             filter(
+
                 #### THIS IS WHERE I WILL NEED TO WRITE #####
-                lambda batch_definition: filter_function(
-                    data_asset_name=batch_definition.data_asset_name,
-                    data_connector_name=batch_definition.data_connector_name,
-                    execution_environment_name=batch_definition.execution_environment_name,
-                    partition_definition=batch_definition.partition_definition,
+                lambda partition: filter_function(
+                    data_asset_name=partition.data_asset_name,
+                    partition_name=partition.name,
+                    partition_definition=partition.definition
                 ),
                 batch_definition_list
             )
@@ -218,10 +221,12 @@ class PartitionRequest(object):
     def best_effort_partition_matcher(self) -> Callable:
         def match_partition_to_query_params(
             data_asset_name: str,
-            data_connector_name: str,
-            execution_environment_name: str,
+            partition_name: str,
             partition_definition: dict
         ) -> bool:
+            if self.partition_name:
+                if partition_name != self.partition_name:
+                    return False
             if self.partition_definition:
                 if not partition_definition:
                     return False

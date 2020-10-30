@@ -47,11 +47,6 @@ def batch_definition_matches_batch_request(
     if batch_request.data_asset_name:
         if batch_request.data_asset_name != batch_definition.data_asset_name:
             return False
-    # FIXME: This is too rigid. Needs to take into account ranges and stuff.
-    if batch_request.partition_request is not None:
-        for k, v in batch_request.partition_request.items():
-            if (k not in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
-                return False
     return True
 
 
