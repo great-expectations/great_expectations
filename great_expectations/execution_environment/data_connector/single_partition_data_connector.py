@@ -16,6 +16,7 @@ instantiate_class_from_config
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
@@ -78,8 +79,7 @@ class SinglePartitionDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache.
         """
-        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts the requirement arguments.</Alex>
-        # TODO: <Alex>See also the comment above batch_definition_matches_batch_request (in great_expectations/execution_environment/data_connector/util.py).</Alex>
+        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the requirement arguments.</Alex>
         batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -106,10 +106,6 @@ class SinglePartitionDataConnector(DataConnector):
 
         return path_list
 
-    # TODO: <Alex>This method should be implemented in every subclass.</Alex>
-    # def _get_data_reference_list(self) -> List[str]:
-    #     pass
-
     def get_data_reference_list_count(self) -> int:
         return len(self._data_references_cache)
 
@@ -131,11 +127,9 @@ class SinglePartitionDataConnector(DataConnector):
             )
         )
 
-        data_asset_names: set = set()
-        for batch_definition in batch_definition_list:
-            data_asset_names.add(batch_definition.data_asset_name)
+        data_asset_names: List[str] = [batch_definition.data_asset_name for batch_definition in batch_definition_list]
 
-        return list(data_asset_names)
+        return list(set(data_asset_names))
 
     def get_batch_definition_list_from_batch_request(
         self,
@@ -198,12 +192,12 @@ class SinglePartitionDataConnector(DataConnector):
 
 
 # TODO: <Alex>Is this class still useful?  If not, we can deprecate it and replace it with SinglePartitionFileDataConnector in all the test modues.</Alex>
+# TODO: <Alex>Decision: Delete this class and rewrite the tests that rely on it in the way that exercises the relevant surviving classes.</Alex>
 class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
     def __init__(
         self,
         name: str,
         data_reference_dict: dict = None,
-        # TODO: <Alex>Are these "kwargs" needed here?</Alex>
         sorters: List[dict] = None,
         **kwargs,
     ):
@@ -219,12 +213,12 @@ class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
         # This simulates the underlying filesystem
         self.data_reference_dict = data_reference_dict
 
-    def _get_data_reference_list(self):
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
         """
-        data_reference_keys = list(self.data_reference_dict.keys())
+        data_reference_keys: List[str] = list(self.data_reference_dict.keys())
         data_reference_keys.sort()
         return data_reference_keys
 
@@ -270,7 +264,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
             sorters=sorters,
         )
 
-    def _get_data_reference_list(self):
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
@@ -278,25 +272,6 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         globbed_paths = Path(self.base_directory).glob(self.glob_directive)
         path_list: List[str] = [os.path.relpath(str(posix_path), self.base_directory) for posix_path in globbed_paths]
         return path_list
-
-    # TODO: <Alex>Why does this need to override SinglePartitionDataConnector.get_available_data_asset_names()?  The results must be identical.</Alex>
-    def get_available_data_asset_names(self) -> List[str]:
-        """Return the list of asset names known by this data connector.
-
-        Returns:
-            A list of available names
-        """
-        if self._data_references_cache is None:
-            self.refresh_data_references_cache()
-
-        available_data_asset_names: List[str] = []
-
-        for k, v in self._data_references_cache.items():
-            if v is not None:
-                batch_definition: BatchDefinition = v[0]
-                available_data_asset_names.append(batch_definition.data_asset_name)
-
-        return list(set(available_data_asset_names))
 
     def _map_data_reference_to_batch_definition_list(
         self,
@@ -315,3 +290,36 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
             regex_pattern=pattern,
             group_names=group_names
         )
+
+    def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
+        regex_config: dict = copy.deepcopy(self._default_regex)
+        pattern: str = regex_config["pattern"]
+        group_names: List[str] = regex_config["group_names"]
+
+        return map_batch_definition_to_data_reference_string_using_regex(
+            batch_definition=batch_definition,
+            regex_pattern=pattern,
+            group_names=group_names
+        )
+
+    def _generate_batch_spec_parameters_from_batch_definition(
+        self,
+        batch_definition: BatchDefinition
+    ) -> dict:
+        path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
+        if not path:
+            raise ValueError(
+                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition
+definition {batch_definition.partition_definition} from batch definition {batch_definition}.
+                '''
+            )
+        return {
+            "path": path
+        }
+
+    def _build_batch_spec_from_batch_definition(
+        self,
+        batch_definition: BatchDefinition
+    ) -> PathBatchSpec:
+        batch_spec = super()._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
+        return PathBatchSpec(batch_spec)

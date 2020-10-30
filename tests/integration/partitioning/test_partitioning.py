@@ -10,9 +10,6 @@ from great_expectations.core.id_dict import PartitionDefinition
 import great_expectations.exceptions as ge_exceptions
 
 
-
-
-
 # TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 def test_return_all_available_partitions_illegal_index_and_limit_combination(
     execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
@@ -35,7 +32,7 @@ def test_return_all_available_partitions_illegal_index_and_limit_combination(
                 "partition_index": 0,
                 "limit": 1
             },
-            in_memory_dataset=None,
+            batch_data=None,
             runtime_parameters=None,
             repartition=False
         )
@@ -72,7 +69,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter(
             "partition_index": None,
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -156,7 +153,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_limit(
             "partition_index": None,
             "limit": 4
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -224,7 +221,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_index_as_int(
             "partition_index": 0,
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -274,7 +271,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_index_as_str(
             "partition_index": "-1",
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -324,7 +321,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_list(
             "partition_index": [1, 3],
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -380,7 +377,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_tuple(
             "partition_index": (0, 4, 3),
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -436,7 +433,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_as_str(
             "partition_index": "3:5",
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -492,7 +489,7 @@ def test_return_partitions_sorted_filtered_by_custom_filter_with_slice_obj(
             "partition_index": slice(3, 5, None),
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -545,7 +542,7 @@ def test_return_partitions_sorted_for_specific_data_asset_name(
             "partition_index": None,
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -592,7 +589,7 @@ def test_return_partitions_sorted_queried_by_partition_name(
             "partition_index": None,
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -639,7 +636,7 @@ def test_return_partitions_sorted_queried_by_partition_definition_dict_1_key(
             "partition_index": None,
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -704,7 +701,7 @@ def test_return_partitions_sorted_queried_by_partition_definition_dict_2_keys(
             "partition_index": None,
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )
@@ -751,7 +748,7 @@ def test_return_partitions_sorted_queried_by_partition_definition_dict_1_key_wit
             "partition_index": 0,
             "limit": None
         },
-        in_memory_dataset=None,
+        batch_data=None,
         runtime_parameters=None,
         repartition=False
     )

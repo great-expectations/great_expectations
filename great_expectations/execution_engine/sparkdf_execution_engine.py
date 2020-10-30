@@ -674,13 +674,13 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         if isinstance(batch_spec, InMemoryBatchSpec):
             # We do not want to store the actual dataframe in batch_spec (mark that this is SparkDFRef instead).
-            in_memory_dataset = batch_spec.pop("dataset")
+            batch_data = batch_spec.pop("batch_data")
             batch_spec["SparkInMemoryDF"] = True
-            if in_memory_dataset is not None:
+            if batch_data is not None:
                 if batch_spec.get("data_asset_name"):
-                    df = in_memory_dataset
+                    df = batch_data
                 else:
-                    raise ValueError("To pass an in_memory_dataset, you must also a data_asset_name as well.")
+                    raise ValueError("To pass an batch_data, you must also a data_asset_name as well.")
         else:
             reader = self.spark.read
             reader_method = batch_spec.get("reader_method")
