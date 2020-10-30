@@ -940,3 +940,20 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             return inner_func
 
         return outer
+
+    def get_batch_data_and_markers(
+        self,
+        batch_spec
+    ):
+        batch_data = self.engine.execute(batch_spec)
+
+        batch_markers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        return batch_data, batch_markers
+

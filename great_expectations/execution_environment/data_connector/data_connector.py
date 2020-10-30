@@ -594,12 +594,7 @@ class DataConnector(object):
         # return data_reference
 
     # TODO: <Alex>This should be implemented in each subclass.</Alex>
-    def self_check(
-        self,
-        pretty_print=True,
-        max_examples=3
-    ):
-        raise NotImplementedError
+    
     def self_check(
         self,
         pretty_print=True,
