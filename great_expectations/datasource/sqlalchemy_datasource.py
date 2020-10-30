@@ -390,8 +390,7 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
                     batch_kwargs["query_parameters"]
                 )
             else:
-                query = quoted_name(batch_kwargs["query"], quote=True)
-
+                query = batch_kwargs["query"]
             batch_reference = SqlAlchemyBatchReference(
                 engine=self.engine,
                 query=query,
