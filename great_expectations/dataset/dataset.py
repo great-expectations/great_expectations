@@ -108,11 +108,7 @@ class MetaDataset(DataAsset):
                 column = kwargs.get("column")
 
             if column is not None:
-                if (
-                    hasattr(self, "engine")
-                    and self.engine.dialect.name.lower() == "snowflake"
-                    and self.batch_kwargs.get("case_sensitive")
-                ):
+                if hasattr(self, "engine") and self.batch_kwargs.get("use_quoted_name"):
                     column = quoted_name(column, quote=True)
 
                 nonnull_count = self.get_column_nonnull_count(
