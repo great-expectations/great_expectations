@@ -231,7 +231,7 @@ class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
         name: str,
         data_reference_dict: dict = None,
         # TODO: <Alex>Are these "kwargs" needed here?</Alex>
-        sorters: Sorter = None,
+        sorters: List[dict] = None,
         **kwargs,
     ):
         if data_reference_dict is None:
@@ -283,7 +283,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         base_directory: str,
         default_regex: dict,
         glob_directive: str = "*",
-        sorters: Sorter = None,
+        sorters: List[dict] = None,
     ):
         logger.debug(f'Constructing SinglePartitionFileDataConnector "{name}".')
 
