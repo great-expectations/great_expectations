@@ -93,9 +93,6 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
         "example_data_reference": {
-            "partition_definition": {
-                "date": "2020-01-03"
-            },
             "n_rows": 2,
             "batch_spec": {
                 "table_name": "table_partitioned_by_date_column__A",
@@ -152,9 +149,6 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
         "example_data_reference": {
-            "partition_definition": {
-                "date": "2020-01-02"
-            },
             "n_rows": 8,
             "batch_spec": {
                 "table_name": "table_partitioned_by_date_column__A",
@@ -210,9 +204,6 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
         "example_data_reference": {
-            "partition_definition": {
-                "timestamp": "2020-01-02"
-            },
             "n_rows": 8,
             "batch_spec": {
                 "table_name": "table_partitioned_by_timestamp_column__B",
@@ -268,9 +259,6 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
         "example_data_reference": {
-            "partition_definition": {
-                "id": 1
-            },
             "n_rows": 10,
             "batch_spec": {
                 "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
@@ -327,9 +315,6 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
         "example_data_reference": {
-            "partition_definition": {
-                "batch_id": 1
-            },
             "n_rows": 9,
             "batch_spec": {
                 "table_name": "table_partitioned_by_incrementing_batch_id__E",
@@ -385,9 +370,6 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
         "example_data_reference": {
-            "partition_definition": {
-                "session_id": 2
-            },
             "n_rows": 2,
             "batch_spec": {
                 "table_name": "table_partitioned_by_foreign_key__F",
@@ -446,11 +428,6 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
         "example_data_reference": {
-            "partition_definition": {
-                "y": 2020,
-                "m": 1,
-                "d": 2,
-            },
             "n_rows": 8,
             "batch_spec": {
                 "table_name": "table_partitioned_by_multiple_columns__G",
@@ -519,9 +496,4 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
 #  'table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D',
 #  'table_containing_id_spacers_for_D',
-
-#  'table_partitioned_by_incrementing_batch_id__E',
-#  'table_partitioned_by_foreign_key__F',
-#  'table_with_fk_reference_from_F',
-#  'table_partitioned_by_multiple_columns__G',
 #  'table_that_should_be_partitioned_by_random_hash__H']

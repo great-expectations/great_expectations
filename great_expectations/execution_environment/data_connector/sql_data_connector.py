@@ -175,9 +175,8 @@ class SqlDataConnector(DataConnector):
         )
         rows = batch_data.fetchall()
         return_object["example_data_reference"] = {
-            "partition_definition" : example_data_reference,
-            "n_rows" : len(rows),
             "batch_spec" : batch_spec,
+            "n_rows" : len(rows),
         }
 
         if pretty_print:
