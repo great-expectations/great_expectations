@@ -5,7 +5,10 @@ import logging
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.id_dict import PartitionRequest
+from great_expectations.core.id_dict import (
+    PartitionRequest,
+    PartitionDefinition
+)
 from great_expectations.execution_environment.types import InMemoryBatchSpec
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
@@ -26,7 +29,8 @@ class PipelineDataConnector(DataConnector):
         execution_environment_name: str,
         execution_engine: ExecutionEngine = None,
         data_asset_name: str = None,
-        batch_data: Any = None,
+        # TODO: <Alex></Alex>
+        # batch_data: Any = None,
         runtime_keys: dict = None,
         partition_request: PartitionRequest = None,
     ):
@@ -39,7 +43,8 @@ class PipelineDataConnector(DataConnector):
         )
 
         self._data_asset_name = data_asset_name
-        self._batch_data = batch_data
+        # TODO: <Alex></Alex>
+        # self._batch_data = batch_data
         self._runtime_keys = runtime_keys
 
         self.partition_request = partition_request
@@ -52,13 +57,15 @@ class PipelineDataConnector(DataConnector):
     def data_asset_name(self, data_asset_name: str):
         self._data_asset_name = data_asset_name
 
-    @property
-    def batch_data(self) -> Any:
-        return self._batch_data
-
-    @batch_data.setter
-    def batch_data(self, batch_data: Any):
-        self._batch_data = batch_data
+    # TODO: <Alex></Alex>
+    # @property
+    # def batch_data(self) -> Any:
+    #     return self._batch_data
+    #
+    # TODO: <Alex></Alex>
+    # @batch_data.setter
+    # def batch_data(self, batch_data: Any):
+    #     self._batch_data = batch_data
 
     @property
     def runtime_keys(self) -> dict:
@@ -190,19 +197,21 @@ class PipelineDataConnector(DataConnector):
         )
         return data_reference
 
+    # TODO: <Alex></Alex>
     def _generate_batch_spec_parameters_from_batch_definition(
         self,
         batch_definition: BatchDefinition
     ) -> dict:
-        if self._batch_data is None:
-            raise ValueError(
-                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition 
-definition {batch_definition.partition_definition} from batch definition {batch_definition}.
-                '''
-            )
-        return {
-            "batch_data": self._batch_data
-        }
+        return {}
+#         if self._batch_data is None:
+#             raise ValueError(
+#                 f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition
+# definition {batch_definition.partition_definition} from batch definition {batch_definition}.
+#                 '''
+#             )
+#         return {
+#             "batch_data": self._batch_data
+#         }
 
     def _build_batch_definition_list(
         self,

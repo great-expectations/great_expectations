@@ -598,7 +598,7 @@ Notes:
 
         if isinstance(batch_spec, InMemoryBatchSpec):
             # We do not want to store the actual dataframe in batch_spec (mark that this is PandasInMemoryDF instead).
-            batch_data = batch_spec.pop("batch_data")
+            # batch_data = batch_spec.pop("batch_data")
             batch_spec["PandasInMemoryDF"] = True
         else:
             reader_method: str = batch_spec.get("reader_method")
