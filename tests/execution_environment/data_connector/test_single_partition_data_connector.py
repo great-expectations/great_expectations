@@ -100,8 +100,8 @@ default_regex:
         data_connector_name="my_data_connector",
         data_asset_name="alpha",
         partition_request={
-            "year_dir": "2020",
-            "month_dir": "03",
+            "partition_definition_query": { "year_dir": "2020",
+            "month_dir": "03"}
         }
     )) == [BatchDefinition(
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
