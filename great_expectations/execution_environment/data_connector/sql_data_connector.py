@@ -190,8 +190,8 @@ class SqlDataConnector(DataConnector):
         column_name: str,
         hash_digits: int,
     ):
-    """Note: this method is experimental. It does not work with all SQL dialects.
-    """
+        """Note: this method is experimental. It does not work with all SQL dialects.
+        """
         # query = f"SELECT MD5(\"{self.column_name}\") = {matching_hash}) AS hashed_var FROM {self.table_name}"
 
         return sa.select([
