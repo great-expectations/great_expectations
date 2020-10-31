@@ -154,7 +154,7 @@ def test__batch_definition_matches_batch_request():
         data_asset_name="aaa",
         partition_definition=PartitionDefinition(
             {
-                "id": "A"
+               "id": "A",
             }
         )
     )
@@ -199,26 +199,34 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    assert not batch_definition_matches_batch_request(
-        batch_definition=A,
-        batch_request=BatchRequest(
-            execution_environment_name="A",
-            data_connector_name="a",
-            data_asset_name="aaa",
-            partition_request={
-                "id": "B"
-            }
-        )
-    )
 
-    assert batch_definition_matches_batch_request(
-        batch_definition=A,
-        batch_request=BatchRequest(
-            partition_request={
-                "id": "A"
-            }
-        )
-    )
+    # <WILL>
+    # partition_request-evel matching is done by the PartitiongQuery Class in a separate step
+
+    # assert not batch_definition_matches_batch_request(
+    #     batch_definition=A,
+    #     batch_request=BatchRequest(
+    #         execution_environment_name="A",
+    #         data_connector_name="a",
+    #         data_asset_name="aaa",
+    #         partition_request={
+    #             "partition_definition_query": {
+    #                 "id": "B"
+    #             },
+    #         }
+    #     )
+    # )
+    #
+    # assert batch_definition_matches_batch_request(
+    #     batch_definition=A,
+    #     batch_request=BatchRequest(
+    #         partition_request={
+    #             "partition_definition_query": {
+    #                 "id": "A"
+    #             },
+    #         }
+    #     )
+    # )
 
     assert batch_definition_matches_batch_request(
         batch_definition=BatchDefinition(**{

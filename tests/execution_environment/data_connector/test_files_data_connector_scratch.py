@@ -191,11 +191,11 @@ def test_partition_request_illegal_index_and_limit_combination(create_files_and_
 def test_partition_request_sorted_filtered_by_custom_filter(create_files_and_instantiate_data_connector):
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
-    def my_custom_partition_selector(partition_definition_query: dict) -> bool:
+    def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
-            partition_definition_query["name"] in ["abe", "james", "eugene"] \
+            partition_definition["name"] in ["abe", "james", "eugene"] \
             and datetime.datetime.strptime(
-                partition_definition_query["timestamp"], "%Y%m%d"
+                partition_definition["timestamp"], "%Y%m%d"
             ).date() > datetime.datetime(
                 2020, 7, 15
             ).date()
@@ -250,11 +250,11 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_limit(create_fi
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
-    def my_custom_partition_selector(partition_definition_query: dict) -> bool:
+    def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
-            partition_definition_query["name"] in ["abe", "james", "eugene"] \
+            partition_definition["name"] in ["abe", "james", "eugene"] \
             and datetime.datetime.strptime(
-                partition_definition_query["timestamp"], "%Y%m%d"
+                partition_definition["timestamp"], "%Y%m%d"
             ).date() > datetime.datetime(
                 2020, 7, 15
             ).date()
@@ -303,11 +303,11 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_int(cr
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
-    def my_custom_partition_selector(partition_definition_query: dict) -> bool:
+    def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
-            partition_definition_query["name"] in ["abe", "james", "eugene"] \
+            partition_definition["name"] in ["abe", "james", "eugene"] \
             and datetime.datetime.strptime(
-                partition_definition_query["timestamp"], "%Y%m%d"
+                partition_definition["timestamp"], "%Y%m%d"
             ).date() > datetime.datetime(
                 2020, 7, 15
             ).date()
@@ -339,11 +339,11 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_string
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
-    def my_custom_partition_selector(partition_definition_query: dict) -> bool:
+    def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
-            partition_definition_query["name"] in ["abe", "james", "eugene"] \
+            partition_definition["name"] in ["abe", "james", "eugene"] \
             and datetime.datetime.strptime(
-                partition_definition_query["timestamp"], "%Y%m%d"
+                partition_definition["timestamp"], "%Y%m%d"
             ).date() > datetime.datetime(
                 2020, 7, 15
             ).date()
@@ -376,11 +376,11 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_list(c
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
-    def my_custom_partition_selector(partition_definition_query: dict) -> bool:
+    def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
-            partition_definition_query["name"] in ["abe", "james", "eugene"] \
+            partition_definition["name"] in ["abe", "james", "eugene"] \
             and datetime.datetime.strptime(
-                partition_definition_query["timestamp"], "%Y%m%d"
+                partition_definition["timestamp"], "%Y%m%d"
             ).date() > datetime.datetime(
                 2020, 7, 15
             ).date()
@@ -419,11 +419,11 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_tuple(
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
-    def my_custom_partition_selector(partition_definition_query: dict) -> bool:
+    def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
-            partition_definition_query["name"] in ["abe", "james", "eugene"] \
+            partition_definition["name"] in ["abe", "james", "eugene"] \
             and datetime.datetime.strptime(
-                partition_definition_query["timestamp"], "%Y%m%d"
+                partition_definition["timestamp"], "%Y%m%d"
             ).date() > datetime.datetime(
                 2020, 7, 15
             ).date()
@@ -461,11 +461,11 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_str(cr
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
-    def my_custom_partition_selector(partition_definition_query: dict) -> bool:
+    def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
-            partition_definition_query["name"] in ["abe", "james", "eugene"] \
+            partition_definition["name"] in ["abe", "james", "eugene"] \
             and datetime.datetime.strptime(
-                partition_definition_query["timestamp"], "%Y%m%d"
+                partition_definition["timestamp"], "%Y%m%d"
             ).date() > datetime.datetime(
                 2020, 7, 15
             ).date()
@@ -502,11 +502,11 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(creat
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
-    def my_custom_partition_selector(partition_definition_query: dict) -> bool:
+    def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
-            partition_definition_query["name"] in ["abe", "james", "eugene"] \
+            partition_definition["name"] in ["abe", "james", "eugene"] \
             and datetime.datetime.strptime(
-                partition_definition_query["timestamp"], "%Y%m%d"
+                partition_definition["timestamp"], "%Y%m%d"
             ).date() > datetime.datetime(
                 2020, 7, 15
             ).date()

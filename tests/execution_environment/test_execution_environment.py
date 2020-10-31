@@ -170,8 +170,11 @@ def test_some_very_basic_stuff(basic_execution_environment):
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="B1",
         partition_request={
-            "letter": "B",
-            "number": "1",
+            "partition_definition_query":
+                {
+                    "letter": "B",
+                    "number": "1",
+                }
         }
     ))
     assert len(batch_list) == 0
@@ -181,8 +184,11 @@ def test_some_very_basic_stuff(basic_execution_environment):
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="Titanic",
         partition_request={
-            "letter": "B",
-            "number": "1",
+            "partition_definition_query":
+                {
+                    "letter": "B",
+                    "number": "1",
+                }
         }
     ))
     assert len(batch_list) == 1
@@ -214,8 +220,11 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
         "partition_request": {
-            "letter": "Titanic",
-            "number": "19120414"
+            "partition_definition_query":
+                {
+                    "letter": "Titanic",
+                    "number": "19120414"
+                }
         },
         # "limit": None,
         # "batch_spec_passthrough": {
@@ -255,7 +264,10 @@ def test_get_batch_with_pipeline_style_batch_request(basic_execution_environment
         "data_asset_name": data_asset_name,
         "batch_data": test_df,
         "partition_request": {
-            "run_id": 1234567890,
+            "partition_definition_query":
+                {
+                    "run_id": 1234567890,
+                }
         },
         "limit": None,
     }
@@ -407,7 +419,10 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
         "data_asset_name": data_asset_name,
         "batch_data": test_df,
         "partition_request": {
-            "run_id": 1234567890,
+            "partition_definition_query":
+                {
+                    "run_id": 1234567890,
+                }
         },
         "limit": None,
     }

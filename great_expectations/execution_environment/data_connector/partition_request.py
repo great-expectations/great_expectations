@@ -170,7 +170,7 @@ class PartitionRequest(object):
         selected_batch_definitions = list(
             filter(
                 lambda batch_definition: filter_function(
-                    partition_definition_query=batch_definition.partition_definition,
+                    partition_definition=batch_definition.partition_definition,
                 ),
                 batch_definition_list
             )
@@ -186,17 +186,18 @@ class PartitionRequest(object):
 
     def best_effort_partition_matcher(self) -> Callable:
         def match_partition_to_query_params(
-            partition_definition_query: dict
+            partition_definition: dict
         ) -> bool:
             if self.partition_definition_query:
-                if not partition_definition_query:
+                if not partition_definition:
                     return False
-                partition_definition_query_keys: set = set(self.partition_definition_query.keys())
-                if not partition_definition_query_keys:
+                partition_definition_keys: set = set(self.partition_definition_query.keys())
+
+                if not partition_definition_keys:
                     return False
-                for key in partition_definition_query_keys:
+                for key in partition_definition_keys:
                     if not (
-                        key in partition_definition_query and partition_definition_query[key] == self.partition_definition_query[key]
+                        key in partition_definition and partition_definition[key] == self.partition_definition_query[key]
                     ):
                         return False
             return True

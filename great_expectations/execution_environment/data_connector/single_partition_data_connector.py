@@ -10,11 +10,11 @@ from great_expectations.core.batch import (
     BatchDefinition,
 )
 
-from great_expectations.data_context.util import (
-instantiate_class_from_config
+from great_expectations.execution_environment.data_connector.partition_request import (
+PartitionRequest,
+build_partition_request,
 )
 
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.execution_environment.data_connector.sorter import Sorter
@@ -140,6 +140,8 @@ class SinglePartitionDataConnector(DataConnector):
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
+
+        # 1) batch definition matches batch_request
         batch_definition_list: List[BatchDefinition] = list(
             filter(
                 lambda batch_definition: batch_definition_matches_batch_request(
@@ -153,6 +155,15 @@ class SinglePartitionDataConnector(DataConnector):
                 ]
             )
         )
+
+        # 2) batch_definition matches partition_request
+        if batch_request.partition_request is not None:
+            partition_request_obj: PartitionRequest = build_partition_request(
+                partition_request_dict=batch_request.partition_request)
+            batch_definition_list = partition_request_obj.select_from_partition_request(
+                batch_definition_list=batch_definition_list)
+
+        # 3) sort batch_definition
         if len(self._sorters) > 0:
             sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
             return sorted_batch_definition_list
