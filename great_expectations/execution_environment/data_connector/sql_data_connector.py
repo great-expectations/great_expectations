@@ -129,34 +129,13 @@ class SqlDataConnector(DataConnector):
         batch_definition: BatchDefinition
     ):
         data_asset_name = batch_definition.data_asset_name
-        table_name = data_asset_name
+        batch_spec = BatchSpec({
+            "table_name" : data_asset_name,
+            "partition_definition": batch_definition.partition_definition,
+            **self.assets[data_asset_name],
+        })
 
-        data_asset = self.assets[data_asset_name]
-        column_names = self._get_column_names_from_splitter_kwargs(data_asset["splitter_kwargs"])
-
-        # !!! Hacky! Temporary!
-        # column_name = data_asset["splitter_kwargs"]["column_name"]
-        # divisor = data_asset["splitter_kwargs"]["divisor"]
-
-        return sa.select('*').select_from(
-            sa.text(table_name)
-        )
-        # .where(
-        #     sa.and_(
-        #         # Splitting
-        #         sa.cast(
-        #             sa.column(column_name) / divisor,
-        #             sa.Integer
-        #         ) == 0,
-        #         # Sampling
-        #         sa.func.left(
-        #             sa.func.md5(
-        #                 sa.cast(sa.column("date"), sa.Text)
-        #             ),
-        #             1
-        #         ) == 'f'
-        #     )
-        # )
+        return batch_spec
 
     def self_check(
         self,
@@ -184,7 +163,8 @@ class SqlDataConnector(DataConnector):
             print(f"\t\tReference chosen: {example_data_reference}")
 
         #...and fetch it.
-        print(f"\n\t\tFetching 5 rows..")
+        if pretty_print:
+            print(f"\n\t\tFetching batch data..")
         batch_data, batch_spec, batch_markers = self.get_batch_data_and_metadata_from_batch_definition(
             BatchDefinition(
                 execution_environment_name=self.execution_environment_name,
@@ -193,14 +173,22 @@ class SqlDataConnector(DataConnector):
                 partition_definition=PartitionDefinition(example_data_reference),
             )
         )
-        rows = batch_data.fetchmany(5)
+        rows = batch_data.fetchall()
+        return_object["example_data_reference"] = {
+            "partition_definition" : example_data_reference,
+            "n_rows" : len(rows),
+            "batch_spec" : batch_spec,
+        }
 
         if pretty_print:
-            print(pd.DataFrame(rows))
+            print(f"\n\t\tShowing 5 rows")
+            print(pd.DataFrame(rows[:5]))
+
+        # batch.expect_column_func_value_to_be("col_1", 1)
 
         return return_object
 
-    ### Splitter methods ###
+    ### Splitter methods for listing partitions ###
 
     def _split_on_column_value(
         self,

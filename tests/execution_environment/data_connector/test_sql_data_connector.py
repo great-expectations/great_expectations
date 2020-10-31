@@ -16,6 +16,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
     PartitionDefinition,
+    PartitionRequest,
 )
 from great_expectations.data_context.util import (
     instantiate_class_from_config
@@ -90,11 +91,28 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
             }
         },
         "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": []
+        "example_unmatched_data_references": [],
+        "example_data_reference": {
+            "partition_definition": {
+                "date": "2020-01-03"
+            },
+            "n_rows": 2,
+            "batch_spec": {
+                "table_name": "table_partitioned_by_date_column__A",
+                "partition_definition": {
+                    "date": "2020-01-03"
+                },
+                "splitter_method": "_split_on_column_value",
+                "splitter_kwargs": {
+                    "column_name": "date"
+                }
+            }
+        }
     }
 
 
 def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
@@ -132,11 +150,28 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
             }
         },
         "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": []
+        "example_unmatched_data_references": [],
+        "example_data_reference": {
+            "partition_definition": {
+                "date": "2020-01-02"
+            },
+            "n_rows": 8,
+            "batch_spec": {
+                "table_name": "table_partitioned_by_date_column__A",
+                "partition_definition": {
+                    "date": "2020-01-02"
+                },
+                "splitter_method": "_split_on_column_value",
+                "splitter_kwargs": {
+                    "column_name": "date"
+                }
+            }
+        }        
     }
 
 
 def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
@@ -173,10 +208,27 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
             }
         },
         "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": []
+        "example_unmatched_data_references": [],
+        "example_data_reference": {
+            "partition_definition": {
+                "timestamp": "2020-01-02"
+            },
+            "n_rows": 8,
+            "batch_spec": {
+                "table_name": "table_partitioned_by_timestamp_column__B",
+                "partition_definition": {
+                    "timestamp": "2020-01-02"
+                },
+                "splitter_method": "_split_on_converted_datetime",
+                "splitter_kwargs": {
+                    "column_name": "timestamp"
+                }
+            }
+        }
     }
 
 def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
@@ -214,11 +266,29 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
             }
         },
         "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": []
+        "example_unmatched_data_references": [],
+        "example_data_reference": {
+            "partition_definition": {
+                "id": 1
+            },
+            "n_rows": 10,
+            "batch_spec": {
+                "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+                "partition_definition": {
+                    "id": 1
+                },
+                "splitter_method": "_split_on_divided_integer",
+                "splitter_kwargs": {
+                    "column_name": "id",
+                    "divisor": 10
+                }
+            }
+        }
     }
 
 
 def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
@@ -255,10 +325,27 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
             }
         },
         "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": []
+        "example_unmatched_data_references": [],
+        "example_data_reference": {
+            "partition_definition": {
+                "batch_id": 1
+            },
+            "n_rows": 9,
+            "batch_spec": {
+                "table_name": "table_partitioned_by_incrementing_batch_id__E",
+                "partition_definition": {
+                    "batch_id": 1
+                },
+                "splitter_method": "_split_on_column_value",
+                "splitter_kwargs": {
+                    "column_name": "batch_id"
+                }
+            }
+        }
     }
 
 def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
@@ -296,10 +383,27 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
             }
         },
         "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": []
+        "example_unmatched_data_references": [],
+        "example_data_reference": {
+            "partition_definition": {
+                "session_id": 2
+            },
+            "n_rows": 2,
+            "batch_spec": {
+                "table_name": "table_partitioned_by_foreign_key__F",
+                "partition_definition": {
+                    "session_id": 2
+                },
+                "splitter_method": "_split_on_column_value",
+                "splitter_kwargs": {
+                    "column_name": "session_id"
+                }
+            }
+        }
     }
 
 def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
@@ -340,8 +444,32 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
             }
         },
         "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": []
-    }
+        "example_unmatched_data_references": [],
+        "example_data_reference": {
+            "partition_definition": {
+                "y": 2020,
+                "m": 1,
+                "d": 2,
+            },
+            "n_rows": 8,
+            "batch_spec": {
+                "table_name": "table_partitioned_by_multiple_columns__G",
+                "partition_definition": {
+                    "y": 2020,
+                    "m": 1,
+                    "d": 2,
+                },
+                "splitter_method": "_split_on_multi_column_values",
+                "splitter_kwargs": {
+                    "column_names": [
+                        "y",
+                        "m",
+                        "d"
+                    ]
+                }
+            }
+        }
+    }   
 
 
 def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
