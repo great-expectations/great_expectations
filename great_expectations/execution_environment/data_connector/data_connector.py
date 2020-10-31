@@ -64,7 +64,7 @@ class DataConnector(object):
         execution_engine: ExecutionEngine = None,
     ):
         self._name = name
-        self.execution_environment_name = execution_environment_name
+        self._execution_environment_name = execution_environment_name
         self._execution_engine = execution_engine
 
         # This is a dictionary which maps data_references onto batch_requests.
@@ -73,6 +73,10 @@ class DataConnector(object):
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def execution_environment_name(self) -> str:
+        return self._execution_environment_name
 
     def get_batch_data_and_metadata_from_batch_definition(
         self,
@@ -85,9 +89,7 @@ class DataConnector(object):
         batch_spec: BatchSpec = self._build_batch_spec_from_batch_definition(
             batch_definition=batch_definition
         )
-        batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
-            **batch_spec
-        )
+        batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
         return (
             batch_data,
             batch_spec,
@@ -108,32 +110,20 @@ class DataConnector(object):
 
         return batch_spec
 
-    def _generate_partition_definition_list_from_batch_request(
-        self,
-        batch_request: BatchRequest
-    ) -> dict:
-        #FIXME: switch this to use the data_reference cache instead of the partition cache.
-        available_partitions = self.get_available_partitions(
-            data_asset_name=batch_request.data_asset_name,
-            batch_request=batch_request,
-            partition_request=batch_request.partition_request
-        )
-        return [partition.definition for partition in available_partitions]
-
     def refresh_data_references_cache(
         self,
     ):
         raise NotImplementedError
 
-    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[Any]:
-        """
-        Fetch data_references corresponding to data_asset_name from the cache.
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
+        """List objects in the underlying data store to create a list of data_references.	
+        This method is used to refresh the cache.
         """
         raise NotImplementedError
 
-    def _get_data_reference_list(self) -> List[Any]:
-        """List objects in the underlying data store to create a list of data_references.
-        This method is used to refresh the cache.
+    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[Any]:
+        """
+        Fetch data_references corresponding to data_asset_name from the cache.
         """
         raise NotImplementedError
 
@@ -168,8 +158,8 @@ class DataConnector(object):
         raise NotImplementedError
 
     def _generate_batch_spec_parameters_from_batch_definition(
-            self,
-            batch_definition: BatchDefinition
+        self,
+        batch_definition: BatchDefinition
     ) -> dict:
         raise NotImplementedError
 
@@ -178,7 +168,7 @@ class DataConnector(object):
         pretty_print=True,
         max_examples=3
     ):
-        if self._data_references_cache == None:
+        if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
         if pretty_print:
@@ -222,3 +212,18 @@ class DataConnector(object):
         data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
 
         return data_connector_obj
+
+    def _validate_batch_request(self, batch_request: BatchRequest):
+        if not (
+            batch_request.execution_environment_name is None
+            or batch_request.execution_environment_name == self.execution_environment_name
+        ):
+            raise ValueError(
+                f'''execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not match DataConnector execution_environment_name:
+"{self.execution_environment_name}".
+                '''
+            )
+        if not (batch_request.data_connector_name is None or batch_request.data_connector_name == self.name):
+            raise ValueError(
+                f'data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match DataConnector name: "{self.name}".'
+            )

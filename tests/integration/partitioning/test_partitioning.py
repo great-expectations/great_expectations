@@ -10,9 +10,6 @@ from great_expectations.core.id_dict import PartitionDefinition
 import great_expectations.exceptions as ge_exceptions
 
 
-
-
-
 # TODO: <Alex>DataContext.get_available_partitions() has been deprecated.  Either develop a test for an equivalent functionality, or delete this test.</Alex>
 
 # NOW is : test_partition_request_illegal_index_and_limit_combination()
