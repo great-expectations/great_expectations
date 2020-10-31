@@ -50,18 +50,18 @@ class SinglePartitionDataConnector(DataConnector):
     ):
         logger.debug(f'Constructing SinglePartitionDataConnector "{name}".')
 
+        super().__init__(
+            name=name,
+            execution_environment_name=execution_environment_name,
+            execution_engine=None,
+        )
+
         self.base_directory = base_directory
         self.glob_directive = glob_directive
         if default_regex is None:
             default_regex = {}
         self._default_regex = default_regex
         self._sorters = build_sorters_from_config(config_list=sorters)
-
-        super().__init__(
-            name=name,
-            execution_environment_name=execution_environment_name,
-            execution_engine=None,
-        )
 
     def refresh_data_references_cache(self):
         """
@@ -251,7 +251,6 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
     ):
         logger.debug(f'Constructing SinglePartitionFileDataConnector "{name}".')
 
-        self.glob_directive = glob_directive
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
@@ -306,7 +305,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
         if not path:
             raise ValueError(
-                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition
+                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition \
 definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )

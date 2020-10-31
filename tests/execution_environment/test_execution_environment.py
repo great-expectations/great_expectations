@@ -25,6 +25,7 @@ from tests.test_utils import (
     create_files_for_regex_partitioner,
     create_files_in_directory,
 )
+import great_expectations.exceptions as ge_exceptions
 
 
 @pytest.fixture
@@ -38,6 +39,13 @@ execution_engine:
     class_name: PandasExecutionEngine
 
 data_connectors:
+    test_pipeline_data_connector:
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: PipelineDataConnector
+        runtime_keys:
+            - pipeline_stage_name
+            - run_id
+
     my_filesystem_data_connector:
         class_name: FilesDataConnector
         base_directory: {base_directory}
@@ -80,6 +88,13 @@ execution_engine:
     class_name: PandasExecutionEngine
 
 data_connectors:
+    test_pipeline_data_connector:
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: PipelineDataConnector
+        runtime_keys:
+            - pipeline_stage_name
+            - run_id
+
     my_filesystem_data_connector:
         class_name: SinglePartitionFileDataConnector
         base_directory: {base_directory}
@@ -290,7 +305,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_e
         "limit": None,
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
-    with pytest.raises(AttributeError):
+    with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_list: List[Batch] = basic_execution_environment.get_batch_list_from_batch_request(
             batch_request=batch_request
