@@ -105,6 +105,8 @@ class ExecutionEnvironment(object):
         """
         self._validate_batch_request(batch_request=batch_request)
 
+        batches: List[Batch] = []
+
         data_connector: DataConnector = self.get_data_connector(
             name=batch_request.data_connector_name
         )
@@ -127,17 +129,17 @@ with batch_data parameter.
             # data_connector.batch_data = batch_request.batch_data
             data_connector.partition_request = batch_request.partition_request
             data_connector.refresh_data_references_cache()
-
-        batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
-        )
-
-        batches: List[Batch] = []
-        for batch_definition in batch_definition_list:
-            batch_data, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata_from_batch_definition(
+            batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=batch_request
+            )
+            if len(batch_definition_list) == 0:
+                return []
+            batch_definition: BatchDefinition = batch_definition_list[0]
+            _, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata_from_batch_definition(
                 batch_definition=batch_definition
             )
-
+            batch_data: Any = batch_request.batch_data
+            self.execution_engine.update_batch_markers(batch_markers=batch_markers, batch_data=batch_data)
             new_batch: Batch = Batch(
                 data=batch_data,
                 batch_request=batch_request,
@@ -146,6 +148,24 @@ with batch_data parameter.
                 batch_markers=batch_markers,
             )
             batches.append(new_batch)
+        else:
+            batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=batch_request
+            )
+
+            for batch_definition in batch_definition_list:
+                batch_data, batch_spec, batch_markers = \
+                    data_connector.get_batch_data_and_metadata_from_batch_definition(
+                        batch_definition=batch_definition
+                    )
+                new_batch: Batch = Batch(
+                    data=batch_data,
+                    batch_request=batch_request,
+                    batch_definition=batch_definition,
+                    batch_spec=batch_spec,
+                    batch_markers=batch_markers,
+                )
+                batches.append(new_batch)
 
         return batches
 

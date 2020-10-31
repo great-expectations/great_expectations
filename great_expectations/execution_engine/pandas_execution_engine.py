@@ -629,10 +629,20 @@ operate.
                     """
                 )
 
-        if batch_data.memory_usage().sum() < HASH_THRESHOLD:
-            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
+        if batch_data is not None:
+            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
 
         return batch_data, batch_markers
+
+    @staticmethod
+    def update_batch_markers(
+        batch_markers: BatchMarkers,
+        batch_data: pd.DataFrame
+    ):
+        if batch_data is not None:
+            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
 
     @property
     def dataframe(self):

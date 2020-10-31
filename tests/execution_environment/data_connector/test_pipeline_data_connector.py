@@ -6,10 +6,13 @@ from typing import List
 
 from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector import PipelineDataConnector
+from great_expectations.core.id_dict import (
+    PartitionDefinitionSubset,
+    PartitionDefinition
+)
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
-    PartitionDefinition,
 )
 from great_expectations.execution_environment.types import InMemoryBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -62,8 +65,9 @@ def test_instantiation(basic_execution_environment):
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
     test_pipeline_data_connector.data_asset_name = "my_data_asset"
-    test_pipeline_data_connector.batch_data = test_df
-    test_pipeline_data_connector.partition_definition = PartitionDefinition(partition_request)
+    # TODO: <Alex></Alex>
+    # test_pipeline_data_connector.batch_data = test_df
+    test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
 
     assert test_pipeline_data_connector.self_check() == {
         "class_name": "PipelineDataConnector",
@@ -130,8 +134,9 @@ def test_get_available_data_asset_names(basic_execution_environment):
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
     test_pipeline_data_connector.data_asset_name = "my_data_asset"
-    test_pipeline_data_connector.batch_data = test_df
-    test_pipeline_data_connector.partition_definition = PartitionDefinition(partition_request)
+    # TODO: <Alex></Alex>
+    # test_pipeline_data_connector.batch_data = test_df
+    test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
 
     expected_available_data_asset_names: List[str] = ["my_data_asset"]
 
@@ -160,8 +165,9 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_execution
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
     test_pipeline_data_connector.data_asset_name = "my_data_asset"
-    test_pipeline_data_connector.batch_data = test_df
-    test_pipeline_data_connector.partition_definition = PartitionDefinition(partition_request)
+    # TODO: <Alex></Alex>
+    # test_pipeline_data_connector.batch_data = test_df
+    test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
 
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
@@ -201,8 +207,9 @@ def test_get_batch_definition_list_from_batch_request_length_zero(basic_executio
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
     test_pipeline_data_connector.data_asset_name = "my_data_asset"
-    test_pipeline_data_connector.batch_data = test_df
-    test_pipeline_data_connector.partition_definition = PartitionDefinition(partition_request)
+    # TODO: <Alex></Alex>
+    # test_pipeline_data_connector.batch_data = test_df
+    test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
 
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
@@ -234,8 +241,9 @@ def test__get_data_reference_list(basic_execution_environment):
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
     test_pipeline_data_connector.data_asset_name = "my_data_asset"
-    test_pipeline_data_connector.batch_data = test_df
-    test_pipeline_data_connector.partition_definition = PartitionDefinition(partition_request)
+    # TODO: <Alex></Alex>
+    # test_pipeline_data_connector.batch_data = test_df
+    test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
 
     expected_data_reference_list: List[str] = ["staging-1234567890"]
 
@@ -257,11 +265,13 @@ def test__build_batch_spec_from_batch_definition(basic_execution_environment):
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
     test_pipeline_data_connector.data_asset_name = "my_data_asset"
-    test_pipeline_data_connector.batch_data = test_df
-    test_pipeline_data_connector.partition_definition = PartitionDefinition(partition_request)
+    # TODO: <Alex></Alex>
+    # test_pipeline_data_connector.batch_data = test_df
+    test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
 
+    # TODO: <Alex></Alex>
     expected_batch_spec: InMemoryBatchSpec = InMemoryBatchSpec(
-        batch_data=test_df,
+        # batch_data=test_df,
     )
 
     # noinspection PyProtectedMember

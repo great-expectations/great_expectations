@@ -6,7 +6,7 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.id_dict import (
-    PartitionRequest,
+    PartitionDefinitionSubset,
     PartitionDefinition
 )
 from great_expectations.execution_environment.types import InMemoryBatchSpec
@@ -32,7 +32,7 @@ class PipelineDataConnector(DataConnector):
         # TODO: <Alex></Alex>
         # batch_data: Any = None,
         runtime_keys: dict = None,
-        partition_request: PartitionRequest = None,
+        partition_request: PartitionDefinitionSubset = None,
     ):
         logger.debug(f'Constructing PipelineDataConnector "{name}".')
 
@@ -76,11 +76,11 @@ class PipelineDataConnector(DataConnector):
         self._runtime_keys = runtime_keys
 
     @property
-    def partition_request(self) -> PartitionRequest:
+    def partition_request(self) -> PartitionDefinitionSubset:
         return self._partition_request
 
     @partition_request.setter
-    def partition_request(self, partition_request: PartitionRequest):
+    def partition_request(self, partition_request: PartitionDefinitionSubset):
         if partition_request:
             self._validate_runtime_keys_configuration(runtime_keys=list(partition_request.keys()))
         self._partition_request = partition_request
@@ -105,7 +105,7 @@ class PipelineDataConnector(DataConnector):
         """
         return [
             self._get_data_reference_name(
-                partition_definition=self._partition_definition
+                partition_request=self.partition_request
             )
         ]
 
@@ -193,7 +193,7 @@ class PipelineDataConnector(DataConnector):
             raise TypeError("batch_definition is not of an instance of type BatchDefinition")
         partition_definition: PartitionDefinition = batch_definition.partition_definition
         data_reference: str = self._get_data_reference_name(
-            partition_definition=partition_definition
+            partition_request=partition_definition
         )
         return data_reference
 
@@ -226,7 +226,7 @@ class PipelineDataConnector(DataConnector):
                 execution_environment_name=execution_environment_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
-                partition_definition=self._partition_definition
+                partition_definition=PartitionDefinition(self.partition_request)
             )
         ]
 
@@ -239,11 +239,11 @@ class PipelineDataConnector(DataConnector):
         
     @staticmethod
     def _get_data_reference_name(
-        partition_definition: PartitionDefinition
+        partition_request: PartitionDefinitionSubset
     ) -> str:
         data_reference_name = DEFAULT_DELIMITER.join(
             [
-                str(value) for value in partition_definition.values()
+                str(value) for value in partition_request.values()
             ]
         )
         return data_reference_name
