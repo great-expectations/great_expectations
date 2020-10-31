@@ -124,7 +124,7 @@ class ExecutionEnvironment(object):
 with batch_data parameter.
                     '''
                 )
-            data_connector.data_asset_name = batch_request.data_asset_name
+            # data_connector.data_asset_name = batch_request.data_asset_name
             # TODO: <Alex></Alex>
             # data_connector.batch_data = batch_request.batch_data
             data_connector.partition_request = batch_request.partition_request

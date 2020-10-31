@@ -21,6 +21,7 @@ DEFAULT_DATA_ASSET_NAME: str = "IN_MEMORY_DATA_ASSET"
 DEFAULT_DELIMITER: str = "-"
 
 
+# TODO: <Alex>We need a mechanism for specifying the data_asset_name for PipelineDataConnector (otherwise, it will always be the default).</Alex>
 class PipelineDataConnector(DataConnector):
 
     def __init__(
@@ -28,7 +29,7 @@ class PipelineDataConnector(DataConnector):
         name: str,
         execution_environment_name: str,
         execution_engine: ExecutionEngine = None,
-        data_asset_name: str = None,
+        # data_asset_name: str = None,
         # TODO: <Alex></Alex>
         # batch_data: Any = None,
         runtime_keys: dict = None,
@@ -42,20 +43,21 @@ class PipelineDataConnector(DataConnector):
             execution_engine=execution_engine,
         )
 
-        self._data_asset_name = data_asset_name
+        # self._data_asset_name = data_asset_name
         # TODO: <Alex></Alex>
         # self._batch_data = batch_data
         self._runtime_keys = runtime_keys
 
         self.partition_request = partition_request
 
-    @property
-    def data_asset_name(self) -> str:
-        return self._data_asset_name
-
-    @data_asset_name.setter
-    def data_asset_name(self, data_asset_name: str):
-        self._data_asset_name = data_asset_name
+    # TODO: <Alex></Alex>
+    # @property
+    # def data_asset_name(self) -> str:
+    #     return self._data_asset_name
+    #
+    # @data_asset_name.setter
+    # def data_asset_name(self, data_asset_name: str):
+    #     self._data_asset_name = data_asset_name
 
     # TODO: <Alex></Alex>
     # @property
@@ -90,13 +92,21 @@ class PipelineDataConnector(DataConnector):
         """
         # Map data_references to batch_definitions
         data_reference: str = self._get_data_reference_list()[0]
-        batch_definition_list: List[BatchDefinition] = self._build_batch_definition_list(
-            execution_environment_name=self.execution_environment_name,
-            data_connector_name=self.name,
+        mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(
+            data_reference=data_reference,
+            data_asset_name=None
         )
         self._data_references_cache = {
-            data_reference: batch_definition_list
+            data_reference: mapped_batch_definition_list
         }
+        # TODO: <Alex></Alex>
+        # batch_definition_list: List[BatchDefinition] = self._build_batch_definition_list(
+        #     execution_environment_name=self.execution_environment_name,
+        #     data_connector_name=self.name,
+        # )
+        # self._data_references_cache = {
+        #     data_reference: batch_definition_list
+        # }
 
     def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
@@ -180,10 +190,27 @@ class PipelineDataConnector(DataConnector):
         data_reference: str,
         data_asset_name: Optional[str] = None
     ) -> Optional[List[BatchDefinition]]:
-        return self._build_batch_definition_list(
-            execution_environment_name=self.execution_environment_name,
-            data_connector_name=self.name,
+        # TODO: <Alex></Alex>
+        # return self._build_batch_definition_list(
+        #     execution_environment_name=self.execution_environment_name,
+        #     data_connector_name=self.name,
+        #     data_asset_name=data_asset_name
+        # )
+        if data_asset_name is None:
+            data_asset_name = DEFAULT_DATA_ASSET_NAME
+        # TODO: <Alex>Update this!!!</Alex>
+        batch_request: BatchRequest = BatchRequest(
+            data_asset_name=data_asset_name,
+            partition_request=PartitionDefinition(self.partition_request),
         )
+        return [
+            BatchDefinition(
+                execution_environment_name=self.execution_environment_name,
+                data_connector_name=self.name,
+                data_asset_name=data_asset_name,
+                partition_definition=PartitionDefinition(batch_request.partition_request)
+            )
+        ]
 
     def _map_batch_definition_to_data_reference(
         self,
@@ -213,22 +240,23 @@ class PipelineDataConnector(DataConnector):
 #             "batch_data": self._batch_data
 #         }
 
-    def _build_batch_definition_list(
-        self,
-        execution_environment_name: str,
-        data_connector_name: str,
-    ) -> Optional[List[BatchDefinition]]:
-        data_asset_name: str = DEFAULT_DATA_ASSET_NAME
-        if self._data_asset_name is not None:
-            data_asset_name = self._data_asset_name
-        return [
-            BatchDefinition(
-                execution_environment_name=execution_environment_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                partition_definition=PartitionDefinition(self.partition_request)
-            )
-        ]
+    # TODO: <Alex></Alex>
+    # def _build_batch_definition_list(
+    #     self,
+    #     execution_environment_name: str,
+    #     data_connector_name: str,
+    #     data_asset_name: Optional[str] = None
+    # ) -> Optional[List[BatchDefinition]]:
+    #     if data_asset_name is None:
+    #         data_asset_name = DEFAULT_DATA_ASSET_NAME
+    #     return [
+    #         BatchDefinition(
+    #             execution_environment_name=execution_environment_name,
+    #             data_connector_name=data_connector_name,
+    #             data_asset_name=data_asset_name,
+    #             partition_definition=PartitionDefinition(self.partition_request)
+    #         )
+    #     ]
 
     def _build_batch_spec_from_batch_definition(
         self,

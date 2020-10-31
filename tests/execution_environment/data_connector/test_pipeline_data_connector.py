@@ -64,17 +64,20 @@ def test_instantiation(basic_execution_environment):
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.data_asset_name = "my_data_asset"
+    # test_pipeline_data_connector.data_asset_name = "my_data_asset"
     # TODO: <Alex></Alex>
     # test_pipeline_data_connector.batch_data = test_df
     test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
 
+    # TODO: <Alex></Alex>
     assert test_pipeline_data_connector.self_check() == {
         "class_name": "PipelineDataConnector",
         "data_asset_count": 1,
-        "example_data_asset_names": ["my_data_asset"],
+        # "example_data_asset_names": ["my_data_asset"],
+        "example_data_asset_names": ["IN_MEMORY_DATA_ASSET"],
         "data_assets": {
-            "my_data_asset": {
+            # "my_data_asset": {
+            "IN_MEMORY_DATA_ASSET": {
                 "batch_definition_count": 1,
                 "example_data_references": ["1234567890"]
             }
@@ -133,19 +136,20 @@ def test_get_available_data_asset_names(basic_execution_environment):
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.data_asset_name = "my_data_asset"
+    # test_pipeline_data_connector.data_asset_name = "my_data_asset"
     # TODO: <Alex></Alex>
     # test_pipeline_data_connector.batch_data = test_df
     test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
 
-    expected_available_data_asset_names: List[str] = ["my_data_asset"]
+    # TODO: <Alex></Alex>
+    # expected_available_data_asset_names: List[str] = ["my_data_asset"]
+    #
+    # available_data_asset_names: List[str] = test_pipeline_data_connector.get_available_data_asset_names()
+    #
+    # assert available_data_asset_names == expected_available_data_asset_names
 
-    available_data_asset_names: List[str] = test_pipeline_data_connector.get_available_data_asset_names()
-
-    assert available_data_asset_names == expected_available_data_asset_names
-
-    test_pipeline_data_connector.data_asset_name = None
-    test_pipeline_data_connector.refresh_data_references_cache()
+    # test_pipeline_data_connector.data_asset_name = None
+    # test_pipeline_data_connector.refresh_data_references_cache()
 
     expected_available_data_asset_names: List[str] = ["IN_MEMORY_DATA_ASSET"]
 
@@ -164,7 +168,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_execution
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.data_asset_name = "my_data_asset"
+    # test_pipeline_data_connector.data_asset_name = "my_data_asset"
     # TODO: <Alex></Alex>
     # test_pipeline_data_connector.batch_data = test_df
     test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
@@ -172,7 +176,9 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_execution
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
         "data_connector_name": test_pipeline_data_connector.name,
-        "data_asset_name": "my_data_asset",
+        # TODO: <Alex></Alex>
+        # "data_asset_name": "my_data_asset",
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
         "batch_data": test_df,
         "partition_request": partition_request,
         "limit": None,
@@ -183,7 +189,9 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_execution
         BatchDefinition(
             execution_environment_name="my_execution_environment",
             data_connector_name="test_pipeline_data_connector",
-            data_asset_name="my_data_asset",
+            # TODO: <Alex></Alex>
+            # data_asset_name="my_data_asset",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
             partition_definition=PartitionDefinition(partition_request)
         )
     ]
@@ -206,7 +214,7 @@ def test_get_batch_definition_list_from_batch_request_length_zero(basic_executio
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.data_asset_name = "my_data_asset"
+    # test_pipeline_data_connector.data_asset_name = "my_data_asset"
     # TODO: <Alex></Alex>
     # test_pipeline_data_connector.batch_data = test_df
     test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
@@ -240,7 +248,7 @@ def test__get_data_reference_list(basic_execution_environment):
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.data_asset_name = "my_data_asset"
+    # test_pipeline_data_connector.data_asset_name = "my_data_asset"
     # TODO: <Alex></Alex>
     # test_pipeline_data_connector.batch_data = test_df
     test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
@@ -264,7 +272,7 @@ def test__build_batch_spec_from_batch_definition(basic_execution_environment):
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.data_asset_name = "my_data_asset"
+    # test_pipeline_data_connector.data_asset_name = "my_data_asset"
     # TODO: <Alex></Alex>
     # test_pipeline_data_connector.batch_data = test_df
     test_pipeline_data_connector.partition_request = PartitionDefinitionSubset(partition_request)
