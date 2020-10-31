@@ -118,7 +118,7 @@ class ExecutionEnvironment(object):
                 )
             if batch_request.batch_data is not None and not batch_request.partition_request:
                 raise ge_exceptions.DataConnectorError(
-                    f'''PipelineDataConnector "{data_connector.name}" did not provide a partition_definition along \
+                    f'''PipelineDataConnector "{data_connector.name}" did not provide a partition_definition along 
 with batch_data parameter.
                     '''
                 )
@@ -325,7 +325,7 @@ with batch_data parameter.
             or batch_request.execution_environment_name == self.name
         ):
             raise ValueError(
-                f'''execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not \
-match ExecutionEnvironment name: "{self.name}".
+                f'''execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not
+                match ExecutionEnvironment name: "{self.name}".
                 '''
             )

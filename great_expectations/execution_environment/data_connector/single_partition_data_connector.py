@@ -17,7 +17,6 @@ from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
-    log_warning_message_on_empty_list,
     build_sorters_from_config,
 )
 
@@ -127,7 +126,6 @@ class SinglePartitionDataConnector(DataConnector):
 
         return list(set(data_asset_names))
 
-    @log_warning_message_on_empty_list
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,
@@ -302,7 +300,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
         if not path:
             raise ValueError(
-                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition \
+                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition 
 definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )

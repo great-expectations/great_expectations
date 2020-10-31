@@ -197,13 +197,13 @@ class DataConnector(object):
             or batch_request.execution_environment_name == self.execution_environment_name
         ):
             raise ValueError(
-                f'''execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not \
+                f'''execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not 
 match DataConnector execution_environment_name: "{self.execution_environment_name}".
                 '''
             )
         if not (batch_request.data_connector_name is None or batch_request.data_connector_name == self.name):
             raise ValueError(
-                f'''data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match \
+                f'''data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match 
 DataConnector name: "{self.name}".
                 '''
             )

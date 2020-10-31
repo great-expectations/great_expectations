@@ -54,7 +54,7 @@ execution_engine:
 def test_instantiation(basic_execution_environment):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request = {
+    partition_request: dict = {
         "run_id": 1234567890,
     }
 
@@ -122,7 +122,7 @@ def test_instantiation(basic_execution_environment):
 def test_get_available_data_asset_names(basic_execution_environment):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request = {
+    partition_request: dict = {
         "run_id": 1234567890,
     }
 
@@ -152,7 +152,7 @@ def test_get_available_data_asset_names(basic_execution_environment):
 def test_get_batch_definition_list_from_batch_request_length_one(basic_execution_environment):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request = {
+    partition_request: dict = {
         "run_id": 1234567890,
     }
 
@@ -193,7 +193,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_execution
 def test_get_batch_definition_list_from_batch_request_length_zero(basic_execution_environment):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request = {
+    partition_request: dict = {
         "run_id": 1234567890,
     }
 
@@ -225,7 +225,7 @@ def test_get_batch_definition_list_from_batch_request_length_zero(basic_executio
 def test__get_data_reference_list(basic_execution_environment):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request = {
+    partition_request: dict = {
         "custom_key_0": "staging",
         "run_id": 1234567890,
     }
@@ -248,7 +248,7 @@ def test__get_data_reference_list(basic_execution_environment):
 def test__build_batch_spec_from_batch_definition(basic_execution_environment):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request = {
+    partition_request: dict = {
         "custom_key_0": "staging",
         "run_id": 1234567890,
     }

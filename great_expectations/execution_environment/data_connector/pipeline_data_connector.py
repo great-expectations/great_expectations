@@ -5,13 +5,10 @@ import logging
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.id_dict import PartitionDefinition
+from great_expectations.core.id_dict import PartitionRequest
 from great_expectations.execution_environment.types import InMemoryBatchSpec
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.execution_environment.data_connector.util import (
-    batch_definition_matches_batch_request,
-    log_warning_message_on_empty_list
-)
+from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
@@ -31,7 +28,7 @@ class PipelineDataConnector(DataConnector):
         data_asset_name: str = None,
         batch_data: Any = None,
         runtime_keys: dict = None,
-        partition_definition: PartitionDefinition = None,
+        partition_request: PartitionRequest = None,
     ):
         logger.debug(f'Constructing PipelineDataConnector "{name}".')
 
@@ -45,7 +42,7 @@ class PipelineDataConnector(DataConnector):
         self._batch_data = batch_data
         self._runtime_keys = runtime_keys
 
-        self.partition_definition = partition_definition
+        self.partition_request = partition_request
 
     @property
     def data_asset_name(self) -> str:
@@ -72,14 +69,14 @@ class PipelineDataConnector(DataConnector):
         self._runtime_keys = runtime_keys
 
     @property
-    def partition_definition(self) -> PartitionDefinition:
-        return self._partition_definition
+    def partition_request(self) -> PartitionRequest:
+        return self._partition_request
 
-    @partition_definition.setter
-    def partition_definition(self, partition_definition: PartitionDefinition):
-        if partition_definition:
-            self._validate_runtime_keys_configuration(runtime_keys=list(partition_definition.keys()))
-        self._partition_definition = partition_definition
+    @partition_request.setter
+    def partition_request(self, partition_request: PartitionRequest):
+        if partition_request:
+            self._validate_runtime_keys_configuration(runtime_keys=list(partition_request.keys()))
+        self._partition_request = partition_request
 
     def refresh_data_references_cache(self):
         """
@@ -153,7 +150,6 @@ class PipelineDataConnector(DataConnector):
 
         return list(data_asset_names)
 
-    @log_warning_message_on_empty_list
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,
@@ -200,7 +196,7 @@ class PipelineDataConnector(DataConnector):
     ) -> dict:
         if self._batch_data is None:
             raise ValueError(
-                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition \
+                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition 
 definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )
@@ -246,8 +242,9 @@ definition {batch_definition.partition_definition} from batch definition {batch_
     def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
         if runtime_keys and len(runtime_keys) > 0:
             if not (self.runtime_keys and set(runtime_keys) <= set(self.runtime_keys)):
+
                 raise ge_exceptions.DataConnectorError(
-                    f'''PipelineDataConnector "{self.name}" was invoked with one or more runtime keys that do not \
+                    f'''PipelineDataConnector "{self.name}" was invoked with one or more runtime keys that do not 
 appear among the configured runtime keys.
                     '''
                 )
