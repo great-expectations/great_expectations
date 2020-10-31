@@ -139,8 +139,17 @@ def test_get_available_data_asset_names(basic_execution_environment):
 
     assert available_data_asset_names == expected_available_data_asset_names
 
+    test_pipeline_data_connector.data_asset_name = None
+    test_pipeline_data_connector.refresh_data_references_cache()
 
-def test_get_batch_definition_list_from_batch_request(basic_execution_environment):
+    expected_available_data_asset_names: List[str] = ["IN_MEMORY_DATA_ASSET"]
+
+    available_data_asset_names: List[str] = test_pipeline_data_connector.get_available_data_asset_names()
+
+    assert available_data_asset_names == expected_available_data_asset_names
+
+
+def test_get_batch_definition_list_from_batch_request_length_one(basic_execution_environment):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     partition_request = {
@@ -159,9 +168,7 @@ def test_get_batch_definition_list_from_batch_request(basic_execution_environmen
         "data_connector_name": test_pipeline_data_connector.name,
         "data_asset_name": "my_data_asset",
         "batch_data": test_df,
-        "partition_request": {
-            "run_id": 1234567890,
-        },
+        "partition_request": partition_request,
         "limit": None,
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
@@ -171,9 +178,7 @@ def test_get_batch_definition_list_from_batch_request(basic_execution_environmen
             execution_environment_name="my_execution_environment",
             data_connector_name="test_pipeline_data_connector",
             data_asset_name="my_data_asset",
-            partition_definition=PartitionDefinition({
-                "run_id": 1234567890,
-            })
+            partition_definition=PartitionDefinition(partition_request)
         )
     ]
 
@@ -183,6 +188,38 @@ def test_get_batch_definition_list_from_batch_request(basic_execution_environmen
         )
 
     assert batch_definition_list == expected_batch_definition_list
+
+
+def test_get_batch_definition_list_from_batch_request_length_zero(basic_execution_environment):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    partition_request = {
+        "run_id": 1234567890,
+    }
+
+    test_pipeline_data_connector: PipelineDataConnector
+
+    test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_pipeline_data_connector.data_asset_name = "my_data_asset"
+    test_pipeline_data_connector.batch_data = test_df
+    test_pipeline_data_connector.partition_definition = PartitionDefinition(partition_request)
+
+    batch_request: dict = {
+        "execution_environment_name": basic_execution_environment.name,
+        "data_connector_name": test_pipeline_data_connector.name,
+        "data_asset_name": "nonexistent_data_asset",
+        "batch_data": test_df,
+        "partition_request": partition_request,
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    batch_definition_list: List[BatchDefinition] = \
+        test_pipeline_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
+
+    assert len(batch_definition_list) == 0
 
 
 def test__get_data_reference_list(basic_execution_environment):

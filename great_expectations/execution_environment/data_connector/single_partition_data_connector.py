@@ -10,11 +10,6 @@ from great_expectations.core.batch import (
     BatchDefinition,
 )
 
-from great_expectations.data_context.util import (
-instantiate_class_from_config
-)
-
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.execution_environment.data_connector.sorter import Sorter
@@ -22,6 +17,7 @@ from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
+    log_warning_message_on_empty_list,
     build_sorters_from_config,
 )
 
@@ -79,7 +75,7 @@ class SinglePartitionDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache.
         """
-        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the requirement arguments.</Alex>
+        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
         batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -131,6 +127,7 @@ class SinglePartitionDataConnector(DataConnector):
 
         return list(set(data_asset_names))
 
+    @log_warning_message_on_empty_list
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,

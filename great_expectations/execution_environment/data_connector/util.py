@@ -2,7 +2,8 @@
 
 # Utility methods for dealing with DataConnector objects
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable
+from functools import wraps
 import copy
 import re
 import sre_parse
@@ -232,3 +233,14 @@ def _build_sorter_from_config(sorter_config) -> Sorter:
         }
     )
     return sorter
+
+
+def log_warning_message_on_empty_list(func) -> Callable:
+    @wraps(func)
+    def detect_empty_list(*args, **kwargs) -> List[Any]:
+        result_list: List[Any] = func(*args, **kwargs)
+        if len(result_list) == 0:
+            params: str = "; ".join(f'{name}={value}' for name, value in kwargs.items())
+            logger.warning(f'Execution of function {func.__name__}({params}) returned an empty list.')
+        return result_list
+    return detect_empty_list

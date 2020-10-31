@@ -1,37 +1,15 @@
 # -*- coding: utf-8 -*-
-import copy
-import itertools
-from typing import List, Dict, Union, Callable, Any, Tuple, Optional
-from ruamel.yaml.comments import CommentedMap
-import json
-import re
-from string import Template
-import sre_parse
-import sre_constants
+from typing import List, Any, Tuple, Optional
 
 import logging
 
-from great_expectations.data_context.types.base import (
-    PartitionerConfig,
-    partitionerConfigSchema
-)
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.asset.asset import Asset
-from great_expectations.execution_environment.data_connector.partition_request import (
-    PartitionRequest,
-    build_partition_request
-)
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.id_dict import (
-    PartitionDefinitionSubset,
-    PartitionDefinition,
-    BatchSpec,
-)
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.batch import (
     BatchMarkers,
     BatchDefinition,
 )
-import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 

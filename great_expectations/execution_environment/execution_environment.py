@@ -2,22 +2,12 @@
 
 import copy
 import logging
-from typing import Union, List, Dict, Callable, Any, Optional
+from typing import Union, List, Any, Optional
 
-from great_expectations.data_context.types.base import (
-    DataConnectorConfig,
-    dataConnectorConfigSchema
-)
 from great_expectations.data_context.util import instantiate_class_from_config
-from ruamel.yaml.comments import CommentedMap
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.pipeline_data_connector import PipelineDataConnector
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.core.id_dict import (
-    PartitionRequest,
-    PartitionDefinition,
-    BatchSpec
-)
+from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
@@ -135,6 +125,7 @@ with batch_data parameter.
             data_connector.data_asset_name = batch_request.data_asset_name
             data_connector.batch_data = batch_request.batch_data
             data_connector.partition_definition = PartitionDefinition(batch_request.partition_request)
+            data_connector.refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request

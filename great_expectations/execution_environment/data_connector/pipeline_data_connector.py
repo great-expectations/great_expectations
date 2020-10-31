@@ -8,7 +8,10 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.execution_environment.types import InMemoryBatchSpec
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
+from great_expectations.execution_environment.data_connector.util import (
+    batch_definition_matches_batch_request,
+    log_warning_message_on_empty_list
+)
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
@@ -105,7 +108,7 @@ class PipelineDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache.
         """
-        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the requirement arguments.</Alex>
+        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
         batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -150,6 +153,7 @@ class PipelineDataConnector(DataConnector):
 
         return list(data_asset_names)
 
+    @log_warning_message_on_empty_list
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,
