@@ -135,10 +135,7 @@ class SinglePartitionDataConnector(DataConnector):
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-        if batch_request.data_connector_name != self.name:
-            raise ValueError(
-                f'data_connector_name "{batch_request.data_connector_name}" does not match name "{self.name}".'
-            )
+        self._validate_batch_request(batch_request=batch_request)
 
         if self._data_references_cache is None:
             self.refresh_data_references_cache()

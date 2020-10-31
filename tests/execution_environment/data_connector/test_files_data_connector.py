@@ -1,28 +1,21 @@
-# import pytest
-# import pandas as pd
+import pytest
 import yaml
 import json
 
 from typing import List
 
 from great_expectations.execution_environment.data_connector import (
+    DataConnector,
     FilesDataConnector,
 )
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-)
-from tests.test_utils import (
-    create_files_in_directory,
-)
-
-from great_expectations.execution_environment.data_connector import DataConnector
-
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
     PartitionRequest,
     PartitionDefinition,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
+from tests.test_utils import create_files_in_directory
 
 
 def test_basic_instantiation(tmp_path_factory):
@@ -69,11 +62,13 @@ def test_basic_instantiation(tmp_path_factory):
     assert my_data_connector.get_data_reference_list_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
-    print(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="something",
-        data_connector_name="my_data_connector",
-        data_asset_name="something",
-    )))
+    # Illegal execution environment name
+    with pytest.raises(ValueError):
+        print(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+            execution_environment_name="something",
+            data_connector_name="my_data_connector",
+            data_asset_name="something",
+        )))
 
 
 def test_instantiation_from_a_config(empty_data_context, tmp_path_factory):

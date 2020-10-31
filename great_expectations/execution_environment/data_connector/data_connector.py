@@ -64,7 +64,7 @@ class DataConnector(object):
         execution_engine: ExecutionEngine = None,
     ):
         self._name = name
-        self.execution_environment_name = execution_environment_name
+        self._execution_environment_name = execution_environment_name
         self._execution_engine = execution_engine
 
         # This is a dictionary which maps data_references onto batch_requests.
@@ -73,6 +73,10 @@ class DataConnector(object):
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def execution_environment_name(self) -> str:
+        return self._execution_environment_name
 
     def get_batch_data_and_metadata_from_batch_definition(
         self,
@@ -208,3 +212,18 @@ class DataConnector(object):
         data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
 
         return data_connector_obj
+
+    def _validate_batch_request(self, batch_request: BatchRequest):
+        if not (
+            batch_request.execution_environment_name is None
+            or batch_request.execution_environment_name == self.execution_environment_name
+        ):
+            raise ValueError(
+                f'''execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not match DataConnector execution_environment_name:
+"{self.execution_environment_name}".
+                '''
+            )
+        if not (batch_request.data_connector_name is None or batch_request.data_connector_name == self.name):
+            raise ValueError(
+                f'data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match DataConnector name: "{self.name}".'
+            )

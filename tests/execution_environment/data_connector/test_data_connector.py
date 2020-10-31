@@ -1,3 +1,4 @@
+# TODO: <Alex>This module should be broken up -- please see suggestions below.</Alex>
 import pytest
 import yaml
 
@@ -43,6 +44,7 @@ assets:
     return basic_data_connector
 
 
+# TODO: <Alex>This test should be moved to "tests/execution_environment/data_connector/test_files_data_connector.py".</Alex>
 def test_basic_instantiation(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
 
@@ -60,8 +62,9 @@ def test_basic_instantiation(tmp_path_factory):
             "my_asset_name": {}
         }
     )
-    
 
+
+# TODO: <Alex>This test should be potentially moved to "tests/execution_environment/data_connector/test_files_data_connector.py".</Alex>
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
     # noinspection PyProtectedMember
     data_references: list = basic_data_connector._get_data_reference_list_from_cache_by_data_asset_name(
@@ -71,6 +74,7 @@ def test__get_instantiation_through_instantiate_class_from_config(basic_data_con
     assert data_references == []
 
 
+# TODO: <Alex>This test should be renamed properly and moved to "tests/execution_environment/data_connector/test_files_data_connector.py".</Alex>
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
     create_files_in_directory(
@@ -141,6 +145,7 @@ def test_available_data_asset_names():
     pass
 
 
+# TODO: <Alex>This test should be moved to the test module that is dedicated to BatchRequest and BatchDefinition testing.</Alex>
 def test__batch_definition_matches_batch_request():
     # TODO: <Alex>We need to cleanup PyCharm warnings.</Alex>
     A = BatchDefinition(

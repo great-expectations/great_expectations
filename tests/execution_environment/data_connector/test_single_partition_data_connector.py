@@ -1,4 +1,7 @@
+import pytest
 import yaml
+
+from typing import List
 
 from great_expectations.execution_environment.data_connector import SinglePartitionDictDataConnector
 from great_expectations.core.batch import (
@@ -21,30 +24,31 @@ def test_basic_instantiation(tmp_path_factory):
         "directory/B-2.csv": create_fake_data_frame(),
     }
 
-    my_data_connector = SinglePartitionDictDataConnector(
+    my_data_connector: SinglePartitionDictDataConnector = SinglePartitionDictDataConnector(
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
             "pattern": "(.*)/(.+)-(\\d+)\\.csv",
             "group_names": ["data_asset_name", "letter", "number"],
         },
-        data_reference_dict = data_reference_dict,
+        data_reference_dict=data_reference_dict,
     )
 
     my_data_connector.refresh_data_references_cache()
     assert my_data_connector.get_data_reference_list_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
-    print(
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                execution_environment_name="something",
-                data_connector_name="my_data_connector",
-                data_asset_name="something",
+    # Illegal execution environment name
+    with pytest.raises(ValueError):
+        print(
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    execution_environment_name="something",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="something",
+                )
             )
         )
-    )
-
 
 
 def test_example_with_implicit_data_asset_names():
@@ -82,37 +86,78 @@ default_regex:
     )
 
     my_data_connector.refresh_data_references_cache()
-    assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-    ))) == 3
-    assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-    ))) == 3
-    assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        data_connector_name="my_data_connector",
-        data_asset_name="beta",
-    ))) == 4
 
-    assert my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-        partition_request={
-            "year_dir": "2020",
-            "month_dir": "03",
-        }
-    )) == [BatchDefinition(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-        partition_definition=PartitionDefinition(
-            year_dir="2020",
-            month_dir="03",
+    # Test for an unknown execution environment
+    with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
+        batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    execution_environment_name="non_existent_execution_environment",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="my_data_asset",
+                )
+            )
+
+    # Test for an unknown data_connector
+    with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
+        batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+                    data_connector_name="non_existent_data_connector",
+                    data_asset_name="my_data_asset",
+                )
+            )
+
+    assert len(
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+                data_connector_name="my_data_connector",
+                data_asset_name="alpha",
+            )
         )
-    )]
+    ) == 3
+
+    assert len(
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                data_connector_name="my_data_connector",
+                data_asset_name="alpha",
+            )
+        )
+    ) == 3
+
+    assert len(
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                data_connector_name="my_data_connector",
+                data_asset_name="beta",
+            )
+        )
+    ) == 4
+
+    assert my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            data_connector_name="my_data_connector",
+            data_asset_name="alpha",
+            partition_request={
+                "year_dir": "2020",
+                "month_dir": "03",
+            }
+        )
+    ) == [
+        BatchDefinition(
+            execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            data_connector_name="my_data_connector",
+            data_asset_name="alpha",
+            partition_definition=PartitionDefinition(
+                year_dir="2020",
+                month_dir="03",
+            )
+        )
+    ]
 
 
 # TODO: Abe 20201028 : This test should actually be implemented with a FilesDataConnector, not a SinglePartitionDataConnector
@@ -379,7 +424,6 @@ def test_that_needs_a_better_name():
         "example_unmatched_data_references": ["CCC.csv"],
         "unmatched_data_reference_count": 1,
     }
-
 
 
 def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path_factory):
@@ -761,5 +805,3 @@ def test_redundant_information_in_naming_convention_bucket_sorted(empty_data_con
                         ))
     ]
     assert expected == sorted_batch_definition_list
-
-
