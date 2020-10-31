@@ -46,7 +46,6 @@ def test_basic_instantiation(tmp_path_factory):
     )
 
 
-
 def test_example_with_implicit_data_asset_names():
     data_reference_dict = dict([
         (data_reference, create_fake_data_frame)

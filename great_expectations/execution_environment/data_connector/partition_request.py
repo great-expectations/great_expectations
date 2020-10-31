@@ -6,7 +6,6 @@ from typing import List, Dict, Callable, Union, Optional
 import logging
 
 from great_expectations.core.id_dict import PartitionDefinitionSubset
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.util import is_int
 import great_expectations.exceptions as ge_exceptions
 
@@ -20,11 +19,9 @@ def build_partition_request(
 ):
     if not partition_request_dict:
         return PartitionRequest(
-            custom_filter=None,
-            partition_name=None,
-            partition_definition=None,
-            data_asset_name=None,
-            partition_index=None,
+            custom_filter_function=None,
+            partition_definition_query=None,
+            index=None,
             limit=None,
         )
     partition_request_keys: set = set(partition_request_dict.keys())
@@ -34,40 +31,26 @@ def build_partition_request(
 "{str(partition_request_keys - PartitionRequest.RECOGNIZED_PARTITION_REQUEST_KEYS)}" detected.
             '''
         )
-    custom_filter: Callable = partition_request_dict.get("custom_filter")
-    if custom_filter and not isinstance(custom_filter, Callable):
+    custom_filter_function: Callable = partition_request_dict.get("custom_filter_function")
+    if custom_filter_function and not isinstance(custom_filter_function, Callable):
         raise ge_exceptions.PartitionerError(
             f'''The type of a custom_filter be a function (Python "Callable").  The type given is
-"{str(type(custom_filter))}", which is illegal.
+"{str(type(custom_filter_function))}", which is illegal.
             '''
         )
-    partition_name: str = partition_request_dict.get("partition_name")
-    if partition_name and not isinstance(partition_name, str):
-        raise ge_exceptions.PartitionerError(
-            f'''The type of a partition_name must be a string (Python "str").  The type given is
-"{str(type(partition_name))}", which is illegal.
-            '''
-        )
-    partition_definition: Union[dict, None] = partition_request_dict.get("partition_definition")
-    if partition_definition:
-        if not isinstance(partition_definition, dict):
+    partition_definition_query: Union[dict, None] = partition_request_dict.get("partition_definition_query")
+    if partition_definition_query:
+        if not isinstance(partition_definition_query, dict):
             raise ge_exceptions.PartitionerError(
                 f'''The type of a partition_definition must be a dictionary (Python "dict").  The type given is
-"{str(type(partition_definition))}", which is illegal.
+"{str(type(partition_definition_query))}", which is illegal.
                 '''
             )
-        if not all([isinstance(key, str) for key in partition_definition.keys()]):
+        if not all([isinstance(key, str) for key in partition_definition_query.keys()]):
             raise ge_exceptions.PartitionerError('All partition_definition keys must strings (Python "str").')
-    if partition_definition is not None:
-        partition_definition: PartitionDefinitionSubset = PartitionDefinitionSubset(partition_definition)
-    data_asset_name: str = partition_request_dict.get("data_asset_name")
-    if data_asset_name and not isinstance(data_asset_name, str):
-        raise ge_exceptions.PartitionerError(
-            f'''The type of a data_asset_name must be a string (Python "str").  The type given is
-"{str(type(data_asset_name))}", which is illegal.
-            '''
-        )
-    partition_index: Union[int, list, tuple, slice, str, None] = partition_request_dict.get("partition_index")
+    if partition_definition_query is not None:
+        partition_definition_query: PartitionDefinitionSubset = PartitionDefinitionSubset(partition_definition_query)
+    index: Union[int, list, tuple, slice, str, None] = partition_request_dict.get("index")
     limit: Union[int, None] = partition_request_dict.get("limit")
     if limit and (not isinstance(limit, int) or limit < 0):
         raise ge_exceptions.PartitionerError(
@@ -75,99 +58,93 @@ def build_partition_request(
 type and value given are "{str(type(limit))}" and "{limit}", respectively, which is illegal.
             '''
         )
-    if partition_index is not None and limit is not None:
+    if index is not None and limit is not None:
         raise ge_exceptions.PartitionerError(
             "Only one of partition_index or limit, but not both, can be specified (specifying both is illegal)."
         )
-    partition_index = _parse_partition_index(partition_index=partition_index)
+    index = _parse_index(index=index)
     return PartitionRequest(
-        custom_filter=custom_filter,
-        partition_name=partition_name,
-        partition_definition=partition_definition,
-        data_asset_name=data_asset_name,
+        custom_filter_function=custom_filter_function,
+        partition_definition_query=partition_definition_query,
         limit=limit,
-        partition_index=partition_index,
+        index=index,
     )
 
 
-def _parse_partition_index(
-    partition_index: Union[int, list, tuple, slice, str, None] = None
+def _parse_index(
+    index: Union[int, list, tuple, slice, str, None] = None
 ) -> Union[int, slice, None]:
-    if partition_index is None:
+    if index is None:
         return None
-    elif isinstance(partition_index, (int, slice)):
-        return partition_index
-    elif isinstance(partition_index, (list, tuple)):
-        if len(partition_index) > 3:
+    elif isinstance(index, (int, slice)):
+        return index
+    elif isinstance(index, (list, tuple)):
+        if len(index) > 3:
             raise ge_exceptions.PartitionerError(
                 f'''The number of partition_index slice components must be between 1 and 3 (the given number is
-{len(partition_index)}).
+{len(index)}).
                 '''
             )
-        if len(partition_index) == 1:
-            return _parse_partition_index(partition_index=partition_index[0])
-        if len(partition_index) == 2:
-            return slice(partition_index[0], partition_index[1], None)
-        if len(partition_index) == 3:
-            return slice(partition_index[0], partition_index[1], partition_index[2])
-    elif isinstance(partition_index, str):
-        if is_int(value=partition_index):
-            return _parse_partition_index(partition_index=int(partition_index))
-        return _parse_partition_index(partition_index=[int(idx_str) for idx_str in partition_index.split(":")])
+        if len(index) == 1:
+            return index(index=index[0])
+        if len(index) == 2:
+            return slice(index[0], index[1], None)
+        if len(index) == 3:
+            return slice(index[0], index[1], index[2])
+    elif isinstance(index, str):
+        if is_int(value=index):
+            return _parse_index(index=int(index))
+        return _parse_index(index=[int(idx_str) for idx_str in index.split(":")])
     else:
         raise ge_exceptions.PartitionerError(
             f'''The type of a partition_index must be an integer (Python "int"), or a list (Python "list") or a tuple
 (Python "tuple"), or a Python "slice" object, or a string that has the format of a single integer or a slice argument.  
-The type given is "{str(type(partition_index))}", which is illegal.
+The type given is "{str(type(index))}", which is illegal.
             '''
         )
 
 
 class PartitionRequest(object):
+    """
+
+        Will Note:
+            - Just some thoughts on how all of this can be better named
+            - custom_filter --> custom_filter_function
+            - partition_definition_field --> ?
+            - limit -->
+        - these are not acting on Partition objects, but are acting on BatchDefinitions, which have a PartitionDefinition as part of it
+
+    """
     RECOGNIZED_PARTITION_REQUEST_KEYS: set = {
-        "custom_filter",
-        "partition_name",
-        "partition_definition",
-        "data_asset_name",
-        "partition_index",
+        "custom_filter_function",
+        "partition_definition_query",
+        "index",
         "limit",
     }
 
     def __init__(
         self,
-        custom_filter: Callable = None,
-        partition_name: str = None,
-        partition_definition: Optional[PartitionDefinitionSubset] = None,
-        data_asset_name: str = None,
-        partition_index: Optional[Union[int, slice]] = None,
+        custom_filter_function: Callable = None,
+        partition_definition_query: Optional[PartitionDefinitionSubset] = None,
+        index: Optional[Union[int, slice]] = None,
         limit: int = None,
     ):
-        self._custom_filter = custom_filter
-        self._partition_name = partition_name
-        self._data_asset_name = data_asset_name
-        self._partition_definition = partition_definition
-        self._partition_index = partition_index
+        self._custom_filter_function = custom_filter_function
+        self._partition_definition_query = partition_definition_query
+        self._index = index
         self._limit = limit
 
     @property
-    def custom_filter(self) -> Callable:
-        return self._custom_filter
+    def custom_filter_function(self) -> Callable:
+        return self._custom_filter_function
 
     @property
-    def partition_name(self) -> str:
-        return self._partition_name
+    def partition_definition_query(self) -> Union[PartitionDefinitionSubset, None]:
+        return self._partition_definition_query
 
     @property
-    def partition_definition(self) -> Union[PartitionDefinitionSubset, None]:
-        return self._partition_definition
-
-    @property
-    def data_asset_name(self) -> str:
-        return self._data_asset_name
-
-    @property
-    def partition_index(self) -> Union[int, slice, None]:
-        return self._partition_index
+    def index(self) -> Union[int, slice, None]:
+        return self._index
 
     @property
     def limit(self) -> int:
@@ -175,66 +152,52 @@ class PartitionRequest(object):
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
-            "custom_filter": self.custom_filter,
-            "partition_name": self.partition_name,
-            "partition_definition": self.partition_definition,
-            "data_asset_name": self.data_asset_name,
-            "partition_index": self.partition_index,
+            "custom_filter_function": self._custom_filter_function,
+            "partition_definition_query": self.partition_definition_query,
+            "index": self.index,
             "limit": self.limit,
         }
         return str(doc_fields_dict)
 
     def select_from_partition_request(self, batch_definition_list=None):
-        print("HI HI HI HI")
-        print(batch_definition_list)
         if batch_definition_list is None:
             return []
         filter_function: Callable
-        if self.custom_filter:
-            filter_function = self.custom_filter
+        if self.custom_filter_function:
+            filter_function = self.custom_filter_function
         else:
             filter_function = self.best_effort_partition_matcher()
-        selected_partitions = list(
+        selected_batch_definitions = list(
             filter(
-                #### THIS IS WHERE I WILL NEED TO WRITE #####
                 lambda batch_definition: filter_function(
-                    data_asset_name=batch_definition.data_asset_name,
-                    data_connector_name=batch_definition.data_connector_name,
-                    execution_environment_name=batch_definition.execution_environment_name,
-                    partition_definition=batch_definition.partition_definition,
+                    partition_definition_query=batch_definition.partition_definition,
                 ),
                 batch_definition_list
             )
         )
-        if self.partition_index is None:
-            selected_partitions = selected_partitions[:self.limit]
+        if self.index is None:
+            selected_batch_definitions = selected_batch_definitions[:self.limit]
         else:
-            if isinstance(self.partition_index, int):
-                selected_partitions = [selected_partitions[self.partition_index]]
+            if isinstance(self.index, int):
+                selected_batch_definitions = [selected_batch_definitions[self.index]]
             else:
-                selected_partitions = list(itertools.chain.from_iterable([selected_partitions[self.partition_index]]))
-        return selected_partitions
+                selected_batch_definitions = list(itertools.chain.from_iterable([selected_batch_definitions[self.index]]))
+        return selected_batch_definitions
 
     def best_effort_partition_matcher(self) -> Callable:
         def match_partition_to_query_params(
-            data_asset_name: str,
-            data_connector_name: str,
-            execution_environment_name: str,
-            partition_definition: dict
+            partition_definition_query: dict
         ) -> bool:
-            if self.partition_definition:
-                if not partition_definition:
+            if self.partition_definition_query:
+                if not partition_definition_query:
                     return False
-                partition_definition_query_keys: set = set(self.partition_definition.keys())
+                partition_definition_query_keys: set = set(self.partition_definition_query.keys())
                 if not partition_definition_query_keys:
                     return False
                 for key in partition_definition_query_keys:
                     if not (
-                        key in partition_definition and partition_definition[key] == self.partition_definition[key]
+                        key in partition_definition_query and partition_definition_query[key] == self.partition_definition_query[key]
                     ):
                         return False
-            if self.data_asset_name:
-                if data_asset_name != self.data_asset_name:
-                    return False
             return True
         return match_partition_to_query_params
