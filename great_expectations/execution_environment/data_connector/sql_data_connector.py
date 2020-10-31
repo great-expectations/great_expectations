@@ -182,12 +182,20 @@ class SqlDataConnector(DataConnector):
         if pretty_print:
             print(f"\n\t\tShowing 5 rows")
             print(pd.DataFrame(rows[:5]))
-
-        # batch.expect_column_func_value_to_be("col_1", 1)
-
+        
         return return_object
 
     ### Splitter methods for listing partitions ###
+
+    def _split_on_whole_table(
+        self,
+        table_name: str,
+        column_name: str,
+    ):
+        """'Split' by returning the whole table"""
+
+        return [0]
+
 
     def _split_on_column_value(
         self,

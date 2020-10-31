@@ -944,6 +944,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     ### Splitter methods for partitioning tables ###
 
+    def _split_on_whole_table(
+        self,
+        table_name: str,
+        # column_name: str,
+        partition_definition: dict,
+    ):
+        """'Split' by returning the whole table"""
+
+        # return sa.column(column_name) == partition_definition[column_name]
+        return 1 == 1
+
     def _split_on_column_value(
         self,
         table_name: str,
@@ -1021,44 +1032,100 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             hash_digits
         ) == partition_definition[column_name]
 
+    ### Sampling methods ###
+
+    # _sample_using_limit
+    # _sample_using_random
+    # _sample_using_mod
+    # _sample_using_a_list
+    # _sample_using_md5
+
+    def _sample_using_random(
+        self,
+        p: float = .1,
+    ):
+        """Take a random sample of rows, retaining proportion p
+        
+        Note: the Random function behaves differently on different dialects of SQL
+        """
+        return sa.func.random() < p
+
+    def _sample_using_mod(
+        self,
+        column_name,
+        mod: int,
+        value: int,
+    ):
+        """Take the mod of named column, and only keep rows that match the given value"""
+        return sa.column(column_name) % mod == value
+
+    def _sample_using_a_list(
+        self,
+        column_name: str,
+        value_list: list,
+    ):
+        """Match the values in the named column against value_list, and only keep the matches"""
+        return sa.column(column_name).in_(value_list)
+
+    def _sample_using_md5(
+        self,
+        column_name: str,
+        hash_digits: int=1,
+        hash_value: str='f',
+    ):
+        """Hash the values in the named column, and split on that"""
+        return sa.func.right(
+            sa.func.md5(
+                sa.cast(sa.column(column_name), sa.Text)
+            ),
+            hash_digits
+        ) == hash_value
+
 
     def _build_selector_from_batch_spec(self, batch_spec):
-
-        print(json.dumps(batch_spec, indent=2))
-
         table_name = batch_spec["table_name"]
 
         splitter_fn = getattr(self, batch_spec["splitter_method"])
+        if "sampling_method" in batch_spec:
+            if batch_spec["sampling_method"] == "_sample_using_limit":
 
-        return sa.select('*').select_from(
-            sa.text(table_name)
-        ).where(
-            sa.and_(
+                return sa.select('*').select_from(
+                    sa.text(table_name)
+                ).where(
+                    splitter_fn(
+                        table_name=table_name,
+                        partition_definition=batch_spec["partition_definition"],
+                        **batch_spec["splitter_kwargs"]
+                    )
+                ).limit(batch_spec["sampling_kwargs"]["n"])
+
+            else:
+
+                sampler_fn = getattr(self, batch_spec["sampling_method"])
+                return sa.select('*').select_from(
+                    sa.text(table_name)
+                ).where(
+                    sa.and_(
+                        splitter_fn(
+                            table_name=table_name,
+                            partition_definition=batch_spec["partition_definition"],
+                            **batch_spec["splitter_kwargs"]
+                        ),
+                        sampler_fn(**batch_spec["sampling_kwargs"]),
+                    )
+                )
+        
+        else:
+
+            return sa.select('*').select_from(
+                sa.text(table_name)
+            ).where(
                 splitter_fn(
                     table_name=table_name,
                     partition_definition=batch_spec["partition_definition"],
                     **batch_spec["splitter_kwargs"]
-                ),
-                # sampler_fn(**batch_spec["sampler_kwargs"]),
+                )
             )
-        )
-
-        # .where(
-        #     sa.and_(
-        #         # Splitting
-        #         sa.cast(
-        #             sa.column(column_name) / divisor,
-        #             sa.Integer
-        #         ) == 0,
-        #         # Sampling
-        #         sa.func.left(
-        #             sa.func.md5(
-        #                 sa.cast(sa.column("date"), sa.Text)
-        #             ),
-        #             1
-        #         ) == 'f'
-        #     )
-        # )
 
     def get_batch_data_and_markers(
         self,

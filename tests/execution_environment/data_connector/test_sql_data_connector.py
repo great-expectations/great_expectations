@@ -15,6 +15,7 @@ from great_expectations.execution_environment.data_connector import (
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
+    BatchSpec,
     PartitionDefinition,
     PartitionRequest,
 )
@@ -53,7 +54,7 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine():
 
 
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
-    # base_directory = str(tmp_path_factory.mktemp("test_basic_self_check"))
+    random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
@@ -93,11 +94,11 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
         "example_data_reference": {
-            "n_rows": 2,
+            "n_rows": 8,
             "batch_spec": {
                 "table_name": "table_partitioned_by_date_column__A",
                 "partition_definition": {
-                    "date": "2020-01-03"
+                    "date": "2020-01-02"
                 },
                 "splitter_method": "_split_on_column_value",
                 "splitter_kwargs": {
@@ -497,3 +498,105 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
 #  'table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D',
 #  'table_containing_id_spacers_for_D',
 #  'table_that_should_be_partitioned_by_random_hash__H']
+
+
+def test_sampling_method__limit(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=BatchSpec({
+            "table_name": "table_partitioned_by_date_column__A",
+            "partition_definition": {},
+            "splitter_method": "_split_on_whole_table",
+            "splitter_kwargs": {},
+            "sampling_method": "_sample_using_limit",
+            "sampling_kwargs": {
+                "n": 20
+            }
+        })
+    )
+    assert len(batch_data.fetchall()) == 20
+
+    # TODO: Implement this test once get_batch_data_and_markers is returning a proper SqlAlchemyBatchData
+    # batch_data.expect_column_values_to_be_in_set("date", values=["2020-01-02"])
+
+
+def test_sampling_method__random(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=BatchSpec({
+            "table_name": "table_partitioned_by_date_column__A",
+            "partition_definition": {},
+            "splitter_method": "_split_on_whole_table",
+            "splitter_kwargs": {},
+            "sampling_method": "_sample_using_random",
+            "sampling_kwargs": {
+                "p": 1.0
+            }
+        })
+    )
+
+    # random.seed() is no good here: the random number generator is in the database, not python
+    # assert len(batch_data.fetchall()) == 63
+    pass
+
+def test_sampling_method__mod(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=BatchSpec({
+            "table_name": "table_partitioned_by_date_column__A",
+            "partition_definition": {},
+            "splitter_method": "_split_on_whole_table",
+            "splitter_kwargs": {},
+            "sampling_method": "_sample_using_mod",
+            "sampling_kwargs": {
+                "column_name": "id",
+                "mod": 10,
+                "value": 8,
+            }
+        })
+    )
+
+    # random.seed() is no good here: the random number generator is in the database, not python
+    assert len(batch_data.fetchall()) == 12
+
+
+def test_sampling_method__a_list(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=BatchSpec({
+            "table_name": "table_partitioned_by_date_column__A",
+            "partition_definition": {},
+            "splitter_method": "_split_on_whole_table",
+            "splitter_kwargs": {},
+            "sampling_method": "_sample_using_a_list",
+            "sampling_kwargs": {
+                "column_name": "id",
+                "value_list": [10, 20, 30, 40],
+            }
+        })
+    )
+
+    assert len(batch_data.fetchall()) == 4
+
+
+def test_sampling_method__md5(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    # SQlite doesn't support MD5
+    # batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    #     batch_spec=BatchSpec({
+    #         "table_name": "table_partitioned_by_date_column__A",
+    #         "partition_definition": {},
+    #         "splitter_method": "_split_on_whole_table",
+    #         "splitter_kwargs": {},
+    #         "sampling_method": "_sample_using_md5",
+    #         "sampling_kwargs": {
+    #             "column_name": "index",
+    #         }
+    #     })
+    # )
+
