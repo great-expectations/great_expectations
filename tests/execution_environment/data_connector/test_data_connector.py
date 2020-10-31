@@ -1,26 +1,18 @@
+# TODO: <Alex>This module should be broken up -- please see suggestions below.</Alex>
 import pytest
-import pandas as pd
 import yaml
-import json
 
-from great_expectations.execution_environment.data_connector import (
-    FilesDataConnector,
-    SinglePartitionDictDataConnector,
-)
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-)
+from great_expectations.execution_environment.data_connector import FilesDataConnector
 from tests.test_utils import (
     create_files_in_directory,
-    create_fake_data_frame,
 )
-
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
-    PartitionRequest,
     PartitionDefinition,
 )
+from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
+from great_expectations.data_context.util import instantiate_class_from_config
 
 
 @pytest.fixture
@@ -52,6 +44,7 @@ assets:
     return basic_data_connector
 
 
+# TODO: <Alex>This test should be moved to "tests/execution_environment/data_connector/test_files_data_connector.py".</Alex>
 def test_basic_instantiation(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
 
@@ -69,15 +62,19 @@ def test_basic_instantiation(tmp_path_factory):
             "my_asset_name": {}
         }
     )
-    
 
+
+# TODO: <Alex>This test should be potentially moved to "tests/execution_environment/data_connector/test_files_data_connector.py".</Alex>
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
     # noinspection PyProtectedMember
-    data_references: list = basic_data_connector._get_data_reference_list(data_asset_name="my_asset_name")
+    data_references: list = basic_data_connector._get_data_reference_list_from_cache_by_data_asset_name(
+        data_asset_name="my_asset_name"
+    )
     assert len(data_references) == 0
     assert data_references == []
 
 
+# TODO: <Alex>This test should be renamed properly and moved to "tests/execution_environment/data_connector/test_files_data_connector.py".</Alex>
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
     create_files_in_directory(
@@ -128,7 +125,7 @@ def test_get_batch_data_and_metadata_from_batch_definition():
     pass
 
 
-def test_convert_in_memory_dataset_to_batch():
+def test_convert_batch_data_to_batch():
     pass
 
 
@@ -148,13 +145,8 @@ def test_available_data_asset_names():
     pass
 
 
+# TODO: <Alex>This test should be moved to the test module that is dedicated to BatchRequest and BatchDefinition testing.</Alex>
 def test__batch_definition_matches_batch_request():
-    my_data_connector = SinglePartitionDictDataConnector(
-        name="my_data_connector",
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        data_reference_dict={},
-    )
-
     # TODO: <Alex>We need to cleanup PyCharm warnings.</Alex>
     A = BatchDefinition(
         execution_environment_name="A",
@@ -167,24 +159,21 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert my_data_connector._batch_definition_matches_batch_request(
+    assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="A"
         )
     )
 
-    # noinspection PyProtectedMember
-    assert not my_data_connector._batch_definition_matches_batch_request(
+    assert not batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="B"
         )
     )
 
-    # noinspection PyProtectedMember
-    assert my_data_connector._batch_definition_matches_batch_request(
+    assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="A",
@@ -192,8 +181,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert my_data_connector._batch_definition_matches_batch_request(
+    assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="A",
@@ -202,8 +190,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert not my_data_connector._batch_definition_matches_batch_request(
+    assert not batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="A",
@@ -212,8 +199,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert not my_data_connector._batch_definition_matches_batch_request(
+    assert not batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             execution_environment_name="A",
@@ -225,8 +211,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert my_data_connector._batch_definition_matches_batch_request(
+    assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
             partition_request={
@@ -235,8 +220,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
-    # noinspection PyProtectedMember
-    assert my_data_connector._batch_definition_matches_batch_request(
+    assert batch_definition_matches_batch_request(
         batch_definition=BatchDefinition(**{
             "execution_environment_name": "FAKE_EXECUTION_ENVIRONMENT",
             "data_connector_name": "TEST_DATA_CONNECTOR",

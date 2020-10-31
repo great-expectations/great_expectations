@@ -1386,8 +1386,7 @@ def test_get_batch_list_from_new_style_datasource_based_on_explicit_data_referen
         "execution_environment_name": execution_environment_name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "in_memory_dataset": None,
-        # TODO: <Alex>Is the notion of "partition_request" being replaced with something "data_reference" related?</Alex>
+        "batch_data": None,
         "partition_request": None,
         "limit": None,
         # TODO: <Alex>Commenting out "batch_spec_passthrough" for now, until we have decided on whether or not it will be admitted.</Alex>

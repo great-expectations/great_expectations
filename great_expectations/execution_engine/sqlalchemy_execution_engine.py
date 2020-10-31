@@ -507,7 +507,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     def load_batch(
-        self, batch_request=None, batch_spec=None, in_memory_dataset=None
+        self, batch_request=None, batch_spec=None, batch_data=None
     ) -> Batch:
         """
         With the help of the execution environment and data connector specified within the batch request,
@@ -515,7 +515,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         Args:
            batch_spec (dict): A dictionary specifying the parameters used to build the batch
-           in_memory_dataset (A Pandas DataFrame or None): Optional specification of an in memory Dataset used
+           batch_data (A Pandas DataFrame or None): Optional specification of an in memory Dataset used
                                                             to load a batch. A Data Asset name and partition ID
                                                             must still be passed via batch request.
 

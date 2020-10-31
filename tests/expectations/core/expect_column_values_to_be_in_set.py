@@ -90,7 +90,7 @@ def test_spark_expect_column_values_to_be_in_set_impl():
     batch = myengine.load_batch(
         batch_request={"data_asset_name": "foo", "partition_name": "bar"},
         batch_spec=BatchSpec({"blarg": "bah"}),
-        in_memory_dataset=df,
+        batch_data=df,
     )
 
     result = expectation.validate(
@@ -111,7 +111,7 @@ def test_spark_expect_column_values_to_be_in_set_impl():
     batch = myengine.load_batch(
         batch_request={"data_asset_name": "foo", "partition_name": "bar"},
         batch_spec=BatchSpec({"blarg": "bah"}),
-        in_memory_dataset=df,
+        batch_data=df,
     )
 
     result = expectation.validate(

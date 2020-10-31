@@ -1,17 +1,15 @@
+import pytest
 import yaml
-from great_expectations.execution_environment.data_connector import (
-    SinglePartitionDictDataConnector,
-)
 
+from typing import List
+
+from great_expectations.execution_environment.data_connector import SinglePartitionDictDataConnector
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
     PartitionDefinition,
 )
-
-from great_expectations.data_context.util import (
-    instantiate_class_from_config
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 from tests.test_utils import (
     create_fake_data_frame,
     create_files_in_directory,
@@ -26,29 +24,31 @@ def test_basic_instantiation(tmp_path_factory):
         "directory/B-2.csv": create_fake_data_frame(),
     }
 
-    my_data_connector = SinglePartitionDictDataConnector(
+    my_data_connector: SinglePartitionDictDataConnector = SinglePartitionDictDataConnector(
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
-            "pattern" : "(.*)/(.+)-(\\d+)\\.csv",
-            "group_names" : ["data_asset_name", "letter", "number"],
+            "pattern": "(.*)/(.+)-(\\d+)\\.csv",
+            "group_names": ["data_asset_name", "letter", "number"],
         },
-        data_reference_dict = data_reference_dict,
+        data_reference_dict=data_reference_dict,
     )
 
     my_data_connector.refresh_data_references_cache()
     assert my_data_connector.get_data_reference_list_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
-    print(
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                execution_environment_name="something",
-                data_connector_name="my_data_connector",
-                data_asset_name="something",
+    # Illegal execution environment name
+    with pytest.raises(ValueError):
+        print(
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    execution_environment_name="something",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="something",
+                )
             )
         )
-    )
 
 
 def test_example_with_implicit_data_asset_names():
@@ -86,37 +86,78 @@ default_regex:
     )
 
     my_data_connector.refresh_data_references_cache()
-    assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-    ))) == 3
-    assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-    ))) == 3
-    assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        data_connector_name="my_data_connector",
-        data_asset_name="beta",
-    ))) == 4
 
-    assert my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-        partition_request={
-            "year_dir": "2020",
-            "month_dir": "03",
-        }
-    )) == [BatchDefinition(
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-        partition_definition=PartitionDefinition(
-            year_dir="2020",
-            month_dir="03",
+    # Test for an unknown execution environment
+    with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
+        batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    execution_environment_name="non_existent_execution_environment",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="my_data_asset",
+                )
+            )
+
+    # Test for an unknown data_connector
+    with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
+        batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+                    data_connector_name="non_existent_data_connector",
+                    data_asset_name="my_data_asset",
+                )
+            )
+
+    assert len(
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+                data_connector_name="my_data_connector",
+                data_asset_name="alpha",
+            )
         )
-    )]
+    ) == 3
+
+    assert len(
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                data_connector_name="my_data_connector",
+                data_asset_name="alpha",
+            )
+        )
+    ) == 3
+
+    assert len(
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                data_connector_name="my_data_connector",
+                data_asset_name="beta",
+            )
+        )
+    ) == 4
+
+    assert my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            data_connector_name="my_data_connector",
+            data_asset_name="alpha",
+            partition_request={
+                "year_dir": "2020",
+                "month_dir": "03",
+            }
+        )
+    ) == [
+        BatchDefinition(
+            execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            data_connector_name="my_data_connector",
+            data_asset_name="alpha",
+            partition_definition=PartitionDefinition(
+                year_dir="2020",
+                month_dir="03",
+            )
+        )
+    ]
 
 
 # TODO: Abe 20201028 : This test should actually be implemented with a FilesDataConnector, not a SinglePartitionDataConnector
@@ -143,7 +184,7 @@ default_regex:
 # class_name: SinglePartitionDictDataConnector
 # execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
 # base_directory: my_base_directory/
-# # glob_directive: '*.csv'
+# # glob_directive: "*.csv"
 # default_regex:
 #     pattern: ^.*\\/(.+)-(\\d{4})(\\d{2})\\.(csv|txt)$
 #     group_names:
@@ -155,10 +196,10 @@ default_regex:
 #         base_directory: alpha/files/go/here/
 #     beta:
 #         base_directory: beta_here/
-#         # glob_directive: '*.txt'
+#         # glob_directive: "*.txt"
 #     gamma:
 #         base_directory: ""
-        
+
 #     """
 #     config = yaml.load(yaml_string, Loader=yaml.FullLoader)
 #     config["data_reference_dict"] = data_reference_dict
@@ -220,24 +261,24 @@ default_regex:
     """, return_mode="return_object")
 
     assert return_object == {
-        'class_name': 'SinglePartitionFileDataConnector',
-        'data_asset_count': 2,
-        'example_data_asset_names': [
-            'alpha',
-            'beta'
+        "class_name": "SinglePartitionFileDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": [
+            "alpha",
+            "beta"
         ],
         "data_assets": {
-            'alpha': {
-                'example_data_references': ['2020/01/alpha-*.csv', '2020/02/alpha-*.csv', '2020/03/alpha-*.csv'],
-                'batch_definition_count': 3
+            "alpha": {
+                "example_data_references": ["2020/01/alpha-*.csv", "2020/02/alpha-*.csv", "2020/03/alpha-*.csv"],
+                "batch_definition_count": 3
             },
-            'beta': {
-                'example_data_references': ['2020/01/beta-*.csv', '2020/02/beta-*.csv', '2020/03/beta-*.csv'],
-                'batch_definition_count': 4
+            "beta": {
+                "example_data_references": ["2020/01/beta-*.csv", "2020/02/beta-*.csv", "2020/03/beta-*.csv"],
+                "batch_definition_count": 4
             }
         },
-        'example_unmatched_data_references': [],
-        'unmatched_data_reference_count': 0,
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
     }
 
 
@@ -278,24 +319,24 @@ default_regex:
     """, return_mode="return_object")
 
     assert return_object == {
-        'class_name': 'SinglePartitionFileDataConnector',
-        'data_asset_count': 2,
-        'example_data_asset_names': [
-            'alpha',
-            'beta'
+        "class_name": "SinglePartitionFileDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": [
+            "alpha",
+            "beta"
         ],
         "data_assets": {
-            'alpha': {
-                'example_data_references': ['2020/01/alpha-*.csv', '2020/02/alpha-*.csv', '2020/03/alpha-*.csv'],
-                'batch_definition_count': 3
+            "alpha": {
+                "example_data_references": ["2020/01/alpha-*.csv", "2020/02/alpha-*.csv", "2020/03/alpha-*.csv"],
+                "batch_definition_count": 3
             },
-            'beta': {
-                'example_data_references': ['2020/01/beta-*.csv', '2020/02/beta-*.csv', '2020/03/beta-*.csv'],
-                'batch_definition_count': 4
+            "beta": {
+                "example_data_references": ["2020/01/beta-*.csv", "2020/02/beta-*.csv", "2020/03/beta-*.csv"],
+                "batch_definition_count": 4
             }
         },
-        'example_unmatched_data_references': [],
-        'unmatched_data_reference_count': 0,
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
     }
 
 
@@ -313,6 +354,7 @@ def test_self_check():
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         default_regex={
             "pattern": "(.+)-(\\d+)\\.csv",
+            # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; idea: resurrect the Partition class.</Alex>
             "group_names": ["data_asset_name", "number"]
         }
     )
@@ -320,24 +362,24 @@ def test_self_check():
     self_check_return_object = my_data_connector.self_check()
 
     assert self_check_return_object == {
-        'class_name': 'SinglePartitionDictDataConnector',
-        'data_asset_count': 2,
-        'example_data_asset_names': [
-            'A',
-            'B'
+        "class_name": "SinglePartitionDictDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": [
+            "A",
+            "B"
         ],
         "data_assets": {
-            'A': {
-                'example_data_references': ['A-100.csv', 'A-101.csv'],
-                'batch_definition_count': 2
+            "A": {
+                "example_data_references": ["A-100.csv", "A-101.csv"],
+                "batch_definition_count": 2
             },
-            'B': {
-                'example_data_references': ['B-1.csv', 'B-2.csv'],
-                'batch_definition_count': 2
+            "B": {
+                "example_data_references": ["B-1.csv", "B-2.csv"],
+                "batch_definition_count": 2
             }
         },
-        'example_unmatched_data_references': [],
-        'unmatched_data_reference_count': 0,
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
     }
 
 
@@ -363,26 +405,25 @@ def test_that_needs_a_better_name():
     self_check_return_object = my_data_connector.self_check()
 
     assert self_check_return_object == {
-        'class_name': 'SinglePartitionDictDataConnector',
-        'data_asset_count': 2,
-        'example_data_asset_names': [
-            'A',
-            'B'
+        "class_name": "SinglePartitionDictDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": [
+            "A",
+            "B"
         ],
         "data_assets": {
-            'A': {
-                'example_data_references': ['A-100.csv', 'A-101.csv'],
-                'batch_definition_count': 2
+            "A": {
+                "example_data_references": ["A-100.csv", "A-101.csv"],
+                "batch_definition_count": 2
             },
-            'B': {
-                'example_data_references': ['B-1.csv', 'B-2.csv'],
-                'batch_definition_count': 2
+            "B": {
+                "example_data_references": ["B-1.csv", "B-2.csv"],
+                "batch_definition_count": 2
             }
         },
-        'example_unmatched_data_references': ['CCC.csv'],
-        'unmatched_data_reference_count': 1,
+        "example_unmatched_data_references": ["CCC.csv"],
+        "unmatched_data_reference_count": 1,
     }
-
 
 
 def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path_factory):
@@ -421,29 +462,29 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
         """, return_mode="return_object")
 
     assert return_object == {
-        'class_name': 'SinglePartitionFileDataConnector',
-        'data_asset_count': 4,
-        'example_data_asset_names': [
-             'A',
-             'B',
-             'C'
+        "class_name": "SinglePartitionFileDataConnector",
+        "data_asset_count": 4,
+        "example_data_asset_names": [
+             "A",
+             "B",
+             "C"
         ],
         "data_assets": {
-            'A': {
-                'batch_definition_count': 3,
-                'example_data_references': ['A/A-1.csv', 'A/A-2.csv', 'A/A-3.csv']
+            "A": {
+                "batch_definition_count": 3,
+                "example_data_references": ["A/A-1.csv", "A/A-2.csv", "A/A-3.csv"]
             },
-            'B': {
-                'batch_definition_count': 3,
-                'example_data_references': ['B/B-1.csv', 'B/B-2.csv', 'B/B-3.csv']
+            "B": {
+                "batch_definition_count": 3,
+                "example_data_references": ["B/B-1.csv", "B/B-2.csv", "B/B-3.csv"]
             },
-            'C': {
-                'batch_definition_count': 3,
-                'example_data_references': ['C/C-1.csv', 'C/C-2.csv', 'C/C-3.csv']
+            "C": {
+                "batch_definition_count": 3,
+                "example_data_references": ["C/C-1.csv", "C/C-2.csv", "C/C-3.csv"]
             }
         },
-        'unmatched_data_reference_count': 0,
-        'example_unmatched_data_references': []
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": []
     }
 
 
@@ -476,25 +517,25 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
                 - day
                 - data_asset_name
               pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
-              
+
               """, return_mode="return_object")
 
     assert return_object == {
-        'class_name': 'SinglePartitionFileDataConnector',
-        'data_asset_count': 1,
-        'example_data_asset_names': [
-            'log_file'
+        "class_name": "SinglePartitionFileDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "log_file"
         ],
         "data_assets": {
-            'log_file': {
-                'batch_definition_count': 7,
-                'example_data_references': ['2021/01/01/log_file-*.txt.gz',
-                                            '2021/01/02/log_file-*.txt.gz',
-                                            '2021/01/03/log_file-*.txt.gz']
+            "log_file": {
+                "batch_definition_count": 7,
+                "example_data_references": ["2021/01/01/log_file-*.txt.gz",
+                                            "2021/01/02/log_file-*.txt.gz",
+                                            "2021/01/03/log_file-*.txt.gz"]
             }
         },
-        'unmatched_data_reference_count': 0,
-        'example_unmatched_data_references': []
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": []
     }
 
 
@@ -535,29 +576,29 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
 #               , return_mode="return_object")
 #
 #     return_object == {
-#         'class_name': 'SinglePartitionFileDataConnector',
-#         'data_asset_count': 7,
-#         'example_data_asset_names': [
-#             '2021/01/01',
-#             '2021/01/02',
-#             '2021/01/03'
+#         "class_name": "SinglePartitionFileDataConnector",
+#         "data_asset_count": 7,
+#         "example_data_asset_names": [
+#             "2021/01/01",
+#             "2021/01/02",
+#             "2021/01/03"
 #         ],
 #         "data_assets": {
-#             '2021/01/01': {
-#                 'batch_definition_count': 2,
-#                 'example_data_references': ['2021/01/01/log_file-*.txt.gz', '2021/01/01/log_file-*.txt.gz']
+#             "2021/01/01": {
+#                 "batch_definition_count": 2,
+#                 "example_data_references": ["2021/01/01/log_file-*.txt.gz", "2021/01/01/log_file-*.txt.gz"]
 #             },
-#             '2021/01/02': {
-#                 'batch_definition_count': 2,
-#                 'example_data_references': ['2021/01/02/log_file-*.txt.gz', '2021/01/02/log_file-*.txt.gz']
+#             "2021/01/02": {
+#                 "batch_definition_count": 2,
+#                 "example_data_references": ["2021/01/02/log_file-*.txt.gz", "2021/01/02/log_file-*.txt.gz"]
 #             },
-#             '2021/01/03': {
-#                 'batch_definition_count': 2,
-#                 'example_data_references': ['2021/01/03/log_file-*.txt.gz', '2021/01/03/log_file-*.txt.gz']
+#             "2021/01/03": {
+#                 "batch_definition_count": 2,
+#                 "example_data_references": ["2021/01/03/log_file-*.txt.gz", "2021/01/03/log_file-*.txt.gz"]
 #             }
 #         },
-#         'unmatched_data_reference_count': 0,
-#         'example_unmatched_data_references': []
+#         "unmatched_data_reference_count": 0,
+#         "example_unmatched_data_references": []
 #     }
 
 
@@ -592,19 +633,21 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
               pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
       """, return_mode="return_object")
     assert return_object == {
-        'class_name': 'SinglePartitionFileDataConnector',
-        'data_asset_count': 1,
-        'example_data_asset_names': [
-            'log_file'
+        "class_name": "SinglePartitionFileDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "log_file"
         ],
         "data_assets": {
-            'log_file': {
-                'batch_definition_count': 7,
-                'example_data_references': ['log_file-2021-01-01-*.txt.gz', 'log_file-2021-01-02-*.txt.gz', 'log_file-2021-01-03-*.txt.gz']
+            "log_file": {
+                "batch_definition_count": 7,
+                "example_data_references": [
+                    "log_file-2021-01-01-*.txt.gz", "log_file-2021-01-02-*.txt.gz", "log_file-2021-01-03-*.txt.gz"
+                ]
             }
         },
-        'unmatched_data_reference_count': 0,
-        'example_unmatched_data_references': []
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": []
     }
 
 
@@ -640,21 +683,125 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context, t
               """, return_mode="return_object")
 
     assert return_object == {
-        'class_name': 'SinglePartitionFileDataConnector',
-        'data_asset_count': 1,
-        'example_data_asset_names': [
-            'some_bucket'
+        "class_name": "SinglePartitionFileDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "some_bucket"
         ],
-        'data_assets': {
-            'some_bucket': {
-                'batch_definition_count': 7,
-                'example_data_references': [
-                    'some_bucket/2021/01/01/log_file-*.txt.gz',
-                    'some_bucket/2021/01/02/log_file-*.txt.gz',
-                    'some_bucket/2021/01/03/log_file-*.txt.gz'
+        "data_assets": {
+            "some_bucket": {
+                "batch_definition_count": 7,
+                "example_data_references": [
+                    "some_bucket/2021/01/01/log_file-*.txt.gz",
+                    "some_bucket/2021/01/02/log_file-*.txt.gz",
+                    "some_bucket/2021/01/03/log_file-*.txt.gz"
                 ]
             }
         },
-        'unmatched_data_reference_count': 0,
-        'example_unmatched_data_references': []
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": []
     }
+
+
+
+def test_redundant_information_in_naming_convention_bucket_sorted(empty_data_context, tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("logs"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "some_bucket/2021/01/01/log_file-20210101.txt.gz",
+            "some_bucket/2021/01/02/log_file-20210102.txt.gz",
+            "some_bucket/2021/01/03/log_file-20210103.txt.gz",
+            "some_bucket/2021/01/04/log_file-20210104.txt.gz",
+            "some_bucket/2021/01/05/log_file-20210105.txt.gz",
+            "some_bucket/2021/01/06/log_file-20210106.txt.gz",
+            "some_bucket/2021/01/07/log_file-20210107.txt.gz",
+        ]
+    )
+
+    my_data_connector_yaml = yaml.load(f"""
+          module_name: great_expectations.execution_environment.data_connector
+          class_name: SinglePartitionFileDataConnector
+          execution_environment_name: test_environment
+          name: single_partitioner_data_connector
+          base_directory: {base_directory}/
+          glob_directive: "*/*/*/*/*.txt.gz"
+          default_regex:
+              group_names:
+                  - data_asset_name
+                  - year
+                  - month
+                  - day
+                  - full_date
+              pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-(.*)\\.txt\\.gz
+          sorters:
+              - orderby: desc
+                class_name: DateTimeSorter
+                name: full_date
+
+          """, Loader=yaml.FullLoader)
+
+    my_data_connector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "single_partitioner_data_connector",
+            "execution_environment_name": "test_environment",
+            "data_context_root_directory": base_directory,
+            "execution_engine": "BASE_ENGINE",
+        },
+        config_defaults={
+            "module_name": "great_expectations.execution_environment.data_connector"
+        },
+    )
+
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="test_environment",
+        data_connector_name="single_partitioner_data_connector",
+        data_asset_name="some_bucket",
+    ))
+
+    expected = [
+        BatchDefinition(execution_environment_name="test_environment",
+                        data_connector_name="single_partitioner_data_connector",
+                        data_asset_name="some_bucket",
+                        partition_definition=PartitionDefinition(
+                            {'year': '2021', 'month': '01', 'day': '07', 'full_date': '20210107'}
+                        )),
+        BatchDefinition(execution_environment_name="test_environment",
+                        data_connector_name="single_partitioner_data_connector",
+                        data_asset_name="some_bucket",
+                        partition_definition=PartitionDefinition(
+                            {'year': '2021', 'month': '01', 'day': '06', 'full_date': '20210106'}
+                        )),
+        BatchDefinition(execution_environment_name="test_environment",
+                        data_connector_name="single_partitioner_data_connector",
+                        data_asset_name="some_bucket",
+                        partition_definition=PartitionDefinition(
+                            {'year': '2021', 'month': '01', 'day': '05', 'full_date': '20210105'}
+                        )),
+        BatchDefinition(execution_environment_name="test_environment",
+                        data_connector_name="single_partitioner_data_connector",
+                        data_asset_name="some_bucket",
+                        partition_definition=PartitionDefinition(
+                            {'year': '2021', 'month': '01', 'day': '04', 'full_date': '20210104'}
+                        )),
+        BatchDefinition(execution_environment_name="test_environment",
+                        data_connector_name="single_partitioner_data_connector",
+                        data_asset_name="some_bucket",
+                        partition_definition=PartitionDefinition(
+                            {'year': '2021', 'month': '01', 'day': '03', 'full_date': '20210103'}
+                        )),
+        BatchDefinition(execution_environment_name="test_environment",
+                        data_connector_name="single_partitioner_data_connector",
+                        data_asset_name="some_bucket",
+                        partition_definition=PartitionDefinition(
+                            {'year': '2021', 'month': '01', 'day': '02', 'full_date': '20210102'}
+                        )),
+        BatchDefinition(execution_environment_name="test_environment",
+                        data_connector_name="single_partitioner_data_connector",
+                        data_asset_name="some_bucket",
+                        partition_definition=PartitionDefinition(
+                            {'year': '2021', 'month': '01', 'day': '01', 'full_date': '20210101'}
+                        ))
+    ]
+    assert expected == sorted_batch_definition_list

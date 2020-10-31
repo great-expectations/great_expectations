@@ -453,6 +453,9 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
 def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
     return
     
+    # Leaving this test commented for now, since sqlite doesn't support MD5.
+    # Later, we'll want to add a more thorough test harness, including other databases.
+    
     # db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     # config = yaml.load("""
