@@ -262,8 +262,6 @@ def test_get_batch_with_pipeline_style_batch_request(basic_execution_environment
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     data_connector_name: str = "test_pipeline_data_connector"
-    # TODO: <Alex></Alex>
-    # data_asset_name: str = "test_asset_1"
     data_asset_name: str = "IN_MEMORY_DATA_ASSET"
 
     batch_request: dict = {
@@ -319,8 +317,6 @@ def test_get_available_data_asset_names_with_files_data_connector(basic_executio
 
     # Call "get_batch_list_from_batch_request()" to fill up the caches
     data_connector_name: str = "test_pipeline_data_connector"
-    # TODO: <Alex></Alex>
-    # data_asset_name: str = "pipeline_stage_data_asset_0"
     data_asset_name: str = "IN_MEMORY_DATA_ASSET"
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     batch_request: dict = {
@@ -418,8 +414,6 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
 
     # Call "get_batch_list_from_batch_request()" to fill up the caches
     data_connector_name: str = "test_pipeline_data_connector"
-    # TODO: <Alex></Alex>
-    # data_asset_name: str = "pipeline_stage_data_asset_0"
     data_asset_name: str = "IN_MEMORY_DATA_ASSET"
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     batch_request: dict = {

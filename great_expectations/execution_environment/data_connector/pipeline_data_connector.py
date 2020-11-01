@@ -29,11 +29,7 @@ class PipelineDataConnector(DataConnector):
         name: str,
         execution_environment_name: str,
         execution_engine: ExecutionEngine = None,
-        # data_asset_name: str = None,
-        # TODO: <Alex></Alex>
-        # batch_data: Any = None,
         runtime_keys: dict = None,
-        partition_request: PartitionDefinitionSubset = None,
     ):
         logger.debug(f'Constructing PipelineDataConnector "{name}".')
 
@@ -43,49 +39,20 @@ class PipelineDataConnector(DataConnector):
             execution_engine=execution_engine,
         )
 
-        # self._data_asset_name = data_asset_name
-        # TODO: <Alex></Alex>
-        # self._batch_data = batch_data
         self._runtime_keys = runtime_keys
 
-        self.partition_request = partition_request
-
-    # TODO: <Alex></Alex>
-    # @property
-    # def data_asset_name(self) -> str:
-    #     return self._data_asset_name
-    #
-    # @data_asset_name.setter
-    # def data_asset_name(self, data_asset_name: str):
-    #     self._data_asset_name = data_asset_name
-
-    # TODO: <Alex></Alex>
-    # @property
-    # def batch_data(self) -> Any:
-    #     return self._batch_data
-    #
-    # TODO: <Alex></Alex>
-    # @batch_data.setter
-    # def batch_data(self, batch_data: Any):
-    #     self._batch_data = batch_data
+        self._runtime_params = None
 
     @property
-    def runtime_keys(self) -> dict:
-        return self._runtime_keys
+    def runtime_params(self) -> PartitionDefinitionSubset:
+        return self._runtime_params
 
-    @runtime_keys.setter
-    def runtime_keys(self, runtime_keys: dict):
-        self._runtime_keys = runtime_keys
-
-    @property
-    def partition_request(self) -> PartitionDefinitionSubset:
-        return self._partition_request
-
-    @partition_request.setter
-    def partition_request(self, partition_request: PartitionDefinitionSubset):
-        if partition_request:
-            self._validate_runtime_keys_configuration(runtime_keys=list(partition_request.keys()))
-        self._partition_request = partition_request
+    @runtime_params.setter
+    def runtime_params(self, runtime_params: PartitionDefinitionSubset):
+        if runtime_params:
+            self._validate_runtime_keys_configuration(runtime_keys=list(runtime_params.keys()))
+        self._runtime_params = PartitionDefinitionSubset(runtime_params)
+        self.refresh_data_references_cache()
 
     def refresh_data_references_cache(self):
         """
@@ -99,14 +66,6 @@ class PipelineDataConnector(DataConnector):
         self._data_references_cache = {
             data_reference: mapped_batch_definition_list
         }
-        # TODO: <Alex></Alex>
-        # batch_definition_list: List[BatchDefinition] = self._build_batch_definition_list(
-        #     execution_environment_name=self.execution_environment_name,
-        #     data_connector_name=self.name,
-        # )
-        # self._data_references_cache = {
-        #     data_reference: batch_definition_list
-        # }
 
     def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
@@ -115,7 +74,7 @@ class PipelineDataConnector(DataConnector):
         """
         return [
             self._get_data_reference_name(
-                partition_request=self.partition_request
+                partition_request=self.runtime_params
             )
         ]
 
@@ -151,7 +110,7 @@ class PipelineDataConnector(DataConnector):
 
     def get_available_data_asset_names(self) -> List[str]:
         if self._data_references_cache is None:
-            self.refresh_data_references_cache()
+            raise ValueError('_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?')
 
         # This will fetch ALL batch_definitions in the cache
         batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
@@ -174,6 +133,7 @@ class PipelineDataConnector(DataConnector):
         self._validate_batch_request(batch_request=batch_request)
 
         if self._data_references_cache is None:
+            self.runtime_params = batch_request.partition_request
             self.refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = list(self._data_references_cache.values())[0]
@@ -190,25 +150,14 @@ class PipelineDataConnector(DataConnector):
         data_reference: str,
         data_asset_name: Optional[str] = None
     ) -> Optional[List[BatchDefinition]]:
-        # TODO: <Alex></Alex>
-        # return self._build_batch_definition_list(
-        #     execution_environment_name=self.execution_environment_name,
-        #     data_connector_name=self.name,
-        #     data_asset_name=data_asset_name
-        # )
         if data_asset_name is None:
             data_asset_name = DEFAULT_DATA_ASSET_NAME
-        # TODO: <Alex>Update this!!!</Alex>
-        batch_request: BatchRequest = BatchRequest(
-            data_asset_name=data_asset_name,
-            partition_request=PartitionDefinition(self.partition_request),
-        )
         return [
             BatchDefinition(
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,
                 data_asset_name=data_asset_name,
-                partition_definition=PartitionDefinition(batch_request.partition_request)
+                partition_definition=PartitionDefinition(self.runtime_params)
             )
         ]
 
@@ -224,39 +173,11 @@ class PipelineDataConnector(DataConnector):
         )
         return data_reference
 
-    # TODO: <Alex></Alex>
     def _generate_batch_spec_parameters_from_batch_definition(
         self,
         batch_definition: BatchDefinition
     ) -> dict:
         return {}
-#         if self._batch_data is None:
-#             raise ValueError(
-#                 f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition
-# definition {batch_definition.partition_definition} from batch definition {batch_definition}.
-#                 '''
-#             )
-#         return {
-#             "batch_data": self._batch_data
-#         }
-
-    # TODO: <Alex></Alex>
-    # def _build_batch_definition_list(
-    #     self,
-    #     execution_environment_name: str,
-    #     data_connector_name: str,
-    #     data_asset_name: Optional[str] = None
-    # ) -> Optional[List[BatchDefinition]]:
-    #     if data_asset_name is None:
-    #         data_asset_name = DEFAULT_DATA_ASSET_NAME
-    #     return [
-    #         BatchDefinition(
-    #             execution_environment_name=execution_environment_name,
-    #             data_connector_name=data_connector_name,
-    #             data_asset_name=data_asset_name,
-    #             partition_definition=PartitionDefinition(self.partition_request)
-    #         )
-    #     ]
 
     def _build_batch_spec_from_batch_definition(
         self,
@@ -278,7 +199,7 @@ class PipelineDataConnector(DataConnector):
 
     def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
         if runtime_keys and len(runtime_keys) > 0:
-            if not (self.runtime_keys and set(runtime_keys) <= set(self.runtime_keys)):
+            if not (self._runtime_keys and set(runtime_keys) <= set(self._runtime_keys)):
 
                 raise ge_exceptions.DataConnectorError(
                     f'''PipelineDataConnector "{self.name}" was invoked with one or more runtime keys that do not 
