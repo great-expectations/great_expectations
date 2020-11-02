@@ -30,21 +30,21 @@ def build_partition_request(
     partition_request_keys: set = set(partition_request_dict.keys())
     if not partition_request_keys <= PartitionRequest.RECOGNIZED_PARTITION_REQUEST_KEYS:
         raise ge_exceptions.PartitionerError(
-            f'''Unrecognized partition_request key(s): \
+            f'''Unrecognized partition_request key(s):
 "{str(partition_request_keys - PartitionRequest.RECOGNIZED_PARTITION_REQUEST_KEYS)}" detected.
             '''
         )
     custom_filter: Callable = partition_request_dict.get("custom_filter")
     if custom_filter and not isinstance(custom_filter, Callable):
         raise ge_exceptions.PartitionerError(
-            f'''The type of a custom_filter be a function (Python "Callable").  The type given is \
+            f'''The type of a custom_filter be a function (Python "Callable").  The type given is
 "{str(type(custom_filter))}", which is illegal.
             '''
         )
     partition_name: str = partition_request_dict.get("partition_name")
     if partition_name and not isinstance(partition_name, str):
         raise ge_exceptions.PartitionerError(
-            f'''The type of a partition_name must be a string (Python "str").  The type given is \
+            f'''The type of a partition_name must be a string (Python "str").  The type given is
 "{str(type(partition_name))}", which is illegal.
             '''
         )
@@ -52,7 +52,7 @@ def build_partition_request(
     if partition_definition:
         if not isinstance(partition_definition, dict):
             raise ge_exceptions.PartitionerError(
-                f'''The type of a partition_definition must be a dictionary (Python "dict").  The type given is \
+                f'''The type of a partition_definition must be a dictionary (Python "dict").  The type given is
 "{str(type(partition_definition))}", which is illegal.
                 '''
             )
@@ -63,7 +63,7 @@ def build_partition_request(
     data_asset_name: str = partition_request_dict.get("data_asset_name")
     if data_asset_name and not isinstance(data_asset_name, str):
         raise ge_exceptions.PartitionerError(
-            f'''The type of a data_asset_name must be a string (Python "str").  The type given is \
+            f'''The type of a data_asset_name must be a string (Python "str").  The type given is
 "{str(type(data_asset_name))}", which is illegal.
             '''
         )
@@ -71,13 +71,13 @@ def build_partition_request(
     limit: Union[int, None] = partition_request_dict.get("limit")
     if limit and (not isinstance(limit, int) or limit < 0):
         raise ge_exceptions.PartitionerError(
-            f'''The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The  \
+            f'''The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
 type and value given are "{str(type(limit))}" and "{limit}", respectively, which is illegal.
             '''
         )
     if partition_index is not None and limit is not None:
         raise ge_exceptions.PartitionerError(
-            "Only one of partition_index or limit, but not both, can be specified (specifying both is illegal)." \
+            "Only one of partition_index or limit, but not both, can be specified (specifying both is illegal)."
         )
     partition_index = _parse_partition_index(partition_index=partition_index)
     return PartitionRequest(
@@ -100,7 +100,7 @@ def _parse_partition_index(
     elif isinstance(partition_index, (list, tuple)):
         if len(partition_index) > 3:
             raise ge_exceptions.PartitionerError(
-                f'''The number of partition_index slice components must be between 1 and 3 (the given number is \
+                f'''The number of partition_index slice components must be between 1 and 3 (the given number is
 {len(partition_index)}).
                 '''
             )
@@ -116,8 +116,8 @@ def _parse_partition_index(
         return _parse_partition_index(partition_index=[int(idx_str) for idx_str in partition_index.split(":")])
     else:
         raise ge_exceptions.PartitionerError(
-            f'''The type of a partition_index must be an integer (Python "int"), or a list (Python "list") or a tuple \
-(Python "tuple"), or a Python "slice" object, or a string that has the format of a single integer or a slice argument. \
+            f'''The type of a partition_index must be an integer (Python "int"), or a list (Python "list") or a tuple
+(Python "tuple"), or a Python "slice" object, or a string that has the format of a single integer or a slice argument.
 The type given is "{str(type(partition_index))}", which is illegal.
             '''
         )
