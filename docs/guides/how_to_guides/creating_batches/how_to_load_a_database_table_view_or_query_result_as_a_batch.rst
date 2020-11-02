@@ -92,8 +92,8 @@ Now that you have a Batch, you can use it to create Expectations or validate the
 
 Additional Notes
 ----------------
-  Å* If you are using Snowflake, and you have lowercase table or column names:
-    * If you are loading your batch with a table, you can use pass `"use_quoted_name":True` into your `batch_kwargs` dictionary. This will use the SQL Alchemy quoted_name method to ensure proper case sensitivity for your table and column names.
+  * If you are using Snowflake, and you have lowercase table or column names:
+    * If you are loading your batch with a table, you can use pass `"use_quoted_name":True` into your `batch_kwargs` dictionary. This will use the SQL Alchemy quoted_name method to ensure case sensitivity for your table and column names.
     * If you are loading your batch with a query, if you have lowercase column names, you still need to pass `"use_quoted_name":True` into your `batch_kwargs` dictionary. You will also need to wrap your query in single quotes, and your table or column name in double quotes like so:
         .. code-block:: python
 
