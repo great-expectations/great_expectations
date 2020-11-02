@@ -562,7 +562,6 @@ def test_sampling_method__mod(test_cases_for_sql_data_connector_sqlite_execution
         })
     )
 
-    # random.seed() is no good here: the random number generator is in the database, not python
     assert len(batch_data.fetchall()) == 12
 
 
@@ -602,4 +601,3 @@ def test_sampling_method__md5(test_cases_for_sql_data_connector_sqlite_execution
     #         }
     #     })
     # )
-
