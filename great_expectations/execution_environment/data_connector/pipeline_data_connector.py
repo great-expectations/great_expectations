@@ -41,28 +41,25 @@ class PipelineDataConnector(DataConnector):
 
         self._runtime_keys = runtime_keys
 
-        self._runtime_params = None
+        self._runtime_params = self._create_empty_runtime_params()
 
-    @property
-    def runtime_params(self) -> PartitionDefinitionSubset:
-        return self._runtime_params
+    def _create_empty_runtime_params(self) -> PartitionDefinitionSubset:
+        return PartitionDefinitionSubset({key: "" for key in self._runtime_keys})
 
-    @runtime_params.setter
-    def runtime_params(self, runtime_params: PartitionDefinitionSubset):
+    def _validate_and_update_runtime_params(self, runtime_params: dict):
         """
         First, validate the keys of runtime_params provided by the user.  Then, if validation passes, then compare the
-        supplied runtime_params to the existing ones.  If these dictionaries are different, then update the property and
+        supplied runtime_params to the existing ones.  If these dictionaries are different, then update the instance and
         refresh the data reference cache in order to incorporate the new runtime_params dictionary into the object.
         """
+        if runtime_params is None:
+            runtime_params = self._create_empty_runtime_params()
         self._validate_runtime_keys_configuration(runtime_keys=list(runtime_params.keys()))
         if not self._eq_runtime_params_dicts(
             runtime_params_a=self._runtime_params,
             runtime_params_b=runtime_params
         ):
-            if runtime_params is None:
-                self._runtime_params = None
-            else:
-                self._runtime_params = PartitionDefinitionSubset(runtime_params)
+            self._runtime_params = PartitionDefinitionSubset(runtime_params)
             self.refresh_data_references_cache()
 
     def refresh_data_references_cache(self):
@@ -85,7 +82,7 @@ class PipelineDataConnector(DataConnector):
         """
         return [
             self._get_data_reference_name(
-                partition_request=self.runtime_params
+                partition_request=self._runtime_params
             )
         ]
 
@@ -120,9 +117,6 @@ class PipelineDataConnector(DataConnector):
         return [k for k, v in self._data_references_cache.items() if v is None]
 
     def get_available_data_asset_names(self) -> List[str]:
-        if self._data_references_cache is None:
-            raise ValueError('_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?')
-
         # This will fetch ALL batch_definitions in the cache
         batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
@@ -143,16 +137,27 @@ class PipelineDataConnector(DataConnector):
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
+        self._validate_and_update_runtime_params(
+            runtime_params=batch_request.partition_request
+        )
+
         if self._data_references_cache is None:
-            self.runtime_params = batch_request.partition_request
             self.refresh_data_references_cache()
 
-        batch_definition_list: List[BatchDefinition] = list(self._data_references_cache.values())[0]
-        if not batch_definition_matches_batch_request(
-            batch_definition=batch_definition_list[0],
-            batch_request=batch_request
-        ):
-            batch_definition_list = []
+        batch_definition_list: List[BatchDefinition] = list(
+            filter(
+                lambda batch_definition: batch_definition_matches_batch_request(
+                    batch_definition=batch_definition,
+                    batch_request=batch_request
+                ),
+                [
+                    batch_definitions[0]
+                    for batch_definitions in self._data_references_cache.values()
+                    if batch_definitions is not None
+                ]
+            )
+        )
+        # TODO: <Alex>Note: sorters can be applied to the resulting list in the multi-part case.</Alex>
 
         return batch_definition_list
 
@@ -168,7 +173,7 @@ class PipelineDataConnector(DataConnector):
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,
                 data_asset_name=data_asset_name,
-                partition_definition=PartitionDefinition(self.runtime_params)
+                partition_definition=PartitionDefinition(self._runtime_params)
             )
         ]
 
@@ -235,7 +240,7 @@ appear among the configured runtime keys.
 "{str(type(runtime_params_a))}", which is illegal.
                 '''
             )
-        if not all([isinstance(value, str) for value in runtime_params_a.values()]):
+        if not all([isinstance(value, (str, int, float, bool)) for value in runtime_params_a.values()]):
             raise ge_exceptions.DataConnectorError("All runtime_param_a values must of Python str type.")
         if not isinstance(runtime_params_b, dict):
             raise ge_exceptions.DataConnectorError(
@@ -243,7 +248,7 @@ appear among the configured runtime keys.
 "{str(type(runtime_params_b))}", which is illegal.
                 '''
             )
-        if not all([isinstance(value, str) for value in runtime_params_b.values()]):
+        if not all([isinstance(value, (str, int, float, bool)) for value in runtime_params_b.values()]):
             raise ge_exceptions.DataConnectorError("All runtime_param_b values must of Python str type.")
         if len(runtime_params_a) != len(runtime_params_b):
             return False

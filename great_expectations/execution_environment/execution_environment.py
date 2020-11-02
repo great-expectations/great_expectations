@@ -165,7 +165,6 @@ class ExecutionEnvironment(object):
                 the batch_data parameter.
                 '''
             )
-        data_connector.runtime_params = batch_request.partition_request
         batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )

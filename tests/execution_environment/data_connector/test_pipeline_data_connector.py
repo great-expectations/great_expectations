@@ -6,10 +6,7 @@ from typing import List
 
 from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector import PipelineDataConnector
-from great_expectations.core.id_dict import (
-    PartitionDefinitionSubset,
-    PartitionDefinition
-)
+from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
@@ -57,14 +54,9 @@ execution_engine:
 def test_instantiation(basic_execution_environment):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request: dict = {
-        "run_id": 1234567890,
-    }
-
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.runtime_params = PartitionDefinitionSubset(partition_request)
 
     assert test_pipeline_data_connector.self_check() == {
         "class_name": "PipelineDataConnector",
@@ -73,7 +65,7 @@ def test_instantiation(basic_execution_environment):
         "data_assets": {
             "IN_MEMORY_DATA_ASSET": {
                 "batch_definition_count": 1,
-                "example_data_references": ["1234567890"]
+                "example_data_references": ["--"]
             }
         },
         "unmatched_data_reference_count": 0,
@@ -121,16 +113,9 @@ def test_instantiation(basic_execution_environment):
 
 
 def test_get_available_data_asset_names(basic_execution_environment):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    partition_request: dict = {
-        "run_id": 1234567890,
-    }
-
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.runtime_params = PartitionDefinitionSubset(partition_request)
 
     expected_available_data_asset_names: List[str] = ["IN_MEMORY_DATA_ASSET"]
 
@@ -149,7 +134,6 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_execution
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.runtime_params = PartitionDefinitionSubset(partition_request)
 
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
@@ -188,7 +172,6 @@ def test_get_batch_definition_list_from_batch_request_length_zero(basic_executio
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.runtime_params = PartitionDefinitionSubset(partition_request)
 
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
@@ -209,19 +192,11 @@ def test_get_batch_definition_list_from_batch_request_length_zero(basic_executio
 
 
 def test__get_data_reference_list(basic_execution_environment):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    partition_request: dict = {
-        "custom_key_0": "staging",
-        "run_id": 1234567890,
-    }
-
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.runtime_params = PartitionDefinitionSubset(partition_request)
 
-    expected_data_reference_list: List[str] = ["staging-1234567890"]
+    expected_data_reference_list: List[str] = ["--"]
 
     # noinspection PyProtectedMember
     data_reference_list: List[str] = test_pipeline_data_connector._get_data_reference_list()
@@ -230,8 +205,6 @@ def test__get_data_reference_list(basic_execution_environment):
 
 
 def test__build_batch_spec_from_batch_definition(basic_execution_environment):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     partition_request: dict = {
         "custom_key_0": "staging",
         "run_id": 1234567890,
@@ -240,7 +213,6 @@ def test__build_batch_spec_from_batch_definition(basic_execution_environment):
     test_pipeline_data_connector: PipelineDataConnector
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
-    test_pipeline_data_connector.runtime_params = PartitionDefinitionSubset(partition_request)
 
     expected_batch_spec: InMemoryBatchSpec = InMemoryBatchSpec()
 
@@ -250,10 +222,7 @@ def test__build_batch_spec_from_batch_definition(basic_execution_environment):
             execution_environment_name="my_execution_environment",
             data_connector_name="test_pipeline_data_connector",
             data_asset_name="my_data_asset",
-            partition_definition=PartitionDefinition({
-                "custom_key_0": "staging",
-                "run_id": 1234567890,
-            })
+            partition_definition=PartitionDefinition(partition_request)
         )
     )
 
