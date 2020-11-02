@@ -300,7 +300,7 @@ configured runtime keys.
                     ):
                         batch_definition_list.extend(batch_definition)
 
-        # 2) batch_definitions selected using PartitionReuqest matches partition_request
+        # 2) batch_definitions selected using PartitionRequest matches partition_request
         if batch_request.partition_request is not None:
             partition_request_obj: PartitionRequest = build_partition_request(partition_request_dict=batch_request.partition_request)
             batch_definition_list = partition_request_obj.select_from_partition_request(batch_definition_list=batch_definition_list)

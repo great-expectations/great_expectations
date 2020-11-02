@@ -16,13 +16,6 @@ from great_expectations.core.batch import (
     BatchDefinition,
     PartitionDefinition
 )
-"""
-* What has been taken out? 
-
-    - partition_name is no longer searchable : we don't deal with it anymore
-    - data_asset_name used to be a PartitionRequest field --> part of BatchRequest
-"""
-
 
 @pytest.fixture()
 def create_files_and_instantiate_data_connector(tmp_path_factory):
@@ -116,8 +109,6 @@ def test_partition_request_non_recognized_param(create_files_and_instantiate_dat
         ))
 
     # Test 3: partition_definitions is not dict
-    # should this be taken out?
-    # <WILL> this caught at batch_definition_matches_batch_request() now is that right?
     with pytest.raises(AssertionError):
         sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
             execution_environment_name="test_environment",
@@ -242,9 +233,7 @@ def test_partition_request_sorted_filtered_by_custom_filter(create_files_and_ins
             partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
         ),
     ]
-
     assert returned_batch_definition_list == expected
-
 
 
 def test_partition_request_sorted_filtered_by_custom_filter_with_limit(create_files_and_instantiate_data_connector):
@@ -296,7 +285,6 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_limit(create_fi
             partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
         ),
     ]
-
     assert returned_batch_definition_list == expected
 
 
@@ -335,7 +323,6 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_int(cr
     assert returned_batch_definition_list == expected
 
 
-
 def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_string(create_files_and_instantiate_data_connector):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
@@ -368,9 +355,6 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_string
         ),
     ]
     assert returned_batch_definition_list == expected
-
-
-
 
 
 def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_list(create_files_and_instantiate_data_connector):
@@ -415,7 +399,6 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_list(c
     assert returned_batch_definition_list == expected
 
 
-
 def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_tuple(create_files_and_instantiate_data_connector):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
@@ -438,7 +421,6 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_tuple(
             "index": (0, 4, 3),
         },
     ))
-
     assert len(returned_batch_definition_list) == 2
 
     expected: List[BatchDefinition] = [
@@ -580,7 +562,6 @@ def test_partition_request_partition_request_partition_definition_query_1_key(cr
         ),
     ]
     assert returned_batch_definition_list == expected
-
 
 
 def test_partition_request_partition_request_partition_definition_query_2_key(create_files_and_instantiate_data_connector):
@@ -729,4 +710,3 @@ def test_partition_request_for_data_asset_name(create_files_and_instantiate_data
         ),
     ]
     assert returned_batch_definition_list == expected
-#
