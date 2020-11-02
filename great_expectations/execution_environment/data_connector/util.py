@@ -47,6 +47,18 @@ def batch_definition_matches_batch_request(
     if batch_request.data_asset_name:
         if batch_request.data_asset_name != batch_definition.data_asset_name:
             return False
+
+    if batch_request.partition_request:
+        assert isinstance(batch_request.partition_request, dict)
+        partition_definition_query = batch_request.partition_request.get("partition_definition_query")
+        if partition_definition_query:
+            assert isinstance(partition_definition_query, dict)
+            for key in partition_definition_query.keys():
+                if not (
+                        key in batch_definition.partition_definition and batch_definition.partition_definition[key] ==
+                        partition_definition_query[key]
+                ):
+                    return False
     return True
 
 

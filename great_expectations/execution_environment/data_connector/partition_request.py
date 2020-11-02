@@ -42,7 +42,7 @@ def build_partition_request(
     if partition_definition_query:
         if not isinstance(partition_definition_query, dict):
             raise ge_exceptions.PartitionerError(
-                f'''The type of a partition_definition must be a dictionary (Python "dict").  The type given is
+                f'''The type of a partition_definition_query must be a dictionary (Python "dict").  The type given is
 "{str(type(partition_definition_query))}", which is illegal.
                 '''
             )
