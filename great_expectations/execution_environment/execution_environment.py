@@ -128,8 +128,8 @@ class ExecutionEnvironment(object):
             batch_request=batch_request
         )
 
+    @staticmethod
     def _get_batches_from_batch_request(
-        self,
         data_connector: DataConnector,
         batch_request: BatchRequest,
     ) -> List[Batch]:
