@@ -109,11 +109,15 @@ class ExecutionEnvironment(object):
         data_connector: DataConnector = self.get_data_connector(
             name=batch_request.data_connector_name
         )
+        batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
 
         if batch_request.batch_data is None:
             return self._get_batches_from_batch_request(
                 data_connector=data_connector,
-                batch_request=batch_request
+                batch_request=batch_request,
+                batch_definition_list=batch_definition_list
             )
 
         if not isinstance(data_connector, PipelineDataConnector):
@@ -125,18 +129,17 @@ class ExecutionEnvironment(object):
 
         return self._get_batches_from_pipeline_batch_data(
             data_connector=data_connector,
-            batch_request=batch_request
+            batch_request=batch_request,
+            batch_definition_list=batch_definition_list
         )
 
     @staticmethod
     def _get_batches_from_batch_request(
         data_connector: DataConnector,
         batch_request: BatchRequest,
+        batch_definition_list: List[BatchDefinition]
     ) -> List[Batch]:
         batches: List[Batch] = []
-        batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
-        )
         for batch_definition in batch_definition_list:
             batch_data: Any
             batch_spec: InMemoryBatchSpec
@@ -158,6 +161,7 @@ class ExecutionEnvironment(object):
         self,
         data_connector: PipelineDataConnector,
         batch_request: BatchRequest,
+        batch_definition_list: List[BatchDefinition]
     ) -> List[Batch]:
         if not batch_request.partition_request:
             raise ge_exceptions.DataConnectorError(
@@ -165,9 +169,6 @@ class ExecutionEnvironment(object):
                 the batch_data parameter.
                 '''
             )
-        batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
-        )
         # TODO: <Alex>Do we want to keep this check here for now (the next line cannot have an empty batch_definition_list)? </Alex>
         if len(batch_definition_list) == 0:
             return []
