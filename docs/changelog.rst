@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Add a store_id property to StoreBackend #2030
 
 0.12.7
 -----------------
