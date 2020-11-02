@@ -203,25 +203,25 @@ def _invert_regex_to_data_reference_template(
 
 def _eq_runtime_params_dicts(runtime_params_a: dict, runtime_params_b: dict) -> bool:
     """
-    :param runtime_params_a -- first one-level dictionary with string-valued keys
-    :param runtime_params_b -- second one-level dictionary with string-valued keys
-    :returns True if keys and values are the same in both input dictionaries
+    :param runtime_params_a -- one-level dictionary with string-valued keys (first operand)
+    :param runtime_params_b -- one-level dictionary with string-valued keys (second operand)
+    :returns True if keys and values are the same in both input dictionaries (False otherwise)
     """
     if runtime_params_a is None and runtime_params_b is None:
         return True
     if runtime_params_a is None or runtime_params_b is None:
         return False
-    if not isinstance(runtime_params_a, (dict, PartitionDefinitionSubset)):
+    if not isinstance(runtime_params_a, dict):
         raise ge_exceptions.DataConnectorError(
-            f'''The type of runtime_params_a must be a Python dict or PartitionDefinition.  The type given is 
+            f'''The type of runtime_params_a must be a Python dict (or PartitionDefinition).  The type given is 
 "{str(type(runtime_params_a))}", which is illegal.
             '''
         )
     if not all([isinstance(value, str) for value in runtime_params_a.values()]):
         raise ge_exceptions.DataConnectorError("All runtime_param_a values must of Python str type.")
-    if not isinstance(runtime_params_b, (dict, PartitionDefinitionSubset)):
+    if not isinstance(runtime_params_b, dict):
         raise ge_exceptions.DataConnectorError(
-            f'''The type of runtime_params_b must be a Python dict or PartitionDefinition.  The type given is 
+            f'''The type of runtime_params_b must be a Python dict (or PartitionDefinition).  The type given is 
 "{str(type(runtime_params_b))}", which is illegal.
             '''
         )
