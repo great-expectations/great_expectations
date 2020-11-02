@@ -252,6 +252,7 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
     assert batch.batch_spec is not None
     assert isinstance(batch.data, pd.DataFrame)
     assert batch.data.shape[0] == 1313
+    assert batch.batch_markers["pandas_data_fingerprint"] == "3aaabc12402f987ff006429a7756f5cf"
 
 
 def test_get_batch_with_caching():
@@ -288,6 +289,7 @@ def test_get_batch_with_pipeline_style_batch_request(basic_execution_environment
     assert isinstance(batch.data, pd.DataFrame)
     assert batch.data.shape == (2, 2)
     assert batch.data["col2"].values[1] == 4
+    assert batch.batch_markers["pandas_data_fingerprint"] == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
 
 
 def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_error(basic_execution_environment):
