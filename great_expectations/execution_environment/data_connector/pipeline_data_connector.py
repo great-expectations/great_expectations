@@ -53,6 +53,8 @@ class PipelineDataConnector(DataConnector):
             self._validate_runtime_keys_configuration(runtime_keys=list(runtime_params.keys()))
             self._runtime_params = PartitionDefinitionSubset(runtime_params)
             self.refresh_data_references_cache()
+        else:
+            self._runtime_params = None
 
     def refresh_data_references_cache(self):
         """
