@@ -11,7 +11,10 @@ from great_expectations.core.id_dict import (
 )
 from great_expectations.execution_environment.types import InMemoryBatchSpec
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
+from great_expectations.execution_environment.data_connector.util import (
+    batch_definition_matches_batch_request,
+    _eq_runtime_params_dicts
+)
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
@@ -49,12 +52,21 @@ class PipelineDataConnector(DataConnector):
 
     @runtime_params.setter
     def runtime_params(self, runtime_params: PartitionDefinitionSubset):
-        if runtime_params:
-            self._validate_runtime_keys_configuration(runtime_keys=list(runtime_params.keys()))
-            self._runtime_params = PartitionDefinitionSubset(runtime_params)
+        """
+        First, validate the keys of runtime_params provided by the user.  Then, if validation passes, then compare the
+        supplied runtime_params to the existing ones.  If these dictionaries are different, then update the property and
+        refresh the data reference cache in order to incorporate the new runtime_params dictionary into the object.
+        """
+        self._validate_runtime_keys_configuration(runtime_keys=list(runtime_params.keys()))
+        if not _eq_runtime_params_dicts(
+            runtime_params_a=self._runtime_params,
+            runtime_params_b=runtime_params
+        ):
+            if runtime_params is None:
+                self._runtime_params = None
+            else:
+                self._runtime_params = PartitionDefinitionSubset(runtime_params)
             self.refresh_data_references_cache()
-        else:
-            self._runtime_params = None
 
     def refresh_data_references_cache(self):
         """
