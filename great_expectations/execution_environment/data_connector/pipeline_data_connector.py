@@ -11,10 +11,7 @@ from great_expectations.core.id_dict import (
 )
 from great_expectations.execution_environment.types import InMemoryBatchSpec
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.execution_environment.data_connector.util import (
-    batch_definition_matches_batch_request,
-    _eq_runtime_params_dicts
-)
+from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
@@ -32,7 +29,7 @@ class PipelineDataConnector(DataConnector):
         name: str,
         execution_environment_name: str,
         execution_engine: ExecutionEngine = None,
-        runtime_keys: dict = None,
+        runtime_keys: list = None,
     ):
         logger.debug(f'Constructing PipelineDataConnector "{name}".')
 
@@ -58,7 +55,7 @@ class PipelineDataConnector(DataConnector):
         refresh the data reference cache in order to incorporate the new runtime_params dictionary into the object.
         """
         self._validate_runtime_keys_configuration(runtime_keys=list(runtime_params.keys()))
-        if not _eq_runtime_params_dicts(
+        if not self._eq_runtime_params_dicts(
             runtime_params_a=self._runtime_params,
             runtime_params_b=runtime_params
         ):
@@ -220,3 +217,40 @@ class PipelineDataConnector(DataConnector):
 appear among the configured runtime keys.
                     '''
                 )
+
+    @staticmethod
+    def _eq_runtime_params_dicts(runtime_params_a: dict, runtime_params_b: dict) -> bool:
+        """
+        :param runtime_params_a -- one-level dictionary with string-valued keys (first operand)
+        :param runtime_params_b -- one-level dictionary with string-valued keys (second operand)
+        :returns True if keys and values are the same in both input dictionaries (False otherwise)
+        """
+        if runtime_params_a is None and runtime_params_b is None:
+            return True
+        if runtime_params_a is None or runtime_params_b is None:
+            return False
+        if not isinstance(runtime_params_a, dict):
+            raise ge_exceptions.DataConnectorError(
+                f'''The type of runtime_params_a must be a Python dict (or PartitionDefinition).  The type given is 
+"{str(type(runtime_params_a))}", which is illegal.
+                '''
+            )
+        if not all([isinstance(value, str) for value in runtime_params_a.values()]):
+            raise ge_exceptions.DataConnectorError("All runtime_param_a values must of Python str type.")
+        if not isinstance(runtime_params_b, dict):
+            raise ge_exceptions.DataConnectorError(
+                f'''The type of runtime_params_b must be a Python dict (or PartitionDefinition).  The type given is 
+"{str(type(runtime_params_b))}", which is illegal.
+                '''
+            )
+        if not all([isinstance(value, str) for value in runtime_params_b.values()]):
+            raise ge_exceptions.DataConnectorError("All runtime_param_b values must of Python str type.")
+        if len(runtime_params_a) != len(runtime_params_b):
+            return False
+        if(set(runtime_params_a.keys())) != (set(runtime_params_b.keys())):
+            return False
+        keys: List[str] = list(runtime_params_a.keys())
+        for key in keys:
+            if runtime_params_a[key] != runtime_params_b[key]:
+                return False
+        return True
