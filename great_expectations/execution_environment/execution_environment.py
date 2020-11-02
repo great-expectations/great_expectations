@@ -8,10 +8,12 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.pipeline_data_connector import PipelineDataConnector
 from great_expectations.core.batch import (
-    Batch,
     BatchRequest,
-    BatchDefinition
+    BatchMarkers,
+    BatchDefinition,
+    Batch,
 )
+from great_expectations.execution_environment.types import InMemoryBatchSpec
 
 import great_expectations.exceptions as ge_exceptions
 
@@ -108,57 +110,23 @@ class ExecutionEnvironment(object):
             name=batch_request.data_connector_name
         )
 
-        if batch_request.batch_data is not None:
-            if not isinstance(data_connector, PipelineDataConnector):
-                raise ge_exceptions.ExecutionEnvironmentError(
-                    f'''Only the PipelineDataConnector can accept batch_data as part of partition_request (the type of
-                    the data connector with the name "{data_connector.name}" is "{str(type(data_connector))}").
-                    '''
-                )
-            return self._get_batches_from_pipeline_batch_data(
+        if batch_request.batch_data is None:
+            return self._get_batches_from_batch_request(
                 data_connector=data_connector,
                 batch_request=batch_request
             )
 
-        return self._get_batches_from_batch_request(
+        if not isinstance(data_connector, PipelineDataConnector):
+            raise ge_exceptions.ExecutionEnvironmentError(
+                f'''Only the PipelineDataConnector can accept batch_data as part of partition_request (the type of
+                the data connector with the name "{data_connector.name}" is "{str(type(data_connector))}").
+                '''
+            )
+
+        return self._get_batches_from_pipeline_batch_data(
             data_connector=data_connector,
             batch_request=batch_request
         )
-
-    def _get_batches_from_pipeline_batch_data(
-            self,
-            data_connector: PipelineDataConnector,
-            batch_request: BatchRequest,
-    ) -> List[Batch]:
-        if not batch_request.partition_request:
-            raise ge_exceptions.DataConnectorError(
-                f'''PipelineDataConnector "{data_connector.name}" did not receive a partition_definition along with
-                the batch_data parameter.
-                '''
-            )
-        data_connector.runtime_params = batch_request.partition_request
-        batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
-        )
-        if len(batch_definition_list) == 0:
-            return []
-        batch_definition: BatchDefinition = batch_definition_list[0]
-        _, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata_from_batch_definition(
-            batch_definition=batch_definition
-        )
-        batch_data: Any = batch_request.batch_data
-        self.execution_engine.update_batch_markers(
-            batch_markers=batch_markers,
-            batch_data=batch_data
-        )
-        new_batch: Batch = Batch(
-            data=batch_data,
-            batch_request=batch_request,
-            batch_definition=batch_definition,
-            batch_spec=batch_spec,
-            batch_markers=batch_markers,
-        )
-        return [new_batch]
 
     def _get_batches_from_batch_request(
         self,
@@ -170,12 +138,11 @@ class ExecutionEnvironment(object):
             batch_request=batch_request
         )
         for batch_definition in batch_definition_list:
+            batch_data: Any
+            batch_spec: InMemoryBatchSpec
+            batch_markers: BatchMarkers
             batch_data, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata_from_batch_definition(
                 batch_definition=batch_definition
-            )
-            self.execution_engine.update_batch_markers(
-                batch_markers=batch_markers,
-                batch_data=batch_data
             )
             new_batch: Batch = Batch(
                 data=batch_data,
@@ -186,6 +153,40 @@ class ExecutionEnvironment(object):
             )
             batches.append(new_batch)
         return batches
+
+    def _get_batches_from_pipeline_batch_data(
+        self,
+        data_connector: PipelineDataConnector,
+        batch_request: BatchRequest,
+    ) -> List[Batch]:
+        if not batch_request.partition_request:
+            raise ge_exceptions.DataConnectorError(
+                f'''PipelineDataConnector "{data_connector.name}" did not receive a partition_definition along with
+                the batch_data parameter.
+                '''
+            )
+        data_connector.runtime_params = batch_request.partition_request
+        batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
+        # TODO: <Alex>Do we want to keep this check here for now (the next line cannot have an empty batch_definition_list)? </Alex>
+        if len(batch_definition_list) == 0:
+            return []
+        batch_definition: BatchDefinition = batch_definition_list[0]
+        batch_data: Any = batch_request.batch_data
+        batch_spec: InMemoryBatchSpec
+        batch_markers: BatchMarkers
+        batch_spec, batch_markers = self.execution_engine.get_batch_spec_and_batch_markers_for_batch_data(
+            batch_data=batch_data
+        )
+        new_batch: Batch = Batch(
+            data=batch_data,
+            batch_request=batch_request,
+            batch_definition=batch_definition,
+            batch_spec=batch_spec,
+            batch_markers=batch_markers,
+        )
+        return [new_batch]
 
     @property
     def name(self):
