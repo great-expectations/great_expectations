@@ -3,12 +3,15 @@ import os
 from unittest.mock import patch
 
 import boto3
+import pyparsing as pp
 import pytest
 from moto import mock_s3
 
+import tests.test_utils as test_utils
 from great_expectations.core import RunIdentifier
 from great_expectations.data_context.store import (
     InMemoryStoreBackend,
+    StoreBackend,
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
@@ -37,6 +40,101 @@ def test_StoreBackendValidation():
 
     # zero-length tuple is allowed
     backend._validate_key(())
+
+
+@mock_s3
+def test_StoreBackend_id_initialization(tmp_path_factory):
+    """
+    What does this test and why?
+
+    A StoreBackend should have a store_id property. That store_id should be read and initialized
+    from an existing persistent store_id during instantiation, or a new store_id should be generated
+    and persisted. The store_id should be a valid UUIDv4
+    If a new store_id cannot be persisted, use an ephemeral store_id.
+    Persistence should be in a .ge_store_id file for for filesystem and blob-stores.
+
+    Note: StoreBackend & TupleStoreBackend are abstract classes, so we will test the
+    concrete classes that inherit from them.
+    """
+
+    def check_store_backend_store_id_functionality(
+        store_backend: StoreBackend,
+    ) -> None:
+        """
+        Assertions to check if a store backend is handling reading and writing a store_id appropriately.
+        Args:
+            store_backend: Instance of subclass of StoreBackend to test e.g. TupleFilesystemStoreBackend
+
+        Returns:
+            None
+        """
+        # Check that store_id exists can be read
+        assert store_backend.store_id is not None
+        # Check that store_id is a valid UUID
+        assert test_utils.validate_uuid4(store_backend.store_id)
+        # Check in file stores that the actual file exists
+        assert store_backend.has_key(key=(".ge_store_id",))
+
+        # Check file stores for the file in the correct format
+        store_id_from_file = store_backend.get(key=(".ge_store_id",))
+        store_id_file_parser = "store_id = " + pp.Word(pp.hexnums + "-")
+        parsed_store_id = store_id_file_parser.parseString(store_id_from_file)
+        assert test_utils.validate_uuid4(parsed_store_id[1])
+
+    # InMemoryStoreBackend
+    # Initialize without store_id and check that it is generated correctly
+    in_memory_store_backend = InMemoryStoreBackend()
+    check_store_backend_store_id_functionality(store_backend=in_memory_store_backend)
+
+    # TupleFilesystemStoreBackend
+    # Initialize without store_id and check that it is generated correctly
+    path = "dummy_str"
+    project_path = str(tmp_path_factory.mktemp("test_TupleFilesystemStoreBackend__dir"))
+
+    tuple_filesystem_store_backend = TupleFilesystemStoreBackend(
+        root_directory=os.path.abspath(path),
+        base_directory=project_path,
+        filepath_template="my_file_{0}",
+    )
+    check_store_backend_store_id_functionality(
+        store_backend=tuple_filesystem_store_backend
+    )
+
+    # TupleS3StoreBackend
+    # Initialize without store_id and check that it is generated correctly
+    bucket = "leakybucket"
+    prefix = "this_is_a_test_prefix"
+
+    # create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    s3_store_backend = TupleS3StoreBackend(
+        filepath_template="my_file_{0}", bucket=bucket, prefix=prefix,
+    )
+
+    check_store_backend_store_id_functionality(store_backend=s3_store_backend)
+
+    # TupleGCSStoreBackend
+    # Initialize without store_id and check that it is generated correctly
+    bucket = "leakybucket"
+    prefix = "this_is_a_test_prefix"
+    project = "dummy-project"
+    base_public_path = "http://www.test.com/"
+
+    gcs_store_backend_with_base_public_path = TupleGCSStoreBackend(
+        filepath_template=None,
+        bucket=bucket,
+        prefix=prefix,
+        project=project,
+        base_public_path=base_public_path,
+    )
+
+    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+
+        assert gcs_store_backend_with_base_public_path.store_id is not None
+        # Currently we don't have a good way to mock GCS functionality
+        # check_store_backend_store_id_functionality(store_backend=gcs_store_backend_with_base_public_path)
 
 
 def test_InMemoryStoreBackend():
