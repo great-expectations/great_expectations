@@ -33,7 +33,7 @@ class StoreBackend(metaclass=ABCMeta):
     @property
     def store_id(self) -> str:
         """
-        Create a store_id using key .store_id if one does not exist, and return it if it exists
+        Create a store_id if one does not exist, and return it if it exists
         Returns:
             store_id which is a UUID(version=4)
         """
