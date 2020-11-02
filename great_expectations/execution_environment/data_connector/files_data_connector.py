@@ -288,15 +288,6 @@ configured runtime keys.
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
-        # what needs to take place
-        # 1. go through the list of data_references:
-        # 2. match it with with ours...
-        # 3. in a best-effort sort of way:
-        # 4. we get a list of  BatchDefinitions and then we filter them
-        batch_definition_list: List[BatchDefinition] = []
-        if self._data_references_cache is None:
-            self.refresh_data_references_cache()
-
         # 1) batch definition matches batch_request
         batch_definition_list: List[BatchDefinition] = []
         for data_asset_name, sub_cache in self._data_references_cache.items():
@@ -309,11 +300,10 @@ configured runtime keys.
                     ):
                         batch_definition_list.extend(batch_definition)
 
-        # 2) batch_definition matches partition_request
+        # 2) batch_definitions selected using PartitionReuqest matches partition_request
         if batch_request.partition_request is not None:
             partition_request_obj: PartitionRequest = build_partition_request(partition_request_dict=batch_request.partition_request)
             batch_definition_list = partition_request_obj.select_from_partition_request(batch_definition_list=batch_definition_list)
-
 
         # 3) sort batch_definition
         if len(self.sorters) > 0:
@@ -322,30 +312,8 @@ configured runtime keys.
         else:
             return batch_definition_list
         return batch_definition_list
-    """
-    def get_batch_definition_list_from_batch_request(
-        self,
-        batch_request: BatchRequest,
-    ) -> List[BatchDefinition]:
-        if batch_request.data_connector_name != self.name:
-            raise ValueError(
-                f'data_connector_name "{batch_request.data_connector_name}" does not match name "{self.name}".'
-            )
-        if self._data_references_cache is None:
-            self.refresh_data_references_cache()
-        batch_definition_list: List[BatchDefinition] = []
-        for data_asset_name, sub_cache in self._data_references_cache.items():
-            # TODO: <Alex>A cleaner implementation would be a filter on sub_cache.values() with "batch_definition_matches_batch_request()" as condition, since "data_reference" is not involved.</Alex>
-            for data_reference, batch_definition in sub_cache.items():
-                if batch_definition is not None:
-                    if batch_definition_matches_batch_request(
-                        batch_definition=batch_definition[0],
-                        batch_request=batch_request
-                    ):
-                        batch_definition_list.extend(batch_definition)
 
-    """
-    def _sort_batch_definition_list(self, batch_definition_list):
+   def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list = []
         # this is not going to be the right order all the time. there must be a way.
         #
