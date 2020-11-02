@@ -64,15 +64,6 @@ class SqlDataConnector(DataConnector):
             column_names = self._get_column_names_from_splitter_kwargs(data_asset["splitter_kwargs"])
             partition_definition_list = [dict(zip(column_names, row))  for row in rows]
 
-            # batch_definition_list = [
-            #     BatchDefinition(
-            #         execution_environment_name=self.execution_environment_name,
-            #         data_connector_name=self.name,
-            #         data_asset_name=data_asset_name,
-            #         partition_definition=PartitionDefinition(split),
-            #     )
-            # for split in splits]
-
             # TODO Abe 20201029 : Apply sorters to partition_definition_list here
 
             self._data_references_cache[data_asset_name] = partition_definition_list
