@@ -115,7 +115,7 @@ def test_partition_request_non_recognized_param(create_files_and_instantiate_dat
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
             partition_request={
-                "partition_definition_query": 1
+                "partition_query": 1
             },
         ))
 
@@ -124,7 +124,7 @@ def test_partition_request_non_recognized_param(create_files_and_instantiate_dat
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request={
-            "partition_definition_query": {"name": "alex"}
+            "partition_query": {"name": "alex"}
         },
     ))
     assert len(returned) == 2
@@ -522,7 +522,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(creat
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_definition_query_1_key(create_files_and_instantiate_data_connector):
+def test_partition_request_partition_request_partition_query_1_key(create_files_and_instantiate_data_connector):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
     returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
@@ -530,7 +530,7 @@ def test_partition_request_partition_request_partition_definition_query_1_key(cr
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request={
-            "partition_definition_query": {"timestamp": "20200809"},
+            "partition_query": {"timestamp": "20200809"},
         },
     ))
 
@@ -564,7 +564,7 @@ def test_partition_request_partition_request_partition_definition_query_1_key(cr
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_definition_query_2_key(create_files_and_instantiate_data_connector):
+def test_partition_request_partition_request_partition_query_1_key_and_index(create_files_and_instantiate_data_connector):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
     returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
@@ -572,55 +572,7 @@ def test_partition_request_partition_request_partition_definition_query_2_key(cr
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request={
-            "partition_definition_query": {"timestamp": "20200809", "name": "will"},
-        },
-    ))
-
-    assert len(returned_batch_definition_list) == 1
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
-            execution_environment_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'will', 'timestamp': '20200809', 'price': '1002'}),
-        ),
-    ]
-    assert returned_batch_definition_list == expected
-
-
-def test_partition_request_partition_request_partition_definition_query_2_key(create_files_and_instantiate_data_connector):
-    my_data_connector = create_files_and_instantiate_data_connector
-    # no limit
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "partition_definition_query": {"timestamp": "20200809", "name": "will"},
-        },
-    ))
-
-    assert len(returned_batch_definition_list) == 1
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
-            execution_environment_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'will', 'timestamp': '20200809', 'price': '1002'}),
-        ),
-    ]
-    assert returned_batch_definition_list == expected
-
-
-def test_partition_request_partition_request_partition_definition_query_2_key(create_files_and_instantiate_data_connector):
-    my_data_connector = create_files_and_instantiate_data_connector
-    # no limit
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "partition_definition_query": {"name": "james"},
+            "partition_query": {"name": "james"},
             "index": 0,
         },
     ))
@@ -632,6 +584,30 @@ def test_partition_request_partition_request_partition_definition_query_2_key(cr
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
             partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
+        ),
+    ]
+    assert returned_batch_definition_list == expected
+
+
+def test_partition_request_partition_request_partition_query_2_key_name_timestamp(create_files_and_instantiate_data_connector):
+    my_data_connector = create_files_and_instantiate_data_connector
+    # no limit
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="test_environment",
+        data_connector_name="general_filesystem_data_connector",
+        data_asset_name="TestFiles",
+        partition_request={
+            "partition_query": {"timestamp": "20200809", "name": "will"},
+        },
+    ))
+
+    assert len(returned_batch_definition_list) == 1
+    expected: List[BatchDefinition] = [
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition({'name': 'will', 'timestamp': '20200809', 'price': '1002'}),
         ),
     ]
     assert returned_batch_definition_list == expected

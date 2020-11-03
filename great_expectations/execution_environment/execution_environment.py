@@ -180,7 +180,7 @@ class ExecutionEnvironment(object):
             partition_definition = None
         else:
             if isinstance(partition_request, dict):
-                partition_definition = PartitionDefinition(partition_request.get("partition_definition_query"))
+                partition_definition = PartitionDefinition(partition_request.get("partition_query"))
             else:
                 partition_definition = PartitionDefinition(partition_request)
         data_connector = PipelineDataConnector(

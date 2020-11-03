@@ -389,7 +389,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request=PartitionRequest(**{
-            "partition_definition_query":
+            "partition_query":
                 {
                     "name": "james",
                     "timestamp": "20200713",
@@ -502,7 +502,7 @@ def test_alpha(tmp_path_factory):
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="A",
         partition_request=PartitionRequest(**{
-             "partition_definition_query": {
+             "partition_query": {
                  "part_1": "B"
              }
         })

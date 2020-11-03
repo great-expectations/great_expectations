@@ -16,7 +16,7 @@ from great_expectations.core.id_dict import (
     PartitionDefinition,
 )
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.execution_environment.data_connector.partition_request import PartitionRequest
+from great_expectations.execution_environment.data_connector.partition_query import PartitionQuery
 import great_expectations.exceptions as ge_exceptions
 
 from great_expectations.execution_environment.data_connector.sorter import Sorter
@@ -50,13 +50,13 @@ def batch_definition_matches_batch_request(
 
     if batch_request.partition_request:
         assert isinstance(batch_request.partition_request, dict)
-        partition_definition_query = batch_request.partition_request.get("partition_definition_query")
-        if partition_definition_query:
-            assert isinstance(partition_definition_query, dict)
-            for key in partition_definition_query.keys():
+        partition_query = batch_request.partition_request.get("partition_query")
+        if partition_query:
+            assert isinstance(partition_query, dict)
+            for key in partition_query.keys():
                 if not (
                         key in batch_definition.partition_definition and batch_definition.partition_definition[key] ==
-                        partition_definition_query[key]
+                        partition_query[key]
                 ):
                     return False
     return True

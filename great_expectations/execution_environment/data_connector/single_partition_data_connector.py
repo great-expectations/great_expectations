@@ -10,9 +10,9 @@ from great_expectations.core.batch import (
     BatchDefinition,
 )
 
-from great_expectations.execution_environment.data_connector.partition_request import (
-PartitionRequest,
-build_partition_request,
+from great_expectations.execution_environment.data_connector.partition_query import (
+PartitionQuery,
+build_partition_query,
 )
 
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
@@ -158,9 +158,9 @@ class SinglePartitionDataConnector(DataConnector):
 
         # 2) batch_definition matches partition_request
         if batch_request.partition_request is not None:
-            partition_request_obj: PartitionRequest = build_partition_request(
+            partition_query_obj: PartitionQuery = build_partition_query(
                 partition_request_dict=batch_request.partition_request)
-            batch_definition_list = partition_request_obj.select_from_partition_request(
+            batch_definition_list = partition_query_obj.select_from_partition_request(
                 batch_definition_list=batch_definition_list)
 
         # 3) sort batch_definition

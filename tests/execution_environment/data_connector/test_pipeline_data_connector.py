@@ -44,7 +44,7 @@ def test_instantiation(basic_execution_environment):
         data_asset_name="my_data_asset",
         batch_data=test_df,
         partition_request={
-         "partition_definition_query":
+         "partition_query":
                 {
             		"run_id": 1234567890,
             	}
@@ -116,7 +116,7 @@ def test_get_available_data_asset_names(basic_execution_environment):
         data_asset_name="my_data_asset",
         batch_data=test_df,
         partition_request={
-               "partition_definition_query":
+               "partition_query":
                 {
             		"run_id": 1234567890,
             	}
@@ -141,7 +141,7 @@ def test_get_batch_definition_list_from_batch_request(basic_execution_environmen
         data_asset_name="my_data_asset",
         batch_data=test_df,
         partition_request={
-            "partition_definition_query":
+            "partition_query":
                 {
                     "run_id": 1234567890,
                 }
@@ -154,10 +154,9 @@ def test_get_batch_definition_list_from_batch_request(basic_execution_environmen
         "data_asset_name": "my_data_asset",
         "batch_data": test_df,
         "partition_request": {
-               "partition_definition_query":
-                {
-            		"run_id": 1234567890,
-            	}
+               "partition_query": {
+                   "run_id": 1234567890,
+               }
         },
         "limit": None,
     }
@@ -193,7 +192,7 @@ def test__get_data_reference_list(basic_execution_environment):
         data_asset_name="my_data_asset",
         batch_data=test_df,
         partition_request={
-               "partition_definition_query":
+               "partition_query":
                 {
 					"custom_key_0": "staging",
             		"run_id": 1234567890,            	
@@ -221,7 +220,7 @@ def test__build_batch_spec_from_batch_definition(basic_execution_environment):
         data_asset_name="my_data_asset",
         batch_data=test_df,
         partition_request={
-            "partition_definition_query":
+            "partition_query":
                 {
                     "custom_key_0": "staging",
                     "run_id": 1234567890,
