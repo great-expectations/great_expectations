@@ -65,8 +65,6 @@ def test_instantiation(basic_execution_environment):
         "data_assets": {
             "IN_MEMORY_DATA_ASSET": {
                 "batch_definition_count": 1,
-                # TODO: <Alex>As a consequence of not having runtime_params as an instance variable, data_reference is an empty string.</Alex>
-                # "example_data_references": ["--"]
                 "example_data_references": [""]
             }
         },
@@ -198,8 +196,6 @@ def test__get_data_reference_list(basic_execution_environment):
 
     test_pipeline_data_connector = basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
 
-    # TODO: <Alex>As a consequence of not having runtime_params as an instance variable, data_reference is an empty string.</Alex>
-    # expected_data_reference_list: List[str] = ["--"]
     expected_data_reference_list: List[str] = [""]
 
     # noinspection PyProtectedMember
