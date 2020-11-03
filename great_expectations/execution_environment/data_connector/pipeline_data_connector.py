@@ -112,8 +112,8 @@ class PipelineDataConnector(DataConnector):
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
-        self._validate_runtime_params(
-            runtime_params=batch_request.partition_request
+        self._validate_partition_request(
+            partition_request=batch_request.partition_request
         )
 
         partition_request: dict = batch_request.partition_request
@@ -193,12 +193,26 @@ class PipelineDataConnector(DataConnector):
         )
         return data_reference_name
 
-    def _validate_runtime_params(self, runtime_params: dict):
+    def _validate_batch_request(self, batch_request: BatchRequest):
+        super()._validate_batch_request(batch_request=batch_request)
+
+        # Insure that batch_data and batch_request satisfy the "if and only if" condition.
+        if not (
+            (batch_request.batch_data is None and batch_request.partition_request is None) or
+            (batch_request.batch_data is not None and batch_request.partition_request)
+        ):
+            raise ge_exceptions.DataConnectorError(
+                f'''PipelineDataConnector "{self.name}" requires batch_data and partition_request to be both present or
+                both absent in the batch_request parameter.
+                '''
+            )
+
+    def _validate_partition_request(self, partition_request: dict):
         """
         """
-        if runtime_params is None:
-            runtime_params = {}
-        self._validate_runtime_keys_configuration(runtime_keys=list(runtime_params.keys()))
+        if partition_request is None:
+            partition_request = {}
+        self._validate_runtime_keys_configuration(runtime_keys=list(partition_request.keys()))
 
     def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
         if runtime_keys and len(runtime_keys) > 0:

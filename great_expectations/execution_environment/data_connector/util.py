@@ -202,43 +202,6 @@ def _invert_regex_to_data_reference_template(
     return data_reference_template
 
 
-def _eq_runtime_params_dicts(runtime_params_a: dict, runtime_params_b: dict) -> bool:
-    """
-    :param runtime_params_a -- one-level dictionary with string-valued keys (first operand)
-    :param runtime_params_b -- one-level dictionary with string-valued keys (second operand)
-    :returns True if keys and values are the same in both input dictionaries (False otherwise)
-    """
-    if runtime_params_a is None and runtime_params_b is None:
-        return True
-    if runtime_params_a is None or runtime_params_b is None:
-        return False
-    if not isinstance(runtime_params_a, dict):
-        raise ge_exceptions.DataConnectorError(
-            f'''The type of runtime_params_a must be a Python dict (or PartitionDefinition).  The type given is 
-"{str(type(runtime_params_a))}", which is illegal.
-            '''
-        )
-    if not all([isinstance(value, str) for value in runtime_params_a.values()]):
-        raise ge_exceptions.DataConnectorError("All runtime_param_a values must of Python str type.")
-    if not isinstance(runtime_params_b, dict):
-        raise ge_exceptions.DataConnectorError(
-            f'''The type of runtime_params_b must be a Python dict (or PartitionDefinition).  The type given is 
-"{str(type(runtime_params_b))}", which is illegal.
-            '''
-        )
-    if not all([isinstance(value, str) for value in runtime_params_b.values()]):
-        raise ge_exceptions.DataConnectorError("All runtime_param_b values must of Python str type.")
-    if len(runtime_params_a) != len(runtime_params_b):
-        return False
-    if(set(runtime_params_a.keys())) != (set(runtime_params_b.keys())):
-        return False
-    keys: List[str] = list(runtime_params_a.keys())
-    for key in keys:
-        if runtime_params_a[key] != runtime_params_b[key]:
-            return False
-    return True
-
-
 def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
     sorter_dict: Dict[str, Sorter] = {}
     if config_list is not None:
