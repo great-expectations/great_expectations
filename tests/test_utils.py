@@ -31,7 +31,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
+    SqlAlchemyExecutionEngine, SqlAlchemyBatchData,
 )
 from great_expectations.execution_environment.types import (
     BatchSpec,
@@ -644,18 +644,6 @@ def get_test_execution_engine_with_data(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return PandasExecutionEngine(caching=caching).load_batch(
-            in_memory_dataset=df,
-            batch_request={"data_asset_name": "test", "partition_name": table_name},
-            batch_spec=BatchSpec(
-                {
-                    "ge_load_time": datetime.datetime.now(
-                        datetime.timezone.utc
-                    ).strftime("%Y%m%dT%H%M%S.%fZ")
-                }
-            ),
-        )
-
         return _build_pandas_engine(df=df)
 
     elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql"]:
@@ -776,17 +764,7 @@ def get_test_execution_engine_with_data(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return SparkDFExecutionEngine(caching=caching).load_batch(
-            in_memory_dataset=spark_df,
-            batch_request={"data_asset_name": "test", "partition_name": table_name},
-            batch_spec=BatchSpec(
-                {
-                    "ge_load_time": datetime.datetime.now(
-                        datetime.timezone.utc
-                    ).strftime("%Y%m%dT%H%M%S.%fZ")
-                }
-            ),
-        )
+        return _build_spark_engine(df=spark_df)
 
     else:
         raise ValueError("Unknown dataset_type " + str(execution_engine))
