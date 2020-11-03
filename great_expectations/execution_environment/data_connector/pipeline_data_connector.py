@@ -41,26 +41,37 @@ class PipelineDataConnector(DataConnector):
 
         self._runtime_keys = runtime_keys
 
-        self._runtime_params = self._create_empty_runtime_params()
+        # TODO: <Alex>Removing run_time_params from instance variables (commenting out for now).</Alex>
+        # self._runtime_params = self._create_empty_runtime_params()
 
-    def _create_empty_runtime_params(self) -> PartitionDefinitionSubset:
-        return PartitionDefinitionSubset({key: "" for key in self._runtime_keys})
+    # TODO: <Alex>Removing run_time_params from instance variables makes the next method not needed (commenting out for now).</Alex>
+    # def _create_empty_runtime_params(self) -> PartitionDefinitionSubset:
+    #     return PartitionDefinitionSubset({key: "" for key in self._runtime_keys})
 
+    # TODO: <Alex>As a consequence of not having runtime_params as an instance variable, this validation method was changed.</Alex>
+    # def _validate_and_update_runtime_params(self, runtime_params: dict):
+    #     """
+    #     First, validate the keys of runtime_params provided by the user.  Then, if validation passes, then compare the
+    #     supplied runtime_params to the existing ones.  If these dictionaries are different, then update the instance and
+    #     refresh the data reference cache in order to incorporate the new runtime_params dictionary into the object.
+    #     """
+    #     if runtime_params is None:
+    #         runtime_params = self._create_empty_runtime_params()
+    #     self._validate_runtime_keys_configuration(runtime_keys=list(runtime_params.keys()))
+    #     if not self._eq_runtime_params_dicts(
+    #         runtime_params_a=self._runtime_params,
+    #         runtime_params_b=runtime_params
+    #     ):
+    #         self._runtime_params = PartitionDefinitionSubset(runtime_params)
+    #         self.refresh_data_references_cache()
+
+    # TODO: <Alex>Keeping the same name for now (even though no update takes place), until the issue with the runtime_params as an instance variable is resolved.</Alex>
     def _validate_and_update_runtime_params(self, runtime_params: dict):
         """
-        First, validate the keys of runtime_params provided by the user.  Then, if validation passes, then compare the
-        supplied runtime_params to the existing ones.  If these dictionaries are different, then update the instance and
-        refresh the data reference cache in order to incorporate the new runtime_params dictionary into the object.
         """
         if runtime_params is None:
-            runtime_params = self._create_empty_runtime_params()
+            runtime_params = {}
         self._validate_runtime_keys_configuration(runtime_keys=list(runtime_params.keys()))
-        if not self._eq_runtime_params_dicts(
-            runtime_params_a=self._runtime_params,
-            runtime_params_b=runtime_params
-        ):
-            self._runtime_params = PartitionDefinitionSubset(runtime_params)
-            self.refresh_data_references_cache()
 
     def refresh_data_references_cache(self):
         """
@@ -80,11 +91,13 @@ class PipelineDataConnector(DataConnector):
 
         This method is used to refresh the cache.
         """
-        return [
-            self._get_data_reference_name(
-                partition_request=self._runtime_params
-            )
-        ]
+        # TODO: <Alex>As a consequence of not having runtime_params as an instance variable, this interface method of DataConnector cannot have meaningful output.</Alex>
+        # return [
+        #     self._get_data_reference_name(
+        #         partition_request=self._runtime_params
+        #     )
+        # ]
+        return [""]
 
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache.
@@ -141,25 +154,41 @@ class PipelineDataConnector(DataConnector):
             runtime_params=batch_request.partition_request
         )
 
-        if self._data_references_cache is None:
-            self.refresh_data_references_cache()
-
-        batch_definition_list: List[BatchDefinition] = list(
-            filter(
-                lambda batch_definition: batch_definition_matches_batch_request(
-                    batch_definition=batch_definition,
-                    batch_request=batch_request
-                ),
-                [
-                    batch_definitions[0]
-                    for batch_definitions in self._data_references_cache.values()
-                    if batch_definitions is not None
-                ]
-            )
-        )
+        # TODO: <Alex>Without runtime_params, batch_definition has to be constructed from batch_request</Alex>
+        # if self._data_references_cache is None:
+        #     self.refresh_data_references_cache()
+        #
+        # batch_definition_list: List[BatchDefinition] = list(
+        #     filter(
+        #         lambda batch_definition: batch_definition_matches_batch_request(
+        #             batch_definition=batch_definition,
+        #             batch_request=batch_request
+        #         ),
+        #         [
+        #             batch_definitions[0]
+        #             for batch_definitions in self._data_references_cache.values()
+        #             if batch_definitions is not None
+        #         ]
+        #     )
+        # )
         # TODO: <Alex>Note: sorters can be applied to the resulting list in the multi-part case.</Alex>
 
-        return batch_definition_list
+        partition_request: dict = batch_request.partition_request
+        if partition_request is None:
+            partition_request = {}
+        batch_definition: BatchDefinition = BatchDefinition(
+            execution_environment_name=self.execution_environment_name,
+            data_connector_name=self.name,
+            data_asset_name=DEFAULT_DATA_ASSET_NAME,
+            partition_definition=PartitionDefinition(partition_request)
+        )
+        if batch_definition_matches_batch_request(
+            batch_definition=batch_definition,
+            batch_request=batch_request
+        ):
+            return [batch_definition]
+
+        return []
 
     def _map_data_reference_to_batch_definition_list(
         self,
@@ -168,12 +197,21 @@ class PipelineDataConnector(DataConnector):
     ) -> Optional[List[BatchDefinition]]:
         if data_asset_name is None:
             data_asset_name = DEFAULT_DATA_ASSET_NAME
+        # TODO: <Alex>As a consequence of not having runtime_params as an instance variable, this interface method of DataConnector returns a batch_definition with an empty partition_definition.</Alex>
+        # return [
+        #     BatchDefinition(
+        #         execution_environment_name=self.execution_environment_name,
+        #         data_connector_name=self.name,
+        #         data_asset_name=data_asset_name,
+        #         partition_definition=PartitionDefinition(self._runtime_params)
+        #     )
+        # ]
         return [
             BatchDefinition(
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,
                 data_asset_name=data_asset_name,
-                partition_definition=PartitionDefinition(self._runtime_params)
+                partition_definition=PartitionDefinition()
             )
         ]
 
