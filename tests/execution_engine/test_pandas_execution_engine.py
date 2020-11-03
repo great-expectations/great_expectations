@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from great_expectations.core.batch import Batch
 
 from great_expectations.execution_engine import PandasExecutionEngine
 
@@ -32,8 +33,15 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     pass
 
 
-def test_dataframe_method():
-    pass
+def test_dataframe_property_given_loaded_batch():
+    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": [1, 2, 3, 4]})
+
+    # Loading batch data
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+
+    # Ensuring Data not distorted
+    assert engine.dataframe.equals(df)
 
 
 

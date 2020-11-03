@@ -75,9 +75,10 @@ Notes:
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
         ValueError Exception
         """
-        if not self.active_batch_data:
+        # Changed to is None because was breaking prior
+        if self.active_batch_data is None:
             raise ValueError(
-                "Batch has not been loaded - please run load_batch() to load a batch."
+                "Batch has not been loaded - please run load_batch_data() to load a batch."
             )
 
         return self.active_batch_data
