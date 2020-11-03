@@ -5,6 +5,7 @@ import pytest
 from freezegun import freeze_time
 from moto import mock_s3
 
+import tests.test_utils as test_utils
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
@@ -78,6 +79,16 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
         ns_2,
     }
 
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert my_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(my_store.store_backend_id)
+
 
 @freeze_time("09/26/2019 13:42:41")
 def test_ValidationsStore_with_InMemoryStoreBackend():
@@ -120,11 +131,19 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
     assert my_store.get(ns_2) == ExpectationSuiteValidationResult(
         success=False, statistics={}, results=[]
     )
-
     assert set(my_store.list_keys()) == {
         ns_1,
         ns_2,
     }
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert my_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(my_store.store_backend_id)
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -195,6 +214,16 @@ test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
 """
     )
 
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert my_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(my_store.store_backend_id)
+
 
 def test_ValidationsStore_with_DatabaseStoreBackend(sa):
     # Use sqlite so we don't require postgres for this test.
@@ -240,3 +269,13 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
         ns_1,
         ns_2,
     }
+
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    # assert my_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    # assert test_utils.validate_uuid4(my_store.store_backend_id)

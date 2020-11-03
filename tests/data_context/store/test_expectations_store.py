@@ -1,5 +1,6 @@
 import pytest
 
+import tests.test_utils as test_utils
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.store import (
     DatabaseStoreBackend,
@@ -88,3 +89,16 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
         ns_1,
         ns_2,
     }
+
+
+def test_expectations_store_report_store_id():
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    expectations_store = ExpectationsStore()
+    # Check that store_backend_id exists can be read
+    assert expectations_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(expectations_store.store_backend_id)
