@@ -16,7 +16,7 @@ from great_expectations.core.id_dict import (
     PartitionDefinition,
 )
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.execution_environment.data_connector.partition_request import PartitionRequest
+from great_expectations.execution_environment.data_connector.partition_query import PartitionQuery
 import great_expectations.exceptions as ge_exceptions
 
 from great_expectations.execution_environment.data_connector.sorter import Sorter
@@ -47,11 +47,18 @@ def batch_definition_matches_batch_request(
     if batch_request.data_asset_name:
         if batch_request.data_asset_name != batch_definition.data_asset_name:
             return False
-    # FIXME: This is too rigid. Needs to take into account ranges and stuff.
-    if batch_request.partition_request is not None:
-        for k, v in batch_request.partition_request.items():
-            if (k not in batch_definition.partition_definition) or batch_definition.partition_definition[k] != v:
-                return False
+
+    if batch_request.partition_request:
+        assert isinstance(batch_request.partition_request, dict)
+        partition_query = batch_request.partition_request.get("partition_query")
+        if partition_query:
+            assert isinstance(partition_query, dict)
+            for key in partition_query.keys():
+                if not (
+                        key in batch_definition.partition_definition and batch_definition.partition_definition[key] ==
+                        partition_query[key]
+                ):
+                    return False
     return True
 
 

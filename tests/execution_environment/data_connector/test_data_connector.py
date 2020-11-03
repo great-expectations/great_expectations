@@ -154,7 +154,7 @@ def test__batch_definition_matches_batch_request():
         data_asset_name="aaa",
         partition_definition=PartitionDefinition(
             {
-                "id": "A"
+               "id": "A",
             }
         )
     )
@@ -199,6 +199,7 @@ def test__batch_definition_matches_batch_request():
         )
     )
 
+
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
@@ -206,7 +207,9 @@ def test__batch_definition_matches_batch_request():
             data_connector_name="a",
             data_asset_name="aaa",
             partition_request={
-                "id": "B"
+                "partition_query": {
+                    "id": "B"
+                },
             }
         )
     )
@@ -215,7 +218,9 @@ def test__batch_definition_matches_batch_request():
         batch_definition=A,
         batch_request=BatchRequest(
             partition_request={
-                "id": "A"
+                "partition_query": {
+                    "id": "A"
+                },
             }
         )
     )
