@@ -103,18 +103,6 @@ class SqlDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name:str) -> List[str]:
         return self._data_references_cache[data_asset_name]
 
-    def get_batch_data_and_metadata_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition,
-    ) -> Tuple[
-        Any, #batch_data
-        BatchSpec,
-        BatchMarkers,
-    ]:
-        batch_spec: BatchSpec = self._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
-        batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(batch_spec)
-        return batch_data, batch_spec, batch_markers
-
     def _build_batch_spec_from_batch_definition(
         self,
         batch_definition: BatchDefinition
