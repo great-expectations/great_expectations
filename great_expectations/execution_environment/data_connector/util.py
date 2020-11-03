@@ -2,8 +2,10 @@
 
 # Utility methods for dealing with DataConnector objects
 
+import os
 from typing import List, Dict, Any, Optional
 import copy
+from pathlib import Path
 import re
 import sre_parse
 import sre_constants
@@ -206,6 +208,21 @@ def _invert_regex_to_data_reference_template(
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)
 
     return data_reference_template
+
+
+def get_filesystem_one_level_directory_glob_path_list(
+    base_directory_path: str,
+    glob_directive: str
+) -> List[str]:
+    """
+    List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
+    :param base_directory_path -- base directory path, relative to which file paths will be collected
+    :param glob_directive -- glob expansion directive
+    :returns -- list of relative file paths
+    """
+    globbed_paths = Path(base_directory_path).glob(glob_directive)
+    path_list: List[str] = [os.path.relpath(str(posix_path), base_directory_path) for posix_path in globbed_paths]
+    return path_list
 
 
 def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:

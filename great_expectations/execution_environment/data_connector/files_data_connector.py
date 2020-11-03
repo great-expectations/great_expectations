@@ -21,6 +21,7 @@ from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
+    get_filesystem_one_level_directory_glob_path_list,
     build_sorters_from_config,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -50,7 +51,6 @@ class FilesDataConnector(DataConnector):
         base_directory: str,
         default_regex: dict,
         assets: dict,
-
         glob_directive: str = "*",
         sorters: list = None,
         execution_engine: ExecutionEngine = None,
@@ -62,8 +62,6 @@ class FilesDataConnector(DataConnector):
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
         )
-        self._glob_directive = glob_directive
-
         self._data_context_root_directory = data_context_root_directory
 
         self._base_directory = self._normalize_directory_path(dir_path=base_directory)
@@ -203,8 +201,10 @@ configured runtime keys.
             if asset.base_directory:
                 data_asset_path = str(Path(self.base_directory).joinpath(asset.base_directory))
 
-        globbed_paths = Path(data_asset_path).glob(self._glob_directive)
-        path_list: List[str] = [os.path.relpath(str(posix_path), data_asset_path) for posix_path in globbed_paths]
+        path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
+            base_directory_path=data_asset_path,
+            glob_directive=self._glob_directive
+        )
 
         return path_list
 

@@ -21,6 +21,7 @@ from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
+    get_filesystem_one_level_directory_glob_path_list,
     build_sorters_from_config,
 )
 
@@ -273,8 +274,10 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
 
         This method is used to refresh the cache.
         """
-        globbed_paths = Path(self.base_directory).glob(self.glob_directive)
-        path_list: List[str] = [os.path.relpath(str(posix_path), self.base_directory) for posix_path in globbed_paths]
+        path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
+            base_directory_path=self.base_directory,
+            glob_directive=self.glob_directive
+        )
         return path_list
 
     def _map_data_reference_to_batch_definition_list(
