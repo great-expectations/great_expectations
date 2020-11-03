@@ -356,9 +356,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 data_context (DataContext): \
                     An object representing a Great Expectations project that can be used to access Expectation
                     Suites and the Project Data itself
-                engine (SqlAlchemyExecutionEngine): \
-                    An Execution Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
-                    Execution Engine has already been configured and should be reused. Will override Credentials
+                engine (Engine): \
+                    A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
+                    Engine has already been configured and should be reused. Will override Credentials
                     if provided.
                 connection_string (string): \
                     If neither the engines nor the credentials have been provided, a connection string can be used
