@@ -576,7 +576,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
     def validate(
         self,
-        batches: Iterable[Batch],
         execution_engine: ExecutionEngine,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration=None,
@@ -584,7 +583,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if configuration is None:
             configuration = self.configuration
         return Validator(
-            execution_engine=execution_engine, batches=batches
+            execution_engine=execution_engine
         ).graph_validate(
             configurations=[configuration], runtime_configuration=runtime_configuration,
         )[

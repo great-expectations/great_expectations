@@ -202,7 +202,6 @@ class Validator:
                 #     if k in ("result_format", "include_config", "catch_exceptions")
                 # }
                 validation_result = expectation.validate(
-                    batches={self.batch.batch_spec.to_id(): self.batch},
                     execution_engine=self.execution_engine,
                     runtime_configuration=runtime_configuration,
                 )
