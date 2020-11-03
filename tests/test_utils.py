@@ -1432,7 +1432,7 @@ def evaluate_json_test(data_asset, expectation_type, test):
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_cfe(batch, expectation_type, test):
+def evaluate_json_test_cfe(execution_engine_with_data, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -1457,7 +1457,7 @@ def evaluate_json_test_cfe(batch, expectation_type, test):
     """
     expectation_suite = ExpectationSuite("json_test_suite")
     validator = Validator(
-        execution_engine=batch.execution_engine, expectation_suite=expectation_suite
+        execution_engine=execution_engine_with_data, expectation_suite=expectation_suite
     )
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
     # validator.set_default_expectation_argument("include_config", False)
@@ -1486,7 +1486,7 @@ def evaluate_json_test_cfe(batch, expectation_type, test):
         kwargs["include_config"] = False
         result = getattr(validator, expectation_type)(**kwargs)
 
-    check_json_test_result(test=test, result=result, data_asset=batch.data)
+    check_json_test_result(test=test, result=result, data_asset=execution_engine_with_data.active_batch_data)
 
 
 def check_json_test_result(test, result, data_asset=None):
