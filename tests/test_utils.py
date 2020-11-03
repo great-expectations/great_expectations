@@ -1031,6 +1031,45 @@ def get_test_batch(
         raise ValueError("Unknown dataset_type " + str(execution_engine))
 
 
+def _build_spark_engine(df):
+    from pyspark.sql import SparkSession
+
+    spark = SparkSession.builder.getOrCreate()
+    if isinstance(df, pd.DataFrame):
+        df = spark.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in df.to_records(index=False)
+            ],
+            df.columns.tolist(),
+        )
+    batch = Batch(data=df)
+    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
+    return engine
+
+
+def _build_sa_engine(df):
+    import sqlalchemy as sa
+
+    eng = sa.create_engine("sqlite://", echo=False)
+    df.to_sql("test", eng)
+    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    batch = Batch(data=batch_data)
+    engine = SqlAlchemyExecutionEngine(
+        engine=eng, batch_data_dict={batch.id: batch_data}
+    )
+    return engine
+
+
+def _build_pandas_engine(df):
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    return engine
+
+
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
     if context in ["sqlite"]:
         return getter in ["get_column_modes", "get_column_stdev"]
