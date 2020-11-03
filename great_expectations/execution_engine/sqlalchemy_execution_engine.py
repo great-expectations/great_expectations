@@ -5,6 +5,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 from urllib.parse import urlparse
+import json
 
 from sqlalchemy.engine import reflection
 from sqlalchemy.engine.default import DefaultDialect
@@ -940,3 +941,213 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             return inner_func
 
         return outer
+
+    ### Splitter methods for partitioning tables ###
+
+    def _split_on_whole_table(
+        self,
+        table_name: str,
+        # column_name: str,
+        partition_definition: dict,
+    ):
+        """'Split' by returning the whole table"""
+
+        # return sa.column(column_name) == partition_definition[column_name]
+        return 1 == 1
+
+    def _split_on_column_value(
+        self,
+        table_name: str,
+        column_name: str,
+        partition_definition: dict,
+    ):
+        """Split using the values in the named column"""
+
+        return sa.column(column_name) == partition_definition[column_name]
+
+    def _split_on_converted_datetime(
+        self,
+        table_name: str,
+        column_name: str,
+        partition_definition: dict,
+        date_format_string: str='%Y-%m-%d',
+    ):
+        """Convert the values in the named column to the given date_format, and split on that"""
+
+        return sa.func.strftime(
+            date_format_string,
+            sa.column(column_name),
+        ) == partition_definition[column_name]
+
+    def _split_on_divided_integer(
+        self,
+        table_name: str,
+        column_name: str,
+        divisor:int,
+        partition_definition: dict,
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+
+        return sa.cast(
+            sa.column(column_name) / divisor,
+            sa.Integer
+        ) == partition_definition[column_name]
+
+    def _split_on_mod_integer(
+        self,
+        table_name: str,
+        column_name: str,
+        mod:int,
+        partition_definition: dict,
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+
+        return sa.column(column_name) % mod == partition_definition[column_name]
+
+    def _split_on_multi_column_values(
+        self,
+        table_name: str,
+        column_names: List[str],
+        partition_definition: dict,
+    ):
+        """Split on the joint values in the named columns"""
+
+        return sa.and_(*[
+            sa.column(column_name) == column_value for column_name, column_value in partition_definition.items()
+        ])
+        
+    def _split_on_hashed_column(
+        self,
+        table_name: str,
+        column_name: str,
+        hash_digits: int,
+        partition_definition: dict,
+    ):
+        """Split on the hashed value of the named column"""
+
+        return sa.func.right(
+            sa.func.md5(
+                sa.column(column_name)
+            ),
+            hash_digits
+        ) == partition_definition[column_name]
+
+    ### Sampling methods ###
+
+    # _sample_using_limit
+    # _sample_using_random
+    # _sample_using_mod
+    # _sample_using_a_list
+    # _sample_using_md5
+
+    def _sample_using_random(
+        self,
+        p: float = .1,
+    ):
+        """Take a random sample of rows, retaining proportion p
+        
+        Note: the Random function behaves differently on different dialects of SQL
+        """
+        return sa.func.random() < p
+
+    def _sample_using_mod(
+        self,
+        column_name,
+        mod: int,
+        value: int,
+    ):
+        """Take the mod of named column, and only keep rows that match the given value"""
+        return sa.column(column_name) % mod == value
+
+    def _sample_using_a_list(
+        self,
+        column_name: str,
+        value_list: list,
+    ):
+        """Match the values in the named column against value_list, and only keep the matches"""
+        return sa.column(column_name).in_(value_list)
+
+    def _sample_using_md5(
+        self,
+        column_name: str,
+        hash_digits: int=1,
+        hash_value: str='f',
+    ):
+        """Hash the values in the named column, and split on that"""
+        return sa.func.right(
+            sa.func.md5(
+                sa.cast(sa.column(column_name), sa.Text)
+            ),
+            hash_digits
+        ) == hash_value
+
+
+    def _build_selector_from_batch_spec(self, batch_spec):
+        table_name = batch_spec["table_name"]
+
+        splitter_fn = getattr(self, batch_spec["splitter_method"])
+        if "sampling_method" in batch_spec:
+            if batch_spec["sampling_method"] == "_sample_using_limit":
+
+                return sa.select('*').select_from(
+                    sa.text(table_name)
+                ).where(
+                    splitter_fn(
+                        table_name=table_name,
+                        partition_definition=batch_spec["partition_definition"],
+                        **batch_spec["splitter_kwargs"]
+                    )
+                ).limit(batch_spec["sampling_kwargs"]["n"])
+
+            else:
+
+                sampler_fn = getattr(self, batch_spec["sampling_method"])
+                return sa.select('*').select_from(
+                    sa.text(table_name)
+                ).where(
+                    sa.and_(
+                        splitter_fn(
+                            table_name=table_name,
+                            partition_definition=batch_spec["partition_definition"],
+                            **batch_spec["splitter_kwargs"]
+                        ),
+                        sampler_fn(**batch_spec["sampling_kwargs"]),
+                    )
+                )
+        
+        else:
+
+            return sa.select('*').select_from(
+                sa.text(table_name)
+            ).where(
+                splitter_fn(
+                    table_name=table_name,
+                    partition_definition=batch_spec["partition_definition"],
+                    **batch_spec["splitter_kwargs"]
+                )
+            )
+
+    def get_batch_data_and_markers(
+        self,
+        batch_spec
+    ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
+
+        selector = self._build_selector_from_batch_spec(batch_spec)
+        batch_data = self.engine.execute(selector)
+        # TODO: Abe 20201030: This method should return a SqlAlchemyBatchData as its first object, but that probably requires deeper changes.
+        # SqlAlchemyBatchData(
+        #     engine=self.engine,
+        #     table_name=batch_spec.get("table"),
+        #     schema=batch_spec.get("schema"),
+        # )
+
+        batch_markers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        return batch_data, batch_markers
+
