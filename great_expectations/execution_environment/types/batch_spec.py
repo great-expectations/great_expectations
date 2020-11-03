@@ -91,10 +91,6 @@ class S3BatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
 class InMemoryBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if "batch_data" not in self:
-            raise InvalidBatchSpecError(
-                'InMemoryBatchSpec requires a "batch_data" element'
-            )
 
     @property
     def dataset(self):

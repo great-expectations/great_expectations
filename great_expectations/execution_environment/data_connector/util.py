@@ -2,7 +2,7 @@
 
 # Utility methods for dealing with DataConnector objects
 
-from typing import List, Dict, Union, Callable, Any, Tuple, Optional
+from typing import List, Dict, Any, Optional
 import copy
 import re
 import sre_parse
@@ -16,14 +16,8 @@ from great_expectations.core.id_dict import (
     PartitionDefinition,
 )
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.execution_environment.data_connector.partition_query import PartitionQuery
-import great_expectations.exceptions as ge_exceptions
-
 from great_expectations.execution_environment.data_connector.sorter import Sorter
-
-from great_expectations.data_context.util import (
-    instantiate_class_from_config
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 
 logger = logging.getLogger(__name__)
 
@@ -50,13 +44,13 @@ def batch_definition_matches_batch_request(
 
     if batch_request.partition_request:
         assert isinstance(batch_request.partition_request, dict)
-        partition_query = batch_request.partition_request.get("partition_query")
+        partition_query: Any = batch_request.partition_request.get("partition_query")
         if partition_query:
             assert isinstance(partition_query, dict)
             for key in partition_query.keys():
                 if not (
-                        key in batch_definition.partition_definition and batch_definition.partition_definition[key] ==
-                        partition_query[key]
+                    key in batch_definition.partition_definition and batch_definition.partition_definition[key] ==
+                    partition_query[key]
                 ):
                     return False
     return True
@@ -70,12 +64,6 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     regex_pattern: str,
     group_names: List[str],
 ) -> Optional[List[BatchDefinition]]:
-    # TODO: <Alex>Per Abe: The two-steps process involving a BatchRequest intermediary can be simplified by turning
-    # convert_data_reference_string_to_batch_request_using_regex() into convert_data_reference_string_to_batch_definition_using_regex()
-    # and passing it all the arguments it needs to create a BatchDefinition.
-    # We could not do it before, because the Partitioner difd not have all the required arguments. But the DataConnector does have them.
-    #</Alex>
-
     batch_request: BatchRequest = convert_data_reference_string_to_batch_request_using_regex(
         data_reference=data_reference,
         regex_pattern=regex_pattern,
@@ -112,7 +100,8 @@ def convert_data_reference_string_to_batch_request_using_regex(
         dict(zip(group_names, groups))
     )
 
-    # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; idea: resurrect the Partition class.</Alex>
+    # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
+    # TODO: <Alex>Update: Approach -- we can differentiate "convert_data_reference_string_to_batch_request_using_regex()" methods between FilesDataConnector and SinglePartitionFileDataConnector so that PartitionDefinition never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
     if "data_asset_name" in partition_definition:
         data_asset_name = partition_definition.pop("data_asset_name")
@@ -130,11 +119,6 @@ def map_batch_definition_to_data_reference_string_using_regex(
     regex_pattern: str,
     group_names: List[str],
 ) -> str:
-    # TODO: <Alex>Per Abe: The two-steps process involving a BatchRequest intermediary can be simplified by turning
-    # convert_data_reference_string_to_batch_request_using_regex() into convert_data_reference_string_to_batch_definition_using_regex()
-    # and passing it all the arguments it needs to create a BatchDefinition.
-    # We could not do it before, because the Partitioner difd not have all the required arguments. But the DataConnector does have them.
-    #</Alex>
     data_asset_name: str = batch_definition.data_asset_name
     partition_definition: PartitionDefinition = batch_definition.partition_definition
     partition_request: dict = partition_definition
@@ -224,14 +208,14 @@ def _invert_regex_to_data_reference_template(
     return data_reference_template
 
 
-def build_sorters_from_config(config_list: List[Dict[str, Any]]):
+def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
     sorter_dict: Dict[str, Sorter] = {}
     if config_list is not None:
         for sorter_config in config_list:
             # if sorters were not configured
             if sorter_config is None:
-                return
-            if 'name' not in sorter_config:
+                return None
+            if "name" not in sorter_config:
                 raise ValueError("Sorter config should have a name")
             sorter_name = sorter_config['name']
             new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)
@@ -249,6 +233,6 @@ def _build_sorter_from_config(sorter_config) -> Sorter:
         runtime_environment=runtime_environment,
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector.sorter"
-       },
+        }
     )
     return sorter

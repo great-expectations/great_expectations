@@ -1666,27 +1666,32 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "batch_spec_defaults": {}
             },
             "data_connectors": {
-                # "test_pipeline_data_connector": {
-                #     "module_name": "great_expectations.execution_environment.data_connector",
-                #     "class_name": "PipelineDataConnector",
-                #     # "partitioners": {
-                #     #     "test_pipeline_partitioner": {
-                #     #         "module_name": "great_expectations.execution_environment.data_connector.partitioner",
-                #     #         "class_name": "PipelinePartitioner",
-                #     #         "allow_multipart_partitions": False,
-                #     #         "runtime_keys": [
-                #     #             "run_id",
-                #     #             "custom_key_0",
-                #     #         ]
-                #     #     }
-                #     # },
-                #     # "default_partitioner_name": "test_pipeline_partitioner",
-                #     # "assets": {
-                #     #     "test_asset_1": {
-                #     #         # "partitioner_name": "test_pipeline_partitioner"
-                #     #     }
-                #     # }
-                # },
+                "test_pipeline_data_connector": {
+                    "module_name": "great_expectations.execution_environment.data_connector",
+                    "class_name": "PipelineDataConnector",
+                    "runtime_keys": [
+                        "pipeline_stage_name",
+                        "run_id",
+                        "custom_key_0",
+                    ],
+                    # "partitioners": {
+                    #     "test_pipeline_partitioner": {
+                    #         "module_name": "great_expectations.execution_environment.data_connector.partitioner",
+                    #         "class_name": "PipelinePartitioner",
+                    #         "allow_multipart_partitions": False,
+                    #         "runtime_keys": [
+                    #             "run_id",
+                    #             "custom_key_0",
+                    #         ]
+                    #     }
+                    # },
+                    # "default_partitioner_name": "test_pipeline_partitioner",
+                    # "assets": {
+                    #     "test_asset_1": {
+                    #         # "partitioner_name": "test_pipeline_partitioner"
+                    #     }
+                    # }
+                },
                 "test_filesystem_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
                     "class_name": "FilesDataConnector",

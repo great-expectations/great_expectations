@@ -8,10 +8,7 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 
-from great_expectations.execution_environment.data_connector.partition_query import (
-PartitionQuery,
-build_partition_query,
-)
+from great_expectations.execution_environment.data_connector.partition_query import build_partition_query
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.core.batch import (
     BatchRequest,
@@ -79,6 +76,7 @@ class FilesDataConnector(DataConnector):
         _assets: Dict[str, Union[dict, Asset]] = assets
         self._assets = _assets
         self._build_assets_from_config(config=assets)
+
         self._sorters = build_sorters_from_config(config_list=sorters)
 
     @property
@@ -94,8 +92,9 @@ class FilesDataConnector(DataConnector):
         return self._glob_directive
 
     @property
-    def sorters(self) -> List[Sorter]:
+    def sorters(self) -> Optional[dict]:
         return self._sorters
+
     def _build_assets_from_config(self, config: Dict[str, dict]):
         for name, asset_config in config.items():
             if asset_config is None:
@@ -127,7 +126,6 @@ class FilesDataConnector(DataConnector):
                 class_name=config["class_name"],
             )
         return asset
-
 
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
@@ -212,7 +210,7 @@ configured runtime keys.
         """
         Fetch data_references corresponding to data_asset_name from the cache.
         """
-        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the requirement arguments.</Alex>
+        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
         batch_definition_list = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -268,14 +266,6 @@ configured runtime keys.
 
         return unmatched_data_references
 
-    def get_available_data_asset_names(self) -> List[str]:
-        """Return the list of asset names known by this data connector.
-
-        Returns:
-            A list of available names
-        """
-        return list(self.assets.keys())
-
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,
@@ -285,27 +275,36 @@ configured runtime keys.
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
-        batch_definition_list: List[BatchDefinition] = []
-        for data_asset_name, sub_cache in self._data_references_cache.items():
-            # TODO: <Alex>A cleaner implementation would be a filter on sub_cache.values() with "batch_definition_matches_batch_request()" as condition, since "data_reference" is not involved.</Alex>
-            for data_reference, batch_definition in sub_cache.items():
-                if batch_definition is not None:
-                    if batch_definition_matches_batch_request(
-                            batch_definition=batch_definition[0],
-                            batch_request=batch_request
-                    ):
-                        batch_definition_list.extend(batch_definition)
+        batch_definition_list: List[BatchDefinition] = list(
+            filter(
+                lambda batch_definition: batch_definition_matches_batch_request(
+                    batch_definition=batch_definition,
+                    batch_request=batch_request
+                ),
+                [
+                    batch_definitions[0]
+                    for data_reference_sub_cache in self._data_references_cache.values()
+                    for batch_definitions in data_reference_sub_cache.values()
+                    if batch_definitions is not None
+                ]
+            )
+        )
 
         if batch_request.partition_request is not None:
-            partition_query_obj: PartitionQuery = build_partition_query(partition_request_dict=batch_request.partition_request)
-            batch_definition_list = partition_query_obj.select_from_partition_request(batch_definition_list=batch_definition_list)
+            partition_query_obj: PartitionQuery = build_partition_query(
+                partition_request_dict=batch_request.partition_request
+            )
+            batch_definition_list = partition_query_obj.select_from_partition_request(
+                batch_definition_list=batch_definition_list
+            )
 
         if len(self.sorters) > 0:
-            sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
+            sorted_batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list
+            )
             return sorted_batch_definition_list
         else:
             return batch_definition_list
-        return batch_definition_list
 
     def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list = []
@@ -370,7 +369,7 @@ configured runtime keys.
         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
         if not path:
             raise ValueError(
-                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition
+                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition 
 definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )

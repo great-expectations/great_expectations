@@ -11,10 +11,9 @@ from great_expectations.core.batch import (
 )
 
 from great_expectations.execution_environment.data_connector.partition_query import (
-PartitionQuery,
-build_partition_query,
+    PartitionQuery,
+    build_partition_query,
 )
-
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.execution_environment.data_connector.sorter import Sorter
@@ -50,18 +49,18 @@ class SinglePartitionDataConnector(DataConnector):
     ):
         logger.debug(f'Constructing SinglePartitionDataConnector "{name}".')
 
+        super().__init__(
+            name=name,
+            execution_environment_name=execution_environment_name,
+            execution_engine=None,
+        )
+
         self.base_directory = base_directory
         self.glob_directive = glob_directive
         if default_regex is None:
             default_regex = {}
         self._default_regex = default_regex
         self._sorters = build_sorters_from_config(config_list=sorters)
-
-        super().__init__(
-            name=name,
-            execution_environment_name=execution_environment_name,
-            execution_engine=None,
-        )
 
     def refresh_data_references_cache(self):
         """
@@ -79,7 +78,7 @@ class SinglePartitionDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache.
         """
-        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the requirement arguments.</Alex>
+        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
         batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -156,9 +155,11 @@ class SinglePartitionDataConnector(DataConnector):
 
         if batch_request.partition_request is not None:
             partition_query_obj: PartitionQuery = build_partition_query(
-                partition_request_dict=batch_request.partition_request)
+                partition_request_dict=batch_request.partition_request
+            )
             batch_definition_list = partition_query_obj.select_from_partition_request(
-                batch_definition_list=batch_definition_list)
+                batch_definition_list=batch_definition_list
+            )
 
         if len(self._sorters) > 0:
             sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
@@ -258,7 +259,6 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
     ):
         logger.debug(f'Constructing SinglePartitionFileDataConnector "{name}".')
 
-        self.glob_directive = glob_directive
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
@@ -313,7 +313,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
         if not path:
             raise ValueError(
-                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition
+                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition 
 definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )

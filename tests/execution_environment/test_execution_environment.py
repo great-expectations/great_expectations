@@ -25,6 +25,7 @@ from tests.test_utils import (
     create_files_for_regex_partitioner,
     create_files_in_directory,
 )
+import great_expectations.exceptions as ge_exceptions
 
 
 @pytest.fixture
@@ -38,6 +39,13 @@ execution_engine:
     class_name: PandasExecutionEngine
 
 data_connectors:
+    test_pipeline_data_connector:
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: PipelineDataConnector
+        runtime_keys:
+            - pipeline_stage_name
+            - run_id
+
     my_filesystem_data_connector:
         class_name: FilesDataConnector
         base_directory: {base_directory}
@@ -80,6 +88,13 @@ execution_engine:
     class_name: PandasExecutionEngine
 
 data_connectors:
+    test_pipeline_data_connector:
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: PipelineDataConnector
+        runtime_keys:
+            - pipeline_stage_name
+            - run_id
+
     my_filesystem_data_connector:
         class_name: SinglePartitionFileDataConnector
         base_directory: {base_directory}
@@ -243,6 +258,7 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
     assert batch.batch_spec is not None
     assert isinstance(batch.data, pd.DataFrame)
     assert batch.data.shape[0] == 1313
+    assert batch.batch_markers["pandas_data_fingerprint"] == "3aaabc12402f987ff006429a7756f5cf"
 
 
 def test_get_batch_with_caching():
@@ -253,7 +269,7 @@ def test_get_batch_with_pipeline_style_batch_request(basic_execution_environment
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     data_connector_name: str = "test_pipeline_data_connector"
-    data_asset_name: str = "test_asset_1"
+    data_asset_name: str = "IN_MEMORY_DATA_ASSET"
 
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
@@ -281,6 +297,7 @@ def test_get_batch_with_pipeline_style_batch_request(basic_execution_environment
     assert isinstance(batch.data, pd.DataFrame)
     assert batch.data.shape == (2, 2)
     assert batch.data["col2"].values[1] == 4
+    assert batch.batch_markers["pandas_data_fingerprint"] == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
 
 
 def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_error(basic_execution_environment):
@@ -298,7 +315,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_e
         "limit": None,
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
-    with pytest.raises(AttributeError):
+    with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_list: List[Batch] = basic_execution_environment.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -310,7 +327,7 @@ def test_get_available_data_asset_names_with_files_data_connector(basic_executio
 
     # Call "get_batch_list_from_batch_request()" to fill up the caches
     data_connector_name: str = "test_pipeline_data_connector"
-    data_asset_name: str = "pipeline_stage_data_asset_0"
+    data_asset_name: str = "IN_MEMORY_DATA_ASSET"
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
@@ -409,7 +426,7 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
 
     # Call "get_batch_list_from_batch_request()" to fill up the caches
     data_connector_name: str = "test_pipeline_data_connector"
-    data_asset_name: str = "pipeline_stage_data_asset_0"
+    data_asset_name: str = "IN_MEMORY_DATA_ASSET"
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     batch_request: dict = {
         "execution_environment_name": execution_environment.name,
