@@ -50,7 +50,6 @@ def test_basic_instantiation(tmp_path_factory):
             )
         )
 
-
 def test_example_with_implicit_data_asset_names():
     data_reference_dict = dict([
         (data_reference, create_fake_data_frame)
@@ -143,8 +142,10 @@ default_regex:
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
             partition_request={
-                "year_dir": "2020",
-                "month_dir": "03",
+                "partition_query": {
+                    "year_dir": "2020",
+                    "month_dir": "03",
+                }
             }
         )
     ) == [
