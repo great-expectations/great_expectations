@@ -89,15 +89,43 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
     # TupleFilesystemStoreBackend
     # Initialize without store_id and check that it is generated correctly
     path = "dummy_str"
-    project_path = str(tmp_path_factory.mktemp("test_TupleFilesystemStoreBackend__dir"))
+    project_path = str(
+        tmp_path_factory.mktemp("test_StoreBackend_id_initialization__dir")
+    )
 
     tuple_filesystem_store_backend = TupleFilesystemStoreBackend(
         root_directory=os.path.abspath(path),
         base_directory=project_path,
-        filepath_template="my_file_{0}",
+        # filepath_template="my_file_{0}",
     )
     check_store_backend_store_id_functionality(
         store_backend=tuple_filesystem_store_backend
+    )
+    assert (
+        gen_directory_tree_str(project_path)
+        == """\
+test_StoreBackend_id_initialization__dir0/
+    .ge_store_id
+"""
+    )
+
+    project_path_with_filepath_template = str(
+        tmp_path_factory.mktemp("test_StoreBackend_id_initialization__dir")
+    )
+    tuple_filesystem_store_backend_with_filepath_template = TupleFilesystemStoreBackend(
+        root_directory=os.path.abspath(path),
+        base_directory=project_path_with_filepath_template,
+        filepath_template="my_file_{0}",
+    )
+    check_store_backend_store_id_functionality(
+        store_backend=tuple_filesystem_store_backend_with_filepath_template
+    )
+    assert (
+        gen_directory_tree_str(project_path_with_filepath_template)
+        == """\
+test_StoreBackend_id_initialization__dir1/
+    my_file_.ge_store_id
+"""
     )
 
     # TupleS3StoreBackend
@@ -232,7 +260,6 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     assert my_store.get(("BBB",)) == "bbb"
 
     assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
-
     assert (
         gen_directory_tree_str(project_path)
         == """\
