@@ -1,7 +1,9 @@
 import logging
 
+import pyparsing as pp
 import pytest
 
+import tests.test_utils as test_utils
 from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.exceptions import StoreBackendError
 
@@ -34,7 +36,9 @@ def test_database_store_backend_get_url_for_key(caplog, sa, test_backends):
 
 def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backends):
     if "postgresql" not in test_backends:
-        pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
+        pytest.skip(
+            "test_database_store_backend_duplicate_key_violation requires postgresql"
+        )
 
     store_backend = DatabaseStoreBackend(
         credentials={
@@ -70,3 +74,47 @@ def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backend
         store_backend.set(key, "world", allow_update=False)
 
     assert "Integrity error" in str(exc.value)
+
+
+def test_database_store_backend_id_initialization(caplog, sa, test_backends):
+    """
+    What does this test and why?
+
+    NOTE: This test only has one key column which may not mirror actual functionality
+
+    A StoreBackend should have a store_id property. That store_id should be read and initialized
+    from an existing persistent store_id during instantiation, or a new store_id should be generated
+    and persisted. The store_id should be a valid UUIDv4
+    If a new store_id cannot be persisted, use an ephemeral store_id.
+    Persistence should be in a .ge_store_id file for for filesystem and blob-stores.
+
+    Note: StoreBackend & TupleStoreBackend are abstract classes, so we will test the
+    concrete classes that inherit from them.
+    See also test_store_backends::test_StoreBackend_id_initialization
+    """
+
+    if "postgresql" not in test_backends:
+        pytest.skip("test_database_store_backend_id_initialization requires postgresql")
+
+    store_backend = DatabaseStoreBackend(
+        credentials={
+            "drivername": "postgresql",
+            "username": "postgres",
+            "password": "",
+            "host": "localhost",
+            "port": "5432",
+            "database": "test_ci",
+        },
+        table_name="test_database_store_backend_id_initialization",
+        key_columns=["k1"],
+    )
+
+    # Check that store_id exists can be read
+    assert store_backend.store_id is not None
+    # Check that store_id is a valid UUID
+    assert test_utils.validate_uuid4(store_backend.store_id)
+    # Check value is in the correct format
+    store_id_from_db = store_backend.get(key=(".ge_store_id",))
+    store_id_file_parser = "store_id = " + pp.Word(pp.hexnums + "-")
+    parsed_store_id = store_id_file_parser.parseString(store_id_from_db)
+    assert test_utils.validate_uuid4(parsed_store_id[1])

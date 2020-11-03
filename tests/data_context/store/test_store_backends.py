@@ -55,6 +55,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
 
     Note: StoreBackend & TupleStoreBackend are abstract classes, so we will test the
     concrete classes that inherit from them.
+    See also test_database_store_backend::test_database_store_backend_id_initialization
     """
 
     def check_store_backend_store_id_functionality(
