@@ -174,10 +174,11 @@ class ExecutionEnvironment(object):
             return []
         batch_definition: BatchDefinition = batch_definition_list[0]
         batch_data: Any = batch_request.batch_data
-        batch_spec: InMemoryBatchSpec
+        batch_spec: InMemoryBatchSpec = InMemoryBatchSpec()
         batch_markers: BatchMarkers
-        batch_spec, batch_markers = self.execution_engine.get_batch_spec_and_batch_markers_for_batch_data(
-            batch_data=batch_data
+        batch_markers = self.execution_engine.get_batch_markers_and_update_batch_spec_for_batch_data(
+            batch_data=batch_data,
+            batch_spec=batch_spec
         )
         new_batch: Batch = Batch(
             data=batch_data,

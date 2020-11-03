@@ -638,16 +638,15 @@ operate.
         return batch_data, batch_markers
 
     @staticmethod
-    def get_batch_spec_and_batch_markers_for_batch_data(
+    def get_batch_markers_and_update_batch_spec_for_batch_data(
         batch_data: pd.DataFrame,
-    ) -> Tuple[
-        BatchSpec,
-        BatchMarkers
-    ]:
+        batch_spec: BatchSpec
+    ) -> BatchMarkers:
         """
         Computes batch_markers in the case of user-provided batch_data (e.g., in the case of a data pipeline).
 
         :param batch_data -- user-provided dataframe
+        :param batch_spec -- BatchSpec (must be previously instantiated/initialized by PipelineDataConnector)
         :returns computed batch_markers specific to this execution engine
         """
         batch_markers: BatchMarkers = BatchMarkers(
@@ -657,14 +656,13 @@ operate.
                 )
             }
         )
-        batch_spec: InMemoryBatchSpec = InMemoryBatchSpec()
         if batch_data is not None:
             if batch_data.memory_usage().sum() < HASH_THRESHOLD:
                 batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
             # we do not want to store the actual dataframe in batch_spec
             # hence, marking that this is a PandasInMemoryDF instead
             batch_spec["PandasInMemoryDF"] = True
-        return batch_spec, batch_markers
+        return batch_markers
 
     @property
     def dataframe(self):

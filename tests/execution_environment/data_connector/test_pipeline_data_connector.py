@@ -298,6 +298,30 @@ def test__get_data_reference_list(basic_execution_environment):
     assert data_reference_list == expected_data_reference_list
 
 
+def test__generate_batch_spec_parameters_from_batch_definition(basic_execution_environment):
+    partition_request: dict = {
+        "custom_key_0": "staging",
+        "run_id": 1234567890,
+    }
+
+    test_pipeline_data_connector: PipelineDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+
+    expected_batch_spec_parameters: dict = {}
+
+    # noinspection PyProtectedMember
+    batch_spec_parameters: dict = test_pipeline_data_connector._generate_batch_spec_parameters_from_batch_definition(
+        batch_definition=BatchDefinition(
+            execution_environment_name="my_execution_environment",
+            data_connector_name="test_pipeline_data_connector",
+            data_asset_name="my_data_asset",
+            partition_definition=PartitionDefinition(partition_request)
+        )
+    )
+
+    assert batch_spec_parameters == expected_batch_spec_parameters
+
+
 def test__build_batch_spec_from_batch_definition(basic_execution_environment):
     partition_request: dict = {
         "custom_key_0": "staging",

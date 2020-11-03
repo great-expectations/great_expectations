@@ -167,19 +167,21 @@ class PipelineDataConnector(DataConnector):
         )
         return data_reference
 
+    # This method is currently called called only in tests.
     def _generate_batch_spec_parameters_from_batch_definition(
         self,
         batch_definition: BatchDefinition
     ) -> dict:
         return {}
 
+    # This method is currently called called only in tests.
     def _build_batch_spec_from_batch_definition(
         self,
         batch_definition: BatchDefinition
     ) -> InMemoryBatchSpec:
         batch_spec = super()._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
         return InMemoryBatchSpec(batch_spec)
-        
+
     @staticmethod
     def _get_data_reference_name(
         partition_request: PartitionDefinitionSubset
