@@ -65,6 +65,7 @@ class SqlDataConnector(DataConnector):
             partition_definition_list = [dict(zip(column_names, row))  for row in rows]
 
             # TODO Abe 20201029 : Apply sorters to partition_definition_list here
+            # TODO Will 20201102 : add sorting code here
 
             self._data_references_cache[data_asset_name] = partition_definition_list
     
