@@ -1,5 +1,6 @@
 import pytest
 
+import tests.test_utils as test_utils
 from great_expectations.data_context.util import instantiate_class_from_config
 
 
@@ -41,3 +42,15 @@ def param_store(request, test_backends):
         config_defaults={"module_name": "great_expectations.data_context.store",},
         runtime_environment={},
     )
+
+
+def test_metric_store_store_backend_id(param_store):
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert param_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(param_store.store_backend_id)

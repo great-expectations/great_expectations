@@ -3,6 +3,7 @@ import datetime
 import pytest
 from freezegun import freeze_time
 
+import tests.test_utils as test_utils
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuiteValidationResult,
@@ -149,6 +150,16 @@ def test_database_evaluation_parameter_store_basics(param_store):
     param_store.set(metric_identifier, metric_value)
     value = param_store.get(metric_identifier)
     assert value == metric_value
+
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert param_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(param_store.store_backend_id)
 
 
 @freeze_time("09/26/2019 13:42:41")

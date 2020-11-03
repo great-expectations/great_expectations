@@ -1,5 +1,6 @@
 import pytest
 
+import tests.test_utils as test_utils
 from great_expectations.data_context.store.query_store import SqlAlchemyQueryStore
 
 
@@ -20,3 +21,13 @@ def test_basic_query(basic_sqlalchemy_query_store):
     )
     res = basic_sqlalchemy_query_store.get_query_result("q2", {"table_name": "titanic"})
     assert res[0] == 1313
+
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert basic_sqlalchemy_query_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(basic_sqlalchemy_query_store.store_backend_id)
