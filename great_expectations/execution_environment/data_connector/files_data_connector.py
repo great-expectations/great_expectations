@@ -297,8 +297,8 @@ configured runtime keys.
                         batch_definition_list.extend(batch_definition)
 
         if batch_request.partition_request is not None:
-            partition_request_obj: PartitionQuery = build_partition_query(partition_request_dict=batch_request.partition_request)
-            batch_definition_list = partition_request_obj.select_from_partition_request(batch_definition_list=batch_definition_list)
+            partition_query_obj: PartitionQuery = build_partition_query(partition_request_dict=batch_request.partition_request)
+            batch_definition_list = partition_query_obj.select_from_partition_request(batch_definition_list=batch_definition_list)
 
         if len(self.sorters) > 0:
             sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)

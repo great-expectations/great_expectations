@@ -124,7 +124,9 @@ def test_partition_request_non_recognized_param(create_files_and_instantiate_dat
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request={
-            "partition_query": {"name": "alex"}
+            "partition_query": {
+                "name": "alex"
+            }
         },
     ))
     assert len(returned) == 2
@@ -183,6 +185,7 @@ def test_partition_request_illegal_index_and_limit_combination(create_files_and_
 def test_partition_request_sorted_filtered_by_custom_filter(create_files_and_instantiate_data_connector):
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
             partition_definition["name"] in ["abe", "james", "eugene"] \
@@ -240,6 +243,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_limit(create_fi
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
             partition_definition["name"] in ["abe", "james", "eugene"] \
@@ -292,6 +296,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_int(cr
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
             partition_definition["name"] in ["abe", "james", "eugene"] \
@@ -327,6 +332,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_string
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
             partition_definition["name"] in ["abe", "james", "eugene"] \
@@ -361,6 +367,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_list(c
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
             partition_definition["name"] in ["abe", "james", "eugene"] \
@@ -403,6 +410,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_tuple(
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
             partition_definition["name"] in ["abe", "james", "eugene"] \
@@ -444,6 +452,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_str(cr
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
             partition_definition["name"] in ["abe", "james", "eugene"] \
@@ -462,8 +471,8 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_str(cr
             "index": "3:5",
         },
     ))
-
     assert len(returned_batch_definition_list) == 2
+
     expected: List[BatchDefinition] = [
         BatchDefinition(
             execution_environment_name="test_environment",
@@ -485,6 +494,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(creat
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return \
             partition_definition["name"] in ["abe", "james", "eugene"] \
@@ -503,8 +513,8 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(creat
             "index": slice(3, 5, None),
         },
     ))
-
     assert len(returned_batch_definition_list) == 2
+
     expected: List[BatchDefinition] = [
         BatchDefinition(
             execution_environment_name="test_environment",
@@ -530,11 +540,13 @@ def test_partition_request_partition_request_partition_query_1_key(create_files_
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request={
-            "partition_query": {"timestamp": "20200809"},
+            "partition_query": {
+                "timestamp": "20200809"
+            },
         },
     ))
-
     assert len(returned_batch_definition_list) == 4
+
     expected: List[BatchDefinition] = [
         BatchDefinition(
             execution_environment_name="test_environment",
@@ -572,12 +584,14 @@ def test_partition_request_partition_request_partition_query_1_key_and_index(cre
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request={
-            "partition_query": {"name": "james"},
+            "partition_query": {
+                "name": "james"
+            },
             "index": 0,
         },
     ))
-
     assert len(returned_batch_definition_list) == 1
+
     expected: List[BatchDefinition] = [
         BatchDefinition(
             execution_environment_name="test_environment",
@@ -597,11 +611,14 @@ def test_partition_request_partition_request_partition_query_2_key_name_timestam
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request={
-            "partition_query": {"timestamp": "20200809", "name": "will"},
+            "partition_query": {
+                "timestamp": "20200809",
+                "name": "will"
+            },
         },
     ))
-
     assert len(returned_batch_definition_list) == 1
+
     expected: List[BatchDefinition] = [
         BatchDefinition(
             execution_environment_name="test_environment",
@@ -621,8 +638,8 @@ def test_partition_request_for_data_asset_name(create_files_and_instantiate_data
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
     ))
-
     assert len(returned_batch_definition_list) == 10
+
     expected: List[BatchDefinition] = [
         BatchDefinition(
             execution_environment_name="test_environment",

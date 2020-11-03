@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import itertools
-from typing import Dict, Callable, Union, Optional
-
 import logging
+import itertools
+
+from typing import Dict, Callable, Union, Optional
 
 from great_expectations.core.id_dict import PartitionDefinitionSubset
 from great_expectations.util import is_int

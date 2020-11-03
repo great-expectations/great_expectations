@@ -140,8 +140,6 @@ class SinglePartitionDataConnector(DataConnector):
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
 
-
-        # 1) batch definition matches batch_request
         batch_definition_list: List[BatchDefinition] = list(
             filter(
                 lambda batch_definition: batch_definition_matches_batch_request(
@@ -156,14 +154,12 @@ class SinglePartitionDataConnector(DataConnector):
             )
         )
 
-        # 2) batch_definition matches partition_request
         if batch_request.partition_request is not None:
             partition_query_obj: PartitionQuery = build_partition_query(
                 partition_request_dict=batch_request.partition_request)
             batch_definition_list = partition_query_obj.select_from_partition_request(
                 batch_definition_list=batch_definition_list)
 
-        # 3) sort batch_definition
         if len(self._sorters) > 0:
             sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
             return sorted_batch_definition_list
