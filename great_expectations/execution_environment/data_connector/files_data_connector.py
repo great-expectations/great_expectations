@@ -7,8 +7,10 @@ import logging
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-
-from great_expectations.execution_environment.data_connector.partition_query import build_partition_query
+from great_expectations.execution_environment.data_connector.partition_query import (
+    PartitionQuery,
+    build_partition_query
+)
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.core.batch import (
     BatchRequest,
@@ -315,7 +317,7 @@ configured runtime keys.
         sorters: Iterator[Sorter] = reversed(sorters_list)
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
-        return(batch_definition_list)
+        return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(
         self,
