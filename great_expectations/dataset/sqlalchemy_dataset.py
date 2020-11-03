@@ -1187,10 +1187,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
-            if not self.generated_table_name:
-                table_type = "TRANSIENT"
-            else:
-                table_type = "TEMPORARY"
+            table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
+
             logger.info("Creating temporary table %s" % table_name)
             if schema_name is not None:
                 table_name = schema_name + "." + table_name
@@ -1223,9 +1221,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql
             )
 
-        # close_with_result = True
-        # if self.sql_engine_dialect.name == "snowflake":
-        #     close_with_result = False
         self.engine.execute(stmt)
 
     def column_reflection_fallback(self):
