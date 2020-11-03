@@ -7,8 +7,10 @@ import logging
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-
-from great_expectations.execution_environment.data_connector.partition_query import build_partition_query
+from great_expectations.execution_environment.data_connector.partition_query import (
+    PartitionQuery,
+    build_partition_query
+)
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.core.batch import (
     BatchRequest,
