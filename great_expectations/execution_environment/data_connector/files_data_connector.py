@@ -317,7 +317,7 @@ configured runtime keys.
         sorters: Iterator[Sorter] = reversed(sorters_list)
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
-        return(batch_definition_list)
+        return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(
         self,
