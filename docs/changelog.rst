@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Snowflake uses temp tables by default while still allowing transient tables.
 
 0.12.7
 -----------------
