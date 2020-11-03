@@ -372,7 +372,7 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
         if "bigquery_temp_table" in batch_kwargs:
             query_support_table_name = batch_kwargs.get("bigquery_temp_table")
         elif "snowflake_transient_table" in batch_kwargs:
-            # Snowflake uses a transient table, so we expect a table_name to be provided
+            # Snowflake can use either a transient or temp table, so we allow a table_name to be provided
             query_support_table_name = batch_kwargs.get("snowflake_transient_table")
         else:
             query_support_table_name = None
