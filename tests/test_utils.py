@@ -602,7 +602,7 @@ def get_dataset(
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 
-def get_test_batch(
+def get_test_execution_engine_with_data(
     execution_engine,
     data,
     schemas=None,
