@@ -44,13 +44,13 @@ def batch_definition_matches_batch_request(
 
     if batch_request.partition_request:
         assert isinstance(batch_request.partition_request, dict)
-        partition_query: Any = batch_request.partition_request.get("partition_query")
-        if partition_query:
-            assert isinstance(partition_query, dict)
-            for key in partition_query.keys():
+        partition_identifiers: Any = batch_request.partition_request.get("partition_identifiers")
+        if partition_identifiers:
+            assert isinstance(partition_identifiers, dict)
+            for key in partition_identifiers.keys():
                 if not (
                     key in batch_definition.partition_definition and batch_definition.partition_definition[key] ==
-                    partition_query[key]
+                    partition_identifiers[key]
                 ):
                     return False
     return True
