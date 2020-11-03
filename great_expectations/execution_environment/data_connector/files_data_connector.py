@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Union, Any, Dict, Optional, Iterator
+from typing import List, Union, Dict, Optional, Iterator
 import os
 import copy
 import logging
@@ -7,6 +7,8 @@ import logging
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+
+from great_expectations.execution_environment.data_connector.partition_query import build_partition_query
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.core.batch import (
     BatchRequest,
@@ -288,8 +290,18 @@ configured runtime keys.
             )
         )
 
+        if batch_request.partition_request is not None:
+            partition_query_obj: PartitionQuery = build_partition_query(
+                partition_request_dict=batch_request.partition_request
+            )
+            batch_definition_list = partition_query_obj.select_from_partition_request(
+                batch_definition_list=batch_definition_list
+            )
+
         if len(self.sorters) > 0:
-            sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
+            sorted_batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list
+            )
             return sorted_batch_definition_list
         else:
             return batch_definition_list

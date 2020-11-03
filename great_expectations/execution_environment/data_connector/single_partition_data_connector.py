@@ -10,6 +10,10 @@ from great_expectations.core.batch import (
     BatchDefinition,
 )
 
+from great_expectations.execution_environment.data_connector.partition_query import (
+    PartitionQuery,
+    build_partition_query,
+)
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.execution_environment.data_connector.sorter import Sorter
@@ -148,6 +152,15 @@ class SinglePartitionDataConnector(DataConnector):
                 ]
             )
         )
+
+        if batch_request.partition_request is not None:
+            partition_query_obj: PartitionQuery = build_partition_query(
+                partition_request_dict=batch_request.partition_request
+            )
+            batch_definition_list = partition_query_obj.select_from_partition_request(
+                batch_definition_list=batch_definition_list
+            )
+
         if len(self._sorters) > 0:
             sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
             return sorted_batch_definition_list

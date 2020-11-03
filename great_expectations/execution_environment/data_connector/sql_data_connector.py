@@ -3,7 +3,8 @@ import datetime
 from hashlib import md5
 import sqlite3
 import yaml
-from typing import List, Dict
+from typing import List, Dict, Tuple, Any
+import json
 
 import pandas as pd
 import sqlalchemy as sa
@@ -16,6 +17,8 @@ from great_expectations.execution_environment.data_connector.asset.asset import 
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
+    BatchSpec,
+    BatchMarkers,
     PartitionRequest,
     PartitionDefinition,
 )
@@ -58,18 +61,27 @@ class SqlDataConnector(DataConnector):
             rows = self._execution_engine.engine.execute(split_query).fetchall()
 
             # Zip up split parameters with column names
-            column_names : List[str] = []
-            if "column_names" in data_asset["splitter_kwargs"]:
-                column_names = data_asset["splitter_kwargs"]["column_names"]
-            elif "column_name" in data_asset["splitter_kwargs"]:
-                column_names = [data_asset["splitter_kwargs"]["column_name"]]
-            
-            splits = [dict(zip(column_names, row))  for row in rows]
+            column_names = self._get_column_names_from_splitter_kwargs(data_asset["splitter_kwargs"])
+            partition_definition_list = [dict(zip(column_names, row))  for row in rows]
 
-            # TODO Abe 20201029 : Apply sorters to splits here
+            # TODO Abe 20201029 : Apply sorters to partition_definition_list here
+            # TODO Will 20201102 : add sorting code here
 
-            self._data_references_cache[data_asset_name] = splits
-            
+            self._data_references_cache[data_asset_name] = partition_definition_list
+    
+    def _get_column_names_from_splitter_kwargs(
+        self,
+        splitter_kwargs
+    ) -> List[str]:
+        column_names : List[str] = []
+
+        if "column_names" in splitter_kwargs:
+            column_names = splitter_kwargs["column_names"]
+        elif "column_name" in splitter_kwargs:
+            column_names = [splitter_kwargs["column_name"]]
+        
+        return column_names
+
     def get_available_data_asset_names(self):
         return list(self.assets.keys())
     
@@ -92,7 +104,78 @@ class SqlDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name:str) -> List[str]:
         return self._data_references_cache[data_asset_name]
 
-    ### Splitter methods ###
+    def _build_batch_spec_from_batch_definition(
+        self,
+        batch_definition: BatchDefinition
+    ):
+        data_asset_name = batch_definition.data_asset_name
+        batch_spec = BatchSpec({
+            "table_name" : data_asset_name,
+            "partition_definition": batch_definition.partition_definition,
+            **self.assets[data_asset_name],
+        })
+
+        return batch_spec
+
+    def self_check(
+        self,
+        pretty_print=True,
+        max_examples=3
+    ):
+        return_object = super().self_check(
+            pretty_print=pretty_print,
+            max_examples=max_examples
+        )
+
+        # Choose an example data_reference
+        if pretty_print:
+            print("\n\tChoosing an example data reference...")
+
+        example_data_reference =  None
+        for data_asset_name, data_asset_return_obj in return_object["data_assets"].items():
+            # print(data_asset_name)
+            # print(json.dumps(data_asset_return_obj["example_data_references"], indent=2))
+            if data_asset_return_obj["batch_definition_count"] > 0:
+                example_data_reference = random.choice(data_asset_return_obj["example_data_references"])
+                break
+
+        if pretty_print:
+            print(f"\t\tReference chosen: {example_data_reference}")
+
+        #...and fetch it.
+        if pretty_print:
+            print(f"\n\t\tFetching batch data..")
+        batch_data, batch_spec, batch_markers = self.get_batch_data_and_metadata_from_batch_definition(
+            BatchDefinition(
+                execution_environment_name=self.execution_environment_name,
+                data_connector_name=self.name,
+                data_asset_name=data_asset_name,
+                partition_definition=PartitionDefinition(example_data_reference),
+            )
+        )
+        rows = batch_data.fetchall()
+        return_object["example_data_reference"] = {
+            "batch_spec" : batch_spec,
+            "n_rows" : len(rows),
+        }
+
+        if pretty_print:
+            print(f"\n\t\tShowing 5 rows")
+            print(pd.DataFrame(rows[:5]))
+        
+        return return_object
+
+    ### Splitter methods for listing partitions ###
+
+    def _split_on_whole_table(
+        self,
+        table_name: str,
+        column_name: str,
+    ):
+        """'Split' by returning the whole table"""
+
+        return [0]
+
 
     def _split_on_column_value(
         self,

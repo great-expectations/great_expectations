@@ -112,13 +112,14 @@ class PipelineDataConnector(DataConnector):
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
-        self._validate_partition_request(
-            partition_request=batch_request.partition_request
-        )
-
-        partition_request: dict = batch_request.partition_request
-        if partition_request is None:
-            partition_request = {}
+        partition_query: Optional[dict] = None
+        if batch_request.partition_request:
+            self._validate_partition_query(
+                partition_query=batch_request.partition_request.get("partition_query")
+            )
+            partition_query = batch_request.partition_request.get("partition_query")
+        if not partition_query:
+            partition_query = {}
 
         batch_definition_list: List[BatchDefinition]
 
@@ -126,7 +127,7 @@ class PipelineDataConnector(DataConnector):
             execution_environment_name=self.execution_environment_name,
             data_connector_name=self.name,
             data_asset_name=DEFAULT_DATA_ASSET_NAME,
-            partition_definition=PartitionDefinition(partition_request)
+            partition_definition=PartitionDefinition(partition_query)
         )
 
         if batch_definition_matches_batch_request(
@@ -163,7 +164,7 @@ class PipelineDataConnector(DataConnector):
             raise TypeError("batch_definition is not of an instance of type BatchDefinition")
         partition_definition: PartitionDefinition = batch_definition.partition_definition
         data_reference: str = self._get_data_reference_name(
-            partition_request=partition_definition
+            partition_query=partition_definition
         )
         return data_reference
 
@@ -184,13 +185,13 @@ class PipelineDataConnector(DataConnector):
 
     @staticmethod
     def _get_data_reference_name(
-        partition_request: PartitionDefinitionSubset
+        partition_query: PartitionDefinitionSubset
     ) -> str:
-        if partition_request is None:
-            partition_request = PartitionDefinitionSubset({})
+        if partition_query is None:
+            partition_query = PartitionDefinitionSubset({})
         data_reference_name = DEFAULT_DELIMITER.join(
             [
-                str(value) for value in partition_request.values()
+                str(value) for value in partition_query.values()
             ]
         )
         return data_reference_name
@@ -200,8 +201,18 @@ class PipelineDataConnector(DataConnector):
 
         # Insure that batch_data and batch_request satisfy the "if and only if" condition.
         if not (
-            (batch_request.batch_data is None and batch_request.partition_request is None) or
-            (batch_request.batch_data is not None and batch_request.partition_request)
+            (
+                batch_request.batch_data is None
+                and (
+                    batch_request.partition_request is None
+                    or not batch_request.partition_request.get("partition_query")
+                )
+            ) or
+            (
+                batch_request.batch_data is not None
+                and batch_request.partition_request and
+                batch_request.partition_request.get("partition_query")
+            )
         ):
             raise ge_exceptions.DataConnectorError(
                 f'''PipelineDataConnector "{self.name}" requires batch_data and partition_request to be both present or
@@ -209,12 +220,12 @@ class PipelineDataConnector(DataConnector):
                 '''
             )
 
-    def _validate_partition_request(self, partition_request: dict):
+    def _validate_partition_query(self, partition_query: dict):
         """
         """
-        if partition_request is None:
-            partition_request = {}
-        self._validate_runtime_keys_configuration(runtime_keys=list(partition_request.keys()))
+        if partition_query is None:
+            partition_query = {}
+        self._validate_runtime_keys_configuration(runtime_keys=list(partition_query.keys()))
 
     def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
         if runtime_keys and len(runtime_keys) > 0:

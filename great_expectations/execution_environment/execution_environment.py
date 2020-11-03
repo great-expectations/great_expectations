@@ -163,9 +163,11 @@ class ExecutionEnvironment(object):
         batch_request: BatchRequest,
         batch_definition_list: List[BatchDefinition]
     ) -> List[Batch]:
-        if not batch_request.partition_request:
+        if not (
+            batch_request.partition_request and batch_request.partition_request.get("partition_query")
+        ):
             raise ge_exceptions.DataConnectorError(
-                f'''PipelineDataConnector "{data_connector.name}" did not receive a partition_definition along with
+                f'''PipelineDataConnector "{data_connector.name}" did not receive a valid partition_query along with
                 the batch_data parameter.
                 '''
             )
