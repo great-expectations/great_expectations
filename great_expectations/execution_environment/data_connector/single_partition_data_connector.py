@@ -1,22 +1,20 @@
-import os
-from typing import Union, List, Any, Optional, Dict, Iterator
-from pathlib import Path
+from typing import List, Optional, Iterator
 import copy
 
 import logging
 
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
 )
-
 from great_expectations.execution_environment.data_connector.partition_query import (
     PartitionQuery,
     build_partition_query,
 )
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types import PathBatchSpec
-from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
@@ -43,6 +41,7 @@ class SinglePartitionDataConnector(DataConnector):
         self,
         name: str,
         execution_environment_name: str,
+        execution_engine: ExecutionEngine = None,
         default_regex: dict = None,
         base_directory: str = None,
         glob_directive: str = "*",
@@ -53,7 +52,7 @@ class SinglePartitionDataConnector(DataConnector):
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
-            execution_engine=None,
+            execution_engine=execution_engine,
         )
 
         self.base_directory = base_directory
@@ -177,17 +176,34 @@ class SinglePartitionDataConnector(DataConnector):
             batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
         return batch_definition_list
 
-    # # TODO: <Alex>This method should be implemented in every subclass.</Alex>
-    # def _map_data_reference_to_batch_definition_list(
-    #     self,
-    #     data_reference: str,
-    #     data_asset_name: Optional[str] = None
-    # ) -> Optional[List[BatchDefinition]]:
-    #     pass
+    def _map_data_reference_to_batch_definition_list(
+        self,
+        data_reference: str,
+        data_asset_name: Optional[str] = None
+    ) -> Optional[List[BatchDefinition]]:
+        regex_config: dict = copy.deepcopy(self._default_regex)
+        pattern: str = regex_config["pattern"]
+        group_names: List[str] = regex_config["group_names"]
 
-    # TODO: <Alex>This method should be implemented in every subclass.</Alex>
-    # def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
-    #     pass
+        return map_data_reference_string_to_batch_definition_list_using_regex(
+            execution_environment_name=self.execution_environment_name,
+            data_connector_name=self.name,
+            data_asset_name=data_asset_name,
+            data_reference=data_reference,
+            regex_pattern=pattern,
+            group_names=group_names
+        )
+
+    def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
+        regex_config: dict = copy.deepcopy(self._default_regex)
+        pattern: str = regex_config["pattern"]
+        group_names: List[str] = regex_config["group_names"]
+
+        return map_batch_definition_to_data_reference_string_using_regex(
+            batch_definition=batch_definition,
+            regex_pattern=pattern,
+            group_names=group_names
+        )
 
     # TODO: <Alex>This method should be implemented in every subclass.</Alex>
     # def _generate_batch_spec_parameters_from_batch_definition(
@@ -228,34 +244,16 @@ class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
         data_reference_keys.sort()
         return data_reference_keys
 
-    # TODO: <Alex>This method relies on data_reference values being string valued (as if they are file paths).</Alex>
-    def _map_data_reference_to_batch_definition_list(
-        self,
-        data_reference: str,
-        data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
-        regex_config: dict = copy.deepcopy(self._default_regex)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-
-        return map_data_reference_string_to_batch_definition_list_using_regex(
-            execution_environment_name=self.execution_environment_name,
-            data_connector_name=self.name,
-            data_asset_name=data_asset_name,
-            data_reference=data_reference,
-            regex_pattern=pattern,
-            group_names=group_names
-        )
-
 
 class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
     def __init__(
         self,
         name: str,
         execution_environment_name: str,
-        base_directory: str,
-        default_regex: dict,
+        base_directory: str = None,
+        default_regex: dict = None,
         glob_directive: str = "*",
+        execution_engine: ExecutionEngine = None,
         sorters: List[dict] = None,
     ):
         logger.debug(f'Constructing SinglePartitionFileDataConnector "{name}".')
@@ -263,6 +261,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
+            execution_engine=execution_engine,
             base_directory=base_directory,
             glob_directive=glob_directive,
             default_regex=default_regex,
@@ -279,35 +278,6 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
             glob_directive=self.glob_directive
         )
         return path_list
-
-    def _map_data_reference_to_batch_definition_list(
-        self,
-        data_reference: str,
-        data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
-        regex_config: dict = copy.deepcopy(self._default_regex)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-
-        return map_data_reference_string_to_batch_definition_list_using_regex(
-            execution_environment_name=self.execution_environment_name,
-            data_connector_name=self.name,
-            data_asset_name=data_asset_name,
-            data_reference=data_reference,
-            regex_pattern=pattern,
-            group_names=group_names
-        )
-
-    def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
-        regex_config: dict = copy.deepcopy(self._default_regex)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-
-        return map_batch_definition_to_data_reference_string_using_regex(
-            batch_definition=batch_definition,
-            regex_pattern=pattern,
-            group_names=group_names
-        )
 
     def _generate_batch_spec_parameters_from_batch_definition(
         self,
