@@ -202,7 +202,7 @@ class Validator:
                 #     if k in ("result_format", "include_config", "catch_exceptions")
                 # }
                 validation_result = expectation.validate(
-                    execution_engine=self.execution_engine,
+                    validator=self,
                     runtime_configuration=runtime_configuration,
                 )
                 if isinstance(validation_result, dict):
