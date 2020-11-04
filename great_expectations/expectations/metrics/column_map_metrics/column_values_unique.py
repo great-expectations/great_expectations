@@ -45,7 +45,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         return column.notin_(dup_query)
 
     @column_map_condition(
-        engine=SparkDFExecutionEngine, metric_fn_type="map_condition_column"
+        engine=SparkDFExecutionEngine,  # metric_fn_type="map_condition_column"
     )
     def _spark(cls, column, **kwargs):
         return F.count(F.lit(1)).over(Window.partitionBy(column)) <= 1

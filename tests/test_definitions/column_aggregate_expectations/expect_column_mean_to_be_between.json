@@ -25,7 +25,7 @@
         }
       },
       "tests": [{
-          "title": "simple mean: positive range",
+          "title": "simple_mean_positive_range",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -38,7 +38,7 @@
           }
         },
         {
-          "title": "simple mean: negative range",
+          "title": "simple_mean_negative_range",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -51,7 +51,7 @@
           }
         },
         {
-          "title": "simple mean: positive exact match",
+          "title": "simple_mean_positive_exact_match",
           "exact_match_out": false,
           "in": {
             "column": "y",
@@ -64,7 +64,7 @@
           }
         },
         {
-          "title": "simple mean: negative exact match",
+          "title": "simple_mean_negative_exact_match",
           "exact_match_out": false,
           "in": {
             "column": "y",
@@ -77,7 +77,7 @@
           }
         },
         {
-          "title": "simple mean: positive exact match",
+          "title": "simple_mean_positive_exact_match",
           "exact_match_out": false,
           "in": {
             "column": "z",
@@ -91,7 +91,7 @@
           }
         },
         {
-          "title": "simple mean: negative range match",
+          "title": "simple_mean_negative_range_match",
           "exact_match_out": false,
           "in": {
             "column": "z",
@@ -105,7 +105,7 @@
           }
         },
         {
-          "title": "simple mean: includes null",
+          "title": "simple_mean_includes_null",
           "exact_match_out": false,
           "in": {
             "column": "n",
@@ -118,7 +118,7 @@
           }
         },
         {
-          "title": "Vacuously true: missing min and max",
+          "title": "vacuously_true_missing_min_and_max",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -140,7 +140,7 @@
         "x": [true, null, false, null]
       },
       "tests": [{
-          "title": "type mismatch: null observed_value",
+          "title": "type_mismatch_null_observed_value",
           "exact_match_out": false,
 	        "suppress_test_for": ["sqlalchemy"],
           "in": {
@@ -154,7 +154,7 @@
           }
         },
         {
-          "title": "coerced types: true/false values",
+          "title": "coerced_types_true__false_values",
           "exact_match_out": false,
           "in": {
             "column": "b",
@@ -169,7 +169,7 @@
           "_comment": "postgresql, mssql, and spark will not allow coercing the boolean type to an average"
         },
         {
-          "title": "coerced types: true/false and null",
+          "title": "coerced_types_true__false_and_null",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -184,7 +184,7 @@
           "_comment": "postgresql, mssql, and spark will not allow coercing the boolean type to an average"
         },
         {
-          "title": "TypeError: catch exceptions. Non-number min-value",
+          "title": "typeerror_catch_exceptions___non_number_min_value",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -196,7 +196,7 @@
           }
         },
         {
-          "title": "TypeError: catch exceptions. Non-number max-value",
+          "title": "typeerror_catch_exceptions___non_number_max_value",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -217,7 +217,7 @@
         }
       },
       "tests": [{
-        "title": "Test empty column; should be false (no observed value with which to compare)",
+        "title": "test_empty_column__should_be_false_no_observed_value_with_which_to_compare",
         "exact_match_out": false,
         "in": {
           "column": "empty_column",

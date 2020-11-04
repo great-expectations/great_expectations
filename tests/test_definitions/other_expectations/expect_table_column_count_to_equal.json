@@ -38,7 +38,7 @@
       },
       "tests": [
         {
-          "title": "Basic positive case",
+          "title": "basic_positive_case",
                     "exact_match_out": false,
 
           "in": [
@@ -51,7 +51,7 @@
           }
         },
         {
-          "title": "Basic negative case - upper error",
+          "title": "basic_negative_case___upper_error",
           "exact_match_out": false,
           "in": [
             5
@@ -62,7 +62,7 @@
           }
         },
         {
-          "title": "Basic negative case - lower error",
+          "title": "basic_negative_case___lower_error",
           "exact_match_out": false,
           "in": [
             0
@@ -73,7 +73,7 @@
           }
         },
         {
-          "title": "Basic negative case - kwargs args",
+          "title": "basic_negative_case___kwargs_args",
           "exact_match_out": false,
           "in": {
             "value": 3
@@ -84,7 +84,7 @@
           }
         },
         {
-          "title": "Invalid arguments-throws exception",
+          "title": "invalid_arguments_throws_exception",
           "exact_match_out": false,
           "in": {
             "value": "hello",

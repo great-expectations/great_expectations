@@ -438,7 +438,7 @@ def _pandas_column_map_index(
     result_format = metric_value_kwargs["result_format"]
     boolean_mapped_unexpected_values = metrics.get("unexpected_condition")
     if result_format["result_format"] == "COMPLETE":
-        return list(data[boolean_mapped_unexpected_values == False].index)
+        return list(data[boolean_mapped_unexpected_values == True].index)
     else:
         return list(
             data[boolean_mapped_unexpected_values == True].index[
@@ -779,7 +779,6 @@ class MapMetricProvider(MetricProvider):
                         "A MapMetricProvider must have a metric_condition_name to have a decorated column_map_condition method."
                     )
 
-                # rename for readability
                 condition_provider = candidate_metric_fn
                 metric_name = cls.condition_metric_name
                 metric_domain_keys = cls.condition_domain_keys
@@ -963,7 +962,6 @@ class MapMetricProvider(MetricProvider):
                     raise ValueError(
                         "A MapMetricProvider must have a function_metric_name to have a decorated column_map_function method."
                     )
-                # rename for readability
                 map_function_provider = candidate_metric_fn
                 metric_name = cls.function_metric_name
                 metric_domain_keys = cls.function_domain_keys

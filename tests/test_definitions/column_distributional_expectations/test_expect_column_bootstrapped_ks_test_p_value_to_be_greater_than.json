@@ -9,7 +9,7 @@
       "categorical_fixed": ["A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C"]
     },
     "tests" : [{
-      "title": "positive - norm_0_1_auto partition",
+      "title": "positive___norm_0_1_auto_partition",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -24,7 +24,7 @@
       }
     },
     {
-      "title": "positive - norm_0_1_uniform partition",
+      "title": "positive___norm_0_1_uniform_partition",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -39,7 +39,7 @@
       }
     },
     {
-      "title": "positive - norm_0_1_ntile partition",
+      "title": "positive___norm_0_1_ntile_partition",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -54,7 +54,7 @@
       }
     },
     {
-      "title": "positive - norm_0_1_kde partition",
+      "title": "positive___norm_0_1_kde_partition",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -69,7 +69,7 @@
       }
     },
     {
-      "title": "negative - norm_0_1_auto partition, norm_1_1 column",
+      "title": "negative___norm_0_1_auto_partition__norm_1_1_column",
       "exact_match_out": false,
       "in": {
         "column": "norm_1_1",
@@ -84,7 +84,7 @@
       }
     },
     {
-      "title": "negative - norm_0_1_uniform partition, norm_1_1 column",
+      "title": "negative___norm_0_1_uniform_partition__norm_1_1_column",
       "exact_match_out": false,
       "in": {
         "column": "norm_1_1",
@@ -99,7 +99,7 @@
       }
     },
     {
-      "title": "negative - norm_0_1_ntile partition, norm_1_1 column",
+      "title": "negative___norm_0_1_ntile_partition__norm_1_1_column",
       "exact_match_out": false,
       "in": {
         "column": "norm_1_1",
@@ -114,7 +114,7 @@
       }
     },
     {
-      "title": "negative - norm_0_1_kde partition, norm_1_1 column",
+      "title": "negative___norm_0_1_kde_partition__norm_1_1_column",
       "exact_match_out": false,
       "in": {
         "column": "norm_1_1",
@@ -129,7 +129,7 @@
       }
     },
     {
-      "title": "positive - bimodal_auto partition",
+      "title": "positive___bimodal_auto_partition",
       "exact_match_out": false,
       "in": {
         "column": "bimodal",
@@ -144,7 +144,7 @@
       }
     },
     {
-      "title": "positive - bimodal_kde partition",
+      "title": "positive___bimodal_kde_partition",
       "exact_match_out": false,
       "in": {
         "column": "bimodal",
@@ -159,7 +159,7 @@
       }
     },
     {
-      "title": "negative - norm_0_1_auto partition, bimodal column",
+      "title": "negative___norm_0_1_auto_partition__bimodal_column",
       "exact_match_out": false,
       "in": {
         "column": "bimodal",
@@ -174,7 +174,7 @@
       }
     },
     {
-      "title": "negative - norm_0_1_uniform partition, bimodal column",
+      "title": "negative___norm_0_1_uniform_partition__bimodal_column",
       "exact_match_out": false,
       "in": {
         "column": "bimodal",
@@ -189,7 +189,7 @@
       }
     },
     {
-      "title": "negative - norm_0_1_uniform partition - detail",
+      "title": "negative___norm_0_1_uniform_partition___detail",
       "exact_match_out": false,
       "in": {
         "column": "bimodal",
@@ -304,7 +304,7 @@
       }
     },
     {
-      "title": "observed above and below partition",
+      "title": "observed_above_and_below_partition",
       "_notes": "the key to this test is that the observed cdf should begin and end at the endpoints of the real data, not the parittion",
       "exact_match_out": false,
       "in": {
@@ -322,7 +322,7 @@
       }
     },
     {
-      "title": "expected extends above partition",
+      "title": "expected_extends_above_partition",
       "_notes": "the key to this test is that the observed cdf should begin at the partition, and end at the real data",
       "exact_match_out": false,
       "in": {
@@ -340,7 +340,7 @@
       }
     },
     {
-      "title": "partition extends above data",
+      "title": "partition_extends_above_data",
       "_notes": "the key to this test is that the observed cdf should begin at the real data and end at the parittion",
       "exact_match_out": false,
       "in": {
@@ -358,7 +358,7 @@
       }
     },
     {
-      "title": "partition above and below observed",
+      "title": "partition_above_and_below_observed",
       "_notes": "the key to this test is that the observed cdf should begin and end at the endpoints of the partition, not the real data",
       "exact_match_out": false,
       "in": {
@@ -376,7 +376,7 @@
       }
     },
     {
-      "title": "bad partition - infinite endpoints - raise error",
+      "title": "bad_partition___infinite_endpoints___raise_error",
       "_notes": "this test relies on using python json deserialization of the string Infinity; eventually this structure will be deprecated in favor of tail_weights",
       "exact_match_out": false,
       "in": {
@@ -392,7 +392,7 @@
       }
     },
     {
-      "title": "bad partition - tail weights - raise error",
+      "title": "bad_partition___tail_weights___raise_error",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -408,7 +408,7 @@
       }
     },
     {
-      "title": "bad partition - categorical - raise error",
+      "title": "bad_partition___categorical___raise_error",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",

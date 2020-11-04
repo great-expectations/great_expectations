@@ -107,16 +107,6 @@ def register_metric(
     metric_provider.metric_fn_type = metric_fn_type
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]
-        current_dependencies = metric_definition.get("metric_dependencies", set())
-        # if set(current_dependencies) != set(metric_dependencies):
-        #     logger.warning(
-        #         f"metric {metric_name} is being registered with different dependencies; overwriting dependencies"
-        #     )
-        #     _add_response_key(
-        #         res,
-        #         "warning",
-        #         f"metric {metric_name} is being registered with different dependencies; overwriting dependencies",
-        #     )
         current_domain_keys = metric_definition.get("metric_domain_keys", set())
         if set(current_domain_keys) != set(metric_domain_keys):
             logger.warning(
@@ -191,7 +181,9 @@ def get_metric_kwargs(
     runtime_configuration: Optional[dict] = None,
 ) -> dict():
     try:
-        metric_definition = _registered_metrics.get(metric_name, dict())
+        metric_definition = _registered_metrics.get(metric_name)
+        if metric_definition is None:
+            raise MetricProviderError(f"No definition found for {metric_name}")
         default_kwarg_values = metric_definition["default_kwarg_values"]
         metric_kwargs = {
             "metric_domain_keys": metric_definition["metric_domain_keys"],

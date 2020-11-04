@@ -9,7 +9,7 @@
         },
     "tests": [
       {
-        "title": "Basic positive test",
+        "title": "basic_positive_test",
         "exact_match_out": false,
         "in": {
           "column": "dist1",
@@ -22,7 +22,7 @@
         }
       },
       {
-        "title": "Positive test with null values in column",
+        "title": "positive_test_with_null_values_in_column",
         "exact_match_out": false,
         "in": {
           "column": "dist2",
@@ -35,7 +35,7 @@
         }
       },
       {
-        "title": "Null min; duplicate values in column",
+        "title": "null_min__duplicate_values_in_column",
         "exact_match_out": false,
         "in": {
           "column": "dist3",
@@ -48,7 +48,7 @@
         }
       },
       {
-        "title": "Null max; duplicate and null values",
+        "title": "null_max__duplicate_and_null_values",
         "exact_match_out": false,
         "in": {
           "column": "dist4",
@@ -61,7 +61,7 @@
         }
       },
       {
-        "title": "Vacuously true: null min and max",
+        "title": "vacuously_true_null_min_and_max",
         "exact_match_out": false,
         "in": {
           "column": "dist1",

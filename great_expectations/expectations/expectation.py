@@ -583,9 +583,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
             configuration = self.configuration
         return validator.graph_validate(
             configurations=[configuration], runtime_configuration=runtime_configuration,
-        )[
-            0
-        ]
+        )[0]
 
     @property
     def configuration(self):
@@ -683,9 +681,12 @@ class TableExpectation(Expectation, ABC):
         return dependencies
 
 
+class ColumnExpectation(TableExpectation, ABC):
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+
+
 class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
-
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     success_keys = ("mostly",)
     default_kwarg_values = {
@@ -845,7 +846,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             success_ratio = (total_count - unexpected_count - null_count) / (
                 total_count - null_count
             )
-            success = success_ratio > mostly
+            success = success_ratio >= mostly
 
         return _format_map_output(
             result_format=parse_result_format(result_format),

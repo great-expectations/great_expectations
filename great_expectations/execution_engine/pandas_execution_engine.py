@@ -21,6 +21,35 @@ logger = logging.getLogger(__name__)
 HASH_THRESHOLD = 1e9
 
 
+class PandasBatchData:
+    def __init__(
+        self,
+        dataframe: pd.DataFrame = None,
+        dataframe_dict: Dict[str, pd.DataFrame] = None,
+        default_table_name=None,
+    ):
+        assert (
+            dataframe is not None or dataframe_dict is not None
+        ), "dataframe or dataframe_dict is required"
+        assert (
+            not dataframe and dataframe_dict
+        ), "dataframe and dataframe_dict may not both be specified"
+
+        if dataframe is not None:
+            dataframe_dict = {"": dataframe}
+            default_table_name = ""
+
+        self._dataframe_dict = dataframe_dict
+        self._default_table_name = default_table_name
+
+    @property
+    def default_dataframe(self):
+        if self._default_table_name in self._dataframe_dict:
+            return self._dataframe_dict[self._default_table_name]
+
+        return None
+
+
 class PandasExecutionEngine(ExecutionEngine):
     """
 PandasExecutionEngine instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
