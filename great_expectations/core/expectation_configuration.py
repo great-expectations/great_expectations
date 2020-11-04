@@ -1059,12 +1059,13 @@ class ExpectationConfiguration(DictDot):
         return get_expectation_impl(self.expectation_type)
 
     def validate(
-        self, batches: Dict[str, Batch], execution_engine, runtime_configuration=None,
+        self,
+        validator: "Validator",
+        runtime_configuration=None,
     ):
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).validate(
-            batches=batches,
-            execution_engine=execution_engine,
+            validator=validator,
             runtime_configuration=runtime_configuration,
         )
 

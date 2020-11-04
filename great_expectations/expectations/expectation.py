@@ -41,7 +41,6 @@ from ..render.types import (
 )
 from ..render.util import num_to_str
 from ..validator.validation_graph import MetricConfiguration
-from ..validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -576,15 +575,13 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
     def validate(
         self,
-        execution_engine: ExecutionEngine,
+        validator: "Validator",
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration=None,
     ):
         if configuration is None:
             configuration = self.configuration
-        return Validator(
-            execution_engine=execution_engine
-        ).graph_validate(
+        return validator.graph_validate(
             configurations=[configuration], runtime_configuration=runtime_configuration,
         )[
             0
