@@ -8,7 +8,11 @@ from great_expectations.execution_environment.data_connector.util import(
     _invert_regex_to_data_reference_template,
     convert_data_reference_string_to_batch_request_using_regex,
     convert_batch_request_to_data_reference_string_using_regex,
+    build_sorters_from_config,
 )
+
+import pytest
+import great_expectations.exceptions.exceptions as ge_exceptions
 
 # TODO: <Alex>Why does this method name have 2 underscores?</Alex>
 def test__invert_regex_to_data_reference_template():
@@ -213,3 +217,44 @@ def test_convert_batch_request_to_data_reference_string_using_regex():
         group_names=group_names
     ) == "*_20200809_1000.csv"
 
+
+def test_build_sorters_from_config_good_config():
+    sorters_config = [
+        {
+            "orderby": "desc",
+            "class_name": "NumericSorter",
+            "name": "price",
+        }
+    ]
+    sorters = build_sorters_from_config(sorters_config)
+    assert sorters.__repr__() == str("{'price': {'name': 'price', 'reverse': True, 'type': 'NumericSorter'}}")
+    assert sorters["price"].__repr__() == str({"name": "price", "reverse": True, 'type': 'NumericSorter'})
+
+    # no sorters by name of i_dont_exist
+    with pytest.raises(KeyError):
+        sorters["i_dont_exist"]
+
+
+def test_build_sorters_from_config_bad_config():
+    # 1. class_name is bad
+    sorters_config = [
+        {
+            "orderby": "desc",
+            "class_name": "IDontExist",
+            "name": "price",
+        }
+    ]
+    with pytest.raises(ge_exceptions.PluginClassNotFoundError):
+        sorters = build_sorters_from_config(sorters_config)
+
+    # 2. orderby : not a real order
+    sorters_config = [
+        {
+            "orderby": "not_a_real_order",
+            "class_name": "NumericSorter",
+            "name": "price",
+        }
+    ]
+    price_sorter_config = [{"orderby": "not_a_real_order", "class_name": "NumericSorter", "name": "price"}]
+    with pytest.raises(ge_exceptions.SorterError):
+        sorters = build_sorters_from_config(sorters_config)

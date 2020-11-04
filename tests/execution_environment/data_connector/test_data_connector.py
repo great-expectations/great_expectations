@@ -241,5 +241,4 @@ def test__batch_definition_matches_batch_request():
             "partition_request": None
         })
     )
-
     # TODO : Test cases to exercise ranges, etc.
