@@ -602,7 +602,7 @@ def get_dataset(
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 
-def get_test_execution_engine_with_data(
+def get_test_validator_with_data(
     execution_engine,
     data,
     schemas=None,
@@ -644,12 +644,12 @@ def get_test_execution_engine_with_data(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return _build_pandas_engine(df=df)
+        return _build_pandas_validator_with_data(df=df)
 
     elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql"]:
         if not create_engine:
             return None
-        return _build_sa_engine_cfe(
+        return _build_sa_validator_with_data(
             df=df,
             sa_engine_name=execution_engine,
             schemas=schemas,
@@ -764,7 +764,7 @@ def get_test_execution_engine_with_data(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return _build_spark_engine(df=spark_df)
+        return _build_spark_validator_with_data(df=spark_df)
 
     else:
         raise ValueError("Unknown dataset_type " + str(execution_engine))
@@ -790,6 +790,29 @@ def _build_spark_engine(df):
     return engine
 
 
+def _build_spark_validator_with_data(df):
+    from pyspark.sql import SparkSession
+
+    spark = SparkSession.builder.getOrCreate()
+    if isinstance(df, pd.DataFrame):
+        df = spark.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in df.to_records(index=False)
+            ],
+            df.columns.tolist(),
+        )
+    batch = Batch(data=df)
+
+    return Validator(
+        execution_engine=SparkDFExecutionEngine(),
+        batches=(batch,)
+    )
+
+
 def _build_sa_engine(df):
     import sqlalchemy as sa
 
@@ -809,7 +832,16 @@ def _build_pandas_engine(df):
     return engine
 
 
-def _build_sa_engine_cfe(
+def _build_pandas_validator_with_data(df):
+    batch = Batch(data=df)
+
+    return Validator(
+        execution_engine=PandasExecutionEngine(),
+        batches=(batch,)
+    )
+
+
+def _build_sa_validator_with_data(
         df,
         sa_engine_name,
         schemas=None,
@@ -900,12 +932,12 @@ def _build_sa_engine_cfe(
 
     batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
     batch = Batch(data=batch_data)
-    batch_data_dict = {
-        batch.id: batch_data
-    }
+    execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
-    # Build a SqlAlchemyDataset using that database
-    return SqlAlchemyExecutionEngine(caching=caching, engine=engine, batch_data_dict=batch_data_dict)
+    return Validator(
+        execution_engine=execution_engine,
+        batches=(batch,)
+    )
 
 
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
@@ -1270,7 +1302,7 @@ def evaluate_json_test(data_asset, expectation_type, test):
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_cfe(execution_engine_with_data, expectation_type, test):
+def evaluate_json_test_cfe(validator, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -1294,9 +1326,7 @@ def evaluate_json_test_cfe(execution_engine_with_data, expectation_type, test):
     :return: None. asserts correctness of results.
     """
     expectation_suite = ExpectationSuite("json_test_suite")
-    validator = Validator(
-        execution_engine=execution_engine_with_data, expectation_suite=expectation_suite
-    )
+    validator._initialize_expectations(expectation_suite=expectation_suite)
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
     # validator.set_default_expectation_argument("include_config", False)
 
@@ -1324,7 +1354,7 @@ def evaluate_json_test_cfe(execution_engine_with_data, expectation_type, test):
         kwargs["include_config"] = False
         result = getattr(validator, expectation_type)(**kwargs)
 
-    check_json_test_result(test=test, result=result, data_asset=execution_engine_with_data.active_batch_data)
+    check_json_test_result(test=test, result=result, data_asset=validator.execution_engine.active_batch_data)
 
 
 def check_json_test_result(test, result, data_asset=None):
