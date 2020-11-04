@@ -112,14 +112,14 @@ class PipelineDataConnector(DataConnector):
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
-        partition_query: Optional[dict] = None
+        partition_identifiers: Optional[dict] = None
         if batch_request.partition_request:
-            self._validate_partition_query(
-                partition_query=batch_request.partition_request.get("partition_query")
+            self._validate_partition_identifiers(
+                partition_identifiers=batch_request.partition_request.get("partition_identifiers")
             )
-            partition_query = batch_request.partition_request.get("partition_query")
-        if not partition_query:
-            partition_query = {}
+            partition_identifiers = batch_request.partition_request.get("partition_identifiers")
+        if not partition_identifiers:
+            partition_identifiers = {}
 
         batch_definition_list: List[BatchDefinition]
 
@@ -127,7 +127,7 @@ class PipelineDataConnector(DataConnector):
             execution_environment_name=self.execution_environment_name,
             data_connector_name=self.name,
             data_asset_name=DEFAULT_DATA_ASSET_NAME,
-            partition_definition=PartitionDefinition(partition_query)
+            partition_definition=PartitionDefinition(partition_identifiers)
         )
 
         if batch_definition_matches_batch_request(
@@ -164,7 +164,7 @@ class PipelineDataConnector(DataConnector):
             raise TypeError("batch_definition is not of an instance of type BatchDefinition")
         partition_definition: PartitionDefinition = batch_definition.partition_definition
         data_reference: str = self._get_data_reference_name(
-            partition_query=partition_definition
+            partition_identifiers=partition_definition
         )
         return data_reference
 
@@ -185,13 +185,13 @@ class PipelineDataConnector(DataConnector):
 
     @staticmethod
     def _get_data_reference_name(
-        partition_query: PartitionDefinitionSubset
+        partition_identifiers: PartitionDefinitionSubset
     ) -> str:
-        if partition_query is None:
-            partition_query = PartitionDefinitionSubset({})
+        if partition_identifiers is None:
+            partition_identifiers = PartitionDefinitionSubset({})
         data_reference_name = DEFAULT_DELIMITER.join(
             [
-                str(value) for value in partition_query.values()
+                str(value) for value in partition_identifiers.values()
             ]
         )
         return data_reference_name
@@ -205,13 +205,13 @@ class PipelineDataConnector(DataConnector):
                 batch_request.batch_data is None
                 and (
                     batch_request.partition_request is None
-                    or not batch_request.partition_request.get("partition_query")
+                    or not batch_request.partition_request.get("partition_identifiers")
                 )
             ) or
             (
                 batch_request.batch_data is not None
                 and batch_request.partition_request and
-                batch_request.partition_request.get("partition_query")
+                batch_request.partition_request.get("partition_identifiers")
             )
         ):
             raise ge_exceptions.DataConnectorError(
@@ -220,12 +220,12 @@ class PipelineDataConnector(DataConnector):
                 '''
             )
 
-    def _validate_partition_query(self, partition_query: dict):
+    def _validate_partition_identifiers(self, partition_identifiers: dict):
         """
         """
-        if partition_query is None:
-            partition_query = {}
-        self._validate_runtime_keys_configuration(runtime_keys=list(partition_query.keys()))
+        if partition_identifiers is None:
+            partition_identifiers = {}
+        self._validate_runtime_keys_configuration(runtime_keys=list(partition_identifiers.keys()))
 
     def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
         if runtime_keys and len(runtime_keys) > 0:

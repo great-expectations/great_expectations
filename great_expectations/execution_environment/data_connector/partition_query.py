@@ -20,7 +20,7 @@ def build_partition_query(
     if not partition_request_dict:
         return PartitionQuery(
             custom_filter_function=None,
-            partition_query=None,
+            partition_identifiers=None,
             index=None,
             limit=None,
         )
@@ -38,18 +38,18 @@ def build_partition_query(
 "{str(type(custom_filter_function))}", which is illegal.
             '''
         )
-    partition_query: Union[dict, None] = partition_request_dict.get("partition_query")
-    if partition_query:
-        if not isinstance(partition_query, dict):
+    partition_identifiers: Union[dict, None] = partition_request_dict.get("partition_identifiers")
+    if partition_identifiers:
+        if not isinstance(partition_identifiers, dict):
             raise ge_exceptions.PartitionerError(
-                f'''The type of a partition_query must be a dictionary (Python "dict").  The type given is
-"{str(type(partition_query))}", which is illegal.
+                f'''The type of a partition_identifiers must be a dictionary (Python "dict").  The type given is
+"{str(type(partition_identifiers))}", which is illegal.
                 '''
             )
-        if not all([isinstance(key, str) for key in partition_query.keys()]):
+        if not all([isinstance(key, str) for key in partition_identifiers.keys()]):
             raise ge_exceptions.PartitionerError('All partition_definition keys must strings (Python "str").')
-    if partition_query is not None:
-        partition_query: PartitionDefinitionSubset = PartitionDefinitionSubset(partition_query)
+    if partition_identifiers is not None:
+        partition_identifiers: PartitionDefinitionSubset = PartitionDefinitionSubset(partition_identifiers)
     index: Union[int, list, tuple, slice, str, None] = partition_request_dict.get("index")
     limit: Union[int, None] = partition_request_dict.get("limit")
     if limit and (not isinstance(limit, int) or limit < 0):
@@ -65,7 +65,7 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
     index = _parse_index(index=index)
     return PartitionQuery(
         custom_filter_function=custom_filter_function,
-        partition_query=partition_query,
+        partition_identifiers=partition_identifiers,
         limit=limit,
         index=index,
     )
@@ -107,7 +107,7 @@ The type given is "{str(type(index))}", which is illegal.
 class PartitionQuery(object):
     RECOGNIZED_KEYS: set = {
         "custom_filter_function",
-        "partition_query",
+        "partition_identifiers",
         "index",
         "limit",
     }
@@ -115,12 +115,12 @@ class PartitionQuery(object):
     def __init__(
         self,
         custom_filter_function: Callable = None,
-        partition_query: Optional[PartitionDefinitionSubset] = None,
+        partition_identifiers: Optional[PartitionDefinitionSubset] = None,
         index: Optional[Union[int, slice]] = None,
         limit: int = None,
     ):
         self._custom_filter_function = custom_filter_function
-        self._partition_query = partition_query
+        self._partition_identifiers = partition_identifiers
         self._index = index
         self._limit = limit
 
@@ -129,8 +129,8 @@ class PartitionQuery(object):
         return self._custom_filter_function
 
     @property
-    def partition_query(self) -> Union[PartitionDefinitionSubset, None]:
-        return self._partition_query
+    def partition_identifiers(self) -> Union[PartitionDefinitionSubset, None]:
+        return self._partition_identifiers
 
     @property
     def index(self) -> Union[int, slice, None]:
@@ -143,7 +143,7 @@ class PartitionQuery(object):
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "custom_filter_function": self._custom_filter_function,
-            "partition_query": self.partition_query,
+            "partition_identifiers": self.partition_identifiers,
             "index": self.index,
             "limit": self.limit,
         }
@@ -178,16 +178,16 @@ class PartitionQuery(object):
         def match_partition_to_query_params(
             partition_definition: dict
         ) -> bool:
-            if self.partition_query:
+            if self.partition_identifiers:
                 if not partition_definition:
                     return False
-                partition_definition_keys: set = set(self.partition_query.keys())
+                partition_definition_keys: set = set(self.partition_identifiers.keys())
 
                 if not partition_definition_keys:
                     return False
                 for key in partition_definition_keys:
                     if not (
-                        key in partition_definition and partition_definition[key] == self.partition_query[key]
+                        key in partition_definition and partition_definition[key] == self.partition_identifiers[key]
                     ):
                         return False
             return True

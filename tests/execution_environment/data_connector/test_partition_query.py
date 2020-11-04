@@ -86,7 +86,7 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
 
 def test_partition_request_non_recognized_param(create_files_and_instantiate_data_connector):
     my_data_connector = create_files_and_instantiate_data_connector
-    # Test 1: non valid_partition_query_limit
+    # Test 1: non valid_partition_identifiers_limit
     with pytest.raises(ge_exceptions.PartitionerError):
         sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
             execution_environment_name="test_environment",
@@ -115,7 +115,7 @@ def test_partition_request_non_recognized_param(create_files_and_instantiate_dat
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
             partition_request={
-                "partition_query": 1
+                "partition_identifiers": 1
             },
         ))
 
@@ -124,7 +124,7 @@ def test_partition_request_non_recognized_param(create_files_and_instantiate_dat
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request={
-            "partition_query": {
+            "partition_identifiers": {
                 "name": "alex"
             }
         },
@@ -532,7 +532,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(creat
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_query_1_key(create_files_and_instantiate_data_connector):
+def test_partition_request_partition_request_partition_identifiers_1_key(create_files_and_instantiate_data_connector):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
     returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
@@ -540,7 +540,7 @@ def test_partition_request_partition_request_partition_query_1_key(create_files_
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request={
-            "partition_query": {
+            "partition_identifiers": {
                 "timestamp": "20200809"
             },
         },
@@ -576,7 +576,7 @@ def test_partition_request_partition_request_partition_query_1_key(create_files_
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_query_1_key_and_index(create_files_and_instantiate_data_connector):
+def test_partition_request_partition_request_partition_identifiers_1_key_and_index(create_files_and_instantiate_data_connector):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
     returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
@@ -584,7 +584,7 @@ def test_partition_request_partition_request_partition_query_1_key_and_index(cre
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request={
-            "partition_query": {
+            "partition_identifiers": {
                 "name": "james"
             },
             "index": 0,
@@ -603,7 +603,7 @@ def test_partition_request_partition_request_partition_query_1_key_and_index(cre
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_query_2_key_name_timestamp(create_files_and_instantiate_data_connector):
+def test_partition_request_partition_request_partition_identifiers_2_key_name_timestamp(create_files_and_instantiate_data_connector):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
     returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
@@ -611,7 +611,7 @@ def test_partition_request_partition_request_partition_query_2_key_name_timestam
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
         partition_request={
-            "partition_query": {
+            "partition_identifiers": {
                 "timestamp": "20200809",
                 "name": "will"
             },

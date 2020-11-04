@@ -115,9 +115,9 @@ def test_error_checking(basic_execution_environment):
                 )
             )
 
-    # Test for illegal nullity of partition_request["partition_query"] when batch_data is specified
+    # Test for illegal nullity of partition_request["partition_identifiers"] when batch_data is specified
     partition_request: dict = {
-        "partition_query": None
+        "partition_identifiers": None
     }
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
@@ -132,9 +132,9 @@ def test_error_checking(basic_execution_environment):
                 )
             )
 
-    # Test for illegal falsiness of partition_request["partition_query"] when batch_data is specified
+    # Test for illegal falsiness of partition_request["partition_identifiers"] when batch_data is specified
     partition_request: dict = {
-        "partition_query": {}
+        "partition_identifiers": {}
     }
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
@@ -156,7 +156,7 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(basic_execu
     partition_request: dict
 
     partition_request = {
-        "partition_query": {
+        "partition_identifiers": {
             "pipeline_stage_name": "core_processing",
             "run_id": 1234567890,
             "custom_key_0": "custom_value_0"
@@ -191,7 +191,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(basic_execution_e
     partition_request: dict
 
     partition_request = {
-        "partition_query": {
+        "partition_identifiers": {
             "pipeline_stage_name": "core_processing",
             "run_id": 1234567890,
             "custom_key_0": "custom_value_0",
@@ -202,7 +202,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(basic_execution_e
     test_pipeline_data_connector: PipelineDataConnector = \
         basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
 
-    # Insure that keys in partition_request["partition_query"] that are not among runtime_keys declared in configuration
+    # Insure that keys in partition_request["partition_identifiers"] that are not among runtime_keys declared in configuration
     # are not accepted.  In this test, all legal keys plus a single illegal key are present.
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
@@ -222,7 +222,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(basic_execution_e
             )
 
     partition_request = {
-        "partition_query": {
+        "partition_identifiers": {
             "unknown_key": "some_value"
         }
     }
@@ -230,7 +230,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(basic_execution_e
     test_pipeline_data_connector: PipelineDataConnector = \
         basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
 
-    # Insure that keys in partition_request["partition_query"] that are not among runtime_keys declared in configuration
+    # Insure that keys in partition_request["partition_identifiers"] that are not among runtime_keys declared in configuration
     # are not accepted.  In this test, a single illegal key is present.
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
@@ -265,7 +265,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_execution
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     partition_request: dict = {
-        "partition_query": {
+        "partition_identifiers": {
             "run_id": 1234567890,
         }
     }
@@ -288,7 +288,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_execution
             execution_environment_name="my_execution_environment",
             data_connector_name="test_pipeline_data_connector",
             data_asset_name="IN_MEMORY_DATA_ASSET",
-            partition_definition=PartitionDefinition(partition_request["partition_query"])
+            partition_definition=PartitionDefinition(partition_request["partition_identifiers"])
         )
     ]
 
@@ -304,7 +304,7 @@ def test_get_batch_definition_list_from_batch_request_length_zero(basic_executio
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     partition_request: dict = {
-        "partition_query": {
+        "partition_identifiers": {
             "run_id": 1234567890,
         }
     }
@@ -344,7 +344,7 @@ def test__get_data_reference_list(basic_execution_environment):
 
 def test__generate_batch_spec_parameters_from_batch_definition(basic_execution_environment):
     partition_request: dict = {
-        "partition_query": {
+        "partition_identifiers": {
             "custom_key_0": "staging",
             "run_id": 1234567890,
         }
@@ -361,7 +361,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(basic_execution_e
             execution_environment_name="my_execution_environment",
             data_connector_name="test_pipeline_data_connector",
             data_asset_name="my_data_asset",
-            partition_definition=PartitionDefinition(partition_request["partition_query"])
+            partition_definition=PartitionDefinition(partition_request["partition_identifiers"])
         )
     )
 
@@ -370,7 +370,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(basic_execution_e
 
 def test__build_batch_spec_from_batch_definition(basic_execution_environment):
     partition_request: dict = {
-        "partition_query": {
+        "partition_identifiers": {
             "custom_key_0": "staging",
             "run_id": 1234567890,
         }
@@ -387,7 +387,7 @@ def test__build_batch_spec_from_batch_definition(basic_execution_environment):
             execution_environment_name="my_execution_environment",
             data_connector_name="test_pipeline_data_connector",
             data_asset_name="my_data_asset",
-            partition_definition=PartitionDefinition(partition_request["partition_query"])
+            partition_definition=PartitionDefinition(partition_request["partition_identifiers"])
         )
     )
     assert batch_spec == expected_batch_spec
