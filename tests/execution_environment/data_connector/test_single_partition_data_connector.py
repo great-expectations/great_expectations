@@ -808,6 +808,3 @@ def test_redundant_information_in_naming_convention_bucket_sorted(empty_data_con
                         ))
     ]
     assert expected == sorted_batch_definition_list
-
-
-
