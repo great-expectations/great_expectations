@@ -16,7 +16,7 @@ import great_expectations.exceptions.exceptions as ge_exceptions
 #     with pytest.raises(ge_exceptions.SorterError):
 #         test_partitioner.get_sorter("i_dont_exist")
 
-
+# <WILL> move to test_sorting
 def test_base_partitioner_with_sorter():
     # test sorter config
     price_sorter_config = [
@@ -38,6 +38,7 @@ def test_base_partitioner_with_sorter():
         test_partitioner_with_sorter.get_sorter("i_dont_exist")
 
 
+# <WILL> move to test_sorting
 def test_base_partitioner_with_bad_sorter_config():
     # 1. class_name is bad
     price_sorter_config = [{"orderby": "desc", "class_name": "IDontExist", "name": "price"}]
