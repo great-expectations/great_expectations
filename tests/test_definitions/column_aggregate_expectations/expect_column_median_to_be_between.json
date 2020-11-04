@@ -31,7 +31,7 @@
       },
       "tests": [
         {
-          "title": "Positive test, min == max",
+          "title": "positive_test__min_equal___max",
           "exact_match_out": false,
           "in": {
             "column": "a",
@@ -44,7 +44,7 @@
           }
         },
         {
-          "title": "Positive test, null min",
+          "title": "positive_test__null_min",
           "exact_match_out": false,
           "in": {
             "column": "a",
@@ -57,7 +57,7 @@
           }
         },
         {
-          "title": "Positive test, null max",
+          "title": "positive_test__null_max",
           "exact_match_out": false,
           "in": {
             "column": "a",
@@ -70,7 +70,7 @@
           }
         },
         {
-          "title": "Negative test, min == max",
+          "title": "negative_test__min_equal___max",
           "exact_match_out": false,
           "in": {
             "column": "b",
@@ -83,7 +83,7 @@
           }
         },
         {
-          "title": "Negative test, null min",
+          "title": "negative_test__null_min",
           "exact_match_out": false,
           "in": {
             "column": "b",
@@ -96,7 +96,7 @@
           }
         },
         {
-          "title": "Negative test, null max",
+          "title": "negative_test__null_max",
           "exact_match_out": false,
           "in": {
             "column": "b",
@@ -109,7 +109,7 @@
           }
         },
         {
-          "title": "Positive Test, missing value in column, exact min and max",
+          "title": "positive_test__missing_value_in_column__exact_min_and_max",
           "exact_match_out": false,
           "in": {
             "column": "c",
@@ -123,7 +123,7 @@
           }
         },
         {
-          "title": "Negative Test, missing value in column, COMPLETE result format",
+          "title": "negative_test__missing_value_in_column__complete_result_format",
           "exact_match_out": true,
           "in": {
             "column": "c",
@@ -142,7 +142,7 @@
           }
         },
         {
-          "title": "Vacuously true: both min and max null",
+          "title": "vacuously_true_both_min_and_max_null",
           "exact_match_out": false,
           "in": {
             "column": "c",
@@ -165,7 +165,7 @@
         }
       },
       "tests": [{
-        "title": "Test empty column; should be false (no observed value with which to compare)",
+        "title": "test_empty_column__should_be_false_no_observed_value_with_which_to_compare",
         "exact_match_out": false,
         "in": {
           "column": "empty_column",

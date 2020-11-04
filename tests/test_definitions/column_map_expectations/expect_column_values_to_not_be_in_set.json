@@ -9,7 +9,7 @@
     },
     "tests" : [
       {
-        "title": "Basic positive test case, single value not in column",
+        "title": "basic_positive_test_case__single_value_not_in_column",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -20,7 +20,7 @@
         }
       },
       {
-        "title": "Negative test case, include one existing column value",
+        "title": "negative_test_case__include_one_existing_column_value",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -33,7 +33,7 @@
         }
       },
       {
-        "title": "Positive, Empty values set",
+        "title": "positive__empty_values_set",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -46,7 +46,7 @@
         }
       },
       {
-        "title": "Basic Negative strings set, all character values",
+        "title": "basic_negative_strings_set__all_character_values",
         "exact_match_out": false,
         "in": {
           "column": "z",
@@ -59,7 +59,7 @@
         }
       },
       {
-        "title": "Positive test, strings set, extra value in column",
+        "title": "positive_test__strings_set__extra_value_in_column",
         "exact_match_out": false,
         "in": {
           "column": "z",
@@ -70,7 +70,7 @@
         }
       },
       {
-        "title": "Negative test, float set, two out of three column values included, mostly",
+        "title": "negative_test__float_set__two_out_of_three_column_values_included__mostly",
         "exact_match_out": false,
         "in": {
           "column": "y",
@@ -84,7 +84,7 @@
         }
       },
       {
-        "title": "Positive test, float set, two out of three column values included, mostly",
+        "title": "positive_test__float_set__two_out_of_three_column_values_included__mostly",
         "exact_match_out": false,
         "in": {
           "column": "y",
@@ -98,7 +98,7 @@
         }
       },
       {
-        "title": "Positive_test__values_set_is_null",
+        "title": "positive_test__values_set_is_null",
         "exact_match_out": false,
         "in": {
           "column": "n",
@@ -123,7 +123,7 @@
         "only_for": ["spark"]
       },
       {
-        "title": "Raise TypeError when Values set is missing",
+        "title": "raise_typeerror_when_values_set_is_missing",
         "exact_match_out": false,
         "in": {
           "column": "z",
