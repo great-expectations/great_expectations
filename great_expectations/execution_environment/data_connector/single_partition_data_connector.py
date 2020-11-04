@@ -1,10 +1,9 @@
 import os
-from typing import Union, List, Any, Optional, Dict, Iterator
+from typing import List, Optional, Iterator
 from pathlib import Path
 import copy
 
 import logging
-
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
@@ -23,6 +22,7 @@ from great_expectations.execution_environment.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
     build_sorters_from_config,
 )
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +61,10 @@ class SinglePartitionDataConnector(DataConnector):
             default_regex = {}
         self._default_regex = default_regex
         self._sorters = build_sorters_from_config(config_list=sorters)
+
+    @property
+    def sorters(self) -> Optional[dict]:
+        return self._sorters
 
     def refresh_data_references_cache(self):
         """
@@ -135,6 +139,7 @@ class SinglePartitionDataConnector(DataConnector):
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
+        self._validate_sorters_configuration()
 
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
@@ -166,6 +171,23 @@ class SinglePartitionDataConnector(DataConnector):
             return sorted_batch_definition_list
         else:
             return batch_definition_list
+
+    def _validate_sorters_configuration(self):
+        if len(self.sorters) > 0:
+            regex_config = self._default_regex
+            group_names: List[str] = regex_config["group_names"]
+            if any([sorter not in group_names for sorter in self.sorters]):
+                raise ge_exceptions.DataConnectorError(
+                    f'''FilesDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+                  configured group_name.
+                      '''
+                )
+            if len(group_names) < len(self.sorters):
+                raise ge_exceptions.DataConnectorError(
+                    f'''FilesDataConnector "{self.name}" is configured with {len(group_names)} group names;
+                        this is fewer than number of sorters specified, which is {len(self.sorters)}.
+                      '''
+                )
 
     def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list = []
@@ -313,7 +335,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
         if not path:
             raise ValueError(
-                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition 
+                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given partition 
 definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )

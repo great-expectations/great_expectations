@@ -7,9 +7,11 @@ import logging
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+
 from great_expectations.execution_environment.data_connector.partition_query import (
     PartitionQuery,
     build_partition_query
+
 )
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.core.batch import (
@@ -138,23 +140,6 @@ class FilesDataConnector(DataConnector):
         return list(self.assets.keys())
 
     # TODO: <Alex>This code is broken; it is used only by deprecated classes and methods.</Alex>
-    def _validate_sorters_configuration(self, partition_keys: List[str], num_actual_partition_keys: int):
-        if self.sorters and len(self.sorters) > 0:
-            if any([sorter.name not in partition_keys for sorter in self.sorters]):
-                raise ge_exceptions.PartitionerError(
-                    f'''Partitioner "{self.name}" specifies one or more sort keys that do not appear among the
-                configured partition keys.
-                    '''
-                )
-            if len(partition_keys) < len(self.sorters):
-                raise ge_exceptions.PartitionerError(
-                    f'''Partitioner "{self.name}", configured with {len(partition_keys)} partition keys, matches
-                    {num_actual_partition_keys} actual partition keys; this is fewer than number of sorters specified, which is
-                    {len(self.sorters)}.
-                    '''
-                )
-
-    # TODO: <Alex>This code is broken; it is used only by deprecated classes and methods.</Alex>
     def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
         if runtime_keys and len(runtime_keys) > 0:
             if not (self.runtime_keys and set(runtime_keys) <= set(self.runtime_keys)):
@@ -273,6 +258,7 @@ configured runtime keys.
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
+        self._validate_sorters_configuration(batch_request=batch_request)
 
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
@@ -301,17 +287,37 @@ configured runtime keys.
             )
 
         if len(self.sorters) > 0:
-            sorted_batch_definition_list = self._sort_batch_definition_list(
-                batch_definition_list=batch_definition_list
-            )
+            sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
             return sorted_batch_definition_list
         else:
             return batch_definition_list
 
+    def _validate_sorters_configuration(self, batch_request):
+        # Override the default
+        if len(self.sorters) > 0:
+            regex_config = self._default_regex
+            if batch_request.data_asset_name is not None and self.assets and batch_request.data_asset_name in self.assets:
+
+                asset: Asset = self.assets[batch_request.data_asset_name]
+                if asset.group_names:
+                    regex_config["group_names"] = asset.group_names
+
+            group_names: List[str] = regex_config["group_names"]
+            if any([sorter not in group_names for sorter in self.sorters]):
+                raise ge_exceptions.DataConnectorError(
+                    f'''FilesDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+                  configured group_name.
+                      '''
+                )
+            if len(group_names) < len(self.sorters):
+                raise ge_exceptions.DataConnectorError(
+                    f'''FilesDataConnector "{self.name}" is configured with {len(group_names)} group names; 
+                        this is fewer than number of sorters specified, which is {len(self.sorters)}.
+                      '''
+                )
+
     def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list = []
-        # this is not going to be the right order all the time. there must be a way.
-        #
         for sorter in self.sorters.values():
             sorters_list.append(sorter)
         sorters: Iterator[Sorter] = reversed(sorters_list)
@@ -371,7 +377,7 @@ configured runtime keys.
         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
         if not path:
             raise ValueError(
-                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition 
+                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given partition
 definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )

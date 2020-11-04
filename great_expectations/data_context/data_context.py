@@ -64,7 +64,6 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
 from great_expectations.execution_environment import ExecutionEnvironment
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder

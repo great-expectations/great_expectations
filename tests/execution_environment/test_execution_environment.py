@@ -9,7 +9,6 @@ from typing import Union, List, Optional
 
 from great_expectations.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.files_data_connector import FilesDataConnector
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
