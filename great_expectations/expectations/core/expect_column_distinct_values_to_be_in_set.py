@@ -14,7 +14,9 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from ...validator.validation_graph import MetricConfiguration
 from ..expectation import (
+    ColumnExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
@@ -24,7 +26,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnDistinctValuesToBeInSet(TableExpectation):
+class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     """Expect the set of distinct column values to be contained by a given set.
 
             The success value for this expectation will match that of expect_column_values_to_be_in_set. However,

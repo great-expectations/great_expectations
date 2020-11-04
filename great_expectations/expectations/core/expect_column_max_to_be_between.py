@@ -26,17 +26,11 @@ except ImportError:
 
 
 from ...render.renderer.renderer import renderer
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
+from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
 from ..registry import extract_metrics
 
 
-class ExpectColumnMaxToBeBetween(TableExpectation):
+class ExpectColumnMaxToBeBetween(ColumnExpectation):
     """Expect the column max to be between an min and max value
 
            expect_column_max_to_be_between is a \
@@ -264,7 +258,6 @@ class ExpectColumnMaxToBeBetween(TableExpectation):
             "{:.2f}".format(result.result["observed_value"]),
         ]
 
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validate(
         self,
         configuration: ExpectationConfiguration,

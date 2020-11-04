@@ -85,7 +85,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
     """
 
-    map_metric = "column_values.is_between"
+    map_metric = "column_values.between"
     success_keys = (
         "min_value",
         "max_value",

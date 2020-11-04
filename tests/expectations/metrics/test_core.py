@@ -1,6 +1,9 @@
+import numpy as np
 import pandas as pd
+import sqlalchemy as sa
 
 from great_expectations.core.batch import Batch
+from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -9,9 +12,47 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.metrics import *
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.validation_graph import MetricConfiguration
-from tests.test_utils import _build_spark_engine, _build_sa_engine, _build_pandas_engine
+
+
+def _build_spark_engine(df):
+    from pyspark.sql import SparkSession
+
+    spark = SparkSession.builder.getOrCreate()
+    df = spark.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in df.to_records(index=False)
+        ],
+        df.columns.tolist(),
+    )
+    batch = Batch(data=df)
+    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
+    return engine
+
+
+def _build_sa_engine(df):
+    import sqlalchemy as sa
+
+    eng = sa.create_engine("sqlite://", echo=False)
+    df.to_sql("test", eng)
+    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    batch = Batch(data=batch_data)
+    engine = SqlAlchemyExecutionEngine(
+        engine=eng, batch_data_dict={batch.id: batch_data}
+    )
+    return engine
+
+
+def _build_pandas_engine(df):
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    return engine
 
 
 def test_metric_loads():
