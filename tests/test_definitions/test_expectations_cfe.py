@@ -29,7 +29,7 @@ from tests.test_utils import (
     candidate_test_is_on_temporary_notimplemented_list_cfe,
     evaluate_json_test,
     evaluate_json_test_cfe,
-    get_test_execution_engine_with_data,
+    get_test_validator_with_data,
 )
 
 def pytest_generate_tests(metafunc):
@@ -61,7 +61,7 @@ def pytest_generate_tests(metafunc):
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
-                        schemas = execution_engine_with_data = None
+                        schemas = validator_with_data = None
                     else:
                         skip_expectation = False
                         if isinstance(d["data"], list):
@@ -82,7 +82,7 @@ def pytest_generate_tests(metafunc):
                             )
                             for dataset in d["data"]:
                                 datasets.append(
-                                    get_test_execution_engine_with_data(
+                                    get_test_validator_with_data(
                                         c,
                                         dataset["data"],
                                         dataset.get("schemas"),
@@ -90,10 +90,10 @@ def pytest_generate_tests(metafunc):
                                         sqlite_db_path=sqlite_db_path,
                                     )
                                 )
-                            execution_engine_with_data = datasets[0]
+                            validator_with_data = datasets[0]
                         else:
                             schemas = d["schemas"] if "schemas" in d else None
-                            execution_engine_with_data = get_test_execution_engine_with_data(c, d["data"], schemas=schemas)
+                            validator_with_data = get_test_validator_with_data(c, d["data"], schemas=schemas)
 
                     for test in d["tests"]:
                         generate_test = True
@@ -104,8 +104,8 @@ def pytest_generate_tests(metafunc):
                             if not isinstance(test["only_for"], list):
                                 raise ValueError("Invalid test specification.")
 
-                            if execution_engine_with_data and isinstance(
-                                execution_engine_with_data.active_batch_data, SqlAlchemyBatchData
+                            if validator_with_data and isinstance(
+                                validator_with_data.execution_engine.active_batch_data, SqlAlchemyBatchData
                             ):
                                 # Call out supported dialects
                                 if "sqlalchemy" in test["only_for"]:
@@ -114,7 +114,8 @@ def pytest_generate_tests(metafunc):
                                     "sqlite" in test["only_for"]
                                     and sqliteDialect is not None
                                     and isinstance(
-                                        execution_engine_with_data.active_batch_data.sql_engine_dialect,
+                                        validator_with_data.execution_engine.active_batch_data
+                                                .sql_engine_dialect,
                                         sqliteDialect,
                                     )
                                 ):
@@ -123,7 +124,8 @@ def pytest_generate_tests(metafunc):
                                     "postgresql" in test["only_for"]
                                     and postgresqlDialect is not None
                                     and isinstance(
-                                        execution_engine_with_data.active_batch_data.sql_engine_dialect,
+                                        validator_with_data.execution_engine.active_batch_data
+                                                .sql_engine_dialect,
                                         postgresqlDialect,
                                     )
                                 ):
@@ -132,7 +134,8 @@ def pytest_generate_tests(metafunc):
                                     "mysql" in test["only_for"]
                                     and mysqlDialect is not None
                                     and isinstance(
-                                        execution_engine_with_data.active_batch_data.sql_engine_dialect,
+                                        validator_with_data.execution_engine.active_batch_data
+                                                .sql_engine_dialect,
                                         mysqlDialect,
                                     )
                                 ):
@@ -141,13 +144,14 @@ def pytest_generate_tests(metafunc):
                                     "mssql" in test["only_for"]
                                     and mssqlDialect is not None
                                     and isinstance(
-                                        execution_engine_with_data.active_batch_data.sql_engine_dialect,
+                                        validator_with_data.execution_engine.active_batch_data
+                                                .sql_engine_dialect,
                                         mssqlDialect,
                                     )
                                 ):
                                     generate_test = True
-                            elif execution_engine_with_data and isinstance(
-                                execution_engine_with_data.active_batch_data, pandas_DataFrame
+                            elif validator_with_data and isinstance(
+                                validator_with_data.execution_engine.active_batch_data, pandas_DataFrame
                             ):
                                 if "pandas" in test["only_for"]:
                                     generate_test = True
@@ -160,8 +164,8 @@ def pytest_generate_tests(metafunc):
                                     pd.__version__.split(".")[1]
                                 ) > 24:
                                     generate_test = True
-                            elif execution_engine_with_data and isinstance(
-                                execution_engine_with_data.active_batch_data, spark_DataFrame
+                            elif validator_with_data and isinstance(
+                                validator_with_data.execution_engine.active_batch_data, spark_DataFrame
                             ):
                                 if "spark" in test["only_for"]:
                                     generate_test = True
@@ -172,68 +176,79 @@ def pytest_generate_tests(metafunc):
                         if "suppress_test_for" in test and (
                             (
                                 "sqlalchemy" in test["suppress_test_for"]
-                                and execution_engine_with_data
+                                and validator_with_data
                                 and isinstance(
-                                    execution_engine_with_data.active_batch_data, SqlAlchemyBatchData
+                                    validator_with_data.execution_engine.active_batch_data,
+                                SqlAlchemyBatchData
                                 )
                             )
                             or (
                                 "sqlite" in test["suppress_test_for"]
                                 and sqliteDialect is not None
-                                and execution_engine_with_data
+                                and validator_with_data
                                 and isinstance(
-                                    execution_engine_with_data.active_batch_data, SqlAlchemyBatchData
+                                    validator_with_data.execution_engine.active_batch_data,
+                                SqlAlchemyBatchData
                                 )
                                 and isinstance(
-                                    execution_engine_with_data.active_batch_data.sql_engine_dialect, sqliteDialect
+                                    validator_with_data.execution_engine.active_batch_data
+                                            .sql_engine_dialect,
+                                sqliteDialect
                                 )
                             )
                             or (
                                 "postgresql" in test["suppress_test_for"]
                                 and postgresqlDialect is not None
-                                and execution_engine_with_data
+                                and validator_with_data
                                 and isinstance(
-                                    execution_engine_with_data.active_batch_data, SqlAlchemyBatchData
+                                    validator_with_data.execution_engine.active_batch_data,
+                                SqlAlchemyBatchData
                                 )
                                 and isinstance(
-                                    execution_engine_with_data.active_batch_data.sql_engine_dialect,
+                                    validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
                                     postgresqlDialect,
                                 )
                             )
                             or (
                                 "mysql" in test["suppress_test_for"]
                                 and mysqlDialect is not None
-                                and execution_engine_with_data
+                                and validator_with_data
                                 and isinstance(
-                                    execution_engine_with_data.active_batch_data, SqlAlchemyBatchData
+                                    validator_with_data.execution_engine.active_batch_data,
+                                SqlAlchemyBatchData
                                 )
                                 and isinstance(
-                                    execution_engine_with_data.active_batch_data.sql_engine_dialect, mssqlDialect
+                                    validator_with_data.execution_engine.active_batch_data
+                                            .sql_engine_dialect,
+                                mssqlDialect
                                 )
                             )
                             or (
                                 "mssql" in test["suppress_test_for"]
                                 and mssqlDialect is not None
-                                and execution_engine_with_data
+                                and validator_with_data
                                 and isinstance(
-                                    execution_engine_with_data.active_batch_data, SqlAlchemyBatchData
+                                    validator_with_data.execution_engine.active_batch_data,
+                                SqlAlchemyBatchData
                                 )
                                 and isinstance(
-                                    execution_engine_with_data.active_batch_data.sql_engine_dialect, mssqlDialect
+                                    validator_with_data.execution_engine.active_batch_data
+                                            .sql_engine_dialect,
+                                mssqlDialect
                                 )
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]
-                                and execution_engine_with_data
+                                and validator_with_data
                                 and isinstance(
-                                    execution_engine_with_data.active_batch_data, pandas_DataFrame
+                                    validator_with_data.execution_engine.active_batch_data, pandas_DataFrame
                                 )
                             )
                             or (
                                 "spark" in test["suppress_test_for"]
-                                and execution_engine_with_data
+                                and validator_with_data
                                 and isinstance(
-                                    execution_engine_with_data.active_batch_data, spark_DataFrame
+                                    validator_with_data.execution_engine.active_batch_data, spark_DataFrame
                                 )
                             )
                         ):
@@ -241,9 +256,9 @@ def pytest_generate_tests(metafunc):
                         # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
                         if (
                             "allow_cross_type_comparisons" in test["in"]
-                            and execution_engine_with_data
+                            and validator_with_data
                             and isinstance(
-                                execution_engine_with_data.active_batch_data, SqlAlchemyBatchData
+                                validator_with_data.execution_engine.active_batch_data, SqlAlchemyBatchData
                             )
                         ):
                             skip_test = True
@@ -253,7 +268,7 @@ def pytest_generate_tests(metafunc):
                                 "expectation_type": test_configuration[
                                     "expectation_type"
                                 ],
-                                "execution_engine_with_data": execution_engine_with_data,
+                                "validator_with_data": validator_with_data,
                                 "test": test,
                                 "skip": skip_expectation or skip_test,
                             }
@@ -279,4 +294,8 @@ def test_case_runner_cfe(test_case):
     # Note: this should never be done in practice, but we are wiping expectations to reuse batches during testing.
     # test_case["batch"]._initialize_expectations()
 
-    evaluate_json_test_cfe(test_case["execution_engine_with_data"], test_case["expectation_type"], test_case["test"])
+    evaluate_json_test_cfe(
+        validator=test_case["validator_with_data"],
+        expectation_type=test_case["expectation_type"],
+        test=test_case["test"]
+    )
