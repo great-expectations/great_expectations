@@ -336,7 +336,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
         if not path:
             raise ValueError(
-                f'''No partition for data asset name "{batch_definition.data_asset_name}" matches the given partition 
+                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given partition 
 definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )
