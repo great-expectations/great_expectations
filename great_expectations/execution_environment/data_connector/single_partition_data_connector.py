@@ -173,8 +173,7 @@ class SinglePartitionDataConnector(DataConnector):
             return batch_definition_list
 
     def _validate_sorters_configuration(self):
-        # Override the default
-        if self.sorters and len(self.sorters) > 0:
+        if len(self.sorters) > 0:
             regex_config = self._default_regex
             group_names: List[str] = regex_config["group_names"]
             if any([sorter not in group_names for sorter in self.sorters]):
