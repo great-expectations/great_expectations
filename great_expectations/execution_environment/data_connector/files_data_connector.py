@@ -291,9 +291,6 @@ configured runtime keys.
         else:
             return batch_definition_list
 
-        # TODO: <Alex>This code is broken; it is used only by deprecated classes and methods.</Alex>
-
-
     def _validate_sorters_configuration(self, batch_request):
         # Override the default
         if len(self.sorters) > 0:
@@ -305,7 +302,6 @@ configured runtime keys.
                     regex_config["group_names"] = asset.group_names
 
             group_names: List[str] = regex_config["group_names"]
-
             if any([sorter not in group_names for sorter in self.sorters]):
                 raise ge_exceptions.DataConnectorError(
                     f'''FilesDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
@@ -319,11 +315,8 @@ configured runtime keys.
                       '''
                 )
 
-
     def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list = []
-        # this is not going to be the right order all the time. there must be a way.
-        #
         for sorter in self.sorters.values():
             sorters_list.append(sorter)
         sorters: Iterator[Sorter] = reversed(sorters_list)

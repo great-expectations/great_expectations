@@ -676,8 +676,6 @@ def test_foxtrot(tmp_path_factory):
     assert len(my_batch_definition_list) == 3
 
 
-
-
 def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
     create_files_in_directory(
@@ -749,7 +747,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
         ))
-
 
 
 def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):

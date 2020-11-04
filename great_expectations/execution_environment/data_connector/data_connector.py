@@ -154,8 +154,7 @@ class DataConnector(object):
             print()
 
         asset_names = self.get_available_data_asset_names()
-        # <WILL> use a real sorter here?
-
+        # <WILL> : do these need to be sorted using sorter? Sorters currently act on BatchDefinitions, and this returns a list of strings
         asset_names.sort()
         len_asset_names = len(asset_names)
 
