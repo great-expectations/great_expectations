@@ -94,7 +94,6 @@ def convert_data_reference_string_to_batch_request_using_regex(
     matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
     if matches is None:
         return None
-
     groups: list = list(matches.groups())
     partition_definition: PartitionDefinitionSubset = PartitionDefinitionSubset(
         dict(zip(group_names, groups))
@@ -210,6 +209,7 @@ def _invert_regex_to_data_reference_template(
 
 def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
     sorter_dict: Dict[str, Sorter] = {}
+
     if config_list is not None:
         for sorter_config in config_list:
             # if sorters were not configured
@@ -220,6 +220,7 @@ def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dic
             sorter_name = sorter_config['name']
             new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)
             sorter_dict[sorter_name] = new_sorter
+
     return sorter_dict
 
 

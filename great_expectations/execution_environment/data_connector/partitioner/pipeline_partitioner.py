@@ -3,7 +3,7 @@ from typing import Union, List
 import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+#from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 
 logger = logging.getLogger(__name__)
 
