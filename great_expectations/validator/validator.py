@@ -146,8 +146,11 @@ class Validator:
     def __getattr__(self, name):
         if name.startswith("expect_") and get_expectation_impl(name):
             return self.validate_expectation(name)
-        elif self._expose_dataframe_methods and isinstance(self.active_batch.data, pd.DataFrame) and hasattr(
-                pd.DataFrame, name):
+        elif (
+            self._expose_dataframe_methods
+            and isinstance(self.active_batch.data, pd.DataFrame)
+            and hasattr(pd.DataFrame, name)
+        ):
             return getattr(self.active_batch.data, name)
         else:
             raise AttributeError(
@@ -203,8 +206,7 @@ class Validator:
                 #     if k in ("result_format", "include_config", "catch_exceptions")
                 # }
                 validation_result = expectation.validate(
-                    validator=self,
-                    runtime_configuration=runtime_configuration,
+                    validator=self, runtime_configuration=runtime_configuration,
                 )
                 if isinstance(validation_result, dict):
                     validation_result = ExpectationValidationResult(**validation_result)

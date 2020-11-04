@@ -31,7 +31,8 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine, SqlAlchemyBatchData,
+    SqlAlchemyBatchData,
+    SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_environment.types import (
     BatchSpec,
@@ -655,7 +656,7 @@ def get_test_validator_with_data(
             schemas=schemas,
             caching=caching,
             table_name=table_name,
-            sqlite_db_path=sqlite_db_path
+            sqlite_db_path=sqlite_db_path,
         )
 
     elif execution_engine == "spark":
@@ -807,10 +808,7 @@ def _build_spark_validator_with_data(df):
         )
     batch = Batch(data=df)
 
-    return Validator(
-        execution_engine=SparkDFExecutionEngine(),
-        batches=(batch,)
-    )
+    return Validator(execution_engine=SparkDFExecutionEngine(), batches=(batch,))
 
 
 def _build_sa_engine(df):
@@ -835,31 +833,23 @@ def _build_pandas_engine(df):
 def _build_pandas_validator_with_data(df):
     batch = Batch(data=df)
 
-    return Validator(
-        execution_engine=PandasExecutionEngine(),
-        batches=(batch,)
-    )
+    return Validator(execution_engine=PandasExecutionEngine(), batches=(batch,))
 
 
 def _build_sa_validator_with_data(
-        df,
-        sa_engine_name,
-        schemas=None,
-        caching=True,
-        table_name=None,
-        sqlite_db_path=None
+    df, sa_engine_name, schemas=None, caching=True, table_name=None, sqlite_db_path=None
 ):
     dialect_classes = {
         "sqlite": sqlitetypes.dialect,
         "postgresql": postgresqltypes.dialect,
         "mysql": mysqltypes.dialect,
-        "mssql": mssqltypes.dialect
+        "mssql": mssqltypes.dialect,
     }
     dialect_types = {
         "sqlite": SQLITE_TYPES,
         "postgresql": POSTGRESQL_TYPES,
         "mysql": MYSQL_TYPES,
-        "mssql": MSSQL_TYPES
+        "mssql": MSSQL_TYPES,
     }
     if sa_engine_name == "sqlite":
         if sqlite_db_path is not None:
@@ -885,12 +875,15 @@ def _build_sa_validator_with_data(
 
     sql_dtypes = {}
     if (
-            schemas
-            and sa_engine_name in schemas
-            and isinstance(engine.dialect, dialect_classes.get(sa_engine_name))
+        schemas
+        and sa_engine_name in schemas
+        and isinstance(engine.dialect, dialect_classes.get(sa_engine_name))
     ):
         schema = schemas[sa_engine_name]
-        sql_dtypes = {col: dialect_types.get(sa_engine_name)[dtype] for (col, dtype) in schema.items()}
+        sql_dtypes = {
+            col: dialect_types.get(sa_engine_name)[dtype]
+            for (col, dtype) in schema.items()
+        }
         for col in schema:
             type_ = schema[col]
             if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
@@ -923,21 +916,14 @@ def _build_sa_validator_with_data(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
     df.to_sql(
-        name=table_name,
-        con=conn,
-        index=False,
-        dtype=sql_dtypes,
-        if_exists="replace",
+        name=table_name, con=conn, index=False, dtype=sql_dtypes, if_exists="replace",
     )
 
     batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
-    return Validator(
-        execution_engine=execution_engine,
-        batches=(batch,)
-    )
+    return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
@@ -1354,7 +1340,11 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
         kwargs["include_config"] = False
         result = getattr(validator, expectation_type)(**kwargs)
 
-    check_json_test_result(test=test, result=result, data_asset=validator.execution_engine.active_batch_data)
+    check_json_test_result(
+        test=test,
+        result=result,
+        data_asset=validator.execution_engine.active_batch_data,
+    )
 
 
 def check_json_test_result(test, result, data_asset=None):

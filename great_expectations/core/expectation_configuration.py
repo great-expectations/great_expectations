@@ -1059,14 +1059,11 @@ class ExpectationConfiguration(DictDot):
         return get_expectation_impl(self.expectation_type)
 
     def validate(
-        self,
-        validator: "Validator",
-        runtime_configuration=None,
+        self, validator: "Validator", runtime_configuration=None,
     ):
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).validate(
-            validator=validator,
-            runtime_configuration=runtime_configuration,
+            validator=validator, runtime_configuration=runtime_configuration,
         )
 
     def metrics_validate(
