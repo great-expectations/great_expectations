@@ -11,8 +11,11 @@ Develop
 -----------------
 * [ENHANCEMENT] CLI supports s3a:// or gs:// paths for Pandas Datasources (issue #2006)
 * [ENHANCEMENT] Escape $ characters in configuration, support multiple substitutions (#2005 & #2015)
+* [ENHANCEMENT] Implement Skip prompt flag on datasource profile cli (#1881 Thanks @thcidale0808!)
 * [BUGFIX] Fixed bug where slack messages cause stacktrace when data docs pages have issue
+* [DOCS] how to use docker images (#1797)
 * [DOCS] Remove incorrect doc line from PagerdutyAlertAction (Thanks @niallrees!)
+* [MAINTENANCE] Update broken link (Thanks @noklam!)
 * [MAINTENANCE] Fix path for how-to guide (Thanks @gauthamzz!)
 
 0.12.6
