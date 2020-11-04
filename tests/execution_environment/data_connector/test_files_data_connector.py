@@ -214,12 +214,15 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         },
     )
 
+    with pytest.raises(TypeError):
+        my_data_connector.get_batch_definition_list_from_batch_request()
+
+    # with unnamed data_asset_name
     unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
         execution_environment_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
+        data_asset_name=None,
     ))
-
     expected = [
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
@@ -282,6 +285,14 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                             {'name': 'james', 'timestamp': '20200713', 'price': '1567'}
                         )),
     ]
+    assert expected == unsorted_batch_definition_list
+
+    # with named data_asset_name
+    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="test_environment",
+        data_connector_name="general_filesystem_data_connector",
+        data_asset_name="TestFiles",
+    ))
     assert expected == unsorted_batch_definition_list
 
 

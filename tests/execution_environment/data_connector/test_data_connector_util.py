@@ -70,8 +70,7 @@ def test_convert_data_reference_string_to_batch_request_using_regex():
         data_reference=data_reference,
         regex_pattern=pattern,
         group_names=group_names
-    ) == None
-
+    ) is None
 
     data_reference="eugene_DOESNT_MATCH_ALL_CAPTURING_GROUPS_1500.csv"
     pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
@@ -80,12 +79,11 @@ def test_convert_data_reference_string_to_batch_request_using_regex():
         data_reference=data_reference,
         regex_pattern=pattern,
         group_names=group_names
-    ) == None
+    ) is None
 
     #TODO ABE 20201017 : Future case to handle
     #with pytest.raises(ValueError):
     #    regex_partitioner._convert_data_reference_to_batch_request("NOT_THE_RIGHT_DIR/eugene_20200810_1500.csv")
-
 
 
 # TODO: Will 20201104
