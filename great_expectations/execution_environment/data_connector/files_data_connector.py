@@ -162,6 +162,7 @@ configured runtime keys.
                     '''
                 )
 
+    # TODO: <Alex>This method should be used in other file path type DataConnector classes (currently it is not).</Alex>
     def _normalize_directory_path(self, dir_path: str) -> str:
         # If directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
