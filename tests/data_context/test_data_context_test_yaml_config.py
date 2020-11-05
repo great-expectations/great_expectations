@@ -92,7 +92,7 @@ def test_execution_environment_config(empty_data_context):
     print(temp_dir)
 
     return_obj = empty_data_context.test_yaml_config(
-        yaml_config=fr"""
+        yaml_config=f"""
 class_name: ExecutionEnvironment
 
 execution_engine:
