@@ -10,6 +10,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.exceptions import StoreBackendError
+from great_expectations.util import gen_directory_tree_str
 
 
 def test_expectations_store():
@@ -91,14 +92,72 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
     }
 
 
-def test_expectations_store_report_store_id():
+def test_expectations_store_report_store_backend_id_in_memory_store_backend():
     """
     What does this test and why?
     A Store should be able to report it's store_backend_id
     which is set when the StoreBackend is instantiated.
     """
-    expectations_store = ExpectationsStore()
+    in_memory_expectations_store = ExpectationsStore()
     # Check that store_backend_id exists can be read
-    assert expectations_store.store_backend_id is not None
+    assert in_memory_expectations_store.store_backend_id is not None
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(expectations_store.store_backend_id)
+    assert test_utils.validate_uuid4(in_memory_expectations_store.store_backend_id)
+
+
+def test_expectations_store_report_same_id_with_same_configuration_TupleFilesystemStoreBackend(
+    tmp_path_factory,
+):
+    """
+    What does this test and why?
+    A store with the same config (must be persistent store) should report the same store_backend_id
+    """
+    path = "dummy_str"
+    project_path = str(
+        tmp_path_factory.mktemp(
+            "test_expectations_store_report_same_id_with_same_configuration__dir"
+        )
+    )
+
+    assert (
+        gen_directory_tree_str(project_path)
+        == """\
+test_expectations_store_report_same_id_with_same_configuration__dir0/
+"""
+    )
+
+    # Check two stores with the same config
+    persistent_expectations_store = ExpectationsStore(
+        store_backend={
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": project_path,
+        }
+    )
+    # Check successful initialization with a store_backend_id
+    initialized_directory_tree_with_store_backend_id = """\
+test_expectations_store_report_same_id_with_same_configuration__dir0/
+    .ge_store_backend_id
+"""
+    assert (
+        gen_directory_tree_str(project_path)
+        == initialized_directory_tree_with_store_backend_id
+    )
+    assert persistent_expectations_store.store_backend_id is not None
+
+    # Check that a duplicate store reports the same store_backend_id
+    persistent_expectations_store_duplicate = ExpectationsStore(
+        store_backend={
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": project_path,
+        }
+    )
+    assert persistent_expectations_store_duplicate.store_backend_id is not None
+    assert (
+        persistent_expectations_store.store_backend_id
+        == persistent_expectations_store_duplicate.store_backend_id
+    )
+    # Check no change to filesystem
+    assert (
+        gen_directory_tree_str(project_path)
+        == initialized_directory_tree_with_store_backend_id
+    )
