@@ -169,7 +169,8 @@ def test_some_very_basic_stuff(basic_execution_environment):
         )
     )
 
-    assert batch.batch_request is None
+    # TODO Abe 20201104: Make sure this is what we truly want to do.
+    assert batch.batch_request == {}
     assert type(batch.data) == pd.DataFrame
     assert batch.batch_definition == BatchDefinition(
         execution_environment_name="my_execution_environment",
@@ -217,7 +218,8 @@ def test_some_very_basic_stuff(basic_execution_environment):
             "some_random_id": 1
         })
     ), batch_data=my_df)
-    assert batch.batch_request is None
+    # TODO Abe 20201104: Make sure this is what we truly want to do.
+    assert batch.batch_request == {}
 
 
 def test_get_batch_list_from_batch_request(basic_execution_environment):
