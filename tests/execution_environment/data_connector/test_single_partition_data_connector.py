@@ -3,7 +3,7 @@ import yaml
 
 from typing import List
 
-from great_expectations.execution_environment.data_connector import SinglePartitionDictDataConnector
+from great_expectations.execution_environment.data_connector import SinglePartitionerDictDataConnector
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -26,7 +26,7 @@ def test_basic_instantiation(tmp_path_factory):
         "directory/B-2.csv": create_fake_data_frame(),
     }
 
-    my_data_connector: SinglePartitionDictDataConnector = SinglePartitionDictDataConnector(
+    my_data_connector: SinglePartitionerDictDataConnector = SinglePartitionerDictDataConnector(
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
@@ -188,7 +188,7 @@ default_regex:
 #     ])
 
 #     yaml_string = """
-# class_name: SinglePartitionDictDataConnector
+# class_name: SinglePartitionerDictDataConnector
 # execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
 # base_directory: my_base_directory/
 # # glob_directive: "*.csv"
@@ -374,7 +374,7 @@ def test_self_check():
     self_check_return_object = my_data_connector.self_check()
 
     assert self_check_return_object == {
-        "class_name": "SinglePartitionDictDataConnector",
+        "class_name": "SinglePartitionerDictDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
             "A",
@@ -417,7 +417,7 @@ def test_that_needs_a_better_name():
     self_check_return_object = my_data_connector.self_check()
 
     assert self_check_return_object == {
-        "class_name": "SinglePartitionDictDataConnector",
+        "class_name": "SinglePartitionerDictDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
             "A",

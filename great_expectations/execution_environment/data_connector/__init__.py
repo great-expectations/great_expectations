@@ -3,6 +3,7 @@ from .files_data_connector import FilesDataConnector
 from .pipeline_data_connector import PipelineDataConnector
 from .single_partitioner_data_connector import (
     SinglePartitionerDataConnector,
+    SinglePartitionerDictDataConnector,
     SinglePartitionerFileDataConnector,
 )
 from .sql_data_connector import SqlDataConnector
