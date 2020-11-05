@@ -33,7 +33,7 @@ try:
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
+    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup, quoted_name
     from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.operators import custom_op
     from sqlalchemy.sql.selectable import CTE, Select
@@ -167,6 +167,8 @@ class MetaSqlAlchemyDataset(Dataset):
         def inner_wrapper(
             self, column, mostly=None, result_format=None, *args, **kwargs
         ):
+            if self.batch_kwargs.get("use_quoted_name"):
+                column = quoted_name(column, quote=True)
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
