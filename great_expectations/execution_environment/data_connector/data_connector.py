@@ -213,26 +213,6 @@ match DataConnector execution_environment_name: "{self.execution_environment_nam
 DataConnector name: "{self.name}".
                 '''
             )
-        if hasattr(self, "sorters") and self.sorters is not None and len(self.sorters) > 0:
-            regex_config = self._default_regex
-            if hasattr(self, "assets") and self.assets is not None:
-                if batch_request.data_asset_name is not None and batch_request.data_asset_name in self.assets:
-                    asset: Asset = self.assets[batch_request.data_asset_name]
-                    if asset.group_names:
-                        regex_config["group_names"] = asset.group_names
-            group_names: List[str] = regex_config["group_names"]
-
-            if any([sorter not in group_names for sorter in self.sorters]):
-                raise ge_exceptions.DataConnectorError(
-                    f'''DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-                    configured group_name.
-                    '''
-                )
-            if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
-                    f'''DataConnector "{self.name}" is configured with {len(group_names)} group names;
-                        this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                      ''')
 
     def _validate_sorters_configuration(self):
         if len(self.sorters) > 0:

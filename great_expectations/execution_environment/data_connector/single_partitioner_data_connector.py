@@ -142,7 +142,7 @@ class SinglePartitionerDataConnector(DataConnector):
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-        self._validate_batch_request(batch_request=batch_request)
+        super()._validate_batch_request(batch_request=batch_request)
 
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
