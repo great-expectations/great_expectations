@@ -176,16 +176,6 @@ class SqlAlchemyBatchData:
                     "default dataset in engine url"
                 )
 
-        if (
-            query is not None
-            and engine.dialect.name.lower() == "snowflake"
-            and generated_table_name is not None
-        ):
-            raise ValueError(
-                "No snowflake_transient_table specified. Snowflake with a query batch_kwarg will create "
-                "a transient table, so you must provide a user-selected name."
-            )
-
         if query:
             self.create_temporary_table(table_name, query, schema_name=schema)
 
@@ -268,10 +258,9 @@ class SqlAlchemyBatchData:
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
-            logger.info("Creating transient table %s" % table_name)
             if schema_name is not None:
                 table_name = schema_name + "." + table_name
-            stmt = "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
+            stmt = "CREATE OR REPLACE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name == "mysql":
@@ -405,9 +394,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
 
-            if engine and engine.dialect.name.lower() in ["sqlite", "mssql"]:
-                # sqlite/mssql temp tables only persist within a connection so override the engine
-                self.engine = engine.connect()
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
@@ -422,6 +408,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
         else:
             self.dialect = None
+
+        if self.engine and self.engine.dialect.name.lower() in [
+            "sqlite",
+            "mssql",
+            "snowflake",
+        ]:
+            # sqlite/mssql temp tables only persist within a connection so override the engine
+            self.engine = engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
