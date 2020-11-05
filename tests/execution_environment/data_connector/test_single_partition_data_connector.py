@@ -370,7 +370,6 @@ def test_self_check(tmp_path_factory):
     )
 
     self_check_return_object = my_data_connector.self_check()
-    print(self_check_return_object)
     assert self_check_return_object == {
         "class_name": "SinglePartitionerFileDataConnector",
         "data_asset_count": 2,
@@ -415,11 +414,11 @@ def test_multiple_data_references_per_data_asset_excluding_non_regex_matching_fi
                 "data_asset_name",
                 "number"
             ]
-        }
+        },
+        glob_directive="*.csv",
+        base_directory=base_directory,
     )
-
     self_check_return_object = my_data_connector.self_check()
-
     assert self_check_return_object == {
         "class_name": "SinglePartitionerFileDataConnector",
         "data_asset_count": 2,

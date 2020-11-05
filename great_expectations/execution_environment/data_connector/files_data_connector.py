@@ -84,7 +84,7 @@ class FilesDataConnector(DataConnector):
         self._build_assets_from_config(config=assets)
 
         self._sorters = build_sorters_from_config(config_list=sorters)
-        self._validate_sorters_configuration()
+        super()._validate_sorters_configuration()
 
     @property
     def assets(self) -> Dict[str, Union[dict, Asset]]:
@@ -298,32 +298,6 @@ configured runtime keys.
             return sorted_batch_definition_list
         else:
             return batch_definition_list
-
-    # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
-    def _validate_sorters_configuration(self, batch_request):
-        # Override the default
-        if len(self.sorters) > 0:
-            regex_config = self._default_regex
-            if (
-                batch_request.data_asset_name is not None
-                and self.assets and batch_request.data_asset_name in self.assets
-            ):
-                asset: Asset = self.assets[batch_request.data_asset_name]
-                if asset.group_names:
-                    regex_config["group_names"] = asset.group_names
-            group_names: List[str] = regex_config["group_names"]
-            if any([sorter not in group_names for sorter in self.sorters]):
-                raise ge_exceptions.DataConnectorError(
-                    f'''FilesDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-configured group_name.
-                      '''
-                )
-            if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
-                    f'''FilesDataConnector "{self.name}" is configured with {len(group_names)} group names;
-this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                    '''
-                )
 
     def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list: List[Sorter] = []

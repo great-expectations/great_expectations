@@ -64,7 +64,7 @@ class SinglePartitionerDataConnector(DataConnector):
         self._default_regex = default_regex
 
         self._sorters = build_sorters_from_config(config_list=sorters)
-        self._validate_sorters_configuration()
+        super()._validate_sorters_configuration()
 
     @property
     def sorters(self) -> Optional[dict]:
