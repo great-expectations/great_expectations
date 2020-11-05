@@ -364,6 +364,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             assert len(aggregate["ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
+            logger.warning(
+                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {domain_id}"
+            )
             for idx, id in enumerate(aggregate["ids"]):
                 resolved_metrics[id] = res[0][idx]
 

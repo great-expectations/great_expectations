@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 import sqlalchemy as sa
@@ -794,3 +796,59 @@ def test_sa_batch_aggregate_metrics():
     assert res[desired_metric_2.id] == 1
     assert res[desired_metric_3.id] == 4
     assert res[desired_metric_4.id] == 4
+
+
+def test_sparkdf_batch_aggregate_metrics(caplog):
+    import datetime
+
+    engine = _build_spark_engine(
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
+    )
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.aggregate.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.aggregate.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.aggregate.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.aggregate.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+    )
+    start = datetime.datetime.now()
+    caplog.clear()
+    caplog.set_level(logging.DEBUG, logger="great_expectations")
+    res = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        )
+    )
+    end = datetime.datetime.now()
+    print(end - start)
+    assert res[desired_metric_1.id] == 3
+    assert res[desired_metric_2.id] == 1
+    assert res[desired_metric_3.id] == 4
+    assert res[desired_metric_4.id] == 4
+
+    # Check that all four of these metrics were computed on a single domain
+    found_message = False
+    for record in caplog.records:
+        if (
+            record.message
+            == "SparkDFExecutionEngine computed 4 metrics on domain_id ()"
+        ):
+            found_message = True
+    assert found_message
