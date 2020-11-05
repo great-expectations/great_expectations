@@ -3,7 +3,10 @@ import logging
 import pandas as pd
 import sqlalchemy as sa
 
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -47,3 +50,13 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
                 for regex in regex_list
             ]
         )
+
+    @column_map_condition(engine=SparkDFExecutionEngine)
+    def _sqlalchemy(cls, column, regex_list, **kwargs):
+        for regex in regex_list:
+            if compound is None:
+                compound = column.rlike(regex)
+            else:
+                compound = compound & ~column.rlike(regex)
+
+        return compound

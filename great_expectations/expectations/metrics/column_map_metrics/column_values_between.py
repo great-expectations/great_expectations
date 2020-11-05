@@ -191,3 +191,41 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 return sa.and_(min_value <= column, column < max_value)
             else:
                 return sa.and_(min_value <= column, column <= max_value)
+
+    @column_map_condition(engine=SparkDFExecutionEngine)
+    def _sqlalchemy(
+        cls,
+        column,
+        min_value=None,
+        max_value=None,
+        strict_min=None,
+        strict_max=None,
+        **kwargs
+    ):
+        if min_value is not None and max_value is not None and min_value > max_value:
+            raise ValueError("min_value cannot be greater than max_value")
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        if min_value is None:
+            if strict_max:
+                return column < max_value
+            else:
+                return column <= max_value
+
+        elif max_value is None:
+            if strict_min:
+                return min_value < column
+            else:
+                return min_value <= column
+
+        else:
+            if strict_min and strict_max:
+                return min_value < column & column < max_value
+            elif strict_min:
+                return min_value < column & column <= max_value
+            elif strict_max:
+                return min_value <= column & column < max_value
+            else:
+                return min_value <= column & column <= max_value

@@ -16,14 +16,9 @@ from great_expectations.expectations.metrics.column_map_metric import (
     column_map_function,
 )
 from great_expectations.expectations.metrics.column_map_metric import sa as sa
+from great_expectations.expectations.metrics.import_manager import F, Window
 from great_expectations.expectations.metrics.metric_provider import metric
 from great_expectations.validator.validation_graph import MetricConfiguration
-
-try:
-    import pyspark.sql.functions as F
-    from pyspark.sql import Window
-except ImportError:
-    Window = None
 
 
 class ColumnValuesUnique(ColumnMapMetricProvider):
@@ -45,7 +40,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         return column.notin_(dup_query)
 
     @column_map_condition(
-        engine=SparkDFExecutionEngine,  # metric_fn_type="map_condition_column"
+        engine=SparkDFExecutionEngine, metric_fn_type="window_condition_fn"
     )
     def _spark(cls, column, **kwargs):
         return F.count(F.lit(1)).over(Window.partitionBy(column)) <= 1
