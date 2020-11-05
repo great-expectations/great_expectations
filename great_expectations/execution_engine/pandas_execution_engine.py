@@ -178,8 +178,8 @@ Notes:
         self, domain_kwargs: Dict,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
-        to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
-        or otherwise a Data Frame.
+        to obtain and/or query a batch. Returns in the format of a Pandas DataFrame. If the domain is a single column,
+        this is added to 'accessor domain kwargs' and used for later access
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain

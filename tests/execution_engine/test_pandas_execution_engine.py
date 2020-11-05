@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 from great_expectations.core.batch import Batch
-
 from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.metrics import ColumnMean, ColumnStandardDeviation, ColumnValuesZScore
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 def test_reader_fn():
@@ -61,12 +62,60 @@ def test_get_compute_domain_with_row_condition():
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
+# What happens when we filter such that no value meets the condition?
+def test_get_compute_domain_with_unmeetable_row_condition():
+    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+    expected_df = df[df['b'] > 24].reset_index()
+
+    # Loading batch data
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+
+    # Todo: why is condition parser necessary?
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 24",
+                                                                                     "condition_parser": "pandas"})
+    # Ensuring data has been properly queried
+    assert data['b'].equals(expected_df['b']), "Data does not match after getting compute domain"
+
+    # Ensuring compute kwargs have not been modified
+    assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
+    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
+
+
 def test_resolve_metric_bundle():
-    pass
+    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": [1, 2, 3,None], "b": [2, 3, 4, None]})
+
+    # Loading batch data
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+
+    # Building configs
+    mean_config = MetricConfiguration("column.aggregate.mean", {"column": "a"}, None)
+    std_dev_cofig = MetricConfiguration("column.aggregate.standard_deviation", {"column": "a"}, None)
+
+    # Asking for metrics
+    resolved = engine.resolve_metric_bundle([(mean_config, ColumnMean._pandas, {"column": "a"}),
+                                             (std_dev_cofig,ColumnStandardDeviation._pandas, {"column": "a"}),])
+    print(resolved)
+    assert True
 
 
 def test_resolve_metric_bundle_with_nonexistent_metric():
-    pass
+    engine = PandasExecutionEngine()
+    df = pd.DataFrame({"a": [1, 2, 3, None], "b": [2, 3, 4, None]})
+
+    # Loading batch data
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+
+    # Building configs
+    mean_config = MetricConfiguration("column.aggregate.nonexistent", {"column": "a"}, None)
+    std_dev_cofig = MetricConfiguration("column.aggregate.standard_deviation", {"column": "a"}, None)
+
+    # Asking for metrics
+    resolved = engine.resolve_metric_bundle([(mean_config, ColumnMean._pandas, {"column": "a"}),
+                                             (std_dev_cofig, ColumnStandardDeviation._pandas, {"column": "a"}), ])
+    print(resolved)
+    assert True
 
 
 def test_dataframe_property_given_loaded_batch():
