@@ -7,8 +7,16 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
+from ...render.renderer.renderer import renderer
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    handle_strict_min_max,
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -16,7 +24,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     """Expect column entries to be between a minimum value and a maximum value (inclusive).
 
     expect_column_values_to_be_between is a \
@@ -78,10 +86,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.is_between"
-    metric_dependencies = (
-        "column_values.is_between.count",
-        "column_values.nonnull.count",
-    )
     success_keys = (
         "min_value",
         "max_value",
@@ -107,156 +111,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
-
-    """ A Column Map Metric Decorator for checking if a value is between given thresholds"""
-
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.is_between",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=(
-            "min_value",
-            "max_value",
-            "strict_min",
-            "strict_max",
-            "allow_cross_type_comparisons",
-            "parse_strings_as_datetimes",
-        ),
-        metric_dependencies=(),
-        filter_column_isnull=True,
-    )
-    def _pandas_is_between(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        min_value = metric_value_kwargs.get("min_value")
-        max_value = metric_value_kwargs.get("max_value")
-        strict_min = metric_value_kwargs.get("strict_min")
-        strict_max = metric_value_kwargs.get("strict_max")
-        allow_cross_type_comparisons = metric_value_kwargs.get(
-            "allow_cross_type_comparisons"
-        )
-        parse_strings_as_datetimes = metric_value_kwargs.get(
-            "parse_strings_as_datetimes"
-        )
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        # if strict_min and min_value:
-        #     min_value += tolerance
-        #
-        # if strict_max and max_value:
-        #     max_value -= tolerance
-
-        if parse_strings_as_datetimes:
-            # tolerance = timedelta(days=tolerance)
-            if min_value:
-                min_value = self.parse(min_value)
-
-            if max_value:
-                max_value = self.parse(max_value)
-
-            try:
-                temp_column = series.map(self.parse)
-            except TypeError:
-                temp_column = series
-
-        else:
-            temp_column = series
-
-        if min_value is not None and max_value is not None and min_value > max_value:
-            raise ValueError("min_value cannot be greater than max_value")
-
-        def is_between(val):
-            # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
-            # Ensure types can be compared since some types in Python 3 cannot be logically compared.
-            # print type(val), type(min_value), type(max_value), val, min_value, max_value
-
-            if type(val) is None:
-                return False
-
-            if min_value is not None and max_value is not None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_min and strict_max:
-                            return (min_value < val) and (val < max_value)
-                        elif strict_min:
-                            return (min_value < val) and (val <= max_value)
-                        elif strict_max:
-                            return (min_value <= val) and (val < max_value)
-                        else:
-                            return (min_value <= val) and (val <= max_value)
-                    except TypeError:
-                        return False
-
-                else:
-                    if (isinstance(val, str) != isinstance(min_value, str)) or (
-                        isinstance(val, str) != isinstance(max_value, str)
-                    ):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_min and strict_max:
-                        return (min_value < val) and (val < max_value)
-                    elif strict_min:
-                        return (min_value < val) and (val <= max_value)
-                    elif strict_max:
-                        return (min_value <= val) and (val < max_value)
-                    else:
-                        return (min_value <= val) and (val <= max_value)
-
-            elif min_value is None and max_value is not None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_max:
-                            return val < max_value
-                        else:
-                            return val <= max_value
-                    except TypeError:
-                        return False
-
-                else:
-                    if isinstance(val, str) != isinstance(max_value, str):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_max:
-                        return val < max_value
-                    else:
-                        return val <= max_value
-
-            elif min_value is not None and max_value is None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_min:
-                            return min_value < val
-                        else:
-                            return min_value <= val
-                    except TypeError:
-                        return False
-
-                else:
-                    if isinstance(val, str) != isinstance(min_value, str):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_min:
-                        return min_value < val
-                    else:
-                        return min_value <= val
-
-            else:
-                return False
-
-        return pd.DataFrame({"column_values.is_between": temp_column.map(is_between)})
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -307,66 +161,77 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
 
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+    # NOTE: This method is a pretty good example of good usage of `params`.
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
-        """Validates the given data against a minimum and maximum threshold, returning a nested dictionary documenting the
-        validation."""
-
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
         )
 
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
+        template_str = ""
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str += "may have any numerical value."
         else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            mostly_str = ""
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                mostly_str = ", at least $mostly_pct % of the time"
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value{mostly_str}."
+
+            elif params["min_value"] is None:
+                template_str += f"values must be {at_most_str} $max_value{mostly_str}."
+
+            elif params["max_value"] is None:
+                template_str += f"values must be {at_least_str} $min_value{mostly_str}."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
             )
-
-        # Obtaining value for "mostly" and "threshold" arguments to evaluate success
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-
-        # If result_format is changed by the runtime configuration
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        else:
-            result_format = self.default_kwarg_values.get("result_format")
-
-        is_between_count = metric_vals.get("column_values.is_between.count")
-        nonnull_count = metric_vals.get("column_values.nonnull.count")
-
-        # Returning dictionary output with necessary metrics based on the format
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=(is_between_count / nonnull_count) >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.is_between.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.is_between.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.is_between.unexpected_index_list"
-            ),
-        )
+        ]

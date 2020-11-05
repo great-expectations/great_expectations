@@ -20,8 +20,8 @@ from great_expectations.render.renderer.content_block import (
 )
 from great_expectations.render.view import DefaultJinjaPageView
 from tests.test_utils import (
-    expectationSuiteValidationResultSchema,
     expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
 )
 
 

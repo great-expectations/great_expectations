@@ -2,14 +2,15 @@ import json
 import os
 import shutil
 
+import pandas as pd
 from typing import List
 
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
-import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
@@ -32,7 +33,6 @@ from great_expectations.exceptions import (
     ConfigNotFoundError,
     DataContextError,
 )
-from great_expectations.core.batch import Batch
 from great_expectations.execution_environment.types import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -1387,7 +1387,11 @@ def test_get_batch_list_from_new_style_datasource_based_on_explicit_data_referen
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
         "batch_data": None,
-        "partition_request": None,
+        "partition_request": {
+            "partition_identifiers": {
+                "timestamp": "19120414"
+            }
+        },
         "limit": None,
         # TODO: <Alex>Commenting out "batch_spec_passthrough" for now, until we have decided on whether or not it will be admitted.</Alex>
         # "batch_spec_passthrough": {
@@ -1401,10 +1405,19 @@ def test_get_batch_list_from_new_style_datasource_based_on_explicit_data_referen
         batch_request=batch_request
     )
 
-    # assert batch.batch_spec is not None
-    # assert batch.batch_spec["data_asset_name"] == data_asset_name
-    # assert isinstance(batch.data, pd.DataFrame)
-    # assert batch.data.shape[0] == 1313
+    assert len(batch_list) == 1
+
+    batch: Batch = batch_list[0]
+
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == data_asset_name
+    assert batch.batch_definition["partition_definition"] == {
+        "name": "Titanic",
+        "timestamp": "19120414",
+        "price": "1313",
+    }
+    assert isinstance(batch.data, pd.DataFrame)
+    assert batch.data.shape[0] == 1313
 
 
 def test_list_validation_operators_data_context_with_none_returns_empty_list(

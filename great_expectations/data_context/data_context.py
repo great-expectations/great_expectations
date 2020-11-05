@@ -11,13 +11,15 @@ import sys
 import uuid
 import warnings
 import webbrowser
-from typing import Dict, List, Optional, Callable, Union, Any
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -37,7 +39,6 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
-from ruamel.yaml.comments import CommentedMap
 from great_expectations.data_context.types.base import (  # TODO: deprecate
     CURRENT_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
@@ -69,10 +70,6 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequest
-)
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -492,10 +489,7 @@ class BaseDataContext:
         return new_validation_operator
 
     def test_yaml_config(
-        self,
-        yaml_config: str,
-        pretty_print=True,
-        return_mode="instantiated_class",
+        self, yaml_config: str, pretty_print=True, return_mode="instantiated_class",
     ):
         """ Convenience method for testing yaml configs for Datasources, Checkpoints, and Stores
         """
@@ -508,7 +502,7 @@ class BaseDataContext:
             class_name = config["class_name"]
         else:
             class_name = None
- 
+
         if class_name in [
             "ExpectationsStore",
             "ValidationsStore",
@@ -521,33 +515,37 @@ class BaseDataContext:
             instantiated_class = self._build_store_from_config("my_temp_store", config)
 
         elif class_name in ["ExecutionEnvironment"]:
-            print(f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}")
+            print(
+                f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}"
+            )
             instantiated_class = instantiate_class_from_config(
                 config,
                 runtime_environment={},
                 config_defaults={
                     "name": "my_temp_execution_environment",
                     "module_name": "great_expectations.execution_environment",
-                }
+                },
             )
 
         else:
-            print("\tNo matching class found. Attempting to instantiate class from the raw config...")
+            print(
+                "\tNo matching class found. Attempting to instantiate class from the raw config..."
+            )
             instantiated_class = instantiate_class_from_config(
-                config,
-                runtime_environment={},
-                config_defaults={}
+                config, runtime_environment={}, config_defaults={}
             )
 
-        if pretty_print:        
-            print(f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}")
+        if pretty_print:
+            print(
+                f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}"
+            )
             print()
 
         return_object = instantiated_class.self_check(pretty_print)
-        
+
         if return_mode == "instantiated_class":
             return instantiated_class
-        
+
         elif return_mode == "return_object":
             return return_object
 
@@ -575,6 +573,7 @@ class BaseDataContext:
         resource_identifier=None,
         site_name: Optional[str] = None,
         only_if_exists=True,
+        site_names: Optional[List[str]] = None,
     ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
@@ -589,12 +588,24 @@ class BaseDataContext:
                 the URLs of the index page.
             site_name: Optionally specify which site to open. If not specified,
                 return all urls in the project.
+            site_names: Optionally specify which sites are active. Sites not in
+                this list are not processed, even if specified in site_name.
 
         Returns:
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        sites = self._project_config_with_variables_substituted.data_docs_sites
+        unfiltered_sites = (
+            self._project_config_with_variables_substituted.data_docs_sites
+        )
+
+        # Filter out sites that are not in site_names
+        sites = (
+            {k: v for k, v in unfiltered_sites.items() if k in site_names}
+            if site_names
+            else unfiltered_sites
+        )
+
         if not sites:
             logger.debug("Found no data_docs_sites.")
             return []
@@ -715,7 +726,9 @@ class BaseDataContext:
     def execution_environments(self) -> Dict[str, ExecutionEnvironment]:
         """A single holder for all ExecutionEnvironments in this context"""
         return {
-            execution_environment: self.get_execution_environment(execution_environment_name=execution_environment)
+            execution_environment: self.get_execution_environment(
+                execution_environment_name=execution_environment
+            )
             for execution_environment in self._project_config_with_variables_substituted.execution_environments
         }
 
@@ -1136,10 +1149,6 @@ class BaseDataContext:
             execution_environment_name=execution_environment_name
         )
         batch_request: BatchRequest = BatchRequest(**batch_request)
-        # TODO: <Alex>Remove old code</Alex>
-        # return execution_environment.get_batch(
-        #     batch_request=batch_request
-        # )
         return execution_environment.get_batch_list_from_batch_request(
             batch_request=batch_request
         )
@@ -1370,8 +1379,7 @@ class BaseDataContext:
         # context provides. ExecutionEnvironments should not see unsubstituted variables in their config.
         if initialize:
             execution_environment = self._build_execution_environment_from_config(
-                name,
-                config
+                name, config
             )
             self._cached_execution_environments[name] = execution_environment
         else:
@@ -1482,7 +1490,7 @@ class BaseDataContext:
 
     def get_execution_environment(
         self,
-        execution_environment_name: str
+        execution_environment_name: str = "default",
     ) -> ExecutionEnvironment:
         """Get the named execution_environment
 
@@ -1514,7 +1522,8 @@ class BaseDataContext:
         )
         execution_environment: ExecutionEnvironment = self._build_execution_environment_from_config(
             name=execution_environment_name,
-            config=execution_environment_config
+            config=execution_environment_config,
+            runtime_environment=runtime_environment,
         )
         self._cached_execution_environments[
             execution_environment_name
@@ -1524,12 +1533,13 @@ class BaseDataContext:
     def _build_execution_environment_from_config(
         self,
         name: str,
-        config: dict
+        config: CommentedMap,
+        runtime_environment: Union[dict, None] = None,
     ) -> ExecutionEnvironment:
         module_name: str = "great_expectations.execution_environment"
         runtime_environment: dict = {
             "name": name,
-            "data_context_root_directory": self.root_directory
+            "data_context_root_directory": self.root_directory,
         }
         execution_environment: ExecutionEnvironment = instantiate_class_from_config(
             config=config,
@@ -1543,6 +1553,34 @@ class BaseDataContext:
                 class_name=config["class_name"],
             )
         return execution_environment
+
+    # def get_available_partitions(
+    #     self,
+    #     execution_environment_name: str,
+    #     data_connector_name: str,
+    #     data_asset_name: str = None,
+    #     partition_request: Union[
+    #         Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None
+    #     ] = None,
+    #     in_memory_dataset: Any = None,
+    #     runtime_parameters: Union[dict, None] = None,
+    #     repartition: bool = False,
+    # ) -> List[Partition]:
+    #     execution_environment: ExecutionEnvironment = self.get_execution_environment(
+    #         execution_environment_name=execution_environment_name,
+    #         runtime_environment=runtime_environment,
+    #     )
+    #     available_partitions: List[
+    #         Partition
+    #     ] = execution_environment.get_available_partitions(
+    #         data_connector_name=data_connector_name,
+    #         data_asset_name=data_asset_name,
+    #         partition_request=partition_request,
+    #         in_memory_dataset=in_memory_dataset,
+    #         runtime_parameters=runtime_parameters,
+    #         repartition=repartition,
+    #     )
+    #     return available_partitions
 
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""
@@ -1966,7 +2004,7 @@ class BaseDataContext:
             for site_name, site_config in sites.items():
                 logger.debug("Building Data Docs Site %s" % site_name,)
 
-                if (site_names and site_name in site_names) or not site_names:
+                if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
                     module_name = "great_expectations.render.renderer.site_builder"
                     site_builder = instantiate_class_from_config(

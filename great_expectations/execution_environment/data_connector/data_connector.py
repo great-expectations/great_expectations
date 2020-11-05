@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-from typing import List, Any, Tuple, Optional
-
+import copy
+import itertools
+import json
 import logging
+from typing import Any, Callable, Dict, List, Tuple, Union, Optional
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.core.batch import BatchRequest
@@ -14,7 +15,7 @@ from great_expectations.core.batch import (
 logger = logging.getLogger(__name__)
 
 
-class DataConnector(object):
+class DataConnector:
     """
     DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
     can use to get individual batches of data. They add flexibility in how to obtain data
@@ -57,8 +58,7 @@ class DataConnector(object):
         return self._execution_environment_name
 
     def get_batch_data_and_metadata_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition,
+        self, batch_definition: BatchDefinition,
     ) -> Tuple[
         Any,  # batch_data
         BatchSpec,
@@ -75,8 +75,7 @@ class DataConnector(object):
         )
 
     def _build_batch_spec_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition
+        self, batch_definition: BatchDefinition
     ) -> BatchSpec:
         batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
             batch_definition=batch_definition
@@ -150,7 +149,7 @@ class DataConnector(object):
             self.refresh_data_references_cache()
 
         if pretty_print:
-            print("\t"+self.name, ":", self.__class__.__name__)
+            print("\t" + self.name, ":", self.__class__.__name__)
             print()
 
         asset_names = self.get_available_data_asset_names()
@@ -175,11 +174,14 @@ class DataConnector(object):
             example_data_references = data_reference_list[:max_examples]
 
             if pretty_print:
-                print(f"\t\t{asset_name} ({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):", example_data_references)
+                print(
+                    f"\t\t{asset_name} ({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):",
+                    example_data_references,
+                )
 
             data_connector_obj["data_assets"][asset_name] = {
                 "batch_definition_count": len_batch_definition_list,
-                "example_data_references": example_data_references
+                "example_data_references": example_data_references,
             }
 
         unmatched_data_references = self.get_unmatched_data_references()

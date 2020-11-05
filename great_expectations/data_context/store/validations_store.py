@@ -1,6 +1,7 @@
 import random
 
 from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
 from great_expectations.data_context.store.database_store_backend import (
@@ -9,14 +10,12 @@ from great_expectations.data_context.store.database_store_backend import (
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
 from great_expectations.util import verify_dynamic_loading_support
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-)
+
 
 class ValidationsStore(Store):
     """
@@ -147,17 +146,19 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
         len_keys = return_obj["len_keys"]
 
         if pretty_print:
-            if return_obj["len_keys"]==0:
+            if return_obj["len_keys"] == 0:
                 print(f"\t{len_keys} keys found")
             else:
                 print(f"\t{len_keys} keys found:")
                 for key in return_obj["keys"][:10]:
-                    print("\t\t"+str(key) )
-            if len_keys>10:
-                print("\t\t...")    
+                    print("\t\t" + str(key))
+            if len_keys > 10:
+                print("\t\t...")
             print()
 
-        test_key_name = "test-key-"+"".join([random.choice(list("0123456789ABCDEF")) for i in range(20)])
+        test_key_name = "test-key-" + "".join(
+            [random.choice(list("0123456789ABCDEF")) for i in range(20)]
+        )
 
         test_key = self._key_class(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
@@ -170,19 +171,16 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
 
         if pretty_print:
             print(f"Attempting to add a new test key: {test_key}...")
-        self.set(
-            key=test_key,
-            value=test_value
-        )
+        self.set(key=test_key, value=test_value)
         if pretty_print:
             print("\tTest key successfully added.")
             print()
 
         if pretty_print:
-            print(f"Attempting to retrieve the test value associated with key: {test_key}...")
-        test_value = self.get(
-            key=test_key,
-        )
+            print(
+                f"Attempting to retrieve the test value associated with key: {test_key}..."
+            )
+        test_value = self.get(key=test_key,)
         if pretty_print:
             print("\tTest value successfully retreived.")
             print()

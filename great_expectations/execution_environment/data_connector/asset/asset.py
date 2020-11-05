@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Asset(object):
+class Asset:
     """
     A typed data asset class that maintains data asset specific properties (to override data connector level proprties with
     the same name and/or semantics, such as "partitioner_name", "base_directory", and "glob_directive").

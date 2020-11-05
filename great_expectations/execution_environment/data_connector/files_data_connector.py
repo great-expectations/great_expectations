@@ -1,9 +1,13 @@
+import itertools
 from pathlib import Path
-from typing import List, Union, Dict, Optional, Iterator
-import os
+from typing import Any, List, Union, Dict, Optional, Iterator
 import copy
 import logging
+import os
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
+from great_expectations.core.id_dict import BatchSpec, PartitionDefinitionSubset
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
@@ -142,9 +146,9 @@ class FilesDataConnector(DataConnector):
         if runtime_keys and len(runtime_keys) > 0:
             if not (self.runtime_keys and set(runtime_keys) <= set(self.runtime_keys)):
                 raise ge_exceptions.PartitionerError(
-                    f'''Partitioner "{self.name}" was invoked with one or more runtime keys that do not appear among the
+                    f"""Partitioner "{self.name}" was invoked with one or more runtime keys that do not appear among the
 configured runtime keys.
-                    '''
+                    """
                 )
 
     # TODO: <Alex>This method should be used in other file path type DataConnector classes (currently it is not).</Alex>
