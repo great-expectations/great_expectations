@@ -304,6 +304,7 @@ class DataConnectorError(DataContextError):
         super().__init__(self.message)
 
 
+# <WILL> Are we deprecating these?
 class PartitionerError(DataContextError):
     def __init__(self, message):
         self.message = message

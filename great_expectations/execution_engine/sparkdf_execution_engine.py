@@ -128,6 +128,82 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         super().__init__(*args, **kwargs)
 
+    def load_batch(self, batch_spec: BatchSpec = None) -> Batch:
+        """
+        Utilizes the provided batch spec to load a batch using the appropriate file reader and the given file path.
+        :arg batch_spec the parameters used to build the batch
+        :returns Batch
+        """
+        batch_spec._id_ignore_keys = {"dataset"}
+        batch_id = batch_spec.to_id()
+
+        # We need to build a batch_markers to be used in the dataframe
+        batch_markers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        if isinstance(batch_spec, InMemoryBatchSpec):
+            # We do not want to store the actual dataframe in batch_spec (mark that this is SparkDFRef instead).
+            batch_data = batch_spec.pop("batch_data")
+            batch_spec["SparkInMemoryDF"] = True
+            if batch_data is not None:
+                if batch_spec.get("data_asset_name"):
+                    df = batch_data
+                else:
+                    raise ValueError("To pass an batch_data, you must also a data_asset_name as well.")
+        else:
+            reader = self.spark.read
+            reader_method = batch_spec.get("reader_method")
+            reader_options = batch_spec.get("reader_options") or {}
+            for option in reader_options.items():
+                reader = reader.option(*option)
+            if isinstance(batch_spec, PathBatchSpec):
+                path = batch_spec["path"]
+                reader_fn = self._get_reader_fn(reader, reader_method, path)
+                df = reader_fn(path)
+            elif isinstance(batch_spec, S3BatchSpec):
+                # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
+                # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
+                # url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
+                # reader_fn = self._get_reader_fn(reader, reader_method, url.key)
+                # df = reader_fn(
+                #     StringIO(
+                #         s3_object["Body"]
+                #         .read()
+                #         .decode(s3_object.get("ContentEncoding", "utf-8"))
+                #     ),
+                #     **reader_options,
+                # )
+                pass
+            else:
+                raise BatchSpecError(
+                    "Invalid batch_spec: file path, s3 path, or df is required for a SparkDFExecutionEngine to operate."
+                )
+
+        limit = batch_spec.get("limit")
+        if limit:
+            df = df.limit(limit)
+
+        if self._persist:
+            df.persist()
+
+        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_spec != batch_spec:
+            batch = Batch(
+                data=df,
+                batch_spec=batch_spec,
+                batch_markers=batch_markers,
+            )
+            self.batches[batch_id] = batch
+        else:
+            batch = self.batches.get(batch_id)
+
+        self._loaded_batch_id = batch_id
+        return batch
+
     @property
     def dataframe(self):
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""

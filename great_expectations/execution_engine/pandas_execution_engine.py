@@ -69,6 +69,189 @@ Notes:
     def configure_validator(self, validator):
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
+        
+    # TODO: <Alex>Is this method still needed?  The method "get_batch_data_and_markers()" seems to accoplish the needed functionality.</Alex>
+    def load_batch(self, batch_spec: BatchSpec = None) -> Batch:
+        """
+        Utilizes the provided batch spec to load a batch using the appropriate file reader and the given file path.
+        :arg batch_spec the parameters used to build the batch
+        :returns Batch
+        """
+        batch_spec._id_ignore_keys = {"dataset"}
+        batch_id = batch_spec.to_id()
+
+        # We need to build a batch_markers to be used in the dataframe
+        batch_markers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        if isinstance(batch_spec, InMemoryBatchSpec):
+            # We do not want to store the actual dataframe in batch_spec (mark that this is PandasInMemoryDF instead).
+            batch_data = batch_spec.pop("batch_data")
+            batch_spec["PandasInMemoryDF"] = True
+            if batch_data is not None:
+                if batch_spec.get("data_asset_name"):
+                    df = batch_data
+                else:
+                    raise ValueError("To pass an batch_data, you must also a data_asset_name as well.")
+        else:
+            reader_method = batch_spec.get("reader_method")
+            reader_options = batch_spec.get("reader_options") or {}
+            if isinstance(batch_spec, PathBatchSpec):
+                path = batch_spec["path"]
+                reader_fn = self._get_reader_fn(reader_method, path)
+                df = reader_fn(path, **reader_options)
+            elif isinstance(batch_spec, S3BatchSpec):
+                # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
+                # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
+                # url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
+                # reader_method = batch_spec.get("reader_method")
+                # reader_fn = self._get_reader_fn(reader_method, url.key)
+                # df = reader_fn(
+                #     StringIO(
+                #         s3_object["Body"]
+                #         .read()
+                #         .decode(s3_object.get("ContentEncoding", "utf-8"))
+                #     ),
+                #     **reader_options,
+                # )
+                pass
+            else:
+                raise BatchSpecError(
+                    "Invalid batch_spec: file path, s3 path, or df is required for a PandasExecutionEngine to operate."
+                )
+
+        if df.memory_usage().sum() < HASH_THRESHOLD:
+            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
+
+        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_spec != batch_spec:
+            batch = Batch(
+                data=df,
+                batch_spec=batch_spec,
+                batch_markers=batch_markers,
+            )
+            self.batches[batch_id] = batch
+        else:
+            batch = self.batches.get(batch_id)
+
+        self._loaded_batch_id = batch_id
+        return batch
+
+    # TODO: <Alex>This signature does not permit "batch_data"; we should accept BatchSpec and parse it (please see the re-implementation below).</Alex>
+    # def get_batch_data_and_markers(
+    #     self,
+    #     path: str,
+    #     reader_method: str = "read_csv",
+    #     reader_options: dict = None
+    # ) -> Tuple[
+    #     Any, #batch_data
+    #     BatchMarkers
+    # ]:
+    #     if reader_options is None:
+    #         reader_options = {}
+    #
+    #     reader_fn = self._get_reader_fn(reader_method, path)
+    #     batch_data = reader_fn(path, **reader_options)
+    #
+    #     batch_markers = BatchMarkers(
+    #         {
+    #             "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+    #                 "%Y%m%dT%H%M%S.%fZ"
+    #             )
+    #         }
+    #     )
+    #
+    #     return batch_data, batch_markers
+
+    def get_batch_data_and_markers(
+        self,
+        batch_spec: BatchSpec
+    ) -> Tuple[
+        Any,  # batch_data
+        BatchMarkers
+    ]:
+        batch_data: Any = None
+
+        # We need to build a batch_markers to be used in the dataframe
+        batch_markers: BatchMarkers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        if isinstance(batch_spec, InMemoryBatchSpec):
+            raise BatchSpecError(
+                '''The batch_spec argument must not have the type InMemoryBatchSpec when calling 
+"get_batch_data_and_markers()"."
+                '''
+            )
+
+        reader_method: str = batch_spec.get("reader_method")
+        reader_options: dict = batch_spec.get("reader_options") or {}
+        if isinstance(batch_spec, PathBatchSpec):
+            path: str = batch_spec["path"]
+            reader_fn: Callable = self._get_reader_fn(reader_method, path)
+            batch_data = reader_fn(path, **reader_options)
+        elif isinstance(batch_spec, S3BatchSpec):
+            # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
+            # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
+            # url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
+            # reader_method = batch_spec.get("reader_method")
+            # reader_fn = self._get_reader_fn(reader_method, url.key)
+            # batch_data = reader_fn(
+            #     StringIO(
+            #         s3_object["Body"]
+            #         .read()
+            #         .decode(s3_object.get("ContentEncoding", "utf-8"))
+            #     ),
+            #     **reader_options,
+            # )
+            pass
+        else:
+            raise BatchSpecError(
+                """Invalid batch_spec: file path, s3 path, or batch_data is required for a PandasExecutionEngine to
+operate.
+                """
+            )
+
+        if batch_data is not None:
+            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
+
+        return batch_data, batch_markers
+
+    @staticmethod
+    def get_batch_markers_and_update_batch_spec_for_batch_data(
+        batch_data: pd.DataFrame,
+        batch_spec: BatchSpec
+    ) -> BatchMarkers:
+        """
+        Computes batch_markers in the case of user-provided batch_data (e.g., in the case of a data pipeline).
+
+        :param batch_data -- user-provided dataframe
+        :param batch_spec -- BatchSpec (must be previously instantiated/initialized by PipelineDataConnector)
+        :returns computed batch_markers specific to this execution engine
+        """
+        batch_markers: BatchMarkers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+        if batch_data is not None:
+            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
+            # we do not want to store the actual dataframe in batch_spec
+            # hence, marking that this is a PandasInMemoryDF instead
+            batch_spec["PandasInMemoryDF"] = True
+        return batch_markers
 
     @property
     def dataframe(self):
@@ -148,8 +331,9 @@ Notes:
 
         raise BatchSpecError(f'Unable to determine reader method from path: "{path}".')
 
-    def process_batch_definition(self, batch_definition, batch_spec):
-        """Takes in a batch definition and batch spec. If the batch definition has a limit, uses it to initialize the
+    # TODO: <Alex>Is this method still needed?  The DataConnector subclasses seem to accoplish the needed functionality.</Alex>
+    def process_batch_request(self, batch_request: BatchRequest, batch_spec: BatchSpec):
+        """Takes in a batch request and batch spec. If the batch request has a limit, uses it to initialize the
         number of rows to process for the batch spec in obtaining a batch
         Args:
             batch_definition (dict) - The batch definition as defined by the user
@@ -157,7 +341,7 @@ Notes:
         Returns:
              batch_spec (dict) - The batch spec used to query the backend, with the added row limit
         """
-        limit = batch_definition.get("limit")
+        limit = batch_request.get("limit")
         if limit is not None:
             if not batch_spec.get("reader_options"):
                 batch_spec["reader_options"] = {}

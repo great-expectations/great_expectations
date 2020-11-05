@@ -60,6 +60,7 @@ store_backend:
 
 def test_empty_store2(empty_data_context):
 
+    # noinspection PyUnusedLocal
     my_expectation_store = empty_data_context.test_yaml_config(
         yaml_config="""
 class_name: ValidationsStore
@@ -72,7 +73,6 @@ store_backend:
 
 
 def test_execution_environment_config(empty_data_context):
-
     temp_dir = str(tempfile.mkdtemp())
     create_files_in_directory(
         directory=temp_dir,
@@ -100,46 +100,54 @@ execution_engine:
 
 data_connectors:
     my_filesystem_data_connector:
-        class_name: FilesDataConnector
+        # class_name: FilesDataConnector
+        class_name: SinglePartitionFileDataConnector
         base_directory: {temp_dir}
         glob_directive: '*.csv'
-
-        default_partitioner_name: my_regex_partitioner
-        partitioners:
-            my_regex_partitioner:
-                class_name: RegexPartitioner
-                pattern: {temp_dir}/(.+)(\d+)\.csv
-                group_names:
-                    - letter
-                    - number
-""",
-        return_mode="return_object",
+        default_regex:
+            pattern: (.+)_(\\d+)\\.csv
+            group_names:
+            - letter
+            - number
+        # assets: {{}}
+            
+        # partitioners:
+        #     my_regex_partitioner:
+        #         class_name: RegexPartitioner
+        #         pattern: {temp_dir}/(.+)(\\d+)\\.csv
+        #         group_names:
+        #         - letter
+        #         - number
+        # default_partitioner_name: my_regex_partitioner
+""", return_mode="return_object"
     )
 
     print(json.dumps(return_obj, indent=2))
 
     assert return_obj == {
-        "execution_engine": {"class_name": "PandasExecutionEngine"},
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine"
+        },
         "data_connectors": {
             "count": 1,
             "my_filesystem_data_connector": {
-                "class_name": "FilesDataConnector",
-                "data_asset_count": 10,
-                "example_data_asset_names": ["abe_20200809_1040", "alex_20200809_1000"],
-                "assets": {
-                    "abe_20200809_1040": {
-                        "partition_count": 1,
-                        "example_partition_names": [
-                            {"letter": "abe_20200809_104", "number": "0"}
-                        ],
-                    },
-                    "alex_20200809_1000": {
-                        "partition_count": 1,
-                        "example_partition_names": [
-                            {"letter": "alex_20200809_100", "number": "0"}
-                        ],
-                    },
+                "class_name": "SinglePartitionFileDataConnector",
+                "data_asset_count": 1,
+                "example_data_asset_names": [
+                    "DEFAULT_ASSET_NAME"
+                ],
+                "data_assets": {
+                    "DEFAULT_ASSET_NAME": {
+                        "batch_definition_count": 10,
+                        "example_data_references": [
+                            "abe_20200809_1040.csv",
+                            "alex_20200809_1000.csv",
+                            "alex_20200819_1300.csv"
+                        ]
+                    }
                 },
-            },
-        },
+                "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": []
+            }
+        }
     }
