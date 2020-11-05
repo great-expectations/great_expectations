@@ -1,5 +1,6 @@
 import datetime
 import os
+import uuid
 from unittest.mock import patch
 
 import boto3
@@ -42,53 +43,66 @@ def test_StoreBackendValidation():
     backend._validate_key(())
 
 
+def check_store_backend_store_backend_id_functionality(
+    store_backend: StoreBackend, store_backend_id: str = None
+) -> None:
+    """
+    Assertions to check if a store backend is handling reading and writing a store_backend_id appropriately.
+    Args:
+        store_backend: Instance of subclass of StoreBackend to test e.g. TupleFilesystemStoreBackend
+        store_backend_id: Manually input store_backend_id
+    Returns:
+        None
+    """
+    # Check that store_backend_id exists can be read
+    assert store_backend.store_backend_id is not None
+    if store_backend_id:
+        assert store_backend.store_backend_id == store_backend_id
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(store_backend.store_backend_id)
+    # Check in file stores that the actual file exists
+    assert store_backend.has_key(key=(".ge_store_backend_id",))
+
+    # Check file stores for the file in the correct format
+    store_backend_id_from_file = store_backend.get(key=(".ge_store_backend_id",))
+    store_backend_id_file_parser = "store_backend_id = " + pp.Word(pp.hexnums + "-")
+    parsed_store_backend_id = store_backend_id_file_parser.parseString(
+        store_backend_id_from_file
+    )
+    assert test_utils.validate_uuid4(parsed_store_backend_id[1])
+
+
 @mock_s3
 def test_StoreBackend_id_initialization(tmp_path_factory):
     """
     What does this test and why?
 
-    A StoreBackend should have a store_id property. That store_id should be read and initialized
-    from an existing persistent store_id during instantiation, or a new store_id should be generated
-    and persisted. The store_id should be a valid UUIDv4
-    If a new store_id cannot be persisted, use an ephemeral store_id.
-    Persistence should be in a .ge_store_id file for for filesystem and blob-stores.
+    A StoreBackend should have a store_backend_id property. That store_backend_id should be read and initialized
+    from an existing persistent store_backend_id during instantiation, or a new store_backend_id should be generated
+    and persisted. The store_backend_id should be a valid UUIDv4
+    If a new store_backend_id cannot be persisted, use an ephemeral store_backend_id.
+    Persistence should be in a .ge_store_backend_id file for for filesystem and blob-stores.
 
     Note: StoreBackend & TupleStoreBackend are abstract classes, so we will test the
     concrete classes that inherit from them.
     See also test_database_store_backend::test_database_store_backend_id_initialization
     """
 
-    def check_store_backend_store_id_functionality(
-        store_backend: StoreBackend,
-    ) -> None:
-        """
-        Assertions to check if a store backend is handling reading and writing a store_id appropriately.
-        Args:
-            store_backend: Instance of subclass of StoreBackend to test e.g. TupleFilesystemStoreBackend
-
-        Returns:
-            None
-        """
-        # Check that store_id exists can be read
-        assert store_backend.store_id is not None
-        # Check that store_id is a valid UUID
-        assert test_utils.validate_uuid4(store_backend.store_id)
-        # Check in file stores that the actual file exists
-        assert store_backend.has_key(key=(".ge_store_id",))
-
-        # Check file stores for the file in the correct format
-        store_id_from_file = store_backend.get(key=(".ge_store_id",))
-        store_id_file_parser = "store_id = " + pp.Word(pp.hexnums + "-")
-        parsed_store_id = store_id_file_parser.parseString(store_id_from_file)
-        assert test_utils.validate_uuid4(parsed_store_id[1])
-
     # InMemoryStoreBackend
-    # Initialize without store_id and check that it is generated correctly
+    # Initialize without store_backend_id and check that it is generated correctly
     in_memory_store_backend = InMemoryStoreBackend()
-    check_store_backend_store_id_functionality(store_backend=in_memory_store_backend)
+    check_store_backend_store_backend_id_functionality(
+        store_backend=in_memory_store_backend
+    )
+
+    # Create a new store with the same config and make sure it reports the same store_backend_id
+    # in_memory_store_backend_duplicate = InMemoryStoreBackend()
+    # assert in_memory_store_backend.store_backend_id == in_memory_store_backend_duplicate.store_backend_id
+    # This is not currently implemented for the InMemoryStoreBackend, the store_backend_id is ephemeral since
+    # there is no place to persist it.
 
     # TupleFilesystemStoreBackend
-    # Initialize without store_id and check that it is generated correctly
+    # Initialize without store_backend_id and check that it is generated correctly
     path = "dummy_str"
     project_path = str(
         tmp_path_factory.mktemp("test_StoreBackend_id_initialization__dir")
@@ -99,17 +113,18 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
         base_directory=project_path,
         # filepath_template="my_file_{0}",
     )
-    check_store_backend_store_id_functionality(
+    # Check that store_backend_id is created on instantiation, before being accessed
+    desired_directory_tree_str = """\
+test_StoreBackend_id_initialization__dir0/
+    .ge_store_backend_id
+"""
+    assert gen_directory_tree_str(project_path) == desired_directory_tree_str
+    check_store_backend_store_backend_id_functionality(
         store_backend=tuple_filesystem_store_backend
     )
-    assert (
-        gen_directory_tree_str(project_path)
-        == """\
-test_StoreBackend_id_initialization__dir0/
-    .ge_store_id
-"""
-    )
+    assert gen_directory_tree_str(project_path) == desired_directory_tree_str
 
+    # Repeat the above with a filepath template
     project_path_with_filepath_template = str(
         tmp_path_factory.mktemp("test_StoreBackend_id_initialization__dir")
     )
@@ -118,19 +133,30 @@ test_StoreBackend_id_initialization__dir0/
         base_directory=project_path_with_filepath_template,
         filepath_template="my_file_{0}",
     )
-    check_store_backend_store_id_functionality(
+    check_store_backend_store_backend_id_functionality(
         store_backend=tuple_filesystem_store_backend_with_filepath_template
     )
     assert (
         gen_directory_tree_str(project_path_with_filepath_template)
         == """\
 test_StoreBackend_id_initialization__dir1/
-    my_file_.ge_store_id
+    .ge_store_backend_id
 """
     )
 
+    # Create a new store with the same config and make sure it reports the same store_backend_id
+    tuple_filesystem_store_backend_duplicate = TupleFilesystemStoreBackend(
+        root_directory=os.path.abspath(path),
+        base_directory=project_path,
+        # filepath_template="my_file_{0}",
+    )
+    assert (
+        tuple_filesystem_store_backend.store_backend_id
+        == tuple_filesystem_store_backend_duplicate.store_backend_id
+    )
+
     # TupleS3StoreBackend
-    # Initialize without store_id and check that it is generated correctly
+    # Initialize without store_backend_id and check that it is generated correctly
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
 
@@ -141,29 +167,79 @@ test_StoreBackend_id_initialization__dir1/
     s3_store_backend = TupleS3StoreBackend(
         filepath_template="my_file_{0}", bucket=bucket, prefix=prefix,
     )
+    print(s3_store_backend.list_keys())
 
-    check_store_backend_store_id_functionality(store_backend=s3_store_backend)
+    check_store_backend_store_backend_id_functionality(store_backend=s3_store_backend)
 
-    # TupleGCSStoreBackend
-    # Initialize without store_id and check that it is generated correctly
-    bucket = "leakybucket"
-    prefix = "this_is_a_test_prefix"
-    project = "dummy-project"
-    base_public_path = "http://www.test.com/"
-
-    gcs_store_backend_with_base_public_path = TupleGCSStoreBackend(
-        filepath_template=None,
-        bucket=bucket,
-        prefix=prefix,
-        project=project,
-        base_public_path=base_public_path,
+    # Create a new store with the same config and make sure it reports the same store_backend_id
+    s3_store_backend_duplicate = TupleS3StoreBackend(
+        filepath_template="my_file_{0}", bucket=bucket, prefix=prefix,
+    )
+    assert (
+        s3_store_backend.store_backend_id == s3_store_backend_duplicate.store_backend_id
     )
 
-    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+    # TODO: Fix GCS Testing
+    # TupleGCSStoreBackend
+    # Initialize without store_backend_id and check that it is generated correctly
+    # bucket = "leakybucket"
+    # prefix = "this_is_a_test_prefix"
+    # project = "dummy-project"
+    # base_public_path = "http://www.test.com/"
+    #
+    # gcs_store_backend_with_base_public_path = TupleGCSStoreBackend(
+    #     filepath_template=None,
+    #     bucket=bucket,
+    #     prefix=prefix,
+    #     project=project,
+    #     base_public_path=base_public_path,
+    # )
+    #
+    # gcs_store_backend_with_base_public_path_duplicate = TupleGCSStoreBackend(
+    #     filepath_template=None,
+    #     bucket=bucket,
+    #     prefix=prefix,
+    #     project=project,
+    #     base_public_path=base_public_path,
+    # )
+    #
+    # with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+    #
+    #     assert gcs_store_backend_with_base_public_path.store_backend_id is not None
+    #     # Currently we don't have a good way to mock GCS functionality
+    #     # check_store_backend_store_backend_id_functionality(store_backend=gcs_store_backend_with_base_public_path)
+    #
+    #     # Create a new store with the same config and make sure it reports the same store_backend_id
+    #     assert (
+    #         gcs_store_backend_with_base_public_path.store_backend_id
+    #         == gcs_store_backend_with_base_public_path_duplicate.store_backend_id
+    #     )
 
-        assert gcs_store_backend_with_base_public_path.store_id is not None
-        # Currently we don't have a good way to mock GCS functionality
-        # check_store_backend_store_id_functionality(store_backend=gcs_store_backend_with_base_public_path)
+
+@mock_s3
+def test_TupleS3StoreBackend_store_backend_id():
+    # TupleS3StoreBackend
+    # Initialize without store_backend_id and check that it is generated correctly
+    bucket = "leakybucket2"
+    prefix = "this_is_a_test_prefix"
+
+    # create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    s3_store_backend = TupleS3StoreBackend(
+        filepath_template="my_file_{0}", bucket=bucket, prefix=prefix,
+    )
+
+    check_store_backend_store_backend_id_functionality(store_backend=s3_store_backend)
+
+    # Create a new store with the same config and make sure it reports the same store_backend_id
+    s3_store_backend_duplicate = TupleS3StoreBackend(
+        filepath_template="my_file_{0}", bucket=bucket, prefix=prefix,
+    )
+    assert (
+        s3_store_backend.store_backend_id == s3_store_backend_duplicate.store_backend_id
+    )
 
 
 def test_InMemoryStoreBackend():
@@ -183,7 +259,7 @@ def test_InMemoryStoreBackend():
     assert my_store.has_key(("B",)) is True
     assert my_store.has_key(("A",)) is True
     assert my_store.has_key(("C",)) is False
-    assert my_store.list_keys() == [("A",), ("B",)]
+    assert my_store.list_keys() == [(".ge_store_backend_id",), ("A",), ("B",)]
 
     with pytest.raises(StoreError):
         my_store.get_url_for_key(my_key)
@@ -260,11 +336,12 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     my_store.set(("BBB",), "bbb")
     assert my_store.get(("BBB",)) == "bbb"
 
-    assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
+    assert set(my_store.list_keys()) == {("BBB",), (".ge_store_backend_id",), ("AAA",)}
     assert (
         gen_directory_tree_str(project_path)
         == """\
 test_TupleFilesystemStoreBackend__dir0/
+    .ge_store_backend_id
     my_file_AAA
     my_file_BBB
 """
@@ -308,13 +385,14 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
         gen_directory_tree_str(project_path)
         == """\
 things0/
+    .ge_store_backend_id
     AAA
     .ipynb_checkpoints/
         foo.json
 """
     )
 
-    assert set(my_store.list_keys()) == {("AAA",)}
+    assert set(my_store.list_keys()) == {(".ge_store_backend_id",), ("AAA",)}
 
 
 @mock_s3
@@ -343,7 +421,7 @@ def test_TupleS3StoreBackend_with_prefix():
 
     # We should be able to list keys, even when empty
     keys = my_store.list_keys()
-    assert len(keys) == 0
+    assert len(keys) == 1
 
     my_store.set(("AAA",), "aaa", content_type="text/html; charset=utf-8")
     assert my_store.get(("AAA",)) == "aaa"
@@ -355,13 +433,17 @@ def test_TupleS3StoreBackend_with_prefix():
     my_store.set(("BBB",), "bbb")
     assert my_store.get(("BBB",)) == "bbb"
 
-    assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
+    assert set(my_store.list_keys()) == {("AAA",), ("BBB",), (".ge_store_backend_id",)}
     assert {
         s3_object_info["Key"]
         for s3_object_info in boto3.client("s3").list_objects_v2(
             Bucket=bucket, Prefix=prefix
         )["Contents"]
-    } == {"this_is_a_test_prefix/my_file_AAA", "this_is_a_test_prefix/my_file_BBB"}
+    } == {
+        "this_is_a_test_prefix/.ge_store_backend_id",
+        "this_is_a_test_prefix/my_file_AAA",
+        "this_is_a_test_prefix/my_file_BBB",
+    }
 
     assert my_store.get_url_for_key(
         ("AAA",)
@@ -407,7 +489,7 @@ def test_tuple_s3_store_backend_slash_conditions():
         filepath_suffix="__bar.json",
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
-    expected_s3_keys = ["foo__/my_suite__bar.json"]
+    expected_s3_keys = ["foo__/.ge_store_backend_id", "foo__/my_suite__bar.json"]
     assert [
         obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
     ] == expected_s3_keys
@@ -424,7 +506,7 @@ def test_tuple_s3_store_backend_slash_conditions():
         bucket=bucket, prefix=prefix, platform_specific_separator=False,
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
-    expected_s3_keys = ["my_suite"]
+    expected_s3_keys = [".ge_store_backend_id", "my_suite"]
     assert [
         obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
     ] == expected_s3_keys
@@ -441,7 +523,7 @@ def test_tuple_s3_store_backend_slash_conditions():
         bucket=bucket, prefix=prefix, platform_specific_separator=True,
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
-    expected_s3_keys = ["my_suite"]
+    expected_s3_keys = [".ge_store_backend_id", "my_suite"]
     assert [
         obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
     ] == expected_s3_keys
@@ -459,7 +541,7 @@ def test_tuple_s3_store_backend_slash_conditions():
         bucket=bucket, prefix=prefix, platform_specific_separator=True
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
-    expected_s3_keys = ["foo/my_suite"]
+    expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
     assert [
         obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
     ] == expected_s3_keys
@@ -477,7 +559,7 @@ def test_tuple_s3_store_backend_slash_conditions():
         bucket=bucket, prefix=prefix, platform_specific_separator=True
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
-    expected_s3_keys = ["foo/my_suite"]
+    expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
     assert [
         obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
     ] == expected_s3_keys
@@ -494,7 +576,7 @@ def test_tuple_s3_store_backend_slash_conditions():
         bucket=bucket, prefix=prefix, platform_specific_separator=False
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
-    expected_s3_keys = ["foo/my_suite"]
+    expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
     assert [
         obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
     ] == expected_s3_keys
@@ -512,7 +594,7 @@ def test_tuple_s3_store_backend_slash_conditions():
         bucket=bucket, prefix=prefix, platform_specific_separator=True
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
-    expected_s3_keys = ["foo/my_suite"]
+    expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
     assert [
         obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
     ] == expected_s3_keys
@@ -529,7 +611,7 @@ def test_tuple_s3_store_backend_slash_conditions():
         bucket=bucket, prefix=prefix, platform_specific_separator=False
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
-    expected_s3_keys = ["foo/my_suite"]
+    expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
     assert [
         obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
     ] == expected_s3_keys
@@ -547,7 +629,7 @@ def test_tuple_s3_store_backend_slash_conditions():
         bucket=bucket, prefix=prefix, platform_specific_separator=True
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
-    expected_s3_keys = ["foo/my_suite"]
+    expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
     assert [
         obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
     ] == expected_s3_keys
@@ -564,7 +646,7 @@ def test_tuple_s3_store_backend_slash_conditions():
         bucket=bucket, prefix=prefix, platform_specific_separator=False
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
-    expected_s3_keys = ["foo/my_suite"]
+    expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
     assert [
         obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
     ] == expected_s3_keys
@@ -598,7 +680,7 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
 
     # We should be able to list keys, even when empty
     keys = my_store.list_keys()
-    assert len(keys) == 0
+    assert len(keys) == 1
 
     my_store.set(("AAA",), "aaa", content_type="text/html; charset=utf-8")
     assert my_store.get(("AAA",)) == "aaa"
@@ -611,13 +693,13 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
     my_store.set(("BBB",), "bbb")
     assert my_store.get(("BBB",)) == "bbb"
 
-    assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
+    assert set(my_store.list_keys()) == {("AAA",), ("BBB",), (".ge_store_backend_id",)}
     assert {
         s3_object_info["Key"]
         for s3_object_info in boto3.client("s3").list_objects_v2(
             Bucket=bucket, Prefix=prefix
         )["Contents"]
-    } == {"my_file_AAA", "my_file_BBB"}
+    } == {"my_file_AAA", "my_file_BBB", ".ge_store_backend_id"}
 
     assert (
         my_store.get_url_for_key(("AAA",))
