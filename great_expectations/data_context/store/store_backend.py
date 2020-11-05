@@ -1,7 +1,6 @@
 import logging
 import uuid
 from abc import ABCMeta, abstractmethod
-from typing import Optional
 
 from great_expectations.exceptions import StoreBackendError, StoreError
 
@@ -20,10 +19,10 @@ class StoreBackend(metaclass=ABCMeta):
     """
 
     IGNORED_FILES = [".ipynb_checkpoints"]
-    STORE_ID_KEY = (".ge_store_id",)
-    STORE_ID_PREFIX = "store_id = "
+    STORE_BACKEND_ID_KEY = (".ge_store_backend_id",)
+    STORE_BACKEND_ID_PREFIX = "store_backend_id = "
 
-    def __init__(self, fixed_length_key=False, store_id: Optional[uuid.UUID] = None):
+    def __init__(self, fixed_length_key=False):
         self._fixed_length_key = fixed_length_key
 
     @property
@@ -31,18 +30,20 @@ class StoreBackend(metaclass=ABCMeta):
         return self._fixed_length_key
 
     @property
-    def store_id(self) -> str:
+    def store_backend_id(self) -> str:
         """
-        Create a store_id if one does not exist, and return it if it exists
+        Create a store_backend_id if one does not exist, and return it if it exists
         Returns:
-            store_id which is a UUID(version=4)
+            store_backend_id which is a UUID(version=4)
         """
-        if not self.has_key(key=self.STORE_ID_KEY):
+        if not self.has_key(key=self.STORE_BACKEND_ID_KEY):
             self.set(
-                key=self.STORE_ID_KEY,
-                value=f"{self.STORE_ID_PREFIX}{str(uuid.uuid4())}",
+                key=self.STORE_BACKEND_ID_KEY,
+                value=f"{self.STORE_BACKEND_ID_PREFIX}{str(uuid.uuid4())}",
             )
-        return self.get(key=self.STORE_ID_KEY).replace(self.STORE_ID_PREFIX, "")
+        return self.get(key=self.STORE_BACKEND_ID_KEY).replace(
+            self.STORE_BACKEND_ID_PREFIX, ""
+        )
 
     def get(self, key, **kwargs):
         self._validate_key(key)
@@ -133,6 +134,8 @@ class InMemoryStoreBackend(StoreBackend):
     def __init__(self, runtime_environment=None, fixed_length_key=False):
         super().__init__(fixed_length_key=fixed_length_key)
         self._store = {}
+        # Initialize with store_backend_id
+        _ = self.store_backend_id
 
     def _get(self, key):
         return self._store[key]
