@@ -30,7 +30,11 @@ def test_basic_instantiation(tmp_path_factory):
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
             "pattern": "(.*)/(.+)-(\\d+)\\.csv",
-            "group_names": ["data_asset_name", "letter", "number"],
+            "group_names": [
+                "data_asset_name",
+                "letter",
+                "number"
+            ],
         },
         data_reference_dict=data_reference_dict,
     )
@@ -359,7 +363,10 @@ def test_self_check():
         default_regex={
             "pattern": "(.+)-(\\d+)\\.csv",
             # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; idea: resurrect the Partition class.</Alex>
-            "group_names": ["data_asset_name", "number"]
+            "group_names": [
+                "data_asset_name",
+                "number"
+            ]
         }
     )
 
@@ -402,7 +409,10 @@ def test_that_needs_a_better_name():
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         default_regex={
             "pattern": "(.+)-(\\d+)\\.csv",
-            "group_names": ["data_asset_name", "number"]
+            "group_names": [
+                "data_asset_name",
+                "number"
+            ]
         }
     )
 
