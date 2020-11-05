@@ -96,7 +96,6 @@ def convert_data_reference_string_to_batch_request_using_regex(
     matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
     if matches is None:
         return None
-
     groups: list = list(matches.groups())
     partition_definition: PartitionDefinitionSubset = PartitionDefinitionSubset(
         dict(zip(group_names, groups))
@@ -175,8 +174,6 @@ def _invert_regex_to_data_reference_template(
     # print("-"*80)
     parsed_sre = sre_parse.parse(regex_pattern)
     for token, value in parsed_sre:
-        # print(type(token), token, value)
-
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
             data_reference_template += chr(value)
@@ -206,7 +203,6 @@ def _invert_regex_to_data_reference_template(
 
     # Collapse adjacent wildcards into a single wildcard
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)
-
     return data_reference_template
 
 
