@@ -1,4 +1,5 @@
 import inspect
+import logging
 from datetime import datetime
 from functools import lru_cache, wraps
 from itertools import zip_longest
@@ -18,6 +19,17 @@ from great_expectations.dataset.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
+
+logger = logging.getLogger(__name__)
+
+try:
+    from sqlalchemy.sql import quoted_name
+
+except:
+    logger.debug(
+        "Unable to load quoted name from SqlAlchemy; install optional sqlalchemy dependency for support"
+    )
+    quoted_name = None
 
 
 class MetaDataset(DataAsset):
@@ -107,6 +119,15 @@ class MetaDataset(DataAsset):
                 column = kwargs.get("column")
 
             if column is not None:
+                # We test whether the dataset is a sqlalchemy_dataset by seeing if it has an engine. We don't test
+                # whether it is actually an instance to avoid circular dependency issues.
+                if (
+                    hasattr(self, "engine")
+                    and self.batch_kwargs.get("use_quoted_name")
+                    and quoted_name
+                ):
+                    column = quoted_name(column, quote=True)
+
                 nonnull_count = self.get_column_nonnull_count(
                     kwargs.get("column", column)
                 )
