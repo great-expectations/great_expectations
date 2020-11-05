@@ -17,6 +17,7 @@ from great_expectations.core.batch import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from tests.test_utils import create_files_in_directory
 
+import great_expectations.exceptions.exceptions as ge_exceptions
 
 def test_basic_instantiation(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
@@ -70,7 +71,6 @@ def test_basic_instantiation(tmp_path_factory):
             data_asset_name="something",
         )))
 
-
 def test_instantiation_from_a_config(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
@@ -98,8 +98,6 @@ default_regex:
 
 assets:
     alpha:
-        partitioner_name: my_partitioner
-
     """, return_mode="return_object")
 
     assert return_object == {
@@ -116,6 +114,53 @@ assets:
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
+    }
+
+
+def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context, tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "alpha-1.csv",
+            "alpha-2.csv",
+            "alpha-3.csv",
+        ]
+    )
+
+    return_object = empty_data_context.test_yaml_config(f"""
+module_name: great_expectations.execution_environment.data_connector
+class_name: FilesDataConnector
+execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
+name: TEST_DATA_CONNECTOR
+
+base_directory: {base_directory}
+# glob_directive: "*.csv"
+
+default_regex:
+    pattern: beta-(.*)\\.csv
+    group_names:
+        - index
+
+assets:
+    alpha:
+
+    """, return_mode="return_object")
+
+    assert return_object == {
+        "class_name": "FilesDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "alpha",
+        ],
+        "data_assets": {
+            "alpha": {
+                "example_data_references": [],
+                "batch_definition_count": 0
+            },
+        },
+        "example_unmatched_data_references": ['alpha-3.csv', 'alpha-2.csv', 'alpha-1.csv'],
+        "unmatched_data_reference_count": 3,
     }
 
 
@@ -148,7 +193,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             glob_directive: '*.csv'
             assets:
                 TestFiles:
-                    partitioner_name: default_partitioner_name
             default_regex:
                 pattern: (.+)_(.+)_(.+)\\.csv
                 group_names:
@@ -170,13 +214,15 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         },
     )
 
+    with pytest.raises(TypeError):
+        my_data_connector.get_batch_definition_list_from_batch_request()
+
+    # with unnamed data_asset_name
     unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
         execution_environment_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
+        data_asset_name=None,
     ))
-
-    print(unsorted_batch_definition_list)
     expected = [
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
@@ -241,6 +287,14 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     ]
     assert expected == unsorted_batch_definition_list
 
+    # with named data_asset_name
+    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="test_environment",
+        data_connector_name="general_filesystem_data_connector",
+        data_asset_name="TestFiles",
+    ))
+    assert expected == unsorted_batch_definition_list
+
 
 def test_return_all_batch_definitions_sorted(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
@@ -271,7 +325,6 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
         glob_directive: '*.csv'
         assets:
             TestFiles:
-                partitioner_name: default_partitioner_name
         default_regex:
             pattern: (.+)_(.+)_(.+)\\.csv
             group_names:
@@ -637,3 +690,145 @@ def test_foxtrot(tmp_path_factory):
         batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 3
+
+
+def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "alex_20200809_1000.csv",
+            "eugene_20200809_1500.csv",
+            "james_20200811_1009.csv",
+            "abe_20200809_1040.csv",
+            "will_20200809_1002.csv",
+            "james_20200713_1567.csv",
+            "eugene_20201129_1900.csv",
+            "will_20200810_1001.csv",
+            "james_20200810_1003.csv",
+            "alex_20200819_1300.csv",
+        ]
+    )
+
+    my_data_connector_yaml = yaml.load(f"""
+        class_name: FilesDataConnector
+        execution_environment_name: test_environment
+        execution_engine:
+            BASE_ENGINE:
+            class_name: PandasExecutionEngine
+        class_name: FilesDataConnector
+        base_directory: {base_directory}
+        glob_directive: '*.csv'
+        assets:
+            TestFiles: 
+                pattern: (.+)_(.+)_(.+)\\.csv
+                group_names:
+                    - name
+                    - timestamp
+                    - price
+        default_regex:
+            pattern: (.+)_.+_.+\\.csv
+            group_names:
+                - name
+        sorters:
+            - orderby: asc
+              class_name: LexicographicSorter
+              name: name
+            - datetime_format: '%Y%m%d'
+              orderby: desc
+              class_name: DateTimeSorter
+              name: timestamp
+            - orderby: desc
+              class_name: NumericSorter
+              name: for_me_Me_Me
+
+    """, Loader=yaml.FullLoader)
+
+    my_data_connector: DataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_filesystem_data_connector",
+            "execution_environment_name": "test_environment",
+            "data_context_root_directory": base_directory,
+            "execution_engine": "BASE_ENGINE",
+        },
+        config_defaults={
+            "module_name": "great_expectations.execution_environment.data_connector"
+        },
+    )
+
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+        ))
+
+
+def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "alex_20200809_1000.csv",
+            "eugene_20200809_1500.csv",
+            "james_20200811_1009.csv",
+            "abe_20200809_1040.csv",
+            "will_20200809_1002.csv",
+            "james_20200713_1567.csv",
+            "eugene_20201129_1900.csv",
+            "will_20200810_1001.csv",
+            "james_20200810_1003.csv",
+            "alex_20200819_1300.csv",
+        ]
+    )
+
+    my_data_connector_yaml = yaml.load(f"""
+        class_name: FilesDataConnector
+        execution_environment_name: test_environment
+        execution_engine:
+            BASE_ENGINE:
+            class_name: PandasExecutionEngine
+        class_name: FilesDataConnector
+        base_directory: {base_directory}
+        glob_directive: '*.csv'
+        assets:
+            TestFiles: 
+        default_regex:
+            pattern: (.+)_.+_.+\\.csv
+            group_names:
+                - name
+        sorters:
+            - orderby: asc
+              class_name: LexicographicSorter
+              name: name
+            - datetime_format: '%Y%m%d'
+              orderby: desc
+              class_name: DateTimeSorter
+              name: timestamp
+            - orderby: desc
+              class_name: NumericSorter
+              name: price
+
+    """, Loader=yaml.FullLoader)
+
+    my_data_connector: DataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_filesystem_data_connector",
+            "execution_environment_name": "test_environment",
+            "data_context_root_directory": base_directory,
+            "execution_engine": "BASE_ENGINE",
+        },
+        config_defaults={
+            "module_name": "great_expectations.execution_environment.data_connector"
+        },
+    )
+
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+        ))
+

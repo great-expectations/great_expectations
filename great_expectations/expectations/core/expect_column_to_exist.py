@@ -8,17 +8,20 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
+from ...render.renderer.renderer import renderer
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import ordinal, substitute_none_for_missing
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectColumnToExist(DatasetExpectation):
+class ExpectColumnToExist(TableExpectation):
     """Expect the specified column to exist.
 
     expect_column_to_exist is a :func:`expectation \
@@ -82,13 +85,13 @@ class ExpectColumnToExist(DatasetExpectation):
 
     """ A Metric Decorator for the Columns"""
 
-    @PandasExecutionEngine.metric(
-        metric_name="columns",
-        metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),
-        metric_value_keys=(),
-        metric_dependencies=(),
-        filter_column_isnull=False,
-    )
+    # @PandasExecutionEngine.metric(
+    #        metric_name="columns",
+    #        metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),
+    #        metric_value_keys=(),
+    #        metric_dependencies=(),
+    #        filter_column_isnull=False,
+    #    )
     def _pandas_columns(
         self,
         batches: Dict[str, Batch],
@@ -134,7 +137,49 @@ class ExpectColumnToExist(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs, ["column", "column_index"],
+        )
+
+        if params["column_index"] is None:
+            if include_column_name:
+                template_str = "$column is a required field."
+            else:
+                template_str = "is a required field."
+        else:
+            params["column_indexth"] = ordinal(params["column_index"])
+            if include_column_name:
+                template_str = "$column must be the $column_indexth field."
+            else:
+                template_str = "must be the $column_indexth field."
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,

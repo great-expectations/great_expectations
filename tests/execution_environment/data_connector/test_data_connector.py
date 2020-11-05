@@ -7,9 +7,14 @@ from tests.test_utils import (
     create_files_in_directory,
 )
 from great_expectations.core.batch import (
-    BatchRequest,
     BatchDefinition,
+    BatchRequest,
     PartitionDefinition,
+    PartitionRequest,
+)
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_environment.data_connector import (
+    FilesDataConnector,
 )
 from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -17,7 +22,9 @@ from great_expectations.data_context.util import instantiate_class_from_config
 
 @pytest.fixture
 def basic_data_connector(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+    base_directory = str(
+        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
+    )
 
     basic_data_connector = instantiate_class_from_config(yaml.load(
         f"""
@@ -39,20 +46,22 @@ assets:
         },
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector"
-        }
+        },
     )
     return basic_data_connector
 
 
 # TODO: <Alex>This test should be moved to "tests/execution_environment/data_connector/test_files_data_connector.py".</Alex>
 def test_basic_instantiation(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+    base_directory = str(
+        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
+    )
 
     # noinspection PyUnusedLocal
     my_data_connector = FilesDataConnector(
         name="my_data_connector",
         base_directory=base_directory,
-        glob_directive='*.csv',
+        glob_directive="*.csv",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         default_regex={
             "pattern": "(.*)",
@@ -76,21 +85,23 @@ def test__get_instantiation_through_instantiate_class_from_config(basic_data_con
 
 # TODO: <Alex>This test should be renamed properly and moved to "tests/execution_environment/data_connector/test_files_data_connector.py".</Alex>
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+    base_directory = str(
+        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
+    )
     create_files_in_directory(
         directory=base_directory,
-        file_name_list= [
+        file_name_list=[
             "pretend/path/A-100.csv",
             "pretend/path/A-101.csv",
             "pretend/directory/B-1.csv",
-            "pretend/directory/B-2.csv",            
-        ]
+            "pretend/directory/B-2.csv",
+        ],
     )
 
     my_data_connector = FilesDataConnector(
         name="my_data_connector",
         base_directory=base_directory,
-        glob_directive='*/*/*.csv',
+        glob_directive="*/*/*.csv",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         default_regex={
             "pattern" : "(.*).csv",
@@ -241,5 +252,4 @@ def test__batch_definition_matches_batch_request():
             "partition_request": None
         })
     )
-
     # TODO : Test cases to exercise ranges, etc.

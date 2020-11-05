@@ -1,19 +1,15 @@
-# -*- coding: utf-8 -*-
-
-from typing import List, Any
-
 import logging
+from typing import Any, List
 
 from great_expectations.core.batch import (
     BatchDefinition
 )
-
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
 
-class Sorter(object):
+class Sorter:
     def __init__(self, name: str, orderby: str = "asc"):
         self._name = name
         if orderby is None or orderby == "asc":
@@ -21,7 +17,9 @@ class Sorter(object):
         elif orderby == "desc":
             reverse: bool = True
         else:
-            raise ge_exceptions.SorterError(f'Illegal sort order "{orderby}" for attribute "{name}".')
+            raise ge_exceptions.SorterError(
+                f'Illegal sort order "{orderby}" for attribute "{name}".'
+            )
         self._reverse = reverse
 
     def get_sorted_batch_definitions(self, batch_definitions: List[BatchDefinition]) -> List[BatchDefinition]:
@@ -47,8 +45,5 @@ class Sorter(object):
         return self._reverse
 
     def __repr__(self) -> str:
-        doc_fields_dict: dict = {
-            "name": self.name,
-            "reverse": self.reverse
-        }
+        doc_fields_dict: dict = {"name": self.name, "reverse": self.reverse}
         return str(doc_fields_dict)

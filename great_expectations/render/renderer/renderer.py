@@ -1,7 +1,22 @@
+from functools import wraps
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+
+
+def renderer(renderer_type, **kwargs):
+    def wrapper(renderer_fn):
+        @wraps(renderer_fn)
+        def inner_func(*args, **kwargs):
+            return renderer_fn(*args, **kwargs)
+
+        inner_func._renderer_type = renderer_type
+        inner_func._renderer_definition_kwargs = kwargs
+        return inner_func
+
+    return wrapper
 
 
 class Renderer:

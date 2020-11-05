@@ -1,7 +1,8 @@
-import pytest
 import os
 import shutil
+
 import pandas as pd
+import pytest
 import yaml
 
 from typing import Union, List, Optional
@@ -9,21 +10,21 @@ from typing import Union, List, Optional
 
 from great_expectations.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.files_data_connector import FilesDataConnector
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.batch import (
     Batch,
-    BatchRequest,
     BatchDefinition,
+    BatchRequest,
     PartitionDefinition,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
+from great_expectations.execution_environment import ExecutionEnvironment
 from tests.test_utils import (
-    execution_environment_files_data_connector_regex_partitioner_config,
     create_files_for_regex_partitioner,
     create_files_in_directory,
+    execution_environment_files_data_connector_regex_partitioner_config,
 )
 import great_expectations.exceptions as ge_exceptions
 
@@ -96,7 +97,7 @@ data_connectors:
             - run_id
 
     my_filesystem_data_connector:
-        class_name: SinglePartitionFileDataConnector
+        class_name: SinglePartitionerFileDataConnector
         base_directory: {base_directory}
         # TODO: <Alex>Investigate: this potentially breaks the data_reference centric design.</Alex>
         glob_directive: "*.csv"
@@ -168,7 +169,8 @@ def test_some_very_basic_stuff(basic_execution_environment):
         )
     )
 
-    assert batch.batch_request is None
+    # TODO Abe 20201104: Make sure this is what we truly want to do.
+    assert batch.batch_request == {}
     assert type(batch.data) == pd.DataFrame
     assert batch.batch_definition == BatchDefinition(
         execution_environment_name="my_execution_environment",
@@ -216,7 +218,8 @@ def test_some_very_basic_stuff(basic_execution_environment):
             "some_random_id": 1
         })
     ), batch_data=my_df)
-    assert batch.batch_request is None
+    # TODO Abe 20201104: Make sure this is what we truly want to do.
+    assert batch.batch_request == {}
 
 
 def test_get_batch_list_from_batch_request(basic_execution_environment):
@@ -356,7 +359,9 @@ def test_get_available_data_asset_names_with_files_data_connector(basic_executio
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
+    assert set(available_data_asset_names.keys()) == set(
+        expected_data_asset_names.keys()
+    )
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
@@ -371,7 +376,9 @@ def test_get_available_data_asset_names_with_files_data_connector(basic_executio
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
+    assert set(available_data_asset_names.keys()) == set(
+        expected_data_asset_names.keys()
+    )
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
@@ -385,7 +392,9 @@ def test_get_available_data_asset_names_with_files_data_connector(basic_executio
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
+    assert set(available_data_asset_names.keys()) == set(
+        expected_data_asset_names.keys()
+    )
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
@@ -399,7 +408,9 @@ def test_get_available_data_asset_names_with_files_data_connector(basic_executio
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
+    assert set(available_data_asset_names.keys()) == set(
+        expected_data_asset_names.keys()
+    )
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
@@ -413,7 +424,9 @@ def test_get_available_data_asset_names_with_files_data_connector(basic_executio
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
+    assert set(available_data_asset_names.keys()) == set(
+        expected_data_asset_names.keys()
+    )
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 

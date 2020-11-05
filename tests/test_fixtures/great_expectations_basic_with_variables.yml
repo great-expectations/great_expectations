@@ -13,9 +13,11 @@ datasources:
       mygenerator:
         class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../data
+        password: dont$replace$me$please$$$$thanks
         reader_options:
           sep:
           engine: python
+          password: dont$replaceme
           test_variable_sub1: ${replace_me}
           test_variable_sub2: $replace_me
           test_variable_sub3: ${replace_me_1}

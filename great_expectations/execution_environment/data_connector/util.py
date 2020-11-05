@@ -94,14 +94,13 @@ def convert_data_reference_string_to_batch_request_using_regex(
     matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
     if matches is None:
         return None
-
     groups: list = list(matches.groups())
     partition_definition: PartitionDefinitionSubset = PartitionDefinitionSubset(
         dict(zip(group_names, groups))
     )
 
     # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
-    # TODO: <Alex>Update: Approach -- we can differentiate "convert_data_reference_string_to_batch_request_using_regex()" methods between FilesDataConnector and SinglePartitionFileDataConnector so that PartitionDefinition never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
+    # TODO: <Alex>Update: Approach -- we can differentiate "convert_data_reference_string_to_batch_request_using_regex()" methods between FilesDataConnector and SinglePartitionerFileDataConnector so that PartitionDefinition never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
     if "data_asset_name" in partition_definition:
         data_asset_name = partition_definition.pop("data_asset_name")
@@ -173,8 +172,6 @@ def _invert_regex_to_data_reference_template(
     # print("-"*80)
     parsed_sre = sre_parse.parse(regex_pattern)
     for token, value in parsed_sre:
-        # print(type(token), token, value)
-
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
             data_reference_template += chr(value)
@@ -204,7 +201,6 @@ def _invert_regex_to_data_reference_template(
 
     # Collapse adjacent wildcards into a single wildcard
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)
-
     return data_reference_template
 
 

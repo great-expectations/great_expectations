@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
-from typing import Any
 import datetime
-
 import logging
+from typing import Any
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.sorter.sorter import Sorter
@@ -12,17 +9,19 @@ import great_expectations.exceptions as ge_exceptions
 logger = logging.getLogger(__name__)
 
 
-def parse_string_to_datetime(datetime_string: str, datetime_format_string: str) -> datetime.date:
+def parse_string_to_datetime(
+    datetime_string: str, datetime_format_string: str
+) -> datetime.date:
     if not isinstance(datetime_string, str):
         raise ge_exceptions.SorterError(
-            f'''Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
-            '''
+            f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
+            """
         )
     if datetime_format_string and not isinstance(datetime_format_string, str):
         raise ge_exceptions.SorterError(
-            f'''DateTime parsing formatter "datetime_format_string" must have string type (actual type is
+            f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{str(type(datetime_format_string))}").
-            '''
+            """
         )
     return datetime.datetime.strptime(datetime_string, datetime_format_string).date()
 
@@ -48,7 +47,8 @@ class DateTimeSorter(Sorter):
         partition_definition: dict = batch_definition.partition_definition
         partition_value: Any = partition_definition[self.name]
         dt: datetime.date = parse_string_to_datetime(
-            datetime_string=partition_value, datetime_format_string=self._datetime_format
+            datetime_string=partition_value,
+            datetime_format_string=self._datetime_format,
         )
         return datetime_to_int(dt=dt)
 

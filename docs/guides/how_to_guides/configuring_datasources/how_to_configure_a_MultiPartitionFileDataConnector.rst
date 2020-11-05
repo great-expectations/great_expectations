@@ -12,9 +12,9 @@ This guide demonstrates how to configure a ``MultiPartitionFileDataConnector``, 
   - Understand the basics of ExecutionEnvironments
   - Learned how to use ``test_yaml_config``
 
-Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data: ``SinglePartitionFileDataConnector`` and ``MultiPartitionFileDataConnector``.
+Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data: ``SinglePartitionerFileDataConnector`` and ``MultiPartitionFileDataConnector``.
 
-``MultiPartitionFileDataConnector`` is more complex, and also more powerful. We recommend starting with ``SinglePartitionFileDataConnector`` unless you're sure you need the extra features of a ``MultiPartitionFileDataConnector``. <<Link to "how to configure a SinglePartitionFileDataConnector" here>
+``MultiPartitionFileDataConnector`` is more complex, and also more powerful. We recommend starting with ``SinglePartitionerFileDataConnector`` unless you're sure you need the extra features of a ``MultiPartitionFileDataConnector``. <<Link to "how to configure a SinglePartitionerFileDataConnector" here>
 
 Steps
 -----
@@ -121,7 +121,7 @@ The same configuration as Example 1...
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionFileDataConnector
+    class_name: SinglePartitionerFileDataConnector
     base_directory: my_directory/
 
     partitioner:
@@ -172,7 +172,7 @@ Here’s a configuration...
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionFileDataConnector
+    class_name: SinglePartitionerFileDataConnector
     base_directory: my_directory/
 
     partitioner:
