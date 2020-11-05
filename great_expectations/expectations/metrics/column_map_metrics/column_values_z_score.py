@@ -29,7 +29,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
     )
     default_kwarg_values = {"double_sided": True, "threshold": None}
 
-    function_metric_name = "column_values.z_score.map_function"
+    function_metric_name = "column_values.z_score.map_fn"
     function_value_keys = tuple()
 
     @column_map_function(engine=PandasExecutionEngine)
@@ -51,7 +51,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
         cls, column, _metrics, threshold, double_sided, **kwargs
     ) -> pd.Series:
         # return the boolean series
-        z_score = _metrics["column_values.z_score.map_function"]
+        z_score = _metrics["column_values.z_score.map_fn"]
         try:
             if double_sided:
                 under_threshold = z_score.abs() < abs(threshold)
@@ -66,7 +66,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
     @column_map_condition(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy_condition(cls, column, _metrics, threshold, double_sided, **kwargs):
 
-        z_score, _ = _metrics["column_values.z_score.map_function"]
+        z_score, _ = _metrics["column_values.z_score.map_fn"]
         if double_sided:
             under_threshold = sa.func.abs(z_score) < abs(threshold)
         else:
@@ -89,7 +89,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
 
     @column_map_condition(engine=SparkDFExecutionEngine)
     def _spark_condition(cls, column, _metrics, threshold, double_sided, **kwargs):
-        z_score, _ = _metrics["column_values.z_score.map_function"]
+        z_score, _ = _metrics["column_values.z_score.map_fn"]
 
         if double_sided:
             threshold = abs(threshold)
@@ -109,11 +109,11 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
         types and their respective domains"""
         if metric.metric_name == "column_values.z_score.under_threshold":
             return {
-                "column_values.z_score.map_function": MetricConfiguration(
-                    "column_values.z_score.map_function", metric.metric_domain_kwargs
+                "column_values.z_score.map_fn": MetricConfiguration(
+                    "column_values.z_score.map_fn", metric.metric_domain_kwargs
                 )
             }
-        if metric.metric_name == "column_values.z_score.map_function":
+        if metric.metric_name == "column_values.z_score.map_fn":
             return {
                 "column.aggregate.mean": MetricConfiguration(
                     "column.aggregate.mean", metric.metric_domain_kwargs

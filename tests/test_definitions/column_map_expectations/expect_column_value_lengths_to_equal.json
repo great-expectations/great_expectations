@@ -78,8 +78,9 @@
         "value": 1,
         "catch_exceptions": true
       },
-      "out": {},
-      "traceback_substring": "TypeError: object of type 'int' has no len()"
+      "out": {
+        "traceback_substring": "TypeError: object of type 'int' has no len()"
+      }
     },{
       "title": "test_conditional_expectation_passes",
       "only_for": ["pandas"],

@@ -420,7 +420,7 @@ def test_z_score_under_threshold_pd():
     metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map_function",
+        metric_name="column_values.z_score.map_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
         metric_dependencies={
@@ -436,7 +436,7 @@ def test_z_score_under_threshold_pd():
         metric_name="column_values.z_score.under_threshold",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"column_values.z_score.map_function": desired_metric},
+        metric_dependencies={"column_values.z_score.map_fn": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -471,7 +471,7 @@ def test_z_score_under_threshold_sa():
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metrics))
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map_function",
+        metric_name="column_values.z_score.map_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
         metric_dependencies={
@@ -487,7 +487,7 @@ def test_z_score_under_threshold_sa():
         metric_name="column_values.z_score.under_threshold",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"column_values.z_score.map_function": desired_metric},
+        metric_dependencies={"column_values.z_score.map_fn": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -522,7 +522,7 @@ def test_z_score_under_threshold_spark():
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metrics))
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map_function",
+        metric_name="column_values.z_score.map_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
         metric_dependencies={
@@ -538,7 +538,7 @@ def test_z_score_under_threshold_spark():
         metric_name="column_values.z_score.under_threshold",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"column_values.z_score.map_function": desired_metric},
+        metric_dependencies={"column_values.z_score.map_fn": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
