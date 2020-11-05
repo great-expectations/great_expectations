@@ -7,9 +7,9 @@ from typing import Any, Callable, Dict, Iterable, Tuple
 
 import pandas as pd
 
-from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
+from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec, InMemoryBatchSpec
 
-from ..core.batch import Batch, BatchMarkers
+from ..core.batch import Batch, BatchMarkers, BatchRequest
 from ..core.id_dict import BatchSpec
 from ..exceptions import BatchSpecError, ValidationError
 from ..execution_environment.util import hash_pandas_dataframe

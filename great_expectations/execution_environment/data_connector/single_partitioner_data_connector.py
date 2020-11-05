@@ -6,14 +6,15 @@ import copy
 import logging
 from great_expectations.core.batch import (
     BatchDefinition,
+    BatchRequest,
 )
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.data_connector import (
-    DataConnector,
-)
-from great_expectations.execution_environment.data_connector.files_data_connector import (
-    FilesDataConnector,
-)
+# from great_expectations.execution_environment.data_connector.data_connector import (
+#     DataConnector,
+# )
+# from great_expectations.execution_environment.data_connector.files_data_connector import (
+#     FilesDataConnector,
+# )
 
 from great_expectations.execution_environment.data_connector.partition_query import (
     PartitionQuery,
@@ -225,27 +226,27 @@ class SinglePartitionerDataConnector(DataConnector):
     #     pass
 
 
-# TODO: <Alex>Is this class still useful?  If not, we can deprecate it and replace it with SinglePartitionFileDataConnector in all the test modues.</Alex>
+# TODO: <Alex>Is this class still useful?  If not, we can deprecate it and replace it with SinglePartitionerFileDataConnector in all the test modues.</Alex>
 # TODO: <Alex>Decision: Delete this class and rewrite the tests that rely on it in the way that exercises the relevant surviving classes.</Alex>
-class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
-    def __init__(
-        self,
-        name: str,
-        data_reference_dict: dict = None,
-        sorters: List[dict] = None,
-        **kwargs,
-    ):
-        if data_reference_dict is None:
-            data_reference_dict = {}
-        logger.debug(f'Constructing SinglePartitionDictDataConnector "{name}".')
-        super().__init__(
-            name=name,
-            sorters=sorters,
-            **kwargs,
-        )
+# class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
+#     def __init__(
+#         self,
+#         name: str,
+#         data_reference_dict: dict = None,
+#         sorters: List[dict] = None,
+#         **kwargs,
+#     ):
+#         if data_reference_dict is None:
+#             data_reference_dict = {}
+#         logger.debug(f'Constructing SinglePartitionDictDataConnector "{name}".')
+#         super().__init__(
+#             name=name,
+#             sorters=sorters,
+#             **kwargs,
+#         )
 
-        # This simulates the underlying filesystem
-        self.data_reference_dict = data_reference_dict
+#         # This simulates the underlying filesystem
+#         self.data_reference_dict = data_reference_dict
 
     def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
@@ -276,7 +277,7 @@ class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
         )
 
 
-class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
+class SinglePartitionerFileDataConnector(SinglePartitionerDataConnector):
     def __init__(
         self,
         name: str,

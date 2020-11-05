@@ -101,7 +101,7 @@ execution_engine:
 data_connectors:
     my_filesystem_data_connector:
         # class_name: FilesDataConnector
-        class_name: SinglePartitionFileDataConnector
+        class_name: SinglePartitionerFileDataConnector
         base_directory: {temp_dir}
         glob_directive: '*.csv'
         default_regex:
@@ -131,7 +131,7 @@ data_connectors:
         "data_connectors": {
             "count": 1,
             "my_filesystem_data_connector": {
-                "class_name": "SinglePartitionFileDataConnector",
+                "class_name": "SinglePartitionerFileDataConnector",
                 "data_asset_count": 1,
                 "example_data_asset_names": [
                     "DEFAULT_ASSET_NAME"

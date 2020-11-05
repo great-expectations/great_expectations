@@ -16,7 +16,7 @@ class NumericSorter(Sorter):
         if not is_numeric(value=partition_value):
             raise ge_exceptions.SorterError(
                 # what is the identifying characteristic of batch_definition?
-                f'''BatchDefinition with PartitionDefinition "{self.name}" with value "{partition_value}" has value
+                f"""BatchDefinition with PartitionDefinition "{self.name}" with value "{partition_value}" has value
 "{partition_value}" which cannot be part of numeric sort.
 """
             )

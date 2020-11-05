@@ -11,6 +11,7 @@ except ImportError:
 
 from great_expectations.core.id_dict import IDDict
 
+from great_expectations.core.batch import BatchSpec, Batch
 from ..exceptions import BatchKwargsError, GreatExpectationsError, ValidationError
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration

@@ -2,7 +2,7 @@ import copy
 import itertools
 import json
 import logging
-from typing import Any, Callable, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Tuple, Union, Optional
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.core.batch import BatchRequest
