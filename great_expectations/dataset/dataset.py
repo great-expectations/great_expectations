@@ -119,6 +119,8 @@ class MetaDataset(DataAsset):
                 column = kwargs.get("column")
 
             if column is not None:
+                # We test whether the dataset is a sqlalchemy_dataset by seeing if it has an engine. We don't test
+                # whether it is actually an instance to avoid circular dependency issues.
                 if (
                     hasattr(self, "engine")
                     and self.batch_kwargs.get("use_quoted_name")
