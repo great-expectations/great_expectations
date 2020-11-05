@@ -1,16 +1,10 @@
-# -*- coding: utf-8 -*-
-
-from typing import Any
-
 import logging
+from typing import Any
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.sorter.sorter import Sorter
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.util import(
-    is_numeric,
-    is_int
-)
+from great_expectations.util import is_int, is_numeric
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +16,9 @@ class NumericSorter(Sorter):
         if not is_numeric(value=partition_value):
             raise ge_exceptions.SorterError(
                 # what is the identifying characteristic of batch_definition?
-                f'''BatchDefinition with PartitionDefinition "{self.name}" with value "{partition_value}" has value
+                f"""BatchDefinition with PartitionDefinition "{self.name}" with value "{partition_value}" has value
 "{partition_value}" which cannot be part of numeric sort.
-'''
+"""
             )
         if is_int(value=partition_value):
             return int(partition_value)

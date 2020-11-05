@@ -96,5 +96,6 @@ class Store:
         return self._store_backend.has_key(key.to_tuple())
 
     def self_check(self, pretty_print):
-        NotImplementedError(f"The test method is not implemented for Store class {self.__class__.__name__}.")
- 
+        NotImplementedError(
+            f"The test method is not implemented for Store class {self.__class__.__name__}."
+        )

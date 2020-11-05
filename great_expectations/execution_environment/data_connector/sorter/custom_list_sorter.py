@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-
-from typing import Any, List
-
 import logging
+from typing import Any, List
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.sorter.sorter import Sorter
@@ -16,10 +13,15 @@ class CustomListSorter(Sorter):
     CustomListSorter
         - The CustomListSorter is able to sort partitions values according to a user-provided custom list.
     """
-    def __init__(self, name: str, orderby: str = "asc", reference_list: List[str] = None):
+
+    def __init__(
+        self, name: str, orderby: str = "asc", reference_list: List[str] = None
+    ):
         super().__init__(name=name, orderby=orderby)
 
-        self._reference_list = self._validate_reference_list(reference_list=reference_list)
+        self._reference_list = self._validate_reference_list(
+            reference_list=reference_list
+        )
 
     @staticmethod
     def _validate_reference_list(reference_list: List[str] = None) -> List[str]:

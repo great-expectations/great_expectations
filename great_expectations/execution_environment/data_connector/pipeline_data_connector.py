@@ -1,5 +1,4 @@
-from typing import List, Any, Optional
-
+from typing import List, Any, Optional, Union
 import logging
 
 from great_expectations.execution_engine import ExecutionEngine

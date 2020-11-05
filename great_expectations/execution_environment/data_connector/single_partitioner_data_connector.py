@@ -5,9 +5,16 @@ import copy
 
 import logging
 from great_expectations.core.batch import (
-    BatchRequest,
     BatchDefinition,
+    BatchRequest,
 )
+from great_expectations.execution_engine import ExecutionEngine
+# from great_expectations.execution_environment.data_connector.data_connector import (
+#     DataConnector,
+# )
+# from great_expectations.execution_environment.data_connector.files_data_connector import (
+#     FilesDataConnector,
+# )
 
 from great_expectations.execution_environment.data_connector.partition_query import (
     PartitionQuery,
@@ -27,8 +34,8 @@ import great_expectations.exceptions as ge_exceptions
 logger = logging.getLogger(__name__)
 
 
-class SinglePartitionDataConnector(DataConnector):
-    """SinglePartitionDataConnector is a base class for DataConnectors that require exactly one Partitioner be configured in the declaration.
+class SinglePartitionerDataConnector(DataConnector):
+    """SinglePartitionerDataConnector is a base class for DataConnectors that require exactly one Partitioner be configured in the declaration.
 
     Instead, its data_references are stored in a data_reference_dictionary : {
         "pretend/path/A-100.csv" : pandas_df_A_100,
@@ -38,6 +45,7 @@ class SinglePartitionDataConnector(DataConnector):
         ...
     }
     """
+
     def __init__(
         self,
         name: str,
@@ -47,7 +55,7 @@ class SinglePartitionDataConnector(DataConnector):
         glob_directive: str = "*",
         sorters: list = None,
     ):
-        logger.debug(f'Constructing SinglePartitionDataConnector "{name}".')
+        logger.debug(f'Constructing SinglePartitionerDataConnector "{name}".')
 
         super().__init__(
             name=name,
@@ -204,7 +212,7 @@ class SinglePartitionDataConnector(DataConnector):
 
 # TODO: <Alex>Is this class still useful?  If not, we can deprecate it and replace it with SinglePartitionFileDataConnector in all the test modues.</Alex>
 # TODO: <Alex>Decision: Delete this class and rewrite the tests that rely on it in the way that exercises the relevant surviving classes.</Alex>
-class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
+class SinglePartitionerDictDataConnector(SinglePartitionerDataConnector):
     def __init__(
         self,
         name: str,
@@ -214,7 +222,7 @@ class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
     ):
         if data_reference_dict is None:
             data_reference_dict = {}
-        logger.debug(f'Constructing SinglePartitionDictDataConnector "{name}".')
+        logger.debug(f'Constructing SinglePartitionerDictDataConnector "{name}".')
         super().__init__(
             name=name,
             sorters=sorters,
@@ -253,7 +261,7 @@ class SinglePartitionDictDataConnector(SinglePartitionDataConnector):
         )
 
 
-class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
+class SinglePartitionerFileDataConnector(SinglePartitionerDataConnector):
     def __init__(
         self,
         name: str,
@@ -263,7 +271,7 @@ class SinglePartitionFileDataConnector(SinglePartitionDataConnector):
         glob_directive: str = "*",
         sorters: List[dict] = None,
     ):
-        logger.debug(f'Constructing SinglePartitionFileDataConnector "{name}".')
+        logger.debug(f'Constructing SinglePartitionerFileDataConnector "{name}".')
 
         super().__init__(
             name=name,

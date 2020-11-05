@@ -27,10 +27,10 @@ from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.util import import_library_module
 
 from .test_utils import (
+    create_files_for_regex_partitioner,
+    execution_environment_files_data_connector_regex_partitioner_config,
     expectationSuiteValidationResultSchema,
     get_dataset,
-    execution_environment_files_data_connector_regex_partitioner_config,
-    create_files_for_regex_partitioner
 )
 
 ###
@@ -274,6 +274,7 @@ def empty_expectation_suite():
         "expectations": [],
     }
     return expectation_suite
+
 
 @pytest.fixture
 def basic_expectation_suite():
@@ -1915,22 +1916,131 @@ def non_numeric_high_card_dataset(test_backend):
     }
     return get_dataset(test_backend, data, schemas=schemas)
 
+
 @pytest.fixture
 def periodic_table_of_elements():
-    data = ['Hydrogen', 'Helium', 'Lithium', 'Beryllium', 'Boron', 'Carbon', 'Nitrogen', 'Oxygen', 'Fluorine', 'Neon',
-     'Sodium', 'Magnesium', 'Aluminum', 'Silicon', 'Phosphorus', 'Sulfur', 'Chlorine', 'Argon', 'Potassium', 'Calcium',
-     'Scandium', 'Titanium', 'Vanadium', 'Chromium', 'Manganese', 'Iron', 'Cobalt', 'Nickel', 'Copper', 'Zinc',
-     'Gallium', 'Germanium', 'Arsenic', 'Selenium', 'Bromine', 'Krypton', 'Rubidium', 'Strontium', 'Yttrium',
-     'Zirconium', 'Niobium', 'Molybdenum', 'Technetium', 'Ruthenium', 'Rhodium', 'Palladium', 'Silver', 'Cadmium',
-     'Indium', 'Tin', 'Antimony', 'Tellurium', 'Iodine', 'Xenon', 'Cesium', 'Barium', 'Lanthanum', 'Cerium',
-     'Praseodymium', 'Neodymium', 'Promethium', 'Samarium', 'Europium', 'Gadolinium', 'Terbium', 'Dysprosium',
-     'Holmium', 'Erbium', 'Thulium', 'Ytterbium', 'Lutetium', 'Hafnium', 'Tantalum', 'Tungsten', 'Rhenium', 'Osmium',
-     'Iridium', 'Platinum', 'Gold', 'Mercury', 'Thallium', 'Lead', 'Bismuth', 'Polonium', 'Astatine', 'Radon',
-     'Francium', 'Radium', 'Actinium', 'Thorium', 'Protactinium', 'Uranium', 'Neptunium', 'Plutonium', 'Americium',
-     'Curium', 'Berkelium', 'Californium', 'Einsteinium', 'Fermium', 'Mendelevium', 'Nobelium', 'Lawrencium',
-     'Rutherfordium', 'Dubnium', 'Seaborgium', 'Bohrium', 'Hassium', 'Meitnerium', 'Darmstadtium', 'Roentgenium',
-     'Copernicium', 'Nihomium', 'Flerovium', 'Moscovium', 'Livermorium', 'Tennessine', 'Oganesson']
+    data = [
+        "Hydrogen",
+        "Helium",
+        "Lithium",
+        "Beryllium",
+        "Boron",
+        "Carbon",
+        "Nitrogen",
+        "Oxygen",
+        "Fluorine",
+        "Neon",
+        "Sodium",
+        "Magnesium",
+        "Aluminum",
+        "Silicon",
+        "Phosphorus",
+        "Sulfur",
+        "Chlorine",
+        "Argon",
+        "Potassium",
+        "Calcium",
+        "Scandium",
+        "Titanium",
+        "Vanadium",
+        "Chromium",
+        "Manganese",
+        "Iron",
+        "Cobalt",
+        "Nickel",
+        "Copper",
+        "Zinc",
+        "Gallium",
+        "Germanium",
+        "Arsenic",
+        "Selenium",
+        "Bromine",
+        "Krypton",
+        "Rubidium",
+        "Strontium",
+        "Yttrium",
+        "Zirconium",
+        "Niobium",
+        "Molybdenum",
+        "Technetium",
+        "Ruthenium",
+        "Rhodium",
+        "Palladium",
+        "Silver",
+        "Cadmium",
+        "Indium",
+        "Tin",
+        "Antimony",
+        "Tellurium",
+        "Iodine",
+        "Xenon",
+        "Cesium",
+        "Barium",
+        "Lanthanum",
+        "Cerium",
+        "Praseodymium",
+        "Neodymium",
+        "Promethium",
+        "Samarium",
+        "Europium",
+        "Gadolinium",
+        "Terbium",
+        "Dysprosium",
+        "Holmium",
+        "Erbium",
+        "Thulium",
+        "Ytterbium",
+        "Lutetium",
+        "Hafnium",
+        "Tantalum",
+        "Tungsten",
+        "Rhenium",
+        "Osmium",
+        "Iridium",
+        "Platinum",
+        "Gold",
+        "Mercury",
+        "Thallium",
+        "Lead",
+        "Bismuth",
+        "Polonium",
+        "Astatine",
+        "Radon",
+        "Francium",
+        "Radium",
+        "Actinium",
+        "Thorium",
+        "Protactinium",
+        "Uranium",
+        "Neptunium",
+        "Plutonium",
+        "Americium",
+        "Curium",
+        "Berkelium",
+        "Californium",
+        "Einsteinium",
+        "Fermium",
+        "Mendelevium",
+        "Nobelium",
+        "Lawrencium",
+        "Rutherfordium",
+        "Dubnium",
+        "Seaborgium",
+        "Bohrium",
+        "Hassium",
+        "Meitnerium",
+        "Darmstadtium",
+        "Roentgenium",
+        "Copernicium",
+        "Nihomium",
+        "Flerovium",
+        "Moscovium",
+        "Livermorium",
+        "Tennessine",
+        "Oganesson",
+    ]
     return data
+
 
 def dataset_sample_data(test_backend):
     # No infinities for mysql
@@ -2459,7 +2569,7 @@ def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
 def execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context(
     empty_data_context: DataContext,
     default_base_directory: str = "data",
-    data_asset_base_directory: str = None
+    data_asset_base_directory: str = None,
 ):
     data_context: DataContext = empty_data_context
     execution_environment_name: str = "test_execution_environment"
@@ -2470,12 +2580,14 @@ def execution_environment_files_data_connector_regex_partitioner_no_groups_no_so
             use_group_names=False,
             use_sorters=False,
             default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory
-        )["test_execution_environment"]
+            data_asset_base_directory=data_asset_base_directory,
+        )["test_execution_environment"],
     )
     base_directory_names: list = [default_base_directory, data_asset_base_directory]
     root_directory_path: str = data_context.root_directory
-    create_files_for_regex_partitioner(root_directory_path=root_directory_path, directory_paths=base_directory_names)
+    create_files_for_regex_partitioner(
+        root_directory_path=root_directory_path, directory_paths=base_directory_names
+    )
     return data_context
 
 
@@ -2483,7 +2595,7 @@ def execution_environment_files_data_connector_regex_partitioner_no_groups_no_so
 def execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context(
     empty_data_context: DataContext,
     default_base_directory: str = "data",
-    data_asset_base_directory: str = None
+    data_asset_base_directory: str = None,
 ):
     data_context: DataContext = empty_data_context
     execution_environment_name: str = "test_execution_environment"
@@ -2494,12 +2606,14 @@ def execution_environment_files_data_connector_regex_partitioner_with_groups_wit
             use_group_names=True,
             use_sorters=True,
             default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory
-        )["test_execution_environment"]
+            data_asset_base_directory=data_asset_base_directory,
+        )["test_execution_environment"],
     )
     base_directory_names: list = [default_base_directory, data_asset_base_directory]
     root_directory_path: str = data_context.root_directory
-    create_files_for_regex_partitioner(root_directory_path=root_directory_path, directory_paths=base_directory_names)
+    create_files_for_regex_partitioner(
+        root_directory_path=root_directory_path, directory_paths=base_directory_names
+    )
     return data_context
 
 

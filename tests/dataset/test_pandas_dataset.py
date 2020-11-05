@@ -5,14 +5,9 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
-)
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.profile import ColumnsExistProfiler
-from tests.test_utils import (
-    expectationValidationResultSchema,
-    expectationSuiteSchema,
-)
+from tests.test_utils import expectationSuiteSchema, expectationValidationResultSchema
 
 
 def test_expect_column_values_to_be_dateutil_parseable():

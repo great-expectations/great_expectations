@@ -2,14 +2,15 @@ import json
 import os
 import shutil
 
+import pandas as pd
 from typing import List
 
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
-import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
@@ -32,7 +33,6 @@ from great_expectations.exceptions import (
     ConfigNotFoundError,
     DataContextError,
 )
-from great_expectations.core.batch import Batch
 from great_expectations.execution_environment.types import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (

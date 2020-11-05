@@ -1,9 +1,9 @@
 .. _how_to_guides__miscellaneous__how_to_configure_a_singlepartitionfiledataconnector:
 
-How to configure a ``SinglePartitionFileDataConnector``
+How to configure a ``SinglePartitionerFileDataConnector``
 =======================================================
 
-This guide demonstrates how to configure a ``SinglePartitionFileDataConnector``, and provides several examples you can use for configuration.
+This guide demonstrates how to configure a ``SinglePartitionerFileDataConnector``, and provides several examples you can use for configuration.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -12,9 +12,9 @@ This guide demonstrates how to configure a ``SinglePartitionFileDataConnector``,
   - Understand the basics of ExecutionEnvironments
   - Learned how to use ``test_yaml_config``
 
-Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data: ``SinglePartitionFileDataConnector`` and ``MultiPartitionFileDataConnector``.
+Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data: ``SinglePartitionerFileDataConnector`` and ``MultiPartitionFileDataConnector``.
 
-``SinglePartitionFileDataConnector`` has fewer options, so it's simpler to set up. It’s a good choice if you want to connect to a single ``DataAsset``, or several ``DataAssets`` that all share the same naming convention. It's not difficult to migrate from a ``SinglePartitionFileDataConnector`` to a ``MultiPartitionFileDataConnector``, so we recommend starting with ``SinglePartitionFileDataConnector`` unless you're sure you need the extra features of a ``MultiPartitionFileDataConnector``.
+``SinglePartitionerFileDataConnector`` has fewer options, so it's simpler to set up. It’s a good choice if you want to connect to a single ``DataAsset``, or several ``DataAssets`` that all share the same naming convention. It's not difficult to migrate from a ``SinglePartitionerFileDataConnector`` to a ``MultiPartitionFileDataConnector``, so we recommend starting with ``SinglePartitionerFileDataConnector`` unless you're sure you need the extra features of a ``MultiPartitionFileDataConnector``.
 
 Steps
 -----
@@ -42,7 +42,7 @@ All of the examples below assume you’re testing configuration using something 
 
 If you’re not familiar with the ``test_yaml_config`` method, please check out [How to configure all sorts of stuff with test_yaml_config]() or the corresponding [video tutorial here]().
 
-Principles for configuring ``SinglePartitionFileDataConnectors``
+Principles for configuring ``SinglePartitionerFileDataConnectors``
 ----------------------------------------------------------------
 
 One of your ``group_names`` must be ``data_asset_name``.
@@ -64,7 +64,7 @@ Then this configuration...
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionFileDataConnector
+    class_name: SinglePartitionerFileDataConnector
     base_directory: my_directory/
 
     partitioner:
@@ -122,7 +122,7 @@ The same configuration as Example 1...
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionFileDataConnector
+    class_name: SinglePartitionerFileDataConnector
     base_directory: my_directory/
 
     partitioner:
@@ -173,7 +173,7 @@ Here’s a configuration...
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionFileDataConnector
+    class_name: SinglePartitionerFileDataConnector
     base_directory: my_directory/
 
     partitioner:

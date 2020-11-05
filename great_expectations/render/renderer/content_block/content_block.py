@@ -5,6 +5,10 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.expectations.registry import (
+    get_expectation_impl,
+    get_renderer_impl,
+)
 from great_expectations.render.types import (
     CollapseContent,
     RenderedMarkdownContent,
@@ -39,6 +43,11 @@ not be rendered properly and/or may not appear altogether.  Please use the trace
 diagnose and repair the underlying issue.  Detailed information follows:
         """
 
+        runtime_configuration = {
+            "styling": cls._get_element_styling(),
+            "include_column_name": kwargs.pop("include_column_name", None),
+        }
+
         if isinstance(render_object, list):
             blocks = []
             has_failed_evr = (
@@ -56,9 +65,18 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
                 if content_block_fn is not None:
                     try:
-                        result = content_block_fn(
-                            obj_, styling=cls._get_element_styling(), **kwargs
-                        )
+                        if isinstance(obj_, ExpectationValidationResult):
+                            result = content_block_fn(
+                                result=obj_,
+                                runtime_configuration=runtime_configuration,
+                                **kwargs,
+                            )
+                        else:
+                            result = content_block_fn(
+                                configuration=obj_,
+                                runtime_configuration=runtime_configuration,
+                                **kwargs,
+                            )
                     except Exception as e:
                         exception_traceback = traceback.format_exc()
                         exception_message = (
@@ -71,15 +89,35 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             content_block_fn = cls._get_content_block_fn(
                                 "_missing_content_block_fn"
                             )
+                            result = content_block_fn(
+                                result=obj_,
+                                runtime_configuration=runtime_configuration,
+                                **kwargs,
+                            )
                         else:
                             content_block_fn = cls._missing_content_block_fn
-                        result = content_block_fn(
-                            obj_, cls._get_element_styling(), **kwargs
-                        )
+                            result = content_block_fn(
+                                configuration=obj_,
+                                runtime_configuration=runtime_configuration,
+                                **kwargs,
+                            )
                 else:
-                    result = cls._missing_content_block_fn(
-                        obj_, cls._get_element_styling(), **kwargs
-                    )
+                    if isinstance(obj_, ExpectationValidationResult):
+                        content_block_fn = cls._get_content_block_fn(
+                            "_missing_content_block_fn"
+                        )
+                        result = content_block_fn(
+                            result=obj_,
+                            runtime_configuration=runtime_configuration,
+                            **kwargs,
+                        )
+                    else:
+                        content_block_fn = cls._missing_content_block_fn
+                        result = content_block_fn(
+                            configuration=obj_,
+                            runtime_configuration=runtime_configuration,
+                            **kwargs,
+                        )
 
                 if result is not None:
                     if isinstance(obj_, ExpectationConfiguration):
@@ -129,12 +167,24 @@ diagnose and repair the underlying issue.  Detailed information follows:
         else:
             expectation_type = cls._get_expectation_type(render_object)
 
-            content_block_fn = getattr(cls, expectation_type, None)
+            content_block_fn = get_renderer_impl(
+                object_name=expectation_type, renderer_type="renderer.prescriptive"
+            )
+            content_block_fn = content_block_fn[1] if content_block_fn else None
             if content_block_fn is not None:
                 try:
-                    result = content_block_fn(
-                        render_object, styling=cls._get_element_styling(), **kwargs
-                    )
+                    if isinstance(render_object, ExpectationValidationResult):
+                        result = content_block_fn(
+                            result=render_object,
+                            runtime_configuration=runtime_configuration,
+                            **kwargs,
+                        )
+                    else:
+                        result = content_block_fn(
+                            configuration=render_object,
+                            runtime_configuration=runtime_configuration,
+                            **kwargs,
+                        )
                 except Exception as e:
                     exception_traceback = traceback.format_exc()
                     exception_message = (
@@ -147,15 +197,35 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         content_block_fn = cls._get_content_block_fn(
                             "_missing_content_block_fn"
                         )
+                        result = content_block_fn(
+                            result=render_object,
+                            runtime_configuration=runtime_configuration,
+                            **kwargs,
+                        )
                     else:
                         content_block_fn = cls._missing_content_block_fn
-                    result = content_block_fn(
-                        render_object, cls._get_element_styling(), **kwargs
-                    )
+                        result = content_block_fn(
+                            configuration=render_object,
+                            runtime_configuration=runtime_configuration,
+                            **kwargs,
+                        )
             else:
-                result = cls._missing_content_block_fn(
-                    render_object, cls._get_element_styling(), **kwargs
-                )
+                if isinstance(render_object, ExpectationValidationResult):
+                    content_block_fn = cls._get_content_block_fn(
+                        "_missing_content_block_fn"
+                    )
+                    result = content_block_fn(
+                        result=render_object,
+                        runtime_configuration=runtime_configuration,
+                        **kwargs,
+                    )
+                else:
+                    content_block_fn = cls._missing_content_block_fn
+                    result = content_block_fn(
+                        configuration=render_object,
+                        runtime_configuration=runtime_configuration,
+                        **kwargs,
+                    )
             if result is not None:
                 if isinstance(render_object, ExpectationConfiguration):
                     expectation_meta_notes = cls._render_expectation_meta_notes(
@@ -273,7 +343,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
-        return getattr(cls, expectation_type, None)
+        content_block_fn = get_renderer_impl(
+            object_name=expectation_type, renderer_type="renderer.prescriptive"
+        )
+        return content_block_fn[1] if content_block_fn else None
 
     @classmethod
     def list_available_expectations(cls):
@@ -281,7 +354,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return expectations
 
     @classmethod
-    def _missing_content_block_fn(cls, obj, styling, **kwargs):
+    def _missing_content_block_fn(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
         return []
 
     @classmethod

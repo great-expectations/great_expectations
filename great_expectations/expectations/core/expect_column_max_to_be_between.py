@@ -12,6 +12,12 @@ from great_expectations.execution_engine import (
 )
 
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    handle_strict_min_max,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 try:
     import sqlalchemy as sa
@@ -19,17 +25,18 @@ except ImportError:
     pass
 
 
+from ...render.renderer.renderer import renderer
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectColumnMaxToBeBetween(DatasetExpectation):
+class ExpectColumnMaxToBeBetween(TableExpectation):
     """Expect the column max to be between an min and max value
 
            expect_column_max_to_be_between is a \
@@ -108,30 +115,7 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Maximum"""
-
-    @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.max",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
-    def _pandas_max(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-    ):
-        """Mean Metric Function"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        return series.max()
+    """ A Column Map MetricProvider Decorator for the Maximum"""
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -189,8 +173,74 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
 
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "maximum value may have any numerical value."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+            elif params["min_value"] is None:
+                template_str = f"maximum value must be {at_most_str} $max_value."
+            elif params["max_value"] is None:
+                template_str = f"maximum value must be {at_least_str} $min_value."
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
+    def _validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: dict,
@@ -198,30 +248,7 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         """Validates the given data against the set minimum and maximum value thresholds for the column max"""
-        # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
-        column_max = metric_vals.get("column.aggregate.max")
+        column_max = metrics.get("column.aggregate.max")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")

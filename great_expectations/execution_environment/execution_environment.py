@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import copy
 import logging
 from typing import Union, List, Any, Optional
@@ -20,10 +18,11 @@ import great_expectations.exceptions as ge_exceptions
 logger = logging.getLogger(__name__)
 
 
-class ExecutionEnvironment(object):
+class ExecutionEnvironment:
     """
     An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
     """
+
     recognized_batch_parameters: set = {"limit"}
 
     def __init__(
@@ -48,13 +47,9 @@ class ExecutionEnvironment(object):
         self._execution_engine = instantiate_class_from_config(
             config=execution_engine,
             runtime_environment={},
-            config_defaults={
-                "module_name": "great_expectations.execution_engine"
-            }
+            config_defaults={"module_name": "great_expectations.execution_engine"},
         )
-        self._execution_environment_config = {
-            "execution_engine": execution_engine
-        }
+        self._execution_environment_config = {"execution_engine": execution_engine}
 
         if data_connectors is None:
             data_connectors = {}
@@ -94,8 +89,7 @@ class ExecutionEnvironment(object):
         return new_batch
 
     def get_batch_list_from_batch_request(
-        self,
-        batch_request: BatchRequest
+        self, batch_request: BatchRequest
     ) -> List[Batch]:
         """
         Processes batch_request and returns the (possibly empty) list of batch objects.
@@ -214,7 +208,9 @@ class ExecutionEnvironment(object):
             None
         """
         if "data_connectors" in self._execution_environment_config:
-            for data_connector in self._execution_environment_config["data_connectors"].keys():
+            for data_connector in self._execution_environment_config[
+                "data_connectors"
+            ].keys():
                 self.get_data_connector(name=data_connector)
 
     # TODO Abe 10/6/2020: Should this be an internal method?
@@ -249,9 +245,7 @@ class ExecutionEnvironment(object):
         return data_connector
 
     def _build_data_connector_from_config(
-        self,
-        name: str,
-        config: dict,
+        self, name: str, config: dict,
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         data_connector: DataConnector = instantiate_class_from_config(
@@ -279,7 +273,9 @@ class ExecutionEnvironment(object):
         data_connectors: List[dict] = []
 
         if "data_connectors" in self._execution_environment_config:
-            for key, value in self._execution_environment_config["data_connectors"].items():
+            for key, value in self._execution_environment_config[
+                "data_connectors"
+            ].items():
                 data_connectors.append({"name": key, "class_name": value["class_name"]})
 
         return data_connectors
@@ -358,7 +354,9 @@ class ExecutionEnvironment(object):
                 pretty_print=pretty_print,
                 max_examples=max_examples
             )
-            return_object["data_connectors"][data_connector["name"]] = data_connector_return_obj
+            return_object["data_connectors"][
+                data_connector["name"]
+            ] = data_connector_return_obj
 
         return return_object
 
