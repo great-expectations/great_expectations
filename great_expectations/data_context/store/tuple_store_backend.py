@@ -86,6 +86,14 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         # NOTE: This method uses a hard-coded forward slash as a separator,
         # and then replaces that with a platform-specific separator if requested (the default)
         self._validate_key(key)
+        # Handle store_backend_id separately
+        if key == self.STORE_BACKEND_ID_KEY:
+            filepath = f"{self.filepath_prefix or ''}{'/' if self.filepath_prefix else ''}{key[0]}"
+            return (
+                filepath
+                if not self.platform_specific_separator
+                else os.path.normpath(filepath)
+            )
         if self.filepath_template:
             converted_string = self.filepath_template.format(*list(key))
         else:
@@ -101,6 +109,8 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         return converted_string
 
     def _convert_filepath_to_key(self, filepath):
+        if filepath == self.STORE_BACKEND_ID_KEY[0]:
+            return self.STORE_BACKEND_ID_KEY
         if self.platform_specific_separator:
             filepath = os.path.normpath(filepath)
 
@@ -232,6 +242,8 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 self.full_base_directory = os.path.join(root_directory, base_directory)
 
         os.makedirs(str(os.path.dirname(self.full_base_directory)), exist_ok=True)
+        # Initialize with store_backend_id
+        _ = self.store_backend_id
 
     def _get(self, key):
         contents = ""
@@ -393,7 +405,6 @@ class TupleS3StoreBackend(TupleStoreBackend):
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
             base_public_path=base_public_path,
-       
         )
         self.bucket = bucket
         if prefix:
@@ -405,7 +416,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
             prefix = prefix.strip("/")
         self.prefix = prefix
         self.endpoint_url = endpoint_url
-        
+        # Initialize with store_backend_id
+        _ = self.store_backend_id
+
     def _build_s3_object_key(self, key):
         if self.platform_specific_separator:
             if self.prefix:
@@ -537,18 +550,18 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def get_url_for_key(self, key, protocol=None):
         import boto3
 
-        location = boto3.client("s3", endpoint_url=self.endpoint_url).get_bucket_location(Bucket=self.bucket)[
-            "LocationConstraint"
-        ]
+        location = boto3.client(
+            "s3", endpoint_url=self.endpoint_url
+        ).get_bucket_location(Bucket=self.bucket)["LocationConstraint"]
         if location is None:
             location = "s3"
         else:
             location = "s3-" + location
         s3_key = self._convert_key_to_filepath(key)
 
-        location = boto3.client("s3", endpoint_url=self.endpoint_url).get_bucket_location(Bucket=self.bucket)[
-            "LocationConstraint"
-        ]
+        location = boto3.client(
+            "s3", endpoint_url=self.endpoint_url
+        ).get_bucket_location(Bucket=self.bucket)["LocationConstraint"]
         if location is None:
             location = "s3"
         else:
@@ -649,6 +662,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.prefix = prefix
         self.project = project
         self._public_urls = public_urls
+        # Initialize with store_backend_id
+        _ = self.store_backend_id
 
     def _build_gcs_object_key(self, key):
         if self.platform_specific_separator:
