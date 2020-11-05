@@ -216,7 +216,7 @@ def datasource_profile(
     directory,
     view,
     additional_batch_kwargs,
-    assume_yes
+    assume_yes,
 ):
     """
     Profile a datasource (Experimental)
@@ -262,7 +262,7 @@ def datasource_profile(
                     profile_all_data_assets=profile_all_data_assets,
                     open_docs=view,
                     additional_batch_kwargs=additional_batch_kwargs,
-                    skip_prompt_flag=assume_yes
+                    skip_prompt_flag=assume_yes,
                 )
                 send_usage_message(
                     data_context=context, event="cli.datasource.profile", success=True
@@ -276,7 +276,7 @@ def datasource_profile(
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
                 additional_batch_kwargs=additional_batch_kwargs,
-                skip_prompt_flag=assume_yes
+                skip_prompt_flag=assume_yes,
             )
             send_usage_message(
                 data_context=context, event="cli.datasource.profile", success=True
@@ -1146,9 +1146,7 @@ We could not determine the format of the file. What is it?
         # do not use Click to check if the file exists - the get_batch
         # logic will check this
         path = click.prompt(
-            msg_prompt_file_path,
-            type=click.Path(dir_okay=dir_okay),
-            default=path,
+            msg_prompt_file_path, type=click.Path(dir_okay=dir_okay), default=path,
         )
 
         if not path.startswith("gs:") and not path.startswith("s3"):
@@ -1284,19 +1282,8 @@ Enter an SQL query
     # where appropriate.
     temp_table_kwargs = dict()
     datasource = context.get_datasource(datasource_name)
-    if datasource.engine.dialect.name.lower() == "snowflake":
-        # snowflake requires special handling
-        table_name = click.prompt(
-            "In Snowflake, GE may need to create a transient table "
-            "to use for validation."
-            + os.linesep
-            + "Please enter a name to use for that table: ",
-            default="ge_tmp_" + str(uuid.uuid4())[:8],
-        )
-        temp_table_kwargs = {
-            "snowflake_transient_table": table_name,
-        }
-    elif datasource.engine.dialect.name.lower() == "bigquery":
+
+    if datasource.engine.dialect.name.lower() == "bigquery":
         # bigquery also requires special handling
         table_name = click.prompt(
             "GE will create a table to use for "
@@ -1418,9 +1405,7 @@ def _verify_pyspark_dependent_modules() -> bool:
 def skip_prompt_message(skip_flag, prompt_message_text) -> bool:
 
     if not skip_flag:
-        return click.confirm(
-            prompt_message_text, default=True
-        )
+        return click.confirm(prompt_message_text, default=True)
 
     return skip_flag
 
@@ -1434,7 +1419,7 @@ def profile_datasource(
     max_data_assets=20,
     additional_batch_kwargs=None,
     open_docs=False,
-    skip_prompt_flag=False
+    skip_prompt_flag=False,
 ):
     """"Profile a named datasource using the specified context"""
     # Note we are explicitly not using a logger in all CLI output to have
@@ -1501,7 +1486,9 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         if (
             data_assets
             or profile_all_data_assets
-            or skip_prompt_message(skip_prompt_flag, msg_confirm_ok_to_proceed.format(datasource_name))
+            or skip_prompt_message(
+                skip_prompt_flag, msg_confirm_ok_to_proceed.format(datasource_name)
+            )
         ):
             profiling_results = context.profile_datasource(
                 datasource_name,
