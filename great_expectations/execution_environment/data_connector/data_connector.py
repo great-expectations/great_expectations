@@ -224,13 +224,13 @@ DataConnector name: "{self.name}".
 
             if any([sorter not in group_names for sorter in self.sorters]):
                 raise ge_exceptions.DataConnectorError(
-                    f'''FilesDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+                    f'''DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
                     configured group_name.
                     '''
                 )
             if len(group_names) < len(self.sorters):
                 raise ge_exceptions.DataConnectorError(
-                    f'''FilesDataConnector "{self.name}" is configured with {len(group_names)} group names;
+                    f'''DataConnector "{self.name}" is configured with {len(group_names)} group names;
                         this is fewer than number of sorters specified, which is {len(self.sorters)}.
                       ''')
 

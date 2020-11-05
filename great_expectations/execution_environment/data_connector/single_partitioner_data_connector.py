@@ -8,13 +8,6 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
 )
-from great_expectations.execution_engine import ExecutionEngine
-# from great_expectations.execution_environment.data_connector.data_connector import (
-#     DataConnector,
-# )
-# from great_expectations.execution_environment.data_connector.files_data_connector import (
-#     FilesDataConnector,
-# )
 
 from great_expectations.execution_environment.data_connector.partition_query import (
     PartitionQuery,
@@ -208,57 +201,6 @@ class SinglePartitionerDataConnector(DataConnector):
     #     batch_definition: BatchDefinition
     # ) -> dict:
     #     pass
-
-
-# TODO: <Alex>Is this class still useful?  If not, we can deprecate it and replace it with SinglePartitionFileDataConnector in all the test modues.</Alex>
-# TODO: <Alex>Decision: Delete this class and rewrite the tests that rely on it in the way that exercises the relevant surviving classes.</Alex>
-class SinglePartitionerDictDataConnector(SinglePartitionerDataConnector):
-    def __init__(
-        self,
-        name: str,
-        data_reference_dict: dict = None,
-        sorters: List[dict] = None,
-        **kwargs,
-    ):
-        if data_reference_dict is None:
-            data_reference_dict = {}
-        logger.debug(f'Constructing SinglePartitionerDictDataConnector "{name}".')
-        super().__init__(
-            name=name,
-            sorters=sorters,
-            **kwargs,
-        )
-
-        # This simulates the underlying filesystem
-        self.data_reference_dict = data_reference_dict
-
-    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
-        """List objects in the underlying data store to create a list of data_references.
-
-        This method is used to refresh the cache.
-        """
-        data_reference_keys: List[str] = list(self.data_reference_dict.keys())
-        data_reference_keys.sort()
-        return data_reference_keys
-
-    # TODO: <Alex>This method relies on data_reference values being string valued (as if they are file paths).</Alex>
-    def _map_data_reference_to_batch_definition_list(
-        self,
-        data_reference: str,
-        data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
-        regex_config: dict = copy.deepcopy(self._default_regex)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-
-        return map_data_reference_string_to_batch_definition_list_using_regex(
-            execution_environment_name=self.execution_environment_name,
-            data_connector_name=self.name,
-            data_asset_name=data_asset_name,
-            data_reference=data_reference,
-            regex_pattern=pattern,
-            group_names=group_names
-        )
 
 
 class SinglePartitionerFileDataConnector(SinglePartitionerDataConnector):

@@ -3,43 +3,41 @@ import yaml
 
 from typing import List
 
-from great_expectations.execution_environment.data_connector import SinglePartitionerDictDataConnector
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     PartitionDefinition,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from tests.test_utils import (
-    create_fake_data_frame,
-    create_files_in_directory,
-)
-from tests.test_utils import create_fake_data_frame, create_files_in_directory
+from tests.test_utils import create_files_in_directory
 
+from great_expectations.execution_environment.data_connector import SinglePartitionerFileDataConnector
 import great_expectations.exceptions.exceptions as ge_exceptions
 
 def test_basic_instantiation(tmp_path_factory):
-    data_reference_dict = {
-        "path/A-100.csv": create_fake_data_frame(),
-        "path/A-101.csv": create_fake_data_frame(),
-        "directory/B-1.csv": create_fake_data_frame(),
-        "directory/B-2.csv": create_fake_data_frame(),
-    }
-
-    my_data_connector: SinglePartitionerDictDataConnector = SinglePartitionerDictDataConnector(
+    base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "path/A-100.csv",
+            "path/A-101.csv",
+            "directory/B-1.csv",
+            "directory/B-2.csv",
+        ]
+    )
+    my_data_connector: SinglePartitionerFileDataConnector = SinglePartitionerFileDataConnector(
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
-            "pattern": "(.*)/(.+)-(\\d+)\\.csv",
+            "pattern": r"(.*)/(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "letter", "number"],
         },
-        data_reference_dict=data_reference_dict,
+        glob_directive="*/*.csv",
+        base_directory=base_directory,
     )
-
     my_data_connector.refresh_data_references_cache()
     assert my_data_connector.get_data_reference_list_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
-
     # Illegal execution environment name
     with pytest.raises(ValueError):
         print(
@@ -54,10 +52,11 @@ def test_basic_instantiation(tmp_path_factory):
 
 
 # TODO: <Alex>Can we come up with an explicit way of figuring out the data_asset_name instead of using the implicit mechanism (via "group_names")?</Alex>
-def test_example_with_implicit_data_asset_names():
-    data_reference_dict = {
-        data_reference: create_fake_data_frame
-        for data_reference in [
+def test_example_with_implicit_data_asset_names(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_example_with_implicit_data_asset_names"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
             "2020/01/alpha-1001.csv",
             "2020/01/beta-1002.csv",
             "2020/02/alpha-1003.csv",
@@ -66,22 +65,20 @@ def test_example_with_implicit_data_asset_names():
             "2020/03/beta-1006.csv",
             "2020/04/beta-1007.csv",
         ]
-    }
-
-    yaml_string = """
-class_name: SinglePartitionerDictDataConnector
-base_directory: my_base_directory/
-execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
-
-default_regex:
-    pattern: (\\d{4})/(\\d{2})/(.+)-\\d+\\.csv
-    group_names:
-        - year_dir
-        - month_dir
-        - data_asset_name
+    )
+    yaml_string = f"""
+        class_name: SinglePartitionerFileDataConnector
+        base_directory: {base_directory}/
+        execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
+        default_regex:
+            pattern: (\\d{{4}})\\/(\\d{{2}})\\/(.+)-\\d+\\.csv
+            group_names:
+                - year_dir
+                - month_dir
+                - data_asset_name
+        glob_directive: "*/*/*"
     """
     config = yaml.load(yaml_string, Loader=yaml.FullLoader)
-    config["data_reference_dict"] = data_reference_dict
     my_data_connector = instantiate_class_from_config(
         config,
         config_defaults={
@@ -89,7 +86,6 @@ default_regex:
         },
         runtime_environment={"name": "my_data_connector"},
     )
-
     my_data_connector.refresh_data_references_cache()
 
     # Test for an unknown execution environment
@@ -251,22 +247,21 @@ def test_test_yaml_config(empty_data_context, tmp_path_factory):
     )
 
     return_object = empty_data_context.test_yaml_config(f"""
-module_name: great_expectations.execution_environment.data_connector
-class_name: SinglePartitionerFileDataConnector
-execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
-name: TEST_DATA_CONNECTOR
-
-base_directory: {base_directory}/
-glob_directive: "*/*/*.csv"
-
-default_regex:
-    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
-    group_names:
-        - year_dir
-        - month_dir
-        - data_asset_name
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: SinglePartitionerFileDataConnector
+        execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
+        name: TEST_DATA_CONNECTOR
+        
+        base_directory: {base_directory}/
+        glob_directive: "*/*/*.csv"
+        
+        default_regex:
+            pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+            group_names:
+                - year_dir
+                - month_dir
+                - data_asset_name
     """, return_mode="return_object")
-
     assert return_object == {
         "class_name": "SinglePartitionerFileDataConnector",
         "data_asset_count": 2,
@@ -289,10 +284,8 @@ default_regex:
     }
 
 
-def test_test_yaml_config_excluding_non_regex_matching_files(
-    empty_data_context, tmp_path_factory
-):
-    base_directory = str(tmp_path_factory.mktemp("test_something_needs_a_better_name"))
+def test_test_yaml_config_excluding_non_regex_matching_files(empty_data_context, tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config_excluding_non_regex_matching_files"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -312,23 +305,19 @@ def test_test_yaml_config_excluding_non_regex_matching_files(
 
     return_object = empty_data_context.test_yaml_config(
         f"""
-module_name: great_expectations.execution_environment.data_connector
-class_name: SinglePartitionerFileDataConnector
-execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
-name: TEST_DATA_CONNECTOR
-
-base_directory: {base_directory}/
-glob_directive: "*/*/*.csv"
-
-default_regex:
-    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
-    group_names:
-        - year_dir
-        - month_dir
-        - data_asset_name
-    """,
-        return_mode="return_object",
-    )
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: SinglePartitionerFileDataConnector
+        execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
+        name: TEST_DATA_CONNECTOR
+        base_directory: {base_directory}/
+        glob_directive: "*/*/*.csv"
+        default_regex:
+            pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+            group_names:
+                - year_dir
+                - month_dir
+                - data_asset_name
+        """, return_mode="return_object")
 
     assert return_object == {
         "class_name": "SinglePartitionerFileDataConnector",
@@ -352,29 +341,34 @@ default_regex:
     }
 
 
-def test_self_check():
-    data_reference_dict = {
-        "A-100.csv": create_fake_data_frame(),
-        "A-101.csv": create_fake_data_frame(),
-        "B-1.csv": create_fake_data_frame(),
-        "B-2.csv": create_fake_data_frame(),
-    }
+def test_self_check(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_self_check"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "A-100.csv",
+            "A-101.csv",
+            "B-1.csv",
+            "B-2.csv",
+        ],
+    )
 
-    my_data_connector = SinglePartitionerDictDataConnector(
+    my_data_connector: SinglePartitionerFileDataConnector = SinglePartitionerFileDataConnector(
         name="my_data_connector",
-        data_reference_dict=data_reference_dict,
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
-            "pattern": "(.+)-(\\d+)\\.csv",
+            "pattern": r"(.+)-(\d+)\.csv",
             # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; idea: resurrect the Partition class.</Alex>
             "group_names": ["data_asset_name", "number"]
-        }
+        },
+        glob_directive="*.csv",
+        base_directory=base_directory,
     )
 
     self_check_return_object = my_data_connector.self_check()
-
+    print(self_check_return_object)
     assert self_check_return_object == {
-        "class_name": "SinglePartitionerDictDataConnector",
+        "class_name": "SinglePartitionerFileDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
             "A",
@@ -395,29 +389,35 @@ def test_self_check():
     }
 
 
-def test_multiple_data_references_per_data_asset_excluding_non_regex_matching_files():
-    data_reference_dict = {
-        "A-100.csv": create_fake_data_frame(),
-        "A-101.csv": create_fake_data_frame(),
-        "B-1.csv": create_fake_data_frame(),
-        "B-2.csv": create_fake_data_frame(),
-        "CCC.csv": create_fake_data_frame(),
-    }
+def test_multiple_data_references_per_data_asset_excluding_non_regex_matching_files(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_self_check"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "A-100.csv",
+            "A-101.csv",
+            "B-1.csv",
+            "B-2.csv",
+            "CCC.csv",
+        ],
+    )
 
-    my_data_connector = SinglePartitionerDictDataConnector(
+    my_data_connector: SinglePartitionerFileDataConnector = SinglePartitionerFileDataConnector(
         name="my_data_connector",
-        data_reference_dict=data_reference_dict,
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
-            "pattern": "(.+)-(\\d+)\\.csv",
-            "group_names": ["data_asset_name", "number"],
+            "pattern": r"(.+)-(\d+)\.csv",
+            # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; idea: resurrect the Partition class.</Alex>
+            "group_names": ["data_asset_name", "number"]
         },
+        glob_directive="*.csv",
+        base_directory=base_directory,
     )
 
     self_check_return_object = my_data_connector.self_check()
 
     assert self_check_return_object == {
-        "class_name": "SinglePartitionerDictDataConnector",
+        "class_name": "SinglePartitionerFileDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
             "A",
@@ -439,7 +439,7 @@ def test_multiple_data_references_per_data_asset_excluding_non_regex_matching_fi
 
 
 def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("test_dir_charlie"))
+    base_directory = str(tmp_path_factory.mktemp("test_nested_directory_data_asset_name_in_folder"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -922,4 +922,3 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(empt
                 "module_name": "great_expectations.execution_environment.data_connector"
             },
         )
-

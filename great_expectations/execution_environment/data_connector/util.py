@@ -43,11 +43,8 @@ def batch_definition_matches_batch_request(
             return False
 
     if batch_request.partition_request:
-        # assert isinstance(batch_request.partition_request, dict)
-        # handled by _validate_batch_request() in class BatchRequest(DictDot):
         partition_identifiers: Any = batch_request.partition_request.get("partition_identifiers")
         if partition_identifiers:
-            # <WILL> this may not be the way to handle this situation
             if not isinstance(partition_identifiers, dict):
                 return False
             for key in partition_identifiers.keys():
