@@ -1146,14 +1146,9 @@ class BaseDataContext:
             )
 
         execution_environment: ExecutionEnvironment = self.get_execution_environment(
-            execution_environment_name=execution_environment_name,
-            runtime_environment=runtime_environment,
+            execution_environment_name=execution_environment_name
         )
         batch_request: BatchRequest = BatchRequest(**batch_request)
-        # TODO: <Alex>Remove old code</Alex>
-        # return execution_environment.get_batch(
-        #     batch_request=batch_request
-        # )
         return execution_environment.get_batch_list_from_batch_request(
             batch_request=batch_request
         )
@@ -1496,7 +1491,6 @@ class BaseDataContext:
     def get_execution_environment(
         self,
         execution_environment_name: str = "default",
-        runtime_environment: Union[dict, None] = None,
     ) -> ExecutionEnvironment:
         """Get the named execution_environment
 

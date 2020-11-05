@@ -29,8 +29,12 @@ def test_basic_instantiation(tmp_path_factory):
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
-            "pattern": r"(.*)/(.+)-(\d+)\.csv",
-            "group_names": ["data_asset_name", "letter", "number"],
+            "pattern": "(.*)/(.+)-(\\d+)\\.csv",
+            "group_names": [
+                "data_asset_name",
+                "letter",
+                "number"
+            ],
         },
         glob_directive="*/*.csv",
         base_directory=base_directory,
@@ -251,10 +255,10 @@ def test_test_yaml_config(empty_data_context, tmp_path_factory):
         class_name: SinglePartitionerFileDataConnector
         execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
         name: TEST_DATA_CONNECTOR
-        
+
         base_directory: {base_directory}/
         glob_directive: "*/*/*.csv"
-        
+
         default_regex:
             pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
             group_names:
@@ -406,12 +410,12 @@ def test_multiple_data_references_per_data_asset_excluding_non_regex_matching_fi
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
-            "pattern": r"(.+)-(\d+)\.csv",
-            # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; idea: resurrect the Partition class.</Alex>
-            "group_names": ["data_asset_name", "number"]
-        },
-        glob_directive="*.csv",
-        base_directory=base_directory,
+            "pattern": "(.+)-(\\d+)\\.csv",
+            "group_names": [
+                "data_asset_name",
+                "number"
+            ]
+        }
     )
 
     self_check_return_object = my_data_connector.self_check()

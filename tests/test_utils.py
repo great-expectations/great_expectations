@@ -1649,7 +1649,8 @@ def execution_environment_files_data_connector_regex_partitioner_config(
     test_asset_0 = {
         "module_name": "great_expectations.execution_environment.data_connector.asset",
         # "partitioner_name": "test_regex_partitioner",
-        "glob_directive": "alex*",
+        # "glob_directive": "alex*",
+        "glob_directive": "Titanic*",
     }
     if data_asset_base_directory is not None:
         test_asset_0["base_directory"] = data_asset_base_directory
@@ -1715,7 +1716,8 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                     },
                     # "default_partitioner_name": "test_regex_partitioner",
                     "assets": {
-                        "test_asset_0": test_asset_0,
+                        # "test_asset_0": test_asset_0,
+                        "Titanic": test_asset_0,
                     }
                 }
             }

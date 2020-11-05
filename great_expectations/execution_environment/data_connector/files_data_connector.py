@@ -27,6 +27,7 @@ from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
+    get_filesystem_one_level_directory_glob_path_list,
     build_sorters_from_config,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -56,7 +57,6 @@ class FilesDataConnector(DataConnector):
         base_directory: str,
         default_regex: dict,
         assets: dict,
-
         glob_directive: str = "*",
         sorters: list = None,
         execution_engine: ExecutionEngine = None,
@@ -68,8 +68,6 @@ class FilesDataConnector(DataConnector):
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
         )
-        self._glob_directive = glob_directive
-
         self._data_context_root_directory = data_context_root_directory
 
         self._base_directory = self._normalize_directory_path(dir_path=base_directory)
@@ -154,6 +152,7 @@ configured runtime keys.
                     """
                 )
 
+    # TODO: <Alex>This method should be used in other file path type DataConnector classes (currently it is not).</Alex>
     def _normalize_directory_path(self, dir_path: str) -> str:
         # If directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
@@ -193,8 +192,10 @@ configured runtime keys.
             if asset.base_directory:
                 data_asset_path = str(Path(self.base_directory).joinpath(asset.base_directory))
 
-        globbed_paths = Path(data_asset_path).glob(self._glob_directive)
-        path_list: List[str] = [os.path.relpath(str(posix_path), data_asset_path) for posix_path in globbed_paths]
+        path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
+            base_directory_path=data_asset_path,
+            glob_directive=self._glob_directive
+        )
 
         return path_list
 
@@ -291,13 +292,41 @@ configured runtime keys.
             )
 
         if len(self.sorters) > 0:
-            sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
+            sorted_batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list
+            )
             return sorted_batch_definition_list
         else:
             return batch_definition_list
 
+    # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
+    def _validate_sorters_configuration(self, batch_request):
+        # Override the default
+        if len(self.sorters) > 0:
+            regex_config = self._default_regex
+            if (
+                batch_request.data_asset_name is not None
+                and self.assets and batch_request.data_asset_name in self.assets
+            ):
+                asset: Asset = self.assets[batch_request.data_asset_name]
+                if asset.group_names:
+                    regex_config["group_names"] = asset.group_names
+            group_names: List[str] = regex_config["group_names"]
+            if any([sorter not in group_names for sorter in self.sorters]):
+                raise ge_exceptions.DataConnectorError(
+                    f'''FilesDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+configured group_name.
+                      '''
+                )
+            if len(group_names) < len(self.sorters):
+                raise ge_exceptions.DataConnectorError(
+                    f'''FilesDataConnector "{self.name}" is configured with {len(group_names)} group names;
+this is fewer than number of sorters specified, which is {len(self.sorters)}.
+                    '''
+                )
+
     def _sort_batch_definition_list(self, batch_definition_list):
-        sorters_list = []
+        sorters_list: List[Sorter] = []
         for sorter in self.sorters.values():
             sorters_list.append(sorter)
         sorters: Iterator[Sorter] = reversed(sorters_list)
@@ -357,8 +386,8 @@ configured runtime keys.
         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
         if not path:
             raise ValueError(
-                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given partition
-definition {batch_definition.partition_definition} from batch definition {batch_definition}.
+                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
+partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )
         path = str(Path(self.base_directory).joinpath(path))
