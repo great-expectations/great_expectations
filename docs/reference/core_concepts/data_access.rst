@@ -10,11 +10,11 @@ A **Data Connector** facilitates access to an external data store, such as a dat
 
   Data Connectors replace Batch Kwargs Generators in the updated Great Expectations API.
 
-There are three primary types of Data Connectors in Great Expectations: the ``FilesDataConnector``, ``DatabaseDataConnector``, and ``PipelineDataConnector``.
+There are three primary types of Data Connectors in Great Expectations: the ``ConfiguredAssetFilesystemDataConnector``, ``DatabaseDataConnector``, and ``PipelineDataConnector``.
 
 Each Data Connector holds configuration for connecting to a different type of external data source, and can connect to and inspect that data source.
 
-- For example, a ``FilesDataConnector`` could be configured with the root directory for files on a filesystem or bucket and prefix used to access files from a cloud storage environment.
+- For example, a ``ConfiguredAssetFilesystemDataConnector`` could be configured with the root directory for files on a filesystem or bucket and prefix used to access files from a cloud storage environment.
 
 The simplest ``PipelineDataConnector`` may simply store lookup information about Data Assets. However, Great Expectations makes it possible to configure Data Connectors that offer stronger guarantees about reproducibility, sampling, and compatibility with other tools.
 
@@ -55,7 +55,7 @@ Consider the following example:
       }
     }
 
-Working with a configured spark Execution Engine, the ``FilesDataConnector`` might translate that to the following Batch Spec:
+Working with a configured spark Execution Engine, the ``ConfiguredAssetFilesystemDataConnector`` might translate that to the following Batch Spec:
 
 .. code-block:: json
 

@@ -100,7 +100,7 @@ execution_engine:
 
 data_connectors:
     my_filesystem_data_connector:
-        # class_name: FilesDataConnector
+        # class_name: ConfiguredAssetFilesystemDataConnector
         class_name: SinglePartitionerFileDataConnector
         base_directory: {temp_dir}
         glob_directive: '*.csv'

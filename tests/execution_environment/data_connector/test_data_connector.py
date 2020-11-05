@@ -2,7 +2,7 @@
 import pytest
 import yaml
 
-from great_expectations.execution_environment.data_connector import FilesDataConnector
+from great_expectations.execution_environment.data_connector import ConfiguredAssetFilesystemDataConnector
 from tests.test_utils import (
     create_files_in_directory,
 )
@@ -13,9 +13,6 @@ from great_expectations.core.batch import (
     PartitionRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_environment.data_connector import (
-    FilesDataConnector,
-)
 from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
 from great_expectations.data_context.util import instantiate_class_from_config
 
@@ -28,7 +25,7 @@ def basic_data_connector(tmp_path_factory):
 
     basic_data_connector = instantiate_class_from_config(yaml.load(
         f"""
-class_name: FilesDataConnector
+class_name: ConfiguredAssetFilesystemDataConnector
 base_directory: {base_directory}
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
 
@@ -51,14 +48,14 @@ assets:
     return basic_data_connector
 
 
-# TODO: <Alex>This test should be moved to "tests/execution_environment/data_connector/test_files_data_connector.py".</Alex>
+# TODO: <Alex>This test should be moved to "tests/execution_environment/data_connector/test_configured_asset_filesystem_data_connector.py".</Alex>
 def test_basic_instantiation(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
     )
 
     # noinspection PyUnusedLocal
-    my_data_connector = FilesDataConnector(
+    my_data_connector = ConfiguredAssetFilesystemDataConnector(
         name="my_data_connector",
         base_directory=base_directory,
         glob_directive="*.csv",
@@ -73,7 +70,7 @@ def test_basic_instantiation(tmp_path_factory):
     )
 
 
-# TODO: <Alex>This test should be potentially moved to "tests/execution_environment/data_connector/test_files_data_connector.py".</Alex>
+# TODO: <Alex>This test should be potentially moved to "tests/execution_environment/data_connector/test_configured_asset_filesystem_data_connector.py".</Alex>
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
     # noinspection PyProtectedMember
     data_references: list = basic_data_connector._get_data_reference_list_from_cache_by_data_asset_name(
@@ -83,7 +80,7 @@ def test__get_instantiation_through_instantiate_class_from_config(basic_data_con
     assert data_references == []
 
 
-# TODO: <Alex>This test should be renamed properly and moved to "tests/execution_environment/data_connector/test_files_data_connector.py".</Alex>
+# TODO: <Alex>This test should be renamed properly and moved to "tests/execution_environment/data_connector/test_configured_filesystem_asset_data_connector.py".</Alex>
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
@@ -98,7 +95,7 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         ],
     )
 
-    my_data_connector = FilesDataConnector(
+    my_data_connector = ConfiguredAssetFilesystemDataConnector(
         name="my_data_connector",
         base_directory=base_directory,
         glob_directive="*/*/*.csv",

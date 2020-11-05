@@ -1603,7 +1603,7 @@ def safe_remove(path):
 
 
 # TODO: <Alex>Replace this all-purpose configuration with purpose-fit configuration sections using YAML.</Alex>
-def execution_environment_files_data_connector_regex_partitioner_config(
+def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
     use_group_names: bool = False,
     use_sorters: bool = False,
     default_base_directory="data",
@@ -1693,7 +1693,7 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 },
                 "test_filesystem_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
-                    "class_name": "FilesDataConnector",
+                    "class_name": "ConfiguredAssetFilesystemDataConnector",
                     "base_directory": default_base_directory,
                     "glob_directive": "*",
                     # "partitioners": {

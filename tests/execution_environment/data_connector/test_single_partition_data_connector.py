@@ -171,7 +171,7 @@ default_regex:
     ]
 
 
-# TODO: Abe 20201028 : This test should actually be implemented with a FilesDataConnector, not a SinglePartitionDataConnector
+# TODO: Abe 20201028 : This test should actually be implemented with a ConfiguredAssetFilesystemDataConnector, not a SinglePartitionDataConnector
 # def test_example_with_explicit_data_asset_names(tmp_path_factory):
 #     data_reference_dict = dict([
 #         (data_reference, create_fake_data_frame)

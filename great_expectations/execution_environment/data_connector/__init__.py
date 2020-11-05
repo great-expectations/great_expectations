@@ -1,5 +1,5 @@
 from .data_connector import DataConnector
-from .files_data_connector import FilesDataConnector
+from .configured_asset_filesystem_data_connector import ConfiguredAssetFilesystemDataConnector
 from .pipeline_data_connector import PipelineDataConnector
 from .single_partitioner_data_connector import (
     SinglePartitionerDataConnector,

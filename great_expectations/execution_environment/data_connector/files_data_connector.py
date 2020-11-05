@@ -49,7 +49,7 @@ KNOWN_EXTENSIONS = [
 ]
 
 
-class FilesDataConnector(DataConnector):
+class ConfiguredAssetFilesystemDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
@@ -62,7 +62,7 @@ class FilesDataConnector(DataConnector):
         execution_engine: ExecutionEngine = None,
         data_context_root_directory: str = None,
     ):
-        logger.debug(f'Constructing FilesDataConnector "{name}".')
+        logger.debug(f'Constructing ConfiguredAssetFilesystemDataConnector "{name}".')
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
@@ -314,13 +314,13 @@ configured runtime keys.
             group_names: List[str] = regex_config["group_names"]
             if any([sorter not in group_names for sorter in self.sorters]):
                 raise ge_exceptions.DataConnectorError(
-                    f'''FilesDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+                    f'''ConfiguredAssetFilesystemDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 configured group_name.
                       '''
                 )
             if len(group_names) < len(self.sorters):
                 raise ge_exceptions.DataConnectorError(
-                    f'''FilesDataConnector "{self.name}" is configured with {len(group_names)} group names; 
+                    f'''ConfiguredAssetFilesystemDataConnector "{self.name}" is configured with {len(group_names)} group names; 
 this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     '''
                 )
