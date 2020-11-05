@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -73,6 +74,23 @@ class DatabaseStoreBackend(StoreBackend):
                     f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {str(e)}"
                 )
         self._table = table
+        # Initialize with store_backend_id
+        self._store_backend_id = None
+        self._store_backend_id = self.store_backend_id
+
+    @property
+    def store_backend_id(self) -> str:
+        """
+        Create a store_backend_id if one does not exist, and return it if it exists
+        Ephemeral store_backend_id for database_store_backend until there is a place to store metadata
+        Returns:
+            store_backend_id which is a UUID(version=4)
+        """
+        if not self._store_backend_id:
+            self._store_backend_id = (
+                f"{self.STORE_BACKEND_ID_PREFIX}{str(uuid.uuid4())}"
+            )
+        return self._store_backend_id.replace(self.STORE_BACKEND_ID_PREFIX, "")
 
     def _get(self, key):
         sel = (
