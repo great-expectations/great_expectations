@@ -60,7 +60,9 @@ class SinglePartitionDataConnector(DataConnector):
         if default_regex is None:
             default_regex = {}
         self._default_regex = default_regex
+
         self._sorters = build_sorters_from_config(config_list=sorters)
+        self._validate_sorters_configuration()
 
     @property
     def sorters(self) -> Optional[dict]:
@@ -139,7 +141,6 @@ class SinglePartitionDataConnector(DataConnector):
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
-        self._validate_sorters_configuration()
 
         if self._data_references_cache is None:
             self.refresh_data_references_cache()
@@ -171,23 +172,6 @@ class SinglePartitionDataConnector(DataConnector):
             return sorted_batch_definition_list
         else:
             return batch_definition_list
-
-    def _validate_sorters_configuration(self):
-        if len(self.sorters) > 0:
-            regex_config = self._default_regex
-            group_names: List[str] = regex_config["group_names"]
-            if any([sorter not in group_names for sorter in self.sorters]):
-                raise ge_exceptions.DataConnectorError(
-                    f'''FilesDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-                  configured group_name.
-                      '''
-                )
-            if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
-                    f'''FilesDataConnector "{self.name}" is configured with {len(group_names)} group names;
-                        this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                      '''
-                )
 
     def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list = []
@@ -349,3 +333,4 @@ definition {batch_definition.partition_definition} from batch definition {batch_
     ) -> PathBatchSpec:
         batch_spec = super()._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
         return PathBatchSpec(batch_spec)
+

@@ -232,7 +232,7 @@ default_regex:
 #     ))) == 5
 
 
-def test_test_yaml_config_(empty_data_context, tmp_path_factory):
+def test_test_yaml_config(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
         directory=base_directory,
@@ -387,7 +387,7 @@ def test_self_check():
     }
 
 
-def test_that_needs_a_better_name():
+def test_multiple_data_references_per_data_asset_excluding_non_regex_matching_files():
     data_reference_dict = {
         "A-100.csv": create_fake_data_frame(),
         "A-101.csv": create_fake_data_frame(),
@@ -847,25 +847,19 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
 
           """, Loader=yaml.FullLoader)
 
-    my_data_connector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "single_partitioner_data_connector",
-            "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
-            "execution_engine": "BASE_ENGINE",
-        },
-        config_defaults={
-            "module_name": "great_expectations.execution_environment.data_connector"
-        },
-    )
-
     with pytest.raises(ge_exceptions.DataConnectorError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
-            data_asset_name="some_bucket",
-        ))
+        my_data_connector = instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "single_partitioner_data_connector",
+                "execution_environment_name": "test_environment",
+                "data_context_root_directory": base_directory,
+                "execution_engine": "BASE_ENGINE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector"
+            },
+        )
 
 
 def test_redundant_information_in_naming_convention_bucket_too_many_sorters(empty_data_context, tmp_path_factory):
@@ -907,23 +901,17 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(empt
               class_name: NumericSorter
               name: price
           """, Loader=yaml.FullLoader)
-
-    my_data_connector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "single_partitioner_data_connector",
-            "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
-            "execution_engine": "BASE_ENGINE",
-        },
-        config_defaults={
-            "module_name": "great_expectations.execution_environment.data_connector"
-        },
-    )
-
     with pytest.raises(ge_exceptions.DataConnectorError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
-            data_asset_name="some_bucket",
-        ))
+        my_data_connector = instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "single_partitioner_data_connector",
+                "execution_environment_name": "test_environment",
+                "data_context_root_directory": base_directory,
+                "execution_engine": "BASE_ENGINE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector"
+            },
+        )
+

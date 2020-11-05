@@ -23,7 +23,6 @@ DEFAULT_DELIMITER: str = "-"
 
 # TODO: <Alex>We need a mechanism for specifying the data_asset_name for PipelineDataConnector (otherwise, it will always be the default).</Alex>
 class PipelineDataConnector(DataConnector):
-
     def __init__(
         self,
         name: str,

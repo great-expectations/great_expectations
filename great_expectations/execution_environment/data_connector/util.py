@@ -43,10 +43,13 @@ def batch_definition_matches_batch_request(
             return False
 
     if batch_request.partition_request:
-        assert isinstance(batch_request.partition_request, dict)
+        # assert isinstance(batch_request.partition_request, dict)
+        # handled by _validate_batch_request() in class BatchRequest(DictDot):
         partition_identifiers: Any = batch_request.partition_request.get("partition_identifiers")
         if partition_identifiers:
-            assert isinstance(partition_identifiers, dict)
+            # <WILL> this may not be the way to handle this situation
+            if not isinstance(partition_identifiers, dict):
+                return False
             for key in partition_identifiers.keys():
                 if not (
                     key in batch_definition.partition_definition and batch_definition.partition_definition[key] ==
@@ -118,6 +121,10 @@ def map_batch_definition_to_data_reference_string_using_regex(
     regex_pattern: str,
     group_names: List[str],
 ) -> str:
+
+    if not isinstance(batch_definition, BatchDefinition):
+        raise TypeError("batch_definition is not of an instance of type BatchDefinition")
+
     data_asset_name: str = batch_definition.data_asset_name
     partition_definition: PartitionDefinition = batch_definition.partition_definition
     partition_request: dict = partition_definition

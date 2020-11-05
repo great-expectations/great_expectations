@@ -743,26 +743,19 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
               name: for_me_Me_Me
 
     """, Loader=yaml.FullLoader)
-
-    my_data_connector: DataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "general_filesystem_data_connector",
-            "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
-            "execution_engine": "BASE_ENGINE",
-        },
-        config_defaults={
-            "module_name": "great_expectations.execution_environment.data_connector"
-        },
-    )
-
     with pytest.raises(ge_exceptions.DataConnectorError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-        ))
+        my_data_connector: DataConnector = instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_filesystem_data_connector",
+                "execution_environment_name": "test_environment",
+                "data_context_root_directory": base_directory,
+                "execution_engine": "BASE_ENGINE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector"
+            },
+        )
 
 
 def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
@@ -812,23 +805,16 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
 
     """, Loader=yaml.FullLoader)
 
-    my_data_connector: DataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "general_filesystem_data_connector",
-            "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
-            "execution_engine": "BASE_ENGINE",
-        },
-        config_defaults={
-            "module_name": "great_expectations.execution_environment.data_connector"
-        },
-    )
-
     with pytest.raises(ge_exceptions.DataConnectorError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-        ))
-
+        my_data_connector: DataConnector = instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_filesystem_data_connector",
+                "execution_environment_name": "test_environment",
+                "data_context_root_directory": base_directory,
+                "execution_engine": "BASE_ENGINE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector"
+            },
+        )
