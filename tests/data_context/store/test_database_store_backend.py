@@ -82,10 +82,10 @@ def test_database_store_backend_id_initialization(caplog, sa, test_backends):
 
     NOTE: This test only has one key column which may not mirror actual functionality
 
-    A StoreBackend should have a store_id property. That store_id should be read and initialized
-    from an existing persistent store_id during instantiation, or a new store_id should be generated
-    and persisted. The store_id should be a valid UUIDv4
-    If a new store_id cannot be persisted, use an ephemeral store_id.
+    A StoreBackend should have a store_backend_id property. That store_backend_id should be read and initialized
+    from an existing persistent store_backend_id during instantiation, or a new store_backend_id should be generated
+    and persisted. The store_backend_id should be a valid UUIDv4
+    If a new store_backend_id cannot be persisted, use an ephemeral store_backend_id.
     Persistence should be in a .ge_store_id file for for filesystem and blob-stores.
 
     Note: StoreBackend & TupleStoreBackend are abstract classes, so we will test the
@@ -109,12 +109,12 @@ def test_database_store_backend_id_initialization(caplog, sa, test_backends):
         key_columns=["k1"],
     )
 
-    # Check that store_id exists can be read
-    assert store_backend.store_id is not None
-    # Check that store_id is a valid UUID
-    assert test_utils.validate_uuid4(store_backend.store_id)
+    # Check that store_backend_id exists can be read
+    assert store_backend.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(store_backend.store_backend_id)
     # Check value is in the correct format
-    store_id_from_db = store_backend.get(key=(".ge_store_id",))
-    store_id_file_parser = "store_id = " + pp.Word(pp.hexnums + "-")
+    store_id_from_db = store_backend.get(key=(".ge_store_backend_id",))
+    store_id_file_parser = "store_backend_id = " + pp.Word(pp.hexnums + "-")
     parsed_store_id = store_id_file_parser.parseString(store_id_from_db)
     assert test_utils.validate_uuid4(parsed_store_id[1])
