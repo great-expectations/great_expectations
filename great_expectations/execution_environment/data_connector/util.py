@@ -104,12 +104,10 @@ def convert_data_reference_string_to_batch_request_using_regex(
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
     if "data_asset_name" in partition_definition:
         data_asset_name = partition_definition.pop("data_asset_name")
-
     batch_request: BatchRequest = BatchRequest(
         data_asset_name=data_asset_name,
         partition_request=partition_definition,
     )
-
     return batch_request
 
 

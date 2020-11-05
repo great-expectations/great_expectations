@@ -526,7 +526,6 @@ def test_alpha(tmp_path_factory):
             "module_name": "great_expectations.execution_environment.data_connector"
         },
     )
-
     self_check_report = my_data_connector.self_check()
     print(json.dumps(self_check_report, indent=2))
 
@@ -563,7 +562,6 @@ def test_alpha(tmp_path_factory):
             }
         )
     )
-
     my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=my_batch_request
     )
@@ -578,15 +576,12 @@ def test_foxtrot(tmp_path_factory):
             'test_dir_foxtrot/A/A-1.csv',
             'test_dir_foxtrot/A/A-2.csv',
             'test_dir_foxtrot/A/A-3.csv',
-
             'test_dir_foxtrot/B/B-1.txt',
             'test_dir_foxtrot/B/B-2.txt',
             'test_dir_foxtrot/B/B-3.txt',
-
             'test_dir_foxtrot/C/C-2017.csv',
             'test_dir_foxtrot/C/C-2018.csv',
             'test_dir_foxtrot/C/C-2019.csv',
-
             'test_dir_foxtrot/D/D-aaa.csv',
             'test_dir_foxtrot/D/D-bbb.csv',
             'test_dir_foxtrot/D/D-ccc.csv',
@@ -633,11 +628,7 @@ def test_foxtrot(tmp_path_factory):
             "module_name": "great_expectations.execution_environment.data_connector"
         },
     )
-
     self_check_report = my_data_connector.self_check()
-    # TODO: This report is wrong; replace with something correct.
-    print(json.dumps(self_check_report, indent=2))
-
     assert self_check_report == {
         "class_name": "FilesDataConnector",
         "data_asset_count": 4,
@@ -675,17 +666,14 @@ def test_foxtrot(tmp_path_factory):
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": []
     }
-
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
-
     my_batch_request = BatchRequest(
         execution_environment_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="A",
         partition_request=None
     )
-
     my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=my_batch_request
     )
@@ -709,7 +697,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             "alex_20200819_1300.csv",
         ]
     )
-
     my_data_connector_yaml = yaml.load(f"""
         class_name: FilesDataConnector
         execution_environment_name: test_environment
@@ -741,7 +728,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             - orderby: desc
               class_name: NumericSorter
               name: for_me_Me_Me
-
     """, Loader=yaml.FullLoader)
     with pytest.raises(ge_exceptions.DataConnectorError):
         my_data_connector: DataConnector = instantiate_class_from_config(
@@ -775,7 +761,6 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
             "alex_20200819_1300.csv",
         ]
     )
-
     my_data_connector_yaml = yaml.load(f"""
         class_name: FilesDataConnector
         execution_environment_name: test_environment
@@ -804,7 +789,6 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
               name: price
 
     """, Loader=yaml.FullLoader)
-
     with pytest.raises(ge_exceptions.DataConnectorError):
         my_data_connector: DataConnector = instantiate_class_from_config(
             config=my_data_connector_yaml,

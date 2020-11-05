@@ -55,7 +55,6 @@ class SinglePartitionerDataConnector(DataConnector):
             execution_environment_name=execution_environment_name,
             execution_engine=None,
         )
-
         self.base_directory = base_directory
         self.glob_directive = glob_directive
         if default_regex is None:

@@ -204,7 +204,6 @@ def test_convert_data_reference_string_to_batch_request_using_regex():
 
 
 def test_map_batch_definition_to_data_reference_string_using_regex():
-
     # not BatchDefinition
     my_batch_definition = "I_am_a_string"
     group_names = ['name', 'timestamp', 'price']
@@ -215,6 +214,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
             regex_pattern=regex_pattern,
             group_names=group_names,
         )
+
     # group names do not match
     my_batch_definition = BatchDefinition(execution_environment_name="test_environment",
                                           data_connector_name="general_filesystem_data_connector",
@@ -230,8 +230,6 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
             regex_pattern=regex_pattern,
             group_names=group_names,
         )
-
-    # TODO: handle case of : REGEX does not work
 
     # success
     my_batch_definition = BatchDefinition(execution_environment_name="test_environment",
