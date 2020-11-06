@@ -3,7 +3,7 @@ import datetime
 import logging
 from functools import partial
 from io import StringIO
-from typing import Any, Callable, Dict, Iterable, Tuple
+from typing import Any, Callable, Dict, Iterable, Tuple, List
 
 import pandas as pd
 
@@ -525,12 +525,6 @@ operate.
 
 
     ### Sampling methods ###
-
-    # _sample_using_limit
-    # _sample_using_random
-    # _sample_using_mod
-    # _sample_using_a_list
-    # _sample_using_md5
 
     def _sample_using_random(
         self,
