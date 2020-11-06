@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from great_expectations.core.batch import Batch
+from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.metrics import ColumnMean, ColumnStandardDeviation, ColumnValuesZScore
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -37,7 +38,6 @@ def test_get_compute_domain_with_column_domain():
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column": "a"})
-    # Todo: why is this not querying the column?
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs is not None, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
@@ -51,7 +51,6 @@ def test_get_compute_domain_with_row_condition():
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
-    # Todo: why is condition parser necessary?
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 2",
                                                                                      "condition_parser": "pandas"})
     # Ensuring data has been properly queried
@@ -71,7 +70,6 @@ def test_get_compute_domain_with_unmeetable_row_condition():
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
-    # Todo: why is condition parser necessary?
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 24",
                                                                                      "condition_parser": "pandas"})
     # Ensuring data has been properly queried
@@ -82,42 +80,62 @@ def test_get_compute_domain_with_unmeetable_row_condition():
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
+# Just checking that the Pandas Execution Engine can perform these in sequence
 def test_resolve_metric_bundle():
-    engine = PandasExecutionEngine()
-    df = pd.DataFrame({"a": [1, 2, 3,None], "b": [2, 3, 4, None]})
+    df = pd.DataFrame({"a": [1, 2, 3, None]})
+    batch = Batch(data=df)
 
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
+    # Building engine and configurations in attempt to resolve metrics
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    mean = MetricConfiguration(
+        metric_name="column.aggregate.mean",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    stdev = MetricConfiguration(
+        metric_name="column.aggregate.standard_deviation",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metrics = (mean, stdev)
+    metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
-    # Building configs
-    mean_config = MetricConfiguration("column.aggregate.mean", {"column": "a"}, None)
-    std_dev_cofig = MetricConfiguration("column.aggregate.standard_deviation", {"column": "a"}, None)
-
-    # Asking for metrics
-    resolved = engine.resolve_metric_bundle([(mean_config, ColumnMean._pandas, {"column": "a"}),
-                                             (std_dev_cofig,ColumnStandardDeviation._pandas, {"column": "a"}),])
-    print(resolved)
-    assert True
+    # Ensuring metrics have been properly resolved
+    assert metrics[('column.aggregate.mean', 'column=a', ())] == 2.0, "mean metric not properly computed"
+    assert metrics[('column.aggregate.standard_deviation', 'column=a', ())] == 1.0, "standard deviation " \
+                                                                                    "metric not properly computed"
 
 
+# Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
 def test_resolve_metric_bundle_with_nonexistent_metric():
-    engine = PandasExecutionEngine()
-    df = pd.DataFrame({"a": [1, 2, 3, None], "b": [2, 3, 4, None]})
+    df = pd.DataFrame({"a": [1, 2, 3, None]})
+    batch = Batch(data=df)
 
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
+    # Building engine and configurations in attempt to resolve metrics
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    mean = MetricConfiguration(
+        metric_name="column.aggregate.i_don't_exist",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    stdev = MetricConfiguration(
+        metric_name="column.aggregate.nonexistent",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metrics = (mean, stdev)
 
-    # Building configs
-    mean_config = MetricConfiguration("column.aggregate.nonexistent", {"column": "a"}, None)
-    std_dev_cofig = MetricConfiguration("column.aggregate.standard_deviation", {"column": "a"}, None)
+    error = None
+    try:
+        metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
+    except MetricProviderError as e:
+        error = e
 
-    # Asking for metrics
-    resolved = engine.resolve_metric_bundle([(mean_config, ColumnMean._pandas, {"column": "a"}),
-                                             (std_dev_cofig, ColumnStandardDeviation._pandas, {"column": "a"}), ])
-    print(resolved)
-    assert True
+    # Ensuring that a proper error has been given
+    assert isinstance(error, MetricProviderError)
 
 
+# Making sure dataframe property is functional
 def test_dataframe_property_given_loaded_batch():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4]})
