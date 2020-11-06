@@ -81,7 +81,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     """
 
-    map_metric = "column_values.length_equals"
+    map_metric = "column_values.value_length.equals"
     success_keys = ("value", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
