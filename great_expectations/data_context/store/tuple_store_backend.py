@@ -445,7 +445,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         try:
             s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
-        except s3.exceptions.NoSuchKey:
+        except (s3.exceptions.NoSuchKey, s3.exceptions.NoSuchBucket):
             raise InvalidKeyError(
                 f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {str(s3_object_key)}"
             )

@@ -4,6 +4,7 @@ import shutil
 
 from click.testing import CliRunner
 from freezegun import freeze_time
+from moto import mock_s3
 
 import great_expectations
 from great_expectations import DataContext
@@ -316,6 +317,7 @@ great_expectations/
 
 
 @freeze_time("09/26/2019 13:42:41")
+@mock_s3
 def test_project_upgrade_with_exception(v10_project_directory, caplog):
     # test project upgrade that requires manual steps
 

@@ -90,7 +90,7 @@ data_docs_sites:
     class_name: SiteBuilder
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket:
+      bucket: foo
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
       show_cta_footer: true

@@ -2,7 +2,7 @@ import logging
 import uuid
 from abc import ABCMeta, abstractmethod
 
-from great_expectations.exceptions import StoreBackendError, StoreError
+from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 
 logger = logging.getLogger(__name__)
 
@@ -36,14 +36,23 @@ class StoreBackend(metaclass=ABCMeta):
         Returns:
             store_backend_id which is a UUID(version=4)
         """
-        if not self.has_key(key=self.STORE_BACKEND_ID_KEY):
-            self.set(
-                key=self.STORE_BACKEND_ID_KEY,
-                value=f"{self.STORE_BACKEND_ID_PREFIX}{str(uuid.uuid4())}",
+        try:
+            try:
+                return self.get(key=self.STORE_BACKEND_ID_KEY).replace(
+                    self.STORE_BACKEND_ID_PREFIX, ""
+                )
+            except InvalidKeyError:
+                store_id = str(uuid.uuid4())
+                self.set(
+                    key=self.STORE_BACKEND_ID_KEY,
+                    value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}",
+                )
+                return store_id
+        except Exception:
+            logger.warning(
+                "Invalid store configuration: store_backend_id cannot be retrieved or set."
             )
-        return self.get(key=self.STORE_BACKEND_ID_KEY).replace(
-            self.STORE_BACKEND_ID_PREFIX, ""
-        )
+            return "00000000-0000-0000-0000-00000000e003"
 
     def get(self, key, **kwargs):
         self._validate_key(key)
@@ -138,7 +147,10 @@ class InMemoryStoreBackend(StoreBackend):
         _ = self.store_backend_id
 
     def _get(self, key):
-        return self._store[key]
+        try:
+            return self._store[key]
+        except KeyError as e:
+            raise InvalidKeyError(f"{str(e)}")
 
     def _set(self, key, value, **kwargs):
         self._store[key] = value
