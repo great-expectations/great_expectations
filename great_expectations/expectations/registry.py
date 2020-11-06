@@ -167,7 +167,7 @@ def get_metric_provider(
     metric_name: str, execution_engine: "ExecutionEngine"
 ) -> Callable:
     try:
-        metric_definition = _registered_metrics.get(metric_name, dict())
+        metric_definition = _registered_metrics[metric_name]
         return metric_definition["providers"][type(execution_engine).__name__]
     except KeyError:
         raise MetricProviderError(

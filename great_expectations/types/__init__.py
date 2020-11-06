@@ -1,20 +1,4 @@
-# from .base import (
-#     ListOf,
-#     DictOf,
-#     DotDict,
-#     RequiredKeysDotDict,
-#     AllowedKeysDotDict,
-#     OrderedKeysDotDict,
-# )
-#
-# from .expectations import (
-#     Expectation,
-#     ExpectationSuite,
-#     ValidationResult,
-#     ValidationResultSuite,
-# )
-
-from .configurations import ClassConfig  # Config,
+from .configurations import ClassConfig
 
 
 class DictDot:
@@ -28,3 +12,8 @@ class DictDot:
 
     def __delitem__(self, key):
         delattr(self, key)
+
+
+class SerializableDictDot(DictDot):
+    def to_json_dict(self):
+        raise NotImplementedError

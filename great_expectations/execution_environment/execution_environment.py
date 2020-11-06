@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
