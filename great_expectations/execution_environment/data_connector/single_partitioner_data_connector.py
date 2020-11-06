@@ -10,6 +10,7 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
 )
+
 from great_expectations.execution_environment.data_connector.partition_query import (
     PartitionQuery,
     build_partition_query,
@@ -56,13 +57,14 @@ class SinglePartitionerDataConnector(DataConnector):
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
         )
-
         self.base_directory = base_directory
         self.glob_directive = glob_directive
         if default_regex is None:
             default_regex = {}
         self._default_regex = default_regex
+
         self._sorters = build_sorters_from_config(config_list=sorters)
+        super()._validate_sorters_configuration()
 
     @property
     def sorters(self) -> Optional[dict]:
@@ -140,8 +142,7 @@ class SinglePartitionerDataConnector(DataConnector):
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-        self._validate_batch_request(batch_request=batch_request)
-        self._validate_sorters_configuration()
+        super()._validate_batch_request(batch_request=batch_request)
 
         if self._data_references_cache is None:
             self._refresh_data_references_cache()

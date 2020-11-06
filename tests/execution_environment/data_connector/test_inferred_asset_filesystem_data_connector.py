@@ -86,6 +86,7 @@ import great_expectations.exceptions.exceptions as ge_exceptions
 #     ))) == 5
 
 
+
 def test_test_yaml_config_(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
@@ -106,10 +107,8 @@ module_name: great_expectations.execution_environment.data_connector
 class_name: InferredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
 name: TEST_DATA_CONNECTOR
-
 base_directory: {base_directory}/
 glob_directive: "*/*/*.csv"
-
 default_regex:
     pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
     group_names:
@@ -140,10 +139,9 @@ default_regex:
     }
 
 
-def test_test_yaml_config_excluding_non_regex_matching_files(
-    empty_data_context, tmp_path_factory
-):
-    base_directory = str(tmp_path_factory.mktemp("test_something_needs_a_better_name"))
+
+def test_test_yaml_config_excluding_non_regex_matching_files(empty_data_context, tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config_excluding_non_regex_matching_files"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -204,7 +202,7 @@ default_regex:
 
 
 def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("test_dir_charlie"))
+    base_directory = str(tmp_path_factory.mktemp("test_nested_directory_data_asset_name_in_folder"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -619,27 +617,19 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
 
           """, Loader=yaml.FullLoader)
 
-    my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "single_partitioner_data_connector",
-            "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
-            "execution_engine": "BASE_ENGINE",
-        },
-        config_defaults={
-            "module_name": "great_expectations.execution_environment.data_connector"
-        },
-    )
-
     with pytest.raises(ge_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
-            data_asset_name="some_bucket",
-        ))
-
+        my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "single_partitioner_data_connector",
+                "execution_environment_name": "test_environment",
+                "data_context_root_directory": base_directory,
+                "execution_engine": "BASE_ENGINE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector"
+            },
+        )
 
 def test_redundant_information_in_naming_convention_bucket_too_many_sorters(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("logs"))
@@ -681,23 +671,16 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(empt
               name: price
           """, Loader=yaml.FullLoader)
 
-    my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "single_partitioner_data_connector",
-            "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
-            "execution_engine": "BASE_ENGINE",
-        },
-        config_defaults={
-            "module_name": "great_expectations.execution_environment.data_connector"
-        },
-    )
-
     with pytest.raises(ge_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
-            data_asset_name="some_bucket",
-        ))
+        my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "single_partitioner_data_connector",
+                "execution_environment_name": "test_environment",
+                "data_context_root_directory": base_directory,
+                "execution_engine": "BASE_ENGINE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector"
+            },
+        )

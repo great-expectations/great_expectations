@@ -109,7 +109,7 @@ def test_partition_request_non_recognized_param(create_files_and_instantiate_dat
         ))
 
     # Test 3: partition_definitions is not dict
-    with pytest.raises(AssertionError):
+    with pytest.raises(ge_exceptions.PartitionerError):
         sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
