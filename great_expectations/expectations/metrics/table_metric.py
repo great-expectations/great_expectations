@@ -2,8 +2,6 @@ import logging
 from functools import wraps
 from typing import Any, Callable, Dict, Tuple, Type
 
-import sqlalchemy as sa
-
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,

@@ -7,11 +7,6 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Tuple
 from urllib.parse import urlparse
 
-from sqlalchemy.engine import reflection
-from sqlalchemy.engine.default import DefaultDialect
-from sqlalchemy.sql import Select
-from sqlalchemy.sql.elements import TextClause, quoted_name
-
 from great_expectations.core import IDDict
 from great_expectations.execution_environment.types import (
     SqlAlchemyDatasourceQueryBatchSpec,
@@ -23,8 +18,17 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy.engine import reflection
+    from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.sql import Select
+    from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
     sa = None
+    reflection = None
+    DefaultDialect = None
+    Select = None
+    TextClause = None
+    quoted_name = None
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.exceptions import (
@@ -446,7 +450,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 success=True,
             )
 
-    def _build_engine(self, credentials, **kwargs) -> sa.engine.Engine:
+    def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
@@ -528,7 +532,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def get_compute_domain(
         self, domain_kwargs: dict = None
-    ) -> Tuple[sa.sql.Selectable, dict, dict]:
+    ) -> Tuple["sa.sql.Selectable", dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
