@@ -471,3 +471,49 @@ def test__samplers(test_df):
         datetime.date(2020,1,15),
         datetime.date(2020,1,29),
     ]).all()
+
+
+def test_sample_using_random(test_df):
+    random.seed(1)
+    sampled_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
+        dataset=test_df,
+        sampling_method="_sample_using_random"
+    ))
+    assert sampled_df.shape == (13, 10)
+
+def test_sample_using_mod(test_df):
+    sampled_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
+        dataset=test_df,
+        sampling_method="_sample_using_mod",
+        sampling_kwargs={
+            "column_name":"id",
+            "mod":5,
+            "value":4,
+        }
+    ))
+    assert sampled_df.shape == (24, 10)
+
+def test_sample_using_a_list(test_df):
+    sampled_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
+        dataset=test_df,
+        sampling_method="_sample_using_a_list",
+        sampling_kwargs={
+            "column_name":"id",
+            "value_list":[3,5,7,11],
+        }
+    ))
+    assert sampled_df.shape == (4, 10)
+
+def test_sample_using_md5(test_df):
+    sampled_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
+        dataset=test_df,
+        sampling_method="_sample_using_md5",
+        sampling_kwargs={
+            "column_name": "date",    
+        }
+    ))
+    assert sampled_df.shape == (10, 10)
+    assert sampled_df.date.isin([
+        datetime.date(2020,1,15),
+        datetime.date(2020,1,29),
+    ]).all()

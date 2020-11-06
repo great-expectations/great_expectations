@@ -4,6 +4,7 @@ import logging
 from functools import partial
 from io import StringIO
 import hashlib
+import random
 from typing import Any, Callable, Dict, Iterable, Tuple, List
 
 import pandas as pd
@@ -215,6 +216,12 @@ operate.
         if splitter_method:
             splitter_fn = getattr(self, splitter_method)
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
+
+        sampling_method: str = batch_spec.get("sampling_method") or None
+        sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
+        if sampling_method:
+            sampling_fn = getattr(self, sampling_method)
+            batch_data = sampling_fn(batch_data, **sampling_kwargs)
 
         if batch_data is not None:
             if batch_data.memory_usage().sum() < HASH_THRESHOLD:
@@ -494,43 +501,45 @@ operate.
 
     ### Sampling methods ###
 
+    @staticmethod
     def _sample_using_random(
-        self,
+        df,
         p: float = .1,
     ):
         """Take a random sample of rows, retaining proportion p
         
         Note: the Random function behaves differently on different dialects of SQL
         """
-        return sa.func.random() < p
+        return df[df.index.map( lambda x: random.random() < p )]
 
+    @staticmethod
     def _sample_using_mod(
-        self,
-        column_name,
+        df,
+        column_name: str,
         mod: int,
         value: int,
     ):
         """Take the mod of named column, and only keep rows that match the given value"""
-        return sa.column(column_name) % mod == value
+        return df[df[column_name].map( lambda x: x % mod == value)]
 
+    @staticmethod
     def _sample_using_a_list(
-        self,
+        df,
         column_name: str,
         value_list: list,
     ):
         """Match the values in the named column against value_list, and only keep the matches"""
-        return sa.column(column_name).in_(value_list)
+        return df[df[column_name].isin(value_list)]
 
+    @staticmethod
     def _sample_using_md5(
-        self,
+        df,
         column_name: str,
         hash_digits: int=1,
         hash_value: str='f',
     ):
         """Hash the values in the named column, and split on that"""
-        return sa.func.right(
-            sa.func.md5(
-                sa.cast(sa.column(column_name), sa.Text)
-            ),
-            hash_digits
-        ) == hash_value
+        matches = df[column_name].map(
+            lambda x: hashlib.md5(str(x).encode()).hexdigest()[-1*hash_digits:] == hash_value
+        )
+        return df[matches]
