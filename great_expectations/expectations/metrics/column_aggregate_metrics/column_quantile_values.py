@@ -4,11 +4,21 @@ from collections import Iterable
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
-from sqlalchemy.engine import RowProxy
-from sqlalchemy.exc import ProgrammingError
-from sqlalchemy.sql import Select
-from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
-from sqlalchemy.sql.selectable import CTE
+
+try:
+    from sqlalchemy.engine import RowProxy
+    from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.sql import Select
+    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
+    from sqlalchemy.sql.selectable import CTE
+except ImportError:
+    RowProxy = None
+    ProgrammingError = None
+    Select = None
+    Label = None
+    TextClaus = None
+    WithinGroup = None
+    CTE = None
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,

@@ -17,38 +17,6 @@ from great_expectations.expectations.metrics.metric_provider import (
 
 logger = logging.getLogger(__name__)
 
-try:
-    import pyspark.sql.functions as F
-    import pyspark.sql.types as sparktypes
-    from pyspark.ml.feature import Bucketizer
-    from pyspark.sql import DataFrame, SQLContext, Window
-    from pyspark.sql.functions import (
-        array,
-        col,
-        count,
-        countDistinct,
-        datediff,
-        desc,
-        expr,
-        isnan,
-        lag,
-    )
-    from pyspark.sql.functions import length as length_
-    from pyspark.sql.functions import (
-        lit,
-        monotonically_increasing_id,
-        stddev_samp,
-        udf,
-        when,
-        year,
-    )
-
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
-
 
 def aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
     """Return the aggregate metric decorator for the specified engine.

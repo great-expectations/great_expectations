@@ -104,7 +104,6 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
 
 
 def _get_spark_column_metadata(field, parent_name="", include_nested=True):
-    """This method does not include StructType fields."""
     cols = []
     if parent_name != "":
         parent_name = parent_name + "."

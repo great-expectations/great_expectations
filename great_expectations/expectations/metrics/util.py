@@ -2,19 +2,33 @@ import logging
 from typing import Dict, List
 
 import numpy as np
-import snowflake
-import sqlalchemy as sa
 from dateutil.parser import parse
-from sqlalchemy.dialects import registry
-from sqlalchemy.sql import Select
-from sqlalchemy.sql.elements import BinaryExpression, TextClause, literal
-from sqlalchemy.sql.operators import custom_op
 
 try:
     import psycopg2
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
+
+try:
+    import snowflake
+except ImportError:
+    snowflake = None
+
+try:
+    import sqlalchemy as sa
+    from sqlalchemy.dialects import registry
+    from sqlalchemy.sql import Select
+    from sqlalchemy.sql.elements import BinaryExpression, TextClause, literal
+    from sqlalchemy.sql.operators import custom_op
+except ImportError:
+    sa = None
+    registry = None
+    Select = None
+    BinaryExpression = None
+    TextClause = None
+    literal = None
+    custom_op = None
 
 try:
     import sqlalchemy_redshift
