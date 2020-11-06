@@ -300,6 +300,7 @@ operate.
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
+    # NOTE Abe 20201105: Any reason this shouldn't be a private method?
     @staticmethod
     def guess_reader_method_from_path(path):
         """Helper method for deciding which reader to use to read in a certain path.
@@ -331,31 +332,31 @@ operate.
 
         raise BatchSpecError(f'Unable to determine reader method from path: "{path}".')
 
-    # TODO: <Alex>Is this method still needed?  The DataConnector subclasses seem to accoplish the needed functionality.</Alex>
-    def process_batch_request(self, batch_request: BatchRequest, batch_spec: BatchSpec):
-        """Takes in a batch request and batch spec. If the batch request has a limit, uses it to initialize the
-        number of rows to process for the batch spec in obtaining a batch
-        Args:
-            batch_definition (dict) - The batch definition as defined by the user
-            batch_spec (dict) - The batch spec used to query the backend
-        Returns:
-             batch_spec (dict) - The batch spec used to query the backend, with the added row limit
-        """
-        limit = batch_request.get("limit")
-        if limit is not None:
-            if not batch_spec.get("reader_options"):
-                batch_spec["reader_options"] = {}
-            batch_spec["reader_options"]["nrows"] = limit
+    # # TODO: <Alex>Is this method still needed?  The DataConnector subclasses seem to accoplish the needed functionality.</Alex>
+    # def process_batch_request(self, batch_request: BatchRequest, batch_spec: BatchSpec):
+    #     """Takes in a batch request and batch spec. If the batch request has a limit, uses it to initialize the
+    #     number of rows to process for the batch spec in obtaining a batch
+    #     Args:
+    #         batch_definition (dict) - The batch definition as defined by the user
+    #         batch_spec (dict) - The batch spec used to query the backend
+    #     Returns:
+    #          batch_spec (dict) - The batch spec used to query the backend, with the added row limit
+    #     """
+    #     limit = batch_request.get("limit")
+    #     if limit is not None:
+    #         if not batch_spec.get("reader_options"):
+    #             batch_spec["reader_options"] = {}
+    #         batch_spec["reader_options"]["nrows"] = limit
 
-        # TODO: <Alex>Is this still relevant?</Alex>
-        # TODO: Make sure dataset_options are accounted for in __init__ of ExecutionEngine
-        # if dataset_options is not None:
-        #     # Then update with any locally-specified reader options
-        #     if not batch_parameters.get("dataset_options"):
-        #         batch_parameters["dataset_options"] = dict()
-        #     batch_parameters["dataset_options"].update(dataset_options)
+    #     # TODO: <Alex>Is this still relevant?</Alex>
+    #     # TODO: Make sure dataset_options are accounted for in __init__ of ExecutionEngine
+    #     # if dataset_options is not None:
+    #     #     # Then update with any locally-specified reader options
+    #     #     if not batch_parameters.get("dataset_options"):
+    #     #         batch_parameters["dataset_options"] = dict()
+    #     #     batch_parameters["dataset_options"].update(dataset_options)
 
-        return batch_spec
+    #     return batch_spec
 
     def get_compute_domain(
         self, domain_kwargs: dict,
