@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import json
 from typing import Union
+from typing import Union, Any, Optional
 
 from great_expectations.core.id_dict import (
     BatchKwargs,
@@ -12,6 +13,7 @@ from great_expectations.core.id_dict import (
 )
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot
+
 
 
 class BatchDefinition(DictDot):
@@ -29,12 +31,22 @@ class BatchDefinition(DictDot):
             partition_definition=partition_definition,
             # limit=limit,
         )
+
         assert type(partition_definition) == PartitionDefinition
 
         self._execution_environment_name = execution_environment_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_definition = partition_definition
+
+    def __repr__(self) -> str:
+        doc_fields_dict: dict = {
+            "execution_environment_name": self._execution_environment_name,
+            "data_connector_name": self._data_connector_name,
+            "data_asset_name": self.data_asset_name,
+            "partition_definition": repr(self._partition_definition),
+        }
+        return str(doc_fields_dict)
 
     @staticmethod
     def _validate_batch_definition(
@@ -126,6 +138,17 @@ class BatchDefinition(DictDot):
         return json.dumps(self.get_json_dict(), indent=2)
 
 
+    def __hash__(self) -> int:
+        """Overrides the default implementation"""
+        _result_hash: int = hash(self.execution_environment_name) ^ \
+                            hash(self.data_connector_name) ^ \
+                            hash(self.data_asset_name)
+        if self.definition is not None:
+            for key, value in self.partition_definition.items():
+                _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
+        return _result_hash
+
+  
 class BatchRequest(DictDot):
     """
     This class contains all attributes of a batch_request.
@@ -136,7 +159,8 @@ class BatchRequest(DictDot):
         execution_environment_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        partition_request: dict = None,
+        partition_request: Optional[dict] = None,
+        batch_data: Any = None,
         limit: Union[int, None] = None,
         # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
         sampling: Union[dict, None] = None,
@@ -153,6 +177,7 @@ class BatchRequest(DictDot):
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_request = partition_request
+        self._batch_data = batch_data
         self._limit = limit
         self._sampling = sampling
 
@@ -171,6 +196,10 @@ class BatchRequest(DictDot):
     @property
     def partition_request(self) -> dict:  # PartitionRequest:
         return self._partition_request
+
+    @property
+    def batch_data(self) -> Any:
+        return self._batch_data
 
     @property
     def limit(self) -> int:

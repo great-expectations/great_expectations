@@ -28,7 +28,7 @@ from great_expectations.util import import_library_module
 
 from .test_utils import (
     create_files_for_regex_partitioner,
-    execution_environment_files_data_connector_regex_partitioner_config,
+    execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config,
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
@@ -2566,7 +2566,7 @@ def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
 
 
 @pytest.fixture()
-def execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context(
+def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_no_groups_no_sorters_data_context(
     empty_data_context: DataContext,
     default_base_directory: str = "data",
     data_asset_base_directory: str = None,
@@ -2576,12 +2576,14 @@ def execution_environment_files_data_connector_regex_partitioner_no_groups_no_so
     data_context.add_execution_environment(
         name=execution_environment_name,
         initialize=True,
-        **execution_environment_files_data_connector_regex_partitioner_config(
+        **execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
             use_group_names=False,
             use_sorters=False,
             default_base_directory=default_base_directory,
             data_asset_base_directory=data_asset_base_directory,
-        )["test_execution_environment"],
+        )[
+            "test_execution_environment"
+        ],
     )
     base_directory_names: list = [default_base_directory, data_asset_base_directory]
     root_directory_path: str = data_context.root_directory
@@ -2592,7 +2594,7 @@ def execution_environment_files_data_connector_regex_partitioner_no_groups_no_so
 
 
 @pytest.fixture()
-def execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context(
+def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_with_groups_with_sorters_data_context(
     empty_data_context: DataContext,
     default_base_directory: str = "data",
     data_asset_base_directory: str = None,
@@ -2602,12 +2604,14 @@ def execution_environment_files_data_connector_regex_partitioner_with_groups_wit
     data_context.add_execution_environment(
         name=execution_environment_name,
         initialize=True,
-        **execution_environment_files_data_connector_regex_partitioner_config(
+        **execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
             use_group_names=True,
             use_sorters=True,
             default_base_directory=default_base_directory,
             data_asset_base_directory=data_asset_base_directory,
-        )["test_execution_environment"],
+        )[
+            "test_execution_environment"
+        ],
     )
     base_directory_names: list = [default_base_directory, data_asset_base_directory]
     root_directory_path: str = data_context.root_directory

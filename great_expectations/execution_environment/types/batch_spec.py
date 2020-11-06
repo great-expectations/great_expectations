@@ -91,10 +91,6 @@ class S3BatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
 class InMemoryBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if "dataset" not in self:
-            raise InvalidBatchSpecError(
-                "InMemoryBatchSpec requires a 'dataset' element"
-            )
 
     @property
     def dataset(self):
@@ -108,7 +104,7 @@ class PandasDatasourceInMemoryBatchSpec(InMemoryBatchSpec):
 
         if not isinstance(self["dataset"], pd.DataFrame):
             raise InvalidBatchSpecError(
-                "PandasDatasourceInMemoryBatchSpec 'dataset' must be a pandas DataFrame"
+                'PandasDatasourceInMemoryBatchSpec "dataset" must be a pandas DataFrame'
             )
 
 
@@ -123,7 +119,7 @@ class SparkDFDatasourceInMemoryBatchSpec(InMemoryBatchSpec):
             )
         if not isinstance(self["dataset"], pyspark.sql.DataFrame):
             raise InvalidBatchSpecError(
-                "SparkDFDatasourceInMemoryBatchSpec 'dataset' must be a spark DataFrame"
+                'SparkDFDatasourceInMemoryBatchSpec "dataset" must be a spark DataFrame'
             )
 
 
@@ -132,7 +128,7 @@ class SqlAlchemyDatasourceTableBatchSpec(SqlAlchemyDatasourceBatchSpec):
         super().__init__(*args, **kwargs)
         if "table" not in self:
             raise InvalidBatchSpecError(
-                "SqlAlchemyDatasourceTableBatchSpec requires a 'table' element"
+                'SqlAlchemyDatasourceTableBatchSpec requires a "table" element'
             )
 
     @property
@@ -145,7 +141,7 @@ class SqlAlchemyDatasourceQueryBatchSpec(SqlAlchemyDatasourceBatchSpec):
         super().__init__(*args, **kwargs)
         if "query" not in self:
             raise InvalidBatchSpecError(
-                "SqlAlchemyDatasourceQueryBatchSpec requires a 'query' element"
+                'SqlAlchemyDatasourceQueryBatchSpec requires a "query" element'
             )
 
     @property
@@ -162,7 +158,7 @@ class SparkDFDatasourceQueryBatchSpec(SparkDFDatasourceBatchSpec):
         super().__init__(*args, **kwargs)
         if "query" not in self:
             raise InvalidBatchSpecError(
-                "SparkDFDatasourceQueryBatchSpec requires a 'query' element"
+                'SparkDFDatasourceQueryBatchSpec requires a "query" element'
             )
 
     @property
