@@ -6,7 +6,7 @@ from typing import List
 
 from great_expectations.execution_environment.data_connector import (
     DataConnector,
-    FilesDataConnector,
+    ConfiguredAssetFilesystemDataConnector,
 )
 from great_expectations.core.batch import (
     BatchRequest,
@@ -30,7 +30,7 @@ def test_basic_instantiation(tmp_path_factory):
         ]
     )
 
-    my_data_connector = FilesDataConnector(
+    my_data_connector = ConfiguredAssetFilesystemDataConnector(
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
@@ -44,7 +44,7 @@ def test_basic_instantiation(tmp_path_factory):
     )
 
     assert my_data_connector.self_check() == {
-        "class_name": "FilesDataConnector",
+        "class_name": "ConfiguredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
             "alpha",
@@ -84,7 +84,7 @@ def test_instantiation_from_a_config(empty_data_context, tmp_path_factory):
 
     return_object = empty_data_context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
-class_name: FilesDataConnector
+class_name: ConfiguredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
 name: TEST_DATA_CONNECTOR
 
@@ -101,7 +101,7 @@ assets:
     """, return_mode="return_object")
 
     assert return_object == {
-        "class_name": "FilesDataConnector",
+        "class_name": "ConfiguredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
             "alpha",
@@ -130,7 +130,7 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_conte
 
     return_object = empty_data_context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
-class_name: FilesDataConnector
+class_name: ConfiguredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
 name: TEST_DATA_CONNECTOR
 
@@ -148,7 +148,7 @@ assets:
     """, return_mode="return_object")
 
     assert return_object == {
-        "class_name": "FilesDataConnector",
+        "class_name": "ConfiguredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
             "alpha",
@@ -183,12 +183,12 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     )
 
     my_data_connector_yaml = yaml.load(f"""
-            class_name: FilesDataConnector
+            class_name: ConfiguredAssetFilesystemDataConnector
             execution_environment_name: test_environment
             execution_engine:
                 BASE_ENGINE:
                 class_name: PandasExecutionEngine
-            class_name: FilesDataConnector
+            class_name: ConfiguredAssetFilesystemDataConnector
             base_directory: {base_directory}
             glob_directive: '*.csv'
             assets:
@@ -315,12 +315,12 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
     )
 
     my_data_connector_yaml = yaml.load(f"""
-        class_name: FilesDataConnector
+        class_name: ConfiguredAssetFilesystemDataConnector
         execution_environment_name: test_environment
         execution_engine:
             BASE_ENGINE:
             class_name: PandasExecutionEngine
-        class_name: FilesDataConnector
+        class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
         glob_directive: '*.csv'
         assets:
@@ -360,7 +360,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
 
     self_check_report = my_data_connector.self_check()
 
-    assert self_check_report["class_name"] == "FilesDataConnector"
+    assert self_check_report["class_name"] == "ConfiguredAssetFilesystemDataConnector"
     assert self_check_report["data_asset_count"] == 1
     assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
     assert self_check_report["unmatched_data_reference_count"] == 0
@@ -503,7 +503,7 @@ def test_alpha(tmp_path_factory):
 
     my_data_connector_yaml = yaml.load(f"""
                 module_name: great_expectations.execution_environment.data_connector
-                class_name: FilesDataConnector
+                class_name: ConfiguredAssetFilesystemDataConnector
                 base_directory: {base_directory + "/test_dir_alpha"}
                 assets:
                   A:
@@ -530,7 +530,7 @@ def test_alpha(tmp_path_factory):
     self_check_report = my_data_connector.self_check()
     print(json.dumps(self_check_report, indent=2))
 
-    assert self_check_report["class_name"] == "FilesDataConnector"
+    assert self_check_report["class_name"] == "ConfiguredAssetFilesystemDataConnector"
     assert self_check_report["data_asset_count"] == 1
     assert set(list(self_check_report["data_assets"].keys())) == {"A"}
     assert self_check_report["unmatched_data_reference_count"] == 0
@@ -597,7 +597,7 @@ def test_foxtrot(tmp_path_factory):
 
     my_data_connector_yaml = yaml.load(f"""
             module_name: great_expectations.execution_environment.data_connector
-            class_name: FilesDataConnector
+            class_name: ConfiguredAssetFilesystemDataConnector
             base_directory: {base_directory + "/test_dir_foxtrot"}
             assets:
               A:
@@ -639,7 +639,7 @@ def test_foxtrot(tmp_path_factory):
     print(json.dumps(self_check_report, indent=2))
 
     assert self_check_report == {
-        "class_name": "FilesDataConnector",
+        "class_name": "ConfiguredAssetFilesystemDataConnector",
         "data_asset_count": 4,
         "example_data_asset_names": [
             "A",
@@ -711,12 +711,12 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     )
 
     my_data_connector_yaml = yaml.load(f"""
-        class_name: FilesDataConnector
+        class_name: ConfiguredAssetFilesystemDataConnector
         execution_environment_name: test_environment
         execution_engine:
             BASE_ENGINE:
             class_name: PandasExecutionEngine
-        class_name: FilesDataConnector
+        class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
         glob_directive: '*.csv'
         assets:
@@ -784,12 +784,12 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
     )
 
     my_data_connector_yaml = yaml.load(f"""
-        class_name: FilesDataConnector
+        class_name: ConfiguredAssetFilesystemDataConnector
         execution_environment_name: test_environment
         execution_engine:
             BASE_ENGINE:
             class_name: PandasExecutionEngine
-        class_name: FilesDataConnector
+        class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
         glob_directive: '*.csv'
         assets:

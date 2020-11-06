@@ -25,7 +25,7 @@
 
 
 # class DictDataConnector(DataConnector):
-#     """This DataConnector is meant to closely mimic the FilesDataConnector, but without requiring an actual filesystem.
+#     """This DataConnector is meant to closely mimic the ConfiguredAssetFilesystemDataConnector, but without requiring an actual filesystem.
 
 #     Instead, its data_references are stored in a data_reference_dictionary : {
 #         "pretend/path/A-100.csv" : pandas_df_A_100,

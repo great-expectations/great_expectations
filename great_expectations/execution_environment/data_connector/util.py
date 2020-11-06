@@ -2,8 +2,10 @@
 
 # Utility methods for dealing with DataConnector objects
 
+import os
 from typing import List, Dict, Any, Optional
 import copy
+from pathlib import Path
 import re
 import sre_parse
 import sre_constants
@@ -100,7 +102,7 @@ def convert_data_reference_string_to_batch_request_using_regex(
     )
 
     # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
-    # TODO: <Alex>Update: Approach -- we can differentiate "convert_data_reference_string_to_batch_request_using_regex()" methods between FilesDataConnector and SinglePartitionerFileDataConnector so that PartitionDefinition never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
+    # TODO: <Alex>Update: Approach -- we can differentiate "convert_data_reference_string_to_batch_request_using_regex()" methods between ConfiguredAssetFilesystemDataConnector and SinglePartitionerFilesystemDataConnector so that PartitionDefinition never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
     if "data_asset_name" in partition_definition:
         data_asset_name = partition_definition.pop("data_asset_name")
@@ -202,6 +204,21 @@ def _invert_regex_to_data_reference_template(
     # Collapse adjacent wildcards into a single wildcard
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)
     return data_reference_template
+
+
+def get_filesystem_one_level_directory_glob_path_list(
+    base_directory_path: str,
+    glob_directive: str
+) -> List[str]:
+    """
+    List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
+    :param base_directory_path -- base directory path, relative to which file paths will be collected
+    :param glob_directive -- glob expansion directive
+    :returns -- list of relative file paths
+    """
+    globbed_paths = Path(base_directory_path).glob(glob_directive)
+    path_list: List[str] = [os.path.relpath(str(posix_path), base_directory_path) for posix_path in globbed_paths]
+    return path_list
 
 
 def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:

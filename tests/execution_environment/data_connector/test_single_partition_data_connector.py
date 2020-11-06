@@ -3,7 +3,10 @@ import yaml
 
 from typing import List
 
-from great_expectations.execution_environment.data_connector import SinglePartitionerDictDataConnector
+from great_expectations.execution_environment.data_connector import (
+    SinglePartitionerDictDataConnector,
+    InferredAssetFilesystemDataConnector
+)
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -14,11 +17,10 @@ from tests.test_utils import (
     create_fake_data_frame,
     create_files_in_directory,
 )
-from tests.test_utils import create_fake_data_frame, create_files_in_directory
-
 import great_expectations.exceptions.exceptions as ge_exceptions
 
-def test_basic_instantiation(tmp_path_factory):
+
+def test_basic_instantiation():
     data_reference_dict = {
         "path/A-100.csv": create_fake_data_frame(),
         "path/A-101.csv": create_fake_data_frame(),
@@ -31,7 +33,11 @@ def test_basic_instantiation(tmp_path_factory):
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
             "pattern": "(.*)/(.+)-(\\d+)\\.csv",
-            "group_names": ["data_asset_name", "letter", "number"],
+            "group_names": [
+                "data_asset_name",
+                "letter",
+                "number"
+            ],
         },
         data_reference_dict=data_reference_dict,
     )
@@ -167,7 +173,7 @@ default_regex:
     ]
 
 
-# TODO: Abe 20201028 : This test should actually be implemented with a FilesDataConnector, not a SinglePartitionDataConnector
+# TODO: Abe 20201028 : This test should actually be implemented with a ConfiguredAssetFilesystemDataConnector, not a InferredAssetFilesystemDataConnector
 # def test_example_with_explicit_data_asset_names(tmp_path_factory):
 #     data_reference_dict = dict([
 #         (data_reference, create_fake_data_frame)
@@ -188,7 +194,7 @@ default_regex:
 #     ])
 
 #     yaml_string = """
-# class_name: SinglePartitionerDictDataConnector
+# class_name: InferredAssetFilesystemDataConnector
 # execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
 # base_directory: my_base_directory/
 # # glob_directive: "*.csv"
@@ -252,7 +258,7 @@ def test_test_yaml_config_(empty_data_context, tmp_path_factory):
 
     return_object = empty_data_context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
-class_name: SinglePartitionerFileDataConnector
+class_name: InferredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
 name: TEST_DATA_CONNECTOR
 
@@ -268,7 +274,7 @@ default_regex:
     """, return_mode="return_object")
 
     assert return_object == {
-        "class_name": "SinglePartitionerFileDataConnector",
+        "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
             "alpha",
@@ -313,7 +319,7 @@ def test_test_yaml_config_excluding_non_regex_matching_files(
     return_object = empty_data_context.test_yaml_config(
         f"""
 module_name: great_expectations.execution_environment.data_connector
-class_name: SinglePartitionerFileDataConnector
+class_name: InferredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
 name: TEST_DATA_CONNECTOR
 
@@ -331,7 +337,7 @@ default_regex:
     )
 
     assert return_object == {
-        "class_name": "SinglePartitionerFileDataConnector",
+        "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
             "alpha",
@@ -367,7 +373,10 @@ def test_self_check():
         default_regex={
             "pattern": "(.+)-(\\d+)\\.csv",
             # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; idea: resurrect the Partition class.</Alex>
-            "group_names": ["data_asset_name", "number"]
+            "group_names": [
+                "data_asset_name",
+                "number"
+            ]
         }
     )
 
@@ -410,8 +419,11 @@ def test_that_needs_a_better_name():
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         default_regex={
             "pattern": "(.+)-(\\d+)\\.csv",
-            "group_names": ["data_asset_name", "number"],
-        },
+            "group_names": [
+                "data_asset_name",
+                "number"
+            ]
+        }
     )
 
     self_check_return_object = my_data_connector.self_check()
@@ -460,7 +472,7 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
 
     return_object = empty_data_context.test_yaml_config(f"""
     module_name: great_expectations.execution_environment.data_connector
-    class_name: SinglePartitionerFileDataConnector
+    class_name: InferredAssetFilesystemDataConnector
     execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
     name: TEST_DATA_CONNECTOR
     base_directory: {base_directory}/
@@ -474,7 +486,7 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
         """, return_mode="return_object")
 
     assert return_object == {
-        "class_name": "SinglePartitionerFileDataConnector",
+        "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 4,
         "example_data_asset_names": [
              "A",
@@ -517,7 +529,7 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
 
     return_object = empty_data_context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
-          class_name: SinglePartitionerFileDataConnector
+          class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
@@ -533,7 +545,7 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
               """, return_mode="return_object")
 
     assert return_object == {
-        "class_name": "SinglePartitionerFileDataConnector",
+        "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
             "log_file"
@@ -549,7 +561,6 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": []
     }
-
 
 
 # def test_redundant_information_in_naming_convention_random_hash_asset_name_is_date(empty_data_context, tmp_path_factory):
@@ -575,7 +586,7 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
 #     )
 #     return_object = empty_data_context.test_yaml_config(f
 #           module_name: great_expectations.execution_environment.data_connector
-#           class_name: SinglePartitionFileDataConnector
+#           class_name: InferredAssetFilesystemDataConnector
 #           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
 #           name: TEST_DATA_CONNECTOR
 #           base_directory: {base_directory}/
@@ -588,7 +599,7 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
 #               , return_mode="return_object")
 #
 #     return_object == {
-#         "class_name": "SinglePartitionFileDataConnector",
+#         "class_name": "InferredAssetFilesystemDataConnector",
 #         "data_asset_count": 7,
 #         "example_data_asset_names": [
 #             "2021/01/01",
@@ -631,7 +642,7 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
 
     return_object = empty_data_context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
-          class_name: SinglePartitionerFileDataConnector
+          class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
@@ -645,7 +656,7 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
               pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
       """, return_mode="return_object")
     assert return_object == {
-        "class_name": "SinglePartitionerFileDataConnector",
+        "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
             "log_file"
@@ -680,7 +691,7 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context, t
 
     return_object = empty_data_context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
-          class_name: SinglePartitionerFileDataConnector
+          class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
@@ -695,7 +706,7 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context, t
               """, return_mode="return_object")
 
     assert return_object == {
-        "class_name": "SinglePartitionerFileDataConnector",
+        "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
             "some_bucket"
@@ -732,7 +743,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(empty_data_con
 
     my_data_connector_yaml = yaml.load(f"""
           module_name: great_expectations.execution_environment.data_connector
-          class_name: SinglePartitionerFileDataConnector
+          class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: test_environment
           name: single_partitioner_data_connector
           base_directory: {base_directory}/
@@ -752,7 +763,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(empty_data_con
 
           """, Loader=yaml.FullLoader)
 
-    my_data_connector = instantiate_class_from_config(
+    my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "single_partitioner_data_connector",
@@ -835,7 +846,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
 
     my_data_connector_yaml = yaml.load(f"""
           module_name: great_expectations.execution_environment.data_connector
-          class_name: SinglePartitionerFileDataConnector
+          class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: test_environment
           name: single_partitioner_data_connector
           base_directory: {base_directory}/
@@ -855,7 +866,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
 
           """, Loader=yaml.FullLoader)
 
-    my_data_connector = instantiate_class_from_config(
+    my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "single_partitioner_data_connector",
@@ -869,6 +880,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
     )
 
     with pytest.raises(ge_exceptions.DataConnectorError):
+        # noinspection PyUnusedLocal
         sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
             execution_environment_name="test_environment",
             data_connector_name="single_partitioner_data_connector",
@@ -893,7 +905,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(empt
 
     my_data_connector_yaml = yaml.load(f"""
         module_name: great_expectations.execution_environment.data_connector
-        class_name: SinglePartitionerFileDataConnector
+        class_name: InferredAssetFilesystemDataConnector
         execution_environment_name: test_environment
         name: single_partitioner_data_connector
         base_directory: {base_directory}/
@@ -916,7 +928,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(empt
               name: price
           """, Loader=yaml.FullLoader)
 
-    my_data_connector = instantiate_class_from_config(
+    my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "single_partitioner_data_connector",
@@ -930,6 +942,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(empt
     )
 
     with pytest.raises(ge_exceptions.DataConnectorError):
+        # noinspection PyUnusedLocal
         sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
             execution_environment_name="test_environment",
             data_connector_name="single_partitioner_data_connector",
