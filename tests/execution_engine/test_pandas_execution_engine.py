@@ -130,6 +130,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     with pytest.raises(MetricProviderError) as e:
         metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
+
 # Making sure dataframe property is functional
 def test_dataframe_property_given_loaded_batch():
     engine = PandasExecutionEngine()
