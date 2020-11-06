@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import pytest
+
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -125,15 +127,8 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     )
     desired_metrics = (mean, stdev)
 
-    error = None
-    try:
+    with pytest.raises(MetricProviderError) as e:
         metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
-    except MetricProviderError as e:
-        error = e
-
-    # Ensuring that a proper error has been given
-    assert isinstance(error, MetricProviderError)
-
 
 # Making sure dataframe property is functional
 def test_dataframe_property_given_loaded_batch():
