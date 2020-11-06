@@ -45,11 +45,19 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        return {
-            "column_values.value_length.map_fn": MetricConfiguration(
-                "column_values.value_length.map_fn", metric.metric_domain_kwargs
+        if metric.metric_name == "column_values.value_length.equals":
+            return {
+                "column_values.value_length.map_fn": MetricConfiguration(
+                    "column_values.value_length.map_fn", metric.metric_domain_kwargs
+                )
+            }
+        else:
+            return super().get_evaluation_dependencies(
+                metric=metric,
+                configuration=configuration,
+                execution_engine=execution_engine,
+                runtime_configuration=runtime_configuration,
             )
-        }
 
 
 class ColumnValuesValueLength(ColumnMapMetricProvider):
