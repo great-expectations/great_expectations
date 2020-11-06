@@ -2152,6 +2152,7 @@ def empty_data_context(tmp_path_factory):
 @pytest.fixture
 def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
     monkeypatch.setenv("FOO", "BAR")
+    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
     root_dir = empty_data_context.root_directory
     ge_config_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_basic_with_variables.yml",

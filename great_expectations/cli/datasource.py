@@ -1282,19 +1282,8 @@ Enter an SQL query
     # where appropriate.
     temp_table_kwargs = dict()
     datasource = context.get_datasource(datasource_name)
-    if datasource.engine.dialect.name.lower() == "snowflake":
-        # snowflake requires special handling
-        table_name = click.prompt(
-            "In Snowflake, GE may need to create a transient table "
-            "to use for validation."
-            + os.linesep
-            + "Please enter a name to use for that table: ",
-            default="ge_tmp_" + str(uuid.uuid4())[:8],
-        )
-        temp_table_kwargs = {
-            "snowflake_transient_table": table_name,
-        }
-    elif datasource.engine.dialect.name.lower() == "bigquery":
+
+    if datasource.engine.dialect.name.lower() == "bigquery":
         # bigquery also requires special handling
         table_name = click.prompt(
             "GE will create a table to use for "
