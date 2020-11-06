@@ -4,7 +4,7 @@ import sqlalchemy as sa
 from dateutil.parser import parse
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine, SparkDFExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -193,7 +193,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 return sa.and_(min_value <= column, column <= max_value)
 
     @column_map_condition(engine=SparkDFExecutionEngine)
-    def _sqlalchemy(
+    def _spark(
         cls,
         column,
         min_value=None,
