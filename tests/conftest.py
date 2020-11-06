@@ -2592,7 +2592,7 @@ def execution_environment_configured_asset_filesystem_data_connector_regex_parti
 
 
 @pytest.fixture()
-def execution_environment_configured_filesystem_asset_data_connector_regex_partitioner_with_groups_with_sorters_data_context(
+def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_with_groups_with_sorters_data_context(
     empty_data_context: DataContext,
     default_base_directory: str = "data",
     data_asset_base_directory: str = None,

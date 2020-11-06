@@ -7,9 +7,11 @@ import yaml
 
 from typing import Union, List, Optional
 
-
 from great_expectations.execution_environment import ExecutionEnvironment
-from great_expectations.execution_environment.data_connector import ConfiguredAssetFilesystemDataConnector
+from great_expectations.execution_environment.data_connector import (
+    ConfiguredAssetFilesystemDataConnector,
+    InferredAssetFilesystemDataConnector
+)
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -97,7 +99,7 @@ data_connectors:
             - run_id
 
     my_filesystem_data_connector:
-        class_name: SinglePartitionerFileDataConnector
+        class_name: InferredAssetFilesystemDataConnector
         base_directory: {base_directory}
         # TODO: <Alex>Investigate: this potentially breaks the data_reference centric design.</Alex>
         glob_directive: "*.csv"
