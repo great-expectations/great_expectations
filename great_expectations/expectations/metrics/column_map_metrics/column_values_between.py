@@ -2,7 +2,10 @@ import sqlalchemy as sa
 from dateutil.parser import parse
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine, SparkDFExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
