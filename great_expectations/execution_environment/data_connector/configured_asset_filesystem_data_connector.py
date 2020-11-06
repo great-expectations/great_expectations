@@ -395,9 +395,9 @@ partition definition {batch_definition.partition_definition} from batch definiti
             "path": path
         }
 
-    def _build_batch_spec_from_batch_definition(
+    def build_batch_spec(
         self,
         batch_definition: BatchDefinition
     ) -> PathBatchSpec:
-        batch_spec = super()._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
+        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
         return PathBatchSpec(batch_spec)

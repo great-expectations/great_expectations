@@ -88,53 +88,18 @@ class S3BatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
         return self.get("reader_method")
 
 
-class InMemoryBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    @property
-    def dataset(self):
-        return self.get("dataset")
-
-
 class RuntimeDataBatchSpec(BatchSpec):
     _id_ignore_keys = set("batch_data")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if type(self.batch_data) == None:
-            raise InvalidBatchSpecError("InMemoryBatchSpec batch_data cannot be None")
+        if self.batch_data is None:
+            raise InvalidBatchSpecError("RuntimeDataBatchSpec batch_data cannot be None")
 
     @property
     def batch_data(self):
         return self.get("batch_data")
-
-
-class PandasDatasourceInMemoryBatchSpec(InMemoryBatchSpec):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        import pandas as pd
-
-        if not isinstance(self["dataset"], pd.DataFrame):
-            raise InvalidBatchSpecError(
-                'PandasDatasourceInMemoryBatchSpec "dataset" must be a pandas DataFrame'
-            )
-
-
-class SparkDFDatasourceInMemoryBatchSpec(InMemoryBatchSpec):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        try:
-            import pyspark
-        except ImportError:
-            raise InvalidBatchSpecError(
-                "SparkDFDatasourceInMemoryBatchSpec requires a valid pyspark installation, but pyspark import failed."
-            )
-        if not isinstance(self["dataset"], pyspark.sql.DataFrame):
-            raise InvalidBatchSpecError(
-                'SparkDFDatasourceInMemoryBatchSpec "dataset" must be a spark DataFrame'
-            )
 
 
 class SqlAlchemyDatasourceTableBatchSpec(SqlAlchemyDatasourceBatchSpec):

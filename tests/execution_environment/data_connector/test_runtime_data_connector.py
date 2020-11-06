@@ -12,6 +12,9 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchSpec,
 )
+from great_expectations.execution_environment.types import (
+    RuntimeDataBatchSpec,
+)
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
@@ -368,7 +371,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(basic_execution_e
     assert batch_spec_parameters == expected_batch_spec_parameters
 
 
-def test__build_batch_spec_from_batch_definition(basic_execution_environment):
+def test__build_batch_spec(basic_execution_environment):
     partition_request: dict = {
         "partition_identifiers": {
             "custom_key_0": "staging",
@@ -380,12 +383,16 @@ def test__build_batch_spec_from_batch_definition(basic_execution_environment):
         basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
     # noinspection PyProtectedMember
-    batch_spec: BatchSpec = test_runtime_data_connector._build_batch_spec_from_batch_definition(
+    batch_spec: BatchSpec = test_runtime_data_connector.build_batch_spec(
         batch_definition=BatchDefinition(
             execution_environment_name="my_execution_environment",
             data_connector_name="test_runtime_data_connector",
             data_asset_name="my_data_asset",
             partition_definition=PartitionDefinition(partition_request["partition_identifiers"])
-        )
+        ),
+        batch_data=pd.DataFrame({"x": range(10)})
     )
-    assert batch_spec == BatchSpec()
+    assert type(batch_spec) == RuntimeDataBatchSpec
+    assert set(batch_spec.keys()) == set(["batch_data"])
+    assert batch_spec["batch_data"].shape == (10, 1)
+    

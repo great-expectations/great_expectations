@@ -180,6 +180,7 @@ Notes:
 
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             batch_data = batch_spec.batch_data
+            print("A", batch_data)
 
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.get("reader_method")
@@ -189,6 +190,7 @@ Notes:
             reader_fn: Callable = self._get_reader_fn(reader_method, path)
 
             batch_data = reader_fn(path, **reader_options)
+            print("B", batch_data)
 
         elif isinstance(batch_spec, S3BatchSpec):
             # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
@@ -207,9 +209,7 @@ Notes:
             pass
         else:
             raise BatchSpecError(
-                """Invalid batch_spec: file path, s3 path, or batch_data is required for a PandasExecutionEngine to
-operate.
-                """
+                f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
             )
 
         splitter_method: str = batch_spec.get("splitter_method") or None
@@ -229,32 +229,32 @@ operate.
 
         return batch_data, batch_markers
 
-    @staticmethod
-    def get_batch_markers_and_update_batch_spec_for_batch_data(
-        batch_data: pd.DataFrame,
-        batch_spec: BatchSpec
-    ) -> BatchMarkers:
-        """
-        Computes batch_markers in the case of user-provided batch_data (e.g., in the case of a data pipeline).
+    # @staticmethod
+    # def get_batch_markers_and_update_batch_spec_for_batch_data(
+    #     batch_data: pd.DataFrame,
+    #     batch_spec: BatchSpec
+    # ) -> BatchMarkers:
+    #     """
+    #     Computes batch_markers in the case of user-provided batch_data (e.g., in the case of a data pipeline).
 
-        :param batch_data -- user-provided dataframe
-        :param batch_spec -- BatchSpec (must be previously instantiated/initialized by RuntimeDataConnector)
-        :returns computed batch_markers specific to this execution engine
-        """
-        batch_markers: BatchMarkers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
-        )
-        if batch_data is not None:
-            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
-                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
-            # we do not want to store the actual dataframe in batch_spec
-            # hence, marking that this is a PandasInMemoryDF instead
-            batch_spec["PandasInMemoryDF"] = True
-        return batch_markers
+    #     :param batch_data -- user-provided dataframe
+    #     :param batch_spec -- BatchSpec (must be previously instantiated/initialized by RuntimeDataConnector)
+    #     :returns computed batch_markers specific to this execution engine
+    #     """
+    #     batch_markers: BatchMarkers = BatchMarkers(
+    #         {
+    #             "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+    #                 "%Y%m%dT%H%M%S.%fZ"
+    #             )
+    #         }
+    #     )
+    #     if batch_data is not None:
+    #         if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+    #             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
+    #         # we do not want to store the actual dataframe in batch_spec
+    #         # hence, marking that this is a PandasInMemoryDF instead
+    #         batch_spec["PandasInMemoryDF"] = True
+    #     return batch_markers
 
     @property
     def dataframe(self):
