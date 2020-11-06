@@ -5,7 +5,7 @@ import yaml
 from typing import List
 
 from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
-from great_expectations.execution_environment.data_connector import PipelineDataConnector
+from great_expectations.execution_environment.data_connector import RuntimeDataConnector
 from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.core.batch import (
     BatchRequest,
@@ -18,7 +18,7 @@ import great_expectations.exceptions as ge_exceptions
 
 @pytest.fixture
 def basic_execution_environment(tmp_path_factory):
-    base_directory: str = str(tmp_path_factory.mktemp("basic_execution_environment_pipeline_data_connector"))
+    base_directory: str = str(tmp_path_factory.mktemp("basic_execution_environment_runtime_data_connector"))
 
     basic_execution_environment: ExecutionEnvironment = instantiate_class_from_config(
         config=yaml.load(
@@ -26,9 +26,9 @@ def basic_execution_environment(tmp_path_factory):
 class_name: ExecutionEnvironment
 
 data_connectors:
-    test_pipeline_data_connector:
+    test_runtime_data_connector:
         module_name: great_expectations.execution_environment.data_connector
-        class_name: PipelineDataConnector
+        class_name: RuntimeDataConnector
         runtime_keys:
         - pipeline_stage_name
         - run_id
@@ -53,11 +53,11 @@ execution_engine:
 
 
 def test_self_check(basic_execution_environment):
-    test_pipeline_data_connector: PipelineDataConnector = \
-        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_runtime_data_connector: RuntimeDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
-    assert test_pipeline_data_connector.self_check() == {
-        "class_name": "PipelineDataConnector",
+    assert test_runtime_data_connector.self_check() == {
+        "class_name": "RuntimeDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": ["IN_MEMORY_DATA_ASSET"],
         "data_assets": {
@@ -74,17 +74,17 @@ def test_self_check(basic_execution_environment):
 def test_error_checking(basic_execution_environment):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    test_pipeline_data_connector: PipelineDataConnector = \
-        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_runtime_data_connector: RuntimeDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
     # Test for an unknown execution environment
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[BatchDefinition] = \
-            test_pipeline_data_connector.get_batch_definition_list_from_batch_request(
+            test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name="non_existent_execution_environment",
-                data_connector_name="test_pipeline_data_connector",
+                data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
             )
         )
@@ -93,7 +93,7 @@ def test_error_checking(basic_execution_environment):
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[BatchDefinition] = \
-            test_pipeline_data_connector.get_batch_definition_list_from_batch_request(
+            test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=basic_execution_environment.name,
                 data_connector_name="non_existent_data_connector",
@@ -105,10 +105,10 @@ def test_error_checking(basic_execution_environment):
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[BatchDefinition] = \
-            test_pipeline_data_connector.get_batch_definition_list_from_batch_request(
+            test_runtime_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
                     execution_environment_name=basic_execution_environment.name,
-                    data_connector_name="test_pipeline_data_connector",
+                    data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset",
                     batch_data=test_df,
                     partition_request=None,
@@ -122,10 +122,10 @@ def test_error_checking(basic_execution_environment):
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[BatchDefinition] = \
-            test_pipeline_data_connector.get_batch_definition_list_from_batch_request(
+            test_runtime_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
                     execution_environment_name=basic_execution_environment.name,
-                    data_connector_name="test_pipeline_data_connector",
+                    data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset",
                     batch_data=test_df,
                     partition_request=partition_request,
@@ -139,10 +139,10 @@ def test_error_checking(basic_execution_environment):
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[BatchDefinition] = \
-            test_pipeline_data_connector.get_batch_definition_list_from_batch_request(
+            test_runtime_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
                     execution_environment_name=basic_execution_environment.name,
-                    data_connector_name="test_pipeline_data_connector",
+                    data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset",
                     batch_data=test_df,
                     partition_request=partition_request,
@@ -163,13 +163,13 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(basic_execu
         }
     }
 
-    test_pipeline_data_connector: PipelineDataConnector = \
-        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_runtime_data_connector: RuntimeDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
     # Verify that all keys in partition_request are acceptable as runtime_keys (using batch count).
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
-        "data_connector_name": test_pipeline_data_connector.name,
+        "data_connector_name": test_runtime_data_connector.name,
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
         "batch_data": test_df,
         "partition_request": partition_request,
@@ -178,7 +178,7 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(basic_execu
     batch_request: BatchRequest = BatchRequest(**batch_request)
 
     batch_definition_list: List[BatchDefinition] = \
-        test_pipeline_data_connector.get_batch_definition_list_from_batch_request(
+        test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
 
@@ -199,14 +199,14 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(basic_execution_e
         }
     }
 
-    test_pipeline_data_connector: PipelineDataConnector = \
-        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_runtime_data_connector: RuntimeDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
     # Insure that keys in partition_request["partition_identifiers"] that are not among runtime_keys declared in configuration
     # are not accepted.  In this test, all legal keys plus a single illegal key are present.
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
-        "data_connector_name": test_pipeline_data_connector.name,
+        "data_connector_name": test_runtime_data_connector.name,
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
         "batch_data": test_df,
         "partition_request": partition_request,
@@ -217,7 +217,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(basic_execution_e
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[BatchDefinition] = \
-            test_pipeline_data_connector.get_batch_definition_list_from_batch_request(
+            test_runtime_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=batch_request
             )
 
@@ -227,14 +227,14 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(basic_execution_e
         }
     }
 
-    test_pipeline_data_connector: PipelineDataConnector = \
-        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_runtime_data_connector: RuntimeDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
     # Insure that keys in partition_request["partition_identifiers"] that are not among runtime_keys declared in configuration
     # are not accepted.  In this test, a single illegal key is present.
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
-        "data_connector_name": test_pipeline_data_connector.name,
+        "data_connector_name": test_runtime_data_connector.name,
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
         "batch_data": test_df,
         "partition_request": partition_request,
@@ -245,18 +245,18 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(basic_execution_e
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[BatchDefinition] = \
-            test_pipeline_data_connector.get_batch_definition_list_from_batch_request(
+            test_runtime_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=batch_request
             )
 
 
 def test_get_available_data_asset_names(basic_execution_environment):
-    test_pipeline_data_connector: PipelineDataConnector = \
-        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_runtime_data_connector: RuntimeDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
     expected_available_data_asset_names: List[str] = ["IN_MEMORY_DATA_ASSET"]
 
-    available_data_asset_names: List[str] = test_pipeline_data_connector.get_available_data_asset_names()
+    available_data_asset_names: List[str] = test_runtime_data_connector.get_available_data_asset_names()
 
     assert available_data_asset_names == expected_available_data_asset_names
 
@@ -270,12 +270,12 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_execution
         }
     }
 
-    test_pipeline_data_connector: PipelineDataConnector = \
-        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_runtime_data_connector: RuntimeDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
-        "data_connector_name": test_pipeline_data_connector.name,
+        "data_connector_name": test_runtime_data_connector.name,
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
         "batch_data": test_df,
         "partition_request": partition_request,
@@ -286,14 +286,14 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_execution
     expected_batch_definition_list: List[BatchDefinition] = [
         BatchDefinition(
             execution_environment_name="my_execution_environment",
-            data_connector_name="test_pipeline_data_connector",
+            data_connector_name="test_runtime_data_connector",
             data_asset_name="IN_MEMORY_DATA_ASSET",
             partition_definition=PartitionDefinition(partition_request["partition_identifiers"])
         )
     ]
 
     batch_definition_list: List[BatchDefinition] = \
-        test_pipeline_data_connector.get_batch_definition_list_from_batch_request(
+        test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
 
@@ -309,12 +309,12 @@ def test_get_batch_definition_list_from_batch_request_length_zero(basic_executio
         }
     }
 
-    test_pipeline_data_connector: PipelineDataConnector = \
-        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_runtime_data_connector: RuntimeDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
     batch_request: dict = {
         "execution_environment_name": basic_execution_environment.name,
-        "data_connector_name": test_pipeline_data_connector.name,
+        "data_connector_name": test_runtime_data_connector.name,
         "data_asset_name": "nonexistent_data_asset",
         "batch_data": test_df,
         "partition_request": partition_request,
@@ -323,7 +323,7 @@ def test_get_batch_definition_list_from_batch_request_length_zero(basic_executio
     batch_request: BatchRequest = BatchRequest(**batch_request)
 
     batch_definition_list: List[BatchDefinition] = \
-        test_pipeline_data_connector.get_batch_definition_list_from_batch_request(
+        test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
 
@@ -331,13 +331,13 @@ def test_get_batch_definition_list_from_batch_request_length_zero(basic_executio
 
 
 def test__get_data_reference_list(basic_execution_environment):
-    test_pipeline_data_connector: PipelineDataConnector = \
-        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_runtime_data_connector: RuntimeDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
     expected_data_reference_list: List[str] = [""]
 
     # noinspection PyProtectedMember
-    data_reference_list: List[str] = test_pipeline_data_connector._get_data_reference_list()
+    data_reference_list: List[str] = test_runtime_data_connector._get_data_reference_list()
 
     assert data_reference_list == expected_data_reference_list
 
@@ -350,16 +350,16 @@ def test__generate_batch_spec_parameters_from_batch_definition(basic_execution_e
         }
     }
 
-    test_pipeline_data_connector: PipelineDataConnector = \
-        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_runtime_data_connector: RuntimeDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
     expected_batch_spec_parameters: dict = {}
 
     # noinspection PyProtectedMember
-    batch_spec_parameters: dict = test_pipeline_data_connector._generate_batch_spec_parameters_from_batch_definition(
+    batch_spec_parameters: dict = test_runtime_data_connector._generate_batch_spec_parameters_from_batch_definition(
         batch_definition=BatchDefinition(
             execution_environment_name="my_execution_environment",
-            data_connector_name="test_pipeline_data_connector",
+            data_connector_name="test_runtime_data_connector",
             data_asset_name="my_data_asset",
             partition_definition=PartitionDefinition(partition_request["partition_identifiers"])
         )
@@ -376,16 +376,16 @@ def test__build_batch_spec_from_batch_definition(basic_execution_environment):
         }
     }
 
-    test_pipeline_data_connector: PipelineDataConnector = \
-        basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
+    test_runtime_data_connector: RuntimeDataConnector = \
+        basic_execution_environment.get_data_connector(name="test_runtime_data_connector")
 
     expected_batch_spec: InMemoryBatchSpec = InMemoryBatchSpec()
 
     # noinspection PyProtectedMember
-    batch_spec: InMemoryBatchSpec = test_pipeline_data_connector._build_batch_spec_from_batch_definition(
+    batch_spec: InMemoryBatchSpec = test_runtime_data_connector._build_batch_spec_from_batch_definition(
         batch_definition=BatchDefinition(
             execution_environment_name="my_execution_environment",
-            data_connector_name="test_pipeline_data_connector",
+            data_connector_name="test_runtime_data_connector",
             data_asset_name="my_data_asset",
             partition_definition=PartitionDefinition(partition_request["partition_identifiers"])
         )

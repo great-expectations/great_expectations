@@ -87,7 +87,7 @@ class DataConnector:
 
         return batch_spec
 
-    def refresh_data_references_cache(
+    def _refresh_data_references_cache(
         self,
     ):
         raise NotImplementedError
@@ -146,7 +146,7 @@ class DataConnector:
         max_examples=3
     ):
         if self._data_references_cache is None:
-            self.refresh_data_references_cache()
+            self._refresh_data_references_cache()
 
         if pretty_print:
             print("\t" + self.name, ":", self.__class__.__name__)

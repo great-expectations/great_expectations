@@ -42,7 +42,7 @@ class SqlDataConnector(DataConnector):
     def assets(self) -> Dict[str, Asset]:
         return self._assets
 
-    def refresh_data_references_cache(self):
+    def _refresh_data_references_cache(self):
         self._data_references_cache = {}
         
         for data_asset_name in self._assets:
@@ -87,7 +87,7 @@ class SqlDataConnector(DataConnector):
     
     def get_unmatched_data_references(self):
         if self._data_references_cache is None:
-            raise ValueError("_data_references_cache is None. Have you called refresh_data_references_cache yet?")
+            raise ValueError("_data_references_cache is None. Have you called _refresh_data_references_cache yet?")
 
         return [k for k, v in self._data_references_cache.items() if v is None]        
     

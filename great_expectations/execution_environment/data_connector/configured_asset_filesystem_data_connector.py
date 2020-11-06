@@ -160,7 +160,7 @@ configured runtime keys.
         else:
             return Path(self._data_context_root_directory).joinpath(dir_path)
 
-    def refresh_data_references_cache(
+    def _refresh_data_references_cache(
         self,
     ):
         """
@@ -250,7 +250,7 @@ configured runtime keys.
 
     def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
-            raise ValueError('_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?')
+            raise ValueError('_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?')
 
         unmatched_data_references: List[str] = []
         for data_asset_name, data_reference_sub_cache in self._data_references_cache.items():
@@ -266,7 +266,7 @@ configured runtime keys.
         self._validate_sorters_configuration(batch_request=batch_request)
 
         if self._data_references_cache is None:
-            self.refresh_data_references_cache()
+            self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = list(
             filter(
