@@ -21,7 +21,11 @@ logger = logging.getLogger(__name__)
 
 class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
     condition_metric_name = "column_values.match_regex_list"
-    condition_value_keys = ("regex_list",)
+    condition_value_keys = (
+        "regex_list",
+        "match_on",
+    )
+    default_kwarg_values = {"match_on": "any"}
 
     @column_map_condition(engine=PandasExecutionEngine)
     def _pandas(cls, column, regex_list, match_on, **kwargs):

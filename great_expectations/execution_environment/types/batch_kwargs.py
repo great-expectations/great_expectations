@@ -55,12 +55,12 @@ class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs)
 class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if "s3" not in self:
+        if "s3" not in self and "path" not in self:
             raise InvalidBatchKwargsError("S3BatchKwargs requires a path element")
 
     @property
     def s3(self):
-        return self.get("s3")
+        return self.get("s3", self.get("path"))
 
     @property
     def reader_method(self):

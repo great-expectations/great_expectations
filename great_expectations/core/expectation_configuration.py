@@ -20,7 +20,6 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
     ParserError,
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.marshmallow__shade import (
     Schema,
@@ -29,7 +28,6 @@ from great_expectations.marshmallow__shade import (
     post_load,
 )
 from great_expectations.types import SerializableDictDot
-from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -1060,7 +1058,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return get_expectation_impl(self.expectation_type)
 
     def validate(
-        self, validator: Validator, runtime_configuration=None,
+        self, validator, runtime_configuration=None,
     ):
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).validate(
@@ -1068,10 +1066,7 @@ class ExpectationConfiguration(SerializableDictDot):
         )
 
     def metrics_validate(
-        self,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        self, metrics: Dict, runtime_configuration: dict = None, execution_engine=None,
     ):
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).metrics_validate(
