@@ -93,6 +93,7 @@ great_expectations/
         config_variables.yml
         data_docs/
         validations/
+            .ge_store_backend_id
 """
     )
 
