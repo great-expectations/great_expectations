@@ -87,7 +87,6 @@ class DataConnector:
         batch_spec: BatchSpec = BatchSpec(
             **batch_spec_params
         )
-
         return batch_spec
 
     def _refresh_data_references_cache(
