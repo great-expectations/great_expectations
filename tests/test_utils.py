@@ -49,14 +49,14 @@ expectationConfigurationSchema = ExpectationConfigurationSchema()
 expectationSuiteSchema = ExpectationSuiteSchema()
 
 try:
-    from pyspark.sql import DataFrame as sparkDataFrame
-except ImportError:
-    sparkDataFrame = None
-
-try:
     from sqlalchemy import create_engine
 except ImportError:
     create_engine = None
+
+try:
+    from pyspark.sql import DataFrame as SparkDataFrame
+except ImportError:
+    SparkDataFrame = type(None)
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
@@ -1394,7 +1394,9 @@ def check_json_test_result(test, result, data_asset=None):
                 assert result["result"]["observed_value"] in value
 
             elif key == "unexpected_index_list":
-                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset, SqlAlchemyBatchData, sparkDataFrame)):
+                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
+                    pass
+                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDataFrame)):
                     pass
                 else:
                     assert result["result"]["unexpected_index_list"] == value

@@ -671,13 +671,11 @@ def _spark_column_map_values(
     **kwargs,
 ):
     condition, fn_domain_kwargs = metrics.get("unexpected_condition")
-    (data, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
-        metric_domain_kwargs
-    )
+    (data, _, _,) = execution_engine.get_compute_domain(fn_domain_kwargs)
 
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     result_format = metric_value_kwargs["result_format"]
-    column_name = accessor_domain_kwargs["column"]
+    column_name = metric_domain_kwargs["column"]
     data = data.withColumn("__unexpected", condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     if result_format["result_format"] == "COMPLETE":
