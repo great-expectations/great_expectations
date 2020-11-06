@@ -138,13 +138,27 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
     @classmethod
     def _create_expectations_for_low_card_column(
-        cls, dataset, column, column_cache, excluded_expectations=[]
+        cls,
+        dataset,
+        column,
+        column_cache,
+        excluded_expectations=None,
+        included_expectations=None,
     ):
         cls._create_non_nullity_expectations(
-            dataset, column, excluded_expectations=excluded_expectations
+            dataset,
+            column,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
         )
 
-        if "expect_column_distinct_values_to_be_in_set" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_distinct_values_to_be_in_set" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_distinct_values_to_be_in_set" in included_expectations
+        ):
             value_set = dataset.expect_column_distinct_values_to_be_in_set(
                 column, value_set=None, result_format="SUMMARY"
             ).result["observed_value"]
@@ -152,7 +166,14 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 column, value_set=value_set, result_format="SUMMARY"
             )
 
-        if "expect_column_kl_divergence_to_be_less_than" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_kl_divergence_to_be_less_than"
+            not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_kl_divergence_to_be_less_than" in included_expectations
+        ):
             if cls._get_column_cardinality_with_caching(
                 dataset, column, column_cache
             ) in [ProfilerCardinality.TWO, ProfilerCardinality.VERY_FEW,]:
@@ -166,9 +187,15 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
     @classmethod
     def _create_non_nullity_expectations(
-        cls, dataset, column, excluded_expectations=[]
+        cls, dataset, column, excluded_expectations=None, included_expectations=None
     ):
-        if "expect_column_values_to_not_be_null" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_values_to_not_be_null" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_values_to_not_be_null" in included_expectations
+        ):
             not_null_result = dataset.expect_column_values_to_not_be_null(column)
             if not not_null_result.success:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
@@ -180,13 +207,22 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
     @classmethod
     def _create_expectations_for_numeric_column(
-        cls, dataset, column, excluded_expectations=[]
+        cls, dataset, column, excluded_expectations=None, included_expectations=None
     ):
         cls._create_non_nullity_expectations(
-            dataset, column, excluded_expectations=excluded_expectations
+            dataset,
+            column,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
         )
 
-        if "expect_column_min_to_be_between" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_min_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_min_to_be_between" in included_expectations
+        ):
             observed_min = dataset.expect_column_min_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
@@ -199,7 +235,13 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     f"Skipping expect_column_min_to_be_between because observed value is nan: {observed_min}"
                 )
 
-        if "expect_column_max_to_be_between" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_max_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_max_to_be_between" in included_expectations
+        ):
             observed_max = dataset.expect_column_max_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
@@ -212,7 +254,13 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     f"Skipping expect_column_max_to_be_between because observed value is nan: {observed_max}"
                 )
 
-        if "expect_column_mean_to_be_between" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_mean_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_mean_to_be_between" in included_expectations
+        ):
             observed_mean = dataset.expect_column_mean_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
@@ -225,7 +273,13 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     f"Skipping expect_column_mean_to_be_between because observed value is nan: {observed_mean}"
                 )
 
-        if "expect_column_median_to_be_between" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_median_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_median_to_be_between" in included_expectations
+        ):
             observed_median = dataset.expect_column_median_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
@@ -240,7 +294,14 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
         allow_relative_error: bool = dataset.attempt_allowing_relative_error()
 
-        if "expect_column_quantile_values_to_be_between" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_quantile_values_to_be_between"
+            not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_quantile_values_to_be_between" in included_expectations
+        ):
             quantile_result = dataset.expect_column_quantile_values_to_be_between(
                 column,
                 quantile_ranges={
@@ -284,12 +345,21 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
     @classmethod
     def _create_expectations_for_string_column(
-        cls, dataset, column, excluded_expectations=[]
+        cls, dataset, column, excluded_expectations=None, included_expectations=None
     ):
         cls._create_non_nullity_expectations(
-            dataset, column, excluded_expectations=excluded_expectations
+            dataset,
+            column,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
         )
-        if "expect_column_value_lengths_to_be_between" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_value_lengths_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_value_lengths_to_be_between" in included_expectations
+        ):
             dataset.expect_column_value_lengths_to_be_between(column, min_value=1)
 
     @classmethod
@@ -382,13 +452,22 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
     @classmethod
     def _create_expectations_for_datetime_column(
-        cls, dataset, column, excluded_expectations=[]
+        cls, dataset, column, excluded_expectations=None, included_expectations=None
     ):
         cls._create_non_nullity_expectations(
-            dataset, column, excluded_expectations=excluded_expectations
+            dataset,
+            column,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
         )
 
-        if "expect_column_min_to_be_between" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_min_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_min_to_be_between" in included_expectations
+        ):
             min_value = dataset.expect_column_min_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
@@ -408,7 +487,13 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 except TypeError:
                     min_value = parse(min_value) + datetime.timedelta(days=-365)
 
-        if "expect_column_max_to_be_between" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_max_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_max_to_be_between" in included_expectations
+        ):
             max_value = dataset.expect_column_max_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
@@ -427,7 +512,13 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 except TypeError:
                     max_value = parse(max_value) + datetime.timedelta(days=365)
 
-        if "expect_column_min_to_be_between" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_column_min_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_min_to_be_between" in included_expectations
+        ):
             if min_value is not None or max_value is not None:
                 dataset.expect_column_values_to_be_between(
                     column, min_value, max_value, parse_strings_as_datetimes=True
@@ -460,7 +551,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             if "excluded_expectations" in configuration:
                 excluded_expectations = configuration["excluded_expectations"]
                 if excluded_expectations in [False, None, []]:
-                    excluded_expectations = []
+                    excluded_expectations = None
                 _check_that_expectations_are_available(dataset, excluded_expectations)
 
             if (
@@ -480,9 +571,6 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     excluded_columns = []
                 selected_columns = set(existing_columns) - set(excluded_columns)
 
-        assert isinstance(excluded_expectations, Iterable), ValueError(
-            "excluded_expectations must be an iterable"
-        )
         _check_that_columns_exist(dataset, selected_columns)
         if included_expectations is None:
             suite = cls._build_column_description_metadata(dataset)
@@ -492,11 +580,15 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
         dataset.set_default_expectation_argument("catch_exceptions", False)
         dataset = cls._build_table_row_count_expectation(
-            dataset, excluded_expectations=excluded_expectations
+            dataset,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
         )
         dataset.set_config_value("interactive_evaluation", True)
         dataset = cls._build_table_column_expectations(
-            dataset, excluded_expectations=excluded_expectations
+            dataset,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
         )
 
         column_cache = {}
@@ -532,11 +624,17 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                         cls._create_expectations_for_numeric_column(dataset, column)
                     elif column_type in [ProfilerDataType.DATETIME]:
                         cls._create_expectations_for_datetime_column(
-                            dataset, column, excluded_expectations=excluded_expectations
+                            dataset,
+                            column,
+                            excluded_expectations=excluded_expectations,
+                            included_expectations=included_expectations,
                         )
                     elif column_type in [ProfilerDataType.STRING]:
                         cls._create_expectations_for_string_column(
-                            dataset, column, excluded_expectations=excluded_expectations
+                            dataset,
+                            column,
+                            excluded_expectations=excluded_expectations,
+                            included_expectations=included_expectations,
                         )
                     elif column_type in [ProfilerDataType.UNKNOWN]:
                         logger.debug(
@@ -630,10 +728,20 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
     @classmethod
     def _build_table_row_count_expectation(
-        cls, dataset, tolerance=0.1, excluded_expectations=[]
+        cls,
+        dataset,
+        tolerance=0.1,
+        excluded_expectations=None,
+        included_expectations=None,
     ):
         assert tolerance >= 0, "Tolerance must be greater than zero"
-        if "expect_table_row_count_to_be_between" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_table_row_count_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_table_row_count_to_be_between" in included_expectations
+        ):
             value = dataset.expect_table_row_count_to_be_between(
                 min_value=0, max_value=None
             ).result["observed_value"]
@@ -645,11 +753,25 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return dataset
 
     @classmethod
-    def _build_table_column_expectations(cls, dataset, excluded_expectations=[]):
+    def _build_table_column_expectations(
+        cls, dataset, excluded_expectations=None, included_expectations=None
+    ):
         columns = dataset.get_table_columns()
-        if "expect_table_column_count_to_equal" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_table_column_count_to_equal" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_table_column_count_to_equal" in included_expectations
+        ):
             dataset.expect_table_column_count_to_equal(len(columns))
-        if "expect_table_columns_to_match_ordered_list" not in excluded_expectations:
+        if (
+            not excluded_expectations
+            or "expect_table_columns_to_match_ordered_list" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_table_columns_to_match_ordered_list" in included_expectations
+        ):
             dataset.expect_table_columns_to_match_ordered_list(columns)
         return dataset
 
