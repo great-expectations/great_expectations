@@ -179,7 +179,6 @@ Notes:
         )
 
         if isinstance(batch_spec, RuntimeDataBatchSpec):
-            print("AAAA")
             batch_data = batch_spec.batch_data
 
         elif isinstance(batch_spec, PathBatchSpec):
@@ -213,14 +212,12 @@ operate.
                 """
             )
 
-        print("BBB")
         splitter_method: str = batch_spec.get("splitter_method") or None
         splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
         if splitter_method:
             splitter_fn = getattr(self, splitter_method)
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
-        print("CCCC")
         sampling_method: str = batch_spec.get("sampling_method") or None
         sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
         if sampling_method:
