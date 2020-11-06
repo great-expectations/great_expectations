@@ -194,17 +194,20 @@ class Validator:
                             f"Invalid positional argument: {arg}"
                         )
 
+                # this is used so that exceptions are caught appropriately when they occur in expectation config
+                basic_runtime_configuration = {
+                    k: v
+                    for k, v in kwargs.items()
+                    if k in ("result_format", "include_config", "catch_exceptions")
+                }
+
                 configuration = ExpectationConfiguration(
                     expectation_type=name, kwargs=expectation_kwargs, meta=meta
                 )
                 runtime_configuration = configuration.get_runtime_kwargs()
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
-                # runtime_configuration = {
-                #     k: v
-                #     for k, v in kwargs.items()
-                #     if k in ("result_format", "include_config", "catch_exceptions")
-                # }
+
                 validation_result = expectation.validate(
                     validator=self, runtime_configuration=runtime_configuration,
                 )
@@ -212,7 +215,7 @@ class Validator:
                     validation_result = ExpectationValidationResult(**validation_result)
 
             except Exception as err:
-                if runtime_configuration.get("catch_exceptions"):
+                if basic_runtime_configuration.get("catch_exceptions"):
                     raised_exception = True
                     exception_traceback = traceback.format_exc()
                     exception_message = "{}: {}".format(type(err).__name__, str(err))
