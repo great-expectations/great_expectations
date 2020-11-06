@@ -141,32 +141,6 @@ Notes:
         self._loaded_batch_id = batch_id
         return batch
 
-    # TODO: <Alex>This signature does not permit "batch_data"; we should accept BatchSpec and parse it (please see the re-implementation below).</Alex>
-    # def get_batch_data_and_markers(
-    #     self,
-    #     path: str,
-    #     reader_method: str = "read_csv",
-    #     reader_options: dict = None
-    # ) -> Tuple[
-    #     Any, #batch_data
-    #     BatchMarkers
-    # ]:
-    #     if reader_options is None:
-    #         reader_options = {}
-    #
-    #     reader_fn = self._get_reader_fn(reader_method, path)
-    #     batch_data = reader_fn(path, **reader_options)
-    #
-    #     batch_markers = BatchMarkers(
-    #         {
-    #             "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-    #                 "%Y%m%dT%H%M%S.%fZ"
-    #             )
-    #         }
-    #     )
-    #
-    #     return batch_data, batch_markers
-
     def get_batch_data_and_markers(
         self,
         batch_spec: BatchSpec
@@ -331,32 +305,6 @@ operate.
             }
 
         raise BatchSpecError(f'Unable to determine reader method from path: "{path}".')
-
-    # # TODO: <Alex>Is this method still needed?  The DataConnector subclasses seem to accoplish the needed functionality.</Alex>
-    # def process_batch_request(self, batch_request: BatchRequest, batch_spec: BatchSpec):
-    #     """Takes in a batch request and batch spec. If the batch request has a limit, uses it to initialize the
-    #     number of rows to process for the batch spec in obtaining a batch
-    #     Args:
-    #         batch_definition (dict) - The batch definition as defined by the user
-    #         batch_spec (dict) - The batch spec used to query the backend
-    #     Returns:
-    #          batch_spec (dict) - The batch spec used to query the backend, with the added row limit
-    #     """
-    #     limit = batch_request.get("limit")
-    #     if limit is not None:
-    #         if not batch_spec.get("reader_options"):
-    #             batch_spec["reader_options"] = {}
-    #         batch_spec["reader_options"]["nrows"] = limit
-
-    #     # TODO: <Alex>Is this still relevant?</Alex>
-    #     # TODO: Make sure dataset_options are accounted for in __init__ of ExecutionEngine
-    #     # if dataset_options is not None:
-    #     #     # Then update with any locally-specified reader options
-    #     #     if not batch_parameters.get("dataset_options"):
-    #     #         batch_parameters["dataset_options"] = dict()
-    #     #     batch_parameters["dataset_options"].update(dataset_options)
-
-    #     return batch_spec
 
     def get_compute_domain(
         self, domain_kwargs: dict,
