@@ -7,9 +7,11 @@ import yaml
 
 from typing import Union, List, Optional
 
-
 from great_expectations.execution_environment import ExecutionEnvironment
-from great_expectations.execution_environment.data_connector.files_data_connector import FilesDataConnector
+from great_expectations.execution_environment.data_connector import (
+    ConfiguredAssetFilesystemDataConnector,
+    InferredAssetFilesystemDataConnector
+)
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -24,7 +26,7 @@ from great_expectations.execution_environment import ExecutionEnvironment
 from tests.test_utils import (
     create_files_for_regex_partitioner,
     create_files_in_directory,
-    execution_environment_files_data_connector_regex_partitioner_config,
+    execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config,
 )
 import great_expectations.exceptions as ge_exceptions
 
@@ -48,7 +50,7 @@ data_connectors:
             - run_id
 
     my_filesystem_data_connector:
-        class_name: FilesDataConnector
+        class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
         # TODO: <Alex>Investigate: this potentially breaks the data_reference centric design.</Alex>
         glob_directive: "*.csv"
@@ -97,7 +99,7 @@ data_connectors:
             - run_id
 
     my_filesystem_data_connector:
-        class_name: SinglePartitionerFileDataConnector
+        class_name: InferredAssetFilesystemDataConnector
         base_directory: {base_directory}
         # TODO: <Alex>Investigate: this potentially breaks the data_reference centric design.</Alex>
         glob_directive: "*.csv"
@@ -140,7 +142,7 @@ data_connectors:
 
 
 def test_some_very_basic_stuff(basic_execution_environment):
-    my_data_connector: FilesDataConnector = basic_execution_environment.get_data_connector(
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = basic_execution_environment.get_data_connector(
         name="my_filesystem_data_connector"
     )
     create_files_in_directory(
@@ -325,7 +327,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_e
         )
 
 
-def test_get_available_data_asset_names_with_files_data_connector(basic_execution_environment):
+def test_get_available_data_asset_names_with_configured_asset_filesystem_data_connector(basic_execution_environment):
     data_connector_names: Optional[Union[List, str]] = None
 
     # Call "get_batch_list_from_batch_request()" to fill up the caches
