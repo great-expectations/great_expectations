@@ -104,9 +104,10 @@ Notes:
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
         ValueError Exception
         """
-        if not self.active_batch_data:
+        # Changed to is None because was breaking prior
+        if self.active_batch_data is None:
             raise ValueError(
-                "Batch has not been loaded - please run load_batch() to load a batch."
+                "Batch has not been loaded - please run load_batch_data() to load a batch."
             )
 
         return self.active_batch_data
@@ -206,8 +207,8 @@ Notes:
         self, domain_kwargs: Dict,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
-        to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
-        or otherwise a Data Frame.
+        to obtain and/or query a batch. Returns in the format of a Pandas DataFrame. If the domain is a single column,
+        this is added to 'accessor domain kwargs' and used for later access
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
