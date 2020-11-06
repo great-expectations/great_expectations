@@ -140,6 +140,22 @@ Notes:
 
         self._loaded_batch_id = batch_id
         return batch
+    
+    def get_batch_data(
+        self,
+        batch_spec: BatchSpec,
+    ) -> Any :
+        """Interprets batch_data and returns the appropriate data.
+
+        This method is primarily useful for utility cases (e.g. testing) where
+        data is being fetched without a DataConnector and metadata like
+        batch_markers is unwanted
+
+        Note: this method is currently a thin wrapper for get_batch_data_and_markers.
+        It simply suppresses the batch_markers.
+        """
+        batch_data, _ = self.get_batch_data_and_markers(batch_spec)
+        return batch_data
 
     def get_batch_data_and_markers(
         self,
@@ -160,18 +176,17 @@ Notes:
         )
 
         if isinstance(batch_spec, InMemoryBatchSpec):
-            raise BatchSpecError(
-                '''The batch_spec argument must not have the type InMemoryBatchSpec when calling 
-"get_batch_data_and_markers()"."
-                '''
-            )
+            batch_data = batch_spec.dataset
 
-        reader_method: str = batch_spec.get("reader_method")
-        reader_options: dict = batch_spec.get("reader_options") or {}
-        if isinstance(batch_spec, PathBatchSpec):
+        elif isinstance(batch_spec, PathBatchSpec):
+            reader_method: str = batch_spec.get("reader_method")
+            reader_options: dict = batch_spec.get("reader_options") or {}
+
             path: str = batch_spec["path"]
             reader_fn: Callable = self._get_reader_fn(reader_method, path)
+
             batch_data = reader_fn(path, **reader_options)
+
         elif isinstance(batch_spec, S3BatchSpec):
             # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
             # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
@@ -193,6 +208,12 @@ Notes:
 operate.
                 """
             )
+
+        splitter_method: str = batch_spec.get("splitter_method") or None
+        splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
+        if splitter_method:
+            splitter_fn = getattr(self, splitter_method)
+            batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
         if batch_data is not None:
             if batch_data.memory_usage().sum() < HASH_THRESHOLD:
@@ -384,94 +405,91 @@ operate.
 
     ### Splitter methods for partitioning dataframes ###
 
+    @staticmethod
     def _split_on_whole_table(
-        self,
-        table_name: str,
-        # column_name: str,
-        partition_definition: dict,
-    ):
-        """'Split' by returning the whole table"""
+        df,
+    ) -> pd.DataFrame:
+        return df
 
-        # return sa.column(column_name) == partition_definition[column_name]
-        return 1 == 1
-
+    @staticmethod
     def _split_on_column_value(
-        self,
-        table_name: str,
+        df,
         column_name: str,
         partition_definition: dict,
-    ):
-        """Split using the values in the named column"""
+    ) -> pd.DataFrame:
 
-        return sa.column(column_name) == partition_definition[column_name]
+        return df[df[column_name]==partition_definition[column_name]]
 
+    @staticmethod
     def _split_on_converted_datetime(
-        self,
-        table_name: str,
+        df,
         column_name: str,
         partition_definition: dict,
         date_format_string: str='%Y-%m-%d',
     ):
         """Convert the values in the named column to the given date_format, and split on that"""
 
-        return sa.func.strftime(
-            date_format_string,
-            sa.column(column_name),
-        ) == partition_definition[column_name]
+        stringified_datetime_series = df[column_name].map(lambda x: x.strftime(date_format_string))
+        matching_string = partition_definition[column_name]
 
+        return df[ stringified_datetime_series == matching_string ]
+
+    @staticmethod
     def _split_on_divided_integer(
-        self,
-        table_name: str,
+        df,
         column_name: str,
         divisor:int,
         partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        return sa.cast(
-            sa.column(column_name) / divisor,
-            sa.Integer
-        ) == partition_definition[column_name]
+        matching_divisor = partition_definition[column_name]
+        matching_rows = df[column_name].map(lambda x: int(x/divisor)==matching_divisor)
 
+        return df[matching_rows]
+
+    @staticmethod
     def _split_on_mod_integer(
-        self,
-        table_name: str,
+        df,
         column_name: str,
         mod:int,
         partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        return sa.column(column_name) % mod == partition_definition[column_name]
+        matching_mod_value = partition_definition[column_name]
+        matching_rows = df[column_name].map(lambda x: x % mod == matching_mod_value)
 
+        return df[matching_rows]
+
+    @staticmethod
     def _split_on_multi_column_values(
-        self,
-        table_name: str,
+        df,
         column_names: List[str],
         partition_definition: dict,
     ):
         """Split on the joint values in the named columns"""
 
-        return sa.and_(*[
-            sa.column(column_name) == column_value for column_name, column_value in partition_definition.items()
-        ])
-        
+        subset_df = df.copy()
+        for column_name, value in partition_definition.items():
+            subset_df = subset_df[subset_df[column_name]==value]
+
+        return subset_df
+
+    @staticmethod
     def _split_on_hashed_column(
-        self,
-        table_name: str,
+        df,
         column_name: str,
         hash_digits: int,
         partition_definition: dict,
     ):
         """Split on the hashed value of the named column"""
 
-        return sa.func.right(
-            sa.func.md5(
-                sa.column(column_name)
-            ),
-            hash_digits
-        ) == partition_definition[column_name]
+        matching_rows = df[column_name].map(
+            lambda x: hashlib.md5(str(x).encode()).hexdigest()[-1*hash_digits:] == partition_definition["hash_value"]
+        )
 
+        return df[matching_rows]
 
     ### Sampling methods ###
 

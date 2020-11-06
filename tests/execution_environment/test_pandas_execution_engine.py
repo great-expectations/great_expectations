@@ -252,6 +252,118 @@ def test__splitters(test_df):
     assert split_df.shape == (8, 10)
 
 
+def test_get_batch_data(test_df):
+    print(test_df.T)
+
+    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
+        dataset=test_df,
+    ))
+    assert split_df.shape == (120, 10)
+
+    # TODO Abe 20201105: We should change InMemoryBatchSpec so that this test passes, but that should be a different PR.
+    # No dataset passed to InMemoryBatchSpec
+    # with pytest.raises(ValueError):
+    #     PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
+
+    #         # dataset=test_df,
+    #     ))
+
+def test_get_batch_with_split_on_whole_table(test_df):
+    print(test_df.T)
+
+    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
+        dataset=test_df,
+        splitter_method="_split_on_whole_table"
+    ))
+    assert split_df.shape == (120, 10)
+
+def test_get_batch_with_split_on_column_value(test_df):
+
+    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
+        dataset=test_df,
+        splitter_method="_split_on_column_value",
+        splitter_kwargs={
+            "column_name" : "batch_id",
+            "partition_definition" : {
+                "batch_id": 2
+            }
+        }
+    ))
+    assert split_df.shape == (12, 10)
+    assert (split_df.batch_id == 2).all()
+
+    split_df = _split_on_column_value(
+        test_df,
+        column_name="date",
+        partition_definition={
+            "date": datetime.date(2020,1,30)
+        }
+    )
+    assert (split_df).shape == (3, 10)
+
+
+
+def test_get_batch_with_split_on_converted_datetime(test_df):
+    return
+
+    split_df = _split_on_converted_datetime(
+        test_df,
+        column_name="timestamp",
+        partition_definition={
+            "timestamp": "2020-01-30"
+        }
+    )
+    assert (split_df).shape == (3, 10)
+
+
+    split_df = _split_on_divided_integer(
+        test_df,
+        column_name="id",
+        divisor=10,
+        partition_definition={
+            "id": 5
+        }
+    )
+    assert split_df.shape == (10, 10)
+    assert split_df.id.min() == 50
+    assert split_df.id.max() == 59
+
+
+    split_df = _split_on_mod_integer(
+        test_df,
+        column_name="id",
+        mod=10,
+        partition_definition={
+            "id": 5
+        }
+    )
+    assert split_df.shape == (12, 10)
+    assert split_df.id.min() == 5
+    assert split_df.id.max() == 115
+    
+    split_df = _split_on_multi_column_values(
+        test_df,
+        column_names=["y", "m", "d"],
+        partition_definition={
+            "y": 2020,
+            "m": 1,
+            "d": 5,
+        }
+    )
+    assert split_df.shape == (4, 10)
+    assert (split_df.date == datetime.date(2020,1,5)).all()
+
+    split_df = _split_on_hashed_column(
+        test_df,
+        column_name="favorite_color",
+        hash_digits=1,
+        partition_definition={
+            "hash_value": "a",
+        }
+    )
+    assert split_df.shape == (8, 10)
+
+
 # ### Sampling methods ###
 
 # # _sample_using_limit
