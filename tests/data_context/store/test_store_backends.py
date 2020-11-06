@@ -246,7 +246,7 @@ def test_InMemoryStoreBackend():
     my_store = InMemoryStoreBackend()
 
     my_key = ("A",)
-    with pytest.raises(KeyError):
+    with pytest.raises(InvalidKeyError):
         my_store.get(my_key)
 
     my_store.set(my_key, "aaa")
@@ -791,7 +791,7 @@ def test_TupleGCSStoreBackend():
         mock_gcs_client.assert_called_with("dummy-project")
         mock_client.get_bucket.assert_called_with("leakybucket")
         mock_bucket.blob.assert_called_with("this_is_a_test_prefix/my_file_AAA")
-        mock_bucket.blob.assert_any_call("this_is_a_test_prefix/.ge_store_backend_id")
+        # mock_bucket.blob.assert_any_call("this_is_a_test_prefix/.ge_store_backend_id")
         mock_blob.upload_from_string.assert_called_with(
             b"aaa", content_type="text/html"
         )
@@ -812,7 +812,7 @@ def test_TupleGCSStoreBackend():
         mock_gcs_client.assert_called_with("dummy-project")
         mock_client.get_bucket.assert_called_with("leakybucket")
         mock_bucket.blob.assert_called_with("this_is_a_test_prefix/AAA")
-        mock_bucket.blob.assert_any_call("this_is_a_test_prefix/.ge_store_backend_id")
+        # mock_bucket.blob.assert_any_call("this_is_a_test_prefix/.ge_store_backend_id")
         mock_blob.upload_from_string.assert_called_with(
             b"aaa", content_type="image/png"
         )
