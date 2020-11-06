@@ -62,7 +62,9 @@ class InferredAssetFilePathDataConnector(DataConnector):
         if default_regex is None:
             default_regex = {}
         self._default_regex = default_regex
+        # TODO: <Alex>We need to move sorters to DataConnector and standardize self._validate_sorters_configuration()</Alex>
         self._sorters = build_sorters_from_config(config_list=sorters)
+        self._validate_sorters_configuration()
 
     @property
     def sorters(self) -> Optional[dict]:
@@ -141,7 +143,6 @@ class InferredAssetFilePathDataConnector(DataConnector):
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
-        self._validate_sorters_configuration()
 
         if self._data_references_cache is None:
             self._refresh_data_references_cache()
