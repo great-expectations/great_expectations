@@ -81,7 +81,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     """
 
-    map_metric = "column_values.value_lengths_equal"
+    map_metric = "column_values.value_length.equals"
     success_keys = ("value", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
@@ -166,48 +166,3 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 }
             )
         ]
-
-    # @PandasExecutionEngine.column_map_metric(
-    #     metric_name="column_values.length_equals",
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=("value",),
-    #     metric_dependencies=("column.value_lengths",),
-    #     filter_column_isnull=True,
-    # )
-    def _pandas_column_values_length_equals(
-        self,
-        series: pd.Series,
-        metrics: Dict,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        """Tests whether or not value lengths equal threshold"""
-        value = metric_value_kwargs["value"]
-        length_equals = series.str.len() == value
-        return pd.DataFrame({"column_values.length_equals": length_equals})
-
-    """ A metric decorator for individual value lengths"""
-
-    # @PandasExecutionEngine.metric(
-    #     metric_name="column.value_lengths",
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=(),
-    #     metric_dependencies=tuple(),
-    # )
-    def _pandas_value_lengths(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-    ):
-        """Extracts lengths of individual entries"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        return series.str.len()

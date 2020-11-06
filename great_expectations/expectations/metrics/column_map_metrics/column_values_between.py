@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 from dateutil.parser import parse
 
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -192,7 +193,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 return sa.and_(min_value <= column, column <= max_value)
 
     @column_map_condition(engine=SparkDFExecutionEngine)
-    def _sqlalchemy(
+    def _spark(
         cls,
         column,
         min_value=None,
@@ -221,10 +222,10 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
 
         else:
             if strict_min and strict_max:
-                return min_value < column & column < max_value
+                return (min_value < column) & (column < max_value)
             elif strict_min:
-                return min_value < column & column <= max_value
+                return (min_value < column) & (column <= max_value)
             elif strict_max:
-                return min_value <= column & column < max_value
+                return (min_value <= column) & (column < max_value)
             else:
-                return min_value <= column & column <= max_value
+                return (min_value <= column) & (column <= max_value)
