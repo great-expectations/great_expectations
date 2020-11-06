@@ -340,7 +340,7 @@ def column_map_condition(
                     _compute_domain_kwargs=compute_domain_kwargs,
                     _accessor_domain_kwargs=accessor_domain_kwargs,
                 )
-                if metric_fn_type == "map_condition_column":
+                if metric_fn_type == "window_condition_fn":
                     if filter_column_isnull:
                         compute_domain_kwargs = execution_engine.add_column_null_filter_row_condition(
                             metric_domain_kwargs
@@ -914,7 +914,7 @@ class MapMetricProvider(MetricProvider):
                             metric_provider=_spark_map_unexpected_count,
                             metric_fn_type="aggregate_fn",
                         )
-                    elif metric_fn_type == "map_condition_column":
+                    elif metric_fn_type == "window_condition_fn":
                         register_metric(
                             metric_name=metric_name + ".unexpected_count",
                             metric_domain_keys=metric_domain_keys,

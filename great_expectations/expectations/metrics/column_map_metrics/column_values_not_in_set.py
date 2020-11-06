@@ -42,9 +42,5 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
         return column.notin_(tuple(parsed_value_set))
 
     @column_map_condition(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, value_set, parse_strings_as_datetimes, **kwargs):
-        if parse_strings_as_datetimes:
-            parsed_value_set = parse_value_set(value_set)
-        else:
-            parsed_value_set = value_set
-        return column.notin_(tuple(parsed_value_set))
+    def _spark(cls, column, value_set, **kwargs):
+        return ~column.isin(value_set)
