@@ -223,6 +223,8 @@ def get_filesystem_one_level_directory_glob_path_list(
     return path_list
 
 
+# TODO: <Alex>We need to move sorters to DataConnector and standardize self._validate_sorters_configuration()</Alex>
+# TODO: <Alex>Will: Should this method be private?</Alex>
 def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
     sorter_dict: Dict[str, Sorter] = {}
     if config_list is not None:
