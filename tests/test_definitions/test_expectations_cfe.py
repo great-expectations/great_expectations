@@ -3,22 +3,20 @@ import json
 import os
 import random
 import string
-from collections import OrderedDict
 
 import pandas as pd
 import pytest
 from pandas import DataFrame as pandas_DataFrame
-from pyspark.sql import DataFrame as spark_DataFrame
 
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
+try:
+    from pyspark.sql import DataFrame as spark_DataFrame
+except ImportError:
+    spark_DataFrame = type(None)
+
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
-    SqlAlchemyExecutionEngine,
 )
-from tests.conftest import build_test_backends_list, build_test_backends_list_cfe
+from tests.conftest import build_test_backends_list_cfe
 from tests.test_definitions.test_expectations import mssqlDialect as mssqlDialect
 from tests.test_definitions.test_expectations import mysqlDialect as mysqlDialect
 from tests.test_definitions.test_expectations import (
@@ -28,7 +26,6 @@ from tests.test_definitions.test_expectations import sqliteDialect as sqliteDial
 from tests.test_definitions.test_expectations import tmp_dir
 from tests.test_utils import (
     candidate_test_is_on_temporary_notimplemented_list_cfe,
-    evaluate_json_test,
     evaluate_json_test_cfe,
     get_test_validator_with_data,
 )
@@ -37,7 +34,9 @@ from tests.test_utils import (
 def pytest_generate_tests(metafunc):
 
     # BLOCK ON 0.13-develop; remove when working on these tests
+    metafunc.parametrize("test_case", [])
     return
+    # END BLOCK
 
     # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))

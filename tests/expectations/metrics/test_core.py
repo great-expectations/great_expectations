@@ -2,10 +2,8 @@ import logging
 
 import numpy as np
 import pandas as pd
-import sqlalchemy as sa
 
 from great_expectations.core.batch import Batch
-from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -14,7 +12,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics import *
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.validation_graph import MetricConfiguration
 
