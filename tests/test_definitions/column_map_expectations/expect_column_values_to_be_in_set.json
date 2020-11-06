@@ -116,18 +116,6 @@
           "unexpected_list": [1.1, 2.2, 5.5]
         }
       },
-      {
-        "title": "raise_typeerror_when_values_set_is_missing",
-        "exact_match_out": false,
-        "in": {
-          "column": "z",
-          "value_set": null,
-          "catch_exceptions": true
-        },
-        "out": {
-          "traceback_substring": "argument of type 'NoneType' is not iterable"
-          }
-      },
     {
       "title": "test_conditional_expectation_passes",
       "only_for": ["pandas"],
