@@ -182,38 +182,37 @@ test_StoreBackend_id_initialization__dir1/
     # TODO: Fix GCS Testing
     # TupleGCSStoreBackend
     # Initialize without store_backend_id and check that it is generated correctly
-    # bucket = "leakybucket"
-    # prefix = "this_is_a_test_prefix"
-    # project = "dummy-project"
-    # base_public_path = "http://www.test.com/"
-    #
-    # gcs_store_backend_with_base_public_path = TupleGCSStoreBackend(
-    #     filepath_template=None,
-    #     bucket=bucket,
-    #     prefix=prefix,
-    #     project=project,
-    #     base_public_path=base_public_path,
-    # )
-    #
-    # gcs_store_backend_with_base_public_path_duplicate = TupleGCSStoreBackend(
-    #     filepath_template=None,
-    #     bucket=bucket,
-    #     prefix=prefix,
-    #     project=project,
-    #     base_public_path=base_public_path,
-    # )
-    #
-    # with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
-    #
-    #     assert gcs_store_backend_with_base_public_path.store_backend_id is not None
-    #     # Currently we don't have a good way to mock GCS functionality
-    #     # check_store_backend_store_backend_id_functionality(store_backend=gcs_store_backend_with_base_public_path)
-    #
-    #     # Create a new store with the same config and make sure it reports the same store_backend_id
-    #     assert (
-    #         gcs_store_backend_with_base_public_path.store_backend_id
-    #         == gcs_store_backend_with_base_public_path_duplicate.store_backend_id
-    #     )
+    bucket = "leakybucket"
+    prefix = "this_is_a_test_prefix"
+    project = "dummy-project"
+    base_public_path = "http://www.test.com/"
+
+    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+        gcs_store_backend_with_base_public_path = TupleGCSStoreBackend(
+            filepath_template=None,
+            bucket=bucket,
+            prefix=prefix,
+            project=project,
+            base_public_path=base_public_path,
+        )
+
+        gcs_store_backend_with_base_public_path_duplicate = TupleGCSStoreBackend(
+            filepath_template=None,
+            bucket=bucket,
+            prefix=prefix,
+            project=project,
+            base_public_path=base_public_path,
+        )
+
+        assert gcs_store_backend_with_base_public_path.store_backend_id is not None
+        # Currently we don't have a good way to mock GCS functionality
+        # check_store_backend_store_backend_id_functionality(store_backend=gcs_store_backend_with_base_public_path)
+
+        # Create a new store with the same config and make sure it reports the same store_backend_id
+        assert (
+            gcs_store_backend_with_base_public_path.store_backend_id
+            == gcs_store_backend_with_base_public_path_duplicate.store_backend_id
+        )
 
 
 @mock_s3
@@ -725,18 +724,18 @@ def test_TupleGCSStoreBackend_base_public_path():
     project = "dummy-project"
     base_public_path = "http://www.test.com/"
 
-    my_store_with_base_public_path = TupleGCSStoreBackend(
-        filepath_template=None,
-        bucket=bucket,
-        prefix=prefix,
-        project=project,
-        base_public_path=base_public_path,
-    )
-
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.get_bucket.return_value
         mock_blob = mock_bucket.blob.return_value
+
+        my_store_with_base_public_path = TupleGCSStoreBackend(
+            filepath_template=None,
+            bucket=bucket,
+            prefix=prefix,
+            project=project,
+            base_public_path=base_public_path,
+        )
 
         my_store_with_base_public_path.set(
             ("BBB",), b"bbb", content_encoding=None, content_type="image/png"
@@ -774,34 +773,26 @@ def test_TupleGCSStoreBackend():
     project = "dummy-project"
     base_public_path = "http://www.test.com/"
 
-    my_store = TupleGCSStoreBackend(
-        filepath_template="my_file_{0}", bucket=bucket, prefix=prefix, project=project
-    )
-
-    my_store_with_no_filepath_template = TupleGCSStoreBackend(
-        filepath_template=None, bucket=bucket, prefix=prefix, project=project
-    )
-
-    my_store_with_base_public_path = TupleGCSStoreBackend(
-        filepath_template=None,
-        bucket=bucket,
-        prefix=prefix,
-        project=project,
-        base_public_path=base_public_path,
-    )
-
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
 
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.get_bucket.return_value
         mock_blob = mock_bucket.blob.return_value
 
+        my_store = TupleGCSStoreBackend(
+            filepath_template="my_file_{0}",
+            bucket=bucket,
+            prefix=prefix,
+            project=project,
+        )
+
         my_store.set(("AAA",), "aaa", content_type="text/html")
 
-        mock_gcs_client.assert_called_once_with("dummy-project")
-        mock_client.get_bucket.assert_called_once_with("leakybucket")
-        mock_bucket.blob.assert_called_once_with("this_is_a_test_prefix/my_file_AAA")
-        mock_blob.upload_from_string.assert_called_once_with(
+        mock_gcs_client.assert_called_with("dummy-project")
+        mock_client.get_bucket.assert_called_with("leakybucket")
+        mock_bucket.blob.assert_called_with("this_is_a_test_prefix/my_file_AAA")
+        mock_bucket.blob.assert_any_call("this_is_a_test_prefix/.ge_store_backend_id")
+        mock_blob.upload_from_string.assert_called_with(
             b"aaa", content_type="text/html"
         )
 
@@ -810,14 +801,19 @@ def test_TupleGCSStoreBackend():
         mock_bucket = mock_client.get_bucket.return_value
         mock_blob = mock_bucket.blob.return_value
 
+        my_store_with_no_filepath_template = TupleGCSStoreBackend(
+            filepath_template=None, bucket=bucket, prefix=prefix, project=project
+        )
+
         my_store_with_no_filepath_template.set(
             ("AAA",), b"aaa", content_encoding=None, content_type="image/png"
         )
 
-        mock_gcs_client.assert_called_once_with("dummy-project")
-        mock_client.get_bucket.assert_called_once_with("leakybucket")
-        mock_bucket.blob.assert_called_once_with("this_is_a_test_prefix/AAA")
-        mock_blob.upload_from_string.assert_called_once_with(
+        mock_gcs_client.assert_called_with("dummy-project")
+        mock_client.get_bucket.assert_called_with("leakybucket")
+        mock_bucket.blob.assert_called_with("this_is_a_test_prefix/AAA")
+        mock_bucket.blob.assert_any_call("this_is_a_test_prefix/.ge_store_backend_id")
+        mock_blob.upload_from_string.assert_called_with(
             b"aaa", content_type="image/png"
         )
 
