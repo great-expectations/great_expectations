@@ -107,7 +107,12 @@ class Store:
             )
 
     def list_keys(self):
-        return [self.tuple_to_key(key) for key in self._store_backend.list_keys()]
+        keys_without_store_backend_id = [
+            key
+            for key in self._store_backend.list_keys()
+            if not key == StoreBackend.STORE_BACKEND_ID_KEY
+        ]
+        return [self.tuple_to_key(key) for key in keys_without_store_backend_id]
 
     def has_key(self, key):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:

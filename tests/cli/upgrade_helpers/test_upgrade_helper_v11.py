@@ -151,6 +151,7 @@ great_expectations/
     checkpoints/
         .gitkeep
     expectations/
+        .ge_store_backend_id
         .gitkeep
     notebooks/
         .gitkeep
@@ -162,11 +163,14 @@ great_expectations/
         config_variables.yml
         data_docs/
             local_site/
+                .ge_store_backend_id
                 expectations/
+                    .ge_store_backend_id
                     .gitkeep
                 static/
                     .gitkeep
                 validations/
+                    .ge_store_backend_id
                     diabetic_data/
                         warning/
                             20200430T191246.763896Z/
@@ -176,6 +180,7 @@ great_expectations/
             project_upgrades/
                 UpgradeHelperV11_20190926T134241.000000Z.json
         validations/
+            .ge_store_backend_id
             diabetic_data/
                 warning/
                     20200430T191246.763896Z/
