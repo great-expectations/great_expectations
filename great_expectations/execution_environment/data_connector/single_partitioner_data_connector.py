@@ -68,7 +68,7 @@ class SinglePartitionerDataConnector(DataConnector):
     def sorters(self) -> Optional[dict]:
         return self._sorters
 
-    def refresh_data_references_cache(self):
+    def _refresh_data_references_cache(self):
         """
         """
         # Map data_references to batch_definitions
@@ -116,13 +116,13 @@ class SinglePartitionerDataConnector(DataConnector):
 
     def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
-            raise ValueError('_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?')
+            raise ValueError('_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?')
 
         return [k for k, v in self._data_references_cache.items() if v is None]
 
     def get_available_data_asset_names(self) -> List[str]:
         if self._data_references_cache is None:
-            self.refresh_data_references_cache()
+            self._refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
         batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
@@ -144,7 +144,7 @@ class SinglePartitionerDataConnector(DataConnector):
         self._validate_sorters_configuration()
 
         if self._data_references_cache is None:
-            self.refresh_data_references_cache()
+            self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = list(
             filter(

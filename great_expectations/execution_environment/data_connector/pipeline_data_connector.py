@@ -40,7 +40,7 @@ class PipelineDataConnector(DataConnector):
 
         self._runtime_keys = runtime_keys
 
-    def refresh_data_references_cache(self):
+    def _refresh_data_references_cache(self):
         """
         """
         # Map data_references to batch_definitions
@@ -86,7 +86,7 @@ class PipelineDataConnector(DataConnector):
 
     def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
-            raise ValueError('_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?')
+            raise ValueError('_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?')
 
         return [k for k, v in self._data_references_cache.items() if v is None]
 

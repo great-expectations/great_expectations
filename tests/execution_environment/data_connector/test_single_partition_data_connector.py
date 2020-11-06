@@ -42,7 +42,8 @@ def test_basic_instantiation():
         data_reference_dict=data_reference_dict,
     )
 
-    my_data_connector.refresh_data_references_cache()
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_list_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -96,7 +97,8 @@ default_regex:
         runtime_environment={"name": "my_data_connector"},
     )
 
-    my_data_connector.refresh_data_references_cache()
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
 
     # Test for an unknown execution environment
     with pytest.raises(ValueError):
@@ -222,7 +224,8 @@ default_regex:
 #         runtime_environment={"name": "my_data_connector"},
 #     )
 
-#     my_data_connector.refresh_data_references_cache()
+#     noinspection PyProtectedMember
+#     my_data_connector._refresh_data_references_cache()
 
 #     # I'm starting to think we might want to separate out this behavior into a different class.
 #     assert len(my_data_connector.get_unmatched_data_references()) == 0
