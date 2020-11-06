@@ -235,7 +235,7 @@ operate.
         Computes batch_markers in the case of user-provided batch_data (e.g., in the case of a data pipeline).
 
         :param batch_data -- user-provided dataframe
-        :param batch_spec -- BatchSpec (must be previously instantiated/initialized by PipelineDataConnector)
+        :param batch_spec -- BatchSpec (must be previously instantiated/initialized by RuntimeDataConnector)
         :returns computed batch_markers specific to this execution engine
         """
         batch_markers: BatchMarkers = BatchMarkers(
