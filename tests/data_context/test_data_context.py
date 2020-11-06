@@ -435,6 +435,7 @@ project_path/
         great_expectations.yml
         checkpoints/
         expectations/
+            .ge_store_backend_id
             titanic/
                 subdir_reader/
                     Titanic/
@@ -456,6 +457,7 @@ project_path/
             config_variables.yml
             data_docs/
             validations/
+                .ge_store_backend_id
                 titanic/
                     subdir_reader/
                         Titanic/
@@ -497,8 +499,10 @@ project_path/
         == """\
 data_docs/
     local_site/
+        .ge_store_backend_id
         index.html
         expectations/
+            .ge_store_backend_id
             random/
                 subdir_reader/
                     f1/
@@ -535,6 +539,7 @@ data_docs/
                 data_docs_custom_styles_template.css
                 data_docs_default_styles.css
         validations/
+            .ge_store_backend_id
             random/
                 subdir_reader/
                     f1/
@@ -978,6 +983,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -995,6 +1001,7 @@ great_expectations/
         config_variables.yml
         data_docs/
         validations/
+            .ge_store_backend_id
 """
     )
 
@@ -1008,6 +1015,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -1025,6 +1033,7 @@ great_expectations/
         config_variables.yml
         data_docs/
         validations/
+            .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, "great_expectations")
@@ -1050,6 +1059,7 @@ uncommitted/
     config_variables.yml
     data_docs/
     validations/
+        .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, "great_expectations")
