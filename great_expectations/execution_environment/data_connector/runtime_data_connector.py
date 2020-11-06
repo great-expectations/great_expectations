@@ -20,8 +20,9 @@ DEFAULT_DATA_ASSET_NAME: str = "IN_MEMORY_DATA_ASSET"
 DEFAULT_DELIMITER: str = "-"
 
 
-# TODO: <Alex>We need a mechanism for specifying the data_asset_name for PipelineDataConnector (otherwise, it will always be the default).</Alex>
-class PipelineDataConnector(DataConnector):
+# TODO: <Alex>We need a mechanism for specifying the data_asset_name for RuntimeDataConnector (otherwise, it will always be the default).</Alex>
+class RuntimeDataConnector(DataConnector):
+
     def __init__(
         self,
         name: str,
@@ -29,7 +30,7 @@ class PipelineDataConnector(DataConnector):
         execution_engine: ExecutionEngine = None,
         runtime_keys: list = None,
     ):
-        logger.debug(f'Constructing PipelineDataConnector "{name}".')
+        logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
         super().__init__(
             name=name,
@@ -39,7 +40,7 @@ class PipelineDataConnector(DataConnector):
 
         self._runtime_keys = runtime_keys
 
-    def refresh_data_references_cache(self):
+    def _refresh_data_references_cache(self):
         """
         """
         # Map data_references to batch_definitions
@@ -85,7 +86,7 @@ class PipelineDataConnector(DataConnector):
 
     def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
-            raise ValueError('_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?')
+            raise ValueError('_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?')
 
         return [k for k, v in self._data_references_cache.items() if v is None]
 
@@ -213,7 +214,7 @@ class PipelineDataConnector(DataConnector):
             )
         ):
             raise ge_exceptions.DataConnectorError(
-                f'''PipelineDataConnector "{self.name}" requires batch_data and partition_request to be both present or
+                f'''RuntimeDataConnector "{self.name}" requires batch_data and partition_request to be both present or
                 both absent in the batch_request parameter.
                 '''
             )
@@ -229,7 +230,7 @@ class PipelineDataConnector(DataConnector):
         if runtime_keys and len(runtime_keys) > 0:
             if not (self._runtime_keys and set(runtime_keys) <= set(self._runtime_keys)):
                 raise ge_exceptions.DataConnectorError(
-                    f'''PipelineDataConnector "{self.name}" was invoked with one or more runtime keys that do not 
+                    f'''RuntimeDataConnector "{self.name}" was invoked with one or more runtime keys that do not
 appear among the configured runtime keys.
                     '''
                 )

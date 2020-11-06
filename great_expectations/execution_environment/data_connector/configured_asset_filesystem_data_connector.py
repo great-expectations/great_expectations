@@ -49,7 +49,7 @@ KNOWN_EXTENSIONS = [
 ]
 
 
-class FilesDataConnector(DataConnector):
+class ConfiguredAssetFilesystemDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
@@ -62,7 +62,7 @@ class FilesDataConnector(DataConnector):
         execution_engine: ExecutionEngine = None,
         data_context_root_directory: str = None,
     ):
-        logger.debug(f'Constructing FilesDataConnector "{name}".')
+        logger.debug(f'Constructing ConfiguredAssetFilesystemDataConnector "{name}".')
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
@@ -161,7 +161,7 @@ configured runtime keys.
         else:
             return Path(self._data_context_root_directory).joinpath(dir_path)
 
-    def refresh_data_references_cache(
+    def _refresh_data_references_cache(
         self,
     ):
         """
@@ -251,7 +251,7 @@ configured runtime keys.
 
     def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
-            raise ValueError('_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?')
+            raise ValueError('_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?')
 
         unmatched_data_references: List[str] = []
         for data_asset_name, data_reference_sub_cache in self._data_references_cache.items():
@@ -266,7 +266,7 @@ configured runtime keys.
         self._validate_batch_request(batch_request=batch_request)
 
         if self._data_references_cache is None:
-            self.refresh_data_references_cache()
+            self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = list(
             filter(
@@ -298,6 +298,32 @@ configured runtime keys.
             return sorted_batch_definition_list
         else:
             return batch_definition_list
+
+    # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
+    def _validate_sorters_configuration(self, batch_request):
+        # Override the default
+        if len(self.sorters) > 0:
+            regex_config = self._default_regex
+            if (
+                batch_request.data_asset_name is not None
+                and self.assets and batch_request.data_asset_name in self.assets
+            ):
+                asset: Asset = self.assets[batch_request.data_asset_name]
+                if asset.group_names:
+                    regex_config["group_names"] = asset.group_names
+            group_names: List[str] = regex_config["group_names"]
+            if any([sorter not in group_names for sorter in self.sorters]):
+                raise ge_exceptions.DataConnectorError(
+                    f'''ConfiguredAssetFilesystemDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+configured group_name.
+                      '''
+                )
+            if len(group_names) < len(self.sorters):
+                raise ge_exceptions.DataConnectorError(
+                    f'''ConfiguredAssetFilesystemDataConnector "{self.name}" is configured with {len(group_names)} group names;
+this is fewer than number of sorters specified, which is {len(self.sorters)}.
+                    '''
+                )
 
     def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list: List[Sorter] = []

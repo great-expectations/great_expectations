@@ -38,12 +38,12 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
     )
 
     my_data_connector_yaml = yaml.load(f"""
-            class_name: FilesDataConnector
+            class_name: ConfiguredAssetFilesystemDataConnector
             execution_environment_name: test_environment
             execution_engine:
                 BASE_ENGINE:
                 class_name: PandasExecutionEngine
-            class_name: FilesDataConnector
+            class_name: ConfiguredAssetFilesystemDataConnector
             base_directory: {base_directory}
             glob_directive: '*.csv'
             assets:

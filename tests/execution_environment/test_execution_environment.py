@@ -7,9 +7,11 @@ import yaml
 
 from typing import Union, List, Optional
 
-
 from great_expectations.execution_environment import ExecutionEnvironment
-from great_expectations.execution_environment.data_connector.files_data_connector import FilesDataConnector
+from great_expectations.execution_environment.data_connector import (
+    ConfiguredAssetFilesystemDataConnector,
+    InferredAssetFilesystemDataConnector
+)
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -24,7 +26,7 @@ from great_expectations.execution_environment import ExecutionEnvironment
 from tests.test_utils import (
     create_files_for_regex_partitioner,
     create_files_in_directory,
-    execution_environment_files_data_connector_regex_partitioner_config,
+    execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config,
 )
 import great_expectations.exceptions as ge_exceptions
 
@@ -40,15 +42,15 @@ execution_engine:
     class_name: PandasExecutionEngine
 
 data_connectors:
-    test_pipeline_data_connector:
+    test_runtime_data_connector:
         module_name: great_expectations.execution_environment.data_connector
-        class_name: PipelineDataConnector
+        class_name: RuntimeDataConnector
         runtime_keys:
             - pipeline_stage_name
             - run_id
 
     my_filesystem_data_connector:
-        class_name: FilesDataConnector
+        class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
         # TODO: <Alex>Investigate: this potentially breaks the data_reference centric design.</Alex>
         glob_directive: "*.csv"
@@ -89,15 +91,15 @@ execution_engine:
     class_name: PandasExecutionEngine
 
 data_connectors:
-    test_pipeline_data_connector:
+    test_runtime_data_connector:
         module_name: great_expectations.execution_environment.data_connector
-        class_name: PipelineDataConnector
+        class_name: RuntimeDataConnector
         runtime_keys:
             - pipeline_stage_name
             - run_id
 
     my_filesystem_data_connector:
-        class_name: SinglePartitionerFileDataConnector
+        class_name: InferredAssetFilesystemDataConnector
         base_directory: {base_directory}
         # TODO: <Alex>Investigate: this potentially breaks the data_reference centric design.</Alex>
         glob_directive: "*.csv"
@@ -140,7 +142,7 @@ data_connectors:
 
 
 def test_some_very_basic_stuff(basic_execution_environment):
-    my_data_connector: FilesDataConnector = basic_execution_environment.get_data_connector(
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = basic_execution_environment.get_data_connector(
         name="my_filesystem_data_connector"
     )
     create_files_in_directory(
@@ -271,7 +273,7 @@ def test_get_batch_with_caching():
 def test_get_batch_with_pipeline_style_batch_request(basic_execution_environment):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    data_connector_name: str = "test_pipeline_data_connector"
+    data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "IN_MEMORY_DATA_ASSET"
 
     batch_request: dict = {
@@ -306,7 +308,7 @@ def test_get_batch_with_pipeline_style_batch_request(basic_execution_environment
 def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_error(basic_execution_environment):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    data_connector_name: str = "test_pipeline_data_connector"
+    data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "test_asset_1"
 
     batch_request: dict = {
@@ -325,11 +327,11 @@ def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_e
         )
 
 
-def test_get_available_data_asset_names_with_files_data_connector(basic_execution_environment):
+def test_get_available_data_asset_names_with_configured_asset_filesystem_data_connector(basic_execution_environment):
     data_connector_names: Optional[Union[List, str]] = None
 
     # Call "get_batch_list_from_batch_request()" to fill up the caches
-    data_connector_name: str = "test_pipeline_data_connector"
+    data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "IN_MEMORY_DATA_ASSET"
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     batch_request: dict = {
@@ -351,7 +353,7 @@ def test_get_available_data_asset_names_with_files_data_connector(basic_executio
     )
 
     expected_data_asset_names: dict = {
-        "test_pipeline_data_connector": [data_asset_name],
+        "test_runtime_data_connector": [data_asset_name],
         "my_filesystem_data_connector": ["Titanic"]
     }
 
@@ -365,10 +367,10 @@ def test_get_available_data_asset_names_with_files_data_connector(basic_executio
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
-    data_connector_names = ["my_filesystem_data_connector", "test_pipeline_data_connector"]
+    data_connector_names = ["my_filesystem_data_connector", "test_runtime_data_connector"]
 
     expected_data_asset_names: dict = {
-        "test_pipeline_data_connector": [data_asset_name],
+        "test_runtime_data_connector": [data_asset_name],
         "my_filesystem_data_connector": ["Titanic"]
     }
 
@@ -414,10 +416,10 @@ def test_get_available_data_asset_names_with_files_data_connector(basic_executio
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
-    data_connector_names = ["test_pipeline_data_connector"]
+    data_connector_names = ["test_runtime_data_connector"]
 
     expected_data_asset_names: dict = {
-        "test_pipeline_data_connector": [data_asset_name]
+        "test_runtime_data_connector": [data_asset_name]
     }
 
     available_data_asset_names: dict = basic_execution_environment.get_available_data_asset_names(
@@ -438,7 +440,7 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
     data_connector_names: Optional[Union[List, str]] = None
 
     # Call "get_batch_list_from_batch_request()" to fill up the caches
-    data_connector_name: str = "test_pipeline_data_connector"
+    data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "IN_MEMORY_DATA_ASSET"
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     batch_request: dict = {
@@ -460,7 +462,7 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
     )
 
     expected_data_asset_names: dict = {
-        "test_pipeline_data_connector": [data_asset_name],
+        "test_runtime_data_connector": [data_asset_name],
         "my_filesystem_data_connector": ["DEFAULT_ASSET_NAME"]
     }
 
@@ -472,10 +474,10 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
-    data_connector_names = ["my_filesystem_data_connector", "test_pipeline_data_connector"]
+    data_connector_names = ["my_filesystem_data_connector", "test_runtime_data_connector"]
 
     expected_data_asset_names: dict = {
-        "test_pipeline_data_connector": [data_asset_name],
+        "test_runtime_data_connector": [data_asset_name],
         "my_filesystem_data_connector": ["DEFAULT_ASSET_NAME"]
     }
 

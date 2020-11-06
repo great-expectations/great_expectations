@@ -4,7 +4,7 @@ from typing import Union, List, Any, Optional
 
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.data_connector.pipeline_data_connector import PipelineDataConnector
+from great_expectations.execution_environment.data_connector.runtime_data_connector import RuntimeDataConnector
 from great_expectations.core.batch import (
     BatchRequest,
     BatchMarkers,
@@ -114,9 +114,9 @@ class ExecutionEnvironment:
                 batch_definition_list=batch_definition_list
             )
 
-        if not isinstance(data_connector, PipelineDataConnector):
+        if not isinstance(data_connector, RuntimeDataConnector):
             raise ge_exceptions.ExecutionEnvironmentError(
-                f'''Only the PipelineDataConnector can accept batch_data as part of partition_request (the type of
+                f'''Only the RuntimeDataConnector can accept batch_data as part of partition_request (the type of
                 the data connector with the name "{data_connector.name}" is "{str(type(data_connector))}").
                 '''
             )
@@ -153,7 +153,7 @@ class ExecutionEnvironment:
 
     def _get_batches_from_pipeline_batch_data(
         self,
-        data_connector: PipelineDataConnector,
+        data_connector: RuntimeDataConnector,
         batch_request: BatchRequest,
         batch_definition_list: List[BatchDefinition]
     ) -> List[Batch]:
@@ -161,7 +161,7 @@ class ExecutionEnvironment:
             batch_request.partition_request and batch_request.partition_request.get("partition_identifiers")
         ):
             raise ge_exceptions.DataConnectorError(
-                f'''PipelineDataConnector "{data_connector.name}" did not receive a valid partition_identifiers along with
+                f'''RuntimeDataConnector "{data_connector.name}" did not receive a valid partition_identifiers along with
                 the batch_data parameter.
                 '''
             )
@@ -285,7 +285,7 @@ class ExecutionEnvironment:
         Returns a dictionary of data_asset_names that the specified data
         connector can provide. Note that some data_connectors may not be
         capable of describing specific named data assets, and some (such as
-        files_data_connectors) require the user to configure
+        inferred_asset_data_connector) require the user to configure
         data asset names.
 
         Args:
