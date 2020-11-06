@@ -672,7 +672,7 @@ def _spark_column_map_values(
 ):
     condition, fn_domain_kwargs = metrics.get("unexpected_condition")
     (data, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
-        fn_domain_kwargs
+        metric_domain_kwargs
     )
 
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
