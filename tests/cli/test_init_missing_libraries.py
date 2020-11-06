@@ -75,6 +75,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -257,6 +258,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
     notebooks/
         pandas/
             validation_playground.ipynb
