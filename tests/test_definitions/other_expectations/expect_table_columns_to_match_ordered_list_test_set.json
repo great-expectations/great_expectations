@@ -15,7 +15,7 @@
         }
       },
     "tests": [{
-      "title": "Basic positive test",
+      "title": "basic_positive_test",
       "exact_match_out": false,
       "in":{
         "column_list": ["c1", "c2", "c3"]
@@ -24,7 +24,7 @@
         "success":true
       }
     },{
-      "title": "Negative test: column is missing",
+      "title": "negative_test_column_is_missing",
       "exact_match_out": false,
       "in":{
         "column_list": ["c1", "c2"]
@@ -33,7 +33,7 @@
         "success":false
       }
     },{
-      "title": "Negative test: column is misnamed",
+      "title": "negative_test_column_is_misnamed",
       "exact_match_out": false,
       "in":{
         "column_list": ["b1", "c2", "c3"]
@@ -42,7 +42,7 @@
         "success":false
       }
     },{
-      "title": "Negative test: Columns are right, but ordering wrong",
+      "title": "negative_test_columns_are_right__but_ordering_wrong",
       "exact_match_out": false,
       "in":{
         "column_list": ["c3", "c2", "c1"]
@@ -51,7 +51,7 @@
         "success":false
       }
     },{
-      "title": "Negative test: Extra column",
+      "title": "negative_test_extra_column",
       "exact_match_out": false,
       "in":{
         "column_list": ["c1", "c2", "c3", "c4"]
@@ -60,7 +60,7 @@
         "success": false
       }
     },{
-      "title": "Null list provides vacuously true expectation",
+      "title": "null_list_provides_vacuously_true_expectation",
       "exact_match_out": false,
       "in":{
         "column_list": null

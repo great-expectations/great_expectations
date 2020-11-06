@@ -183,16 +183,6 @@ class SqlAlchemyBatchData:
                     "default dataset in engine url"
                 )
 
-        if (
-            query is not None
-            and engine.dialect.name.lower() == "snowflake"
-            and generated_table_name is not None
-        ):
-            raise ValueError(
-                "No snowflake_transient_table specified. Snowflake with a query batch_kwarg will create "
-                "a transient table, so you must provide a user-selected name."
-            )
-
         if query:
             self.create_temporary_table(table_name, query, schema_name=schema)
 
@@ -230,6 +220,17 @@ class SqlAlchemyBatchData:
     def use_quoted_name(self):
         """Returns a table of the data inside the sqlalchemy_execution_engine"""
         return self._use_quoted_name
+
+    @property
+    def schema(self):
+        return self._schema
+
+    @property
+    def selectable(self):
+        if self._table is not None:
+            return self._table
+        else:
+            return sa.text(self._query)
 
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
         """
@@ -269,10 +270,9 @@ class SqlAlchemyBatchData:
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
-            logger.info("Creating transient table %s" % table_name)
             if schema_name is not None:
                 table_name = schema_name + "." + table_name
-            stmt = "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
+            stmt = "CREATE OR REPLACE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name == "mysql":
@@ -357,9 +357,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 data_context (DataContext): \
                     An object representing a Great Expectations project that can be used to access Expectation
                     Suites and the Project Data itself
-                engine (SqlAlchemyExecutionEngine): \
-                    An Execution Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
-                    Execution Engine has already been configured and should be reused. Will override Credentials
+                engine (Engine): \
+                    A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
+                    Engine has already been configured and should be reused. Will override Credentials
                     if provided.
                 connection_string (string): \
                     If neither the engines nor the credentials have been provided, a connection string can be used
@@ -406,9 +406,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
 
-            if engine and engine.dialect.name.lower() in ["sqlite", "mssql"]:
-                # sqlite/mssql temp tables only persist within a connection so override the engine
-                self.engine = engine.connect()
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
@@ -423,6 +420,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
         else:
             self.dialect = None
+
+        if self.engine and self.engine.dialect.name.lower() in [
+            "sqlite",
+            "mssql",
+            "snowflake",
+        ]:
+            # sqlite/mssql temp tables only persist within a connection so override the engine
+            self.engine = engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -538,14 +543,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if self.active_batch_data:
                 data_object = self.active_batch_data
             else:
-                raise ValidationError(
+                raise GreatExpectationsError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.loaded_batch_data:
                 data_object = self.loaded_batch_data[batch_id]
             else:
-                raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
+                raise GreatExpectationsError(
+                    f"Unable to find batch with batch_id {batch_id}"
+                )
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()

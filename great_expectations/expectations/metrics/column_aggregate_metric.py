@@ -38,10 +38,10 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
             def inner_func(
                 cls,
                 execution_engine: "PandasExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -71,10 +71,10 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
             def inner_func(
                 cls,
                 execution_engine: "SqlAlchemyExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -117,10 +117,10 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
             def inner_func(
                 cls,
                 execution_engine: "SparkDFExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)

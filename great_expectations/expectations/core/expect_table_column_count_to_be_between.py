@@ -97,9 +97,9 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
         self,
         batches: Dict[str, Batch],
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
     ):
         """Column Count Metric Function"""
@@ -170,6 +170,9 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -202,7 +205,7 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
     def _validates(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):

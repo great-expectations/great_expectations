@@ -19,19 +19,17 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
 from great_expectations.expectations.metrics.column_aggregate_metric import (
+    ColumnMetricProvider,
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric,
-)
+from great_expectations.expectations.metrics.metric_provider import metric
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
 logger = logging.getLogger(__name__)
 
 
-class ColumnQuantileValues(MetricProvider):
+class ColumnQuantileValues(ColumnMetricProvider):
     metric_name = "column.aggregate.quantile_values"
     value_keys = ("quantiles", "allow_relative_error")
 
@@ -47,10 +45,10 @@ class ColumnQuantileValues(MetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
-        runtime_configuration: dict,
+        runtime_configuration: Dict,
     ):
         (
             selectable,
@@ -98,10 +96,10 @@ class ColumnQuantileValues(MetricProvider):
     def _spark(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
-        runtime_configuration: dict,
+        runtime_configuration: Dict,
     ):
         (
             df,

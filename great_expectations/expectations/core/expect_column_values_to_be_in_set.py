@@ -3,7 +3,11 @@ from typing import Optional
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
 from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
+from ...render.types import (
+    RenderedBulletListContent,
+    RenderedStringTemplateContent,
+    ValueListContent,
+)
 from ...render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -105,6 +109,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -165,6 +172,71 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 }
             )
         ]
+
+    @classmethod
+    @renderer(renderer_type="renderer.descriptive.example_values_block")
+    def _descriptive_example_values_block_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        assert result, "Must pass in result."
+        if "partial_unexpected_counts" in result.result:
+            partial_unexpected_counts = result.result["partial_unexpected_counts"]
+            values = [str(v["value"]) for v in partial_unexpected_counts]
+        elif "partial_unexpected_list" in result.result:
+            values = [str(item) for item in result.result["partial_unexpected_list"]]
+        else:
+            return
+
+        classes = ["col-3", "mt-1", "pl-1", "pr-1"]
+
+        if any(len(value) > 80 for value in values):
+            content_block_type = "bullet_list"
+            content_block_class = RenderedBulletListContent
+        else:
+            content_block_type = "value_list"
+            content_block_class = ValueListContent
+
+        new_block = content_block_class(
+            **{
+                "content_block_type": content_block_type,
+                "header": RenderedStringTemplateContent(
+                    **{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "Example Values",
+                            "tooltip": {"content": "expect_column_values_to_be_in_set"},
+                            "tag": "h6",
+                        },
+                    }
+                ),
+                content_block_type: [
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "$value",
+                            "params": {"value": value},
+                            "styling": {
+                                "default": {
+                                    "classes": ["badge", "badge-info"]
+                                    if content_block_type == "value_list"
+                                    else [],
+                                    "styles": {"word-break": "break-all"},
+                                },
+                            },
+                        },
+                    }
+                    for value in values
+                ],
+                "styling": {"classes": classes,},
+            }
+        )
+
+        return new_block
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if not super().validate_configuration(configuration):

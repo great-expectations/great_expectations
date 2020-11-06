@@ -4,12 +4,8 @@ from typing import Dict, List
 import numpy as np
 import snowflake
 import sqlalchemy as sa
-
-# import sqlalchemy_redshift
-#import sqlalchemy_redshift
 from dateutil.parser import parse
 from sqlalchemy.dialects import registry
-from sqlalchemy.engine import reflection
 from sqlalchemy.sql import Select
 from sqlalchemy.sql.elements import BinaryExpression, TextClause, literal
 from sqlalchemy.sql.operators import custom_op
@@ -19,6 +15,11 @@ try:
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
+
+try:
+    import sqlalchemy_redshift
+except ImportError:
+    sqlalchemy_redshift = None
 
 logger = logging.getLogger(__name__)
 
@@ -174,7 +175,7 @@ def attempt_allowing_relative_error(dialect):
     return detected_redshift or detected_psycopg2
 
 
-def column_reflection_fallback(table, dialect, sqlalchemy_engine):
+def column_reflection_fallback(selectable, dialect, sqlalchemy_engine):
     """If we can't reflect the table, use a query to at least get column names."""
     col_info_dict_list: List[Dict]
     if dialect.name.lower() == "mssql":
@@ -192,7 +193,7 @@ sys.types AS ty
 ON
 cols.user_type_id = ty.user_type_id
 WHERE
-object_id = OBJECT_ID('tempdb..{table}')
+object_id = OBJECT_ID('tempdb..{selectable}')
             """
         )
         col_info_tuples_list = sqlalchemy_engine.execute(col_info_query).fetchall()
@@ -201,7 +202,7 @@ object_id = OBJECT_ID('tempdb..{table}')
             for col_name, col_type in col_info_tuples_list
         ]
     else:
-        query: Select = sa.select([sa.text("*")]).select_from(table).limit(1)
+        query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
         col_names: list = sqlalchemy_engine.execute(query).keys()
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
     return col_info_dict_list

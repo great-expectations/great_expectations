@@ -10,7 +10,7 @@
       "b": [1, 1, 0, 0, 2, 1, 0, 0, 0, 3]
     },
     "tests" : [{
-      "title": "Basic positive test",
+      "title": "basic_positive_test",
       "exact_match_out" : false,
       "in": {
         "column_list": ["w", "x"],
@@ -22,7 +22,7 @@
         "success": true
       }
     },{
-      "title": "Basic positive test - more than 2 columns",
+      "title": "basic_positive_test___more_than_2_columns",
       "exact_match_out" : false,
       "in": {
         "column_list": ["z", "a", "b"],
@@ -34,7 +34,7 @@
         "success": true
       }
     },{
-      "title": "Basic Negative test",
+      "title": "basic_negative_test",
       "exact_match_out" : false,
       "in": {
         "column_list": ["w", "y"],
@@ -46,7 +46,7 @@
         "success": false
       }
     },{
-      "title": "Negative test - Different Value",
+      "title": "negative_test___different_value",
       "exact_match_out" : false,
       "in": {
         "column_list": ["w", "x"],

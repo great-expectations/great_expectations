@@ -9,7 +9,7 @@
         },
     "tests": [
       {
-        "title": "Basic positive test",
+        "title": "basic_positive_test",
         "exact_match_out": false,
         "in": {
           "column": "dist1",
@@ -21,7 +21,7 @@
         }
       },
       {
-        "title": "Positive test with null values in column",
+        "title": "positive_test_with_null_values_in_column",
         "exact_match_out": false,
         "in": {
           "column": "dist2",
@@ -33,7 +33,7 @@
         }
       },
       {
-        "title": "Positive test with duplicate values in column",
+        "title": "positive_test_with_duplicate_values_in_column",
         "exact_match_out": false,
         "in": {
           "column": "dist3",
@@ -45,7 +45,7 @@
         }
       },
       {
-        "title": "Positive test; duplicate and null values",
+        "title": "positive_test__duplicate_and_null_values",
         "exact_match_out": false,
         "in": {
           "column": "dist4",
@@ -57,7 +57,7 @@
         }
       },
       {
-        "title": "Basic negative test, no set intersection",
+        "title": "basic_negative_test__no_set_intersection",
         "exact_match_out": false,
         "in": {
           "column": "dist1",
@@ -69,7 +69,7 @@
         }
       },
       {
-        "title": "Negative test, some set intersection",
+        "title": "negative_test__some_set_intersection",
         "exact_match_out": false,
         "in": {
           "column": "dist1",
@@ -81,7 +81,7 @@
         }
       },
       {
-        "title": "Negative test with null values in column",
+        "title": "negative_test_with_null_values_in_column",
         "exact_match_out": false,
         "in": {
           "column": "dist2",
@@ -93,7 +93,7 @@
         }
       },
       {
-        "title": "Negative test with duplicate values in column",
+        "title": "negative_test_with_duplicate_values_in_column",
         "exact_match_out": false,
         "in": {
           "column": "dist3",
@@ -105,7 +105,7 @@
         }
       },
       {
-        "title": "Negative test; duplicate and null values",
+        "title": "negative_test__duplicate_and_null_values",
         "exact_match_out": false,
         "in": {
           "column": "dist4",

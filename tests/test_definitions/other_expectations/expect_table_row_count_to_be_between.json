@@ -14,7 +14,7 @@
       }
     },
     "tests": [{
-      "title": "Basic positive test",
+      "title": "basic_positive_test",
       "exact_match_out" : false,
       "in":{
         "min_value": 3,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "title": "Vacuously true",
+      "title": "vacuously_true",
       "exact_match_out" : false,
       "in":{
       },
@@ -36,7 +36,7 @@
       }
     },
     {
-      "title": "Basic negative test",
+      "title": "basic_negative_test",
       "exact_match_out" : false,
       "in":{
         "min_value": 0,
@@ -47,7 +47,7 @@
         "observed_value": 4
       }
     },{
-      "title": "Positive test with null min_value",
+      "title": "positive_test_with_null_min_value",
       "exact_match_out" : false,
       "in":{
         "min_value": null,
@@ -58,7 +58,7 @@
         "observed_value": 4
       }
     },{
-      "title": "Negative test with max < min",
+      "title": "negative_test_with_max_lt_min",
       "exact_match_out" : false,
       "in":{
         "min_value": 1,
@@ -69,7 +69,7 @@
         "observed_value": 4
       }
     },{
-      "title": "Positive test with null min",
+      "title": "positive_test_with_null_min",
       "exact_match_out" : false,
       "in":{
         "min_value": null,
@@ -80,7 +80,7 @@
         "observed_value": 4
       }
     },{
-      "title": "Test error handling for non-int min_value",
+      "title": "test_error_handling_for_non_int_min_value",
       "exact_match_out" : false,
       "in":{
         "min_value": "quack",
@@ -92,7 +92,7 @@
         "traceback_substring": "must be integers"
       }
     },{
-      "title": "Test error handling for non-int max_value",
+      "title": "test_error_handling_for_non_int_max_value",
       "exact_match_out" : false,
       "in":{
         "max_value": "quack",

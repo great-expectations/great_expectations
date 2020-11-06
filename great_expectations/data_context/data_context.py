@@ -2984,7 +2984,7 @@ class DataContext(BaseDataContext):
             logger.debug(e)
 
     @staticmethod
-    def _validate_checkpoint(checkpoint: dict, checkpoint_name: str) -> dict:
+    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
         if checkpoint is None:
             raise ge_exceptions.CheckpointError(
                 f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."

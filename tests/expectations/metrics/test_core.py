@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 import sqlalchemy as sa
@@ -39,7 +41,7 @@ def _build_spark_engine(df):
 def _build_sa_engine(df):
     import sqlalchemy as sa
 
-    eng = sa.create_engine("sqlite://", echo=True)
+    eng = sa.create_engine("sqlite://", echo=False)
     df.to_sql("test", eng)
     batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
     batch = Batch(data=batch_data)
@@ -256,6 +258,74 @@ def test_map_unique_pd():
     assert list(results[desired_metric.id]) == [False, False, True, True]
 
 
+def test_map_unique_spark():
+    engine = _build_spark_engine(
+        pd.DataFrame(
+            {
+                "a": [1, 2, 3, 3, 4, None],
+                "b": [None, "foo", "bar", "baz", "qux", "fish"],
+            }
+        )
+    )
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.unique",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == 2
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [3, 3]
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_value_counts",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [(3, 2)]
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [(3, "bar"), (3, "baz")]
+
+
 def test_map_unique_sa():
     engine = _build_sa_engine(
         pd.DataFrame(
@@ -265,7 +335,7 @@ def test_map_unique_sa():
     condition_metric = MetricConfiguration(
         metric_name="column_values.unique",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"value_set": [1]},
+        metric_value_kwargs=dict(),
     )
     metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
 
@@ -352,7 +422,7 @@ def test_z_score_under_threshold_pd():
     metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map_function",
+        metric_name="column_values.z_score.map_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
         metric_dependencies={
@@ -368,7 +438,7 @@ def test_z_score_under_threshold_pd():
         metric_name="column_values.z_score.under_threshold",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"column_values.z_score.map_function": desired_metric},
+        metric_dependencies={"column_values.z_score.map_fn": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -403,7 +473,7 @@ def test_z_score_under_threshold_sa():
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metrics))
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map_function",
+        metric_name="column_values.z_score.map_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
         metric_dependencies={
@@ -419,7 +489,7 @@ def test_z_score_under_threshold_sa():
         metric_name="column_values.z_score.under_threshold",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"column_values.z_score.map_function": desired_metric},
+        metric_dependencies={"column_values.z_score.map_fn": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -454,7 +524,7 @@ def test_z_score_under_threshold_spark():
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metrics))
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map_function",
+        metric_name="column_values.z_score.map_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
         metric_dependencies={
@@ -470,7 +540,7 @@ def test_z_score_under_threshold_spark():
         metric_name="column_values.z_score.under_threshold",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"column_values.z_score.map_function": desired_metric},
+        metric_dependencies={"column_values.z_score.map_fn": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -726,3 +796,59 @@ def test_sa_batch_aggregate_metrics():
     assert res[desired_metric_2.id] == 1
     assert res[desired_metric_3.id] == 4
     assert res[desired_metric_4.id] == 4
+
+
+def test_sparkdf_batch_aggregate_metrics(caplog):
+    import datetime
+
+    engine = _build_spark_engine(
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
+    )
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.aggregate.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.aggregate.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.aggregate.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.aggregate.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+    )
+    start = datetime.datetime.now()
+    caplog.clear()
+    caplog.set_level(logging.DEBUG, logger="great_expectations")
+    res = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        )
+    )
+    end = datetime.datetime.now()
+    print(end - start)
+    assert res[desired_metric_1.id] == 3
+    assert res[desired_metric_2.id] == 1
+    assert res[desired_metric_3.id] == 4
+    assert res[desired_metric_4.id] == 4
+
+    # Check that all four of these metrics were computed on a single domain
+    found_message = False
+    for record in caplog.records:
+        if (
+            record.message
+            == "SparkDFExecutionEngine computed 4 metrics on domain_id ()"
+        ):
+            found_message = True
+    assert found_message

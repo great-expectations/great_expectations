@@ -3,7 +3,10 @@ import logging
 import pandas as pd
 import sqlalchemy as sa
 
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -17,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
-    condition_metric_name = "column_values.not_match_regex_list"
+    condition_metric_name = "column_values.match_regex_list"
     condition_value_keys = ("regex_list",)
 
     @column_map_condition(engine=PandasExecutionEngine)
@@ -64,3 +67,13 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
                 ]
             )
         return condition
+
+    @column_map_condition(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, regex_list, match_on, **kwargs):
+        if match_on == "any":
+            return column.rlike("|".join(regex_list))
+        elif match_on == "all":
+            formatted_regex_list = ["(?={})".format(regex) for regex in regex_list]
+            return column.rlike("".join(formatted_regex_list))
+        else:
+            raise ValueError("match_on must be either 'any' or 'all'")

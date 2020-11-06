@@ -12,3 +12,4 @@ from .column_quantile_values import ColumnQuantileValues
 from .column_standard_deviation import ColumnStandardDeviation
 from .column_sum import ColumnSum
 from .column_unique_value_count import ColumnUniqueValueCount
+from .column_value_counts import ColumnValueCounts
