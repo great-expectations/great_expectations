@@ -285,6 +285,73 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert len(caplog.messages) == 1
     assert_no_tracebacks(result)
 
+def test_cli_datasource_profile_with_skip_prompt_flag(
+    caplog, empty_data_context, filesystem_csv_2
+):
+    empty_data_context.add_datasource(
+        "my_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+
+    not_so_empty_data_context = empty_data_context
+
+    project_root_dir = not_so_empty_data_context.root_directory
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["datasource", "profile", "-d", project_root_dir, "--no-view",'-y'],
+        input="Y\n",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    stdout = result.stdout
+
+    assert (
+        "Profiling 'my_datasource' will create expectations and documentation."
+        in stdout
+    )
+    assert "Would you like to profile 'my_datasource'" not in stdout
+    assert (
+        "Great Expectations is building Data Docs from the data you just profiled!"
+        in stdout
+    )
+
+    context = DataContext(project_root_dir)
+    assert len(context.list_datasources()) == 1
+
+    expectations_store = context.stores["expectations_store"]
+    suites = expectations_store.list_keys()
+    assert len(suites) == 1
+    assert (
+        suites[0].expectation_suite_name
+        == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
+    )
+
+    validations_store = context.stores["validations_store"]
+    validation_keys = validations_store.list_keys()
+    assert len(validation_keys) == 1
+
+    validation = validations_store.get(validation_keys[0])
+    assert (
+        validation.meta["expectation_suite_name"]
+        == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
+    )
+    assert validation.success is False
+    assert len(validation.results) == 8
+
+    assert "Preparing column 1 of 1" in caplog.messages[0]
+    assert len(caplog.messages) == 1
+    assert_no_tracebacks(result)
+
+
 
 def test_cli_datasource_profile_with_additional_batch_kwargs(
     caplog, empty_data_context, filesystem_csv_2
