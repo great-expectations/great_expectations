@@ -222,10 +222,10 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
 
         else:
             if strict_min and strict_max:
-                return min_value < column & column < max_value
+                return (min_value < column) & (column < max_value)
             elif strict_min:
-                return min_value < column & column <= max_value
+                return (min_value < column) & (column <= max_value)
             elif strict_max:
-                return min_value <= column & column < max_value
+                return (min_value <= column) & (column < max_value)
             else:
-                return min_value <= column & column <= max_value
+                return (min_value <= column) & (column <= max_value)
