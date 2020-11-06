@@ -1389,7 +1389,7 @@ def check_json_test_result(test, result, data_asset=None):
                 assert result["result"]["observed_value"] in value
 
             elif key == "unexpected_index_list":
-                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
+                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset, SqlAlchemyBatchData, sparkDataFrame)):
                     pass
                 else:
                     assert result["result"]["unexpected_index_list"] == value
