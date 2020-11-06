@@ -54,8 +54,7 @@ def pytest_generate_tests(metafunc):
         for c in build_test_backends_list_cfe(metafunc):
             for filename in test_configuration_files:
                 file = open(filename)
-                # Use OrderedDict so that python2 will use the correct order of columns in all cases
-                test_configuration = json.load(file, object_pairs_hook=OrderedDict)
+                test_configuration = json.load(file)
 
                 for d in test_configuration["datasets"]:
                     datasets = []

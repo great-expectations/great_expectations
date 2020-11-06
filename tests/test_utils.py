@@ -54,6 +54,11 @@ except ImportError:
     create_engine = None
 
 try:
+    from pyspark.sql import DataFrame as SparkDataFrame
+except ImportError:
+    SparkDataFrame = type(None)
+
+try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
 
     SQLITE_TYPES = {
@@ -1077,7 +1082,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            "expect_column_value_lengths_to_be_between",
+            # "expect_column_value_lengths_to_be_between",
             "expect_column_value_lengths_to_equal",
             "expect_column_values_to_match_regex",
             "expect_column_values_to_not_match_regex",
@@ -1133,10 +1138,10 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_in_type_list",
             # "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
-            "expect_column_values_to_be_between",
+            # "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            "expect_column_value_lengths_to_be_between",
+            # "expect_column_value_lengths_to_be_between",
             "expect_column_value_lengths_to_equal",
             "expect_column_values_to_match_regex",
             "expect_column_values_to_not_match_regex",
@@ -1390,6 +1395,8 @@ def check_json_test_result(test, result, data_asset=None):
 
             elif key == "unexpected_index_list":
                 if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
+                    pass
+                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDataFrame)):
                     pass
                 else:
                     assert result["result"]["unexpected_index_list"] == value
