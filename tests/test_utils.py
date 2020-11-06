@@ -1665,9 +1665,9 @@ def execution_environment_configured_asset_filesystem_data_connector_regex_parti
                 "batch_spec_defaults": {},
             },
             "data_connectors": {
-                "test_pipeline_data_connector": {
+                "test_runtime_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
-                    "class_name": "PipelineDataConnector",
+                    "class_name": "RuntimeDataConnector",
                     "runtime_keys": [
                         "pipeline_stage_name",
                         "run_id",
