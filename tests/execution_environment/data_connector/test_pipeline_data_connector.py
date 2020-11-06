@@ -10,8 +10,8 @@ from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
+    BatchSpec,
 )
-from great_expectations.execution_environment.types import InMemoryBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
@@ -379,10 +379,8 @@ def test__build_batch_spec_from_batch_definition(basic_execution_environment):
     test_pipeline_data_connector: PipelineDataConnector = \
         basic_execution_environment.get_data_connector(name="test_pipeline_data_connector")
 
-    expected_batch_spec: InMemoryBatchSpec = InMemoryBatchSpec()
-
     # noinspection PyProtectedMember
-    batch_spec: InMemoryBatchSpec = test_pipeline_data_connector._build_batch_spec_from_batch_definition(
+    batch_spec: BatchSpec = test_pipeline_data_connector._build_batch_spec_from_batch_definition(
         batch_definition=BatchDefinition(
             execution_environment_name="my_execution_environment",
             data_connector_name="test_pipeline_data_connector",
@@ -390,4 +388,4 @@ def test__build_batch_spec_from_batch_definition(basic_execution_environment):
             partition_definition=PartitionDefinition(partition_request["partition_identifiers"])
         )
     )
-    assert batch_spec == expected_batch_spec
+    assert batch_spec == BatchSpec()

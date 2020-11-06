@@ -97,6 +97,20 @@ class InMemoryBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
         return self.get("dataset")
 
 
+class RuntimeDataBatchSpec(BatchSpec):
+    _id_ignore_keys = set("batch_data")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if type(self.batch_data) == None:
+            raise InvalidBatchSpecError("InMemoryBatchSpec batch_data cannot be None")
+
+    @property
+    def batch_data(self):
+        return self.get("batch_data")
+
+
 class PandasDatasourceInMemoryBatchSpec(InMemoryBatchSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

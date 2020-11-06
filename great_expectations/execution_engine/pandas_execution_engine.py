@@ -9,7 +9,11 @@ from typing import Any, Callable, Dict, Iterable, Tuple, List
 
 import pandas as pd
 
-from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec, InMemoryBatchSpec
+from great_expectations.execution_environment.types import (
+    PathBatchSpec,
+    S3BatchSpec,
+    RuntimeDataBatchSpec,
+)
 
 from ..core.batch import Batch, BatchMarkers, BatchRequest
 from ..core.id_dict import BatchSpec
@@ -91,15 +95,14 @@ Notes:
             }
         )
 
-        if isinstance(batch_spec, InMemoryBatchSpec):
+        if isinstance(batch_spec, RuntimeDataBatchSpec):
             # We do not want to store the actual dataframe in batch_spec (mark that this is PandasInMemoryDF instead).
             batch_data = batch_spec.pop("batch_data")
             batch_spec["PandasInMemoryDF"] = True
-            if batch_data is not None:
-                if batch_spec.get("data_asset_name"):
-                    df = batch_data
-                else:
-                    raise ValueError("To pass an batch_data, you must also a data_asset_name as well.")
+            if batch_spec.get("data_asset_name"):
+                df = batch_data
+            else:
+                raise ValueError("To pass an batch_data, you must also a data_asset_name as well.")
         else:
             reader_method = batch_spec.get("reader_method")
             reader_options = batch_spec.get("reader_options") or {}
@@ -166,8 +169,6 @@ Notes:
         Any,  # batch_data
         BatchMarkers
     ]:
-        batch_data: Any = None
-
         # We need to build a batch_markers to be used in the dataframe
         batch_markers: BatchMarkers = BatchMarkers(
             {
@@ -177,8 +178,9 @@ Notes:
             }
         )
 
-        if isinstance(batch_spec, InMemoryBatchSpec):
-            batch_data = batch_spec.dataset
+        if isinstance(batch_spec, RuntimeDataBatchSpec):
+            print("AAAA")
+            batch_data = batch_spec.batch_data
 
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.get("reader_method")
@@ -211,21 +213,22 @@ operate.
                 """
             )
 
+        print("BBB")
         splitter_method: str = batch_spec.get("splitter_method") or None
         splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
         if splitter_method:
             splitter_fn = getattr(self, splitter_method)
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
+        print("CCCC")
         sampling_method: str = batch_spec.get("sampling_method") or None
         sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
         if sampling_method:
             sampling_fn = getattr(self, sampling_method)
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
 
-        if batch_data is not None:
-            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
-                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
+        if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
 
         return batch_data, batch_markers
 

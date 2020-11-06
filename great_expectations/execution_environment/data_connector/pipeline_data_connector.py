@@ -8,7 +8,10 @@ from great_expectations.core.id_dict import (
     PartitionDefinitionSubset,
     PartitionDefinition
 )
-from great_expectations.execution_environment.types import InMemoryBatchSpec
+from great_expectations.execution_environment.types import (
+    BatchSpec,
+    InMemoryBatchSpec
+)
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
 import great_expectations.exceptions as ge_exceptions
@@ -178,9 +181,9 @@ class PipelineDataConnector(DataConnector):
     def _build_batch_spec_from_batch_definition(
         self,
         batch_definition: BatchDefinition
-    ) -> InMemoryBatchSpec:
+    ) -> BatchSpec:
         batch_spec = super()._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
-        return InMemoryBatchSpec(batch_spec)
+        return BatchSpec(batch_spec)
 
     @staticmethod
     def _get_data_reference_name(
