@@ -197,10 +197,7 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
                 )
 
     def _sort_batch_definition_list(self, batch_definition_list) -> List[BatchDefinition]:
-        sorters_list: List[Sorter] = []
-        for sorter in self._sorters.values():
-            sorters_list.append(sorter)
-        sorters: Iterator[Sorter] = reversed(sorters_list)
+        sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
         return batch_definition_list
