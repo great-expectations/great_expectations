@@ -180,7 +180,6 @@ Notes:
 
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             batch_data = batch_spec.batch_data
-            print("A", batch_data)
 
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.get("reader_method")
