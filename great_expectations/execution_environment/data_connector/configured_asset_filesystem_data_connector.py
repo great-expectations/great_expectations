@@ -84,6 +84,7 @@ class ConfiguredAssetFilesystemDataConnector(DataConnector):
         self._build_assets_from_config(config=assets)
 
         self._sorters = build_sorters_from_config(config_list=sorters)
+        super()._validate_sorters_configuration()
 
     @property
     def assets(self) -> Dict[str, Union[dict, Asset]]:
@@ -263,7 +264,6 @@ configured runtime keys.
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
-        self._validate_sorters_configuration(batch_request=batch_request)
 
         if self._data_references_cache is None:
             self._refresh_data_references_cache()
@@ -320,7 +320,7 @@ configured group_name.
                 )
             if len(group_names) < len(self.sorters):
                 raise ge_exceptions.DataConnectorError(
-                    f'''ConfiguredAssetFilesystemDataConnector "{self.name}" is configured with {len(group_names)} group names; 
+                    f'''ConfiguredAssetFilesystemDataConnector "{self.name}" is configured with {len(group_names)} group names;
 this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     '''
                 )
@@ -401,3 +401,30 @@ partition definition {batch_definition.partition_definition} from batch definiti
     ) -> PathBatchSpec:
         batch_spec = super().build_batch_spec(batch_definition=batch_definition)
         return PathBatchSpec(batch_spec)
+
+    def _validate_batch_request(self, batch_request: BatchRequest):
+        super()._validate_batch_request(batch_request)
+        if self.sorters is not None and len(self.sorters) > 0:
+            regex_config = self._default_regex
+            if hasattr(self, "assets") and self.assets is not None:
+
+                if batch_request.data_asset_name is not None and \
+                        self.assets is not None and \
+                        batch_request.data_asset_name in self.assets:
+
+                    asset: Asset = self.assets[batch_request.data_asset_name]
+                    if asset.group_names:
+                        regex_config["group_names"] = asset.group_names
+            group_names: List[str] = regex_config["group_names"]
+
+            if any([sorter not in group_names for sorter in self.sorters]):
+                raise ge_exceptions.DataConnectorError(
+                    f'''DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+                           configured group_name.
+                           '''
+                )
+            if len(group_names) < len(self.sorters):
+                raise ge_exceptions.DataConnectorError(
+                    f'''DataConnector "{self.name}" is configured with {len(group_names)} group names;
+                               this is fewer than number of sorters specified, which is {len(self.sorters)}.
+                             ''')

@@ -5,7 +5,7 @@ import logging
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.data_connector import SinglePartitionerDataConnector
+from great_expectations.execution_environment.data_connector import InferredAssetFilePathDataConnector
 from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -28,7 +28,7 @@ import great_expectations.exceptions as ge_exceptions
 logger = logging.getLogger(__name__)
 
 
-class InferredAssetFilesystemDataConnector(SinglePartitionerDataConnector):
+class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
     def __init__(
         self,
         name: str,
@@ -61,21 +61,6 @@ class InferredAssetFilesystemDataConnector(SinglePartitionerDataConnector):
             glob_directive=self.glob_directive
         )
         return path_list
-
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition
-    ) -> dict:
-        path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
-        if not path:
-            raise ValueError(
-                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
-partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
-                '''
-            )
-        return {
-            "path": path
-        }
 
     def build_batch_spec(
         self,

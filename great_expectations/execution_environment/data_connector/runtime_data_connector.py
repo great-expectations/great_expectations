@@ -256,7 +256,7 @@ class RuntimeDataConnector(DataConnector):
         if runtime_keys and len(runtime_keys) > 0:
             if not (self._runtime_keys and set(runtime_keys) <= set(self._runtime_keys)):
                 raise ge_exceptions.DataConnectorError(
-                    f'''RuntimeDataConnector "{self.name}" was invoked with one or more runtime keys that do not 
+                    f'''RuntimeDataConnector "{self.name}" was invoked with one or more runtime keys that do not
 appear among the configured runtime keys.
                     '''
                 )

@@ -10,7 +10,6 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
 )
-
 from great_expectations.execution_environment.data_connector.partition_query import (
     PartitionQuery,
     build_partition_query,
@@ -28,7 +27,7 @@ import great_expectations.exceptions as ge_exceptions
 logger = logging.getLogger(__name__)
 
 
-class SinglePartitionerDataConnector(DataConnector):
+class InferredAssetFilePathDataConnector(DataConnector):
     """SinglePartitionerDataConnector is a base class for DataConnectors that require exactly one Partitioner be configured in the declaration.
 
     Instead, its data_references are stored in a data_reference_dictionary : {
@@ -57,14 +56,15 @@ class SinglePartitionerDataConnector(DataConnector):
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
         )
+
         self.base_directory = base_directory
         self.glob_directive = glob_directive
         if default_regex is None:
             default_regex = {}
         self._default_regex = default_regex
-
+        # TODO: <Alex>We need to move sorters to DataConnector and standardize self._validate_sorters_configuration()</Alex>
         self._sorters = build_sorters_from_config(config_list=sorters)
-        super()._validate_sorters_configuration()
+        self._validate_sorters_configuration()
 
     @property
     def sorters(self) -> Optional[dict]:
@@ -142,7 +142,7 @@ class SinglePartitionerDataConnector(DataConnector):
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-        super()._validate_batch_request(batch_request=batch_request)
+        self._validate_batch_request(batch_request=batch_request)
 
         if self._data_references_cache is None:
             self._refresh_data_references_cache()
@@ -231,9 +231,24 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
             group_names=group_names
         )
 
-    # TODO: <Alex>This method should be implemented in every subclass.</Alex>
-    # def _generate_batch_spec_parameters_from_batch_definition(
-    #     self,
-    #     batch_definition: BatchDefinition
-    # ) -> dict:
-    #     pass
+    def _build_batch_spec_from_batch_definition(
+        self,
+        batch_definition: BatchDefinition
+    ) -> PathBatchSpec:
+        batch_spec = super()._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
+        return PathBatchSpec(batch_spec)
+
+    def _generate_batch_spec_parameters_from_batch_definition(
+        self,
+        batch_definition: BatchDefinition
+    ) -> dict:
+        path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
+        if not path:
+            raise ValueError(
+                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
+partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
+                '''
+            )
+        return {
+            "path": path
+        }

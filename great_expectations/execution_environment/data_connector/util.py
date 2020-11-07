@@ -45,10 +45,10 @@ def batch_definition_matches_batch_request(
             return False
 
     if batch_request.partition_request:
-        assert isinstance(batch_request.partition_request, dict)
         partition_identifiers: Any = batch_request.partition_request.get("partition_identifiers")
         if partition_identifiers:
-            assert isinstance(partition_identifiers, dict)
+            if not isinstance(partition_identifiers, dict):
+                return False
             for key in partition_identifiers.keys():
                 if not (
                     key in batch_definition.partition_definition and batch_definition.partition_definition[key] ==
@@ -106,12 +106,10 @@ def convert_data_reference_string_to_batch_request_using_regex(
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
     if "data_asset_name" in partition_definition:
         data_asset_name = partition_definition.pop("data_asset_name")
-
     batch_request: BatchRequest = BatchRequest(
         data_asset_name=data_asset_name,
         partition_request=partition_definition,
     )
-
     return batch_request
 
 
@@ -120,6 +118,10 @@ def map_batch_definition_to_data_reference_string_using_regex(
     regex_pattern: str,
     group_names: List[str],
 ) -> str:
+
+    if not isinstance(batch_definition, BatchDefinition):
+        raise TypeError("batch_definition is not of an instance of type BatchDefinition")
+
     data_asset_name: str = batch_definition.data_asset_name
     partition_definition: PartitionDefinition = batch_definition.partition_definition
     partition_request: dict = partition_definition
@@ -221,6 +223,8 @@ def get_filesystem_one_level_directory_glob_path_list(
     return path_list
 
 
+# TODO: <Alex>We need to move sorters to DataConnector and standardize self._validate_sorters_configuration()</Alex>
+# TODO: <Alex>Will: Should this method be private?</Alex>
 def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
     sorter_dict: Dict[str, Sorter] = {}
     if config_list is not None:
