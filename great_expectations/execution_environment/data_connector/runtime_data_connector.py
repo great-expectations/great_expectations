@@ -198,6 +198,7 @@ class RuntimeDataConnector(DataConnector):
     ) -> dict:
         return {}
 
+    # This method is currently called called only in tests.
     def build_batch_spec(
         self,
         batch_definition: BatchDefinition,
