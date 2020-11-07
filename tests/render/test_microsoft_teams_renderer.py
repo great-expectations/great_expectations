@@ -1,5 +1,3 @@
-from pprint import pprint
-
 import pytest
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
