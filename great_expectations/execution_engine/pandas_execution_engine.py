@@ -229,33 +229,6 @@ Notes:
 
         return batch_data, batch_markers
 
-    # @staticmethod
-    # def get_batch_markers_and_update_batch_spec_for_batch_data(
-    #     batch_data: pd.DataFrame,
-    #     batch_spec: BatchSpec
-    # ) -> BatchMarkers:
-    #     """
-    #     Computes batch_markers in the case of user-provided batch_data (e.g., in the case of a data pipeline).
-
-    #     :param batch_data -- user-provided dataframe
-    #     :param batch_spec -- BatchSpec (must be previously instantiated/initialized by RuntimeDataConnector)
-    #     :returns computed batch_markers specific to this execution engine
-    #     """
-    #     batch_markers: BatchMarkers = BatchMarkers(
-    #         {
-    #             "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-    #                 "%Y%m%dT%H%M%S.%fZ"
-    #             )
-    #         }
-    #     )
-    #     if batch_data is not None:
-    #         if batch_data.memory_usage().sum() < HASH_THRESHOLD:
-    #             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
-    #         # we do not want to store the actual dataframe in batch_spec
-    #         # hence, marking that this is a PandasInMemoryDF instead
-    #         batch_spec["PandasInMemoryDF"] = True
-    #     return batch_markers
-
     @property
     def dataframe(self):
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
