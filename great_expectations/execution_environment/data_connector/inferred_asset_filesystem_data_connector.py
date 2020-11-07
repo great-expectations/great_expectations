@@ -1,5 +1,6 @@
 from typing import List, Optional, Iterator
 import copy
+from pathlib import Path
 
 import logging
 
@@ -45,11 +46,12 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
-            base_directory=base_directory,
-            glob_directive=glob_directive,
             default_regex=default_regex,
             sorters=sorters,
         )
+
+        self.base_directory = base_directory
+        self.glob_directive = glob_directive
 
     def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
@@ -61,3 +63,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
             glob_directive=self.glob_directive
         )
         return path_list
+
+    def _get_full_path(self, path: str) -> str:
+        # TODO: <Alex>This should use _normalize_path ALEX</Alex>
+        return str(Path(self.base_directory).joinpath(path))

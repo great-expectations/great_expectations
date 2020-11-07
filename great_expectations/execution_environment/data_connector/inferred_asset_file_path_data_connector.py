@@ -45,8 +45,6 @@ class InferredAssetFilePathDataConnector(DataConnector):
         execution_environment_name: str,
         execution_engine: ExecutionEngine = None,
         default_regex: dict = None,
-        base_directory: str = None,
-        glob_directive: str = "*",
         sorters: list = None,
     ):
         logger.debug(f'Constructing SinglePartitionerDataConnector "{name}".')
@@ -57,8 +55,6 @@ class InferredAssetFilePathDataConnector(DataConnector):
             execution_engine=execution_engine,
         )
 
-        self.base_directory = base_directory
-        self.glob_directive = glob_directive
         if default_regex is None:
             default_regex = {}
         self._default_regex = default_regex
@@ -249,6 +245,10 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
 partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )
+        path = self._get_full_path(path=path)
         return {
             "path": path
         }
+
+    def _get_full_path(self, path: str) -> str:
+        raise NotImplementedError
