@@ -631,7 +631,8 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
             },
         )
 
-def test_redundant_information_in_naming_convention_bucket_too_many_sorters(empty_data_context, tmp_path_factory):
+
+def test_redundant_information_in_naming_convention_bucket_too_many_sorters(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
         directory=base_directory,
