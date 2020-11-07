@@ -220,12 +220,12 @@ DataConnector name: "{self.name}".
             if any([sorter not in group_names for sorter in self.sorters]):
                 raise ge_exceptions.DataConnectorError(
                     f'''DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-                  configured group_name.
-                      '''
+configured group_name.
+                    '''
                 )
             if len(group_names) < len(self.sorters):
                 raise ge_exceptions.DataConnectorError(
                     f'''DataConnector "{self.name}" is configured with {len(group_names)} group names;
-                        this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                      '''
+this is fewer than number of sorters specified, which is {len(self.sorters)}.
+                    '''
                 )
