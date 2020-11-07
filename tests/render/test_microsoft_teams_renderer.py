@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import pytest
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
@@ -10,7 +12,6 @@ from great_expectations.render.renderer import MicrosoftTeamsRenderer
 
 
 def test_MicrosoftTeams_validation_results_with_datadocs():
-
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
@@ -44,99 +45,106 @@ def test_MicrosoftTeams_validation_results_with_datadocs():
     )
 
     expected_output = {
-        "type": "message",
         "attachments": [
             {
-                "contentType": "application/vnd.microsoft.card.adaptive",
                 "content": {
                     "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                    "type": "AdaptiveCard",
-                    "version": "1.0",
-                    "body": [
-                        {
-                            "type": "Container",
-                            "height": "auto",
-                            "separator": True,
-                            "items": [
-                                {
-                                    "type": "ColumnSet",
-                                    "columns": [
-                                        {
-                                            "type": "Column",
-                                            "width": "stretch",
-                                            "items": [
-                                                {
-                                                    "type": "TextBlock",
-                                                    "text": "Validation results",
-                                                    "weight": "bolder",
-                                                    "size": "large",
-                                                    "wrap": True,
-                                                },
-                                                {
-                                                    "type": "TextBlock",
-                                                    "spacing": "none",
-                                                    "text": "May 08 2012 07:14:45",
-                                                    "isSubtle": True,
-                                                    "wrap": True,
-                                                },
-                                            ],
-                                        }
-                                    ],
-                                }
-                            ],
-                        },
-                        {
-                            "type": "Container",
-                            "height": "auto",
-                            "separator": True,
-                            "items": [
-                                {
-                                    "type": "TextBlock",
-                                    "text": "**Batch validation status:** Failed :(",
-                                    "horizontalAlignment": "left",
-                                    "color": "attention",
-                                },
-                                {
-                                    "type": "TextBlock",
-                                    "text": "**Data asset name:** asset",
-                                    "horizontalAlignment": "left",
-                                },
-                                {
-                                    "type": "TextBlock",
-                                    "text": "**Expectation suite name:** asset.default",
-                                    "horizontalAlignment": "left",
-                                },
-                                {
-                                    "type": "TextBlock",
-                                    "text": "**Run name:** test_100",
-                                    "horizontalAlignment": "left",
-                                },
-                                {
-                                    "type": "TextBlock",
-                                    "text": "**Batch ID:** 1234",
-                                    "horizontalAlignment": "left",
-                                },
-                                {
-                                    "type": "TextBlock",
-                                    "text": "**Summary:** *0* of *0* expectations were met",
-                                    "horizontalAlignment": "left",
-                                },
-                            ],
-                        },
-                    ],
                     "actions": [
                         {
-                            "type": "Action.OpenUrl",
                             "title": "Open data docs",
+                            "type": "Action.OpenUrl",
                             "url": "file:///localsite/index.html",
                         }
                     ],
+                    "body": [
+                        {
+                            "height": "auto",
+                            "items": [
+                                {
+                                    "columns": [
+                                        {
+                                            "items": [
+                                                {
+                                                    "size": "large",
+                                                    "text": "Validation " "results",
+                                                    "type": "TextBlock",
+                                                    "weight": "bolder",
+                                                    "wrap": True,
+                                                },
+                                                {
+                                                    "isSubtle": True,
+                                                    "spacing": "none",
+                                                    "text": "May "
+                                                    "08 "
+                                                    "2012 "
+                                                    "07:14:45",
+                                                    "type": "TextBlock",
+                                                    "wrap": True,
+                                                },
+                                            ],
+                                            "type": "Column",
+                                            "width": "stretch",
+                                        }
+                                    ],
+                                    "type": "ColumnSet",
+                                }
+                            ],
+                            "separator": True,
+                            "type": "Container",
+                        },
+                        {
+                            "height": "auto",
+                            "items": [
+                                {
+                                    "color": "good",
+                                    "horizontalAlignment": "left",
+                                    "text": "**Batch validation "
+                                    "status:** Success "
+                                    "!!!",
+                                    "type": "TextBlock",
+                                },
+                                {
+                                    "horizontalAlignment": "left",
+                                    "text": "**Data asset " "name:** asset",
+                                    "type": "TextBlock",
+                                },
+                                {
+                                    "horizontalAlignment": "left",
+                                    "text": "**Expectation "
+                                    "suite name:** "
+                                    "asset.default",
+                                    "type": "TextBlock",
+                                },
+                                {
+                                    "horizontalAlignment": "left",
+                                    "text": "**Run name:** " "test_100",
+                                    "type": "TextBlock",
+                                },
+                                {
+                                    "horizontalAlignment": "left",
+                                    "text": "**Batch ID:** 1234",
+                                    "type": "TextBlock",
+                                },
+                                {
+                                    "horizontalAlignment": "left",
+                                    "text": "**Summary:** *0* "
+                                    "of *0* "
+                                    "expectations were "
+                                    "met",
+                                    "type": "TextBlock",
+                                },
+                            ],
+                            "separator": True,
+                            "type": "Container",
+                        },
+                    ],
+                    "type": "AdaptiveCard",
+                    "version": "1.0",
                 },
+                "contentType": "application/vnd.microsoft.card.adaptive",
             }
         ],
+        "type": "message",
     }
-
-    print(rendered_output)
-    print(expected_output)
 
     assert rendered_output == expected_output
