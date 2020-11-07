@@ -208,6 +208,14 @@ def _invert_regex_to_data_reference_template(
     return data_reference_template
 
 
+def normalize_directory_path(dir_path: str, root_directory_path: Optional[str] = None) -> str:
+    # If directory is a relative path, interpret it as relative to the root directory.
+    if Path(dir_path).is_absolute() or root_directory_path is None:
+        return dir_path
+    else:
+        return Path(root_directory_path).joinpath(dir_path)
+
+
 def get_filesystem_one_level_directory_glob_path_list(
     base_directory_path: str,
     glob_directive: str

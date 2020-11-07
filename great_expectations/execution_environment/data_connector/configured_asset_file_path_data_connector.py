@@ -137,15 +137,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         """
         return list(self.assets.keys())
 
-    # TODO: <Alex>This method should be used in other file path type DataConnector classes (currently it is not).  ALEX</Alex>
-    def _normalize_directory_path(self, dir_path: str) -> str:
-        # If directory is a relative path, interpret it as relative to the data context's
-        # context root directory (parent directory of great_expectation dir)
-        if Path(dir_path).is_absolute() or self._data_context_root_directory is None:
-            return dir_path
-        else:
-            return Path(self._data_context_root_directory).joinpath(dir_path)
-
     def _refresh_data_references_cache(
         self,
     ):
@@ -337,30 +328,30 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             group_names=group_names
         )
 
-    # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
-    def build_batch_spec(
-        self,
-        batch_definition: BatchDefinition
-    ) -> PathBatchSpec:
-        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
-        return PathBatchSpec(batch_spec)
-
-    # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition
-    ) -> dict:
-        path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
-        if not path:
-            raise ValueError(
-                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
-partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
-                '''
-            )
-        path = self._get_full_path(path=path)
-        return {
-            "path": path
-        }
+#     # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
+#     def build_batch_spec(
+#         self,
+#         batch_definition: BatchDefinition
+#     ) -> PathBatchSpec:
+#         batch_spec = super().build_batch_spec(batch_definition=batch_definition)
+#         return PathBatchSpec(batch_spec)
+#
+#     # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
+#     def _generate_batch_spec_parameters_from_batch_definition(
+#         self,
+#         batch_definition: BatchDefinition
+#     ) -> dict:
+#         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
+#         if not path:
+#             raise ValueError(
+#                 f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
+# partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
+#                 '''
+#             )
+#         path = self._get_full_path(path=path)
+#         return {
+#             "path": path
+#         }
 
     # TODO: <Alex>What to do with this?  ALEX</Alex>
     def _validate_batch_request(self, batch_request: BatchRequest):
@@ -410,5 +401,5 @@ partition definition {batch_definition.partition_definition} from batch definiti
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         raise NotImplementedError
 
-    def _get_full_path(self, path: str) -> str:
-        raise NotImplementedError
+    # def _get_full_path(self, path: str) -> str:
+    #     raise NotImplementedError

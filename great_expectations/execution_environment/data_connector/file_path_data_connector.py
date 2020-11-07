@@ -34,7 +34,7 @@ import great_expectations.exceptions as ge_exceptions
 logger = logging.getLogger(__name__)
 
 # TODO: <Alex>Should we make this a "set" object?</Alex>
-# TODO: <Alex>ALEX Is this needed?</Alex>
+# TODO: <Alex>Is this actually needed?</Alex>
 KNOWN_EXTENSIONS = [
     ".csv",
     ".tsv",
@@ -157,33 +157,6 @@ class FilePathDataConnector(DataConnector):
         else:
             return batch_definition_list
 
-#     # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
-#     # TODO: <Alex>ALEX This has to work properly at this connector level and for lower connectors</Alex>
-#     def _validate_sorters_configuration(self, batch_request=None):
-#         # Override the default
-#         if len(self.sorters) > 0:
-#             regex_config = self._default_regex
-#             if (
-#                 batch_request.data_asset_name is not None
-#                 and self.assets and batch_request.data_asset_name in self.assets
-#             ):
-#                 asset: Asset = self.assets[batch_request.data_asset_name]
-#                 if asset.group_names:
-#                     regex_config["group_names"] = asset.group_names
-#             group_names: List[str] = regex_config["group_names"]
-#             if any([sorter not in group_names for sorter in self.sorters]):
-#                 raise ge_exceptions.DataConnectorError(
-#                     f'''FilePathDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-# configured group_name.
-#                     '''
-#                 )
-#             if len(group_names) < len(self.sorters):
-#                 raise ge_exceptions.DataConnectorError(
-#                     f'''FilePathDataConnector "{self.name}" is configured with {len(group_names)} group names; this is
-# fewer than number of sorters specified, which is {len(self.sorters)}.
-#                     '''
-#                 )
-
     def _sort_batch_definition_list(self, batch_definition_list) -> List[BatchDefinition]:
         sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
         for sorter in sorters:
@@ -208,10 +181,13 @@ class FilePathDataConnector(DataConnector):
 partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )
-        path = self._get_full_path(path=path)
+        path = self._get_full_file_path(path=path)
         return {
             "path": path
         }
+
+    def _get_full_file_path(self, path: str) -> str:
+        raise NotImplementedError
 
     # TODO: <Alex>What to do with this?  ALEX</Alex>
     def _validate_batch_request(self, batch_request: BatchRequest):

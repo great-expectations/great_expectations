@@ -188,25 +188,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         else:
             return batch_definition_list
 
-#     # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
-#     # TODO: <Alex>ALEX This has to work properly at FilePathDataConnector level and for lower connectors</Alex>
-#     def _validate_sorters_configuration(self):
-#         if len(self.sorters) > 0:
-#             regex_config = self._default_regex
-#             group_names: List[str] = regex_config["group_names"]
-#             if any([sorter not in group_names for sorter in self.sorters]):
-#                 raise ge_exceptions.DataConnectorError(
-#                     f'''InferredAssetDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-# configured group_name.
-#                     '''
-#                 )
-#             if len(group_names) < len(self.sorters):
-#                 raise ge_exceptions.DataConnectorError(
-#                     f'''InferredAssetDataConnector "{self.name}" is configured with {len(group_names)} group names; this is
-# fewer than number of sorters specified, which is {len(self.sorters)}.
-#                     '''
-#                 )
-
     def _sort_batch_definition_list(self, batch_definition_list) -> List[BatchDefinition]:
         sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
         for sorter in sorters:
@@ -239,31 +220,3 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             regex_pattern=pattern,
             group_names=group_names
         )
-
-    # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
-    def build_batch_spec(
-        self,
-        batch_definition: BatchDefinition
-    ) -> PathBatchSpec:
-        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
-        return PathBatchSpec(batch_spec)
-
-    # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition
-    ) -> dict:
-        path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
-        if not path:
-            raise ValueError(
-                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
-partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
-                '''
-            )
-        path = self._get_full_path(path=path)
-        return {
-            "path": path
-        }
-
-    def _get_full_path(self, path: str) -> str:
-        raise NotImplementedError
