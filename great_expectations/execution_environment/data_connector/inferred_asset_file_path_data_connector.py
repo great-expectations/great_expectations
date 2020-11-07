@@ -77,39 +77,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
-    # TODO: <Alex>Consider factoring this out.  ALEX</Alex>
-    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
-        """Fetch data_references corresponding to data_asset_name from the cache.
-        """
-        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
-        # TODO: <Alex>Consider factoring this out.  ALEX</Alex>
-        batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                execution_environment_name=self.execution_environment_name,
-                data_connector_name=self.name,
-                data_asset_name=data_asset_name,
-            )
-        )
-
-        regex_config: dict = copy.deepcopy(self._default_regex)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-
-        # TODO: <Alex>Consider factoring this out.  ALEX this can be convenience method</Alex>
-        path_list: List[str] = [
-            map_batch_definition_to_data_reference_string_using_regex(
-                batch_definition=batch_definition,
-                regex_pattern=pattern,
-                group_names=group_names
-            )
-            for batch_definition in batch_definition_list
-        ]
-
-        # TODO: Sort with a real sorter here
-        path_list.sort()
-
-        return path_list
-
     def get_data_reference_list_count(self) -> int:
         if self._data_references_cache is None:
             raise ValueError(
@@ -212,3 +179,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             regex_pattern=pattern,
             group_names=group_names
         )
+
+    def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
+        regex_config: dict = copy.deepcopy(self._default_regex)
+        return regex_config

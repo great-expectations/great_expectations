@@ -154,40 +154,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         path_list: List[str] = self._get_data_reference_list_for_asset(asset=asset)
         return path_list
 
-    # TODO: <Alex>Consider factoring this out.  ALEX</Alex>
-    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
-        """
-        Fetch data_references corresponding to data_asset_name from the cache.
-        """
-        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
-        # TODO: <Alex>Consider factoring this out.  ALEX Like put this into DataConnector</Alex>
-        batch_definition_list = self.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                execution_environment_name=self.execution_environment_name,
-                data_connector_name=self.name,
-                data_asset_name=data_asset_name,
-            )
-        )
-
-        regex_config: dict = self._get_regex_config_for_asset(data_asset_name=data_asset_name)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-
-        # TODO: <Alex>Consider factoring this out.  ALEX this can be convenience method</Alex>
-        path_list: List[str] = [
-            map_batch_definition_to_data_reference_string_using_regex(
-                batch_definition=batch_definition,
-                regex_pattern=pattern,
-                group_names=group_names
-            )
-            for batch_definition in batch_definition_list
-        ]
-
-        # TODO: Sort with a real sorter here
-        path_list.sort()
-
-        return path_list
-
     def get_data_reference_list_count(self) -> int:
         if self._data_references_cache is None:
             raise ValueError(
@@ -266,7 +232,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         data_reference: str,
         data_asset_name: str = None
     ) -> Optional[List[BatchDefinition]]:
-        regex_config: dict = self._get_regex_config_for_asset(data_asset_name=data_asset_name)
+        regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
         return map_data_reference_string_to_batch_definition_list_using_regex(
@@ -280,7 +246,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
         data_asset_name: str = batch_definition.data_asset_name
-        regex_config: dict = self._get_regex_config_for_asset(data_asset_name=data_asset_name)
+        regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
         return map_batch_definition_to_data_reference_string_using_regex(
@@ -317,9 +283,11 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
                                this is fewer than number of sorters specified, which is {len(self.sorters)}.
                              ''')
 
-    def _get_regex_config_for_asset(self, data_asset_name: str) -> dict:
-        asset: Optional[Asset] = self._get_asset(data_asset_name=data_asset_name)
+    def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
         regex_config: dict = copy.deepcopy(self._default_regex)
+        asset: Optional[Asset] = None
+        if data_asset_name:
+            asset = self._get_asset(data_asset_name=data_asset_name)
         if asset is not None:
             # Override the defaults
             if asset.pattern:

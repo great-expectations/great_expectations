@@ -77,13 +77,15 @@ class FilePathDataConnector(DataConnector):
     def sorters(self) -> Optional[dict]:
         return self._sorters
 
-    # TODO: <Alex>Consider factoring this out.  ALEX</Alex>
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """
         Fetch data_references corresponding to data_asset_name from the cache.
         """
+        regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
+        pattern: str = regex_config["pattern"]
+        group_names: List[str] = regex_config["group_names"]
+
         # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
-        # TODO: <Alex>Consider factoring this out.  ALEX Like put this into DataConnector</Alex>
         batch_definition_list = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -92,11 +94,6 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
-        regex_config: dict = self._get_regex_config_for_asset(data_asset_name=data_asset_name)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-
-        # TODO: <Alex>Consider factoring this out.  ALEX this can be convenience method</Alex>
         path_list: List[str] = [
             map_batch_definition_to_data_reference_string_using_regex(
                 batch_definition=batch_definition,
@@ -235,6 +232,9 @@ appear among the configured group_name.
 names; this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     '''
                 )
+
+    def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
+        raise NotImplementedError
 
     def _get_full_file_path(self, path: str) -> str:
         raise NotImplementedError
