@@ -60,14 +60,14 @@ class DataConnector:
     def execution_environment_name(self) -> str:
         return self._execution_environment_name
 
-    def get_batch_data_and_metadata_from_batch_definition(
+    def get_batch_data_and_metadata(
         self, batch_definition: BatchDefinition,
     ) -> Tuple[
         Any,  # batch_data
         BatchSpec,
         BatchMarkers,
     ]:
-        batch_spec: BatchSpec = self._build_batch_spec_from_batch_definition(
+        batch_spec: BatchSpec = self.build_batch_spec(
             batch_definition=batch_definition
         )
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
@@ -77,7 +77,7 @@ class DataConnector:
             batch_markers,
         )
 
-    def _build_batch_spec_from_batch_definition(
+    def build_batch_spec(
         self, batch_definition: BatchDefinition
     ) -> BatchSpec:
         batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
