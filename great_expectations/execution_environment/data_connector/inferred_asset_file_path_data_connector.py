@@ -171,7 +171,9 @@ class InferredAssetFilePathDataConnector(DataConnector):
             )
 
         if len(self._sorters) > 0:
-            sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
+            sorted_batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list
+            )
             return sorted_batch_definition_list
         else:
             return batch_definition_list
@@ -194,8 +196,8 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
                     '''
                 )
 
-    def _sort_batch_definition_list(self, batch_definition_list):
-        sorters_list = []
+    def _sort_batch_definition_list(self, batch_definition_list) -> List[BatchDefinition]:
+        sorters_list: List[Sorter] = []
         for sorter in self._sorters.values():
             sorters_list.append(sorter)
         sorters: Iterator[Sorter] = reversed(sorters_list)
