@@ -56,7 +56,6 @@ class FilePathDataConnector(DataConnector):
         default_regex: dict,
         execution_engine: ExecutionEngine = None,
         sorters: list = None,
-        # TODO: <Alex>This is needed in InferredAsset too ALEX</Alex>
         data_context_root_directory: str = None,
     ):
         logger.debug(f'Constructing FilePathDataConnector "{name}".')
@@ -67,15 +66,11 @@ class FilePathDataConnector(DataConnector):
         )
         self._data_context_root_directory = data_context_root_directory
 
-        # TODO: Maybe make this a typed object?
-        # TODO: <Alex></Alex>
         if default_regex is None:
             default_regex = {}
         self._default_regex = default_regex
 
         self._sorters = build_sorters_from_config(config_list=sorters)
-        # TODO: <Alex>ALEX</Alex>
-        # super()._validate_sorters_configuration()
         self._validate_sorters_configuration()
 
     @property
@@ -186,9 +181,6 @@ partition definition {batch_definition.partition_definition} from batch definiti
             "path": path
         }
 
-    def _get_full_file_path(self, path: str) -> str:
-        raise NotImplementedError
-
     # TODO: <Alex>What to do with this?  ALEX</Alex>
     def _validate_batch_request(self, batch_request: BatchRequest):
         super()._validate_batch_request(batch_request)
@@ -243,3 +235,6 @@ appear among the configured group_name.
 names; this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     '''
                 )
+
+    def _get_full_file_path(self, path: str) -> str:
+        raise NotImplementedError

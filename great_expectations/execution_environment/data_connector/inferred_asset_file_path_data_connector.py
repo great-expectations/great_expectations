@@ -60,14 +60,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             data_context_root_directory=data_context_root_directory
         )
 
-        # TODO: <Alex></Alex>
-        # if default_regex is None:
-        #     default_regex = {}
-        # self._default_regex = default_regex
-        # TODO: <Alex>We need to move sorters to DataConnector and standardize self._validate_sorters_configuration()</Alex>
-        self._sorters = build_sorters_from_config(config_list=sorters)
-        self._validate_sorters_configuration()
-
     @property
     def sorters(self) -> Optional[dict]:
         return self._sorters

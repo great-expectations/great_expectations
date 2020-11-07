@@ -36,7 +36,7 @@ import great_expectations.exceptions as ge_exceptions
 logger = logging.getLogger(__name__)
 
 # TODO: <Alex>Should we make this a "set" object?</Alex>
-# TODO: <Alex>ALEX Is this needed?</Alex>
+# TODO: <Alex>Is this actually needed?</Alex>
 KNOWN_EXTENSIONS = [
     ".csv",
     ".tsv",
@@ -59,7 +59,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         assets: dict,
         sorters: list = None,
         execution_engine: ExecutionEngine = None,
-        # TODO: <Alex>This is needed in InferredAsset too ALEX</Alex>
         data_context_root_directory: str = None,
     ):
         logger.debug(f'Constructing ConfiguredAssetFilePathDataConnector "{name}".')
@@ -71,23 +70,12 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             sorters=sorters,
             data_context_root_directory=data_context_root_directory
         )
-        # TODO: <Alex></Alex>
-        # self._data_context_root_directory = data_context_root_directory
-
-        # TODO: <Alex></Alex>
-        # TODO: Maybe make this a typed object?
-        # self._default_regex = default_regex
 
         if assets is None:
             assets = {}
         _assets: Dict[str, Union[dict, Asset]] = assets
         self._assets = _assets
         self._build_assets_from_config(config=assets)
-
-        self._sorters = build_sorters_from_config(config_list=sorters)
-        # TODO: <Alex>ALEX</Alex>
-        # super()._validate_sorters_configuration()
-        self._validate_sorters_configuration()
 
     @property
     def assets(self) -> Dict[str, Union[dict, Asset]]:
@@ -267,33 +255,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         else:
             return batch_definition_list
 
-#     # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
-#     # TODO: <Alex>ALEX This has to work properly at FilePathDataConnector level and for lower connectors</Alex>
-#     def _validate_sorters_configuration(self, batch_request):
-#         # Override the default
-#         if len(self.sorters) > 0:
-#             regex_config = self._default_regex
-#             if (
-#                 batch_request.data_asset_name is not None
-#                 and self.assets and batch_request.data_asset_name in self.assets
-#             ):
-#                 asset: Asset = self.assets[batch_request.data_asset_name]
-#                 if asset.group_names:
-#                     regex_config["group_names"] = asset.group_names
-#             group_names: List[str] = regex_config["group_names"]
-#             if any([sorter not in group_names for sorter in self.sorters]):
-#                 raise ge_exceptions.DataConnectorError(
-#                     f'''ConfiguredAssetFilePathDataConnector "{self.name}" specifies one or more sort keys that do not
-# appear among the configured group_name.
-#                     '''
-#                 )
-#             if len(group_names) < len(self.sorters):
-#                 raise ge_exceptions.DataConnectorError(
-#                     f'''ConfiguredAssetFilePathDataConnector "{self.name}" is configured with {len(group_names)} group
-# names; this is fewer than number of sorters specified, which is {len(self.sorters)}.
-#                     '''
-#                 )
-
     def _sort_batch_definition_list(self, batch_definition_list) -> List[BatchDefinition]:
         sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
         for sorter in sorters:
@@ -327,31 +288,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             regex_pattern=pattern,
             group_names=group_names
         )
-
-#     # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
-#     def build_batch_spec(
-#         self,
-#         batch_definition: BatchDefinition
-#     ) -> PathBatchSpec:
-#         batch_spec = super().build_batch_spec(batch_definition=batch_definition)
-#         return PathBatchSpec(batch_spec)
-#
-#     # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
-#     def _generate_batch_spec_parameters_from_batch_definition(
-#         self,
-#         batch_definition: BatchDefinition
-#     ) -> dict:
-#         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
-#         if not path:
-#             raise ValueError(
-#                 f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
-# partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
-#                 '''
-#             )
-#         path = self._get_full_path(path=path)
-#         return {
-#             "path": path
-#         }
 
     # TODO: <Alex>What to do with this?  ALEX</Alex>
     def _validate_batch_request(self, batch_request: BatchRequest):
@@ -400,6 +336,3 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         raise NotImplementedError
-
-    # def _get_full_path(self, path: str) -> str:
-    #     raise NotImplementedError
