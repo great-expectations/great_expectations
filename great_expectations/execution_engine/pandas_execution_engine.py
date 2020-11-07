@@ -189,7 +189,6 @@ Notes:
             reader_fn: Callable = self._get_reader_fn(reader_method, path)
 
             batch_data = reader_fn(path, **reader_options)
-            print("B", batch_data)
 
         elif isinstance(batch_spec, S3BatchSpec):
             # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
