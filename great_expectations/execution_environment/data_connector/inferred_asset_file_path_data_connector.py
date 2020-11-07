@@ -110,6 +110,11 @@ class InferredAssetFilePathDataConnector(DataConnector):
         return path_list
 
     def get_data_reference_list_count(self) -> int:
+        if self._data_references_cache is None:
+            raise ValueError(
+                f"data references cache for {self.__class__.__name__} {self.name} has not yet been populated."
+            )
+
         return len(self._data_references_cache)
 
     def get_unmatched_data_references(self) -> List[str]:
