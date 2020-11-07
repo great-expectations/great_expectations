@@ -64,7 +64,9 @@ class SinglePartitionerDataConnector(DataConnector):
         self._default_regex = default_regex
 
         self._sorters = build_sorters_from_config(config_list=sorters)
-        super()._validate_sorters_configuration()
+        # TODO: <Alex>Uses internal sorter validator, because this class is in its own tree.</Alex>
+        # super()._validate_sorters_configuration()
+        self._validate_sorters_configuration()
 
     @property
     def sorters(self) -> Optional[dict]:
@@ -175,24 +177,6 @@ class SinglePartitionerDataConnector(DataConnector):
         else:
             return batch_definition_list
 
-    # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
-    def _validate_sorters_configuration(self):
-        if len(self.sorters) > 0:
-            regex_config = self._default_regex
-            group_names: List[str] = regex_config["group_names"]
-            if any([sorter not in group_names for sorter in self.sorters]):
-                raise ge_exceptions.DataConnectorError(
-                    f'''InferredAssetDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-configured group_name.
-                    '''
-                )
-            if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
-                    f'''InferredAssetDataConnector "{self.name}" is configured with {len(group_names)} group names; this is
-fewer than number of sorters specified, which is {len(self.sorters)}.
-                    '''
-                )
-
     def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list = []
         for sorter in self._sorters.values():
@@ -237,3 +221,22 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
     #     batch_definition: BatchDefinition
     # ) -> dict:
     #     pass
+
+    # TODO: <Alex>This is an internal sorter validator, because this class is in its own tree.</Alex>
+    # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
+    def _validate_sorters_configuration(self):
+        if len(self.sorters) > 0:
+            regex_config = self._default_regex
+            group_names: List[str] = regex_config["group_names"]
+            if any([sorter not in group_names for sorter in self.sorters]):
+                raise ge_exceptions.DataConnectorError(
+                    f'''InferredAssetDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+configured group_name.
+                    '''
+                )
+            if len(group_names) < len(self.sorters):
+                raise ge_exceptions.DataConnectorError(
+                    f'''InferredAssetDataConnector "{self.name}" is configured with {len(group_names)} group names; this is
+fewer than number of sorters specified, which is {len(self.sorters)}.
+                    '''
+                )

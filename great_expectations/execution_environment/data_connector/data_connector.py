@@ -213,20 +213,20 @@ DataConnector name: "{self.name}".
                 '''
             )
 
-    # TODO: <Alex>ALEX this method currently does not make sense. ALEX it is used, but needs to be cleaned up</Alex>
-    def _validate_sorters_configuration(self):
-        if len(self.sorters) > 0:
-            regex_config = self._default_regex
-            group_names: List[str] = regex_config["group_names"]
-            if any([sorter not in group_names for sorter in self.sorters]):
-                raise ge_exceptions.DataConnectorError(
-                    f'''DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-configured group_name.
-                    '''
-                )
-            if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
-                    f'''DataConnector "{self.name}" is configured with {len(group_names)} group names;
-this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                    '''
-                )
+#     # TODO: <Alex>ALEX this method currently does not make sense. ALEX it is used, but needs to be cleaned up</Alex>
+#     def _validate_sorters_configuration(self):
+#         if len(self.sorters) > 0:
+#             regex_config = self._default_regex
+#             group_names: List[str] = regex_config["group_names"]
+#             if any([sorter not in group_names for sorter in self.sorters]):
+#                 raise ge_exceptions.DataConnectorError(
+#                     f'''DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+# configured group_name.
+#                     '''
+#                 )
+#             if len(group_names) < len(self.sorters):
+#                 raise ge_exceptions.DataConnectorError(
+#                     f'''DataConnector "{self.name}" is configured with {len(group_names)} group names;
+# this is fewer than number of sorters specified, which is {len(self.sorters)}.
+#                     '''
+#                 )

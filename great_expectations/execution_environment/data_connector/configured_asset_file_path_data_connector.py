@@ -86,7 +86,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
         self._sorters = build_sorters_from_config(config_list=sorters)
         # TODO: <Alex>ALEX</Alex>
-        super()._validate_sorters_configuration()
+        # super()._validate_sorters_configuration()
+        self._validate_sorters_configuration()
 
     @property
     def assets(self) -> Dict[str, Union[dict, Asset]]:
