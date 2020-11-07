@@ -147,7 +147,7 @@ def test_MicrosoftTeamsNotificationAction(
         "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
         "class_name": "MicrosoftTeamsRenderer",
     }
-    teams_webhook = "https://webhook.site/700303fe-6398-4a22-96fb-837f90d019e9"
+    teams_webhook = "https://webhook.site/e50bf8c4-d9a1-484e-8aaf-def338f037cd"
     notify_on = "all"
 
     teams_action = MicrosoftTeamsNotificationAction(
