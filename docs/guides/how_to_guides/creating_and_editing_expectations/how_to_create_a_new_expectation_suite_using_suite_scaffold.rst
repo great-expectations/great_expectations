@@ -25,7 +25,7 @@ Steps
         great_expectations suite scaffold npi_distributions
         Heads up! This feature is Experimental. It may change. Please give us your feedback!
 
-        Enter the path (relative or absolute) of a data file
+        Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
         : npi.csv
 
     .. important::
@@ -43,7 +43,7 @@ Steps
         suite scaffold npi_distributions --no-jupyter
         Heads up! This feature is Experimental. It may change. Please give us your feedback!
 
-        Enter the path (relative or absolute) of a data file
+        Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
         : npi.csv
         To continue scaffolding this suite, run `jupyter notebook uncommitted/scaffold_npi_distributions.ipynb`
 
