@@ -1,4 +1,4 @@
-from typing import List, Any, Optional, Union
+from typing import List, Any, Optional, Union, Tuple
 import logging
 
 from great_expectations.execution_engine import ExecutionEngine
@@ -8,7 +8,11 @@ from great_expectations.core.id_dict import (
     PartitionDefinitionSubset,
     PartitionDefinition
 )
-from great_expectations.execution_environment.types import InMemoryBatchSpec
+from great_expectations.execution_environment.types import (
+    BatchSpec,
+    BatchMarkers,
+    RuntimeDataBatchSpec,
+)
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
 import great_expectations.exceptions as ge_exceptions
@@ -105,6 +109,26 @@ class RuntimeDataConnector(DataConnector):
 
         return list(data_asset_names)
 
+    def get_batch_data_and_metadata(
+        self,
+        batch_definition: BatchDefinition,
+        batch_data: Any,
+    ) -> Tuple[
+        Any,  # batch_data
+        BatchSpec,
+        BatchMarkers,
+    ]:
+        batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
+            batch_definition=batch_definition,
+            batch_data=batch_data,
+        )
+        batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
+        return (
+            batch_data,
+            batch_spec,
+            batch_markers,
+        )
+
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,
@@ -175,12 +199,14 @@ class RuntimeDataConnector(DataConnector):
         return {}
 
     # This method is currently called called only in tests.
-    def _build_batch_spec_from_batch_definition(
+    def build_batch_spec(
         self,
-        batch_definition: BatchDefinition
-    ) -> InMemoryBatchSpec:
-        batch_spec = super()._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
-        return InMemoryBatchSpec(batch_spec)
+        batch_definition: BatchDefinition,
+        batch_data: Any,
+    ) -> RuntimeDataBatchSpec:
+        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
+        batch_spec["batch_data"] = batch_data
+        return RuntimeDataBatchSpec(batch_spec)
 
     @staticmethod
     def _get_data_reference_name(

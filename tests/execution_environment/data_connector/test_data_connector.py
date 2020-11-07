@@ -130,7 +130,7 @@ def test_build_batch_spec_from_batch_definition():
     pass
 
 
-def test_get_batch_data_and_metadata_from_batch_definition():
+def test_get_batch_data_and_metadata():
     pass
 
 

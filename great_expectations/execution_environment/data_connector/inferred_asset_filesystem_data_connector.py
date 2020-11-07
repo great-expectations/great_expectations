@@ -61,3 +61,10 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
             glob_directive=self.glob_directive
         )
         return path_list
+
+    def build_batch_spec(
+        self,
+        batch_definition: BatchDefinition
+    ) -> PathBatchSpec:
+        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
+        return PathBatchSpec(batch_spec)

@@ -9,7 +9,11 @@ from typing import Any, Callable, Dict, Iterable, Tuple, List
 
 import pandas as pd
 
-from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec, InMemoryBatchSpec
+from great_expectations.execution_environment.types import (
+    PathBatchSpec,
+    S3BatchSpec,
+    RuntimeDataBatchSpec,
+)
 
 from ..core.batch import Batch, BatchMarkers, BatchRequest
 from ..core.id_dict import BatchSpec
@@ -91,15 +95,14 @@ Notes:
             }
         )
 
-        if isinstance(batch_spec, InMemoryBatchSpec):
+        if isinstance(batch_spec, RuntimeDataBatchSpec):
             # We do not want to store the actual dataframe in batch_spec (mark that this is PandasInMemoryDF instead).
             batch_data = batch_spec.pop("batch_data")
             batch_spec["PandasInMemoryDF"] = True
-            if batch_data is not None:
-                if batch_spec.get("data_asset_name"):
-                    df = batch_data
-                else:
-                    raise ValueError("To pass an batch_data, you must also a data_asset_name as well.")
+            if batch_spec.get("data_asset_name"):
+                df = batch_data
+            else:
+                raise ValueError("To pass an batch_data, you must also a data_asset_name as well.")
         else:
             reader_method = batch_spec.get("reader_method")
             reader_options = batch_spec.get("reader_options") or {}
@@ -166,8 +169,6 @@ Notes:
         Any,  # batch_data
         BatchMarkers
     ]:
-        batch_data: Any = None
-
         # We need to build a batch_markers to be used in the dataframe
         batch_markers: BatchMarkers = BatchMarkers(
             {
@@ -177,8 +178,8 @@ Notes:
             }
         )
 
-        if isinstance(batch_spec, InMemoryBatchSpec):
-            batch_data = batch_spec.dataset
+        if isinstance(batch_spec, RuntimeDataBatchSpec):
+            batch_data = batch_spec.batch_data
 
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.get("reader_method")
@@ -206,9 +207,7 @@ Notes:
             pass
         else:
             raise BatchSpecError(
-                """Invalid batch_spec: file path, s3 path, or batch_data is required for a PandasExecutionEngine to
-operate.
-                """
+                f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
             )
 
         splitter_method: str = batch_spec.get("splitter_method") or None
@@ -223,38 +222,10 @@ operate.
             sampling_fn = getattr(self, sampling_method)
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
 
-        if batch_data is not None:
-            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
-                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
+        if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
 
         return batch_data, batch_markers
-
-    @staticmethod
-    def get_batch_markers_and_update_batch_spec_for_batch_data(
-        batch_data: pd.DataFrame,
-        batch_spec: BatchSpec
-    ) -> BatchMarkers:
-        """
-        Computes batch_markers in the case of user-provided batch_data (e.g., in the case of a data pipeline).
-
-        :param batch_data -- user-provided dataframe
-        :param batch_spec -- BatchSpec (must be previously instantiated/initialized by RuntimeDataConnector)
-        :returns computed batch_markers specific to this execution engine
-        """
-        batch_markers: BatchMarkers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
-        )
-        if batch_data is not None:
-            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
-                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
-            # we do not want to store the actual dataframe in batch_spec
-            # hence, marking that this is a PandasInMemoryDF instead
-            batch_spec["PandasInMemoryDF"] = True
-        return batch_markers
 
     @property
     def dataframe(self):

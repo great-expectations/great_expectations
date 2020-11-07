@@ -104,7 +104,7 @@ class SqlDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name:str) -> List[str]:
         return self._data_references_cache[data_asset_name]
 
-    def _build_batch_spec_from_batch_definition(
+    def build_batch_spec(
         self,
         batch_definition: BatchDefinition
     ):
@@ -145,7 +145,7 @@ class SqlDataConnector(DataConnector):
         #...and fetch it.
         if pretty_print:
             print(f"\n\t\tFetching batch data..")
-        batch_data, batch_spec, batch_markers = self.get_batch_data_and_metadata_from_batch_definition(
+        batch_data, batch_spec, batch_markers = self.get_batch_data_and_metadata(
             BatchDefinition(
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,

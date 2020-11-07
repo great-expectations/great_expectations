@@ -12,6 +12,12 @@ except ImportError:
 from great_expectations.core.id_dict import IDDict
 
 from great_expectations.core.batch import BatchSpec, Batch
+from great_expectations.execution_environment.types import (
+    PathBatchSpec,
+    S3BatchSpec,
+    RuntimeDataBatchSpec,
+)
+RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec
 from ..exceptions import BatchKwargsError, GreatExpectationsError, ValidationError
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
@@ -147,7 +153,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             }
         )
 
-        if isinstance(batch_spec, InMemoryBatchSpec):
+        if isinstance(batch_spec, RuntimeDataBatchSpec):
             # We do not want to store the actual dataframe in batch_spec (mark that this is SparkDFRef instead).
             batch_data = batch_spec.pop("batch_data")
             batch_spec["SparkInMemoryDF"] = True

@@ -6,7 +6,7 @@ import hashlib
 from typing import List
 
 from great_expectations.core.batch import BatchSpec
-from great_expectations.execution_environment.types.batch_spec import InMemoryBatchSpec
+from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec
 from great_expectations.execution_engine.pandas_execution_engine import PandasExecutionEngine
 
 # def test_basic_setup():
@@ -14,7 +14,7 @@ from great_expectations.execution_engine.pandas_execution_engine import PandasEx
 #     # df = PandasExecutionEngine({"x": range(10)})
 
 #     batch_data, batch_markers = PandasExecutionEngine().load_batch(
-#         batch_spec = InMemoryBatchSpec({
+#         batch_spec = RuntimeDataBatchSpec({
 #             "batch_data": df,
 #             "data_asset_name": "TEST_DATA_ASSET",
 #         })
@@ -80,32 +80,32 @@ def test_df(tmp_path_factory):
 def test_get_batch_data(test_df):
     print(test_df.T)
 
-    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
     ))
     assert split_df.shape == (120, 10)
 
-    # TODO Abe 20201105: We should change InMemoryBatchSpec so that this test passes, but that should be a different PR.
-    # No dataset passed to InMemoryBatchSpec
+    # TODO Abe 20201105: We should change RuntimeDataBatchSpec so that this test passes, but that should be a different PR.
+    # No dataset passed to RuntimeDataBatchSpec
     # with pytest.raises(ValueError):
-    #     PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
+    #     PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
 
-    #         # dataset=test_df,
+    #         # batch_data=test_df,
     #     ))
 
 def test_get_batch_with_split_on_whole_table(test_df):
     print(test_df.T)
 
-    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         splitter_method="_split_on_whole_table"
     ))
     assert split_df.shape == (120, 10)
 
 def test_get_batch_with_split_on_column_value(test_df):
 
-    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         splitter_method="_split_on_column_value",
         splitter_kwargs={
             "column_name" : "batch_id",
@@ -117,8 +117,8 @@ def test_get_batch_with_split_on_column_value(test_df):
     assert split_df.shape == (12, 10)
     assert (split_df.batch_id == 2).all()
 
-    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         splitter_method="_split_on_column_value",
         splitter_kwargs={
             "column_name":"date",
@@ -131,8 +131,8 @@ def test_get_batch_with_split_on_column_value(test_df):
 
 
 def test_get_batch_with_split_on_converted_datetime(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         splitter_method="_split_on_converted_datetime",
         splitter_kwargs={
             "column_name": "timestamp",
@@ -144,8 +144,8 @@ def test_get_batch_with_split_on_converted_datetime(test_df):
     assert (split_df).shape == (3, 10)
 
 def test_get_batch_with_split_on_divided_integer(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         splitter_method="_split_on_divided_integer",
         splitter_kwargs={
             "column_name": "id",
@@ -160,8 +160,8 @@ def test_get_batch_with_split_on_divided_integer(test_df):
     assert split_df.id.max() == 59
 
 def test_get_batch_with_split_on_mod_integer(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         splitter_method="_split_on_mod_integer",
         splitter_kwargs={
             "column_name": "id",
@@ -176,8 +176,8 @@ def test_get_batch_with_split_on_mod_integer(test_df):
     assert split_df.id.max() == 115
     
 def test_get_batch_with_split_on_multi_column_values(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         splitter_method="_split_on_multi_column_values",
         splitter_kwargs={
             "column_names" : ["y", "m", "d"],
@@ -192,8 +192,8 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
     assert (split_df.date == datetime.date(2020,1,5)).all()
 
 def test_get_batch_with_split_on_hashed_column(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         splitter_method="_split_on_hashed_column",
         splitter_kwargs={
             "column_name":"favorite_color",
@@ -210,15 +210,15 @@ def test_get_batch_with_split_on_hashed_column(test_df):
 
 def test_sample_using_random(test_df):
     random.seed(1)
-    sampled_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    sampled_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         sampling_method="_sample_using_random"
     ))
     assert sampled_df.shape == (13, 10)
 
 def test_sample_using_mod(test_df):
-    sampled_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    sampled_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         sampling_method="_sample_using_mod",
         sampling_kwargs={
             "column_name":"id",
@@ -229,8 +229,8 @@ def test_sample_using_mod(test_df):
     assert sampled_df.shape == (24, 10)
 
 def test_sample_using_a_list(test_df):
-    sampled_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    sampled_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         sampling_method="_sample_using_a_list",
         sampling_kwargs={
             "column_name":"id",
@@ -240,8 +240,8 @@ def test_sample_using_a_list(test_df):
     assert sampled_df.shape == (4, 10)
 
 def test_sample_using_md5(test_df):
-    sampled_df = PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-        dataset=test_df,
+    sampled_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
         sampling_method="_sample_using_md5",
         sampling_kwargs={
             "column_name": "date",    
