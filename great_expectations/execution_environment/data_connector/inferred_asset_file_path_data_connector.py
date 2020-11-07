@@ -4,7 +4,8 @@ import copy
 import logging
 
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector import FilePathDataConnector
 from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -27,7 +28,7 @@ import great_expectations.exceptions as ge_exceptions
 logger = logging.getLogger(__name__)
 
 
-class InferredAssetFilePathDataConnector(DataConnector):
+class InferredAssetFilePathDataConnector(FilePathDataConnector):
     """SinglePartitionerDataConnector is a base class for DataConnectors that require exactly one Partitioner be configured in the declaration.
 
     Instead, its data_references are stored in a data_reference_dictionary : {
@@ -46,6 +47,7 @@ class InferredAssetFilePathDataConnector(DataConnector):
         execution_engine: ExecutionEngine = None,
         default_regex: dict = None,
         sorters: list = None,
+        data_context_root_directory: str = None,
     ):
         logger.debug(f'Constructing SinglePartitionerDataConnector "{name}".')
 
@@ -53,11 +55,15 @@ class InferredAssetFilePathDataConnector(DataConnector):
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
+            default_regex=default_regex,
+            sorters=sorters,
+            data_context_root_directory=data_context_root_directory
         )
 
-        if default_regex is None:
-            default_regex = {}
-        self._default_regex = default_regex
+        # TODO: <Alex></Alex>
+        # if default_regex is None:
+        #     default_regex = {}
+        # self._default_regex = default_regex
         # TODO: <Alex>We need to move sorters to DataConnector and standardize self._validate_sorters_configuration()</Alex>
         self._sorters = build_sorters_from_config(config_list=sorters)
         self._validate_sorters_configuration()
@@ -79,10 +85,12 @@ class InferredAssetFilePathDataConnector(DataConnector):
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
+    # TODO: <Alex>Consider factoring this out.  ALEX</Alex>
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache.
         """
         # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
+        # TODO: <Alex>Consider factoring this out.  ALEX</Alex>
         batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -95,6 +103,7 @@ class InferredAssetFilePathDataConnector(DataConnector):
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
 
+        # TODO: <Alex>Consider factoring this out.  ALEX this can be convenience method</Alex>
         path_list: List[str] = [
             map_batch_definition_to_data_reference_string_using_regex(
                 batch_definition=batch_definition,
@@ -162,6 +171,7 @@ class InferredAssetFilePathDataConnector(DataConnector):
             )
         )
 
+        # TODO: <Alex>ALEX Can the below be put into a decorator at a higher level?</Alex>
         if batch_request.partition_request is not None:
             partition_query_obj: PartitionQuery = build_partition_query(
                 partition_request_dict=batch_request.partition_request
@@ -178,23 +188,24 @@ class InferredAssetFilePathDataConnector(DataConnector):
         else:
             return batch_definition_list
 
-    # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
-    def _validate_sorters_configuration(self):
-        if len(self.sorters) > 0:
-            regex_config = self._default_regex
-            group_names: List[str] = regex_config["group_names"]
-            if any([sorter not in group_names for sorter in self.sorters]):
-                raise ge_exceptions.DataConnectorError(
-                    f'''InferredAssetDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-configured group_name.
-                    '''
-                )
-            if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
-                    f'''InferredAssetDataConnector "{self.name}" is configured with {len(group_names)} group names; this is
-fewer than number of sorters specified, which is {len(self.sorters)}.
-                    '''
-                )
+#     # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
+#     # TODO: <Alex>ALEX This has to work properly at FilePathDataConnector level and for lower connectors</Alex>
+#     def _validate_sorters_configuration(self):
+#         if len(self.sorters) > 0:
+#             regex_config = self._default_regex
+#             group_names: List[str] = regex_config["group_names"]
+#             if any([sorter not in group_names for sorter in self.sorters]):
+#                 raise ge_exceptions.DataConnectorError(
+#                     f'''InferredAssetDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+# configured group_name.
+#                     '''
+#                 )
+#             if len(group_names) < len(self.sorters):
+#                 raise ge_exceptions.DataConnectorError(
+#                     f'''InferredAssetDataConnector "{self.name}" is configured with {len(group_names)} group names; this is
+# fewer than number of sorters specified, which is {len(self.sorters)}.
+#                     '''
+#                 )
 
     def _sort_batch_definition_list(self, batch_definition_list) -> List[BatchDefinition]:
         sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
@@ -210,7 +221,6 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
         regex_config: dict = copy.deepcopy(self._default_regex)
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
-
         return map_data_reference_string_to_batch_definition_list_using_regex(
             execution_environment_name=self.execution_environment_name,
             data_connector_name=self.name,
@@ -224,13 +234,13 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
         regex_config: dict = copy.deepcopy(self._default_regex)
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
-
         return map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=batch_definition,
             regex_pattern=pattern,
             group_names=group_names
         )
 
+    # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
     def build_batch_spec(
         self,
         batch_definition: BatchDefinition
@@ -238,6 +248,7 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
         batch_spec = super().build_batch_spec(batch_definition=batch_definition)
         return PathBatchSpec(batch_spec)
 
+    # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
     def _generate_batch_spec_parameters_from_batch_definition(
         self,
         batch_definition: BatchDefinition

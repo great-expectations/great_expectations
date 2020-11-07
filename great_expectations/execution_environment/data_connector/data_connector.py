@@ -213,6 +213,7 @@ DataConnector name: "{self.name}".
                 '''
             )
 
+    # TODO: <Alex>ALEX this method currently does not make sense. ALEX it is used, but needs to be cleaned up</Alex>
     def _validate_sorters_configuration(self):
         if len(self.sorters) > 0:
             regex_config = self._default_regex

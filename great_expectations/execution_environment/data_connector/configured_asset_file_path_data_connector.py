@@ -5,12 +5,12 @@ import copy
 import logging
 import os
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec, PartitionDefinitionSubset
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector import FilePathDataConnector
 
 from great_expectations.execution_environment.data_connector.partition_query import (
     PartitionQuery,
@@ -36,6 +36,7 @@ import great_expectations.exceptions as ge_exceptions
 logger = logging.getLogger(__name__)
 
 # TODO: <Alex>Should we make this a "set" object?</Alex>
+# TODO: <Alex>ALEX Is this needed?</Alex>
 KNOWN_EXTENSIONS = [
     ".csv",
     ".tsv",
@@ -49,7 +50,7 @@ KNOWN_EXTENSIONS = [
 ]
 
 
-class ConfiguredAssetFilePathDataConnector(DataConnector):
+class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     def __init__(
         self,
         name: str,
@@ -66,11 +67,16 @@ class ConfiguredAssetFilePathDataConnector(DataConnector):
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
+            default_regex=default_regex,
+            sorters=sorters,
+            data_context_root_directory=data_context_root_directory
         )
-        self._data_context_root_directory = data_context_root_directory
+        # TODO: <Alex></Alex>
+        # self._data_context_root_directory = data_context_root_directory
 
+        # TODO: <Alex></Alex>
         # TODO: Maybe make this a typed object?
-        self._default_regex = default_regex
+        # self._default_regex = default_regex
 
         if assets is None:
             assets = {}
@@ -79,6 +85,7 @@ class ConfiguredAssetFilePathDataConnector(DataConnector):
         self._build_assets_from_config(config=assets)
 
         self._sorters = build_sorters_from_config(config_list=sorters)
+        # TODO: <Alex>ALEX</Alex>
         super()._validate_sorters_configuration()
 
     @property
@@ -129,16 +136,6 @@ class ConfiguredAssetFilePathDataConnector(DataConnector):
         """
         return list(self.assets.keys())
 
-    # TODO: <Alex>This code is broken; it is used only by deprecated classes and methods.</Alex>
-    def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
-        if runtime_keys and len(runtime_keys) > 0:
-            if not (self.runtime_keys and set(runtime_keys) <= set(self.runtime_keys)):
-                raise ge_exceptions.PartitionerError(
-                    f"""Partitioner "{self.name}" was invoked with one or more runtime keys that do not appear among the
-configured runtime keys.
-                    """
-                )
-
     # TODO: <Alex>This method should be used in other file path type DataConnector classes (currently it is not).  ALEX</Alex>
     def _normalize_directory_path(self, dir_path: str) -> str:
         # If directory is a relative path, interpret it as relative to the data context's
@@ -177,11 +174,13 @@ configured runtime keys.
         path_list: List[str] = self._get_data_reference_list_for_asset(asset=asset)
         return path_list
 
+    # TODO: <Alex>Consider factoring this out.  ALEX</Alex>
     def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
         """
         Fetch data_references corresponding to data_asset_name from the cache.
         """
         # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
+        # TODO: <Alex>Consider factoring this out.  ALEX Like put this into DataConnector</Alex>
         batch_definition_list = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
@@ -194,6 +193,7 @@ configured runtime keys.
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
 
+        # TODO: <Alex>Consider factoring this out.  ALEX this can be convenience method</Alex>
         path_list: List[str] = [
             map_batch_definition_to_data_reference_string_using_regex(
                 batch_definition=batch_definition,
@@ -258,6 +258,7 @@ configured runtime keys.
             )
         )
 
+        # TODO: <Alex>ALEX Can the below be put into a decorator at a higher level?</Alex>
         if batch_request.partition_request is not None:
             partition_query_obj: PartitionQuery = build_partition_query(
                 partition_request_dict=batch_request.partition_request
@@ -274,31 +275,32 @@ configured runtime keys.
         else:
             return batch_definition_list
 
-    # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
-    def _validate_sorters_configuration(self, batch_request):
-        # Override the default
-        if len(self.sorters) > 0:
-            regex_config = self._default_regex
-            if (
-                batch_request.data_asset_name is not None
-                and self.assets and batch_request.data_asset_name in self.assets
-            ):
-                asset: Asset = self.assets[batch_request.data_asset_name]
-                if asset.group_names:
-                    regex_config["group_names"] = asset.group_names
-            group_names: List[str] = regex_config["group_names"]
-            if any([sorter not in group_names for sorter in self.sorters]):
-                raise ge_exceptions.DataConnectorError(
-                    f'''ConfiguredAssetFilePathDataConnector "{self.name}" specifies one or more sort keys that do not
-appear among the configured group_name.
-                    '''
-                )
-            if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
-                    f'''ConfiguredAssetFilePathDataConnector "{self.name}" is configured with {len(group_names)} group
-names; this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                    '''
-                )
+#     # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
+#     # TODO: <Alex>ALEX This has to work properly at FilePathDataConnector level and for lower connectors</Alex>
+#     def _validate_sorters_configuration(self, batch_request):
+#         # Override the default
+#         if len(self.sorters) > 0:
+#             regex_config = self._default_regex
+#             if (
+#                 batch_request.data_asset_name is not None
+#                 and self.assets and batch_request.data_asset_name in self.assets
+#             ):
+#                 asset: Asset = self.assets[batch_request.data_asset_name]
+#                 if asset.group_names:
+#                     regex_config["group_names"] = asset.group_names
+#             group_names: List[str] = regex_config["group_names"]
+#             if any([sorter not in group_names for sorter in self.sorters]):
+#                 raise ge_exceptions.DataConnectorError(
+#                     f'''ConfiguredAssetFilePathDataConnector "{self.name}" specifies one or more sort keys that do not
+# appear among the configured group_name.
+#                     '''
+#                 )
+#             if len(group_names) < len(self.sorters):
+#                 raise ge_exceptions.DataConnectorError(
+#                     f'''ConfiguredAssetFilePathDataConnector "{self.name}" is configured with {len(group_names)} group
+# names; this is fewer than number of sorters specified, which is {len(self.sorters)}.
+#                     '''
+#                 )
 
     def _sort_batch_definition_list(self, batch_definition_list) -> List[BatchDefinition]:
         sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
@@ -334,6 +336,15 @@ names; this is fewer than number of sorters specified, which is {len(self.sorter
             group_names=group_names
         )
 
+    # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
+    def build_batch_spec(
+        self,
+        batch_definition: BatchDefinition
+    ) -> PathBatchSpec:
+        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
+        return PathBatchSpec(batch_spec)
+
+    # TODO: <Alex>ALEX Not needed -- get from FilePathDataConnector</Alex>
     def _generate_batch_spec_parameters_from_batch_definition(
         self,
         batch_definition: BatchDefinition
@@ -350,13 +361,7 @@ partition definition {batch_definition.partition_definition} from batch definiti
             "path": path
         }
 
-    def build_batch_spec(
-        self,
-        batch_definition: BatchDefinition
-    ) -> PathBatchSpec:
-        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
-        return PathBatchSpec(batch_spec)
-
+    # TODO: <Alex>What to do with this?  ALEX</Alex>
     def _validate_batch_request(self, batch_request: BatchRequest):
         super()._validate_batch_request(batch_request)
         if self.sorters is not None and len(self.sorters) > 0:
