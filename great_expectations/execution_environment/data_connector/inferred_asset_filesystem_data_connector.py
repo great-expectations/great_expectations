@@ -38,7 +38,8 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         default_regex: dict = None,
         glob_directive: str = "*",
         execution_engine: ExecutionEngine = None,
-        sorters: List[dict] = None,
+        sorters: list = None,
+        data_context_root_directory: str = None,
     ):
         logger.debug(f'Constructing InferredAssetFilesystemDataConnector "{name}".')
 
@@ -48,6 +49,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
+            data_context_root_directory=data_context_root_directory
         )
 
         self.base_directory = base_directory
