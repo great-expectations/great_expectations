@@ -17,6 +17,7 @@ from great_expectations.execution_environment.data_connector.sorter import Sorte
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_batch_definition_to_data_reference_string_using_regex,
+    map_data_reference_string_to_batch_definition_list_using_regex,
     build_sorters_from_config,
 )
 import great_expectations.exceptions as ge_exceptions
@@ -138,6 +139,23 @@ class FilePathDataConnector(DataConnector):
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
         return batch_definition_list
+
+    def _map_data_reference_to_batch_definition_list(
+        self,
+        data_reference: str,
+        data_asset_name: str = None
+    ) -> Optional[List[BatchDefinition]]:
+        regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
+        pattern: str = regex_config["pattern"]
+        group_names: List[str] = regex_config["group_names"]
+        return map_data_reference_string_to_batch_definition_list_using_regex(
+            execution_environment_name=self.execution_environment_name,
+            data_connector_name=self.name,
+            data_asset_name=data_asset_name,
+            data_reference=data_reference,
+            regex_pattern=pattern,
+            group_names=group_names
+        )
 
     def build_batch_spec(
         self,
