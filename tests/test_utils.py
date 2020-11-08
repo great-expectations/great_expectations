@@ -5,7 +5,6 @@ import os
 import random
 import string
 from functools import wraps
-from types import ModuleType
 from typing import List, Union
 
 import numpy as np
@@ -14,14 +13,12 @@ import pytest
 from dateutil.parser import parse
 
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationConfigurationSchema,
     ExpectationSuite,
     ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
-from great_expectations.core.batch import Batch
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
@@ -38,7 +35,6 @@ from great_expectations.execution_environment.types import (
     SqlAlchemyDatasourceBatchSpec,
     SqlAlchemyDatasourceTableBatchSpec,
 )
-from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.validator.validator import Validator
 

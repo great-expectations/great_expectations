@@ -12,12 +12,14 @@ import sre_constants
 
 import logging
 
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import (
+    BatchRequest,
+    BatchDefinition
+)
 from great_expectations.core.id_dict import (
     PartitionDefinitionSubset,
     PartitionDefinition,
 )
-from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.data_context.util import instantiate_class_from_config
 
