@@ -57,10 +57,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     def assets(self) -> Dict[str, Union[dict, Asset]]:
         return self._assets
 
-    @property
-    def sorters(self) -> Optional[dict]:
-        return self._sorters
-
     def _build_assets_from_config(self, config: Dict[str, dict]):
         for name, asset_config in config.items():
             if asset_config is None:

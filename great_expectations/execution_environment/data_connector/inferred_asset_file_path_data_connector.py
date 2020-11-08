@@ -45,10 +45,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             data_context_root_directory=data_context_root_directory
         )
 
-    @property
-    def sorters(self) -> Optional[dict]:
-        return self._sorters
-
     def _refresh_data_references_cache(self):
         """
         """
