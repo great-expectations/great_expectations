@@ -102,46 +102,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
         return list(set(data_asset_names))
 
-    def get_batch_definition_list_from_batch_request(
-        self,
-        batch_request: BatchRequest,
-    ) -> List[BatchDefinition]:
-        self._validate_batch_request(batch_request=batch_request)
-
-        if self._data_references_cache is None:
-            self._refresh_data_references_cache()
-
-        batch_definition_list: List[BatchDefinition] = list(
-            filter(
-                lambda batch_definition: batch_definition_matches_batch_request(
-                    batch_definition=batch_definition,
-                    batch_request=batch_request
-                ),
-                [
-                    batch_definitions[0]
-                    for batch_definitions in self._data_references_cache.values()
-                    if batch_definitions is not None
-                ]
-            )
-        )
-
-        # TODO: <Alex>ALEX Can the below be put into a decorator at a higher level?</Alex>
-        if batch_request.partition_request is not None:
-            partition_query_obj: PartitionQuery = build_partition_query(
-                partition_request_dict=batch_request.partition_request
-            )
-            batch_definition_list = partition_query_obj.select_from_partition_request(
-                batch_definition_list=batch_definition_list
-            )
-
-        if len(self._sorters) > 0:
-            sorted_batch_definition_list = self._sort_batch_definition_list(
-                batch_definition_list=batch_definition_list
-            )
-            return sorted_batch_definition_list
-        else:
-            return batch_definition_list
-
     def _sort_batch_definition_list(self, batch_definition_list) -> List[BatchDefinition]:
         sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
         for sorter in sorters:
@@ -174,6 +134,14 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             regex_pattern=pattern,
             group_names=group_names
         )
+
+    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
+        batch_definition_list: List[BatchDefinition] = [
+            batch_definitions[0]
+            for batch_definitions in self._data_references_cache.values()
+            if batch_definitions is not None
+        ]
+        return batch_definition_list
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
         regex_config: dict = copy.deepcopy(self._default_regex)

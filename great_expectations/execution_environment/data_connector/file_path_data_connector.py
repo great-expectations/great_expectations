@@ -113,16 +113,10 @@ class FilePathDataConnector(DataConnector):
                     batch_definition=batch_definition,
                     batch_request=batch_request
                 ),
-                [
-                    batch_definitions[0]
-                    for data_reference_sub_cache in self._data_references_cache.values()
-                    for batch_definitions in data_reference_sub_cache.values()
-                    if batch_definitions is not None
-                ]
+                self._get_batch_definition_list_from_cache()
             )
         )
 
-        # TODO: <Alex>ALEX Can the below be put into a decorator at a higher level?</Alex>
         if batch_request.partition_request is not None:
             partition_query_obj: PartitionQuery = build_partition_query(
                 partition_request_dict=batch_request.partition_request
@@ -189,6 +183,9 @@ configured group_name.
 this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     '''
                 )
+
+    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
+        raise NotImplementedError
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
         raise NotImplementedError
