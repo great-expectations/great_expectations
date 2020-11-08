@@ -246,9 +246,11 @@ is illegal.
             )
 
     def get_json_dict(self) -> dict:
-        partition_request: dict = copy.deepcopy(self.partition_request)
-        if partition_request.get("custom_filter_function") is not None:
-            partition_request["custom_filter_function"] = partition_request["custom_filter_function"].__name__
+        partition_request: Optional[dict] = None
+        if self.partition_request is not None:
+            partition_request = copy.deepcopy(self.partition_request)
+            if partition_request.get("custom_filter_function") is not None:
+                partition_request["custom_filter_function"] = partition_request["custom_filter_function"].__name__
         return {
             "execution_environment_name": self.execution_environment_name,
             "data_connector_name": self.data_connector_name,
