@@ -178,33 +178,24 @@ partition definition {batch_definition.partition_definition} from batch definiti
             "path": path
         }
 
-    # TODO: <Alex>What to do with this?  ALEX</Alex>
     def _validate_batch_request(self, batch_request: BatchRequest):
         super()._validate_batch_request(batch_request)
         if self.sorters is not None and len(self.sorters) > 0:
-            regex_config = self._default_regex
-            if hasattr(self, "assets") and self.assets is not None:
-
-                if batch_request.data_asset_name is not None and \
-                        self.assets is not None and \
-                        batch_request.data_asset_name in self.assets:
-
-                    asset: Asset = self.assets[batch_request.data_asset_name]
-                    if asset.group_names:
-                        regex_config["group_names"] = asset.group_names
+            data_asset_name: str = batch_request.data_asset_name
+            regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
             group_names: List[str] = regex_config["group_names"]
-
-            if any([sorter not in group_names for sorter in self.sorters]):
+            if any([sorter_name not in group_names for sorter_name in self.sorters.keys()]):
                 raise ge_exceptions.DataConnectorError(
                     f'''DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-                           configured group_name.
-                           '''
+configured group_name.
+                    '''
                 )
             if len(group_names) < len(self.sorters):
                 raise ge_exceptions.DataConnectorError(
                     f'''DataConnector "{self.name}" is configured with {len(group_names)} group names;
-                               this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                             ''')
+this is fewer than number of sorters specified, which is {len(self.sorters)}.
+                    '''
+                )
 
     # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
     # TODO: <Alex>ALEX This has to work properly at FilePathDataConnector level and for lower connectors</Alex>
