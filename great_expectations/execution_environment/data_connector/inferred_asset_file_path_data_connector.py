@@ -1,4 +1,4 @@
-from typing import List, Optional, Iterator
+from typing import List, Optional
 import copy
 
 import logging
@@ -8,9 +8,6 @@ from great_expectations.execution_environment.data_connector import FilePathData
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
-)
-from great_expectations.execution_environment.data_connector.util import (
-    map_batch_definition_to_data_reference_string_using_regex,
 )
 
 logger = logging.getLogger(__name__)
@@ -94,16 +91,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         data_asset_names: List[str] = [batch_definition.data_asset_name for batch_definition in batch_definition_list]
 
         return list(set(data_asset_names))
-
-    def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
-        regex_config: dict = copy.deepcopy(self._default_regex)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-        return map_batch_definition_to_data_reference_string_using_regex(
-            batch_definition=batch_definition,
-            regex_pattern=pattern,
-            group_names=group_names
-        )
 
     def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
         batch_definition_list: List[BatchDefinition] = [

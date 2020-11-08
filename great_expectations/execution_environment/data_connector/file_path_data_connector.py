@@ -157,6 +157,17 @@ class FilePathDataConnector(DataConnector):
             group_names=group_names
         )
 
+    def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
+        data_asset_name: str = batch_definition.data_asset_name
+        regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
+        pattern: str = regex_config["pattern"]
+        group_names: List[str] = regex_config["group_names"]
+        return map_batch_definition_to_data_reference_string_using_regex(
+            batch_definition=batch_definition,
+            regex_pattern=pattern,
+            group_names=group_names
+        )
+
     def build_batch_spec(
         self,
         batch_definition: BatchDefinition

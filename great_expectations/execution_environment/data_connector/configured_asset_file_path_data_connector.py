@@ -1,4 +1,4 @@
-from typing import List, Union, Dict, Optional, Iterator
+from typing import List, Union, Dict, Optional
 import copy
 import logging
 
@@ -6,9 +6,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector import FilePathDataConnector
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.execution_environment.data_connector.util import (
-    map_batch_definition_to_data_reference_string_using_regex,
-)
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
@@ -158,17 +155,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             unmatched_data_references += [k for k, v in data_reference_sub_cache.items() if v is None]
 
         return unmatched_data_references
-
-    def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
-        data_asset_name: str = batch_definition.data_asset_name
-        regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-        return map_batch_definition_to_data_reference_string_using_regex(
-            batch_definition=batch_definition,
-            regex_pattern=pattern,
-            group_names=group_names
-        )
 
     def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
         batch_definition_list: List[BatchDefinition] = [
