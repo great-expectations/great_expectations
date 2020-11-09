@@ -847,6 +847,8 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 total_count - null_count
             )
             success = success_ratio >= mostly
+        elif total_count == 0:
+            success = True
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
