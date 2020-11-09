@@ -63,7 +63,10 @@ def test_cli_init_on_new_project(
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "Does the expectation suite involve data from a single table or multiple tables?"
+        in stdout
+    )
     assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
@@ -210,7 +213,10 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "Does the expectation suite involve data from a single table or multiple tables?"
+        in stdout
+    )
     assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
@@ -304,7 +310,10 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         in stdout
     )
     assert "What is the url/connection string for the sqlalchemy connection?" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "Does the expectation suite involve data from a single table or multiple tables?"
+        in stdout
+    )
     assert "Great Expectations connected to your database" in stdout
     assert "This looks like an existing project that" not in stdout
 
@@ -546,7 +555,10 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     )
 
     assert "Always know what to expect from your data" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "Does the expectation suite involve data from a single table or multiple tables?"
+        in stdout
+    )
     assert "Generating example Expectation Suite..." in stdout
     assert "The following Data Docs sites will be built" in stdout
     assert "Great Expectations is now set up" in stdout
