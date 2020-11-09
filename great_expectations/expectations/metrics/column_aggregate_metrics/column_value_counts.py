@@ -43,9 +43,6 @@ class ColumnValueCounts(ColumnMetricProvider):
         column = accessor_domain_kwargs["column"]
 
         counts = df[column].value_counts()
-        # Convert to flat index, since we are looking only at a single column, but
-        # value_counts returns a multiindex
-        counts.index = [val[0] for val in counts.index]
         if sort == "value":
             try:
                 counts.sort_index(inplace=True)
