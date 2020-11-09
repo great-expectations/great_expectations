@@ -164,9 +164,9 @@ class ExecutionEngine:
                 )
             elif metric_fn_type in [
                 "map_fn",
-                "map_condition",
+                "map_condition_fn",
                 "window_fn",
-                "window_condition",
+                "window_condition_fn",
             ]:
                 # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
                 # than data to optimize compute in the future
@@ -211,11 +211,24 @@ class ExecutionEngine:
 
         raise NotImplementedError
 
-    def add_column_null_filter_row_condition(self, domain_kwargs):
+    def add_column_row_condition(
+        self, domain_kwargs, filter_null=True, filter_nan=False
+    ):
         """EXPERIMENTAL
 
         Add a row condition for handling null filter.
         """
+        if filter_null is False and filter_nan is False:
+            logger.warning(
+                "add_column_row_condition called with no filter condition requested"
+            )
+            return domain_kwargs
+
+        if filter_nan:
+            raise GreatExpectationsError(
+                "Base ExecutionEngine does not support adding nan condition filters"
+            )
+
         if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
             raise GreatExpectationsError(
                 "ExecutionEngine does not support updating existing row_conditions."

@@ -302,9 +302,40 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
-    def _get_eval_column_name(self, column):
-        """Given the name of a column (string), returns the name of the corresponding eval column"""
-        return "__eval_col_" + column.replace(".", "__").replace("`", "_")
+    def add_column_row_condition(
+        self, domain_kwargs, filter_null=True, filter_nan=False
+    ):
+        if filter_nan is False:
+            return super().add_column_row_condition(
+                domain_kwargs=domain_kwargs,
+                filter_null=filter_null,
+                filter_nan=filter_nan,
+            )
+
+        # We explicitly handle filter_nan for spark using a spark-native condition
+        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
+            raise GreatExpectationsError(
+                "ExecutionEngine does not support updating existing row_conditions."
+            )
+
+        new_domain_kwargs = copy.deepcopy(domain_kwargs)
+        assert "column" in domain_kwargs
+        column = domain_kwargs["column"]
+        if filter_null and filter_nan:
+            new_domain_kwargs[
+                "row_condition"
+            ] = f"NOT isnan({column}) AND {column} IS NOT NULL"
+        elif filter_null:
+            new_domain_kwargs["row_condition"] = f"{column} IS NOT NULL"
+        elif filter_nan:
+            new_domain_kwargs["row_condition"] = f"NOT isnan({column})"
+        else:
+            logger.warning(
+                "add_column_row_condition called without specifying a desired row condition"
+            )
+
+        new_domain_kwargs["condition_parser"] = "spark"
+        return new_domain_kwargs
 
     def resolve_metric_bundle(
         self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
