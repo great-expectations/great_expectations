@@ -26,7 +26,7 @@ class ColumnPairValuesAGreaterThanB(MapMetricProvider):
         "parse_strings_as_datetimes",
         "allow_cross_type_comparisons",
     )
-    domain_keys = ("batch_id", "table", "column_a", "column_b")
+    domain_keys = ("batch_id", "table", "column_A", "column_B")
 
     @map_condition(engine=PandasExecutionEngine)
     def _pandas(
@@ -54,8 +54,8 @@ class ColumnPairValuesAGreaterThanB(MapMetricProvider):
         )
 
         column_A, column_B = filter_pair_metric_nulls(
-            df[metric_domain_kwargs["column_a"]],
-            df[metric_domain_kwargs["column_b"]],
+            df[metric_domain_kwargs["column_A"]],
+            df[metric_domain_kwargs["column_B"]],
             ignore_row_if=ignore_row_if,
         )
 

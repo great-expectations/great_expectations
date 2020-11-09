@@ -577,7 +577,7 @@ def test_column_pairs_equal_metric_pd():
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="column_pair_values.equal",
-        metric_domain_kwargs={"column_a": "a", "column_b": "b"},
+        metric_domain_kwargs={"column_A": "a", "column_B": "b"},
         metric_value_kwargs=dict(),
     )
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
@@ -590,7 +590,7 @@ def test_column_pairs_greater_metric_pd():
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="column_pair_values.a_greater_than_b",
-        metric_domain_kwargs={"column_a": "a", "column_b": "b"},
+        metric_domain_kwargs={"column_A": "a", "column_B": "b"},
         metric_value_kwargs={
             "or_equal": True,
             "ignore_row_if": "either_value_is_missing",
@@ -610,7 +610,7 @@ def test_column_pairs_in_set_metric_pd():
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     desired_metric = MetricConfiguration(
         metric_name="column_pair_values.in_set",
-        metric_domain_kwargs={"column_a": "a", "column_b": "b"},
+        metric_domain_kwargs={"column_A": "a", "column_B": "b"},
         metric_value_kwargs={
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
             "ignore_row_if": "either_value_is_missing",
