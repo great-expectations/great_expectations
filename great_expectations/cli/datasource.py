@@ -1300,16 +1300,18 @@ def _get_batch_kwargs_for_sqlalchemy_datasource(
 
     try:
         if sql_query is None:
-            # construct the query explicitly using schema_name and table_name
-            sql_query = f"select * from {schema_name}.{table_name}"
+            batch_kwargs = temp_generator.build_batch_kwargs(
+                data_asset_name, **additional_batch_kwargs
+            )
+            batch_kwargs.update(temp_table_kwargs)
+        else:
+            batch_kwargs = {"query": sql_query, "datasource": datasource_name}
+            batch_kwargs.update(temp_table_kwargs)
 
-        batch_kwargs = {"query": sql_query, "datasource": datasource_name}
-        batch_kwargs.update(temp_table_kwargs)
-
-        Validator(
-            batch=datasource.get_batch(batch_kwargs),
-            expectation_suite=ExpectationSuite("throwaway"),
-        ).get_dataset()
+            Validator(
+                batch=datasource.get_batch(batch_kwargs),
+                expectation_suite=ExpectationSuite("throwaway"),
+            ).get_dataset()
 
     except ge_exceptions.GreatExpectationsError as error:
         cli_message("""<red>ERROR: {}</red>""".format(str(error)))
