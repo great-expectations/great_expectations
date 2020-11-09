@@ -1,8 +1,6 @@
 import pytest
 import yaml
 
-from typing import List
-
 from great_expectations.execution_environment.data_connector import InferredAssetFilesystemDataConnector
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -10,10 +8,7 @@ from great_expectations.core.batch import (
     PartitionDefinition,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from tests.test_utils import (
-    create_fake_data_frame,
-    create_files_in_directory,
-)
+from tests.test_utils import create_files_in_directory
 import great_expectations.exceptions.exceptions as ge_exceptions
 
 
@@ -631,7 +626,8 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
             },
         )
 
-def test_redundant_information_in_naming_convention_bucket_too_many_sorters(empty_data_context, tmp_path_factory):
+
+def test_redundant_information_in_naming_convention_bucket_too_many_sorters(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
         directory=base_directory,
