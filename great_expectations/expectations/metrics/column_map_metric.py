@@ -804,6 +804,15 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=_pandas_map_unexpected_count,
                         metric_fn_type="data",
                     )
+                    register_metric(
+                        metric_name=metric_name + ".unexpected_index_list",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_pandas_column_map_index,
+                        metric_fn_type="data",
+                    )
                     if is_column_domain:
                         register_metric(
                             metric_name=metric_name + ".unexpected_values",
@@ -812,15 +821,6 @@ class MapMetricProvider(MetricProvider):
                             execution_engine=engine,
                             metric_class=cls,
                             metric_provider=_pandas_column_map_values,
-                            metric_fn_type="data",
-                        )
-                        register_metric(
-                            metric_name=metric_name + ".unexpected_index_list",
-                            metric_domain_keys=metric_domain_keys,
-                            metric_value_keys=(*metric_value_keys, "result_format"),
-                            execution_engine=engine,
-                            metric_class=cls,
-                            metric_provider=_pandas_column_map_index,
                             metric_fn_type="data",
                         )
                         register_metric(
