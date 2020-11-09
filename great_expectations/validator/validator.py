@@ -264,7 +264,10 @@ class Validator:
             child_node.metric_name, execution_engine=execution_engine
         )[0]
         metric_dependencies = metric_impl.get_evaluation_dependencies(
-            child_node, configuration
+            metric=child_node,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration
         )
         child_node.metric_dependencies = metric_dependencies
 
