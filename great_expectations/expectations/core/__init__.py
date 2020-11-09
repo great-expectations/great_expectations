@@ -24,6 +24,7 @@ from .expect_column_pair_values_a_to_be_greater_than_b import (
     ExpectColumnPairValuesAToBeGreaterThanB,
 )
 from .expect_column_pair_values_to_be_equal import ExpectColumnPairValuesToBeEqual
+from .expect_column_pair_values_to_be_in_set import ExpectColumnPairValuesToBeInSet
 from .expect_column_proportion_of_unique_values_to_be_between import (
     ExpectColumnProportionOfUniqueValuesToBeBetween,
 )
