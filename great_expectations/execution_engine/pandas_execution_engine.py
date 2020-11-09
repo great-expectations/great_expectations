@@ -7,9 +7,13 @@ from typing import Any, Callable, Dict, Iterable, Tuple
 
 import pandas as pd
 
-from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
+from great_expectations.execution_environment.types import (
+    InMemoryBatchSpec,
+    PathBatchSpec,
+    S3BatchSpec,
+)
 
-from ..core.batch import Batch, BatchMarkers
+from ..core.batch import Batch, BatchMarkers, BatchRequest
 from ..core.id_dict import BatchSpec
 from ..exceptions import BatchSpecError, ValidationError
 from ..execution_environment.util import hash_pandas_dataframe
@@ -19,6 +23,35 @@ from .execution_engine import ExecutionEngine
 logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
+
+
+class PandasBatchData:
+    def __init__(
+        self,
+        dataframe: pd.DataFrame = None,
+        dataframe_dict: Dict[str, pd.DataFrame] = None,
+        default_table_name=None,
+    ):
+        assert (
+            dataframe is not None or dataframe_dict is not None
+        ), "dataframe or dataframe_dict is required"
+        assert (
+            not dataframe and dataframe_dict
+        ), "dataframe and dataframe_dict may not both be specified"
+
+        if dataframe is not None:
+            dataframe_dict = {"": dataframe}
+            default_table_name = ""
+
+        self._dataframe_dict = dataframe_dict
+        self._default_table_name = default_table_name
+
+    @property
+    def default_dataframe(self):
+        if self._default_table_name in self._dataframe_dict:
+            return self._dataframe_dict[self._default_table_name]
+
+        return None
 
 
 class PandasExecutionEngine(ExecutionEngine):
@@ -70,14 +103,100 @@ Notes:
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
 
+    def get_batch_data_and_markers(
+        self, batch_spec: BatchSpec
+    ) -> Tuple[Any, BatchMarkers]:  # batch_data
+        batch_data: Any = None
+
+        # We need to build a batch_markers to be used in the dataframe
+        batch_markers: BatchMarkers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        if isinstance(batch_spec, InMemoryBatchSpec):
+            raise BatchSpecError(
+                """The batch_spec argument must not have the type InMemoryBatchSpec when calling
+"get_batch_data_and_markers()"."
+                """
+            )
+
+        reader_method: str = batch_spec.get("reader_method")
+        reader_options: dict = batch_spec.get("reader_options") or {}
+        if isinstance(batch_spec, PathBatchSpec):
+            path: str = batch_spec["path"]
+            reader_fn: Callable = self._get_reader_fn(reader_method, path)
+            batch_data = reader_fn(path, **reader_options)
+        elif isinstance(batch_spec, S3BatchSpec):
+            # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
+            # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
+            # url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
+            # reader_method = batch_spec.get("reader_method")
+            # reader_fn = self._get_reader_fn(reader_method, url.key)
+            # batch_data = reader_fn(
+            #     StringIO(
+            #         s3_object["Body"]
+            #         .read()
+            #         .decode(s3_object.get("ContentEncoding", "utf-8"))
+            #     ),
+            #     **reader_options,
+            # )
+            pass
+        else:
+            raise BatchSpecError(
+                """Invalid batch_spec: file path, s3 path, or batch_data is required for a PandasExecutionEngine to
+operate.
+                """
+            )
+
+        if batch_data is not None:
+            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(
+                    batch_data
+                )
+
+        return batch_data, batch_markers
+
+    @staticmethod
+    def get_batch_markers_and_update_batch_spec_for_batch_data(
+        batch_data: pd.DataFrame, batch_spec: BatchSpec
+    ) -> BatchMarkers:
+        """
+        Computes batch_markers in the case of user-provided batch_data (e.g., in the case of a data pipeline).
+
+        :param batch_data -- user-provided dataframe
+        :param batch_spec -- BatchSpec (must be previously instantiated/initialized by PipelineDataConnector)
+        :returns computed batch_markers specific to this execution engine
+        """
+        batch_markers: BatchMarkers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+        if batch_data is not None:
+            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(
+                    batch_data
+                )
+            # we do not want to store the actual dataframe in batch_spec
+            # hence, marking that this is a PandasInMemoryDF instead
+            batch_spec["PandasInMemoryDF"] = True
+        return batch_markers
+
     @property
     def dataframe(self):
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
         ValueError Exception
         """
-        if not self.active_batch_data:
+        # Changed to is None because was breaking prior
+        if self.active_batch_data is None:
             raise ValueError(
-                "Batch has not been loaded - please run load_batch() to load a batch."
+                "Batch has not been loaded - please run load_batch_data() to load a batch."
             )
 
         return self.active_batch_data
@@ -148,8 +267,9 @@ Notes:
 
         raise BatchSpecError(f'Unable to determine reader method from path: "{path}".')
 
-    def process_batch_definition(self, batch_definition, batch_spec):
-        """Takes in a batch definition and batch spec. If the batch definition has a limit, uses it to initialize the
+    # TODO: <Alex>Is this method still needed?  The DataConnector subclasses seem to accoplish the needed functionality.</Alex>
+    def process_batch_request(self, batch_request: BatchRequest, batch_spec: BatchSpec):
+        """Takes in a batch request and batch spec. If the batch request has a limit, uses it to initialize the
         number of rows to process for the batch spec in obtaining a batch
         Args:
             batch_definition (dict) - The batch definition as defined by the user
@@ -157,7 +277,7 @@ Notes:
         Returns:
              batch_spec (dict) - The batch spec used to query the backend, with the added row limit
         """
-        limit = batch_definition.get("limit")
+        limit = batch_request.get("limit")
         if limit is not None:
             if not batch_spec.get("reader_options"):
                 batch_spec["reader_options"] = {}
@@ -174,11 +294,11 @@ Notes:
         return batch_spec
 
     def get_compute_domain(
-        self, domain_kwargs: dict,
+        self, domain_kwargs: Dict,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
-        to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
-        or otherwise a Data Frame.
+        to obtain and/or query a batch. Returns in the format of a Pandas DataFrame. If the domain is a single column,
+        this is added to 'accessor domain kwargs' and used for later access
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain

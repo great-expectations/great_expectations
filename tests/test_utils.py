@@ -31,6 +31,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_environment.types import (
@@ -51,6 +52,11 @@ try:
     from sqlalchemy import create_engine
 except ImportError:
     create_engine = None
+
+try:
+    from pyspark.sql import DataFrame as SparkDataFrame
+except ImportError:
+    SparkDataFrame = type(None)
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
@@ -602,7 +608,7 @@ def get_dataset(
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 
-def get_test_batch(
+def get_test_validator_with_data(
     execution_engine,
     data,
     schemas=None,
@@ -644,269 +650,18 @@ def get_test_batch(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return PandasExecutionEngine(caching=caching).load_batch(
-            in_memory_dataset=df,
-            batch_request={"data_asset_name": "test", "partition_name": table_name},
-            batch_spec=BatchSpec(
-                {
-                    "ge_load_time": datetime.datetime.now(
-                        datetime.timezone.utc
-                    ).strftime("%Y%m%dT%H%M%S.%fZ")
-                }
-            ),
-        )
+        return _build_pandas_validator_with_data(df=df)
 
-    elif execution_engine == "sqlite":
+    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql"]:
         if not create_engine:
             return None
-
-        if sqlite_db_path is not None:
-            engine = create_engine(f"sqlite:////{sqlite_db_path}")
-        else:
-            engine = create_engine("sqlite://")
-        conn = engine.connect()
-        # Add the data to the database as a new table
-
-        sql_dtypes = {}
-        if (
-            schemas
-            and "sqlite" in schemas
-            and isinstance(engine.dialect, sqlitetypes.dialect)
-        ):
-            schema = schemas["sqlite"]
-            sql_dtypes = {col: SQLITE_TYPES[dtype] for (col, dtype) in schema.items()}
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=execution_engine, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=execution_engine, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-
-        if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
-        df.to_sql(
-            name=table_name,
-            con=conn,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-
-        # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyExecutionEngine(caching=caching, engine=conn).load_batch(
-            batch_spec=SqlAlchemyDatasourceTableBatchSpec(table=table_name)
-        )
-
-    elif execution_engine == "postgresql":
-        if not create_engine:
-            return None
-
-        # Create a new database
-        engine = create_engine("postgresql://postgres@localhost/test_ci")
-        conn = engine.connect()
-
-        sql_dtypes = {}
-        if (
-            schemas
-            and "postgresql" in schemas
-            and isinstance(engine.dialect, postgresqltypes.dialect)
-        ):
-            schema = schemas["postgresql"]
-            sql_dtypes = {
-                col: POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()
-            }
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=execution_engine, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=execution_engine, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-
-        if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
-        df.to_sql(
-            name=table_name,
-            con=conn,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-
-        # Build a SqlAlchemyDataset using that database
-        # TODO: Add profiler to argument list
-        return SqlAlchemyExecutionEngine(caching=caching, engine=conn).load_batch(
-            batch_spec=SqlAlchemyDatasourceTableBatchSpec(table=table_name)
-        )
-
-    elif execution_engine == "mysql":
-        if not create_engine:
-            return None
-
-        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
-        conn = engine.connect()
-
-        sql_dtypes = {}
-        if (
-            schemas
-            and "mysql" in schemas
-            and isinstance(engine.dialect, mysqltypes.dialect)
-        ):
-            schema = schemas["mysql"]
-            sql_dtypes = {col: MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=execution_engine, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=execution_engine, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-
-        if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
-        df.to_sql(
-            name=table_name,
-            con=conn,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-
-        # Build a SqlAlchemyDataset using that database
-        # TODO: Add profiler to arguments
-        return SqlAlchemyExecutionEngine(caching=caching, engine=conn).load_batch(
-            batch_spec=SqlAlchemyDatasourceBatchSpec(table=table_name)
-        )
-
-    elif execution_engine == "mssql":
-        if not create_engine:
-            return None
-
-        engine = create_engine(
-            "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
-            # echo=True,
-        )
-
-        # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
-        # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
-        # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
-
-        conn = engine.connect()
-
-        sql_dtypes = {}
-        if (
-            schemas
-            and execution_engine in schemas
-            and isinstance(engine.dialect, mssqltypes.dialect)
-        ):
-            schema = schemas[execution_engine]
-            sql_dtypes = {col: MSSQL_TYPES[dtype] for (col, dtype) in schema.items()}
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=execution_engine, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=execution_engine, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-
-        if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
-        df.to_sql(
-            name=table_name,
-            con=conn,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-
-        # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyExecutionEngine(caching=caching, engine=conn).load_batch(
-            batch_spec=SqlAlchemyDatasourceBatchSpec(table=table_name)
+        return _build_sa_validator_with_data(
+            df=df,
+            sa_engine_name=execution_engine,
+            schemas=schemas,
+            caching=caching,
+            table_name=table_name,
+            sqlite_db_path=sqlite_db_path,
         )
 
     elif execution_engine == "spark":
@@ -1015,20 +770,165 @@ def get_test_batch(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return SparkDFExecutionEngine(caching=caching).load_batch(
-            in_memory_dataset=spark_df,
-            batch_request={"data_asset_name": "test", "partition_name": table_name},
-            batch_spec=BatchSpec(
-                {
-                    "ge_load_time": datetime.datetime.now(
-                        datetime.timezone.utc
-                    ).strftime("%Y%m%dT%H%M%S.%fZ")
-                }
-            ),
-        )
+        return _build_spark_validator_with_data(df=spark_df)
 
     else:
         raise ValueError("Unknown dataset_type " + str(execution_engine))
+
+
+def _build_spark_engine(df):
+    from pyspark.sql import SparkSession
+
+    spark = SparkSession.builder.getOrCreate()
+    if isinstance(df, pd.DataFrame):
+        df = spark.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in df.to_records(index=False)
+            ],
+            df.columns.tolist(),
+        )
+    batch = Batch(data=df)
+    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
+    return engine
+
+
+def _build_spark_validator_with_data(df):
+    from pyspark.sql import SparkSession
+
+    spark = SparkSession.builder.getOrCreate()
+    if isinstance(df, pd.DataFrame):
+        df = spark.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in df.to_records(index=False)
+            ],
+            df.columns.tolist(),
+        )
+    batch = Batch(data=df)
+
+    return Validator(execution_engine=SparkDFExecutionEngine(), batches=(batch,))
+
+
+def _build_sa_engine(df):
+    import sqlalchemy as sa
+
+    eng = sa.create_engine("sqlite://", echo=False)
+    df.to_sql("test", eng)
+    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    batch = Batch(data=batch_data)
+    engine = SqlAlchemyExecutionEngine(
+        engine=eng, batch_data_dict={batch.id: batch_data}
+    )
+    return engine
+
+
+def _build_pandas_engine(df):
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    return engine
+
+
+def _build_pandas_validator_with_data(df):
+    batch = Batch(data=df)
+
+    return Validator(execution_engine=PandasExecutionEngine(), batches=(batch,))
+
+
+def _build_sa_validator_with_data(
+    df, sa_engine_name, schemas=None, caching=True, table_name=None, sqlite_db_path=None
+):
+    dialect_classes = {
+        "sqlite": sqlitetypes.dialect,
+        "postgresql": postgresqltypes.dialect,
+        "mysql": mysqltypes.dialect,
+        "mssql": mssqltypes.dialect,
+    }
+    dialect_types = {
+        "sqlite": SQLITE_TYPES,
+        "postgresql": POSTGRESQL_TYPES,
+        "mysql": MYSQL_TYPES,
+        "mssql": MSSQL_TYPES,
+    }
+    if sa_engine_name == "sqlite":
+        if sqlite_db_path is not None:
+            engine = create_engine(f"sqlite:////{sqlite_db_path}")
+        else:
+            engine = create_engine("sqlite://")
+    elif sa_engine_name == "postgresql":
+        engine = create_engine("postgresql://postgres@localhost/test_ci")
+    elif sa_engine_name == "mysql":
+        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+    elif sa_engine_name == "mssql":
+        engine = create_engine(
+            "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+            # echo=True,
+        )
+
+    # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
+    # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
+    # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
+
+    conn = engine.connect()
+    # Add the data to the database as a new table
+
+    sql_dtypes = {}
+    if (
+        schemas
+        and sa_engine_name in schemas
+        and isinstance(engine.dialect, dialect_classes.get(sa_engine_name))
+    ):
+        schema = schemas[sa_engine_name]
+        sql_dtypes = {
+            col: dialect_types.get(sa_engine_name)[dtype]
+            for (col, dtype) in schema.items()
+        }
+        for col in schema:
+            type_ = schema[col]
+            if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                df[col] = pd.to_numeric(df[col], downcast="signed")
+            elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                df[col] = pd.to_numeric(df[col])
+                min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                    schema=sa_engine_name, negative=True
+                )
+                max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                    schema=sa_engine_name, negative=False
+                )
+                for api_schema_type in ["api_np", "api_cast"]:
+                    min_value_api = get_sql_dialect_floating_point_infinity_value(
+                        schema=api_schema_type, negative=True
+                    )
+                    max_value_api = get_sql_dialect_floating_point_infinity_value(
+                        schema=api_schema_type, negative=False
+                    )
+                    df.replace(
+                        to_replace=[min_value_api, max_value_api],
+                        value=[min_value_dbms, max_value_dbms],
+                        inplace=True,
+                    )
+            elif type_ in ["DATETIME", "TIMESTAMP"]:
+                df[col] = pd.to_datetime(df[col])
+
+    if table_name is None:
+        table_name = "test_data_" + "".join(
+            [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+        )
+    df.to_sql(
+        name=table_name, con=conn, index=False, dtype=sql_dtypes, if_exists="replace",
+    )
+
+    batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
+    batch = Batch(data=batch_data)
+    execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
+
+    return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
@@ -1179,11 +1079,11 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_in_type_list",
             "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
-            "expect_column_values_to_be_between",
+            # "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            "expect_column_value_lengths_to_be_between",
-            "expect_column_value_lengths_to_equal",
+            # "expect_column_value_lengths_to_be_between",
+            # "expect_column_value_lengths_to_equal",
             "expect_column_values_to_match_regex",
             "expect_column_values_to_not_match_regex",
             "expect_column_values_to_match_regex_list",
@@ -1238,11 +1138,11 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_in_type_list",
             # "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
-            "expect_column_values_to_be_between",
+            # "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            "expect_column_value_lengths_to_be_between",
-            "expect_column_value_lengths_to_equal",
+            # "expect_column_value_lengths_to_be_between",
+            # "expect_column_value_lengths_to_equal",
             "expect_column_values_to_match_regex",
             "expect_column_values_to_not_match_regex",
             "expect_column_values_to_match_regex_list",
@@ -1393,7 +1293,7 @@ def evaluate_json_test(data_asset, expectation_type, test):
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_cfe(batch, expectation_type, test):
+def evaluate_json_test_cfe(validator, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -1417,9 +1317,7 @@ def evaluate_json_test_cfe(batch, expectation_type, test):
     :return: None. asserts correctness of results.
     """
     expectation_suite = ExpectationSuite("json_test_suite")
-    validator = Validator(
-        execution_engine=batch.execution_engine, expectation_suite=expectation_suite
-    )
+    validator._initialize_expectations(expectation_suite=expectation_suite)
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
     # validator.set_default_expectation_argument("include_config", False)
 
@@ -1447,7 +1345,11 @@ def evaluate_json_test_cfe(batch, expectation_type, test):
         kwargs["include_config"] = False
         result = getattr(validator, expectation_type)(**kwargs)
 
-    check_json_test_result(test=test, result=result, data_asset=batch.data)
+    check_json_test_result(
+        test=test,
+        result=result,
+        data_asset=validator.execution_engine.active_batch_data,
+    )
 
 
 def check_json_test_result(test, result, data_asset=None):
@@ -1493,6 +1395,8 @@ def check_json_test_result(test, result, data_asset=None):
 
             elif key == "unexpected_index_list":
                 if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
+                    pass
+                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDataFrame)):
                     pass
                 else:
                     assert result["result"]["unexpected_index_list"] == value
@@ -1602,7 +1506,8 @@ def safe_remove(path):
             print(e)
 
 
-def execution_environment_files_data_connector_regex_partitioner_config(
+# TODO: <Alex>Replace this all-purpose configuration with purpose-fit configuration sections using YAML.</Alex>
+def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
     use_group_names: bool = False,
     use_sorters: bool = False,
     default_base_directory="data",
@@ -1645,6 +1550,15 @@ def execution_environment_files_data_connector_regex_partitioner_config(
     else:
         sorters = None
 
+    test_asset_0 = {
+        "module_name": "great_expectations.execution_environment.data_connector.asset",
+        # "partitioner_name": "test_regex_partitioner",
+        # "glob_directive": "alex*",
+        "glob_directive": "Titanic*",
+    }
+    if data_asset_base_directory is not None:
+        test_asset_0["base_directory"] = data_asset_base_directory
+
     execution_environments_config: dict = {
         "test_execution_environment": {
             "class_name": "ExecutionEnvironment",
@@ -1658,46 +1572,52 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "test_pipeline_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
                     "class_name": "PipelineDataConnector",
-                    "partitioners": {
-                        "test_pipeline_partitioner": {
-                            "module_name": "great_expectations.execution_environment.data_connector.partitioner",
-                            "class_name": "PipelinePartitioner",
-                            "allow_multipart_partitions": False,
-                            "runtime_keys": ["run_id", "custom_key_0",],
-                        }
-                    },
-                    "default_partitioner_name": "test_pipeline_partitioner",
-                    "assets": {
-                        "test_asset_1": {
-                            "module_name": "great_expectations.execution_environment.data_connector.asset",
-                            "partitioner_name": "test_pipeline_partitioner",
-                        }
-                    },
+                    "runtime_keys": ["pipeline_stage_name", "run_id", "custom_key_0",],
+                    # "partitioners": {
+                    #     "test_pipeline_partitioner": {
+                    #         "module_name": "great_expectations.execution_environment.data_connector.partitioner",
+                    #         "class_name": "PipelinePartitioner",
+                    #         "allow_multipart_partitions": False,
+                    #         "runtime_keys": [
+                    #             "run_id",
+                    #             "custom_key_0",
+                    #         ]
+                    #     }
+                    # },
+                    # "default_partitioner_name": "test_pipeline_partitioner",
+                    # "assets": {
+                    #     "test_asset_1": {
+                    #         # "partitioner_name": "test_pipeline_partitioner"
+                    #     }
+                    # }
                 },
                 "test_filesystem_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
-                    "class_name": "FilesDataConnector",
+                    "class_name": "ConfiguredAssetFilesystemDataConnector",
                     "base_directory": default_base_directory,
                     "glob_directive": "*",
-                    "partitioners": {
-                        "test_regex_partitioner": {
-                            "module_name": "great_expectations.execution_environment.data_connector.partitioner",
-                            "class_name": "RegexPartitioner",
-                            "pattern": r"(.+)_(.+)_(.+)\.csv",
-                            "group_names": group_names,
-                            "allow_multipart_partitions": False,
-                            "sorters": sorters,
-                            "runtime_keys": ["run_id", "custom_key_0",],
-                        }
+                    # "partitioners": {
+                    #     "test_regex_partitioner": {
+                    #         "module_name": "great_expectations.execution_environment.data_connector.partitioner",
+                    #         "class_name": "RegexPartitioner",
+                    #         "pattern": r"(.+)_(.+)_(.+)\.csv",
+                    #         "group_names": group_names,
+                    #         "allow_multipart_partitions": False,
+                    #         "sorters": sorters,
+                    #         "runtime_keys": [
+                    #             "run_id",
+                    #             "custom_key_0",
+                    #         ]
+                    #     }
+                    # },
+                    "default_regex": {
+                        "pattern": r"(.+)_(.+)_(.+)\.csv",
+                        "group_names": group_names,
                     },
-                    "default_partitioner_name": "test_regex_partitioner",
+                    # "default_partitioner_name": "test_regex_partitioner",
                     "assets": {
-                        "test_asset_0": {
-                            "module_name": "great_expectations.execution_environment.data_connector.asset",
-                            "partitioner_name": "test_regex_partitioner",
-                            "base_directory": data_asset_base_directory,
-                            "glob_directive": "alex*",
-                        }
+                        # "test_asset_0": test_asset_0,
+                        "Titanic": test_asset_0,
                     },
                 },
             },

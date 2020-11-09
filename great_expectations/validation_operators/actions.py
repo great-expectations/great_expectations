@@ -191,7 +191,6 @@ PagerdutyAlertAction sends a pagerduty event
     - name: send_pagerduty_alert_on_validation_result
     action:
       class_name: PagerdutyAlertAction
-      # put the actual webhook URL in the uncommitted/config_variables.yml file
       api_key: ${pagerduty_api_key} # Events API v2 key
       routing_key: # The 32 character Integration Key for an integration on a service or on a global ruleset.
       notify_on: failure # possible values: "all", "failure", "success"

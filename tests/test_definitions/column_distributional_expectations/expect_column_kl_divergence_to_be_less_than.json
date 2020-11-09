@@ -6,7 +6,7 @@
       "categorical_fixed": ["A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C"]
     },
     "tests" : [{
-      "title": "discrete - baseline (categorical_fixed partition)",
+      "title": "discrete___baseline_categorical_fixed_partition",
       "exact_match_out": false,
       "in": {
         "column": "categorical_fixed",
@@ -19,7 +19,7 @@
       }
     },
     {
-      "title": "discrete - (categorical_fixed_alternate partition)",
+      "title": "discrete___categorical_fixed_alternate_partition",
       "exact_match_out": false,
       "in": {
         "column": "categorical_fixed",
@@ -41,7 +41,7 @@
       }
     },
     {
-      "title": "internal holdout with categorical partition",
+      "title": "internal_holdout_with_categorical_partition",
       "exact_match_out": false,
       "in": {
         "column": "categorical_fixed",
@@ -61,7 +61,7 @@
       "a": ["a", "a", "b", "c"]
     },
     "tests": [{
-      "title": "holdout - 0.1",
+      "title": "holdout___0__1",
       "exact_match_out": false,
       "in": {
         "column": "a",
@@ -75,7 +75,7 @@
       }
     },
     {
-      "title": "holdout - 0.05",
+      "title": "holdout___0__05",
       "exact_match_out": false,
       "in": {
         "column": "a",
@@ -89,7 +89,7 @@
       }
     },
     {
-      "title": "missing vals no holdout",
+      "title": "missing_vals_no_holdout",
       "exact_match_out": false,
       "in": {
         "column": "a",
@@ -143,7 +143,7 @@
     },
     "tests": [
       {
-        "title": "norm_0_1_auto - explicit infinite endpoints",
+        "title": "norm_0_1_auto___explicit_infinite_endpoints",
         "exact_match_out": false,
         "in": {
           "column": "norm_0_1",
@@ -159,7 +159,7 @@
         }
       },
       {
-        "title": "norm_0_1_auto_inf partition - test tail weights",
+        "title": "norm_0_1_auto_inf_partition___test_tail_weights",
         "exact_match_out": false,
         "in": {
           "column": "norm_0_1",
@@ -176,7 +176,7 @@
         }
       },
       {
-        "title": "norm_0_1_auto_inf partition - should fail with no holdout",
+        "title": "norm_0_1_auto_inf_partition___should_fail_with_no_holdout",
         "exact_match_out": false,
         "in": {
           "column": "norm_0_1",
@@ -191,7 +191,7 @@
         }
       },
       {
-        "title": "norm_0_1_auto_inf partition - null threshold should always succeed",
+        "title": "norm_0_1_auto_inf_partition___null_threshold_should_always_succeed",
         "exact_match_out": false,
         "in": {
           "column": "norm_0_1",
@@ -206,7 +206,7 @@
         }
       },
       {
-        "title": "norm_0_1_auto_inf partition - null threshold *and* partition object supports profiling",
+        "title": "norm_0_1_auto_inf_partition___null_threshold_and_partition_object_supports_profiling",
         "exact_match_out": false,
         "in": {
           "column": "norm_0_1",
@@ -220,7 +220,7 @@
         "_notes": "this test is suppressed for sqlite since it generates partitions, which may not be possible when sqlite doesn't support the ntile windowing function"
       },
       {
-        "title": "norm_0_1_auto_inf partition - tail weights - should fail with no internal holdout",
+        "title": "norm_0_1_auto_inf_partition___tail_weights___should_fail_with_no_internal_holdout",
         "exact_match_out": false,
         "in": {
           "column": "norm_0_1",
@@ -236,7 +236,7 @@
         }
       },
       {
-        "title": "positive - norm_0_1_auto partition",
+        "title": "positive___norm_0_1_auto_partition",
         "exact_match_out": false,
         "in": {
           "column": "norm_0_1",
@@ -253,7 +253,7 @@
         }
       },
       {
-        "title": "positive - norm_0_1_uniform partition",
+        "title": "positive___norm_0_1_uniform_partition",
         "exact_match_out": false,
         "in": {
           "column": "norm_0_1",
@@ -270,7 +270,7 @@
         }
       },
       {
-        "title": "positive - norm_0_1_ntile partition",
+        "title": "positive___norm_0_1_ntile_partition",
         "exact_match_out": false,
         "in": {
           "column": "norm_0_1",
@@ -287,7 +287,7 @@
         }
       },
       {
-        "title": "positive - norm_0_1_kde partition",
+        "title": "positive___norm_0_1_kde_partition",
         "_notes": "note higher threshold for KDE partition",
         "exact_match_out": false,
         "in": {
@@ -305,7 +305,7 @@
         }
       },
       {
-        "title": "negative - norm_1_1 column - norm_0_1_auto partition",
+        "title": "negative___norm_1_1_column___norm_0_1_auto_partition",
         "exact_match_out": false,
         "in": {
           "column": "norm_1_1",
@@ -322,7 +322,7 @@
         }
       },
       {
-        "title": "negative - norm_1_1 column - norm_0_1_uniform partition",
+        "title": "negative___norm_1_1_column___norm_0_1_uniform_partition",
         "exact_match_out": false,
         "in": {
           "column": "norm_1_1",
@@ -339,7 +339,7 @@
         }
       },
       {
-        "title": "negative - norm_1_1 column - norm_0_1_ntile partition",
+        "title": "negative___norm_1_1_column___norm_0_1_ntile_partition",
         "exact_match_out": false,
         "in": {
           "column": "norm_1_1",
@@ -356,7 +356,7 @@
         }
       },
       {
-        "title": "negative - norm_1_1 column - norm_0_1_kde partition",
+        "title": "negative___norm_1_1_column___norm_0_1_kde_partition",
         "_notes": "note higher threshold for KDE partition",
         "exact_match_out": false,
         "in": {
@@ -374,7 +374,7 @@
         }
       },
       {
-        "title": "positive - bimodal_auto partition",
+        "title": "positive___bimodal_auto_partition",
         "exact_match_out": false,
         "in": {
           "column": "bimodal",
@@ -391,7 +391,7 @@
         }
       },
       {
-        "title": "negative - bimodal column - norm_0_1_auto partition",
+        "title": "negative___bimodal_column___norm_0_1_auto_partition",
         "exact_match_out": false,
         "in": {
           "column": "bimodal",
@@ -408,7 +408,7 @@
         }
       },
       {
-        "title": "negative - bimodal column - norm_0_1_uniform partition",
+        "title": "negative___bimodal_column___norm_0_1_uniform_partition",
         "exact_match_out": false,
         "in": {
           "column": "bimodal",
@@ -439,7 +439,7 @@
     },
     "tests": [
       {
-        "title": "manual partition - lower inf bound",
+        "title": "manual_partition___lower_inf_bound",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -464,7 +464,7 @@
         }
       },
       {
-        "title": "manual partition - lower inf bound tail_weights",
+        "title": "manual_partition___lower_inf_bound_tail_weights",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -490,7 +490,7 @@
         }
       },
       {
-        "title": "manual partition - upper inf bound",
+        "title": "manual_partition___upper_inf_bound",
         "_notes": "test should fail - we expect zero weight less than zero",
         "exact_match_out": false,
         "in": {
@@ -516,7 +516,7 @@
         }
       },
       {
-        "title": "manual partition - upper inf bound tail_weights",
+        "title": "manual_partition___upper_inf_bound_tail_weights",
         "exact_match_out": false,
         "in": {
           "column": "y",
@@ -552,7 +552,7 @@
     },
     "tests": [
       {
-        "title": "manual partition - lower and upper inf bounds",
+        "title": "manual_partition___lower_and_upper_inf_bounds",
         "exact_match_out": false,
         "in": {
           "column": "z",
@@ -577,7 +577,7 @@
         }
       },
       {
-        "title": "manual partition - lower and upper inf bounds",
+        "title": "manual_partition___lower_and_upper_inf_bounds",
         "exact_match_out": false,
         "in": {
           "column": "z",
@@ -603,7 +603,7 @@
         }
       },
       {
-        "title": "tail weight holdout is not defined for partitions already extending to inifinity",
+        "title": "tail_weight_holdout_is_not_defined_for_partitions_already_extending_to_inifinity",
         "exact_match_out": false,
         "in": {
           "column": "z",
@@ -620,7 +620,7 @@
         }
       },
       {
-        "title": "tail weight holdout is not defined for partitions already extending to inifinity - tail_weight",
+        "title": "tail_weight_holdout_is_not_defined_for_partitions_already_extending_to_inifinity__tail_weight",
         "exact_match_out": false,
         "in": {
           "column": "z",
@@ -638,7 +638,7 @@
         }
       },
       {
-        "title": "empty partition",
+        "title": "empty_partition",
         "exact_match_out": false,
         "in": {
           "column": "z",
@@ -652,7 +652,7 @@
         }
       },
       {
-        "title": "too-big tail_weight",
+        "title": "too_big_tail_weight",
         "exact_match_out": false,
         "in": {
           "column": "z",
@@ -670,7 +670,7 @@
         }
       },
       {
-        "title": "too-big internal_weight",
+        "title": "too_big_internal_weight",
         "exact_match_out": false,
         "in": {
           "column": "z",
@@ -696,7 +696,7 @@
     },
     "tests": [
       {
-        "title": "manual partition - undefined (infinite) kl divergence",
+        "title": "manual_partition___undefined_infinite_kl_divergence",
         "exact_match_out": false,
         "in": {
           "column": "x1",
@@ -726,7 +726,7 @@
     },
     "tests": [
       {
-        "title": "manual partition - undefined (infinite) kl divergence",
+        "title": "manual_partition___undefined_infinite_kl_divergence",
         "exact_match_out": false,
         "in": {
           "column": "x2",
@@ -741,7 +741,7 @@
         }
       },
       {
-        "title": "manual partition - undefined (infinite) kl divergence - bins do not cover all data",
+        "title": "manual_partition___undefined_infinite_kl_divergence___bins_do_not_cover_all_data",
         "exact_match_out": false,
         "in": {
           "column": "x2",
@@ -756,7 +756,7 @@
         }
       },
       {
-        "title": "manual partition - return partitions should have tail_weights",
+        "title": "manual_partition___return_partitions_should_have_tail_weights",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -780,7 +780,7 @@
         }
       },
       {
-        "title": "manual partition - tail_weights - return partitions should have tail_weights",
+        "title": "manual_partition___tail_weights___return_partitions_should_have_tail_weights",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -805,7 +805,7 @@
         }
       },
       {
-        "title": "manual partition - bounded endpoints - empty tail_weights in return",
+        "title": "manual_partition___bounded_endpoints___empty_tail_weights_in_return",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -829,7 +829,7 @@
         }
       },
       {
-        "title": "manual partition - bounded endpoints - observed with tail_weight - infinite KL divergence",
+        "title": "manual_partition___bounded_endpoints___observed_with_tail_weight___infinite_kl_divergence",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -855,7 +855,7 @@
         }
       },
       {
-        "title": "manual partition - infinite endpoints - non-zero tail_hold_out",
+        "title": "manual_partition___infinite_endpoints___non_zero_tail_hold_out",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -872,7 +872,7 @@
         }
       },
       {
-        "title": "manual partition - upper infinite endpoint - non-zero tail_hold_out",
+        "title": "manual_partition___upper_infinite_endpoint___non_zero_tail_hold_out",
         "_notes": "expected_partition == [0.3*0.98,0.15*0.98,0.05*0.98,0.05*0.98,0.2*0.98]",
         "exact_match_out": false,
         "in": {
@@ -898,7 +898,7 @@
         }
       },
       {
-        "title": "manual partition - lower infinite endpoint - non-zero tail_hold_out",
+        "title": "manual_partition___lower_infinite_endpoint___non_zero_tail_hold_out",
         "_notes": "expected_partition == [0.15*0.95,0.05*0.95,0.05*0.95,0.45*0.95]",
         "exact_match_out": false,
         "in": {
@@ -924,7 +924,7 @@
         }
       },
       {
-        "title": "manual partition - bounded endpoints - non-zero tail_hold_out",
+        "title": "manual_partition___bounded_endpoints___non_zero_tail_hold_out",
         "_notes": "expected_partition == [0.3*0.9, 0.15*0.9, 0.05, 0.10*0.9, 0.45*0.9]",
         "exact_match_out": false,
         "in": {

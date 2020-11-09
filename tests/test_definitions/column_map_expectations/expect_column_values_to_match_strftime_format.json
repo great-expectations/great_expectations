@@ -20,7 +20,7 @@
         }
       },
       "tests": [{
-        "title": "Simple positive test",
+        "title": "simple_positive_test",
         "exact_match_out" : false,
         "in":{
           "column": "a",
@@ -32,7 +32,7 @@
         }
       },
       {
-        "title": "Negative test - wrong format",
+        "title": "negative_test___wrong_format",
         "exact_match_out" : false,
         "in":{
           "column": "a",
@@ -44,7 +44,7 @@
         }
       },
       {
-        "title": "Positive test w/ nulls",
+        "title": "positive_test_w___nulls",
         "exact_match_out" : false,
         "in":{
           "column": "b",
@@ -56,7 +56,7 @@
         }
       },
       {
-        "title": "Positive test w/ mostly",
+        "title": "positive_test_w___mostly",
         "exact_match_out" : false,
         "in":{
           "column": "c",
@@ -69,7 +69,7 @@
         }
       },
       {
-        "title": "Simple negative test",
+        "title": "simple_negative_test",
         "exact_match_out" : false,
         "in":{
           "column": "c",
@@ -81,7 +81,7 @@
         }
       },
       {
-        "title": "Negative test - out of bounds value for month",
+        "title": "negative_test___out_of_bounds_value_for_month",
         "exact_match_out" : false,
         "in":{
           "column": "a",
@@ -93,7 +93,7 @@
         }
       },
       {
-        "title": "Negative test - iso8601",
+        "title": "negative_test___iso8601",
         "exact_match_out" : false,
         "in":{
           "column": "f",
@@ -105,7 +105,7 @@
         }
       },
       {
-        "title": "Test raising exception for wrong input data type",
+        "title": "test_raising_exception_for_wrong_input_data_type",
         "exact_match_out" : false,
         "in":{
           "column": "d",
@@ -117,7 +117,7 @@
         }
       },
       {
-        "title": "Test raising exception for wrong format",
+        "title": "test_raising_exception_for_wrong_format",
         "exact_match_out" : false,
         "in":{
           "column": "a",
@@ -129,7 +129,7 @@
         }
       },
       {
-        "title": "Negative test - input already datetimes",
+        "title": "negative_test___input_already_datetimes",
         "exact_match_out" : false,
         "suppress_test_for": ["pandas"],
         "in":{

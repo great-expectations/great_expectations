@@ -1,5 +1,5 @@
 import copy
-from typing import List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.id_dict import IDDict
 
@@ -8,7 +8,7 @@ class MetricConfiguration:
     def __init__(
         self,
         metric_name: str,
-        metric_domain_kwargs: dict,
+        metric_domain_kwargs: Dict,
         metric_value_kwargs: dict = None,
         metric_dependencies: dict = None,
     ):
@@ -99,7 +99,7 @@ class ValidationGraph:
 
 
 # class ValidationGraph(object):
-#     def __init__(self, domain: dict, edges: Optional[Set[MetricEdge]] = None):
+#     def __init__(self, domain: Dict, edges: Optional[Set[MetricEdge]] = None):
 #         self._domain = IDDict(domain)
 #         if edges:
 #             self.edges = edges

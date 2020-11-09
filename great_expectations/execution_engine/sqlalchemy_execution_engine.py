@@ -1,15 +1,11 @@
 import copy
 import datetime
+import json
 import logging
 import uuid
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Tuple
 from urllib.parse import urlparse
-
-from sqlalchemy.engine import reflection
-from sqlalchemy.engine.default import DefaultDialect
-from sqlalchemy.sql import Select
-from sqlalchemy.sql.elements import TextClause, quoted_name
 
 from great_expectations.core import IDDict
 from great_expectations.execution_environment.types import (
@@ -22,8 +18,17 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy.engine import reflection
+    from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.sql import Select
+    from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
     sa = None
+    reflection = None
+    DefaultDialect = None
+    Select = None
+    TextClause = None
+    quoted_name = None
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.exceptions import (
@@ -183,16 +188,6 @@ class SqlAlchemyBatchData:
                     "default dataset in engine url"
                 )
 
-        if (
-            query is not None
-            and engine.dialect.name.lower() == "snowflake"
-            and generated_table_name is not None
-        ):
-            raise ValueError(
-                "No snowflake_transient_table specified. Snowflake with a query batch_kwarg will create "
-                "a transient table, so you must provide a user-selected name."
-            )
-
         if query:
             self.create_temporary_table(table_name, query, schema_name=schema)
 
@@ -230,6 +225,17 @@ class SqlAlchemyBatchData:
     def use_quoted_name(self):
         """Returns a table of the data inside the sqlalchemy_execution_engine"""
         return self._use_quoted_name
+
+    @property
+    def schema(self):
+        return self._schema
+
+    @property
+    def selectable(self):
+        if self._table is not None:
+            return self._table
+        else:
+            return sa.text(self._query)
 
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
         """
@@ -269,10 +275,9 @@ class SqlAlchemyBatchData:
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
-            logger.info("Creating transient table %s" % table_name)
             if schema_name is not None:
                 table_name = schema_name + "." + table_name
-            stmt = "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
+            stmt = "CREATE OR REPLACE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name == "mysql":
@@ -357,9 +362,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 data_context (DataContext): \
                     An object representing a Great Expectations project that can be used to access Expectation
                     Suites and the Project Data itself
-                engine (SqlAlchemyExecutionEngine): \
-                    An Execution Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
-                    Execution Engine has already been configured and should be reused. Will override Credentials
+                engine (Engine): \
+                    A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
+                    Engine has already been configured and should be reused. Will override Credentials
                     if provided.
                 connection_string (string): \
                     If neither the engines nor the credentials have been provided, a connection string can be used
@@ -406,9 +411,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
 
-            if engine and engine.dialect.name.lower() in ["sqlite", "mssql"]:
-                # sqlite/mssql temp tables only persist within a connection so override the engine
-                self.engine = engine.connect()
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
@@ -423,6 +425,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
         else:
             self.dialect = None
+
+        if self.engine and self.engine.dialect.name.lower() in [
+            "sqlite",
+            "mssql",
+            "snowflake",
+        ]:
+            # sqlite/mssql temp tables only persist within a connection so override the engine
+            self.engine = engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -440,7 +450,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 success=True,
             )
 
-    def _build_engine(self, credentials, **kwargs) -> sa.engine.Engine:
+    def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
@@ -522,7 +532,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def get_compute_domain(
         self, domain_kwargs: dict = None
-    ) -> Tuple[sa.sql.Selectable, dict, dict]:
+    ) -> Tuple["sa.sql.Selectable", dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
@@ -538,14 +548,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if self.active_batch_data:
                 data_object = self.active_batch_data
             else:
-                raise ValidationError(
+                raise GreatExpectationsError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.loaded_batch_data:
                 data_object = self.loaded_batch_data[batch_id]
             else:
-                raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
+                raise GreatExpectationsError(
+                    f"Unable to find batch with batch_id {batch_id}"
+                )
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
@@ -654,3 +666,199 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 resolved_metrics[id] = res[0][idx]
 
         return resolved_metrics
+
+    ### Splitter methods for partitioning tables ###
+
+    def _split_on_whole_table(
+        self,
+        table_name: str,
+        # column_name: str,
+        partition_definition: dict,
+    ):
+        """'Split' by returning the whole table"""
+
+        # return sa.column(column_name) == partition_definition[column_name]
+        return 1 == 1
+
+    def _split_on_column_value(
+        self, table_name: str, column_name: str, partition_definition: dict,
+    ):
+        """Split using the values in the named column"""
+
+        return sa.column(column_name) == partition_definition[column_name]
+
+    def _split_on_converted_datetime(
+        self,
+        table_name: str,
+        column_name: str,
+        partition_definition: dict,
+        date_format_string: str = "%Y-%m-%d",
+    ):
+        """Convert the values in the named column to the given date_format, and split on that"""
+
+        return (
+            sa.func.strftime(date_format_string, sa.column(column_name),)
+            == partition_definition[column_name]
+        )
+
+    def _split_on_divided_integer(
+        self,
+        table_name: str,
+        column_name: str,
+        divisor: int,
+        partition_definition: dict,
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+
+        return (
+            sa.cast(sa.column(column_name) / divisor, sa.Integer)
+            == partition_definition[column_name]
+        )
+
+    def _split_on_mod_integer(
+        self, table_name: str, column_name: str, mod: int, partition_definition: dict,
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+
+        return sa.column(column_name) % mod == partition_definition[column_name]
+
+    def _split_on_multi_column_values(
+        self, table_name: str, column_names: List[str], partition_definition: dict,
+    ):
+        """Split on the joint values in the named columns"""
+
+        return sa.and_(
+            *[
+                sa.column(column_name) == column_value
+                for column_name, column_value in partition_definition.items()
+            ]
+        )
+
+    def _split_on_hashed_column(
+        self,
+        table_name: str,
+        column_name: str,
+        hash_digits: int,
+        partition_definition: dict,
+    ):
+        """Split on the hashed value of the named column"""
+
+        return (
+            sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
+            == partition_definition[column_name]
+        )
+
+    ### Sampling methods ###
+
+    # _sample_using_limit
+    # _sample_using_random
+    # _sample_using_mod
+    # _sample_using_a_list
+    # _sample_using_md5
+
+    def _sample_using_random(
+        self, p: float = 0.1,
+    ):
+        """Take a random sample of rows, retaining proportion p
+
+        Note: the Random function behaves differently on different dialects of SQL
+        """
+        return sa.func.random() < p
+
+    def _sample_using_mod(
+        self, column_name, mod: int, value: int,
+    ):
+        """Take the mod of named column, and only keep rows that match the given value"""
+        return sa.column(column_name) % mod == value
+
+    def _sample_using_a_list(
+        self, column_name: str, value_list: list,
+    ):
+        """Match the values in the named column against value_list, and only keep the matches"""
+        return sa.column(column_name).in_(value_list)
+
+    def _sample_using_md5(
+        self, column_name: str, hash_digits: int = 1, hash_value: str = "f",
+    ):
+        """Hash the values in the named column, and split on that"""
+        return (
+            sa.func.right(
+                sa.func.md5(sa.cast(sa.column(column_name), sa.Text)), hash_digits
+            )
+            == hash_value
+        )
+
+    def _build_selector_from_batch_spec(self, batch_spec):
+        table_name = batch_spec["table_name"]
+
+        splitter_fn = getattr(self, batch_spec["splitter_method"])
+        if "sampling_method" in batch_spec:
+            if batch_spec["sampling_method"] == "_sample_using_limit":
+
+                return (
+                    sa.select("*")
+                    .select_from(sa.text(table_name))
+                    .where(
+                        splitter_fn(
+                            table_name=table_name,
+                            partition_definition=batch_spec["partition_definition"],
+                            **batch_spec["splitter_kwargs"],
+                        )
+                    )
+                    .limit(batch_spec["sampling_kwargs"]["n"])
+                )
+
+            else:
+
+                sampler_fn = getattr(self, batch_spec["sampling_method"])
+                return (
+                    sa.select("*")
+                    .select_from(sa.text(table_name))
+                    .where(
+                        sa.and_(
+                            splitter_fn(
+                                table_name=table_name,
+                                partition_definition=batch_spec["partition_definition"],
+                                **batch_spec["splitter_kwargs"],
+                            ),
+                            sampler_fn(**batch_spec["sampling_kwargs"]),
+                        )
+                    )
+                )
+
+        else:
+
+            return (
+                sa.select("*")
+                .select_from(sa.text(table_name))
+                .where(
+                    splitter_fn(
+                        table_name=table_name,
+                        partition_definition=batch_spec["partition_definition"],
+                        **batch_spec["splitter_kwargs"],
+                    )
+                )
+            )
+
+    def get_batch_data_and_markers(
+        self, batch_spec
+    ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
+
+        selector = self._build_selector_from_batch_spec(batch_spec)
+        batch_data = self.engine.execute(selector)
+        # TODO: Abe 20201030: This method should return a SqlAlchemyBatchData as its first object, but that probably requires deeper changes.
+        # SqlAlchemyBatchData(
+        #     engine=self.engine,
+        #     table_name=batch_spec.get("table"),
+        #     schema=batch_spec.get("schema"),
+        # )
+
+        batch_markers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        return batch_data, batch_markers

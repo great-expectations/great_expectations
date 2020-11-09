@@ -9,7 +9,7 @@
       "equal_length_string":["a", "b", "c", "d", "e"]
     },
     "tests": [{
-      "title": "Positive test, String, one character length",
+      "title": "positive_test__string__one_character_length",
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_string",
@@ -21,7 +21,7 @@
         "unexpected_list": []
       }
     },{
-      "title": "Negative test, String, value is 1 too high",
+      "title": "negative_test__string__value_is_1_too_high",
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_string",
@@ -33,7 +33,7 @@
         "unexpected_list": ["a", "b", "c", "d", "e"]
       }
     },{
-      "title": "Positive test with missing value in column, mostly",
+      "title": "positive_test_with_missing_value_in_column__mostly",
       "exact_match_out" : false,
       "in":{
         "column": "s3",
@@ -46,7 +46,7 @@
         "unexpected_list": ["collected", "casual"]
       }
     },{
-      "title": "Negative, one length too small",
+      "title": "negative__one_length_too_small",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -58,7 +58,7 @@
         "unexpected_list": ["sexy"]
       }
     },{
-      "title": "Positive, one length too small, mostly",
+      "title": "positive__one_length_too_small__mostly",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -71,15 +71,29 @@
         "unexpected_list": ["sexy"]
       }
     },{
-      "title": "Positive test, integer, length = 1",
+      "title": "positive_test__integer__length____1_pandas",
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_integer",
         "value": 1,
         "catch_exceptions": true
       },
-      "out": {},
-      "traceback_substring": "TypeError: object of type 'int' has no len()"
+      "only_for": ["pandas"],
+      "out": {
+        "traceback_substring": "AttributeError: Can only use .str accessor with string values"
+      }
+    },{
+      "title": "positive_test__integer__length____1_postgres",
+      "exact_match_out" : false,
+      "in":{
+        "column": "equal_length_integer",
+        "value": 1,
+        "catch_exceptions": true
+      },
+      "only_for": ["postgresql"],
+      "out": {
+        "traceback_substring": "No function matches the given name and argument types."
+      }
     },{
       "title": "test_conditional_expectation_passes",
       "only_for": ["pandas"],

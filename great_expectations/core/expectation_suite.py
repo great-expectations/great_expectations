@@ -28,11 +28,12 @@ from great_expectations.marshmallow__shade import (
     post_load,
     pre_dump,
 )
+from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
 
 
-class ExpectationSuite:
+class ExpectationSuite(SerializableDictDot):
     """
     This ExpectationSuite object has create, read, update, and delete functionality for its expectations:
         -create: self.add_expectation()

@@ -26,17 +26,11 @@ except ImportError:
 
 
 from ...render.renderer.renderer import renderer
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
+from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
 from ..registry import extract_metrics
 
 
-class ExpectColumnMaxToBeBetween(TableExpectation):
+class ExpectColumnMaxToBeBetween(ColumnExpectation):
     """Expect the column max to be between an min and max value
 
            expect_column_max_to_be_between is a \
@@ -185,6 +179,9 @@ class ExpectColumnMaxToBeBetween(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -239,11 +236,32 @@ class ExpectColumnMaxToBeBetween(TableExpectation):
             )
         ]
 
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
+    @classmethod
+    @renderer(renderer_type="renderer.descriptive.stats_table.max_row")
+    def _descriptive_stats_table_max_row_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        assert result, "Must pass in result."
+        return [
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Maximum",
+                    "tooltip": {"content": "expect_column_max_to_be_between"},
+                },
+            },
+            "{:.2f}".format(result.result["observed_value"]),
+        ]
+
     def _validate(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):

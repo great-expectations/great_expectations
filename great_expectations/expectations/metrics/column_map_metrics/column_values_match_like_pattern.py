@@ -1,6 +1,5 @@
 import logging
 
-from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -10,7 +9,6 @@ from great_expectations.expectations.metrics.column_map_metric import (
 )
 from great_expectations.expectations.metrics.util import (
     get_dialect_like_pattern_expression,
-    get_dialect_regex_expression,
 )
 
 logger = logging.getLogger(__name__)

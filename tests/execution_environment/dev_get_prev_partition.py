@@ -21,7 +21,7 @@ from great_expectations.data_context.util import (
 from great_expectations.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector import (
     DataConnector,
-    SinglePartitionerFileDataConnector,
+    InferredAssetFilesystemDataConnector,
 )
 from great_expectations.execution_environment.data_connector.partitioner.partition import (
     Partition,
@@ -29,7 +29,7 @@ from great_expectations.execution_environment.data_connector.partitioner.partiti
 from tests.test_utils import (
     create_files_for_regex_partitioner,
     create_files_in_directory,
-    execution_environment_files_data_connector_regex_partitioner_config,
+    execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config,
 )
 
 
@@ -51,7 +51,7 @@ def basic_files_dataconnector_yaml(tmp_path_factory):
     return (
         base_directory,
         f"""
-        class_name: SinglePartitionerFileDataConnector
+        class_name: InferredAssetFilesystemDataConnector
         base_directory: {base_directory}
         glob_directive: "*/*.csv"
         execution_environment_name: general_data_source

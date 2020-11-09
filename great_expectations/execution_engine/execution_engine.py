@@ -162,13 +162,25 @@ class ExecutionEngine:
                 metric_fn_bundle.append(
                     (metric_to_resolve, metric_fn, metric_provider_kwargs)
                 )
-            elif metric_fn_type in ["map_fn", "map_condition"]:
+            elif metric_fn_type in [
+                "map_fn",
+                "map_condition",
+                "window_fn",
+                "window_condition",
+            ]:
                 # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
                 # than data to optimize compute in the future
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )
+            elif metric_fn_type == "data":
+                resolved_metrics[metric_to_resolve.id] = metric_fn(
+                    **metric_provider_kwargs
+                )
             else:
+                logger.warning(
+                    f"Unrecognized metric function type while trying to resolve {str(metric_to_resolve.id)}"
+                )
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )

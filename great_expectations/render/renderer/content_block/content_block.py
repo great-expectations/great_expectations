@@ -6,6 +6,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
+    _registered_renderers,
     get_expectation_impl,
     get_renderer_impl,
 )
@@ -36,6 +37,7 @@ class ContentBlockRenderer(Renderer):
     @classmethod
     def render(cls, render_object, **kwargs):
         cls.validate_input(render_object)
+        exception_list_content_block = kwargs.get("exception_list_content_block")
 
         data_docs_exception_message = f"""\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
@@ -63,10 +65,12 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 if isinstance(obj_, ExpectationValidationResult) and not obj_.success:
                     has_failed_evr = True
 
-                if content_block_fn is not None:
+                if content_block_fn is not None and not exception_list_content_block:
                     try:
                         if isinstance(obj_, ExpectationValidationResult):
+                            expectation_config = obj_.expectation_config
                             result = content_block_fn(
+                                configuration=expectation_config,
                                 result=obj_,
                                 runtime_configuration=runtime_configuration,
                                 **kwargs,
@@ -89,7 +93,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             content_block_fn = cls._get_content_block_fn(
                                 "_missing_content_block_fn"
                             )
+                            expectation_config = obj_.expectation_config
                             result = content_block_fn(
+                                configuration=expectation_config,
                                 result=obj_,
                                 runtime_configuration=runtime_configuration,
                                 **kwargs,
@@ -103,10 +109,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             )
                 else:
                     if isinstance(obj_, ExpectationValidationResult):
-                        content_block_fn = cls._get_content_block_fn(
-                            "_missing_content_block_fn"
+                        content_block_fn = (
+                            cls._get_content_block_fn("_missing_content_block_fn")
+                            if not exception_list_content_block
+                            else cls._missing_content_block_fn
                         )
+                        expectation_config = obj_.expectation_config
                         result = content_block_fn(
+                            configuration=expectation_config,
                             result=obj_,
                             runtime_configuration=runtime_configuration,
                             **kwargs,
@@ -171,7 +181,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 object_name=expectation_type, renderer_type="renderer.prescriptive"
             )
             content_block_fn = content_block_fn[1] if content_block_fn else None
-            if content_block_fn is not None:
+            if content_block_fn is not None and not exception_list_content_block:
                 try:
                     if isinstance(render_object, ExpectationValidationResult):
                         result = content_block_fn(
@@ -211,8 +221,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         )
             else:
                 if isinstance(render_object, ExpectationValidationResult):
-                    content_block_fn = cls._get_content_block_fn(
-                        "_missing_content_block_fn"
+                    content_block_fn = (
+                        cls._get_content_block_fn("_missing_content_block_fn")
+                        if not exception_list_content_block
+                        else cls._missing_content_block_fn
                     )
                     result = content_block_fn(
                         result=render_object,
@@ -350,7 +362,11 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def list_available_expectations(cls):
-        expectations = [attr for attr in dir(cls) if attr[:7] == "expect_"]
+        expectations = [
+            object_name
+            for object_name in _registered_renderers
+            if object_name.startswith("expect_")
+        ]
         return expectations
 
     @classmethod

@@ -11,6 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
+from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from dateutil.parser import parse
@@ -65,9 +66,6 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
 from great_expectations.execution_environment import ExecutionEnvironment
-from great_expectations.execution_environment.data_connector.partitioner.partition import (
-    Partition,
-)
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -215,6 +213,7 @@ class BaseDataContext:
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
+    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     @classmethod
     def validate_config(cls, project_config):
@@ -793,7 +792,9 @@ class BaseDataContext:
             config = self._project_config
 
         substituted_config_variables = substitute_all_config_variables(
-            dict(self._load_config_variables_file()), dict(os.environ)
+            dict(self._load_config_variables_file()),
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
         substitutions = {
@@ -803,8 +804,39 @@ class BaseDataContext:
         }
 
         return DataContextConfig(
-            **substitute_all_config_variables(config, substitutions)
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
         )
+
+    def escape_all_config_variables(
+        self,
+        value: Union[str, dict, list],
+        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+    ) -> Union[str, dict, list]:
+        """
+        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
+
+        Args:
+            value: config variable value
+            dollar_sign_escape_string: replaces instances of `$`
+
+        Returns:
+            input value with all `$` characters replaced with the escape string
+        """
+
+        if isinstance(value, dict) or isinstance(value, OrderedDict):
+            return {
+                k: self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for k, v in value.items()
+            }
+
+        elif isinstance(value, list):
+            return [
+                self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for v in value
+            ]
+        return value.replace("$", dollar_sign_escape_string)
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
@@ -817,6 +849,7 @@ class BaseDataContext:
             None
         """
         config_variables = self._load_config_variables_file()
+        value = self.escape_all_config_variables(value, self.DOLLAR_SIGN_ESCAPE_STRING)
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:
@@ -1137,8 +1170,10 @@ class BaseDataContext:
         )
         return batch_kwargs
 
-    # new get_batch
-    def get_batch_from_new_style_datasource(self, batch_request: dict) -> Batch:
+    # New get_batch (note: it returns the List of Batch objects, not a single Batch object).
+    def get_batch_list_from_new_style_datasource(
+        self, batch_request: dict
+    ) -> List[Batch]:
         execution_environment_name: str = batch_request.get(
             "execution_environment_name"
         )
@@ -1148,31 +1183,16 @@ class BaseDataContext:
             )
 
         execution_environment: ExecutionEnvironment = self.get_execution_environment(
-            execution_environment_name=execution_environment_name,
-            runtime_environment=runtime_environment,
+            execution_environment_name=execution_environment_name
         )
         batch_request: BatchRequest = BatchRequest(**batch_request)
-        return execution_environment.get_batch(batch_request=batch_request)
+        return execution_environment.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
 
     def get_validator(
-        self,
-        batch_request,
-        expectation_suite_name: Union[str, ExpectationSuite],
-        in_memory_dataset: Any = None,
+        self, batch_request, expectation_suite_name: Union[str, ExpectationSuite],
     ):
-        # execution_environment_name: str = batch_request.get("execution_environment")
-        # runtime_environment: dict = {}
-        # if in_memory_dataset is not None:
-        #     runtime_environment.update({"in_memory_dataset": in_memory_dataset})
-        # execution_environment: ExecutionEnvironment = self.get_execution_environment(
-        #     execution_environment_name=execution_environment_name,
-        #     runtime_environment=runtime_environment
-        # )
-        # return execution_environment.get_validator(
-        #     batch_request=batch_request,
-        #     expectation_suite_name=expectation_suite_name
-        # )
-        # TODO?
         raise NotImplementedError
 
     def get_batch(
@@ -1504,9 +1524,7 @@ class BaseDataContext:
         return datasource
 
     def get_execution_environment(
-        self,
-        execution_environment_name: str = "default",
-        runtime_environment: Union[dict, None] = None,
+        self, execution_environment_name: str = "default",
     ) -> ExecutionEnvironment:
         """Get the named execution_environment
 
@@ -1570,33 +1588,33 @@ class BaseDataContext:
             )
         return execution_environment
 
-    def get_available_partitions(
-        self,
-        execution_environment_name: str,
-        data_connector_name: str,
-        data_asset_name: str = None,
-        partition_request: Union[
-            Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None
-        ] = None,
-        in_memory_dataset: Any = None,
-        runtime_parameters: Union[dict, None] = None,
-        repartition: bool = False,
-    ) -> List[Partition]:
-        execution_environment: ExecutionEnvironment = self.get_execution_environment(
-            execution_environment_name=execution_environment_name,
-            runtime_environment=runtime_environment,
-        )
-        available_partitions: List[
-            Partition
-        ] = execution_environment.get_available_partitions(
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            in_memory_dataset=in_memory_dataset,
-            runtime_parameters=runtime_parameters,
-            repartition=repartition,
-        )
-        return available_partitions
+    # def get_available_partitions(
+    #     self,
+    #     execution_environment_name: str,
+    #     data_connector_name: str,
+    #     data_asset_name: str = None,
+    #     partition_request: Union[
+    #         Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None
+    #     ] = None,
+    #     in_memory_dataset: Any = None,
+    #     runtime_parameters: Union[dict, None] = None,
+    #     repartition: bool = False,
+    # ) -> List[Partition]:
+    #     execution_environment: ExecutionEnvironment = self.get_execution_environment(
+    #         execution_environment_name=execution_environment_name,
+    #         runtime_environment=runtime_environment,
+    #     )
+    #     available_partitions: List[
+    #         Partition
+    #     ] = execution_environment.get_available_partitions(
+    #         data_connector_name=data_connector_name,
+    #         data_asset_name=data_asset_name,
+    #         partition_request=partition_request,
+    #         in_memory_dataset=in_memory_dataset,
+    #         runtime_parameters=runtime_parameters,
+    #         repartition=repartition,
+    #     )
+    #     return available_partitions
 
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""
@@ -2984,7 +3002,7 @@ class DataContext(BaseDataContext):
             logger.debug(e)
 
     @staticmethod
-    def _validate_checkpoint(checkpoint: dict, checkpoint_name: str) -> dict:
+    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
         if checkpoint is None:
             raise ge_exceptions.CheckpointError(
                 f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
