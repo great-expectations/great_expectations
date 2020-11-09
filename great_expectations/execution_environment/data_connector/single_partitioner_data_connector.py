@@ -221,6 +221,16 @@ class SinglePartitionerDataConnector(DataConnector):
     #     pass
 
     # TODO: <Alex>This is an internal sorter validator, because this class is in its own tree.</Alex>
+    # TODO: <Alex>
+    # The shorthand "internal sorters" here means that these sorters are only for the
+    # SinglePartitionerDictDataConnector / SinglePartitionerDataConnector "island" -- i.e., not part of the new
+    # DataConnector class hierarchy (as in
+    # https://github.com/superconductive/design/blob/main/docs/20201103_data_connector_class_hierarchy.md).  Once we
+    # incorporate the tests into the "final" data connector hierarchy, the
+    # SinglePartitionerDictDataConnector / SinglePartitionerDataConnector classes will be deleted.  So the note simply
+    # says "do not ask here why we are not reusing the sorters and their validators from the new design of data
+    # connector class hierarchy".
+    # </Alex>
     # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
     def _validate_sorters_configuration(self):
         if len(self.sorters) > 0:
