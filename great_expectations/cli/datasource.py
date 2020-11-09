@@ -43,6 +43,14 @@ from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
+try:
+    import sqlalchemy
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sqlalchemy = None
+
 
 class DatasourceTypes(enum.Enum):
     PANDAS = "pandas"
@@ -1231,16 +1239,27 @@ We have saved your setup progress. When you are ready, run great_expectations in
     return (data_asset_name, batch_kwargs)
 
 
+def get_default_schema(datasource):
+    inspector = sqlalchemy.inspect(datasource.engine)
+
+    return inspector.default_schema_name
+
+
 def _get_batch_kwargs_for_sqlalchemy_datasource(
     context, datasource_name, additional_batch_kwargs=None
 ):
+    data_asset_name = None
+    sql_query = None
+
+    datasource = context.get_datasource(datasource_name)
+
+    # get the default schema based on database engine
+    default_schema = get_default_schema(datasource)
+
     msg_prompt_single_or_multiple_data_assets = """Does the expectation suite involve data from a single table or multiple tables?
     1. Single table
     2. Custom query involving multiple tables
     """
-
-    data_asset_name = None
-    sql_query = None
 
     single_or_multiple_data_asset_selection = click.prompt(
         msg_prompt_single_or_multiple_data_assets,
@@ -1249,7 +1268,9 @@ def _get_batch_kwargs_for_sqlalchemy_datasource(
     )
 
     if single_or_multiple_data_asset_selection == "1":  # single table
-        schema_name = click.prompt("Please provide the schema name of the table")
+        schema_name = click.prompt(
+            "Please provide the schema name of the table", default=default_schema
+        )
         table_name = click.prompt("Please provide the table name")
         data_asset_name = f"{schema_name}.{table_name}"
     else:
@@ -1258,8 +1279,6 @@ def _get_batch_kwargs_for_sqlalchemy_datasource(
 
     if additional_batch_kwargs is None:
         additional_batch_kwargs = {}
-
-    datasource = context.get_datasource(datasource_name)
 
     temp_generator = TableBatchKwargsGenerator(name="temp", datasource=datasource)
 
