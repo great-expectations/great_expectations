@@ -36,7 +36,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         table_columns = _metrics["table.column_types"]
         column_metadata = [col for col in table_columns if col["name"] == column_name]
         na_types = [
-            isinstance(column_metadata["dataType"], typ)
+            isinstance(column_metadata["type"], typ)
             for typ in [
                 sparktypes.LongType,
                 sparktypes.DoubleType,
@@ -50,7 +50,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
 
         # NOTE: 20201105 - parse_strings_as_datetimes is not supported here; instead detect types naturally
         if isinstance(
-            column_metadata["dataType"], (sparktypes.TimestampType, sparktypes.DateType)
+            column_metadata["type"], (sparktypes.TimestampType, sparktypes.DateType)
         ):
             diff = F.datediff(
                 column, F.lag(column).over(Window.orderBy(F.lit("constant")))
@@ -65,6 +65,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         else:
             return F.when(diff <= 0, F.lit(True)).otherwise(F.lit(False))
 
+    @classmethod
     def get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
@@ -72,7 +73,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        if isinstance(execution_engine, SparkDFExecutionEngine):
+        if isinstance(execution_engine, SparkDFExecutionEngine) and metric.metric_name == "column_values.decreasing":
             return {
                 "table.column_types": MetricConfiguration(
                     "table.column_types",
@@ -80,5 +81,10 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
                     {"include_nested": True},
                 )
             }
-
-        return dict()
+        else:
+            return super().get_evaluation_dependencies(
+                metric=metric,
+                configuration=configuration,
+                execution_engine=execution_engine,
+                runtime_configuration=runtime_configuration,
+            )
