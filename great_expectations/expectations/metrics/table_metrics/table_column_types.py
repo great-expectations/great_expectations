@@ -74,7 +74,7 @@ class ColumnTypes(TableMetricProvider):
     ):
         df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs)
         return _get_spark_column_metadata(
-            df.schema, metric_value_kwargs["include_nested"]
+            df.schema, include_nested=metric_value_kwargs["include_nested"]
         )
 
 
