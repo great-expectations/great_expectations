@@ -53,32 +53,6 @@
         "unexpected_index_list": [],
         "success": true
       }
-    },{
-      "title" : "positive_test_with_parse_strings_as_datetimes",
-      "exact_match_out" : false,
-      "in": {
-        "column": "z",
-        "parse_strings_as_datetimes" : true
-      },
-      "out": {
-        "unexpected_list": [],
-        "unexpected_index_list": [],
-        "success": true
-      }
-    },{
-      "title" : "negative_test_with_parse_strings_as_datetimes",
-      "exact_match_out" : false,
-      "in": {
-        "column": "z",
-        "parse_strings_as_datetimes" : true,
-        "output_strftime_format" : "%m/%d/%Y",
-        "strictly": true
-      },
-      "out": {
-        "unexpected_list": ["10/02/2016"],
-        "unexpected_index_list": [3],
-        "success": false
-      }
     }]},
     {
       "data": {
