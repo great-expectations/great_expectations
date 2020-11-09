@@ -84,10 +84,7 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
 test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir0/
     my_store/
         .ge_store_backend_id
-        expectations/
-            .ge_store_backend_id
         validations/
-            .ge_store_backend_id
             a/
                 b/
                     c/
@@ -157,10 +154,8 @@ def test_HtmlSiteStore_S3_backend():
         )["Contents"]
     } == {
         "test/prefix/.ge_store_backend_id",
-        "test/prefix/expectations/.ge_store_backend_id",
         "test/prefix/expectations/asset/quarantine.html",
         "test/prefix/index.html",
-        "test/prefix/validations/.ge_store_backend_id",
         "test/prefix/validations/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/1234.html",
     }
 
