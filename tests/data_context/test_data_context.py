@@ -502,7 +502,6 @@ data_docs/
         .ge_store_backend_id
         index.html
         expectations/
-            .ge_store_backend_id
             random/
                 subdir_reader/
                     f1/
@@ -539,7 +538,6 @@ data_docs/
                 data_docs_custom_styles_template.css
                 data_docs_default_styles.css
         validations/
-            .ge_store_backend_id
             random/
                 subdir_reader/
                     f1/

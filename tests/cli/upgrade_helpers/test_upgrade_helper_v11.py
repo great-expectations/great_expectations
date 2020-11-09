@@ -165,12 +165,10 @@ great_expectations/
             local_site/
                 .ge_store_backend_id
                 expectations/
-                    .ge_store_backend_id
                     .gitkeep
                 static/
                     .gitkeep
                 validations/
-                    .ge_store_backend_id
                     diabetic_data/
                         warning/
                             20200430T191246.763896Z/
@@ -381,12 +379,10 @@ great_expectations/
             local_site/
                 .ge_store_backend_id
                 expectations/
-                    .ge_store_backend_id
                     .gitkeep
                 static/
                     .gitkeep
                 validations/
-                    .ge_store_backend_id
                     diabetic_data/
                         warning/
                             20200430T191246.763896Z/
