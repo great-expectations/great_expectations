@@ -91,7 +91,7 @@ def test_stdev_metric_pd():
 
 
 def test_max_metric_sa(sa):
-    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 1]}))
+    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 1]}), sa)
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.max",
         metric_domain_kwargs={"column": "a"},
@@ -102,8 +102,8 @@ def test_max_metric_sa(sa):
     assert results == {desired_metric.id: 2}
 
 
-def test_max_metric_spark():
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}))
+def test_max_metric_spark(spark_session):
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}), spark_session)
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.max",
         metric_domain_kwargs={"column": "a"},
@@ -114,7 +114,7 @@ def test_max_metric_spark():
 
 
 def test_map_value_set_sa(sa):
-    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
+    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), sa)
     desired_metric = MetricConfiguration(
         metric_name="column_values.in_set",
         metric_domain_kwargs={"column": "a"},
@@ -157,7 +157,7 @@ def test_map_of_type_sa(sa):
 
 
 def test_map_value_set_spark(spark_session):
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), spark_session)
 
     condition_metric = MetricConfiguration(
         metric_name="column_values.in_set",
@@ -235,14 +235,15 @@ def test_map_unique_pd():
     assert list(results[desired_metric.id]) == [False, False, True, True]
 
 
-def test_map_unique_spark():
+def test_map_unique_spark(spark_session):
     engine = _build_spark_engine(
         pd.DataFrame(
             {
                 "a": [1, 2, 3, 3, 4, None],
                 "b": [None, "foo", "bar", "baz", "qux", "fish"],
             }
-        )
+        ),
+        spark_session,
     )
 
     condition_metric = MetricConfiguration(
@@ -307,7 +308,8 @@ def test_map_unique_sa(sa):
     engine = _build_sa_engine(
         pd.DataFrame(
             {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
-        )
+        ),
+        sa,
     )
     condition_metric = MetricConfiguration(
         metric_name="column_values.unique",
@@ -420,8 +422,8 @@ def test_z_score_under_threshold_pd():
     assert results[desired_metric.id] == 0
 
 
-def test_z_score_under_threshold_spark():
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
+def test_z_score_under_threshold_spark(spark_session):
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), spark_session)
     mean = MetricConfiguration(
         metric_name="column.aggregate.mean",
         metric_domain_kwargs={"column": "a"},
@@ -536,8 +538,8 @@ def test_column_pairs_in_set_metric_pd():
     )
 
 
-def test_table_metric_spark():
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}))
+def test_table_metric_spark(spark_session):
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}), spark_session)
 
     desired_metric = MetricConfiguration(
         metric_name="table.row_count",
@@ -550,8 +552,8 @@ def test_table_metric_spark():
     assert results == {desired_metric.id: 3}
 
 
-def test_median_metric_spark():
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3]}))
+def test_median_metric_spark(spark_session):
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3]}), spark_session)
 
     row_count = MetricConfiguration(
         metric_name="table.row_count",
@@ -574,8 +576,8 @@ def test_median_metric_spark():
     assert results == {desired_metric.id: 2}
 
 
-def test_distinct_metric_spark():
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
+def test_distinct_metric_spark(spark_session):
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}), spark_session)
 
     desired_metric = MetricConfiguration(
         metric_name="column.value_counts",
@@ -601,7 +603,7 @@ def test_distinct_metric_spark():
 
 def test_distinct_metric_sa(sa):
     engine = _build_sa_engine(
-        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
     desired_metric = MetricConfiguration(
@@ -669,7 +671,7 @@ def test_sa_batch_aggregate_metrics(sa):
     import datetime
 
     engine = _build_sa_engine(
-        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
     desired_metric_1 = MetricConfiguration(
@@ -710,11 +712,11 @@ def test_sa_batch_aggregate_metrics(sa):
     assert res[desired_metric_4.id] == 4
 
 
-def test_sparkdf_batch_aggregate_metrics(caplog):
+def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     import datetime
 
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), spark_session
     )
 
     desired_metric_1 = MetricConfiguration(
