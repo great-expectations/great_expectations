@@ -106,15 +106,10 @@ def test_database_store_backend_id_initialization(caplog, sa, test_backends):
             "database": "test_ci",
         },
         table_name="test_database_store_backend_id_initialization",
-        key_columns=["k1"],
+        key_columns=["k1", "k2", "k3"],
     )
 
     # Check that store_backend_id exists can be read
     assert store_backend.store_backend_id is not None
     # Check that store_backend_id is a valid UUID
     assert test_utils.validate_uuid4(store_backend.store_backend_id)
-    # Check value is in the correct format
-    store_id_from_db = store_backend.get(key=(".ge_store_backend_id",))
-    store_id_file_parser = "store_backend_id = " + pp.Word(pp.hexnums + "-")
-    parsed_store_id = store_id_file_parser.parseString(store_id_from_db)
-    assert test_utils.validate_uuid4(parsed_store_id[1])
