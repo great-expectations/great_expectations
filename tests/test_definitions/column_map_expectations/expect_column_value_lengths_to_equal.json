@@ -80,7 +80,7 @@
       },
       "only_for": ["pandas"],
       "out": {
-        "traceback_substring": "AttributeError: Can only use .str accessor with string values!"
+        "traceback_substring": "AttributeError: Can only use .str accessor with string values"
       }
     },{
       "title": "positive_test__integer__length____1_postgres",

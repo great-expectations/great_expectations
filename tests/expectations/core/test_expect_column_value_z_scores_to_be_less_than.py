@@ -51,11 +51,9 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(postgresql_engine)
     assert result == ExpectationValidationResult(success=True,)
 
 
-def test_spark_expect_column_value_z_scores_to_be_less_than_impl():
-    from pyspark.sql import DataFrame, SparkSession
-
+def test_spark_expect_column_value_z_scores_to_be_less_than_impl(spark_session):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
-    spark = SparkSession.builder.getOrCreate()
+    spark = spark_session.builder.getOrCreate()
     df = spark.createDataFrame(df)
 
     expectationConfiguration = ExpectationConfiguration(

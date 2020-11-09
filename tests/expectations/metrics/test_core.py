@@ -16,11 +16,8 @@ from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-def _build_spark_engine(df):
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(
+def _build_spark_engine(df, spark_session):
+    df = spark_session.createDataFrame(
         [
             tuple(
                 None if isinstance(x, (float, int)) and np.isnan(x) else x
@@ -35,9 +32,7 @@ def _build_spark_engine(df):
     return engine
 
 
-def _build_sa_engine(df):
-    import sqlalchemy as sa
-
+def _build_sa_engine(df, sa):
     eng = sa.create_engine("sqlite://", echo=False)
     df.to_sql("test", eng, index=False)
     batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
@@ -95,7 +90,7 @@ def test_stdev_metric_pd():
     assert results == {desired_metric.id: 1}
 
 
-def test_max_metric_sa():
+def test_max_metric_sa(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 1]}))
     desired_metric = MetricConfiguration(
         metric_name="column.aggregate.max",
@@ -118,7 +113,7 @@ def test_max_metric_spark():
     assert results == {desired_metric.id: 2}
 
 
-def test_map_value_set_sa():
+def test_map_value_set_sa(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
     desired_metric = MetricConfiguration(
         metric_name="column_values.in_set",
@@ -141,9 +136,7 @@ def test_map_value_set_sa():
     assert results == {desired_metric.id: 0}
 
 
-def test_map_of_type_sa():
-    import sqlalchemy as sa
-
+def test_map_of_type_sa(sa):
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     df.to_sql("test", eng, index=False)
@@ -163,7 +156,7 @@ def test_map_of_type_sa():
     assert isinstance(results[desired_metric.id][0]["type"], sa.FLOAT)
 
 
-def test_map_value_set_spark():
+def test_map_value_set_spark(spark_session):
     engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
 
     condition_metric = MetricConfiguration(
@@ -188,10 +181,7 @@ def test_map_value_set_spark():
     # We run the same computation again, this time with None being replaced by nan instead of NULL
     # to demonstrate this behavior
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(df)
+    df = spark_session.createDataFrame(df)
     batch = Batch(data=df)
     engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
 
@@ -313,7 +303,7 @@ def test_map_unique_spark():
     assert results[desired_metric.id] == [(3, "bar"), (3, "baz")]
 
 
-def test_map_unique_sa():
+def test_map_unique_sa(sa):
     engine = _build_sa_engine(
         pd.DataFrame(
             {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
@@ -609,7 +599,7 @@ def test_distinct_metric_spark():
     assert results == {desired_metric.id: {1, 2, 3}}
 
 
-def test_distinct_metric_sa():
+def test_distinct_metric_sa(sa):
     engine = _build_sa_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
     )
@@ -675,7 +665,7 @@ def test_distinct_metric_pd():
     assert results == {desired_metric.id: {1, 2, 3}}
 
 
-def test_sa_batch_aggregate_metrics():
+def test_sa_batch_aggregate_metrics(sa):
     import datetime
 
     engine = _build_sa_engine(
