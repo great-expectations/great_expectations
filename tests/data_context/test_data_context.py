@@ -3,6 +3,8 @@ import os
 import shutil
 
 import pandas as pd
+from typing import List
+
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
@@ -1363,45 +1365,57 @@ def test_get_batch_when_passed_a_suite(titanic_data_context):
     assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
 
 
-def test_get_batch_from_new_style_datasource_explicit_path(
-    execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context,
+# TODO: <Alex>If "batch_spec_passthrough" is decomissioned, the name of this method will need to change to reflect this (i.e., no "explicit_path").</Alex>
+def test_get_batch_list_from_new_style_datasource_based_on_explicit_data_reference_path(
+    execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
     execution_environment_name: str = "test_execution_environment"
     data_connector_name: str = "test_filesystem_data_connector"
     data_asset_name: str = "Titanic"
 
-    data_context: DataContext = execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context
+    data_context: DataContext = \
+        execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 
     context_path: str = data_context.root_directory
 
-    titanic_csv_source_file_path: str = file_relative_path(
-        __file__, "../test_sets/Titanic.csv"
-    )
-    titanic_csv_destination_file_path: str = str(
-        os.path.join(context_path, "data/Titanic.csv")
-    )
+    titanic_csv_source_file_path: str = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    titanic_csv_destination_file_path: str = str(os.path.join(context_path, "data/Titanic_19120414_1313.csv"))
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
     batch_request: dict = {
-        "execution_environment": execution_environment_name,
-        "data_connector": data_connector_name,
+        "execution_environment_name": execution_environment_name,
+        "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "in_memory_dataset": None,
-        "partition_request": None,
-        "limit": None,
-        "batch_spec_passthrough": {
-            "path": titanic_csv_destination_file_path,
-            "reader_method": "read_csv",
-            "reader_options": None,
-            "limit": 2000,
+        "batch_data": None,
+        "partition_request": {
+            "partition_identifiers": {
+                "timestamp": "19120414"
+            }
         },
+        "limit": None,
+        # TODO: <Alex>Commenting out "batch_spec_passthrough" for now, until we have decided on whether or not it will be admitted.</Alex>
+        # "batch_spec_passthrough": {
+        #     "path": titanic_csv_destination_file_path,
+        #     "reader_method": "read_csv",
+        #     "reader_options": None,
+        #     "limit": 2000
+        # }
     }
-    batch: Batch = data_context.get_batch_from_new_style_datasource(
+    batch_list: List[Batch] = data_context.get_batch_list_from_new_style_datasource(
         batch_request=batch_request
     )
 
+    assert len(batch_list) == 1
+
+    batch: Batch = batch_list[0]
+
     assert batch.batch_spec is not None
-    assert batch.batch_spec["data_asset_name"] == data_asset_name
+    assert batch.batch_definition["data_asset_name"] == data_asset_name
+    assert batch.batch_definition["partition_definition"] == {
+        "name": "Titanic",
+        "timestamp": "19120414",
+        "price": "1313",
+    }
     assert isinstance(batch.data, pd.DataFrame)
     assert batch.data.shape[0] == 1313
 

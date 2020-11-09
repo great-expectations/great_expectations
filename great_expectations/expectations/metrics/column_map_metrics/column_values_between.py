@@ -1,7 +1,5 @@
-import sqlalchemy as sa
 from dateutil.parser import parse
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -13,6 +11,7 @@ from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetricProvider,
     column_map_condition,
 )
+from great_expectations.expectations.metrics.import_manager import sa
 
 
 class ColumnValuesBetween(ColumnMapMetricProvider):

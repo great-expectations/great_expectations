@@ -71,15 +71,28 @@
         "unexpected_list": ["sexy"]
       }
     },{
-      "title": "positive_test__integer__length____1",
+      "title": "positive_test__integer__length____1_pandas",
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_integer",
         "value": 1,
         "catch_exceptions": true
       },
+      "only_for": ["pandas"],
       "out": {
-        "traceback_substring": "TypeError: object of type 'int' has no len()"
+        "traceback_substring": "AttributeError: Can only use .str accessor with string values"
+      }
+    },{
+      "title": "positive_test__integer__length____1_postgres",
+      "exact_match_out" : false,
+      "in":{
+        "column": "equal_length_integer",
+        "value": 1,
+        "catch_exceptions": true
+      },
+      "only_for": ["postgresql"],
+      "out": {
+        "traceback_substring": "No function matches the given name and argument types."
       }
     },{
       "title": "test_conditional_expectation_passes",

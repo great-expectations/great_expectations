@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 try:
     from pyspark.sql import DataFrame, SparkSession
 except ImportError:
+    DataFrame = None
     SparkSession = None
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."

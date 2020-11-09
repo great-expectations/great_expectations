@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 from great_expectations.core.batch import Batch
@@ -14,12 +13,10 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_environment.types import (
-    SqlAlchemyDatasourceTableBatchSpec,
-)
 from great_expectations.expectations.core.expect_column_value_z_scores_to_be_less_than import (
     ExpectColumnValueZScoresToBeLessThan,
 )
+from great_expectations.validator.validator import Validator
 
 
 def test_expect_column_value_z_scores_to_be_less_than_impl():
@@ -30,9 +27,8 @@ def test_expect_column_value_z_scores_to_be_less_than_impl():
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
-    result = expectation.validate(
-        batches=[batch], execution_engine=PandasExecutionEngine()
-    )
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    result = expectation.validate(Validator(execution_engine=engine))
     assert result == ExpectationValidationResult(success=True,)
 
 
@@ -51,15 +47,13 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(postgresql_engine)
     engine = SqlAlchemyExecutionEngine(
         engine=postgresql_engine, batch_data_dict={batch.id: batch_data}
     )
-    result = expectation.validate(batches=[batch], execution_engine=engine)
+    result = expectation.validate(Validator(execution_engine=engine))
     assert result == ExpectationValidationResult(success=True,)
 
 
-def test_spark_expect_column_value_z_scores_to_be_less_than_impl():
-    from pyspark.sql import DataFrame, SparkSession
-
+def test_spark_expect_column_value_z_scores_to_be_less_than_impl(spark_session):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
-    spark = SparkSession.builder.getOrCreate()
+    spark = spark_session.builder.getOrCreate()
     df = spark.createDataFrame(df)
 
     expectationConfiguration = ExpectationConfiguration(
@@ -69,5 +63,5 @@ def test_spark_expect_column_value_z_scores_to_be_less_than_impl():
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
     engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
-    result = expectation.validate(batches=[batch], execution_engine=engine)
+    result = expectation.validate(Validator(execution_engine=engine))
     assert result == ExpectationValidationResult(success=True,)

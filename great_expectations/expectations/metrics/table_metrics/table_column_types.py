@@ -6,6 +6,9 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyBatchData,
+)
 from great_expectations.expectations.metrics.import_manager import (
     reflection,
     sparktypes,
@@ -31,7 +34,7 @@ class ColumnTypes(TableMetricProvider):
     ):
         df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs)
         return [
-            {"name": name, "datatype": dtype}
+            {"name": name, "type": dtype}
             for (name, dtype) in zip(df.columns, df.dtypes)
         ]
 
@@ -75,17 +78,17 @@ class ColumnTypes(TableMetricProvider):
         )
 
 
-def _get_sqlalchemy_column_metadata(engine, batch_data):
+def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
     insp = reflection.Inspector.from_engine(engine)
     try:
-        columns = insp.get_columns(batch_data.selectable, schema=batch_data.schema)
+        columns = insp.get_columns(batch_data.table.name, schema=batch_data.schema)
 
-    except KeyError:
+    except (KeyError, AttributeError):
         # we will get a KeyError for temporary tables, since
         # reflection will not find the temporary schema
         columns = column_reflection_fallback(
             selectable=batch_data.selectable,
-            dialect=batch_data.dialect,
+            dialect=batch_data.sql_engine_dialect,
             sqlalchemy_engine=engine,
         )
 
@@ -93,7 +96,7 @@ def _get_sqlalchemy_column_metadata(engine, batch_data):
     if len(columns) == 0:
         columns = column_reflection_fallback(
             selectable=batch_data.selectable,
-            dialect=batch_data.dialect,
+            dialect=batch_data.sql_engine_dialect,
             sqlalchemy_engine=engine,
         )
 
@@ -101,7 +104,6 @@ def _get_sqlalchemy_column_metadata(engine, batch_data):
 
 
 def _get_spark_column_metadata(field, parent_name="", include_nested=True):
-    """This method does not include StructType fields."""
     cols = []
     if parent_name != "":
         parent_name = parent_name + "."
@@ -114,7 +116,7 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
             name = parent_name + "`" + field.name + "`"
         else:
             name = parent_name + field.name
-        field_metadata = {"name": name, "datatype": field.dataType}
+        field_metadata = {"name": name, "type": field.dataType}
         cols.append(field_metadata)
         if include_nested and isinstance(field.dataType, sparktypes.StructType):
             for child in field.dataType.fields:

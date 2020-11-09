@@ -1,4 +1,4 @@
-class_name: SinglePartitionFileDataConnector
+class_name: SinglePartitionerFileDataConnector
 base_directory: my_directory/
 
 partitioner:

@@ -1,7 +1,6 @@
 from typing import Optional
 
 import pandas as pd
-import sqlalchemy as sa
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -18,6 +17,7 @@ from great_expectations.expectations.metrics.column_map_metric import (
     column_map_condition,
     column_map_function,
 )
+from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 

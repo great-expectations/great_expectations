@@ -12,7 +12,7 @@ from great_expectations.core.util import (
 )
 from great_expectations.exceptions import InvalidCacheValueError, UnavailableMetricError
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.types import DictDot
+from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     return None
 
 
-class ExpectationValidationResult:
+class ExpectationValidationResult(SerializableDictDot):
     def __init__(
         self,
         success=None,
@@ -250,7 +250,7 @@ class ExpectationValidationResultSchema(Schema):
         return ExpectationValidationResult(**data)
 
 
-class ExpectationSuiteValidationResult(DictDot):
+class ExpectationSuiteValidationResult(SerializableDictDot):
     def __init__(
         self,
         success=None,

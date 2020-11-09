@@ -1,23 +1,14 @@
 from typing import Optional
 
-from sqlalchemy.engine import reflection
-
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.metric import Metric
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
-    column_aggregate_metric,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.expectations.metrics.table_metric import (
     TableMetricProvider,
     aggregate_metric,
 )
-from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 

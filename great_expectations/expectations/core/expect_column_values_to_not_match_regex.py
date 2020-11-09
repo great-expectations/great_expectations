@@ -120,7 +120,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -188,14 +188,14 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         assert result, "Must pass in result."
         expectation_config = configuration or result.expectation_config
         expectation_kwargs = expectation_config.kwargs
         regex = expectation_kwargs.get("regex")
-        unexpected_count = result.result["unexpected_count"]
+        unexpected_count = result.result.get("unexpected_count", "--")
         if regex == "^\\s+|\\s+$":
             return ["Leading or trailing whitespace (n)", unexpected_count]
         else:
-            return ["Regex: %s" % regex, unexpected_count]
+            return [f"Regex: {regex}", unexpected_count]

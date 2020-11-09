@@ -1506,7 +1506,8 @@ def safe_remove(path):
             print(e)
 
 
-def execution_environment_files_data_connector_regex_partitioner_config(
+# TODO: <Alex>Replace this all-purpose configuration with purpose-fit configuration sections using YAML.</Alex>
+def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
     use_group_names: bool = False,
     use_sorters: bool = False,
     default_base_directory="data",
@@ -1549,6 +1550,15 @@ def execution_environment_files_data_connector_regex_partitioner_config(
     else:
         sorters = None
 
+    test_asset_0 = {
+        "module_name": "great_expectations.execution_environment.data_connector.asset",
+        # "partitioner_name": "test_regex_partitioner",
+        # "glob_directive": "alex*",
+        "glob_directive": "Titanic*",
+    }
+    if data_asset_base_directory is not None:
+        test_asset_0["base_directory"] = data_asset_base_directory
+
     execution_environments_config: dict = {
         "test_execution_environment": {
             "class_name": "ExecutionEnvironment",
@@ -1562,46 +1572,52 @@ def execution_environment_files_data_connector_regex_partitioner_config(
                 "test_pipeline_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
                     "class_name": "PipelineDataConnector",
-                    "partitioners": {
-                        "test_pipeline_partitioner": {
-                            "module_name": "great_expectations.execution_environment.data_connector.partitioner",
-                            "class_name": "PipelinePartitioner",
-                            "allow_multipart_partitions": False,
-                            "runtime_keys": ["run_id", "custom_key_0",],
-                        }
-                    },
-                    "default_partitioner_name": "test_pipeline_partitioner",
-                    "assets": {
-                        "test_asset_1": {
-                            "module_name": "great_expectations.execution_environment.data_connector.asset",
-                            "partitioner_name": "test_pipeline_partitioner",
-                        }
-                    },
+                    "runtime_keys": ["pipeline_stage_name", "run_id", "custom_key_0",],
+                    # "partitioners": {
+                    #     "test_pipeline_partitioner": {
+                    #         "module_name": "great_expectations.execution_environment.data_connector.partitioner",
+                    #         "class_name": "PipelinePartitioner",
+                    #         "allow_multipart_partitions": False,
+                    #         "runtime_keys": [
+                    #             "run_id",
+                    #             "custom_key_0",
+                    #         ]
+                    #     }
+                    # },
+                    # "default_partitioner_name": "test_pipeline_partitioner",
+                    # "assets": {
+                    #     "test_asset_1": {
+                    #         # "partitioner_name": "test_pipeline_partitioner"
+                    #     }
+                    # }
                 },
                 "test_filesystem_data_connector": {
                     "module_name": "great_expectations.execution_environment.data_connector",
-                    "class_name": "FilesDataConnector",
+                    "class_name": "ConfiguredAssetFilesystemDataConnector",
                     "base_directory": default_base_directory,
                     "glob_directive": "*",
-                    "partitioners": {
-                        "test_regex_partitioner": {
-                            "module_name": "great_expectations.execution_environment.data_connector.partitioner",
-                            "class_name": "RegexPartitioner",
-                            "pattern": r"(.+)_(.+)_(.+)\.csv",
-                            "group_names": group_names,
-                            "allow_multipart_partitions": False,
-                            "sorters": sorters,
-                            "runtime_keys": ["run_id", "custom_key_0",],
-                        }
+                    # "partitioners": {
+                    #     "test_regex_partitioner": {
+                    #         "module_name": "great_expectations.execution_environment.data_connector.partitioner",
+                    #         "class_name": "RegexPartitioner",
+                    #         "pattern": r"(.+)_(.+)_(.+)\.csv",
+                    #         "group_names": group_names,
+                    #         "allow_multipart_partitions": False,
+                    #         "sorters": sorters,
+                    #         "runtime_keys": [
+                    #             "run_id",
+                    #             "custom_key_0",
+                    #         ]
+                    #     }
+                    # },
+                    "default_regex": {
+                        "pattern": r"(.+)_(.+)_(.+)\.csv",
+                        "group_names": group_names,
                     },
-                    "default_partitioner_name": "test_regex_partitioner",
+                    # "default_partitioner_name": "test_regex_partitioner",
                     "assets": {
-                        "test_asset_0": {
-                            "module_name": "great_expectations.execution_environment.data_connector.asset",
-                            "partitioner_name": "test_regex_partitioner",
-                            "base_directory": data_asset_base_directory,
-                            "glob_directive": "alex*",
-                        }
+                        # "test_asset_0": test_asset_0,
+                        "Titanic": test_asset_0,
                     },
                 },
             },
