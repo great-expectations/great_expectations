@@ -4,19 +4,32 @@ import logging
 import uuid
 import hashlib
 
-from typing import Any, Callable, Dict, Iterable, Tuple, Union, List
+from typing import Any, Callable, Dict, Iterable, Tuple, Union
+
+logger = logging.getLogger(__name__)
 
 try:
     import pyspark
     import pyspark.sql.functions as F
-    from pyspark.sql.functions import udf, from_utc_timestamp, expr
-    from pyspark.sql.types import StructType, StructField, IntegerType, FloatType, StringType, DateType, BooleanType
+    from pyspark.sql import SparkSession
+    from pyspark.sql.types import (
+        StructType,
+        StructField,
+        IntegerType,
+        FloatType,
+        StringType,
+        DateType,
+        BooleanType,
+    )
 except ImportError:
     F = None
     pyspark = None
+    SparkSession = None
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency for support."
+    )
 
 from great_expectations.core.id_dict import IDDict
-
 from great_expectations.core.batch import BatchSpec, Batch, BatchMarkers
 
 from ..execution_environment.util import hash_spark_dataframe
@@ -31,17 +44,8 @@ from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
 from .execution_engine import ExecutionEngine
 
-logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
-
-try:
-    from pyspark.sql import SparkSession
-except ImportError:
-    SparkSession = None
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
 
 
 class SparkDFExecutionEngine(ExecutionEngine):
@@ -126,7 +130,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     def __init__(self, *args, **kwargs):
         # Creation of the Spark DataFrame is done outside this class
-        #self._batches = kwargs.pop("batches", {})
         self._persist = kwargs.pop("persist", True)
         self._spark_config = kwargs.pop("spark_config", {})
         try:
@@ -145,7 +148,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         super().__init__(*args, **kwargs)
 
-    # TODO: <Will>Is this method still needed?  The method "get_batch_data_and_markers()" seems to accoplish the needed functionality.>
     def load_batch(self, batch_spec: BatchSpec = None) -> Batch:
         """
         Utilizes the provided batch spec to load a batch using the appropriate file reader and the given file path.
@@ -154,11 +156,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         """
         batch_spec._id_ignore_keys = {"dataset"}
 
-        # <Will> not work if in memory dataset because DataFrame is not serializable.
         try:
             batch_id = batch_spec.to_id()
         except:
-            batch_id = IDDict({"data_asset_name" : batch_spec.get("data_asset_name")}).to_id()
+            batch_id = IDDict({"data_asset_name": batch_spec.get("data_asset_name")}).to_id()
 
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(
@@ -213,19 +214,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         if self._persist:
             df.persist()
-
-        #if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_spec != batch_spec:
-        #else:
-        #    batch = self.batches.get(batch_id)
-
         batch = Batch(
             data=df,
             batch_spec=batch_spec,
             batch_markers=batch_markers,
         )
-        # <WILL> do we need to keep these?
-        #self._batches[batch_id] = batch
-        #self._loaded_batch_id = batch_id
         return batch
 
     @property
@@ -272,7 +265,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 )
             }
         )
-        # <WILL> is there more that needs to be added here?
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             batch_data = batch_spec.batch_data
         else:
@@ -293,8 +285,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
 
         if batch_data is not None:
-            # <WILL> find Spark equivalent of this
-            #if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+            # <WILL> 20201110 find Spark equivalent of this
+            # if batch_data.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["sparkdf_data_fingerprint"] = hash_spark_dataframe(batch_data)
         return batch_data, batch_markers
 
