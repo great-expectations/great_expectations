@@ -22,9 +22,9 @@ class StoreBackend(metaclass=ABCMeta):
     STORE_BACKEND_ID_KEY = (".ge_store_backend_id",)
     STORE_BACKEND_ID_PREFIX = "store_backend_id = "
 
-    def __init__(self, fixed_length_key=False, dont_add_store_backend_id=False):
+    def __init__(self, fixed_length_key=False, suppress_store_backend_id=False):
         self._fixed_length_key = fixed_length_key
-        self._dont_add_store_backend_id = dont_add_store_backend_id
+        self._suppress_store_backend_id = suppress_store_backend_id
 
     @property
     def fixed_length_key(self):
