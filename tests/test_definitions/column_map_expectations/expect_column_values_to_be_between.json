@@ -64,7 +64,7 @@
     },
     "tests": [
       {
-        "title": "Basic positive test",
+        "title": "basic_positive_test",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -426,7 +426,7 @@
         }
       },
       {
-        "title": "Test allow_cross_type_comparisons",
+        "title": "test_allow_cross_type_comparisons",
         "exact_match_out": false,
         "in": {
           "column": "y",
@@ -446,7 +446,7 @@
         "suppress_test_for": ["spark"]
       },
       {
-        "title": "Test allow_cross_type_comparisons again",
+        "title": "test_allow_cross_type_comparisons_again",
         "exact_match_out": false,
         "in": {
           "column": "numeric",

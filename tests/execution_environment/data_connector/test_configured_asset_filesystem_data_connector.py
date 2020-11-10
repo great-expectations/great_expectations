@@ -1,17 +1,21 @@
+import json
+from typing import List
+
 import pytest
 import yaml
-import json
-
-from typing import List
 
 from great_expectations.execution_environment.data_connector import ConfiguredAssetFilesystemDataConnector
 from great_expectations.core.batch import (
-    BatchRequest,
     BatchDefinition,
-    PartitionRequest,
+    BatchRequest,
     PartitionDefinition,
+    PartitionRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_environment.data_connector import (
+    ConfiguredAssetFilesystemDataConnector,
+    DataConnector,
+)
 from tests.test_utils import create_files_in_directory
 import great_expectations.exceptions.exceptions as ge_exceptions
 

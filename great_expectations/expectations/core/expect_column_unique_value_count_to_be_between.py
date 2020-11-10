@@ -167,6 +167,9 @@ class ExpectColumnUniqueValueCountToBeBetween(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -230,11 +233,41 @@ class ExpectColumnUniqueValueCountToBeBetween(TableExpectation):
             )
         ]
 
+    @classmethod
+    @renderer(
+        renderer_type="renderer.descriptive.column_properties_table.distinct_count_row"
+    )
+    def _descriptive_column_properties_table_distinct_count_row_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        assert result, "Must pass in result."
+        observed_value = result.result["observed_value"]
+        template_string_object = RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Distinct (%)",
+                    "tooltip": {
+                        "content": "expect_column_proportion_of_unique_values_to_be_between"
+                    },
+                },
+            }
+        )
+        if not observed_value:
+            return [template_string_object, "--"]
+        else:
+            return [template_string_object, "%.1f%%" % (100 * observed_value)]
+
     # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):

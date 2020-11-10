@@ -27,6 +27,35 @@ logger = logging.getLogger(__name__)
 HASH_THRESHOLD = 1e9
 
 
+class PandasBatchData:
+    def __init__(
+        self,
+        dataframe: pd.DataFrame = None,
+        dataframe_dict: Dict[str, pd.DataFrame] = None,
+        default_table_name=None,
+    ):
+        assert (
+            dataframe is not None or dataframe_dict is not None
+        ), "dataframe or dataframe_dict is required"
+        assert (
+            not dataframe and dataframe_dict
+        ), "dataframe and dataframe_dict may not both be specified"
+
+        if dataframe is not None:
+            dataframe_dict = {"": dataframe}
+            default_table_name = ""
+
+        self._dataframe_dict = dataframe_dict
+        self._default_table_name = default_table_name
+
+    @property
+    def default_dataframe(self):
+        if self._default_table_name in self._dataframe_dict:
+            return self._dataframe_dict[self._default_table_name]
+
+        return None
+
+
 class PandasExecutionEngine(ExecutionEngine):
     """
 PandasExecutionEngine instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
@@ -232,9 +261,10 @@ Notes:
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
         ValueError Exception
         """
-        if not self.active_batch_data:
+        # Changed to is None because was breaking prior
+        if self.active_batch_data is None:
             raise ValueError(
-                "Batch has not been loaded - please run load_batch() to load a batch."
+                "Batch has not been loaded - please run load_batch_data() to load a batch."
             )
 
         return self.active_batch_data
@@ -307,11 +337,11 @@ Notes:
         raise BatchSpecError(f'Unable to determine reader method from path: "{path}".')
 
     def get_compute_domain(
-        self, domain_kwargs: dict,
+        self, domain_kwargs: Dict,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
-        to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
-        or otherwise a Data Frame.
+        to obtain and/or query a batch. Returns in the format of a Pandas DataFrame. If the domain is a single column,
+        this is added to 'accessor domain kwargs' and used for later access
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain

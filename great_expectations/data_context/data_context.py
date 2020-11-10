@@ -11,6 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
+from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from dateutil.parser import parse
@@ -212,6 +213,7 @@ class BaseDataContext:
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
+    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     @classmethod
     def validate_config(cls, project_config):
@@ -790,7 +792,9 @@ class BaseDataContext:
             config = self._project_config
 
         substituted_config_variables = substitute_all_config_variables(
-            dict(self._load_config_variables_file()), dict(os.environ)
+            dict(self._load_config_variables_file()),
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
         substitutions = {
@@ -800,8 +804,39 @@ class BaseDataContext:
         }
 
         return DataContextConfig(
-            **substitute_all_config_variables(config, substitutions)
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
         )
+
+    def escape_all_config_variables(
+        self,
+        value: Union[str, dict, list],
+        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+    ) -> Union[str, dict, list]:
+        """
+        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
+
+        Args:
+            value: config variable value
+            dollar_sign_escape_string: replaces instances of `$`
+
+        Returns:
+            input value with all `$` characters replaced with the escape string
+        """
+
+        if isinstance(value, dict) or isinstance(value, OrderedDict):
+            return {
+                k: self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for k, v in value.items()
+            }
+
+        elif isinstance(value, list):
+            return [
+                self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for v in value
+            ]
+        return value.replace("$", dollar_sign_escape_string)
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
@@ -814,6 +849,7 @@ class BaseDataContext:
             None
         """
         config_variables = self._load_config_variables_file()
+        value = self.escape_all_config_variables(value, self.DOLLAR_SIGN_ESCAPE_STRING)
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:
@@ -1136,10 +1172,11 @@ class BaseDataContext:
 
     # New get_batch (note: it returns the List of Batch objects, not a single Batch object).
     def get_batch_list_from_new_style_datasource(
-        self,
-        batch_request: dict
+        self, batch_request: dict
     ) -> List[Batch]:
-        execution_environment_name: str = batch_request.get("execution_environment_name")
+        execution_environment_name: str = batch_request.get(
+            "execution_environment_name"
+        )
         if not execution_environment_name:
             raise ge_exceptions.ExecutionEnvironmentError(
                 message="Batch request must specify an execution_environment."
@@ -1154,9 +1191,7 @@ class BaseDataContext:
         )
 
     def get_validator(
-        self,
-        batch_request,
-        expectation_suite_name: Union[str, ExpectationSuite],
+        self, batch_request, expectation_suite_name: Union[str, ExpectationSuite],
     ):
         raise NotImplementedError
 
@@ -1489,8 +1524,7 @@ class BaseDataContext:
         return datasource
 
     def get_execution_environment(
-        self,
-        execution_environment_name: str = "default",
+        self, execution_environment_name: str = "default",
     ) -> ExecutionEnvironment:
         """Get the named execution_environment
 
@@ -2968,7 +3002,7 @@ class DataContext(BaseDataContext):
             logger.debug(e)
 
     @staticmethod
-    def _validate_checkpoint(checkpoint: dict, checkpoint_name: str) -> dict:
+    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
         if checkpoint is None:
             raise ge_exceptions.CheckpointError(
                 f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."

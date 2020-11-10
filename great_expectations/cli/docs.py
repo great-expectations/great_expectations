@@ -34,8 +34,10 @@ def docs():
     default=True,
 )
 @click.option(
-    "--assume-yes/--yes",
+    "--assume-yes",
+    "--yes",
     "-y",
+    is_flag=True,
     help="By default request confirmation to build docs unless you specify -y/--yes/--assume-yes flag to skip dialog",
     default=False,
 )

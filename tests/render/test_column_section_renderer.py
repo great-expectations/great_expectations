@@ -261,7 +261,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(
     for evr in distinct_values_evrs:
         content_blocks.append(
             ProfilingResultsColumnSectionRenderer()
-            ._render_bar_chart_table(distinct_values_evrs)
+            ._render_value_counts_bar_chart(distinct_values_evrs)
             .to_json_dict()
         )
 

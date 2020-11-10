@@ -99,7 +99,11 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     """
 
     map_metric = "column_values.not_in_set"
-    success_keys = ("value_set", "mostly", "parse_strings_as_datetimes")
+    success_keys = (
+        "value_set",
+        "mostly",
+        "parse_strings_as_datetimes",
+    )
 
     default_kwarg_values = {
         "row_condition": None,
@@ -136,6 +140,9 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -207,9 +214,9 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     def _pandas_column_values_not_in_set(
         self,
         series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metrics: Dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         runtime_configuration: dict = None,
         filter_column_isnull: bool = True,
     ):

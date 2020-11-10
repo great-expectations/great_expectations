@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional, Union
 
+import altair as alt
 import numpy as np
 import pandas as pd
 
@@ -8,12 +9,14 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
+from ...render.types import RenderedGraphContent, RenderedStringTemplateContent
 from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from ...validator.validation_graph import MetricConfiguration
 from ..expectation import (
+    ColumnExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
@@ -23,7 +26,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnDistinctValuesToBeInSet(TableExpectation):
+class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     """Expect the set of distinct column values to be contained by a given set.
 
             The success value for this expectation will match that of expect_column_values_to_be_in_set. However,
@@ -130,6 +133,9 @@ class ExpectColumnDistinctValuesToBeInSet(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
 
         params = substitute_none_for_missing(
@@ -184,6 +190,82 @@ class ExpectColumnDistinctValuesToBeInSet(TableExpectation):
             )
         ]
 
+    @classmethod
+    @renderer(renderer_type="renderer.descriptive.value_counts_bar_chart")
+    def _descriptive_value_counts_bar_chart_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        assert result, "Must pass in result."
+        value_count_dicts = result.result["details"]["value_counts"]
+        if isinstance(value_count_dicts, pd.Series):
+            values = value_count_dicts.index.tolist()
+            counts = value_count_dicts.tolist()
+        else:
+            values = [
+                value_count_dict["value"] for value_count_dict in value_count_dicts
+            ]
+            counts = [
+                value_count_dict["count"] for value_count_dict in value_count_dicts
+            ]
+
+        df = pd.DataFrame({"value": values, "count": counts,})
+
+        if len(values) > 60:
+            return None
+        else:
+            chart_pixel_width = (len(values) / 60.0) * 500
+            if chart_pixel_width < 250:
+                chart_pixel_width = 250
+            chart_container_col_width = round((len(values) / 60.0) * 6)
+            if chart_container_col_width < 4:
+                chart_container_col_width = 4
+            elif chart_container_col_width >= 5:
+                chart_container_col_width = 6
+            elif chart_container_col_width >= 4:
+                chart_container_col_width = 5
+
+        mark_bar_args = {}
+        if len(values) == 1:
+            mark_bar_args["size"] = 20
+
+        bars = (
+            alt.Chart(df)
+            .mark_bar(**mark_bar_args)
+            .encode(y="count:Q", x="value:O", tooltip=["value", "count"])
+            .properties(height=400, width=chart_pixel_width, autosize="fit")
+        )
+
+        chart = bars.to_json()
+
+        new_block = RenderedGraphContent(
+            **{
+                "content_block_type": "graph",
+                "header": RenderedStringTemplateContent(
+                    **{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "Value Counts",
+                            "tooltip": {
+                                "content": "expect_column_distinct_values_to_be_in_set"
+                            },
+                            "tag": "h6",
+                        },
+                    }
+                ),
+                "graph": chart,
+                "styling": {
+                    "classes": ["col-" + str(chart_container_col_width), "mt-1"],
+                },
+            }
+        )
+
+        return new_block
+
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
@@ -201,7 +283,7 @@ class ExpectColumnDistinctValuesToBeInSet(TableExpectation):
     def validate(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
