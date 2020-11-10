@@ -4,10 +4,7 @@ import json
 
 from typing import List
 
-from great_expectations.execution_environment.data_connector import (
-    DataConnector,
-    ConfiguredAssetFilesystemDataConnector,
-)
+from great_expectations.execution_environment.data_connector import ConfiguredAssetFilesystemDataConnector
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
@@ -16,8 +13,8 @@ from great_expectations.core.batch import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from tests.test_utils import create_files_in_directory
-
 import great_expectations.exceptions.exceptions as ge_exceptions
+
 
 def test_basic_instantiation(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
@@ -71,6 +68,7 @@ def test_basic_instantiation(tmp_path_factory):
             data_connector_name="my_data_connector",
             data_asset_name="something",
         )))
+
 
 def test_instantiation_from_a_config(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
@@ -202,7 +200,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     - price
         """, Loader=yaml.FullLoader)
 
-    my_data_connector: DataConnector = instantiate_class_from_config(
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_filesystem_data_connector",
@@ -346,7 +344,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
 
     """, Loader=yaml.FullLoader)
 
-    my_data_connector: DataConnector = instantiate_class_from_config(
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_filesystem_data_connector",
@@ -515,7 +513,7 @@ def test_alpha(tmp_path_factory):
                     - part_1
             """, Loader=yaml.FullLoader)
 
-    my_data_connector: DataConnector = instantiate_class_from_config(
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_filesystem_data_connector",
@@ -617,7 +615,7 @@ def test_foxtrot(tmp_path_factory):
                 - part_2
         """, Loader=yaml.FullLoader)
 
-    my_data_connector: DataConnector = instantiate_class_from_config(
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_filesystem_data_connector",
@@ -731,7 +729,8 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
               name: for_me_Me_Me
     """, Loader=yaml.FullLoader)
     with pytest.raises(ge_exceptions.DataConnectorError):
-        my_data_connector: DataConnector = instantiate_class_from_config(
+        # noinspection PyUnusedLocal
+        my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "general_filesystem_data_connector",
@@ -791,7 +790,8 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
 
     """, Loader=yaml.FullLoader)
     with pytest.raises(ge_exceptions.DataConnectorError):
-        my_data_connector: DataConnector = instantiate_class_from_config(
+        # noinspection PyUnusedLocal
+        my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "general_filesystem_data_connector",

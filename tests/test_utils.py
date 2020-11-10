@@ -1644,7 +1644,6 @@ def execution_environment_configured_asset_filesystem_data_connector_regex_parti
 
     test_asset_0 = {
         "module_name": "great_expectations.execution_environment.data_connector.asset",
-        # "partitioner_name": "test_regex_partitioner",
         # "glob_directive": "alex*",
         "glob_directive": "Titanic*",
     }
@@ -1680,10 +1679,8 @@ def execution_environment_configured_asset_filesystem_data_connector_regex_parti
                     #         ]
                     #     }
                     # },
-                    # "default_partitioner_name": "test_pipeline_partitioner",
                     # "assets": {
                     #     "test_asset_1": {
-                    #         # "partitioner_name": "test_pipeline_partitioner"
                     #     }
                     # }
                 },
@@ -1710,7 +1707,6 @@ def execution_environment_configured_asset_filesystem_data_connector_regex_parti
                         "pattern": r"(.+)_(.+)_(.+)\.csv",
                         "group_names": group_names,
                     },
-                    # "default_partitioner_name": "test_regex_partitioner",
                     "assets": {
                         # "test_asset_0": test_asset_0,
                         "Titanic": test_asset_0,

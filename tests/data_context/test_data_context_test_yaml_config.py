@@ -118,7 +118,6 @@ data_connectors:
         #         group_names:
         #         - letter
         #         - number
-        # default_partitioner_name: my_regex_partitioner
 """, return_mode="return_object"
     )
 
