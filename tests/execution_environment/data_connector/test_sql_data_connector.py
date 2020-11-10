@@ -29,8 +29,10 @@ from tests.test_utils import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine
 )
+from great_expectations.exceptions import (
+    DataConnectorError,
+)
 from great_expectations.data_context.util import file_relative_path
-
 from great_expectations.data_context.util import instantiate_class_from_config
 
 @pytest.fixture
@@ -128,37 +130,70 @@ def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_co
     my_data_connector = SqlDataConnector(**config)
     my_data_connector._refresh_data_references_cache()
 
-    my_data_connector.get_batch_definition_list_from_batch_request(
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=BatchRequest(
             execution_environment_name="FAKE_EE_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request={
-                "date" : "2020-01-01"
+                "partition_identifiers" : {
+                    "date" : "2020-01-01"
+                }
             }
     ))
+    assert len(batch_definition_list) == 1
 
-    my_data_connector.get_batch_definition_list_from_batch_request(
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            execution_environment_name="FAKE_EE_NAME",
+            data_connector_name="my_sql_data_connector",
+            data_asset_name="table_partitioned_by_date_column__A",
+            partition_request={
+                "partition_identifiers" : {}
+            }
+    ))
+    assert len(batch_definition_list) == 30
+
+    # Note: Abe 20201109: It would be nice to put in safeguards for mistakes like this.
+    # I don't think this is unique to SqlDataConnector.
+    # with pytest.raises(DataConnectorError) as e:
+    #     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+    #         batch_request=BatchRequest(
+    #             execution_environment_name="FAKE_EE_NAME",
+    #             data_connector_name="my_sql_data_connector",
+    #             data_asset_name="table_partitioned_by_date_column__A",
+    #             partition_request={
+    #                 "partition_identifiers" : {},
+    #                 "date" : "2020-01-01",
+    #             }
+    #     ))
+    # assert "Unmatched key" in e.value.message
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=BatchRequest(
             execution_environment_name="FAKE_EE_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
     ))
+    assert len(batch_definition_list) == 30
 
-    my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            execution_environment_name="FAKE_EE_NAME",
-            data_connector_name="my_sql_data_connector",
-    ))
+    with pytest.raises(KeyError):
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                execution_environment_name="FAKE_EE_NAME",
+                data_connector_name="my_sql_data_connector",
+        ))
 
-    my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            execution_environment_name="FAKE_EE_NAME",
-    ))
+    with pytest.raises(KeyError):
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                execution_environment_name="FAKE_EE_NAME",
+        ))
 
-    my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest()
-    )
+    with pytest.raises(KeyError):
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest()
+        )
 
 
 
