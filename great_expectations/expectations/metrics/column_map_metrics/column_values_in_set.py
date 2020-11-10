@@ -59,5 +59,5 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
     def _spark(cls, column, value_set, **kwargs):
         if value_set is None:
             # vacuously true
-            return column.withColumn("__success", lit(True))
+            return column.isin(column)
         return column.isin(value_set)
