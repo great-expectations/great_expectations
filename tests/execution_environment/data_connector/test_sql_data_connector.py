@@ -155,6 +155,8 @@ def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_co
     assert len(batch_definition_list) == 30
 
     # Note: Abe 20201109: It would be nice to put in safeguards for mistakes like this.
+    # In this case, "date" should go inside "partition_identifiers".
+    # Currently, the method ignores "date" entirely, and matches on too many partitions.
     # I don't think this is unique to SqlDataConnector.
     # with pytest.raises(DataConnectorError) as e:
     #     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
