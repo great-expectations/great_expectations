@@ -27,6 +27,7 @@ KNOWN_EXTENSIONS = [
 ]
 
 
+# TODO: <Alex>Clean up order of arguments.</Alex>
 class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnector):
     def __init__(
         self,
@@ -52,6 +53,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             data_context_root_directory=data_context_root_directory
         )
 
+        # TODO: <Alex>The next two properties must be private.</Alex>
         self.base_directory = normalize_directory_path(
             dir_path=base_directory,
             root_directory_path=data_context_root_directory
