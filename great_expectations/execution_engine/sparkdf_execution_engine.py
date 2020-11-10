@@ -2,28 +2,39 @@ import copy
 import datetime
 import logging
 import uuid
-from typing import Any, Callable, Dict, Iterable, Tuple, Union
+import hashlib
+import random
+
+from typing import Any, Callable, Dict, Iterable, Tuple, Union, List
 
 try:
+    import pyspark
     import pyspark.sql.functions as F
+    from pyspark.sql.functions import udf, from_utc_timestamp, expr
+    from pyspark.sql.types import StructType, StructField, IntegerType, FloatType, StringType, DateType, BooleanType
 except ImportError:
     F = None
+    pyspark = None
 
 from great_expectations.core.id_dict import IDDict
 
-from great_expectations.core.batch import BatchSpec, Batch
-from great_expectations.execution_environment.types import (
+from great_expectations.core.batch import BatchSpec, Batch, BatchMarkers
+
+from ..execution_environment.util import hash_spark_dataframe
+from great_expectations.execution_environment.types.batch_spec import(
     PathBatchSpec,
     S3BatchSpec,
     RuntimeDataBatchSpec,
 )
-RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec
-from ..exceptions import BatchKwargsError, GreatExpectationsError, ValidationError
+
+from ..exceptions import BatchKwargsError, GreatExpectationsError, ValidationError, BatchSpecError
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
 from .execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
+
+HASH_THRESHOLD = 1e9
 
 try:
     from pyspark.sql import SparkSession
@@ -116,9 +127,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     def __init__(self, *args, **kwargs):
         # Creation of the Spark DataFrame is done outside this class
+        #self._batches = kwargs.pop("batches", {})
         self._persist = kwargs.pop("persist", True)
-
-        self._spark_config = kwargs.pop("spark_config ", {})
+        self._spark_config = kwargs.pop("spark_config", {})
         try:
             builder = SparkSession.builder
             app_name: Union[str, None] = self._spark_config.pop("spark.app.name", None)
@@ -135,6 +146,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         super().__init__(*args, **kwargs)
 
+    # TODO: <Will>Is this method still needed?  The method "get_batch_data_and_markers()" seems to accoplish the needed functionality.>
     def load_batch(self, batch_spec: BatchSpec = None) -> Batch:
         """
         Utilizes the provided batch spec to load a batch using the appropriate file reader and the given file path.
@@ -142,7 +154,12 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         :returns Batch
         """
         batch_spec._id_ignore_keys = {"dataset"}
-        batch_id = batch_spec.to_id()
+
+        # <Will> not work if in memory dataset because DataFrame is not serializable.
+        try:
+            batch_id = batch_spec.to_id()
+        except:
+            batch_id = IDDict({"data_asset_name" : batch_spec.get("data_asset_name")}).to_id()
 
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(
@@ -198,17 +215,18 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if self._persist:
             df.persist()
 
-        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_spec != batch_spec:
-            batch = Batch(
-                data=df,
-                batch_spec=batch_spec,
-                batch_markers=batch_markers,
-            )
-            self.batches[batch_id] = batch
-        else:
-            batch = self.batches.get(batch_id)
+        #if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_spec != batch_spec:
+        #else:
+        #    batch = self.batches.get(batch_id)
 
-        self._loaded_batch_id = batch_id
+        batch = Batch(
+            data=df,
+            batch_spec=batch_spec,
+            batch_markers=batch_markers,
+        )
+        # <WILL> do we need to keep these?
+        #self._batches[batch_id] = batch
+        #self._loaded_batch_id = batch_id
         return batch
 
     @property
@@ -220,6 +238,66 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
 
         return self.active_batch_data
+
+
+    def get_batch_data(
+        self,
+        batch_spec: BatchSpec,
+    ) -> Any :
+        """Interprets batch_data and returns the appropriate data.
+
+        This method is primarily useful for utility cases (e.g. testing) where
+        data is being fetched without a DataConnector and metadata like
+        batch_markers is unwanted
+
+        Note: this method is currently a thin wrapper for get_batch_data_and_markers.
+        It simply suppresses the batch_markers.
+        """
+        batch_data, _ = self.get_batch_data_and_markers(batch_spec)
+        return batch_data
+
+    def get_batch_data_and_markers(
+        self,
+        batch_spec: BatchSpec
+    ) -> Tuple[
+        Any,  # batch_data
+        BatchMarkers
+    ]:
+        batch_data: Any = None
+
+        # We need to build a batch_markers to be used in the dataframe
+        batch_markers: BatchMarkers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+        # <WILL> is there more that needs to be added here?
+        if isinstance(batch_spec, RuntimeDataBatchSpec):
+            batch_data = batch_spec.batch_data
+        else:
+            raise BatchSpecError(
+            """
+                Invalid batch_spec: batch_data is required for a SparkDFExecutionEngine to operate.
+            """
+            )
+        splitter_method: str = batch_spec.get("splitter_method") or None
+        splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
+        if splitter_method:
+            splitter_fn = getattr(self, splitter_method)
+            batch_data = splitter_fn(batch_data, **splitter_kwargs)
+        sampling_method: str = batch_spec.get("sampling_method") or None
+        sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
+        if sampling_method:
+            sampling_fn = getattr(self, sampling_method)
+            batch_data = sampling_fn(batch_data, **sampling_kwargs)
+
+        if batch_data is not None:
+            # <WILL> find Spark equivalent of this
+            #if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+            batch_markers["sparkdf_data_fingerprint"] = hash_spark_dataframe(batch_data)
+        return batch_data, batch_markers
 
     @staticmethod
     def guess_reader_method_from_path(path):
@@ -421,3 +499,171 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     def head(self, n=5):
         """Returns dataframe head. Default is 5"""
         return self.dataframe.limit(n).toPandas()
+
+    @staticmethod
+    def _split_on_whole_table(df, ):
+        return df
+
+    @staticmethod
+    def _split_on_column_value(
+        df,
+        column_name: str,
+        partition_definition: dict,
+    ):
+        return df.filter(F.col(column_name) == partition_definition[column_name])
+
+    @staticmethod
+    def _split_on_converted_datetime(
+        df,
+        column_name: str,
+        partition_definition: dict,
+        date_format_string: str='yyyy-MM-dd',
+    ):
+        #temp_df = df.withColumn()
+        print("HI WILL THIS IS SUPPOSED TO WORK")
+        df.show()
+        matching_string = partition_definition[column_name]
+        full_res = df.withColumn("date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string))
+        print("HI WILL: this is full_res")
+        full_res.show()
+
+        res = df.withColumn("date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)) \
+            .filter(F.col("date_time_tmp") == matching_string) \
+            .drop("date_time_tmp")
+        res.show()
+
+        return res
+
+    @staticmethod
+    def _split_on_divided_integer(
+            df,
+            column_name: str,
+            divisor: int,
+            partition_definition: dict,
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+
+        matching_divisor = partition_definition[column_name]
+        full_res = df.withColumn("div_temp", (F.col(column_name) / divisor).cast(IntegerType()))
+        #print("HI WILL: this is full_res")
+        #full_res.show()
+        res = full_res.filter(F.col("div_temp") == matching_divisor) \
+            .drop("div_temp")
+        return res
+
+
+    @staticmethod
+    def _split_on_mod_integer(
+            df,
+            column_name: str,
+            mod: int,
+            partition_definition: dict,
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+
+        matching_mod_value = partition_definition[column_name]
+        full_res = df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
+        print("HI WILL: this is full_res")
+        full_res.show()
+        res = full_res.filter(F.col("mod_temp") == matching_mod_value) \
+            .drop("mod_temp")
+        return res
+
+    @staticmethod
+    def _split_on_multi_column_values(
+            df,
+            partition_definition: dict,
+    ):
+        """Split on the joint values in the named columns"""
+        for column_name, value in partition_definition.items():
+            df = df.filter(F.col(column_name) == value)
+        return df
+
+
+    @staticmethod
+    def _split_on_hashed_column(
+            df,
+            column_name: str,
+            hash_digits: int,
+            partition_definition: dict,
+    ):
+        """Split on the hashed value of the named column"""
+
+        import hashlib
+        from pyspark.sql.functions import udf
+
+        def encrypt_value(mobno):
+            sha_value = hashlib.sha256(mobno.encode()).hexdigest()[-1 * hash_digits:]
+            return sha_value
+        spark_udf = udf(encrypt_value, StringType())
+        full = df.withColumn('encrypted_value', spark_udf(column_name))
+        res = full.filter(F.col("encrypted_value") == partition_definition["hash_value"]) \
+            .drop("encrypted_value")
+        return res
+
+    ### Sampling methods ###
+
+    @staticmethod
+    def _sample_using_random(
+        df,
+        p: float = .1,
+        seed: int = 1
+    ):
+        """Take a random sample of rows, retaining proportion p
+
+        Note: the Random function behaves differently on different dialects of SQL
+        """
+        random.seed(seed)
+        full_res = df.withColumn('rand',  F.rand(seed=seed))
+        print("HERE IS RANDOM!~~~~")
+        full_res.show()
+        res = full_res.filter(F.col("rand") < p).drop("rand")
+        return res
+
+
+    @staticmethod
+    def _sample_using_mod(
+        df,
+        column_name: str,
+        mod: int,
+        value: int,
+    ):
+        """Take the mod of named column, and only keep rows that match the given value"""
+        full_res = df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
+        res = full_res.filter(F.col("mod_temp") == value) \
+            .drop("mod_temp")
+        return res
+
+
+    @staticmethod
+    def _sample_using_a_list(
+        df,
+        column_name: str,
+        value_list: list,
+    ):
+        """Match the values in the named column against value_list, and only keep the matches"""
+        return df.where(F.col(column_name).isin(value_list))
+
+
+    @staticmethod
+    def _sample_using_md5(
+        df,
+        column_name: str,
+        hash_digits: int = 1,
+        hash_value: str = 'f',
+    ):
+
+        import hashlib
+        from pyspark.sql.functions import udf
+
+        def encrypt_value(mobno):
+            mobno = str(mobno)
+            sha_value = hashlib.md5(mobno.encode()).hexdigest()[-1 * hash_digits:]
+            return sha_value
+
+        spark_udf = udf(encrypt_value, StringType())
+        full = df.withColumn('encrypted_value', spark_udf(column_name))
+        res = full.filter(F.col("encrypted_value") == hash_value) \
+            .drop("encrypted_value")
+        return res
+

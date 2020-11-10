@@ -404,14 +404,12 @@ Notes:
         df,
         column_name: str,
         partition_definition: dict,
-        date_format_string: str='%Y-%m-%d',
+        date_format_string: str = "%Y-%m-%d",
     ):
         """Convert the values in the named column to the given date_format, and split on that"""
-
         stringified_datetime_series = df[column_name].map(lambda x: x.strftime(date_format_string))
         matching_string = partition_definition[column_name]
-
-        return df[ stringified_datetime_series == matching_string ]
+        return df[stringified_datetime_series == matching_string]
 
     @staticmethod
     def _split_on_divided_integer(
@@ -444,7 +442,6 @@ Notes:
     @staticmethod
     def _split_on_multi_column_values(
         df,
-        column_names: List[str],
         partition_definition: dict,
     ):
         """Split on the joint values in the named columns"""
