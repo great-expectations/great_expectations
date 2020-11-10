@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class InferredAssetFilePathDataConnector(FilePathDataConnector):
-    """SinglePartitionerDataConnector is a base class for DataConnectors that require exactly one Partitioner be configured in the declaration.
+    """InferredAssetFilePathDataConnector is a base class for DataConnectors that require exactly one Partitioner be configured in the declaration.
 
     Instead, its data_references are stored in a data_reference_dictionary : {
         "pretend/path/A-100.csv" : pandas_df_A_100,
@@ -34,7 +34,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         sorters: list = None,
         data_context_root_directory: str = None,
     ):
-        logger.debug(f'Constructing SinglePartitionerDataConnector "{name}".')
+        logger.debug(f'Constructing InferredAssetFilePathDataConnector "{name}".')
 
         super().__init__(
             name=name,

@@ -1,6 +1,8 @@
 import pytest
 import yaml
 
+from typing import List
+
 from great_expectations.execution_environment.data_connector import InferredAssetFilesystemDataConnector
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -12,73 +14,265 @@ from tests.test_utils import create_files_in_directory
 import great_expectations.exceptions.exceptions as ge_exceptions
 
 
-# TODO: Abe 20201028 : This test should actually be implemented with a ConfiguredAssetFilesystemDataConnector, not a InferredAssetFilesystemDataConnector
-# def test_example_with_explicit_data_asset_names(tmp_path_factory):
-#     data_reference_dict = dict([
-#         (data_reference, create_fake_data_frame)
-#         for data_reference in [
-#             "my_base_directory/alpha/files/go/here/alpha-202001.csv",
-#             "my_base_directory/alpha/files/go/here/alpha-202002.csv",
-#             "my_base_directory/alpha/files/go/here/alpha-202003.csv",
-#             "my_base_directory/beta_here/beta-202001.txt",
-#             "my_base_directory/beta_here/beta-202002.txt",
-#             "my_base_directory/beta_here/beta-202003.txt",
-#             "my_base_directory/beta_here/beta-202004.txt",
-#             "my_base_directory/gamma-202001.csv",
-#             "my_base_directory/gamma-202002.csv",
-#             "my_base_directory/gamma-202003.csv",
-#             "my_base_directory/gamma-202004.csv",
-#             "my_base_directory/gamma-202005.csv",
-#         ]
-#     ])
+def test_basic_instantiation(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "path/A-100.csv",
+            "path/A-101.csv",
+            "directory/B-1.csv",
+            "directory/B-2.csv",
+        ],
+    )
 
-#     yaml_string = """
-# class_name: InferredAssetFilesystemDataConnector
-# execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
-# base_directory: my_base_directory/
-# # glob_directive: "*.csv"
-# default_regex:
-#     pattern: ^.*\\/(.+)-(\\d{4})(\\d{2})\\.(csv|txt)$
-#     group_names:
-#         - data_asset_name
-#         - year_dir
-#         - month_dir
-# assets:
-#     alpha:
-#         base_directory: alpha/files/go/here/
-#     beta:
-#         base_directory: beta_here/
-#         # glob_directive: "*.txt"
-#     gamma:
-#         base_directory: ""
+    my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        default_regex={
+            "pattern": r"(.+)/(.+)-(\d+)\.csv",
+            "group_names": [
+                "data_asset_name",
+                "letter",
+                "number"
+            ],
+        },
+        glob_directive="*/*.csv",
+        base_directory=base_directory,
+    )
 
-#     """
-#     config = yaml.load(yaml_string, Loader=yaml.FullLoader)
-#     config["data_reference_dict"] = data_reference_dict
-#     my_data_connector = instantiate_class_from_config(
-#         config,
-#         config_defaults={"module_name": "great_expectations.execution_environment.data_connector"},
-#         runtime_environment={"name": "my_data_connector"},
-#     )
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
 
-#     noinspection PyProtectedMember
-#     my_data_connector._refresh_data_references_cache()
+    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_unmatched_data_references() == []
 
-#     # I'm starting to think we might want to separate out this behavior into a different class.
-#     assert len(my_data_connector.get_unmatched_data_references()) == 0
-#     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-#         data_connector_name="my_data_connector",
-#         data_asset_name="alpha",
-#     ))) == 3
+    # Illegal execution environment name
+    with pytest.raises(ValueError):
+        print(
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    execution_environment_name="something",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="something",
+                )
+            )
+        )
 
-#     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-#         data_connector_name="my_data_connector",
-#         data_asset_name="beta",
-#     ))) == 4
-#     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-#         data_connector_name="my_data_connector",
-#         data_asset_name="gamma",
-#     ))) == 5
+
+def test_simple_regex_example_with_implicit_data_asset_names_self_check(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_simple_regex_example_with_implicit_data_asset_names"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "A-100.csv",
+            "A-101.csv",
+            "B-1.csv",
+            "B-2.csv",
+            "CCC.csv",
+        ],
+    )
+
+    my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        default_regex={
+            "pattern": r"(.+)-(\d+)\.csv",
+            "group_names": [
+                "data_asset_name",
+                "number",
+            ],
+        },
+        glob_directive="*",
+        base_directory=base_directory,
+    )
+
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    self_check_return_object = my_data_connector.self_check()
+
+    assert self_check_return_object == {
+        "class_name": "InferredAssetFilesystemDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": [
+            "A",
+            "B"
+        ],
+        "data_assets": {
+            "A": {
+                "example_data_references": ["A-100.csv", "A-101.csv"],
+                "batch_definition_count": 2
+            },
+            "B": {
+                "example_data_references": ["B-1.csv", "B-2.csv"],
+                "batch_definition_count": 2
+            }
+        },
+        "example_unmatched_data_references": ["CCC.csv"],
+        "unmatched_data_reference_count": 1,
+    }
+
+
+def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_complex_regex_example_with_implicit_data_asset_names"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "2020/01/alpha-1001.csv",
+            "2020/01/beta-1002.csv",
+            "2020/02/alpha-1003.csv",
+            "2020/02/beta-1004.csv",
+            "2020/03/alpha-1005.csv",
+            "2020/03/beta-1006.csv",
+            "2020/04/beta-1007.csv",
+        ],
+    )
+
+    my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        default_regex={
+            "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
+            "group_names": [
+                "year_dir",
+                "month_dir",
+                "data_asset_name"
+            ],
+        },
+        glob_directive="*/*/*.csv",
+        base_directory=base_directory,
+    )
+
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    # Test for an unknown execution environment
+    with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
+        batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    execution_environment_name="non_existent_execution_environment",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="my_data_asset",
+                )
+            )
+
+    # Test for an unknown data_connector
+    with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
+        batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+                    data_connector_name="non_existent_data_connector",
+                    data_asset_name="my_data_asset",
+                )
+            )
+
+    assert len(
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+                data_connector_name="my_data_connector",
+                data_asset_name="alpha",
+            )
+        )
+    ) == 3
+
+    assert len(
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                data_connector_name="my_data_connector",
+                data_asset_name="alpha",
+            )
+        )
+    ) == 3
+
+    assert len(
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                data_connector_name="my_data_connector",
+                data_asset_name="beta",
+            )
+        )
+    ) == 4
+
+    assert my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            data_connector_name="my_data_connector",
+            data_asset_name="alpha",
+            partition_request={
+                "partition_identifiers": {
+                    "year_dir": "2020",
+                    "month_dir": "03",
+                }
+            }
+        )
+    ) == [
+        BatchDefinition(
+            execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            data_connector_name="my_data_connector",
+            data_asset_name="alpha",
+            partition_definition=PartitionDefinition(
+                year_dir="2020",
+                month_dir="03",
+            )
+        )
+    ]
+
+
+def test_self_check(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_self_check"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "A-100.csv",
+            "A-101.csv",
+            "B-1.csv",
+            "B-2.csv",
+        ],
+    )
+
+    my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        default_regex={
+            "pattern": r"(.+)-(\d+)\.csv",
+            "group_names": [
+                "data_asset_name",
+                "number"
+            ],
+        },
+        glob_directive="*",
+        base_directory=base_directory,
+    )
+
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    self_check_return_object = my_data_connector.self_check()
+
+    assert self_check_return_object == {
+        "class_name": "InferredAssetFilesystemDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": [
+            "A",
+            "B"
+        ],
+        "data_assets": {
+            "A": {
+                "example_data_references": ["A-100.csv", "A-101.csv"],
+                "batch_definition_count": 2
+            },
+            "B": {
+                "example_data_references": ["B-1.csv", "B-2.csv"],
+                "batch_definition_count": 2
+            }
+        },
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
+    }
 
 
 def test_test_yaml_config(empty_data_context, tmp_path_factory):

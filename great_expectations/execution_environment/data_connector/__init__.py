@@ -1,6 +1,4 @@
 from .data_connector import DataConnector
-from .single_partitioner_data_connector import SinglePartitionerDataConnector
-from .single_partitioner_dict_data_connector import SinglePartitionerDictDataConnector
 from .file_path_data_connector import FilePathDataConnector
 from .configured_asset_file_path_data_connector import ConfiguredAssetFilePathDataConnector
 from .configured_asset_filesystem_data_connector import ConfiguredAssetFilesystemDataConnector

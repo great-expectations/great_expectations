@@ -35,6 +35,7 @@ from great_expectations.exceptions import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.data_context.util import instantiate_class_from_config
 
+
 @pytest.fixture
 def test_cases_for_sql_data_connector_sqlite_execution_engine():
     # TODO: Switch this to an actual ExecutionEngine
@@ -61,7 +62,7 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
 
     config = yaml.load("""
     name: my_sql_data_connector
-    execution_environment_name: FAKE_EE_NAME
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
 
     data_assets:
         table_partitioned_by_date_column__A:
@@ -110,15 +111,16 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
         }
     }
 
+
 def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
     name: my_sql_data_connector
-    execution_environment_name: FAKE_EE_NAME
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
 
-    assets:
+    data_assets:
         table_partitioned_by_date_column__A:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -132,7 +134,7 @@ def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_co
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=BatchRequest(
-            execution_environment_name="FAKE_EE_NAME",
+            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request={
@@ -161,7 +163,7 @@ def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_co
     # with pytest.raises(DataConnectorError) as e:
     #     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
     #         batch_request=BatchRequest(
-    #             execution_environment_name="FAKE_EE_NAME",
+    #             execution_environment_name="FAKE_ExecutionEnvironment_NAME",
     #             data_connector_name="my_sql_data_connector",
     #             data_asset_name="table_partitioned_by_date_column__A",
     #             partition_request={
@@ -173,7 +175,7 @@ def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_co
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=BatchRequest(
-            execution_environment_name="FAKE_EE_NAME",
+            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
     ))
@@ -182,14 +184,14 @@ def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_co
     with pytest.raises(KeyError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
-                execution_environment_name="FAKE_EE_NAME",
+                execution_environment_name="FAKE_ExecutionEnvironment_NAME",
                 data_connector_name="my_sql_data_connector",
         ))
 
     with pytest.raises(KeyError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
-                execution_environment_name="FAKE_EE_NAME",
+                execution_environment_name="FAKE_ExecutionEnvironment_NAME",
         ))
 
     with pytest.raises(KeyError):
@@ -198,14 +200,13 @@ def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_co
         )
 
 
-
 def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
     name: my_sql_data_connector
-    execution_environment_name: FAKE_EE_NAME
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
 
     data_assets:
         table_partitioned_by_date_column__A:
@@ -261,7 +262,7 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
     config = yaml.load("""
     name: my_sql_data_connector
-    execution_environment_name: FAKE_EE_NAME
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
 
     data_assets:
         table_partitioned_by_timestamp_column__B:
@@ -309,13 +310,14 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
         }
     }
 
+
 def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
     name: my_sql_data_connector
-    execution_environment_name: FAKE_EE_NAME
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
 
     data_assets:
         table_partitioned_by_regularly_spaced_incrementing_id_column__C:
@@ -372,7 +374,7 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
     config = yaml.load("""
     name: my_sql_data_connector
-    execution_environment_name: FAKE_EE_NAME
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
 
     data_assets:
         table_partitioned_by_incrementing_batch_id__E:
@@ -420,13 +422,14 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
         }
     }
 
+
 def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
     name: my_sql_data_connector
-    execution_environment_name: FAKE_EE_NAME
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
 
     data_assets:
         table_partitioned_by_foreign_key__F:
@@ -475,13 +478,14 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
         }
     }
 
+
 def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load("""
     name: my_sql_data_connector
-    execution_environment_name: FAKE_EE_NAME
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
 
     data_assets:
         table_partitioned_by_multiple_columns__G:
@@ -550,7 +554,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
     # config = yaml.load("""
     # name: my_sql_data_connector
-    # execution_environment_name: FAKE_EE_NAME
+    # execution_environment_name: FAKE_ExecutionEnvironment_NAME
 
     # data_assets:
     #     table_that_should_be_partitioned_by_random_hash__H:
@@ -633,6 +637,7 @@ def test_sampling_method__random(test_cases_for_sql_data_connector_sqlite_execut
     # random.seed() is no good here: the random number generator is in the database, not python
     # assert len(batch_data.fetchall()) == 63
     pass
+
 
 def test_sampling_method__mod(test_cases_for_sql_data_connector_sqlite_execution_engine):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
