@@ -73,7 +73,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
-        "strictly": False,
+        "strictly": None,
         "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,

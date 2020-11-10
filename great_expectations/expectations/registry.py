@@ -197,7 +197,7 @@ def get_metric_kwargs(
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {
-                        k: configuration_kwargs.get(k, default_kwarg_values.get(k))
+                        k: configuration_kwargs.get(k) or default_kwarg_values.get(k)
                         for k in metric_kwargs["metric_domain_keys"]
                     }
                 )
@@ -206,7 +206,7 @@ def get_metric_kwargs(
             if len(metric_kwargs["metric_value_keys"]) > 0:
                 metric_value_kwargs = IDDict(
                     {
-                        k: configuration_kwargs.get(k, default_kwarg_values.get(k))
+                        k: configuration_kwargs.get(k) or default_kwarg_values.get(k)
                         for k in metric_kwargs["metric_value_keys"]
                     }
                 )
