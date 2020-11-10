@@ -9,20 +9,22 @@ except ImportError:
 import logging
 
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector import InferredAssetFilePathDataConnector
+from great_expectations.execution_environment.data_connector.asset import Asset
+from great_expectations.execution_environment.data_connector import ConfiguredAssetFilePathDataConnector
 from great_expectations.execution_environment.data_connector.util import list_s3_keys
 
 logger = logging.getLogger(__name__)
 
 
 # TODO: <Alex>Clean up order of arguments.</Alex>
-class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
+class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
     def __init__(
         self,
         name: str,
         execution_environment_name: str,
         bucket: str,
         default_regex: dict,
+        assets: dict,
         execution_engine: ExecutionEngine = None,
         sorters: list = None,
         data_context_root_directory: str = None,
@@ -31,13 +33,14 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         max_keys: int = 1000,
         boto3_options: dict = None
     ):
-        logger.debug(f'Constructing InferredAssetS3DataConnector "{name}".')
+        logger.debug(f'Constructing ConfiguredAssetS3DataConnector "{name}".')
 
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
             default_regex=default_regex,
+            assets=assets,
             sorters=sorters,
             data_context_root_directory=data_context_root_directory
         )
@@ -53,22 +56,29 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         try:
             self._s3 = boto3.client("s3", **boto3_options)
         except TypeError:
-            raise ImportError("Unable to load boto3 (it is required for InferredAssetS3DataConnector).")
+            raise ImportError("Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector).")
 
-    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
-        """List objects in the underlying data store to create a list of data_references.
-
-        This method is used to refresh the cache.
-        """
+    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         query_options: dict = {
-            "Delimiter": self._delimiter,
             "Bucket": self._bucket,
             "Prefix": self._prefix,
+            "Delimiter": self._delimiter,
             "MaxKeys": self._max_keys,
         }
+        if asset is not None:
+            if asset.bucket:
+                query_options["Bucket"] = asset.bucket
+            if asset.prefix:
+                query_options["Prefix"] = asset.prefix
+            if asset.delimiter:
+                query_options["Delimiter"] = asset.delimiter
+            if asset.max_keys:
+                query_options["MaxKeys"] = asset.max_keys
+
         path_list: List[str] = [
             key for key in list_s3_keys(s3=self._s3, query_options=query_options, iterator_dict={})
         ]
+
         return path_list
 
     def _get_full_file_path(self, path: str) -> str:
