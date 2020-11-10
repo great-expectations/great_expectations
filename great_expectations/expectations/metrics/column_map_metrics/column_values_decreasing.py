@@ -31,8 +31,6 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         else:
             return series_diff <= 0
 
-    # @column_map_condition(engine=SparkDFExecutionEngine, metric_fn_type="window_condition_fn")
-    # def _spark(cls, column, strictly, _metrics, _accessor_domain_kwargs, _table, **kwargs):
     @metric(
         engine=SparkDFExecutionEngine,
         metric_fn_type="window_condition_fn",
@@ -84,15 +82,18 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             diff = column - F.lag(column).over(Window.orderBy(F.lit("constant")))
             diff = F.when(diff.isNull(), -1).otherwise(diff)
 
+        # NOTE: because in spark we are implementing the window function directly,
+        # we have to return the *unexpected* condition
         if metric_value_kwargs["strictly"]:
             return (
-                F.when(diff >= -1, F.lit(True)).otherwise(F.lit(False)),
+                F.when(diff >= 0, F.lit(True)).otherwise(F.lit(False)),
                 compute_domain_kwargs,
             )
-
+        # If we expect values to be flat or decreasing then unexpected values are those
+        # that are decreasing
         else:
             return (
-                F.when(diff >= 0, F.lit(True)).otherwise(F.lit(False)),
+                F.when(diff > 0, F.lit(True)).otherwise(F.lit(False)),
                 compute_domain_kwargs,
             )
 

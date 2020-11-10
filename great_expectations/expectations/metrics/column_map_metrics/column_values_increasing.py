@@ -23,6 +23,7 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 class ColumnValuesIncreasing(ColumnMapMetricProvider):
     condition_metric_name = "column_values.increasing"
     condition_value_keys = ("strictly",)
+    default_kwarg_values = {"strictly": False}
 
     @column_map_condition(engine=PandasExecutionEngine)
     def _pandas(cls, column, strictly=None, **kwargs):
@@ -84,20 +85,26 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
             )
         else:
             diff = column - F.lag(column).over(Window.orderBy(F.lit("constant")))
-            diff = F.when(diff.isNull(), -1).otherwise(diff)
+            diff = F.when(diff.isNull(), 1).otherwise(diff)
 
-        if metric_value_kwargs["strictly"]:
-            return (
-                F.when(diff <= -1, F.lit(True)).otherwise(F.lit(False)),
-                compute_domain_kwargs,
-            )
-
-        else:
+        # NOTE: because in spark we are implementing the window function directly,
+        # we have to return the *unexpected* condition.
+        # If we expect values to be *strictly* increasing then unexpected values are those
+        # that are flat or decreasing
+        if metric_value_kwargs["strictly"] is True:
             return (
                 F.when(diff <= 0, F.lit(True)).otherwise(F.lit(False)),
                 compute_domain_kwargs,
             )
+        # If we expect values to be flat or increasing then unexpected values are those
+        # that are decreasing
+        else:
+            return (
+                F.when(diff < 0, F.lit(True)).otherwise(F.lit(False)),
+                compute_domain_kwargs,
+            )
 
+    @classmethod
     def get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
@@ -105,7 +112,10 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        if isinstance(execution_engine, SparkDFExecutionEngine):
+        if (
+            isinstance(execution_engine, SparkDFExecutionEngine)
+            and metric.metric_name == "column_values.increasing"
+        ):
             return {
                 "table.column_types": MetricConfiguration(
                     "table.column_types",
@@ -113,5 +123,10 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
                     {"include_nested": True},
                 )
             }
-
-        return dict()
+        else:
+            return super().get_evaluation_dependencies(
+                metric=metric,
+                configuration=configuration,
+                execution_engine=execution_engine,
+                runtime_configuration=runtime_configuration,
+            )

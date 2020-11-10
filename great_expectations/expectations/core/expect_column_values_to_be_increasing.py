@@ -1,16 +1,8 @@
 import logging
-from typing import Dict, Optional, Union
-
-import pandas as pd
+from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
 
-from ...data_asset.util import parse_result_format
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
@@ -18,41 +10,9 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation, Expectation, _format_map_output
-from ..registry import extract_metrics, get_metric_kwargs
+from ..expectation import ColumnMapExpectation
 
 logger = logging.getLogger(__name__)
-
-try:
-    import pyspark.sql.functions as F
-    import pyspark.sql.types as sparktypes
-    from pyspark.ml.feature import Bucketizer
-    from pyspark.sql import DataFrame, SQLContext, Window
-    from pyspark.sql.functions import (
-        array,
-        col,
-        count,
-        countDistinct,
-        datediff,
-        desc,
-        expr,
-        isnan,
-        lag,
-    )
-    from pyspark.sql.functions import length as length_
-    from pyspark.sql.functions import (
-        lit,
-        monotonically_increasing_id,
-        stddev_samp,
-        udf,
-        when,
-        year,
-    )
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
 
 
 class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
@@ -110,11 +70,10 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
 
     map_metric = "column_values.increasing"
     success_keys = ("strictly", "mostly", "parse_strings_as_datetimes")
-
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
-        "strictly": None,
+        "strictly": False,
         "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
@@ -124,14 +83,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         return super().validate_configuration(configuration)
-
-    # @PandasExecutionEngine.column_map_metric(
-    #     metric_name="column_values.increasing",
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=("strictly",),
-    #     metric_dependencies=tuple(),
-    #     filter_column_isnull=True,
-    # )
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -201,53 +152,3 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
                 }
             )
         ]
-
-    def _spark_column_values_increasing(
-        self,
-        column: "pyspark.sql.Column",
-        metrics: Dict,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        strictly = metric_value_kwargs["strictly"]
-
-        # string column name
-        column_name = data.schema.names[0]
-        # check if column is any type that could have na (numeric types)
-        na_types = [
-            isinstance(data.schema[column_name].dataType, typ)
-            for typ in [
-                sparktypes.LongType,
-                sparktypes.DoubleType,
-                sparktypes.IntegerType,
-            ]
-        ]
-
-        # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
-        if any(na_types):
-            data = data.filter(~isnan(data[0]))
-
-        data = (
-            data.withColumn("constant", lit("constant"))
-            .withColumn("lag", lag(data[0]).over(Window.orderBy(col("constant"))))
-            .withColumn("diff", data[0] - col("lag"))
-        )
-
-        # replace lag first row null with 1 so that it is not flagged as fail
-        data = data.withColumn(
-            "diff", when(col("diff").isNull(), 1).otherwise(col("diff"))
-        )
-
-        if strictly:
-            return data.withColumn(
-                column + "__success",
-                when(col("diff") >= 1, lit(True)).otherwise(lit(False)),
-            )
-
-        else:
-            return data.withColumn(
-                column + "__success",
-                when(col("diff") >= 0, lit(True)).otherwise(lit(False)),
-            )
