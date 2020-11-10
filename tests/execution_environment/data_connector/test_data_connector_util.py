@@ -1,21 +1,23 @@
 import pytest
 
+import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
     PartitionRequest,
     PartitionDefinition,
 )
-import great_expectations.exceptions.exceptions as ge_exceptions
+# noinspection PyProtectedMember
 from great_expectations.execution_environment.data_connector.util import(
-    _invert_regex_to_data_reference_template,
-    convert_data_reference_string_to_batch_request_using_regex,
-    map_data_reference_string_to_batch_definition_list_using_regex,
-    map_batch_definition_to_data_reference_string_using_regex,
     batch_definition_matches_batch_request,
+    map_batch_definition_to_data_reference_string_using_regex,
     convert_batch_request_to_data_reference_string_using_regex,
+    map_data_reference_string_to_batch_definition_list_using_regex,
+    convert_data_reference_string_to_batch_request_using_regex,
+    _invert_regex_to_data_reference_template,
     build_sorters_from_config,
 )
+import great_expectations.exceptions.exceptions as ge_exceptions
 
 
 def test_batch_definition_matches_batch_request():

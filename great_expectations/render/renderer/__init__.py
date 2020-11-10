@@ -4,11 +4,13 @@ from .column_section_renderer import (
     ProfilingResultsColumnSectionRenderer,
     ValidationResultsColumnSectionRenderer,
 )
-from .other_section_renderer import ProfilingResultsOverviewSectionRenderer
 from .page_renderer import (
     ExpectationSuitePageRenderer,
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer,
+)
+from .profiling_results_overview_section_renderer import (
+    ProfilingResultsOverviewSectionRenderer,
 )
 from .site_index_page_renderer import SiteIndexPageRenderer
 from .slack_renderer import SlackRenderer

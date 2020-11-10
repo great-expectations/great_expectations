@@ -65,6 +65,7 @@ An **Expectation** is a declarative statements that a computer can evaluate, and
    /reference/core_concepts/expectations/standard_arguments.rst
    /reference/core_concepts/expectations/result_format.rst
    /reference/core_concepts/expectations/implemented_expectations.rst
+   /reference/core_concepts/conditional_expectations.rst
 
 .. _reference__core_concepts__data_access:
 

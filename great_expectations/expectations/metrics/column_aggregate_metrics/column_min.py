@@ -10,6 +10,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
     column_aggregate_metric,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
+from great_expectations.expectations.metrics.import_manager import F
 
 
 class ColumnMin(ColumnMetricProvider):
@@ -25,7 +26,4 @@ class ColumnMin(ColumnMetricProvider):
 
     @column_aggregate_metric(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
-        result = column.agg({column: "min"}).collect()
-        if not result or not result[0]:
-            return None
-        return result[0][0]
+        return F.min(column)

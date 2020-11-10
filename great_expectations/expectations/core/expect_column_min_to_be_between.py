@@ -173,6 +173,9 @@ class ExpectColumnMinToBeBetween(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -227,11 +230,33 @@ class ExpectColumnMinToBeBetween(TableExpectation):
             )
         ]
 
+    @classmethod
+    @renderer(renderer_type="renderer.descriptive.stats_table.min_row")
+    def _descriptive_stats_table_min_row_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        assert result, "Must pass in result."
+        return [
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Minimum",
+                    "tooltip": {"content": "expect_column_min_to_be_between"},
+                },
+            },
+            "{:.2f}".format(result.result["observed_value"]),
+        ]
+
     # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):

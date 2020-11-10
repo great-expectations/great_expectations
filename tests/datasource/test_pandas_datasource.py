@@ -279,7 +279,7 @@ def test_s3_pandas_source_read_parquet(
 ):
     test_bucket = "test-bucket"
     # set up dummy bucket
-    s3 = boto3.client("s3")
+    s3 = boto3.client("s3", region_name="us-east-1")
     s3.create_bucket(Bucket=test_bucket)
 
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})

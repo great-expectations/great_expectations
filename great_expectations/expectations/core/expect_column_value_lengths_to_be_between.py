@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import pandas as pd
 
@@ -80,7 +80,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     """
 
-    map_metric = "column_values.value_length_between"
+    map_metric = "column_values.value_length.between"
     success_keys = (
         "min_value",
         "max_value",
@@ -109,10 +109,9 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             configuration = self.configuration
 
         try:
-            assert configuration.kwargs.get(
-                "min_value"
-            ) is not None or configuration.kwargs.get(
-                "max_value" != None
+            assert (
+                configuration.kwargs.get("min_value") is not None
+                or configuration.kwargs.get("max_value") is not None
             ), "min_value and max_value cannot both be None"
             if configuration.kwargs.get("min_value"):
                 assert float(
@@ -138,6 +137,9 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -204,109 +206,3 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 }
             )
         ]
-
-    # @PandasExecutionEngine.column_map_metric(
-    #     metric_name="column_values.value_length_between",
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
-    #     metric_dependencies=tuple(),
-    #     filter_column_isnull=True,
-    # )
-    def _pandas_value_length_between(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        min_value = metric_value_kwargs["min_value"]
-        max_value = metric_value_kwargs["max_value"]
-        strict_min = metric_value_kwargs["strict_min"]
-        strict_max = metric_value_kwargs["strict_max"]
-
-        column_lengths = series.astype(str).str.len()
-
-        if min_value is not None and max_value is not None:
-            if strict_min and strict_max:
-                metric_series = column_lengths.between(
-                    min_value, max_value, inclusive=False
-                )
-            elif strict_min and not strict_max:
-                metric_series = (column_lengths > min_value) & (
-                    column_lengths <= max_value
-                )
-            elif not strict_min and strict_max:
-                metric_series = (column_lengths >= min_value) & (
-                    column_lengths < max_value
-                )
-            elif not strict_min and not strict_max:
-                metric_series = column_lengths.between(
-                    min_value, max_value, inclusive=True
-                )
-        elif min_value is None and max_value is not None:
-            if strict_max:
-                metric_series = column_lengths < max_value
-            else:
-                metric_series = column_lengths <= max_value
-        elif min_value is not None and max_value is None:
-            if strict_min:
-                metric_series = column_lengths > min_value
-            else:
-                metric_series = column_lengths >= min_value
-
-        return pd.DataFrame({"column_values.value_length_between": metric_series})
-
-    # @SqlAlchemyExecutionEngine.column_map_metric(
-    #     metric_name="column_values.value_length_between",
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
-    #     metric_dependencies=tuple(),
-    #     filter_column_isnull=True,
-    # )
-    def _sqlalchemy_value_length_between(
-        self,
-        column: sa.column,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        min_value = metric_value_kwargs["min_value"]
-        max_value = metric_value_kwargs["max_value"]
-        strict_min = metric_value_kwargs["strict_min"]
-        strict_max = metric_value_kwargs["strict_max"]
-
-        if min_value is not None and max_value is not None:
-            if strict_min and strict_max:
-                return sa.and_(
-                    sa.func.length(column) > min_value,
-                    sa.func.length(column) < max_value,
-                )
-            elif strict_min and not strict_max:
-                return sa.and_(
-                    sa.func.length(column) > min_value,
-                    sa.func.length(column) <= max_value,
-                )
-            elif not strict_min and strict_max:
-                return sa.and_(
-                    sa.func.length(column) >= min_value,
-                    sa.func.length(column) < max_value,
-                )
-            elif not strict_min and not strict_max:
-                return sa.and_(
-                    sa.func.length(column) >= min_value,
-                    sa.func.length(column) <= max_value,
-                )
-        elif min_value is None and max_value is not None:
-            if strict_max:
-                return sa.func.length(column) < max_value
-            else:
-                return sa.func.length(column) <= max_value
-        elif min_value is not None and max_value is None:
-            if strict_min:
-                return sa.func.length(column) > min_value
-            else:
-                return sa.func.length(column) >= min_value
