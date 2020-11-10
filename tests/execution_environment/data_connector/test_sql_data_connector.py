@@ -108,6 +108,59 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
         }
     }
 
+def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    random.seed(0)
+    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    config = yaml.load("""
+    name: my_sql_data_connector
+    execution_environment_name: FAKE_EE_NAME
+
+    assets:
+        table_partitioned_by_date_column__A:
+            splitter_method: _split_on_column_value
+            splitter_kwargs:
+                column_name: date
+
+    """, yaml.FullLoader)
+    config["execution_engine"] = db
+
+    my_data_connector = SqlDataConnector(**config)
+    my_data_connector._refresh_data_references_cache()
+
+    my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            execution_environment_name="FAKE_EE_NAME",
+            data_connector_name="my_sql_data_connector",
+            data_asset_name="table_partitioned_by_date_column__A",
+            partition_request={
+                "date" : "2020-01-01"
+            }
+    ))
+
+    my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            execution_environment_name="FAKE_EE_NAME",
+            data_connector_name="my_sql_data_connector",
+            data_asset_name="table_partitioned_by_date_column__A",
+    ))
+
+    my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            execution_environment_name="FAKE_EE_NAME",
+            data_connector_name="my_sql_data_connector",
+    ))
+
+    my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            execution_environment_name="FAKE_EE_NAME",
+    ))
+
+    my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest()
+    )
+
+
 
 def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
