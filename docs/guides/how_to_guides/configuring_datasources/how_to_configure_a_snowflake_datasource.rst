@@ -188,12 +188,11 @@ Additional Notes
 ----------------
 
 #.
-    When using the Snowflake dialect, ``SqlAlchemyDataset`` will create a **transient** table instead of a **temporary**
+    When using the Snowflake dialect, ``SqlAlchemyDataset`` may create a **transient** table instead of a **temporary**
     table when passing in ``query`` Batch Kwargs or providing ``custom_sql`` to its constructor. Consequently, users
-    **must** provide a ``snowflake_transient_table`` in addition to the ``query`` parameter. Any existing table with that
-    name will be overwritten. Note that a transient table is **only** required when using custom SQL. If your Snowflake
-    user is unable to create transient tables, or you don't want to manually maintain or drop them, you can always use
-    the ``table`` Batch Kwarg and no additional tables will be created by Great Expectations.
+    may provide a ``snowflake_transient_table`` in addition to the ``query`` parameter. Any existing table with that
+    name will be overwritten. By default, if no ``snowflake_transient_table`` is passed into Batch Kwargs,
+    ``SqlAlchemyDataset`` will create a **temporary** table instead.
 
 #.
    ``snowflake_transient_table`` and ``table`` Batch Kwargs do not currently accept a fully qualified table name (i.e. ``database.schema.table``)
