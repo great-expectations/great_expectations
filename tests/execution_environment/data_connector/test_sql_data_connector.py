@@ -601,3 +601,42 @@ def test_sampling_method__md5(test_cases_for_sql_data_connector_sqlite_execution
     #         }
     #     })
     # )
+
+
+def test_to_make_sure_splitter_and_sampler_methods_are_optional(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=BatchSpec({
+            "table_name": "table_partitioned_by_date_column__A",
+            "partition_definition": {},
+            "sampling_method": "_sample_using_mod",
+            "sampling_kwargs": {
+                "column_name": "id",
+                "mod": 10,
+                "value": 8,
+            }
+        })
+    )
+
+    assert len(batch_data.fetchall()) == 12
+
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=BatchSpec({
+            "table_name": "table_partitioned_by_date_column__A",
+            "partition_definition": {},
+        })
+    )
+
+    assert len(batch_data.fetchall()) == 120
+
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=BatchSpec({
+            "table_name": "table_partitioned_by_date_column__A",
+            "partition_definition": {},
+            "splitter_method": "_split_on_whole_table",
+            "splitter_kwargs": {},
+        })
+    )
+
+    assert len(batch_data.fetchall()) == 120

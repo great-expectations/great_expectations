@@ -799,18 +799,26 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _build_selector_from_batch_spec(self, batch_spec):
         table_name = batch_spec["table_name"]
 
-        splitter_fn = getattr(self, batch_spec["splitter_method"])
+        if "splitter_method" in batch_spec:
+            splitter_fn = getattr(self, batch_spec["splitter_method"])
+            split_clause = splitter_fn(
+                table_name=table_name,
+                partition_definition=batch_spec["partition_definition"],
+                **batch_spec["splitter_kwargs"]
+            )
+
+        else:
+            split_clause = True
+
         if "sampling_method" in batch_spec:
             if batch_spec["sampling_method"] == "_sample_using_limit":
+                # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
+                # so the business logic for building the query needs to be different.
 
                 return sa.select('*').select_from(
                     sa.text(table_name)
                 ).where(
-                    splitter_fn(
-                        table_name=table_name,
-                        partition_definition=batch_spec["partition_definition"],
-                        **batch_spec["splitter_kwargs"]
-                    )
+                    split_clause
                 ).limit(batch_spec["sampling_kwargs"]["n"])
 
             else:
@@ -820,11 +828,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     sa.text(table_name)
                 ).where(
                     sa.and_(
-                        splitter_fn(
-                            table_name=table_name,
-                            partition_definition=batch_spec["partition_definition"],
-                            **batch_spec["splitter_kwargs"]
-                        ),
+                        split_clause,
                         sampler_fn(**batch_spec["sampling_kwargs"]),
                     )
                 )
@@ -834,11 +838,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             return sa.select('*').select_from(
                 sa.text(table_name)
             ).where(
-                splitter_fn(
-                    table_name=table_name,
-                    partition_definition=batch_spec["partition_definition"],
-                    **batch_spec["splitter_kwargs"]
-                )
+                split_clause
             )
 
     def get_batch_data_and_markers(
