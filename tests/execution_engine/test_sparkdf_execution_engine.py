@@ -39,41 +39,24 @@ def _build_spark_engine(spark_session, df):
 
 @pytest.fixture
 def test_sparkdf(spark_session):
-    def generate_ascending_list_of_dates(
-        k,
-        start_date=datetime.date(2020,1,1),
-        end_date=datetime.date(2020,12,31)
-    ):
-        days_between_dates = (end_date - start_date).days
-
-        date_list = [start_date + datetime.timedelta(days=random.randrange(days_between_dates)) for i in range(k)]
-        date_list.sort()
-        return date_list
-
     def generate_ascending_list_of_datetimes(
         k,
-        start_date=datetime.date(2020,1,1),
-        end_date=datetime.date(2020,12,31)
+        start_date=datetime.date(2020, 1, 1),
+        end_date=datetime.date(2020, 12, 31)
     ):
         start_time = datetime.datetime(start_date.year, start_date.month, start_date.day)
         days_between_dates = (end_date - start_date).total_seconds()
-
-        #print("hi will")
-        #print(days_between_dates)
         datetime_list = [start_time + datetime.timedelta(seconds=random.randrange(days_between_dates)) for i in range(k)]
         datetime_list.sort()
-        #print(datetime_list)
         return datetime_list
 
     k = 120
     random.seed(1)
     timestamp_list = generate_ascending_list_of_datetimes(k, end_date=datetime.date(2020,1,31))
     date_list = [datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list]
-    #timestamp_list = [timestamp / 1000000000 for timestamp in timestamp_list]
 
     batch_ids = [random.randint(0, 10) for i in range(k)]
     batch_ids.sort()
-
     session_ids = [random.randint(2, 60) for i in range(k)]
     session_ids.sort()
     session_ids = [i-random.randint(0, 2) for i in session_ids]
@@ -135,14 +118,6 @@ def test_get_batch_data(test_sparkdf):
     ))
     assert test_sparkdf.count() == 120
     assert len(test_sparkdf.columns) == 10
-
-    # TODO Abe 20201105: We should change InMemoryBatchSpec so that this test passes, but that should be a different PR.
-    # No dataset passed to InMemoryBatchSpec
-    # with pytest.raises(ValueError):
-    #     PandasExecutionEngine().get_batch_data(InMemoryBatchSpec(
-
-    #         # dataset=test_df,
-    #     ))
 
 
 def test_get_batch_with_split_on_whole_table(test_sparkdf):

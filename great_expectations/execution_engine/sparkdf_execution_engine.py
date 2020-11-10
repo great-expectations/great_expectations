@@ -3,7 +3,6 @@ import datetime
 import logging
 import uuid
 import hashlib
-import random
 
 from typing import Any, Callable, Dict, Iterable, Tuple, Union, List
 
@@ -501,7 +500,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return self.dataframe.limit(n).toPandas()
 
     @staticmethod
-    def _split_on_whole_table(df, ):
+    def _split_on_whole_table(
+        df,
+    ):
         return df
 
     @staticmethod
@@ -519,19 +520,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         partition_definition: dict,
         date_format_string: str='yyyy-MM-dd',
     ):
-        #temp_df = df.withColumn()
-        print("HI WILL THIS IS SUPPOSED TO WORK")
-        df.show()
         matching_string = partition_definition[column_name]
-        full_res = df.withColumn("date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string))
-        print("HI WILL: this is full_res")
-        full_res.show()
-
         res = df.withColumn("date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)) \
             .filter(F.col("date_time_tmp") == matching_string) \
             .drop("date_time_tmp")
-        res.show()
-
         return res
 
     @staticmethod
@@ -542,15 +534,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
-
         matching_divisor = partition_definition[column_name]
-        full_res = df.withColumn("div_temp", (F.col(column_name) / divisor).cast(IntegerType()))
-        #print("HI WILL: this is full_res")
-        #full_res.show()
-        res = full_res.filter(F.col("div_temp") == matching_divisor) \
+        res = df.withColumn("div_temp", (F.col(column_name) / divisor).cast(IntegerType())) \
+            .filter(F.col("div_temp") == matching_divisor) \
             .drop("div_temp")
         return res
-
 
     @staticmethod
     def _split_on_mod_integer(
@@ -560,12 +548,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
-
         matching_mod_value = partition_definition[column_name]
-        full_res = df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
-        print("HI WILL: this is full_res")
-        full_res.show()
-        res = full_res.filter(F.col("mod_temp") == matching_mod_value) \
+        res = df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType())) \
+            .filter(F.col("mod_temp") == matching_mod_value) \
             .drop("mod_temp")
         return res
 
@@ -579,7 +564,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             df = df.filter(F.col(column_name) == value)
         return df
 
-
     @staticmethod
     def _split_on_hashed_column(
             df,
@@ -588,21 +572,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             partition_definition: dict,
     ):
         """Split on the hashed value of the named column"""
-
-        import hashlib
-        from pyspark.sql.functions import udf
-
-        def encrypt_value(mobno):
-            sha_value = hashlib.sha256(mobno.encode()).hexdigest()[-1 * hash_digits:]
+        def encrypt_value_sha256(to_encode):
+            sha_value = hashlib.sha256(to_encode.encode()).hexdigest()[-1 * hash_digits:]
             return sha_value
-        spark_udf = udf(encrypt_value, StringType())
-        full = df.withColumn('encrypted_value', spark_udf(column_name))
-        res = full.filter(F.col("encrypted_value") == partition_definition["hash_value"]) \
+        spark_udf = udf(encrypt_value_sha256, StringType())
+        res = df.withColumn('encrypted_value', spark_udf(column_name)) \
+            .filter(F.col("encrypted_value") == partition_definition["hash_value"]) \
             .drop("encrypted_value")
         return res
 
     ### Sampling methods ###
-
     @staticmethod
     def _sample_using_random(
         df,
@@ -610,16 +589,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         seed: int = 1
     ):
         """Take a random sample of rows, retaining proportion p
-
-        Note: the Random function behaves differently on different dialects of SQL
         """
-        random.seed(seed)
-        full_res = df.withColumn('rand',  F.rand(seed=seed))
-        print("HERE IS RANDOM!~~~~")
-        full_res.show()
-        res = full_res.filter(F.col("rand") < p).drop("rand")
+        res = df.withColumn('rand',  F.rand(seed=seed)) \
+            .filter(F.col("rand") < p) \
+            .drop("rand")
         return res
-
 
     @staticmethod
     def _sample_using_mod(
@@ -629,11 +603,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         value: int,
     ):
         """Take the mod of named column, and only keep rows that match the given value"""
-        full_res = df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
-        res = full_res.filter(F.col("mod_temp") == value) \
+        res = df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType())) \
+            .filter(F.col("mod_temp") == value) \
             .drop("mod_temp")
         return res
-
 
     @staticmethod
     def _sample_using_a_list(
@@ -644,7 +617,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         """Match the values in the named column against value_list, and only keep the matches"""
         return df.where(F.col(column_name).isin(value_list))
 
-
     @staticmethod
     def _sample_using_md5(
         df,
@@ -652,18 +624,13 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         hash_digits: int = 1,
         hash_value: str = 'f',
     ):
-
-        import hashlib
-        from pyspark.sql.functions import udf
-
-        def encrypt_value(mobno):
-            mobno = str(mobno)
-            sha_value = hashlib.md5(mobno.encode()).hexdigest()[-1 * hash_digits:]
+        def _encrypt_value_md5(to_encode):
+            to_encode_str = str(to_encode)
+            sha_value = hashlib.md5(to_encode_str.encode()).hexdigest()[-1 * hash_digits:]
             return sha_value
-
-        spark_udf = udf(encrypt_value, StringType())
-        full = df.withColumn('encrypted_value', spark_udf(column_name))
-        res = full.filter(F.col("encrypted_value") == hash_value) \
+        encrypt_value_md5_udf = udf(_encrypt_value_md5, StringType())
+        res = df.withColumn('encrypted_value', encrypt_value_md5_udf(column_name)) \
+            .filter(F.col("encrypted_value") == hash_value) \
             .drop("encrypted_value")
         return res
 
