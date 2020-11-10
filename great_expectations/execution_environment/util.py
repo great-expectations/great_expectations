@@ -1,9 +1,7 @@
 import hashlib
 import pickle
 from urllib.parse import urlparse
-
 import pandas as pd
-
 
 try:
     import pyspark.sql.functions as F

@@ -84,6 +84,8 @@ def test_sparkdf(spark_session):
         ],
         events_df.columns.tolist(),
     )
+
+    # TODO <WILL> - get rid of 1000000000
     spark_df = spark_df \
         .withColumn("timestamp", F.round(F.col("timestamp") / 1000000000)) \
         .withColumn("timestamp", F.col("timestamp").cast(IntegerType()).cast(StringType()))

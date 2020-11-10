@@ -520,10 +520,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @staticmethod
     def _split_on_divided_integer(
-            df,
-            column_name: str,
-            divisor: int,
-            partition_definition: dict,
+        df,
+        column_name: str,
+        divisor: int,
+        partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
         matching_divisor = partition_definition[column_name]
@@ -534,10 +534,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @staticmethod
     def _split_on_mod_integer(
-            df,
-            column_name: str,
-            mod: int,
-            partition_definition: dict,
+        df,
+        column_name: str,
+        mod: int,
+        partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
         matching_mod_value = partition_definition[column_name]
