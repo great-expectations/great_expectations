@@ -5,7 +5,7 @@
 {% set glossary_url = "https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=walkthrough&utm_medium=glossary" %}
 
 {% if "ValidationResults" in renderer_type or "ProfilingResults" in renderer_type %}
-  {% set static_images_dir = ((expectation_suite_name_dot_count + 3) * "../") + "static/images/" -%}
+  {% set static_images_dir = ((expectation_suite_name_dot_count + 4) * "../") + "static/images/" -%}
 {% elif "ExpectationSuite" in renderer_type %}
   {% set static_images_dir = ((expectation_suite_name_dot_count + 1) * "../") + "static/images/" -%}
 {% elif "SiteIndex" in renderer_type %}
@@ -13,7 +13,7 @@
 {% endif %}
 
 {% if renderer_type in ["ValidationResultsPageRenderer", "ProfilingResultsPageRenderer"] %}
-  {% set static_images_dir = ((expectation_suite_name_dot_count + 3) * "../") + "static/images/" -%}
+  {% set static_images_dir = ((expectation_suite_name_dot_count + 4) * "../") + "static/images/" -%}
 {% elif renderer_type == "ExpectationSuitePageRenderer" %}
   {% set static_images_dir = ((expectation_suite_name_dot_count + 1) * "../") + "static/images/" -%}
 {% elif renderer_type == "SiteIndexPageRenderer" %}
