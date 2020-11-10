@@ -7,11 +7,7 @@ import yaml
 
 from typing import Union, List, Optional
 
-from great_expectations.execution_environment import ExecutionEnvironment
-from great_expectations.execution_environment.data_connector import (
-    ConfiguredAssetFilesystemDataConnector,
-    InferredAssetFilesystemDataConnector
-)
+from great_expectations.execution_environment.data_connector import ConfiguredAssetFilesystemDataConnector
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -23,11 +19,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.execution_environment import ExecutionEnvironment
-from tests.test_utils import (
-    create_files_for_regex_partitioner,
-    create_files_in_directory,
-    execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config,
-)
+from tests.test_utils import create_files_in_directory
 import great_expectations.exceptions as ge_exceptions
 
 

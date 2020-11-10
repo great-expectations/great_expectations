@@ -15,12 +15,10 @@ from great_expectations.execution_environment.data_connector.partition_query imp
     PartitionQuery,
     build_partition_query,
 )
-from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
     map_data_reference_string_to_batch_definition_list_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
-    get_filesystem_one_level_directory_glob_path_list,
     build_sorters_from_config,
 )
 import great_expectations.exceptions as ge_exceptions
@@ -64,7 +62,9 @@ class SinglePartitionerDataConnector(DataConnector):
         self._default_regex = default_regex
 
         self._sorters = build_sorters_from_config(config_list=sorters)
-        super()._validate_sorters_configuration()
+        # TODO: <Alex>Uses internal sorter validator, because this class is in its own tree.</Alex>
+        # super()._validate_sorters_configuration()
+        self._validate_sorters_configuration()
 
     @property
     def sorters(self) -> Optional[dict]:
@@ -175,24 +175,6 @@ class SinglePartitionerDataConnector(DataConnector):
         else:
             return batch_definition_list
 
-    # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
-    def _validate_sorters_configuration(self):
-        if len(self.sorters) > 0:
-            regex_config = self._default_regex
-            group_names: List[str] = regex_config["group_names"]
-            if any([sorter not in group_names for sorter in self.sorters]):
-                raise ge_exceptions.DataConnectorError(
-                    f'''InferredAssetDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-configured group_name.
-                    '''
-                )
-            if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
-                    f'''InferredAssetDataConnector "{self.name}" is configured with {len(group_names)} group names; this is
-fewer than number of sorters specified, which is {len(self.sorters)}.
-                    '''
-                )
-
     def _sort_batch_definition_list(self, batch_definition_list):
         sorters_list = []
         for sorter in self._sorters.values():
@@ -237,3 +219,32 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
     #     batch_definition: BatchDefinition
     # ) -> dict:
     #     pass
+
+    # TODO: <Alex>This is an internal sorter validator, because this class is in its own tree.</Alex>
+    # TODO: <Alex>
+    # The shorthand "internal sorters" here means that these sorters are only for the
+    # SinglePartitionerDictDataConnector / SinglePartitionerDataConnector "island" -- i.e., not part of the new
+    # DataConnector class hierarchy (as in
+    # https://github.com/superconductive/design/blob/main/docs/20201103_data_connector_class_hierarchy.md).  Once we
+    # incorporate the tests into the "final" data connector hierarchy, the
+    # SinglePartitionerDictDataConnector / SinglePartitionerDataConnector classes will be deleted.  So the note simply
+    # says "do not ask here why we are not reusing the sorters and their validators from the new design of data
+    # connector class hierarchy".
+    # </Alex>
+    # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
+    def _validate_sorters_configuration(self):
+        if len(self.sorters) > 0:
+            regex_config = self._default_regex
+            group_names: List[str] = regex_config["group_names"]
+            if any([sorter not in group_names for sorter in self.sorters]):
+                raise ge_exceptions.DataConnectorError(
+                    f'''InferredAssetDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+configured group_name.
+                    '''
+                )
+            if len(group_names) < len(self.sorters):
+                raise ge_exceptions.DataConnectorError(
+                    f'''InferredAssetDataConnector "{self.name}" is configured with {len(group_names)} group names; this is
+fewer than number of sorters specified, which is {len(self.sorters)}.
+                    '''
+                )

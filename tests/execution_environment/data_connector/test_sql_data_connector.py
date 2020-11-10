@@ -29,8 +29,10 @@ from tests.test_utils import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine
 )
+from great_expectations.exceptions import (
+    DataConnectorError,
+)
 from great_expectations.data_context.util import file_relative_path
-
 from great_expectations.data_context.util import instantiate_class_from_config
 
 @pytest.fixture
@@ -107,6 +109,94 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
             }
         }
     }
+
+def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    random.seed(0)
+    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    config = yaml.load("""
+    name: my_sql_data_connector
+    execution_environment_name: FAKE_EE_NAME
+
+    assets:
+        table_partitioned_by_date_column__A:
+            splitter_method: _split_on_column_value
+            splitter_kwargs:
+                column_name: date
+
+    """, yaml.FullLoader)
+    config["execution_engine"] = db
+
+    my_data_connector = SqlDataConnector(**config)
+    my_data_connector._refresh_data_references_cache()
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            execution_environment_name="FAKE_EE_NAME",
+            data_connector_name="my_sql_data_connector",
+            data_asset_name="table_partitioned_by_date_column__A",
+            partition_request={
+                "partition_identifiers" : {
+                    "date" : "2020-01-01"
+                }
+            }
+    ))
+    assert len(batch_definition_list) == 1
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+            data_connector_name="my_sql_data_connector",
+            data_asset_name="table_partitioned_by_date_column__A",
+            partition_request={
+                "partition_identifiers" : {}
+            }
+    ))
+    assert len(batch_definition_list) == 30
+
+    # Note: Abe 20201109: It would be nice to put in safeguards for mistakes like this.
+    # In this case, "date" should go inside "partition_identifiers".
+    # Currently, the method ignores "date" entirely, and matches on too many partitions.
+    # I don't think this is unique to SqlDataConnector.
+    # with pytest.raises(DataConnectorError) as e:
+    #     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+    #         batch_request=BatchRequest(
+    #             execution_environment_name="FAKE_EE_NAME",
+    #             data_connector_name="my_sql_data_connector",
+    #             data_asset_name="table_partitioned_by_date_column__A",
+    #             partition_request={
+    #                 "partition_identifiers" : {},
+    #                 "date" : "2020-01-01",
+    #             }
+    #     ))
+    # assert "Unmatched key" in e.value.message
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            execution_environment_name="FAKE_EE_NAME",
+            data_connector_name="my_sql_data_connector",
+            data_asset_name="table_partitioned_by_date_column__A",
+    ))
+    assert len(batch_definition_list) == 30
+
+    with pytest.raises(KeyError):
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                execution_environment_name="FAKE_EE_NAME",
+                data_connector_name="my_sql_data_connector",
+        ))
+
+    with pytest.raises(KeyError):
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                execution_environment_name="FAKE_EE_NAME",
+        ))
+
+    with pytest.raises(KeyError):
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest()
+        )
+
 
 
 def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):

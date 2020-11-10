@@ -12,9 +12,7 @@ from great_expectations.core.batch import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from tests.test_utils import (
     create_fake_data_frame,
-    create_files_in_directory,
 )
-import great_expectations.exceptions.exceptions as ge_exceptions
 
 
 def test_basic_instantiation():
