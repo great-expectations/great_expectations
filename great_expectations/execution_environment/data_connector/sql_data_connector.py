@@ -52,11 +52,14 @@ class SqlDataConnector(DataConnector):
             else:
                 table_name = data_asset_name
             
-            splitter_fn = getattr(self, data_asset["splitter_method"])
-            split_query = splitter_fn(
-                table_name=table_name,
-                **data_asset["splitter_kwargs"]
-            )
+            if "splitter_method" in data_asset:
+                splitter_fn = getattr(self, data_asset["splitter_method"])
+                split_query = splitter_fn(
+                    table_name=table_name,
+                    **data_asset["splitter_kwargs"]
+                )
+            else:
+                split_query = self._split_on_whole_table()
 
             rows = self._execution_engine.engine.execute(split_query).fetchall()
 
@@ -169,7 +172,6 @@ class SqlDataConnector(DataConnector):
 
     def _split_on_whole_table(
         self,
-        table_name: str,
     ):
         """'Split' by returning the whole table"""
 
