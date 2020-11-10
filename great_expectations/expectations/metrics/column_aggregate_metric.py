@@ -80,7 +80,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
                 if filter_column_isnull:
-                    compute_domain_kwargs = execution_engine.add_column_null_filter_row_condition(
+                    compute_domain_kwargs = execution_engine.add_column_row_condition(
                         metric_domain_kwargs
                     )
                 else:
@@ -127,7 +127,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                 )
 
                 if filter_column_isnull:
-                    compute_domain_kwargs = execution_engine.add_column_null_filter_row_condition(
+                    compute_domain_kwargs = execution_engine.add_column_row_condition(
                         metric_domain_kwargs
                     )
                 else:

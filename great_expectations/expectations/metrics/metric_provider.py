@@ -34,7 +34,7 @@ def metric(
 
         if metric_name is not None:
             inner_func.metric_name = metric_name
-        inner_func.metric_fn_engine = engine
+        inner_func.metric_engine = engine
         inner_func.metric_fn_type = metric_fn_type
         inner_func.metric_definition_kwargs = kwargs
         return inner_func
@@ -56,13 +56,13 @@ class MetricProvider(metaclass=MetaMetricProvider):
 
         for attr_name in dir(cls):
             attr_obj = getattr(cls, attr_name)
-            if not hasattr(attr_obj, "metric_fn_engine") and not hasattr(
+            if not hasattr(attr_obj, "metric_engine") and not hasattr(
                 attr_obj, "_renderer_type"
             ):
                 # This is not a metric or renderer
                 continue
-            elif hasattr(attr_obj, "metric_fn_engine"):
-                engine = getattr(attr_obj, "metric_fn_engine")
+            elif hasattr(attr_obj, "metric_engine"):
+                engine = getattr(attr_obj, "metric_engine")
                 if not issubclass(engine, ExecutionEngine):
                     raise ValueError(
                         "metric functions must be defined with an Execution Engine"

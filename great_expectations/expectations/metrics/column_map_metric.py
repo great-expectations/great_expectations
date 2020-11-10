@@ -62,10 +62,10 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
                 )
                 return values
 
-            inner_func.map_function_metric_engine = engine
-            inner_func.map_function_metric_kwargs = kwargs
+            inner_func.metric_engine = engine
+            inner_func.metric_definition_kwargs = kwargs
             inner_func.metric_fn_type = "map_fn"
-            inner_func.column_domain = True
+            inner_func.domain_type = "column"
             return inner_func
 
         return wrapper
@@ -86,7 +86,7 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
                 if filter_column_isnull:
-                    compute_domain_kwargs = execution_engine.add_column_null_filter_row_condition(
+                    compute_domain_kwargs = execution_engine.add_column_row_condition(
                         metric_domain_kwargs
                     )
                 else:
@@ -109,10 +109,10 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
                 )
                 return column_function, compute_domain_kwargs
 
-            inner_func.map_function_metric_engine = engine
-            inner_func.map_function_metric_kwargs = kwargs
+            inner_func.metric_engine = engine
+            inner_func.metric_definition_kwargs = kwargs
             inner_func.metric_fn_type = "map_fn"
-            inner_func.column_domain = True
+            inner_func.domain_type = "column"
             return inner_func
 
         return wrapper
@@ -134,7 +134,7 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
                 )
 
                 if filter_column_isnull:
-                    compute_domain_kwargs = execution_engine.add_column_null_filter_row_condition(
+                    compute_domain_kwargs = execution_engine.add_column_row_condition(
                         metric_domain_kwargs
                     )
                 else:
@@ -158,10 +158,10 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
                 )
                 return column_function, compute_domain_kwargs
 
-            inner_func.map_function_metric_engine = engine
-            inner_func.map_function_metric_kwargs = kwargs
+            inner_func.metric_engine = engine
+            inner_func.metric_definition_kwargs = kwargs
             inner_func.metric_fn_type = "map_fn"
-            inner_func.column_domain = True
+            inner_func.domain_type = "column"
             return inner_func
 
         return wrapper
@@ -171,7 +171,7 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
 
 
 def map_condition(
-    engine: Type[ExecutionEngine], metric_fn_type: str = "map_condition", **kwargs
+    engine: Type[ExecutionEngine], metric_fn_type: str = "map_condition_fn", **kwargs
 ):
     """Annotates a metric provider with the "map" metric_fn_type and associated engine.
 
@@ -191,8 +191,8 @@ def map_condition(
         def inner_func(*args, **kwargs):
             return metric_fn(*args, **kwargs)
 
-        inner_func.map_condition_metric_engine = engine
-        inner_func.map_condition_metric_kwargs = kwargs
+        inner_func.metric_engine = engine
+        inner_func.metric_definition_kwargs = kwargs
         inner_func.metric_fn_type = metric_fn_type
 
         return inner_func
@@ -201,7 +201,7 @@ def map_condition(
 
 
 def column_map_condition(
-    engine: Type[ExecutionEngine], metric_fn_type: str = "map_condition", **kwargs
+    engine: Type[ExecutionEngine], metric_fn_type: str = "map_condition_fn", **kwargs
 ):
     """Provides engine-specific support for authing a metric_fn with a simplified signature. A column_map_condition
     must provide a map function that evalues to a boolean value; it will be used to provide supplemental metrics, such
@@ -251,7 +251,7 @@ def column_map_condition(
                 )
                 return ~meets_expectation_series
 
-            inner_func.column_domain = True
+            inner_func.domain_type = "column"
             return inner_func
 
         return wrapper
@@ -301,7 +301,7 @@ def column_map_condition(
                     unexpected_condition = sa.not_(expected_condition)
                 return unexpected_condition, compute_domain_kwargs
 
-            inner_func.column_domain = True
+            inner_func.domain_type = "column"
             return inner_func
 
         return wrapper
@@ -342,7 +342,7 @@ def column_map_condition(
                 )
                 if metric_fn_type == "window_condition_fn":
                     if filter_column_isnull:
-                        compute_domain_kwargs = execution_engine.add_column_null_filter_row_condition(
+                        compute_domain_kwargs = execution_engine.add_column_row_condition(
                             metric_domain_kwargs
                         )
                     unexpected_condition = ~expected_condition
@@ -353,7 +353,7 @@ def column_map_condition(
                         unexpected_condition = ~expected_condition
                 return unexpected_condition, compute_domain_kwargs
 
-            inner_func.column_domain = True
+            inner_func.domain_type = "column"
             return inner_func
 
         return wrapper
@@ -761,17 +761,17 @@ class MapMetricProvider(MetricProvider):
             return
 
         for attr, candidate_metric_fn in cls.__dict__.items():
-            if not hasattr(
-                candidate_metric_fn, "map_condition_metric_engine"
-            ) and not hasattr(candidate_metric_fn, "map_function_metric_engine"):
+            if not hasattr(candidate_metric_fn, "metric_engine"):
                 # This is not a metric
                 continue
-            if hasattr(candidate_metric_fn, "map_condition_metric_engine"):
-                engine = candidate_metric_fn.map_condition_metric_engine
-                if not issubclass(engine, ExecutionEngine):
-                    raise ValueError(
-                        "metric functions must be defined with an Execution Engine"
-                    )
+            metric_fn_type = getattr(candidate_metric_fn, "metric_fn_type")
+            engine = candidate_metric_fn.metric_engine
+            if not issubclass(engine, ExecutionEngine):
+                raise ValueError(
+                    "metric functions must be defined with an Execution Engine"
+                )
+
+            if metric_fn_type in ["window_condition_fn", "map_condition_fn"]:
                 if not hasattr(cls, "condition_metric_name"):
                     raise ValueError(
                         "A MapMetricProvider must have a metric_condition_name to have a decorated column_map_condition method."
@@ -781,10 +781,14 @@ class MapMetricProvider(MetricProvider):
                 metric_name = cls.condition_metric_name
                 metric_domain_keys = cls.condition_domain_keys
                 metric_value_keys = cls.condition_value_keys
-                map_condition_metric_kwargs = getattr(
-                    condition_provider, "map_condition_metric_kwags", dict()
+                metric_definition_kwargs = getattr(
+                    condition_provider, "metric_definition_kwargs", dict()
                 )
-                is_column_domain = getattr(condition_provider, "column_domain", False)
+                domain_type = getattr(
+                    condition_provider,
+                    "domain_type",
+                    metric_definition_kwargs.get("domain_type", "unknown"),
+                )
                 if issubclass(engine, PandasExecutionEngine):
                     register_metric(
                         metric_name=metric_name,
@@ -793,7 +797,7 @@ class MapMetricProvider(MetricProvider):
                         execution_engine=engine,
                         metric_class=cls,
                         metric_provider=condition_provider,
-                        metric_fn_type="map_condition",
+                        metric_fn_type="map_condition_fn",
                     )
                     register_metric(
                         metric_name=metric_name + ".unexpected_count",
@@ -813,7 +817,7 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=_pandas_column_map_index,
                         metric_fn_type="data",
                     )
-                    if is_column_domain:
+                    if domain_type == "column":
                         register_metric(
                             metric_name=metric_name + ".unexpected_values",
                             metric_domain_keys=metric_domain_keys,
@@ -850,7 +854,7 @@ class MapMetricProvider(MetricProvider):
                         execution_engine=engine,
                         metric_class=cls,
                         metric_provider=condition_provider,
-                        metric_fn_type="map_condition",
+                        metric_fn_type="map_condition_fn",
                     )
                     register_metric(
                         metric_name=metric_name + ".unexpected_count",
@@ -861,7 +865,7 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=_sqlalchemy_map_unexpected_count,
                         metric_fn_type="aggregate_fn",
                     )
-                    if is_column_domain:
+                    if domain_type == "column":
                         register_metric(
                             metric_name=metric_name + ".unexpected_values",
                             metric_domain_keys=metric_domain_keys,
@@ -890,9 +894,6 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type="data",
                         )
                 elif issubclass(engine, SparkDFExecutionEngine):
-                    metric_fn_type = getattr(
-                        condition_provider, "metric_fn_type", "map_condition"
-                    )
                     register_metric(
                         metric_name=metric_name,
                         metric_domain_keys=metric_domain_keys,
@@ -902,7 +903,7 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=condition_provider,
                         metric_fn_type=metric_fn_type,
                     )
-                    if metric_fn_type == "map_condition":
+                    if metric_fn_type == "map_condition_fn":
                         register_metric(
                             metric_name=metric_name + ".unexpected_count",
                             metric_domain_keys=metric_domain_keys,
@@ -922,7 +923,7 @@ class MapMetricProvider(MetricProvider):
                             metric_provider=_spark_map_unexpected_count_data,
                             metric_fn_type="data",
                         )
-                    if is_column_domain:
+                    if domain_type == "column":
                         register_metric(
                             metric_name=metric_name + ".unexpected_values",
                             metric_domain_keys=metric_domain_keys,
@@ -950,12 +951,7 @@ class MapMetricProvider(MetricProvider):
                             metric_provider=_spark_column_map_rows,
                             metric_fn_type="data",
                         )
-            if hasattr(candidate_metric_fn, "map_function_metric_engine"):
-                engine = candidate_metric_fn.map_function_metric_engine
-                if not issubclass(engine, ExecutionEngine):
-                    raise ValueError(
-                        "metric functions must be defined with an Execution Engine"
-                    )
+            elif metric_fn_type == "map_fn":
                 if not hasattr(cls, "function_metric_name"):
                     raise ValueError(
                         "A MapMetricProvider must have a function_metric_name to have a decorated column_map_function method."
