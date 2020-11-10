@@ -170,7 +170,6 @@ class SqlDataConnector(DataConnector):
     def _split_on_whole_table(
         self,
         table_name: str,
-        column_name: str,
     ):
         """'Split' by returning the whole table"""
 
