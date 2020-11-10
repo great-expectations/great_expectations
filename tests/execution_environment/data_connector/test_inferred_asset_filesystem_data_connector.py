@@ -344,7 +344,8 @@ def test_yaml_config_excluding_non_regex_matching_files(empty_data_context, tmp_
         ],
     )
 
-    # gamma-202001.csv and gamma-202002.csv do not match regex (which includes 2020/month directory).
+    # gamma-202001.csv and gamma-202002.csv do not match regex (which includes 2020/month directory).  They are not
+    # considered as unmatched data references, because glob_directive causes these data references to not be listed.
 
     return_object = empty_data_context.test_yaml_config(
         f"""

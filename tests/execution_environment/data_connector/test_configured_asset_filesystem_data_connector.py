@@ -4,10 +4,7 @@ import json
 
 from typing import List
 
-from great_expectations.execution_environment.data_connector import (
-    DataConnector,
-    ConfiguredAssetFilesystemDataConnector,
-)
+from great_expectations.execution_environment.data_connector import ConfiguredAssetFilesystemDataConnector
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
