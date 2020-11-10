@@ -9,7 +9,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetricProvider,
-    column_map_condition,
+    column_condition_partial,
 )
 from great_expectations.expectations.metrics.import_manager import sa
 
@@ -25,7 +25,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         "allow_cross_type_comparisons",
     )
 
-    @column_map_condition(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(
         cls,
         column,
@@ -145,7 +145,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
 
         return temp_column.map(is_between)
 
-    @column_map_condition(engine=SqlAlchemyExecutionEngine)
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         column,
@@ -191,7 +191,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
             else:
                 return sa.and_(min_value <= column, column <= max_value)
 
-    @column_map_condition(engine=SparkDFExecutionEngine)
+    @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         column,

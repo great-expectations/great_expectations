@@ -8,10 +8,10 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetricProvider,
-    column_map_condition,
+    column_condition_partial,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
-from great_expectations.expectations.metrics.metric_provider import metric
+from great_expectations.expectations.metrics.metric_provider import metric_value_fn
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -20,7 +20,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
     condition_value_keys = ("strictly",)
     default_kwarg_values = {"strictly": False}
 
-    @column_map_condition(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, strictly, **kwargs):
         series_diff = column.diff()
         # The first element is null, so it gets a bye and is always treated as True
@@ -31,7 +31,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         else:
             return series_diff <= 0
 
-    @metric(
+    @metric_value_fn(
         engine=SparkDFExecutionEngine,
         metric_fn_type="window_condition_fn",
         domain_type="column",
@@ -98,7 +98,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             )
 
     @classmethod
-    def get_evaluation_dependencies(
+    def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -116,10 +116,4 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
                     {"include_nested": True},
                 )
             }
-        else:
-            return super().get_evaluation_dependencies(
-                metric=metric,
-                configuration=configuration,
-                execution_engine=execution_engine,
-                runtime_configuration=runtime_configuration,
-            )
+

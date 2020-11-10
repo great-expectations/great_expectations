@@ -14,10 +14,9 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_map_metric import (
     MapMetricProvider,
-    column_map_condition,
-    map_condition,
 )
 from great_expectations.expectations.metrics.import_manager import F, SQLContext
+from great_expectations.expectations.metrics.metric_provider import metric_partial_fn
 from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 
 
@@ -29,7 +28,7 @@ class ColumnPairValuesInSet(MapMetricProvider):
     )
     condition_domain_keys = ("batch_id", "table", "column_A", "column_B")
 
-    @map_condition(engine=PandasExecutionEngine)
+    @metric_partial_fn(engine=PandasExecutionEngine, partial_fn_type="condition_fn", domain_type="column_pair")
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
@@ -77,7 +76,7 @@ class ColumnPairValuesInSet(MapMetricProvider):
 
         return pd.Series(results)
 
-    @map_condition(engine=SparkDFExecutionEngine)
+    @metric_partial_fn(engine=SparkDFExecutionEngine, partial_fn_type="window_fn", domain_type="column_pair")
     def _spark(
         cls,
         execution_engine: "SparkDFExecutionEngine",

@@ -11,7 +11,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import metric
+from great_expectations.expectations.metrics.metric_provider import metric_value_fn
 
 
 class ColumnValueCounts(ColumnMetricProvider):
@@ -20,7 +20,7 @@ class ColumnValueCounts(ColumnMetricProvider):
 
     default_kwarg_values = {"sort": "value", "collate": None}
 
-    @metric(engine=PandasExecutionEngine)
+    @metric_value_fn(engine=PandasExecutionEngine)
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
@@ -58,7 +58,7 @@ class ColumnValueCounts(ColumnMetricProvider):
         counts.index.name = "value"
         return counts
 
-    @metric(engine=SqlAlchemyExecutionEngine)
+    @metric_value_fn(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -114,7 +114,7 @@ class ColumnValueCounts(ColumnMetricProvider):
         )
         return series
 
-    @metric(engine=SparkDFExecutionEngine)
+    @metric_value_fn(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,

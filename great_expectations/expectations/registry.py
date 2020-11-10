@@ -98,13 +98,14 @@ def register_metric(
     metric_value_keys: Tuple[str, ...],
     execution_engine: Type["ExecutionEngine"],
     metric_class: Type["MetricProvider"],
-    metric_provider: Callable,
+    metric_provider: Union[Callable, None],
     metric_fn_type: str,
 ) -> dict:
     res = dict()
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
-    metric_provider.metric_fn_type = metric_fn_type
+    if metric_provider is not None:
+        metric_provider.metric_fn_type = metric_fn_type
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]
         current_domain_keys = metric_definition.get("metric_domain_keys", set())

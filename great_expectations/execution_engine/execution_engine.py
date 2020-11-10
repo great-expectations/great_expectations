@@ -1,10 +1,11 @@
 import copy
 import logging
-from typing import Any, Dict, Iterable, Tuple
+from typing import Any, Dict, Iterable, Tuple, Union
 
 from ruamel.yaml import YAML
 
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.expectations.metrics.metric_provider import MetricDomainTypes
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.validation_graph import MetricConfiguration
 
@@ -157,23 +158,26 @@ class ExecutionEngine:
                 "metrics": metric_dependencies,
                 "runtime_configuration": runtime_configuration,
             }
-            metric_fn_type = getattr(metric_fn, "metric_fn_type", "data")
-            if metric_fn_type in ["aggregate_fn"]:
+            if metric_fn is None:
+                metric_fn, compute_domain_kwargs = metric_dependencies.pop("metric_partial_fn")
                 metric_fn_bundle.append(
-                    (metric_to_resolve, metric_fn, metric_provider_kwargs)
+                    (metric_to_resolve, metric_fn, compute_domain_kwargs, metric_provider_kwargs)
                 )
-            elif metric_fn_type in [
+                continue
+            metric_fn_type = getattr(metric_fn, "metric_fn_type", "value")
+            if metric_fn_type in [
                 "map_fn",
                 "map_condition_fn",
                 "window_fn",
                 "window_condition_fn",
+                "aggregate_fn",
             ]:
                 # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
                 # than data to optimize compute in the future
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )
-            elif metric_fn_type == "data":
+            elif metric_fn_type == "value":
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )
@@ -193,7 +197,11 @@ class ExecutionEngine:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
-    def get_compute_domain(self, domain_kwargs: dict) -> Tuple[Any, dict, dict]:
+    def get_compute_domain(
+        self,
+        domain_kwargs: dict,
+        domain_type: Union[str, MetricDomainTypes],
+    ) -> Tuple[Any, dict, dict]:
         """get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
         and specific engine semantics.
 

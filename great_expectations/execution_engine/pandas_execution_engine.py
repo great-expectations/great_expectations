@@ -3,7 +3,7 @@ import datetime
 import logging
 from functools import partial
 from io import StringIO
-from typing import Any, Callable, Dict, Iterable, Tuple
+from typing import Any, Callable, Dict, Iterable, Tuple, Union
 
 import pandas as pd
 
@@ -17,6 +17,7 @@ from ..core.batch import Batch, BatchMarkers, BatchRequest
 from ..core.id_dict import BatchSpec
 from ..exceptions import BatchSpecError, ValidationError
 from ..execution_environment.util import hash_pandas_dataframe
+from ..expectations.metrics.metric_provider import MetricDomainTypes
 from ..validator.validation_graph import MetricConfiguration
 from .execution_engine import ExecutionEngine
 
@@ -294,7 +295,9 @@ operate.
         return batch_spec
 
     def get_compute_domain(
-        self, domain_kwargs: Dict,
+        self,
+        domain_kwargs: dict,
+        domain_type: Union[str, MetricDomainTypes],
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas DataFrame. If the domain is a single column,
@@ -302,7 +305,6 @@ operate.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            batches (dict) - A dictionary specifying batch id and which batches to obtain
 
         Returns:
             A tuple including:
@@ -351,18 +353,3 @@ operate.
             accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
-
-    def resolve_metric_bundle(
-        self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
-    ) -> dict:
-        """This engine simply evaluates metrics one at a time."""
-        resolved_metrics = dict()
-        for (
-            metric_to_resolve,
-            metric_provider,
-            metric_provider_kwargs,
-        ) in metric_fn_bundle:
-            resolved_metrics[metric_to_resolve.id] = metric_provider(
-                **metric_provider_kwargs
-            )
-        return resolved_metrics

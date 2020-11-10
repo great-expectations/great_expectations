@@ -12,23 +12,23 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetricProvider,
-    column_map_condition,
-    column_map_function,
+    column_condition_partial,
+    column_function_partial,
 )
 from great_expectations.expectations.metrics.column_map_metric import sa as sa
 from great_expectations.expectations.metrics.import_manager import F, Window
-from great_expectations.expectations.metrics.metric_provider import metric
+from great_expectations.expectations.metrics.metric_provider import metric_value_fn
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class ColumnValuesUnique(ColumnMapMetricProvider):
     condition_metric_name = "column_values.unique"
 
-    @column_map_condition(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         return ~column.duplicated(keep=False)
 
-    @column_map_condition(engine=SqlAlchemyExecutionEngine)
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _table, **kwargs):
         dup_query = (
             sa.select([column])
@@ -39,7 +39,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
 
         return column.notin_(dup_query)
 
-    @column_map_condition(
+    @column_condition_partial(
         engine=SparkDFExecutionEngine, metric_fn_type="window_condition_fn"
     )
     def _spark(cls, column, **kwargs):

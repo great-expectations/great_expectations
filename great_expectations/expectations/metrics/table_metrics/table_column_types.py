@@ -13,7 +13,7 @@ from great_expectations.expectations.metrics.import_manager import (
     reflection,
     sparktypes,
 )
-from great_expectations.expectations.metrics.metric_provider import metric
+from great_expectations.expectations.metrics.metric_provider import metric_value_fn
 from great_expectations.expectations.metrics.table_metric import TableMetricProvider
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 
@@ -23,7 +23,7 @@ class ColumnTypes(TableMetricProvider):
     value_keys = ("include_nested",)
     default_kwarg_values = {"include_nested": True}
 
-    @metric(engine=PandasExecutionEngine)
+    @metric_value_fn(engine=PandasExecutionEngine)
     def _spark(
         cls,
         execution_engine: PandasExecutionEngine,
@@ -38,7 +38,7 @@ class ColumnTypes(TableMetricProvider):
             for (name, dtype) in zip(df.columns, df.dtypes)
         ]
 
-    @metric(engine=SqlAlchemyExecutionEngine)
+    @metric_value_fn(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -63,7 +63,7 @@ class ColumnTypes(TableMetricProvider):
             )
         return _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
 
-    @metric(engine=SparkDFExecutionEngine)
+    @metric_value_fn(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,

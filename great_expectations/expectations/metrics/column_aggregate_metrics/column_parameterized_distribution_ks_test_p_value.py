@@ -9,7 +9,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
-    column_aggregate_metric,
+    column_aggregate_partial, column_aggregate_value,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.expectations.metrics.util import (
@@ -35,10 +35,10 @@ from great_expectations.expectations.metrics.column_aggregate_metric import F as
 class ColumnParameterizedDistributionKSTestPValue(ColumnMetricProvider):
     """MetricProvider Class for Aggregate Standard Deviation metric"""
 
-    metric_name = "column.aggregate.parameterized_distribution_ks_test_p_value"
+    metric_name = "column.parameterized_distribution_ks_test_p_value"
     value_keys = ("distribution", "p_value", "params")
 
-    @column_aggregate_metric(engine=PandasExecutionEngine)
+    @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, distribution, p_value=0.05, params=None, **kwargs):
         if p_value <= 0 or p_value >= 1:
             raise ValueError("p_value must be between 0 and 1 exclusive")

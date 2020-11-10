@@ -5,7 +5,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetricProvider,
-    column_map_condition,
+    column_condition_partial,
 )
 from great_expectations.expectations.metrics.util import (
     get_dialect_like_pattern_expression,
@@ -18,7 +18,7 @@ class ColumnValuesMatchLikePattern(ColumnMapMetricProvider):
     condition_metric_name = "column_values.match_like_pattern"
     condition_value_keys = ("like_pattern",)
 
-    @column_map_condition(engine=SqlAlchemyExecutionEngine)
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, like_pattern, _dialect, **kwargs):
         like_pattern_expression = get_dialect_like_pattern_expression(
             column, _dialect, like_pattern

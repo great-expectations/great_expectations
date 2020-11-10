@@ -6,26 +6,27 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnMetricProvider, column_aggregate_value,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import F as F
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    column_aggregate_metric,
+    column_aggregate_partial,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
+from great_expectations.expectations.metrics.metric_provider import metric_value_fn
 
 
 class ColumnMax(ColumnMetricProvider):
-    metric_name = "column.aggregate.max"
+    metric_name = "column.max"
 
-    @column_aggregate_metric(engine=PandasExecutionEngine)
+    @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         return column.max()
 
-    @column_aggregate_metric(engine=SqlAlchemyExecutionEngine)
+    @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, **kwargs):
         return sa.func.max(column)
 
-    @column_aggregate_metric(engine=SparkDFExecutionEngine)
+    @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
         return F.max(column)

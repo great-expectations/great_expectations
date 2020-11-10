@@ -4,17 +4,11 @@ from dateutil.parser import parse
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_map_metric import (
     MapMetricProvider,
-    column_map_condition,
-    map_condition,
 )
-from great_expectations.expectations.metrics.metric_provider import metric
+from great_expectations.expectations.metrics.metric_provider import metric_partial_fn
 from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 
 
@@ -28,7 +22,7 @@ class ColumnPairValuesAGreaterThanB(MapMetricProvider):
     )
     domain_keys = ("batch_id", "table", "column_A", "column_B")
 
-    @map_condition(engine=PandasExecutionEngine)
+    @metric_partial_fn(engine=PandasExecutionEngine, partial_fn_type="map_condition_series", domain_type="column_pair")
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
@@ -49,8 +43,8 @@ class ColumnPairValuesAGreaterThanB(MapMetricProvider):
             "allow_cross_type_comparisons"
         )
 
-        df, compute_domain, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs
+        df, compute_domain, accessor_domain = execution_engine.get_compute_domain(
+            metric_domain_kwargs, "column_pair"
         )
 
         column_A, column_B = filter_pair_metric_nulls(
@@ -71,6 +65,6 @@ class ColumnPairValuesAGreaterThanB(MapMetricProvider):
             temp_column_B = column_B
 
         if or_equal:
-            return temp_column_A >= temp_column_B
+            return temp_column_A >= temp_column_B, compute_domain, accessor_domain
         else:
-            return temp_column_A > temp_column_B
+            return temp_column_A > temp_column_B, compute_domain, accessor_domain

@@ -87,7 +87,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(TableExpectation):
     """
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.unique_proportion",)
+    metric_dependencies = ("column.unique_proportion",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
     # Default values
@@ -296,7 +296,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(TableExpectation):
                 "result_format", self.default_kwarg_values.get("result_format")
             )
 
-        column_unique_prop = metric_vals.get("column.aggregate.unique_proportion")
+        column_unique_prop = metric_vals.get("column.unique_proportion")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")

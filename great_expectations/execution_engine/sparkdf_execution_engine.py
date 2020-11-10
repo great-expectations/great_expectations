@@ -4,6 +4,8 @@ import logging
 import uuid
 from typing import Any, Callable, Dict, Iterable, Tuple, Union
 
+from ..expectations.metrics.metric_provider import MetricDomainTypes
+
 try:
     import pyspark.sql.functions as F
 except ImportError:
@@ -244,7 +246,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return batch_spec
 
     def get_compute_domain(
-        self, domain_kwargs: dict
+        self,
+        domain_kwargs: dict,
+        domain_type: Union[str, MetricDomainTypes]
     ) -> Tuple["pyspark.sql.DataFrame", dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
@@ -355,24 +359,20 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         aggregates: Dict[Tuple, dict] = dict()
         for (
             metric_to_resolve,
-            metric_provider,
+            engine_fn,
+            compute_domain_kwargs,
             metric_provider_kwargs,
         ) in metric_fn_bundle:
-            assert (
-                metric_provider.metric_fn_type == "aggregate_fn"
-            ), "resolve_metric_bundle only supports aggregate metrics"
-            # batch_id and table are the only determining factors for bundled metrics
-            column_aggregate, domain_kwargs = metric_provider(**metric_provider_kwargs)
-            if not isinstance(domain_kwargs, IDDict):
-                domain_kwargs = IDDict(domain_kwargs)
-            domain_id = domain_kwargs.to_id()
+            if not isinstance(compute_domain_kwargs, IDDict):
+                compute_domain_kwargs = IDDict(compute_domain_kwargs)
+            domain_id = compute_domain_kwargs.to_id()
             if domain_id not in aggregates:
                 aggregates[domain_id] = {
                     "column_aggregates": [],
                     "ids": [],
-                    "domain_kwargs": domain_kwargs,
+                    "domain_kwargs": compute_domain_kwargs,
                 }
-            aggregates[domain_id]["column_aggregates"].append(column_aggregate)
+            aggregates[domain_id]["column_aggregates"].append(engine_fn)
             aggregates[domain_id]["ids"].append(metric_to_resolve.id)
         for aggregate in aggregates.values():
             df, compute_domain_kwargs, _ = self.get_compute_domain(
@@ -396,8 +396,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             assert len(aggregate["ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
-            logger.warning(
-                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {domain_id}"
+            logger.debug(
+                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
             )
             for idx, id in enumerate(aggregate["ids"]):
                 resolved_metrics[id] = res[0][idx]

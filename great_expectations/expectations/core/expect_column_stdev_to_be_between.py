@@ -82,7 +82,7 @@ class ExpectColumnStdevToBeBetween(TableExpectation):
 
             """
 
-    metric_dependencies = ("column.aggregate.standard_deviation",)
+    metric_dependencies = ("column.standard_deviation",)
     success_keys = (
         "min_value",
         "strict_min",
@@ -122,7 +122,7 @@ class ExpectColumnStdevToBeBetween(TableExpectation):
         return True
 
     # @PandasExecutionEngine.metric(
-    #        metric_name="column.aggregate.standard_deviation",
+    #        metric_name="column.standard_deviation",
     #        metric_domain_keys=TableExpectation.domain_keys,
     #        metric_value_keys=tuple(),
     #        metric_dependencies=tuple(),
@@ -221,7 +221,7 @@ class ExpectColumnStdevToBeBetween(TableExpectation):
         metric_vals = extract_metrics(
             metric_dependencies, metrics, configuration, runtime_configuration
         )
-        column_stdev = metric_vals.get("column.aggregate.standard_deviation")
+        column_stdev = metric_vals.get("column.standard_deviation")
         min_value = self.get_success_kwargs(configuration).get("min_value")
         strict_min = self.get_success_kwargs(configuration).get("strict_min")
         max_value = self.get_success_kwargs(configuration).get("max_value")

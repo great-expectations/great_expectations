@@ -51,16 +51,54 @@ def _build_pandas_engine(df):
 
 def test_metric_loads():
     assert (
-        get_metric_provider("column.aggregate.max", PandasExecutionEngine()) is not None
+        get_metric_provider("column.max", PandasExecutionEngine()) is not None
     )
-
 
 def test_basic_metric():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     batch = Batch(data=df)
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+
     desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,)
+    )
+    assert results == {desired_metric.id: 3}
+
+
+def test_basic_metric_sa(sa):
+    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), sa)
+
+    partial_metric = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+
+    metrics = engine.resolve_metrics(metrics_to_resolve=(partial_metric,))
+    desired_metric = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": partial_metric},
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results == {desired_metric.id: 3}
+
+def test_column_max():
+    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    desired_metric = MetricConfiguration(
+        metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -71,7 +109,7 @@ def test_basic_metric():
 def test_mean_metric_pd():
     engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
     desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.mean",
+        metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -82,7 +120,7 @@ def test_mean_metric_pd():
 def test_stdev_metric_pd():
     engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
     desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.standard_deviation",
+        metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -93,7 +131,7 @@ def test_stdev_metric_pd():
 def test_max_metric_sa(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 1]}), sa)
     desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -105,7 +143,7 @@ def test_max_metric_sa(sa):
 def test_max_metric_spark(spark_session):
     engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}), spark_session)
     desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -374,12 +412,12 @@ def test_z_score_under_threshold_pd():
     batch = Batch(data=df)
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     mean = MetricConfiguration(
-        metric_name="column.aggregate.mean",
+        metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     stdev = MetricConfiguration(
-        metric_name="column.aggregate.standard_deviation",
+        metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -391,8 +429,8 @@ def test_z_score_under_threshold_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
         metric_dependencies={
-            "column.aggregate.standard_deviation": stdev,
-            "column.aggregate.mean": mean,
+            "column.standard_deviation": stdev,
+            "column.mean": mean,
         },
     )
     results = engine.resolve_metrics(
@@ -425,12 +463,12 @@ def test_z_score_under_threshold_pd():
 def test_z_score_under_threshold_spark(spark_session):
     engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), spark_session)
     mean = MetricConfiguration(
-        metric_name="column.aggregate.mean",
+        metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     stdev = MetricConfiguration(
-        metric_name="column.aggregate.standard_deviation",
+        metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -442,8 +480,8 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
         metric_dependencies={
-            "column.aggregate.standard_deviation": stdev,
-            "column.aggregate.mean": mean,
+            "column.standard_deviation": stdev,
+            "column.mean": mean,
         },
     )
     results = engine.resolve_metrics(
@@ -565,7 +603,7 @@ def test_median_metric_spark(spark_session):
     metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
     desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.median",
+        metric_name="column.median",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
         metric_dependencies={"table.row_count": row_count},
@@ -675,22 +713,22 @@ def test_sa_batch_aggregate_metrics(sa):
     )
 
     desired_metric_1 = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     desired_metric_2 = MetricConfiguration(
-        metric_name="column.aggregate.min",
+        metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     desired_metric_3 = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
     )
     desired_metric_4 = MetricConfiguration(
-        metric_name="column.aggregate.min",
+        metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
     )
@@ -720,22 +758,22 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     )
 
     desired_metric_1 = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     desired_metric_2 = MetricConfiguration(
-        metric_name="column.aggregate.min",
+        metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     desired_metric_3 = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
     )
     desired_metric_4 = MetricConfiguration(
-        metric_name="column.aggregate.min",
+        metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
     )

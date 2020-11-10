@@ -92,7 +92,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
            """
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.max",)
+    metric_dependencies = ("column.max",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
     # Default values
@@ -266,7 +266,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         """Validates the given data against the set minimum and maximum value thresholds for the column max"""
-        column_max = metrics.get("column.aggregate.max")
+        column_max = metrics.get("column.max")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")

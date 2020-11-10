@@ -118,7 +118,7 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
 
            """
 
-    metric_dependencies = ("column.aggregate.quantiles",)
+    metric_dependencies = ("column.quantiles",)
     success_keys = (
         "quantile_ranges",
         "allow_relative_error",
@@ -393,7 +393,7 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
                 "result_format", self.default_kwarg_values.get("result_format")
             )
 
-        quantile_vals = metric_vals.get("column.aggregate.quantiles")
+        quantile_vals = metric_vals.get("column.quantiles")
         quantile_ranges = self.get_success_kwargs(configuration).get("quantile_ranges")
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]

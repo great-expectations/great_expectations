@@ -12,16 +12,16 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnMetricProvider, column_aggregate_value,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import F as F
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    column_aggregate_metric,
+    column_aggregate_partial,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
-    metric,
+    metric_value_fn,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
@@ -29,14 +29,14 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 class ColumnMedian(MetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
-    metric_name = "column.aggregate.median"
+    metric_name = "column.median"
 
-    @column_aggregate_metric(engine=PandasExecutionEngine)
+    @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Median Implementation"""
         return column.median()
 
-    @metric(engine=SqlAlchemyExecutionEngine, metric_fn_type="data")
+    @metric_value_fn(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     def _sqlalchemy(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
@@ -85,7 +85,7 @@ class ColumnMedian(MetricProvider):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    @metric(engine=SparkDFExecutionEngine, metric_fn_type="data")
+    @metric_value_fn(engine=SparkDFExecutionEngine, metric_fn_type="value")
     def _spark(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
@@ -117,7 +117,7 @@ class ColumnMedian(MetricProvider):
         return np.mean(result)
 
     @classmethod
-    def get_evaluation_dependencies(
+    def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,

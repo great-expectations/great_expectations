@@ -9,7 +9,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
-    column_aggregate_metric,
+    column_aggregate_partial, column_aggregate_value,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 
@@ -29,14 +29,14 @@ from great_expectations.expectations.metrics.column_aggregate_metric import F as
 class ColumnStandardDeviation(ColumnMetricProvider):
     """MetricProvider Class for Aggregate Standard Deviation metric"""
 
-    metric_name = "column.aggregate.standard_deviation"
+    metric_name = "column.standard_deviation"
 
-    @column_aggregate_metric(engine=PandasExecutionEngine)
+    @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Standard Deviation implementation"""
         return column.std()
 
-    @column_aggregate_metric(engine=SqlAlchemyExecutionEngine)
+    @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _dialect, **kwargs):
         """SqlAlchemy Standard Deviation implementation"""
         if _dialect.name.lower() == "mssql":
@@ -45,7 +45,7 @@ class ColumnStandardDeviation(ColumnMetricProvider):
             standard_deviation = sa.func.stddev_samp(column)
         return standard_deviation
 
-    @column_aggregate_metric(engine=SparkDFExecutionEngine)
+    @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
         """Spark Standard Deviation implementation"""
         return F.stddev_samp(column)
