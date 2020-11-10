@@ -206,7 +206,8 @@ def get_metric_kwargs(
             if len(metric_kwargs["metric_value_keys"]) > 0:
                 metric_value_kwargs = IDDict(
                     {
-                        k: configuration_kwargs.get(k) or default_kwarg_values.get(k)
+                        k: configuration_kwargs.get(k) if configuration_kwargs.get(k) is not None else
+                        default_kwarg_values.get(k)
                         for k in metric_kwargs["metric_value_keys"]
                     }
                 )
