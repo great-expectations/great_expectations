@@ -145,7 +145,7 @@ def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_co
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=BatchRequest(
-            execution_environment_name="FAKE_EE_NAME",
+            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request={
