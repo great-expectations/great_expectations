@@ -48,7 +48,6 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
             glob_directive: '*.csv'
             assets:
                 TestFiles:
-                    partitioner_name: default_partitioner_name
             default_regex:
                 pattern: (.+)_(.+)_(.+)\\.csv
                 group_names:
