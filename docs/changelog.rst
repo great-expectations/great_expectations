@@ -8,6 +8,7 @@ Develop
 -----------------
 * [ENHANCEMENT] Snowflake uses temp tables by default while still allowing transient tables.
 * [ENHANCEMENT] Enabled use of lowercase table and column names in GE with the `use_quoted_name` key in batch_kwargs
+* [BUGFIX] Basic suite builder profiler (suite scaffold) skips excluded expectations
 
 0.12.7
 -----------------
