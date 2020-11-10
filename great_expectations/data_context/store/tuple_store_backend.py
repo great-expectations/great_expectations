@@ -29,12 +29,12 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         forbidden_substrings=None,
         platform_specific_separator=True,
         fixed_length_key=False,
-        dont_add_store_backend_id=False,
+        suppress_store_backend_id=False,
         base_public_path=None,
     ):
         super().__init__(
             fixed_length_key=fixed_length_key,
-            dont_add_store_backend_id=dont_add_store_backend_id,
+            suppress_store_backend_id=suppress_store_backend_id,
         )
         if forbidden_substrings is None:
             forbidden_substrings = ["/", "\\"]
@@ -218,7 +218,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         platform_specific_separator=True,
         root_directory=None,
         fixed_length_key=False,
-        dont_add_store_backend_id=False,
+        suppress_store_backend_id=False,
         base_public_path=None,
     ):
         super().__init__(
@@ -228,7 +228,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
-            dont_add_store_backend_id=dont_add_store_backend_id,
+            suppress_store_backend_id=suppress_store_backend_id,
             base_public_path=base_public_path,
         )
         if os.path.isabs(base_directory):
@@ -249,7 +249,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         os.makedirs(str(os.path.dirname(self.full_base_directory)), exist_ok=True)
         # Initialize with store_backend_id if not part of an HTMLSiteStore
-        if not self._dont_add_store_backend_id:
+        if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
     def _get(self, key):
@@ -401,7 +401,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         forbidden_substrings=None,
         platform_specific_separator=False,
         fixed_length_key=False,
-        dont_add_store_backend_id=False,
+        suppress_store_backend_id=False,
         base_public_path=None,
         endpoint_url=None,
     ):
@@ -412,7 +412,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
-            dont_add_store_backend_id=dont_add_store_backend_id,
+            suppress_store_backend_id=suppress_store_backend_id,
             base_public_path=base_public_path,
         )
         self.bucket = bucket
@@ -426,7 +426,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         self.prefix = prefix
         self.endpoint_url = endpoint_url
         # Initialize with store_backend_id if not part of an HTMLSiteStore
-        if not self._dont_add_store_backend_id:
+        if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
     def _build_s3_object_key(self, key):
@@ -656,7 +656,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         forbidden_substrings=None,
         platform_specific_separator=False,
         fixed_length_key=False,
-        dont_add_store_backend_id=False,
+        suppress_store_backend_id=False,
         public_urls=True,
         base_public_path=None,
     ):
@@ -667,7 +667,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
-            dont_add_store_backend_id=dont_add_store_backend_id,
+            suppress_store_backend_id=suppress_store_backend_id,
             base_public_path=base_public_path,
         )
         self.bucket = bucket
@@ -675,7 +675,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.project = project
         self._public_urls = public_urls
         # Initialize with store_backend_id if not part of an HTMLSiteStore
-        if not self._dont_add_store_backend_id:
+        if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
     def _build_gcs_object_key(self, key):

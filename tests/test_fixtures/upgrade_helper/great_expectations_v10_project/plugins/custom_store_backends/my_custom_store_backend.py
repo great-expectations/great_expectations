@@ -10,7 +10,7 @@ class MyCustomStoreBackend(TupleStoreBackend):
         forbidden_substrings=None,
         platform_specific_separator=True,
         fixed_length_key=False,
-        dont_add_store_backend_id=False,
+        suppress_store_backend_id=False,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -19,7 +19,7 @@ class MyCustomStoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
-            dont_add_store_backend_id=dont_add_store_backend_id,
+            suppress_store_backend_id=suppress_store_backend_id,
         )
 
     def _get(self, key):
