@@ -11,6 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
+import traceback
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from dateutil.parser import parse
@@ -489,7 +490,11 @@ class BaseDataContext:
         return new_validation_operator
 
     def test_yaml_config(
-        self, yaml_config: str, pretty_print=True, return_mode="instantiated_class",
+        self,
+        yaml_config: str,
+        pretty_print=True,
+        return_mode="instantiated_class",
+        shorten_tracebacks=True,
     ):
         """ Convenience method for testing yaml configs for Datasources, Checkpoints, and Stores
         """
@@ -503,45 +508,53 @@ class BaseDataContext:
         else:
             class_name = None
 
-        if class_name in [
-            "ExpectationsStore",
-            "ValidationsStore",
-            "HtmlSiteStore",
-            "EvaluationParameterStore",
-            "MetricStore",
-            "SqlAlchemyQueryStore",
-        ]:
-            print(f"\tInstantiating as a Store, since class_name is {class_name}")
-            instantiated_class = self._build_store_from_config("my_temp_store", config)
+        try:
+            if class_name in [
+                "ExpectationsStore",
+                "ValidationsStore",
+                "HtmlSiteStore",
+                "EvaluationParameterStore",
+                "MetricStore",
+                "SqlAlchemyQueryStore",
+            ]:
+                print(f"\tInstantiating as a Store, since class_name is {class_name}")
+                instantiated_class = self._build_store_from_config("my_temp_store", config)
 
-        elif class_name in ["ExecutionEnvironment"]:
-            print(
-                f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}"
-            )
-            instantiated_class = instantiate_class_from_config(
-                config,
-                runtime_environment={},
-                config_defaults={
-                    "name": "my_temp_execution_environment",
-                    "module_name": "great_expectations.execution_environment",
-                },
-            )
+            elif class_name in ["ExecutionEnvironment"]:
+                print(
+                    f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}"
+                )
+                instantiated_class = instantiate_class_from_config(
+                    config,
+                    runtime_environment={},
+                    config_defaults={
+                        "name": "my_temp_execution_environment",
+                        "module_name": "great_expectations.execution_environment",
+                    },
+                )
 
-        else:
-            print(
-                "\tNo matching class found. Attempting to instantiate class from the raw config..."
-            )
-            instantiated_class = instantiate_class_from_config(
-                config, runtime_environment={}, config_defaults={}
-            )
+            else:
+                print(
+                    "\tNo matching class found. Attempting to instantiate class from the raw config..."
+                )
+                instantiated_class = instantiate_class_from_config(
+                    config, runtime_environment={}, config_defaults={}
+                )
 
-        if pretty_print:
-            print(
-                f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}"
-            )
-            print()
+            if pretty_print:
+                print(
+                    f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}"
+                )
+                print()
 
-        return_object = instantiated_class.self_check(pretty_print)
+            return_object = instantiated_class.self_check(pretty_print)
+        
+        except Exception as e:
+            if shorten_tracebacks:
+                raise(e)
+
+            else:
+                raise(e)
 
         if return_mode == "instantiated_class":
             return instantiated_class

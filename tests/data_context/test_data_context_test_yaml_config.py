@@ -151,3 +151,30 @@ data_connectors:
             }
         }
     }
+
+def test_error_states(empty_data_context):
+
+    with pytest.raises(AttributeError) as excinfo:
+        empty_data_context.test_yaml_config(
+            yaml_config="""
+class_name: ExecutionEnvironment
+
+execution_engine:
+    class_name: NOT_A_REAL_CLASS_NAME
+"""
+        )
+    shortened_message_len = len(excinfo.value.message)
+
+    with pytest.raises(AttributeError) as excinfo:
+        empty_data_context.test_yaml_config(
+            yaml_config="""
+class_name: ExecutionEnvironment
+
+execution_engine:
+    class_name: NOT_A_REAL_CLASS_NAME
+""",
+            shorten_tracebacks=False
+        )
+    long_message_len = len(excinfo.value.message)
+
+    assert shortened_message_len < long_message_len
