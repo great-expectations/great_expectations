@@ -5,6 +5,9 @@ import tempfile
 import pytest
 
 from tests.test_utils import create_files_in_directory
+from great_expectations.exceptions import (
+    DataContextError
+)
 
 
 def test_empty_store(empty_data_context):
@@ -109,16 +112,6 @@ data_connectors:
             group_names:
             - letter
             - number
-        # assets: {{}}
-            
-        # partitioners:
-        #     my_regex_partitioner:
-        #         class_name: RegexPartitioner
-        #         pattern: {temp_dir}/(.+)(\\d+)\\.csv
-        #         group_names:
-        #         - letter
-        #         - number
-        # default_partitioner_name: my_regex_partitioner
 """, return_mode="return_object"
     )
 
@@ -154,27 +147,68 @@ data_connectors:
 
 def test_error_states(empty_data_context):
 
-    with pytest.raises(AttributeError) as excinfo:
-        empty_data_context.test_yaml_config(
-            yaml_config="""
+    first_config = """
 class_name: ExecutionEnvironment
 
 execution_engine:
     class_name: NOT_A_REAL_CLASS_NAME
 """
+
+    with pytest.raises(DataContextError) as excinfo:
+        empty_data_context.test_yaml_config(
+            yaml_config=first_config
         )
+    print(excinfo.value.message)
     shortened_message_len = len(excinfo.value.message)
 
-    with pytest.raises(AttributeError) as excinfo:
+    print("="*80)
+
+    with pytest.raises(DataContextError) as excinfo:
         empty_data_context.test_yaml_config(
-            yaml_config="""
+            yaml_config=first_config,
+            shorten_tracebacks=False,
+        )
+    print(excinfo.value.message)
+    long_message_len = len(excinfo.value.message)
+
+    # assert shortened_message_len < long_message_len
+
+
+
+
+    temp_dir = str(tempfile.mkdtemp())
+    second_config = f"""
 class_name: ExecutionEnvironment
 
 execution_engine:
-    class_name: NOT_A_REAL_CLASS_NAME
-""",
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        # class_name: ConfiguredAssetFilesystemDataConnector
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: {temp_dir}
+        glob_directive: '*.csv'
+        default_regex:
+            pattern: (.+)_(\\d+)\\.csv
+            group_names:
+            - letter
+            - number
+        NOT_A_REAL_KEY: nothing
+"""
+
+    with pytest.raises(DataContextError) as excinfo:
+        empty_data_context.test_yaml_config(
+            yaml_config=second_config,
+        )
+    short_message_len = len(excinfo.value.message)
+
+    with pytest.raises(TypeError) as excinfo:
+        empty_data_context.test_yaml_config(
+            yaml_config=second_config,
             shorten_tracebacks=False
         )
-    long_message_len = len(excinfo.value.message)
+    print(str(excinfo))
+    long_message_len = len(excinfo.message)
 
     assert shortened_message_len < long_message_len

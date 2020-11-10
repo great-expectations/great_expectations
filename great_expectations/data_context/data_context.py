@@ -71,6 +71,9 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
+from great_expectations.exceptions import (
+    DataContextError
+)
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -551,9 +554,12 @@ class BaseDataContext:
         
         except Exception as e:
             if shorten_tracebacks:
-                raise(e)
+                print("here")
+                msg = str(e)
+                raise DataContextError("DataContext.test_yaml_config raised an error:\n\n"+msg) from None
 
             else:
+                print("there")
                 raise(e)
 
         if return_mode == "instantiated_class":
