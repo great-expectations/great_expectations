@@ -687,32 +687,3 @@ def lint_code(code):
         return linted_code
     except (black.NothingChanged, RuntimeError):
         return code
-
-
-def is_numeric(value: Any) -> bool:
-    """
-    <WILL> TODO : check to see if this is the right place to put the scripts, and if so, add the proper documentation
-    """
-    return is_int(value) or is_float(value)
-
-
-def is_int(value: Any) -> bool:
-    """
-    <WILL> TODO : check to see if this is the right place to put the scripts, and if so, add the proper documentation
-    """
-    try:
-        num: int = int(value)
-    except ValueError:
-        return False
-    return True
-
-
-def is_float(value: Any) -> bool:
-    """
-    <WILL> TODO : check to see if this is the right place to put the scripts, and if so, add the proper documentation
-    """
-    try:
-        num: float = float(value)
-    except ValueError:
-        return False
-    return True

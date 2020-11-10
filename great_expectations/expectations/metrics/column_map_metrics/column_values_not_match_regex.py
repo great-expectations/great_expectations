@@ -1,6 +1,9 @@
 import logging
 
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -14,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class ColumnValuesNotMatchRegex(ColumnMapMetricProvider):
-    condition_metric_name = "column_values.not_match_regex_list"
+    condition_metric_name = "column_values.not_match_regex"
     condition_value_keys = ("regex",)
 
     @column_map_condition(engine=PandasExecutionEngine)
@@ -31,3 +34,7 @@ class ColumnValuesNotMatchRegex(ColumnMapMetricProvider):
             raise NotImplementedError
 
         return regex_expression
+
+    @column_map_condition(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, regex, **kwargs):
+        return ~column.rlike(regex)

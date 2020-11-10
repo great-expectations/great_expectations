@@ -42,16 +42,3 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 RESULT_FORMATS = ["BOOLEAN_ONLY", "BASIC", "COMPLETE", "SUMMARY"]
-
-# TODO: re-enable once we can allow arbitrary keys but still add this sort of validation
-# class MetaDictSchema(Schema):
-#     """The MetaDict """
-#
-#     # noinspection PyUnusedLocal
-#     @validates_schema
-#     def validate_json_serializable(self, data, **kwargs):
-#         import json
-#         try:
-#             json.dumps(data)
-#         except (TypeError, OverflowError):
-#             raise ValidationError("meta information must be json serializable.")

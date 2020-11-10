@@ -32,10 +32,10 @@ class ColumnPairValuesAGreaterThanB(MapMetricProvider):
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
-        runtime_configuration: dict,
+        runtime_configuration: Dict,
     ):
 
         ignore_row_if = metric_value_kwargs.get("ignore_row_if")

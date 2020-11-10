@@ -40,10 +40,10 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
             def inner_func(
                 cls,
                 execution_engine: "PandasExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -77,10 +77,10 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
             def inner_func(
                 cls,
                 execution_engine: "SqlAlchemyExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -124,10 +124,10 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
             def inner_func(
                 cls,
                 execution_engine: "SparkDFExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -154,6 +154,7 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
                     column=data[column_name],
                     **metric_value_kwargs,
                     _metrics=metrics,
+                    _compute_domain_kwargs=compute_domain_kwargs,
                 )
                 return column_function, compute_domain_kwargs
 
@@ -169,7 +170,9 @@ def column_map_function(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for column_aggregate_metric")
 
 
-def map_condition(engine: Type[ExecutionEngine], **kwargs):
+def map_condition(
+    engine: Type[ExecutionEngine], metric_fn_type: str = "map_condition", **kwargs
+):
     """Annotates a metric provider with the "map" metric_fn_type and associated engine.
 
     The MapMetricProvider class provides engine-specific support for authoring metrics that operate on rows/records
@@ -190,14 +193,16 @@ def map_condition(engine: Type[ExecutionEngine], **kwargs):
 
         inner_func.map_condition_metric_engine = engine
         inner_func.map_condition_metric_kwargs = kwargs
-        inner_func.metric_fn_type = "map_condition"
+        inner_func.metric_fn_type = metric_fn_type
 
         return inner_func
 
     return wrapper
 
 
-def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
+def column_map_condition(
+    engine: Type[ExecutionEngine], metric_fn_type: str = "map_condition", **kwargs
+):
     """Provides engine-specific support for authing a metric_fn with a simplified signature. A column_map_condition
     must provide a map function that evalues to a boolean value; it will be used to provide supplemental metrics, such
     as the unexpected_value count, unexpected_values, and unexpected_rows.
@@ -218,15 +223,15 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     if issubclass(engine, PandasExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @map_condition(engine, **kwargs)
+            @map_condition(engine, metric_fn_type, **kwargs)
             @wraps(metric_fn)
             def inner_func(
                 cls,
                 execution_engine: "PandasExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
@@ -254,15 +259,15 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SqlAlchemyExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @map_condition(engine, **kwargs)
+            @map_condition(engine, metric_fn_type, **kwargs)
             @wraps(metric_fn)
             def inner_func(
                 cls,
                 execution_engine: "SqlAlchemyExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
@@ -304,15 +309,15 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SparkDFExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @map_condition(engine, **kwargs)
+            @map_condition(engine, metric_fn_type, **kwargs)
             @wraps(metric_fn)
             def inner_func(
                 cls,
                 execution_engine: "SparkDFExecutionEngine",
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
                 metrics: Dict[Tuple, Any],
-                runtime_configuration: dict,
+                runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
@@ -327,12 +332,25 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
                 column_name = accessor_domain_kwargs["column"]
                 column = data[column_name]
                 expected_condition = metric_fn(
-                    cls, column, **metric_value_kwargs, _metrics=metrics
+                    cls,
+                    column,
+                    **metric_value_kwargs,
+                    _table=data,
+                    _metrics=metrics,
+                    _compute_domain_kwargs=compute_domain_kwargs,
+                    _accessor_domain_kwargs=accessor_domain_kwargs,
                 )
-                if filter_column_isnull:
-                    unexpected_condition = column.isNotNull() & ~expected_condition
-                else:
+                if metric_fn_type == "window_condition_fn":
+                    if filter_column_isnull:
+                        compute_domain_kwargs = execution_engine.add_column_null_filter_row_condition(
+                            metric_domain_kwargs
+                        )
                     unexpected_condition = ~expected_condition
+                else:
+                    if filter_column_isnull:
+                        unexpected_condition = column.isNotNull() & ~expected_condition
+                    else:
+                        unexpected_condition = ~expected_condition
                 return unexpected_condition, compute_domain_kwargs
 
             inner_func.column_domain = True
@@ -346,8 +364,8 @@ def column_map_condition(engine: Type[ExecutionEngine], **kwargs):
 def _pandas_map_unexpected_count(
     cls,
     execution_engine: "PandasExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
@@ -358,8 +376,8 @@ def _pandas_map_unexpected_count(
 def _pandas_column_map_values(
     cls,
     execution_engine: "PandasExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
@@ -402,8 +420,8 @@ def _pandas_column_map_values(
 def _pandas_column_map_index(
     cls,
     execution_engine: "PandasExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
@@ -420,7 +438,7 @@ def _pandas_column_map_index(
     result_format = metric_value_kwargs["result_format"]
     boolean_mapped_unexpected_values = metrics.get("unexpected_condition")
     if result_format["result_format"] == "COMPLETE":
-        return list(data[boolean_mapped_unexpected_values == False].index)
+        return list(data[boolean_mapped_unexpected_values == True].index)
     else:
         return list(
             data[boolean_mapped_unexpected_values == True].index[
@@ -432,8 +450,8 @@ def _pandas_column_map_index(
 def _pandas_column_map_value_counts(
     cls,
     execution_engine: "PandasExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
@@ -474,8 +492,8 @@ def _pandas_column_map_value_counts(
 def _pandas_column_map_rows(
     cls,
     execution_engine: "PandasExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
@@ -501,8 +519,8 @@ def _pandas_column_map_rows(
 def _sqlalchemy_map_unexpected_count(
     cls,
     execution_engine: "SqlAlchemyExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
@@ -517,8 +535,8 @@ def _sqlalchemy_map_unexpected_count(
 def _sqlalchemy_column_map_values(
     cls,
     execution_engine: "SqlAlchemyExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
@@ -555,8 +573,8 @@ def _sqlalchemy_column_map_values(
 def _sqlalchemy_column_map_value_counts(
     cls,
     execution_engine: "SqlAlchemyExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
@@ -586,8 +604,8 @@ def _sqlalchemy_column_map_value_counts(
 def _sqlalchemy_column_map_rows(
     cls,
     execution_engine: "SqlAlchemyExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
@@ -617,8 +635,8 @@ def _sqlalchemy_column_map_rows(
 def _spark_map_unexpected_count(
     cls,
     execution_engine: "SparkDFExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
@@ -626,88 +644,92 @@ def _spark_map_unexpected_count(
     return F.sum(F.when(unexpected_condition, 1).otherwise(0)), compute_domain_kwargs
 
 
-def _spark_column_map_values(
+def _spark_map_unexpected_count_data(
     cls,
     execution_engine: "SparkDFExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
-    (
-        data,
-        compute_domain_kwargs,
-        accessor_domain_kwargs,
-    ) = execution_engine.get_compute_domain(metric_domain_kwargs)
+    # fn_domain_kwargs maybe updated to reflect null filtering
+    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
+    (data, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
+        fn_domain_kwargs
+    )
+    data = data.withColumn("__unexpected", condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    return filtered.count()
+
+
+def _spark_column_map_values(
+    cls,
+    execution_engine: "SparkDFExecutionEngine",
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[Tuple, Any],
+    **kwargs,
+):
+    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
+    (data, _, _,) = execution_engine.get_compute_domain(fn_domain_kwargs)
 
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     result_format = metric_value_kwargs["result_format"]
-    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
-    assert (
-        fn_domain_kwargs == compute_domain_kwargs
-    ), "compute domain should be equivalent to the function domain"
-    column_name = accessor_domain_kwargs["column"]
-    filtered = data.filter(condition)
+    column_name = metric_domain_kwargs["column"]
+    data = data.withColumn("__unexpected", condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     if result_format["result_format"] == "COMPLETE":
-        return list(filtered.select(F.col(column_name)).collect())
+        rows = filtered.select(F.col(column_name)).collect()
     else:
-        return list(
+        rows = (
             filtered.select(F.col(column_name))
             .limit(result_format["partial_unexpected_count"])
             .collect()
         )
+    return [row[column_name] for row in rows]
 
 
 def _spark_column_map_value_counts(
     cls,
     execution_engine: "SparkDFExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
-    (
-        data,
-        compute_domain_kwargs,
-        accessor_domain_kwargs,
-    ) = execution_engine.get_compute_domain(metric_domain_kwargs)
+    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
+    (data, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
+        fn_domain_kwargs
+    )
     """Returns all unique values in the column and their corresponding counts"""
     result_format = metric_value_kwargs["result_format"]
-    condition, fn_domain_kwargs = metrics.get("unexpected_condition")
-    assert (
-        fn_domain_kwargs == compute_domain_kwargs
-    ), "compute domain should be equivalent to the function domain"
     column_name = accessor_domain_kwargs["column"]
-    filtered = data.filter(condition)
+    data = data.withColumn("__unexpected", condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     value_counts = filtered.groupBy(F.col(column_name)).count()
     if result_format["result_format"] == "COMPLETE":
-        return value_counts
+        rows = value_counts.collect()
     else:
-        return value_counts[result_format["partial_unexpected_count"]]
+        rows = value_counts.collect()[: result_format["partial_unexpected_count"]]
+    return rows
 
 
 def _spark_column_map_rows(
     cls,
     execution_engine: "PandasExecutionEngine",
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
     metrics: Dict[Tuple, Any],
     **kwargs,
 ):
-    row_domain = {k: v for (k, v) in metric_domain_kwargs.items() if k != "column"}
-
-    (
-        data,
-        compute_domain_kwargs,
-        accessor_domain_kwargs,
-    ) = execution_engine.get_compute_domain(row_domain)
-
-    result_format = metric_value_kwargs["result_format"]
     condition, fn_domain_kwargs = metrics.get("unexpected_condition")
-    assert (
-        fn_domain_kwargs == compute_domain_kwargs
-    ), "compute domain should be equivalent to the function domain"
-    filtered = data.filter(condition)
+
+    (data, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
+        fn_domain_kwargs
+    )
+    result_format = metric_value_kwargs["result_format"]
+    data = data.withColumn("__unexpected", condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     if result_format["result_format"] == "COMPLETE":
         return filtered.collect()
     else:
@@ -755,12 +777,11 @@ class MapMetricProvider(MetricProvider):
                         "A MapMetricProvider must have a metric_condition_name to have a decorated column_map_condition method."
                     )
 
-                # rename for readability
                 condition_provider = candidate_metric_fn
                 metric_name = cls.condition_metric_name
                 metric_domain_keys = cls.condition_domain_keys
                 metric_value_keys = cls.condition_value_keys
-                map_condition_metric_kwags = getattr(
+                map_condition_metric_kwargs = getattr(
                     condition_provider, "map_condition_metric_kwags", dict()
                 )
                 is_column_domain = getattr(condition_provider, "column_domain", False)
@@ -869,6 +890,9 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type="data",
                         )
                 elif issubclass(engine, SparkDFExecutionEngine):
+                    metric_fn_type = getattr(
+                        condition_provider, "metric_fn_type", "map_condition"
+                    )
                     register_metric(
                         metric_name=metric_name,
                         metric_domain_keys=metric_domain_keys,
@@ -876,17 +900,28 @@ class MapMetricProvider(MetricProvider):
                         execution_engine=engine,
                         metric_class=cls,
                         metric_provider=condition_provider,
-                        metric_fn_type="map_condition",
+                        metric_fn_type=metric_fn_type,
                     )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_count",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=metric_value_keys,
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_spark_map_unexpected_count,
-                        metric_fn_type="aggregate_fn",
-                    )
+                    if metric_fn_type == "map_condition":
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=metric_value_keys,
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_map_unexpected_count,
+                            metric_fn_type="aggregate_fn",
+                        )
+                    elif metric_fn_type == "window_condition_fn":
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=metric_value_keys,
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_map_unexpected_count_data,
+                            metric_fn_type="data",
+                        )
                     if is_column_domain:
                         register_metric(
                             metric_name=metric_name + ".unexpected_values",
@@ -925,7 +960,6 @@ class MapMetricProvider(MetricProvider):
                     raise ValueError(
                         "A MapMetricProvider must have a function_metric_name to have a decorated column_map_function method."
                     )
-                # rename for readability
                 map_function_provider = candidate_metric_fn
                 metric_name = cls.function_metric_name
                 metric_domain_keys = cls.function_domain_keys

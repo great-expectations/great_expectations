@@ -7,6 +7,7 @@ from IPython import get_ipython
 
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,11 @@ def convert_to_json_serializable(data):
 
     import numpy as np
     import pandas as pd
+
+    # If it's one of our types, we use our own conversion; this can move to full schema
+    # once nesting goes all the way down
+    if isinstance(data, SerializableDictDot):
+        return data.to_json_dict()
 
     try:
         if not isinstance(data, list) and np.isnan(data):

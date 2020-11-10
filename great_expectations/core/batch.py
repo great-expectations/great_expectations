@@ -1,7 +1,7 @@
 import datetime
 import hashlib
 import json
-from typing import Union
+import copy
 from typing import Union, Any, Optional
 
 from great_expectations.core.id_dict import (
@@ -11,9 +11,8 @@ from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionRequest,
 )
-from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot
-
+from great_expectations.exceptions import InvalidBatchIdError
 
 
 class BatchDefinition(DictDot):
@@ -162,7 +161,6 @@ class BatchRequest(DictDot):
         partition_request: Optional[dict] = None,
         batch_data: Any = None,
         limit: Union[int, None] = None,
-        # TODO: <Alex>Is sampling in the scope of the present release?</Alex>
         sampling: Union[dict, None] = None,
     ):
         self._validate_batch_request(
@@ -210,7 +208,7 @@ class BatchRequest(DictDot):
         execution_environment_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        partition_request: Union[PartitionRequest, dict, None] = None,
+        partition_request: Optional[Union[PartitionRequest, dict]] = None,
         limit: Union[int, None] = None,
     ):
         if execution_environment_name and not isinstance(
@@ -248,11 +246,16 @@ is illegal.
             )
 
     def get_json_dict(self) -> dict:
+        partition_request: Optional[dict] = None
+        if self.partition_request is not None:
+            partition_request = copy.deepcopy(self.partition_request)
+            if partition_request.get("custom_filter_function") is not None:
+                partition_request["custom_filter_function"] = partition_request["custom_filter_function"].__name__
         return {
             "execution_environment_name": self.execution_environment_name,
             "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_request": self.partition_request,
+            "partition_request": partition_request,
         }
 
     def __str__(self):

@@ -1,26 +1,26 @@
-import yaml
-import pytest
 import datetime
 from typing import List
 
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-)
-from tests.test_utils import (
-    create_files_in_directory,
-)
-from great_expectations.execution_environment.data_connector import DataConnector
+import pytest
+import yaml
+
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
-    BatchRequest,
     BatchDefinition,
-    PartitionDefinition
+    BatchRequest,
+    PartitionDefinition,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_environment.data_connector import DataConnector
+from tests.test_utils import create_files_in_directory
+
 
 @pytest.fixture()
 def create_files_and_instantiate_data_connector(tmp_path_factory):
 
-    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
+    base_directory = str(
+        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
+    )
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -34,10 +34,11 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
             "will_20200810_1001.csv",
             "james_20200810_1003.csv",
             "alex_20200819_1300.csv",
-        ]
+        ],
     )
 
-    my_data_connector_yaml = yaml.load(f"""
+    my_data_connector_yaml = yaml.load(
+        f"""
             class_name: ConfiguredAssetFilesystemDataConnector
             execution_environment_name: test_environment
             execution_engine:
@@ -48,7 +49,6 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
             glob_directive: '*.csv'
             assets:
                 TestFiles:
-                    partitioner_name: default_partitioner_name
             default_regex:
                 pattern: (.+)_(.+)_(.+)\\.csv
                 group_names:
@@ -67,7 +67,9 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
                   class_name: NumericSorter
                   name: price
 
-        """, Loader=yaml.FullLoader)
+        """,
+        Loader=yaml.FullLoader,
+    )
 
     my_data_connector: DataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,

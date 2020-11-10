@@ -28,8 +28,8 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     """The SubdirReaderBatchKwargsGenerator inspects a filesystem and produces path-based batch_kwargs.
 
     SubdirReaderBatchKwargsGenerator recognizes data assets using two criteria:
-      - for files directly in 'base_directory' with recognized extensions (.csv, .tsv, .parquet, .xls, .xlsx, .json),
-        it uses the name of the file without the extension
+      - for files directly in 'base_directory' with recognized extensions (.csv, .tsv, .parquet, .xls, .xlsx, .json
+        .csv.gz, tsv.gz, .feather, .pkl), it uses the name of the file without the extension
       - for other files or directories in 'base_directory', is uses the file or directory name
 
     SubdirReaderBatchKwargsGenerator sees all files inside a directory of base_directory as batches of one datasource.

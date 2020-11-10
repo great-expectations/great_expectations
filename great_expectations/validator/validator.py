@@ -146,8 +146,12 @@ class Validator:
     def __getattr__(self, name):
         if name.startswith("expect_") and get_expectation_impl(name):
             return self.validate_expectation(name)
-        elif self._expose_dataframe_methods and hasattr(pd.DataFrame, name):
-            return getattr(self.batch.data, name)
+        elif (
+            self._expose_dataframe_methods
+            and isinstance(self.active_batch.data, pd.DataFrame)
+            and hasattr(pd.DataFrame, name)
+        ):
+            return getattr(self.active_batch.data, name)
         else:
             raise AttributeError(
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
@@ -190,27 +194,28 @@ class Validator:
                             f"Invalid positional argument: {arg}"
                         )
 
+                # this is used so that exceptions are caught appropriately when they occur in expectation config
+                basic_runtime_configuration = {
+                    k: v
+                    for k, v in kwargs.items()
+                    if k in ("result_format", "include_config", "catch_exceptions")
+                }
+
                 configuration = ExpectationConfiguration(
                     expectation_type=name, kwargs=expectation_kwargs, meta=meta
                 )
                 runtime_configuration = configuration.get_runtime_kwargs()
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
-                # runtime_configuration = {
-                #     k: v
-                #     for k, v in kwargs.items()
-                #     if k in ("result_format", "include_config", "catch_exceptions")
-                # }
+
                 validation_result = expectation.validate(
-                    batches={self.batch.batch_spec.to_id(): self.batch},
-                    execution_engine=self.execution_engine,
-                    runtime_configuration=runtime_configuration,
+                    validator=self, runtime_configuration=runtime_configuration,
                 )
                 if isinstance(validation_result, dict):
                     validation_result = ExpectationValidationResult(**validation_result)
 
             except Exception as err:
-                if runtime_configuration.get("catch_exceptions"):
+                if basic_runtime_configuration.get("catch_exceptions"):
                     raised_exception = True
                     exception_traceback = traceback.format_exc()
                     exception_message = "{}: {}".format(type(err).__name__, str(err))
@@ -382,7 +387,7 @@ class Validator:
         self,
         execution_engine: "ExecutionEngine",
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
     ):
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
@@ -513,38 +518,45 @@ class Validator:
         return self._validator_config[key]
 
     @property
-    def batch(self):
-        """Getter for batch"""
-        if self._batch:
-            return self._batch
-        else:
-            return self.execution_engine.active_batch_data
+    def batches(self):
+        """Getter for batches"""
+        return self._batches
 
     @property
-    def batch_spec(self):
-        """Getter for batch_spec"""
-        if not self.batch:
+    def active_batch(self):
+        """Getter for active batch"""
+        active_batch_id = self.execution_engine.active_batch_data_id
+        active_batch = self.batches.get(active_batch_id) if active_batch_id else None
+        return active_batch
+
+    @property
+    def active_batch_spec(self):
+        """Getter for active batch's batch_spec"""
+        if not self.active_batch:
             return None
         else:
-            return self.batch.batch_spec
+            return self.active_batch.batch_spec
 
     @property
-    def batch_id(self):
-        """Getter for batch id"""
-        return self.batch_spec.to_id()
+    def active_batch_id(self):
+        """Getter for active batch id"""
+        return self.execution_engine.active_batch_data_id
 
     @property
     def batch_markers(self):
-        """Getter for batch markers"""
-        if not self.batch:
+        """Getter for active batch's batch markers"""
+        if not self.active_batch:
             return None
         else:
-            return self.batch.batch_markers
+            return self.active_batch.batch_markers
 
     @property
     def batch_definition(self):
-        """Getter for the batch definition"""
-        return self.batch.batch_definition
+        """Getter for the active batch's batch definition"""
+        if not self.active_batch:
+            return None
+        else:
+            return self.active_batch.batch_definition
 
     def discard_failing_expectations(self):
         """Removes any expectations from the validator where the validation has failed"""

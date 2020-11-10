@@ -5,7 +5,6 @@ from typing import Any, Dict
 
 import jsonpatch
 
-from great_expectations.core.batch import Batch
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     find_evaluation_parameter_dependencies,
@@ -28,7 +27,7 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_load,
 )
-from great_expectations.types import DictDot
+from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +45,7 @@ def parse_result_format(result_format):
     return result_format
 
 
-class ExpectationConfiguration(DictDot):
+class ExpectationConfiguration(SerializableDictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
     kwarg_lookup_dict = {
@@ -1059,20 +1058,15 @@ class ExpectationConfiguration(DictDot):
         return get_expectation_impl(self.expectation_type)
 
     def validate(
-        self, batches: Dict[str, Batch], execution_engine, runtime_configuration=None,
+        self, validator, runtime_configuration=None,
     ):
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).validate(
-            batches=batches,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
+            validator=validator, runtime_configuration=runtime_configuration,
         )
 
     def metrics_validate(
-        self,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: "ExecutionEngine" = None,
+        self, metrics: Dict, runtime_configuration: dict = None, execution_engine=None,
     ):
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).metrics_validate(

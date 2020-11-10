@@ -1,11 +1,5 @@
-import copy
-import itertools
-import json
 import logging
-from typing import Any, Callable, Dict, List, Tuple, Union, Optional
-
-from great_expectations.execution_environment.data_connector.asset.asset import Asset
-import great_expectations.exceptions as ge_exceptions
+from typing import Any, List, Tuple, Optional
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.core.batch import BatchRequest
@@ -171,7 +165,9 @@ class DataConnector:
             print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
 
         for asset_name in asset_names[:max_examples]:
-            data_reference_list = self._get_data_reference_list_from_cache_by_data_asset_name(asset_name)
+            data_reference_list = self._get_data_reference_list_from_cache_by_data_asset_name(
+                data_asset_name=asset_name
+            )
             len_batch_definition_list = len(data_reference_list)
             example_data_references = data_reference_list[:max_examples]
 
@@ -212,20 +208,3 @@ match DataConnector execution_environment_name: "{self.execution_environment_nam
 DataConnector name: "{self.name}".
                 '''
             )
-
-    def _validate_sorters_configuration(self):
-        if len(self.sorters) > 0:
-            regex_config = self._default_regex
-            group_names: List[str] = regex_config["group_names"]
-            if any([sorter not in group_names for sorter in self.sorters]):
-                raise ge_exceptions.DataConnectorError(
-                    f'''DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-configured group_name.
-                    '''
-                )
-            if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
-                    f'''DataConnector "{self.name}" is configured with {len(group_names)} group names;
-this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                    '''
-                )

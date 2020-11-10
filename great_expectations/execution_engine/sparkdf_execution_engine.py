@@ -45,7 +45,48 @@ from ..validator.validation_graph import MetricConfiguration
 from .execution_engine import ExecutionEngine
 
 
-HASH_THRESHOLD = 1e9
+try:
+    from pyspark.sql import DataFrame, SparkSession
+except ImportError:
+    DataFrame = None
+    SparkSession = None
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency for support."
+    )
+
+
+class SparkDFBatchData:
+    def __init__(
+        self,
+        dataframe: DataFrame = None,
+        dataframe_dict: Dict[str, DataFrame] = None,
+        default_table_name=None,
+    ):
+        assert (
+            dataframe is not None or dataframe_dict is not None
+        ), "dataframe or dataframe_dict is required"
+        assert (
+            not dataframe and dataframe_dict
+        ), "dataframe and dataframe_dict may not both be specified"
+
+        if dataframe is not None:
+            dataframe_dict = {"": dataframe}
+            default_table_name = ""
+
+        self._dataframe_dict = dataframe_dict
+        self._default_table_name = default_table_name
+
+    @property
+    def default(self):
+        if self._default_table_name in self._dataframe_dict:
+            return self._dataframe_dict[self._default_table_name]
+        return None
+
+    def __getattr__(self, item):
+        return self._dataframe_dict.get(item)
+
+    def __getitem__(self, item):
+        return self._dataframe_dict.get(item)
 
 
 class SparkDFExecutionEngine(ExecutionEngine):
@@ -482,6 +523,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             assert len(aggregate["ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
+            logger.warning(
+                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {domain_id}"
+            )
             for idx, id in enumerate(aggregate["ids"]):
                 resolved_metrics[id] = res[0][idx]
 
@@ -625,4 +669,3 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             .filter(F.col("encrypted_value") == hash_value) \
             .drop("encrypted_value")
         return res
-

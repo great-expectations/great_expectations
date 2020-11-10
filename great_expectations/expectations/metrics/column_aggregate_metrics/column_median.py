@@ -40,10 +40,10 @@ class ColumnMedian(MetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
-        runtime_configuration: dict,
+        runtime_configuration: Dict,
     ):
         (
             selectable,
@@ -89,10 +89,10 @@ class ColumnMedian(MetricProvider):
     def _spark(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
-        runtime_configuration: dict,
+        runtime_configuration: Dict,
     ):
         (
             df,

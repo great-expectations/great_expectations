@@ -1,7 +1,10 @@
 import numpy as np
 import pandas as pd
 
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -37,3 +40,7 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
         else:
             parsed_value_set = value_set
         return column.notin_(tuple(parsed_value_set))
+
+    @column_map_condition(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, value_set, **kwargs):
+        return ~column.isin(value_set)

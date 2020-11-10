@@ -1,41 +1,18 @@
-import itertools
-from pathlib import Path
-from typing import Any, List, Union, Dict, Optional, Iterator
+from typing import List, Union, Dict, Optional
 import copy
 import logging
-import os
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
-from great_expectations.core.id_dict import BatchSpec, PartitionDefinitionSubset
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-
-from great_expectations.execution_environment.data_connector.partition_query import (
-    PartitionQuery,
-    build_partition_query
-
-)
-from great_expectations.execution_environment.types import PathBatchSpec
-from great_expectations.core.batch import (
-    BatchRequest,
-    BatchDefinition,
-)
-from great_expectations.execution_environment.data_connector.sorter import Sorter
-from great_expectations.execution_environment.data_connector.util import (
-    batch_definition_matches_batch_request,
-    map_data_reference_string_to_batch_definition_list_using_regex,
-    map_batch_definition_to_data_reference_string_using_regex,
-    get_filesystem_one_level_directory_glob_path_list,
-    build_sorters_from_config,
-)
+from great_expectations.execution_environment.data_connector import FilePathDataConnector
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
 # TODO: <Alex>Should we make this a "set" object?</Alex>
+# TODO: <Alex>Is this actually needed?</Alex>
 KNOWN_EXTENSIONS = [
     ".csv",
     ".tsv",
@@ -49,7 +26,7 @@ KNOWN_EXTENSIONS = [
 ]
 
 
-class ConfiguredAssetFilePathDataConnector(DataConnector):
+class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     def __init__(
         self,
         name: str,
@@ -58,7 +35,6 @@ class ConfiguredAssetFilePathDataConnector(DataConnector):
         assets: dict,
         sorters: list = None,
         execution_engine: ExecutionEngine = None,
-        # TODO: <Alex>This is needed in InferredAsset too ALEX</Alex>
         data_context_root_directory: str = None,
     ):
         logger.debug(f'Constructing ConfiguredAssetFilePathDataConnector "{name}".')
@@ -66,11 +42,10 @@ class ConfiguredAssetFilePathDataConnector(DataConnector):
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
+            default_regex=default_regex,
+            sorters=sorters,
+            data_context_root_directory=data_context_root_directory
         )
-        self._data_context_root_directory = data_context_root_directory
-
-        # TODO: Maybe make this a typed object?
-        self._default_regex = default_regex
 
         if assets is None:
             assets = {}
@@ -78,16 +53,9 @@ class ConfiguredAssetFilePathDataConnector(DataConnector):
         self._assets = _assets
         self._build_assets_from_config(config=assets)
 
-        self._sorters = build_sorters_from_config(config_list=sorters)
-        super()._validate_sorters_configuration()
-
     @property
     def assets(self) -> Dict[str, Union[dict, Asset]]:
         return self._assets
-
-    @property
-    def sorters(self) -> Optional[dict]:
-        return self._sorters
 
     def _build_assets_from_config(self, config: Dict[str, dict]):
         for name, asset_config in config.items():
@@ -129,25 +97,6 @@ class ConfiguredAssetFilePathDataConnector(DataConnector):
         """
         return list(self.assets.keys())
 
-    # TODO: <Alex>This code is broken; it is used only by deprecated classes and methods.</Alex>
-    def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
-        if runtime_keys and len(runtime_keys) > 0:
-            if not (self.runtime_keys and set(runtime_keys) <= set(self.runtime_keys)):
-                raise ge_exceptions.PartitionerError(
-                    f"""Partitioner "{self.name}" was invoked with one or more runtime keys that do not appear among the
-configured runtime keys.
-                    """
-                )
-
-    # TODO: <Alex>This method should be used in other file path type DataConnector classes (currently it is not).  ALEX</Alex>
-    def _normalize_directory_path(self, dir_path: str) -> str:
-        # If directory is a relative path, interpret it as relative to the data context's
-        # context root directory (parent directory of great_expectation dir)
-        if Path(dir_path).is_absolute() or self._data_context_root_directory is None:
-            return dir_path
-        else:
-            return Path(self._data_context_root_directory).joinpath(dir_path)
-
     def _refresh_data_references_cache(
         self,
     ):
@@ -177,37 +126,6 @@ configured runtime keys.
         path_list: List[str] = self._get_data_reference_list_for_asset(asset=asset)
         return path_list
 
-    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
-        """
-        Fetch data_references corresponding to data_asset_name from the cache.
-        """
-        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
-        batch_definition_list = self.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                execution_environment_name=self.execution_environment_name,
-                data_connector_name=self.name,
-                data_asset_name=data_asset_name,
-            )
-        )
-
-        regex_config: dict = self._get_regex_config_for_asset(data_asset_name=data_asset_name)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-
-        path_list: List[str] = [
-            map_batch_definition_to_data_reference_string_using_regex(
-                batch_definition=batch_definition,
-                regex_pattern=pattern,
-                group_names=group_names
-            )
-            for batch_definition in batch_definition_list
-        ]
-
-        # TODO: Sort with a real sorter here
-        path_list.sort()
-
-        return path_list
-
     def get_data_reference_list_count(self) -> int:
         if self._data_references_cache is None:
             raise ValueError(
@@ -234,162 +152,20 @@ configured runtime keys.
 
         return unmatched_data_references
 
-    def get_batch_definition_list_from_batch_request(
-        self,
-        batch_request: BatchRequest,
-    ) -> List[BatchDefinition]:
-        self._validate_batch_request(batch_request=batch_request)
-
-        if self._data_references_cache is None:
-            self._refresh_data_references_cache()
-
-        batch_definition_list: List[BatchDefinition] = list(
-            filter(
-                lambda batch_definition: batch_definition_matches_batch_request(
-                    batch_definition=batch_definition,
-                    batch_request=batch_request
-                ),
-                [
-                    batch_definitions[0]
-                    for data_reference_sub_cache in self._data_references_cache.values()
-                    for batch_definitions in data_reference_sub_cache.values()
-                    if batch_definitions is not None
-                ]
-            )
-        )
-
-        if batch_request.partition_request is not None:
-            partition_query_obj: PartitionQuery = build_partition_query(
-                partition_request_dict=batch_request.partition_request
-            )
-            batch_definition_list = partition_query_obj.select_from_partition_request(
-                batch_definition_list=batch_definition_list
-            )
-
-        if len(self.sorters) > 0:
-            sorted_batch_definition_list = self._sort_batch_definition_list(
-                batch_definition_list=batch_definition_list
-            )
-            return sorted_batch_definition_list
-        else:
-            return batch_definition_list
-
-    # TODO: <Alex>Opportunity to combine code with other connectors into a utility method.</Alex>
-    def _validate_sorters_configuration(self, batch_request):
-        # Override the default
-        if len(self.sorters) > 0:
-            regex_config = self._default_regex
-            if (
-                batch_request.data_asset_name is not None
-                and self.assets and batch_request.data_asset_name in self.assets
-            ):
-                asset: Asset = self.assets[batch_request.data_asset_name]
-                if asset.group_names:
-                    regex_config["group_names"] = asset.group_names
-            group_names: List[str] = regex_config["group_names"]
-            if any([sorter not in group_names for sorter in self.sorters]):
-                raise ge_exceptions.DataConnectorError(
-                    f'''ConfiguredAssetFilePathDataConnector "{self.name}" specifies one or more sort keys that do not
-appear among the configured group_name.
-                    '''
-                )
-            if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
-                    f'''ConfiguredAssetFilePathDataConnector "{self.name}" is configured with {len(group_names)} group
-names; this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                    '''
-                )
-
-    def _sort_batch_definition_list(self, batch_definition_list):
-        sorters_list: List[Sorter] = []
-        for sorter in self.sorters.values():
-            sorters_list.append(sorter)
-        sorters: Iterator[Sorter] = reversed(sorters_list)
-        for sorter in sorters:
-            batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
+    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
+        batch_definition_list: List[BatchDefinition] = [
+            batch_definitions[0]
+            for data_reference_sub_cache in self._data_references_cache.values()
+            for batch_definitions in data_reference_sub_cache.values()
+            if batch_definitions is not None
+        ]
         return batch_definition_list
 
-    def _map_data_reference_to_batch_definition_list(
-        self,
-        data_reference: str,
-        data_asset_name: str = None
-    ) -> Optional[List[BatchDefinition]]:
-        regex_config: dict = self._get_regex_config_for_asset(data_asset_name=data_asset_name)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-        return map_data_reference_string_to_batch_definition_list_using_regex(
-            execution_environment_name=self.execution_environment_name,
-            data_connector_name=self.name,
-            data_asset_name=data_asset_name,
-            data_reference=data_reference,
-            regex_pattern=pattern,
-            group_names=group_names
-        )
-
-    def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
-        data_asset_name: str = batch_definition.data_asset_name
-        regex_config: dict = self._get_regex_config_for_asset(data_asset_name=data_asset_name)
-        pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
-        return map_batch_definition_to_data_reference_string_using_regex(
-            batch_definition=batch_definition,
-            regex_pattern=pattern,
-            group_names=group_names
-        )
-
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition
-    ) -> dict:
-        path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
-        if not path:
-            raise ValueError(
-                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
-partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
-                '''
-            )
-        path = self._get_full_path(path=path)
-        return {
-            "path": path
-        }
-
-    def build_batch_spec(
-        self,
-        batch_definition: BatchDefinition
-    ) -> PathBatchSpec:
-        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
-        return PathBatchSpec(batch_spec)
-
-    def _validate_batch_request(self, batch_request: BatchRequest):
-        super()._validate_batch_request(batch_request)
-        if self.sorters is not None and len(self.sorters) > 0:
-            regex_config = self._default_regex
-            if hasattr(self, "assets") and self.assets is not None:
-
-                if batch_request.data_asset_name is not None and \
-                        self.assets is not None and \
-                        batch_request.data_asset_name in self.assets:
-
-                    asset: Asset = self.assets[batch_request.data_asset_name]
-                    if asset.group_names:
-                        regex_config["group_names"] = asset.group_names
-            group_names: List[str] = regex_config["group_names"]
-
-            if any([sorter not in group_names for sorter in self.sorters]):
-                raise ge_exceptions.DataConnectorError(
-                    f'''DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-                           configured group_name.
-                           '''
-                )
-            if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
-                    f'''DataConnector "{self.name}" is configured with {len(group_names)} group names;
-                               this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                             ''')
-
-    def _get_regex_config_for_asset(self, data_asset_name: str) -> dict:
-        asset: Optional[Asset] = self._get_asset(data_asset_name=data_asset_name)
+    def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
         regex_config: dict = copy.deepcopy(self._default_regex)
+        asset: Optional[Asset] = None
+        if data_asset_name:
+            asset = self._get_asset(data_asset_name=data_asset_name)
         if asset is not None:
             # Override the defaults
             if asset.pattern:
@@ -405,7 +181,4 @@ partition definition {batch_definition.partition_definition} from batch definiti
         return asset
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
-        raise NotImplementedError
-
-    def _get_full_path(self, path: str) -> str:
         raise NotImplementedError

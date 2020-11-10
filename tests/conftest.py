@@ -2152,6 +2152,7 @@ def empty_data_context(tmp_path_factory):
 @pytest.fixture
 def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
     monkeypatch.setenv("FOO", "BAR")
+    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
     root_dir = empty_data_context.root_directory
     ge_config_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_basic_with_variables.yml",
@@ -2581,7 +2582,9 @@ def execution_environment_configured_asset_filesystem_data_connector_regex_parti
             use_sorters=False,
             default_base_directory=default_base_directory,
             data_asset_base_directory=data_asset_base_directory,
-        )["test_execution_environment"],
+        )[
+            "test_execution_environment"
+        ],
     )
     base_directory_names: list = [default_base_directory, data_asset_base_directory]
     root_directory_path: str = data_context.root_directory
@@ -2607,7 +2610,9 @@ def execution_environment_configured_asset_filesystem_data_connector_regex_parti
             use_sorters=True,
             default_base_directory=default_base_directory,
             data_asset_base_directory=data_asset_base_directory,
-        )["test_execution_environment"],
+        )[
+            "test_execution_environment"
+        ],
     )
     base_directory_names: list = [default_base_directory, data_asset_base_directory]
     root_directory_path: str = data_context.root_directory
@@ -2772,14 +2777,14 @@ def evr_failed():
             "exception_message": None,
             "exception_traceback": None,
         },
-        expectation_config={
-            "expectation_type": "expect_column_values_to_not_match_regex",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_match_regex",
+            kwargs={
                 "column": "Name",
                 "regex": "^\\s+|\\s+$",
                 "result_format": "SUMMARY",
             },
-        },
+        ),
     )
 
 
