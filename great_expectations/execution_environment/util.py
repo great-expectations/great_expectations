@@ -67,11 +67,7 @@ def hash_pandas_dataframe(df):
 
 
 def hash_spark_dataframe(df):
-    # <WILL> : need to know ow to hash a dataframe
-    #try:
-    #    df.withColumn("hash", F.hash(col("Col1")))
-    #except TypeError:
-        # In case of facing unhashable objects (like dict), use pickle
+    # <WILL> : what is the proper way to hash a spark dataframe?
+    df = df.filter(df[0] != 0)
     obj = pickle.dumps(df.collect(), pickle.HIGHEST_PROTOCOL)
-
     return hashlib.md5(obj).hexdigest()
