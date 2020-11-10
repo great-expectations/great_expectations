@@ -61,7 +61,7 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
     name: my_sql_data_connector
     execution_environment_name: FAKE_EE_NAME
 
-    assets:
+    data_assets:
         table_partitioned_by_date_column__A:
             #table_name: events # If table_name is omitted, then the table_name defaults to the asset name
             splitter_method: _split_on_column_value
@@ -117,7 +117,7 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     execution_environment_name: FAKE_EE_NAME
 
-    assets:
+    data_assets:
         table_partitioned_by_date_column__A:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -173,7 +173,7 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     execution_environment_name: FAKE_EE_NAME
 
-    assets:
+    data_assets:
         table_partitioned_by_timestamp_column__B:
             splitter_method: _split_on_converted_datetime
             splitter_kwargs:
@@ -227,7 +227,7 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     execution_environment_name: FAKE_EE_NAME
 
-    assets:
+    data_assets:
         table_partitioned_by_regularly_spaced_incrementing_id_column__C:
             splitter_method: _split_on_divided_integer
             splitter_kwargs:
@@ -284,7 +284,7 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     execution_environment_name: FAKE_EE_NAME
 
-    assets:
+    data_assets:
         table_partitioned_by_incrementing_batch_id__E:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -338,7 +338,7 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     execution_environment_name: FAKE_EE_NAME
 
-    assets:
+    data_assets:
         table_partitioned_by_foreign_key__F:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -393,7 +393,7 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     execution_environment_name: FAKE_EE_NAME
 
-    assets:
+    data_assets:
         table_partitioned_by_multiple_columns__G:
             splitter_method: _split_on_multi_column_values
             splitter_kwargs:
@@ -462,7 +462,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
     # name: my_sql_data_connector
     # execution_environment_name: FAKE_EE_NAME
 
-    # assets:
+    # data_assets:
     #     table_that_should_be_partitioned_by_random_hash__H:
     #         splitter_method: _split_on_hashed_column
     #         splitter_kwargs:

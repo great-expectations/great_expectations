@@ -28,9 +28,9 @@ class SqlDataConnector(DataConnector):
         name:str,
         execution_environment_name: str,
         execution_engine,
-        assets: List[Dict],
+        data_assets: List[Dict],
     ):
-        self._assets = assets
+        self._data_assets = data_assets
         
         super(SqlDataConnector, self).__init__(
             name=name,
@@ -39,14 +39,14 @@ class SqlDataConnector(DataConnector):
         )
     
     @property
-    def assets(self) -> Dict[str, Asset]:
-        return self._assets
+    def data_assets(self) -> Dict[str, Asset]:
+        return self._data_assets
 
     def _refresh_data_references_cache(self):
         self._data_references_cache = {}
         
-        for data_asset_name in self._assets:
-            data_asset = self._assets[data_asset_name]
+        for data_asset_name in self.data_assets:
+            data_asset = self.data_assets[data_asset_name]
             if "table_name" in data_asset:
                 table_name = data_asset["table_name"]
             else:
@@ -83,7 +83,7 @@ class SqlDataConnector(DataConnector):
         return column_names
 
     def get_available_data_asset_names(self):
-        return list(self.assets.keys())
+        return list(self.data_assets.keys())
     
     def get_unmatched_data_references(self):
         if self._data_references_cache is None:
@@ -112,7 +112,7 @@ class SqlDataConnector(DataConnector):
         batch_spec = BatchSpec({
             "table_name" : data_asset_name,
             "partition_definition": batch_definition.partition_definition,
-            **self.assets[data_asset_name],
+            **self.data_assets[data_asset_name],
         })
 
         return batch_spec
