@@ -81,8 +81,7 @@ import great_expectations.exceptions.exceptions as ge_exceptions
 #     ))) == 5
 
 
-
-def test_test_yaml_config_(empty_data_context, tmp_path_factory):
+def test_test_yaml_config(empty_data_context, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
         directory=base_directory,
@@ -151,7 +150,8 @@ def test_yaml_config_excluding_non_regex_matching_files(empty_data_context, tmp_
         ],
     )
 
-    # gamma-202001.csv and gamma-202002.csv do not match regex (which includes 2020/month directory).
+    # gamma-202001.csv and gamma-202002.csv do not match regex (which includes 2020/month directory).  They are not
+    # considered as unmatched data references, because glob_directive causes these data references to not be listed.
 
     return_object = empty_data_context.test_yaml_config(
         f"""

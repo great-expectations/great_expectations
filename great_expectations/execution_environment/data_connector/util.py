@@ -246,20 +246,27 @@ def list_s3_keys(s3, query_options: dict, iterator_dict: dict) -> str:
 
     s3_objects_info: dict = s3.list_objects_v2(**query_options)
 
-    if "Contents" not in s3_objects_info:
+    if not any(key in s3_objects_info for key in ["Contents", "CommonPrefixes"]):
         raise ValueError("S3 query may not have been configured correctly.")
 
-    keys: List[str] = [
-        item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0
-    ]
-
-    yield from keys
-
+    if "Contents" in s3_objects_info:
+        keys: List[str] = [
+            item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0
+        ]
+        yield from keys
+    if "CommonPrefixes" in s3_objects_info:
+        common_prefixes: List[Dict[str, Any]] = s3_objects_info["CommonPrefixes"]
+        for prefix_info in common_prefixes:
+            query_options_tmp: dict = copy.deepcopy(query_options)
+            query_options_tmp.update({"Prefix": prefix_info["Prefix"]})
+            # Recursively fetch from updated prefix
+            yield from list_s3_keys(s3=s3, query_options=query_options_tmp, iterator_dict={})
     if s3_objects_info["IsTruncated"]:
         iterator_dict["continuation_token"] = s3_objects_info["NextContinuationToken"]
         # Recursively fetch more
-        yield from self._list_s3_keys(iterator_dict=iterator_dict)
-    elif "continuation_token" in iterator_dict:
+        yield from list_s3_keys(s3=s3, query_options=query_options, iterator_dict=iterator_dict)
+
+    if "continuation_token" in iterator_dict:
         # Make sure we clear the token once we've gotten fully through
         del iterator_dict["continuation_token"]
 
