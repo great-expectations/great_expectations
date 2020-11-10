@@ -567,7 +567,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         def encrypt_value_sha256(to_encode):
             sha_value = hashlib.sha256(to_encode.encode()).hexdigest()[-1 * hash_digits:]
             return sha_value
-        spark_udf = udf(encrypt_value_sha256, StringType())
+        spark_udf = F.udf(encrypt_value_sha256, StringType())
         res = df.withColumn('encrypted_value', spark_udf(column_name)) \
             .filter(F.col("encrypted_value") == partition_definition["hash_value"]) \
             .drop("encrypted_value")
@@ -620,7 +620,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             to_encode_str = str(to_encode)
             sha_value = hashlib.md5(to_encode_str.encode()).hexdigest()[-1 * hash_digits:]
             return sha_value
-        encrypt_value_md5_udf = udf(_encrypt_value_md5, StringType())
+        encrypt_value_md5_udf = F.udf(_encrypt_value_md5, StringType())
         res = df.withColumn('encrypted_value', encrypt_value_md5_udf(column_name)) \
             .filter(F.col("encrypted_value") == hash_value) \
             .drop("encrypted_value")

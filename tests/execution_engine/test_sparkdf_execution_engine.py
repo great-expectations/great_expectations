@@ -242,7 +242,7 @@ def test_get_batch_with_split_on_hashed_column(test_sparkdf):
         batch_data=test_sparkdf,
         splitter_method="_split_on_hashed_column",
         splitter_kwargs={
-            "column_name":"favorite_color",
+            "column_name": "favorite_color",
             "hash_digits": 1,
             "partition_definition": {
                 "hash_value": "a",

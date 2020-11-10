@@ -180,7 +180,6 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
         batch_data=test_df,
         splitter_method="_split_on_multi_column_values",
         splitter_kwargs={
-            "column_names" : ["y", "m", "d"],
             "partition_definition" : {
                 "y": 2020,
                 "m": 1,
