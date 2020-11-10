@@ -125,7 +125,7 @@ class SqlDataConnector(DataConnector):
         pretty_print=True,
         max_examples=3
     ):
-        return_object = super().self_check(
+        report_object = super().self_check(
             pretty_print=pretty_print,
             max_examples=max_examples
         )
@@ -135,7 +135,7 @@ class SqlDataConnector(DataConnector):
             print("\n\tChoosing an example data reference...")
 
         example_data_reference =  None
-        for data_asset_name, data_asset_return_obj in return_object["data_assets"].items():
+        for data_asset_name, data_asset_return_obj in report_object["data_assets"].items():
             # print(data_asset_name)
             # print(json.dumps(data_asset_return_obj["example_data_references"], indent=2))
             if data_asset_return_obj["batch_definition_count"] > 0:
@@ -157,7 +157,7 @@ class SqlDataConnector(DataConnector):
             )
         )
         rows = batch_data.fetchall()
-        return_object["example_data_reference"] = {
+        report_object["example_data_reference"] = {
             "batch_spec" : batch_spec,
             "n_rows" : len(rows),
         }
@@ -166,7 +166,7 @@ class SqlDataConnector(DataConnector):
             print(f"\n\t\tShowing 5 rows")
             print(pd.DataFrame(rows[:5]))
         
-        return return_object
+        return report_object
 
     ### Splitter methods for listing partitions ###
 

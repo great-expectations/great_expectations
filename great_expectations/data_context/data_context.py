@@ -497,12 +497,52 @@ class BaseDataContext:
         yaml_config: str,
         pretty_print=True,
         return_mode="instantiated_class",
-        shorten_tracebacks=True,
+        shorten_tracebacks=False,
     ):
-        """ Convenience method for testing yaml configs for Datasources, Checkpoints, and Stores
+        """ Convenience method for testing yaml configs
+
+        test_yaml_config is a convenience method for configuring the moving
+        parts of a Great Expectations deployment. It allows you to quickly
+        test out configs for system components, especially Datasources,
+        Checkpoints, and Stores.
+                
+        For many deployments of Great Expectations, these components (plus
+        Expectations) are the only ones you'll need.
+
+        test_yaml_config is mainly intended for use within notebooks and tests.
+
+        Parameters
+        ----------
+        yaml_config : str
+            A string containing the yaml config to be tested
+
+        pretty_print : bool
+            Determines whether to print human-readable output
+
+        return_mode : str
+            Determines what type of object test_yaml_config will return
+            Valid modes are "instantiated_class" and "report_object"
+
+        shorten_tracebacks : bool
+            If true, catch any errors during instantiation and print only the
+            last element of the traceback stack. This can be helpful for
+            rapid iteration on configs in a notebook, because it can remove
+            the need to scroll up and down a lot.
+
+        Returns
+        -------
+        The instantiated component (e.g. a Datasource)
+        OR
+        a json object containing metadata from the component's self_check method
+
+        The returned object is determined by return_mode.
         """
         if pretty_print:
             print("Attempting to instantiate class from config...")
+
+        if not return_mode in ["instantiated_class", "report_object"]:
+                raise ValueError(f"Unknown return_mode: {return_mode}.")
+
 
         config = yaml.load(yaml_config)
 
@@ -550,26 +590,20 @@ class BaseDataContext:
                 )
                 print()
 
-            return_object = instantiated_class.self_check(pretty_print)
-        
+            report_object = instantiated_class.self_check(pretty_print)
+
+            if return_mode == "instantiated_class":
+                return instantiated_class
+
+            elif return_mode == "report_object":
+                return report_object
+
         except Exception as e:
             if shorten_tracebacks:
-                print("here")
-                msg = str(e)
-                raise DataContextError("DataContext.test_yaml_config raised an error:\n\n"+msg) from None
+                traceback.print_exc(limit=1)
 
             else:
-                print("there")
                 raise(e)
-
-        if return_mode == "instantiated_class":
-            return instantiated_class
-
-        elif return_mode == "return_object":
-            return return_object
-
-        else:
-            raise ValueError(f"Unknown return_mode: {return_mode}.")
 
     def _normalize_absolute_or_relative_path(self, path):
         if path is None:

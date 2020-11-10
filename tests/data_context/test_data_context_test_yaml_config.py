@@ -6,7 +6,7 @@ import pytest
 
 from tests.test_utils import create_files_in_directory
 from great_expectations.exceptions import (
-    DataContextError
+    PluginClassNotFoundError,
 )
 
 
@@ -112,7 +112,7 @@ data_connectors:
             group_names:
             - letter
             - number
-""", return_mode="return_object"
+""", return_mode="report_object"
     )
 
     print(json.dumps(return_obj, indent=2))
@@ -154,28 +154,22 @@ execution_engine:
     class_name: NOT_A_REAL_CLASS_NAME
 """
 
-    with pytest.raises(DataContextError) as excinfo:
+    with pytest.raises(PluginClassNotFoundError) as excinfo:
         empty_data_context.test_yaml_config(
             yaml_config=first_config
         )
-    print(excinfo.value.message)
-    shortened_message_len = len(excinfo.value.message)
+    # print(excinfo.value.message)
+    # shortened_message_len = len(excinfo.value.message)
+    # print("="*80)
 
-    print("="*80)
+    # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
+    # Note: a more thorough test could also verify that the traceback is indeed short.
+    empty_data_context.test_yaml_config(
+        yaml_config=first_config,
+        shorten_tracebacks=True,
+    )
 
-    with pytest.raises(DataContextError) as excinfo:
-        empty_data_context.test_yaml_config(
-            yaml_config=first_config,
-            shorten_tracebacks=False,
-        )
-    print(excinfo.value.message)
-    long_message_len = len(excinfo.value.message)
-
-    # assert shortened_message_len < long_message_len
-
-
-
-
+    # For good measure, do it again, with a different config and a different type of error
     temp_dir = str(tempfile.mkdtemp())
     second_config = f"""
 class_name: ExecutionEnvironment
@@ -197,18 +191,12 @@ data_connectors:
         NOT_A_REAL_KEY: nothing
 """
 
-    with pytest.raises(DataContextError) as excinfo:
-        empty_data_context.test_yaml_config(
-            yaml_config=second_config,
-        )
-    short_message_len = len(excinfo.value.message)
-
     with pytest.raises(TypeError) as excinfo:
         empty_data_context.test_yaml_config(
             yaml_config=second_config,
-            shorten_tracebacks=False
         )
-    print(str(excinfo))
-    long_message_len = len(excinfo.message)
 
-    assert shortened_message_len < long_message_len
+    empty_data_context.test_yaml_config(
+        yaml_config=second_config,
+        shorten_tracebacks=True
+    )

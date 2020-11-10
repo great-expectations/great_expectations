@@ -294,7 +294,7 @@ class ExecutionEnvironment:
         return batch_definition_list
 
     def self_check(self, pretty_print=True, max_examples=3):
-        return_object = {
+        report_object = {
             "execution_engine": {
                 "class_name" : self.execution_engine.__class__.__name__,
             }
@@ -308,7 +308,7 @@ class ExecutionEnvironment:
 
         data_connector_list = self.list_data_connectors()
         data_connector_list.sort()
-        return_object["data_connectors"] = {
+        report_object["data_connectors"] = {
             "count": len(data_connector_list)
         }
 
@@ -318,11 +318,11 @@ class ExecutionEnvironment:
                 pretty_print=pretty_print,
                 max_examples=max_examples
             )
-            return_object["data_connectors"][
+            report_object["data_connectors"][
                 data_connector["name"]
             ] = data_connector_return_obj
 
-        return return_object
+        return report_object
 
     def _validate_batch_request(self, batch_request: BatchRequest):
         if not (

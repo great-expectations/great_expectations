@@ -194,9 +194,9 @@ def test_self_check():
         }
     )
 
-    self_check_return_object = my_data_connector.self_check()
+    self_check_report_object = my_data_connector.self_check()
 
-    assert self_check_return_object == {
+    assert self_check_report_object == {
         "class_name": "SinglePartitionerDictDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
@@ -240,9 +240,9 @@ def test_that_needs_a_better_name():
         }
     )
 
-    self_check_return_object = my_data_connector.self_check()
+    self_check_report_object = my_data_connector.self_check()
 
-    assert self_check_return_object == {
+    assert self_check_report_object == {
         "class_name": "SinglePartitionerDictDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
