@@ -662,3 +662,99 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(test_cases_for_s
     )
 
     assert len(batch_data.fetchall()) == 120
+
+def test_default_behavior_with_no_splitter(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    config = yaml.load(
+        """
+    name: my_sql_data_connector
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+
+    data_assets:
+        table_partitioned_by_date_column__A: {}
+    """,
+        yaml.FullLoader,
+    )
+    config["execution_engine"] = db
+
+    my_data_connector = SqlDataConnector(**config)
+    report_object = my_data_connector.self_check()
+    print(json.dumps(report_object, indent=2))
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+        partition_request={}
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+        partition_request={
+            "partition_identifiers": {}
+        }
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}
+
+def test_behavior_with_whole_table_splitter(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    config = yaml.load(
+        """
+    name: my_sql_data_connector
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+
+    data_assets:
+        table_partitioned_by_date_column__A:
+            splitter_method : "_split_on_whole_table"
+            splitter_kwargs : {}
+    """,
+        yaml.FullLoader,
+    )
+    config["execution_engine"] = db
+
+    my_data_connector = SqlDataConnector(**config)
+    report_object = my_data_connector.self_check()
+    print(json.dumps(report_object, indent=2))
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+        partition_request={}
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+        partition_request={
+            "partition_identifiers": {}
+        }
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}

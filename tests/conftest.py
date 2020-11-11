@@ -25,6 +25,7 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.util import import_library_module
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 from .test_utils import (
     create_files_for_regex_partitioner,
@@ -2859,13 +2860,10 @@ def basic_sqlalchemy_datasource(sqlitedb_engine):
 
 @pytest.fixture
 def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
-    # TODO: Switch this to an actual ExecutionEngine
 
     db_file = file_relative_path(
-        __file__, os.path.join("..", "..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        __file__, os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
     )
-    # db = sqlite3.connect(db_file)
-    # return db
 
     engine = sa.create_engine(f"sqlite:////{db_file}")
     conn = engine.connect()
