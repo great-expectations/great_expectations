@@ -100,11 +100,7 @@ data_connectors:
     }
 
 def test_StreamlinedSqlExecutionEnvironment(empty_data_context):
-    return
-
     # This test mirrors the likely path to configure a StreamlinedSqlExecutionEnvironment
-    random.seed(0)
-
     db_file = os.path.join(os.getcwd(), "tests", "test_sets", "test_cases_for_sql_data_connector.db")
 
     #Absolutely minimal starting config
@@ -118,28 +114,44 @@ connection_string: sqlite:///{db_file}
         "bar",
     ]
 
-#TNote: Abe 2020111: this test belongs with the data_connector, not here.
+#Note: Abe 2020111: this test belongs with the data_connector tests, not here.
 def test_introspect_db(empty_data_context):
-    # This test mirrors the likely path to configure a StreamlinedSqlExecutionEnvironment
-    random.seed(0)
-
     db_file = os.path.join(os.getcwd(), "tests", "test_sets", "test_cases_for_sql_data_connector.db")
-
-    #Absolutely minimal starting config
     my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
 class_name: StreamlinedSqlExecutionEnvironment
 connection_string: sqlite:///{db_file}
 """)
 
-    assert my_sql_execution_environment.data_connectors["ONLY_DATA_CONNECTOR"]._introspect_db() == [
-        'table_containing_id_spacers_for_D',
-        'table_partitioned_by_date_column__A',
-        'table_partitioned_by_foreign_key__F',
-        'table_partitioned_by_incrementing_batch_id__E',
-        'table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D',
-        'table_partitioned_by_multiple_columns__G',
-        'table_partitioned_by_regularly_spaced_incrementing_id_column__C',
-        'table_partitioned_by_timestamp_column__B',
-        'table_that_should_be_partitioned_by_random_hash__H',
-        'table_with_fk_reference_from_F'
+    my_data_connector = my_sql_execution_environment.data_connectors["ONLY_DATA_CONNECTOR"]
+
+    assert my_data_connector._introspect_db() == [
+        {"schema_name": "main", "table_name": "table_containing_id_spacers_for_D", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_date_column__A", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_foreign_key__F", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_incrementing_batch_id__E", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_multiple_columns__G", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_timestamp_column__B", "type": "table"},
+        {"schema_name": "main", "table_name": "table_that_should_be_partitioned_by_random_hash__H", "type": "table"},
+        {"schema_name": "main", "table_name": "table_with_fk_reference_from_F", "type": "table"},
     ]
+
+    assert my_data_connector._introspect_db(
+        schema_name="main"
+    ) == [
+        {"schema_name": "main", "table_name": "table_containing_id_spacers_for_D", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_date_column__A", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_foreign_key__F", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_incrementing_batch_id__E", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_multiple_columns__G", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_timestamp_column__B", "type": "table"},
+        {"schema_name": "main", "table_name": "table_that_should_be_partitioned_by_random_hash__H", "type": "table"},
+        {"schema_name": "main", "table_name": "table_with_fk_reference_from_F", "type": "table"},
+    ]
+
+    #Note: Abe 2020111: this test currently only uses a sqlite fixture.
+    # We should extend this to at least include postgresql in the unit tests.
+    # Other tests can be run as integration tests.

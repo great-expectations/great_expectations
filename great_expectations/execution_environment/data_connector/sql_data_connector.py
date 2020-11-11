@@ -191,78 +191,79 @@ class SqlDataConnector(DataConnector):
     
         return report_object
 
-    def _introspect_db(self):
+    def _introspect_db(
+        self,
+        schema_name: str=None,
+    ):
+        engine = self._execution_engine.engine
+        inspector = sa.inspect(engine)
 
-        inspector = sa.inspect(self._execution_engine.engine)
-
-        tables = inspector.get_table_names()
+        tables = []
+        
+        inspector.get_table_names()
         print(tables)
 
-        # tables.extend(
-        #     [
-        #         (table_name, "table")
-        #         if inspector.default_schema_name == schema_name
-        #         else (schema_name + "." + table_name, "table")
-        #         for table_name in inspector.get_table_names(
-        #             schema=schema_name
-        #         )
-        #         if table_name not in known_system_tables
-        #     ]
-        # )
+        for schema_name in inspector.get_schema_names():
+            known_information_schemas = [
+                "INFORMATION_SCHEMA",  # snowflake, mssql, mysql, oracle
+                "information_schema",  # postgres, redshift, mysql
+                "performance_schema",  # mysql
+                "sys",  # mysql
+                "mysql",  # mysql
+            ]
+            known_system_tables = ["sqlite_master"]  # sqlite
+            if schema_name in known_information_schemas:
+                continue
 
+            if engine.dialect.name.lower() == "bigquery":
+                tables.extend(
+                    [
+                        {
+                            "schema_name": schema_name,
+                            "table_name": table_name,
+                            "type": "table",
+                        }
+                        
+                        for table_name in inspector.get_table_names(
+                            schema=schema_name
+                        )
+                        if table_name not in known_system_tables
+                    ]
+                )
+            else:
+                tables.extend(
+                    [
+                        {
+                            "schema_name": schema_name,
+                            "table_name": table_name,
+                            "type": "table",
+                        }
+#                         if inspector.default_schema_name == schema_name
+#                         else {
+#                             "schema_name": schema_name,
+#                             "table_name": table_name,
+#                             "type": "table",
+#                         }
+# (schema_name + "." + table_name, "table")
+                        for table_name in inspector.get_table_names(schema=schema_name)
+                        if table_name not in known_system_tables
+                    ]
+                )
+            try:
+                tables.extend(
+                    [
+                        (table_name, "view")
+                        if inspector.default_schema_name == schema_name
+                        else (schema_name + "." + table_name, "view")
+                        for table_name in inspector.get_view_names(schema=schema_name)
+                        if table_name not in known_system_tables
+                    ]
+                )
+            except NotImplementedError:
+                pass
+        
         return tables
 
-        
-        if self.engine is not None and self.inspector is not None:
-            for schema_name in self.inspector.get_schema_names():
-                known_information_schemas = [
-                    "INFORMATION_SCHEMA",  # snowflake, mssql, mysql, oracle
-                    "information_schema",  # postgres, redshift, mysql
-                    "performance_schema",  # mysql
-                    "sys",  # mysql
-                    "mysql",  # mysql
-                ]
-                known_system_tables = ["sqlite_master"]  # sqlite
-                if schema_name in known_information_schemas:
-                    continue
-
-                if self.engine.dialect.name.lower() == "bigquery":
-                    tables.extend(
-                        [
-                            (table_name, "table")
-                            for table_name in self.inspector.get_table_names(
-                                schema=schema_name
-                            )
-                            if table_name not in known_system_tables
-                        ]
-                    )
-                else:
-                    tables.extend(
-                        [
-                            (table_name, "table")
-                            if self.inspector.default_schema_name == schema_name
-                            else (schema_name + "." + table_name, "table")
-                            for table_name in self.inspector.get_table_names(
-                                schema=schema_name
-                            )
-                            if table_name not in known_system_tables
-                        ]
-                    )
-                try:
-                    tables.extend(
-                        [
-                            (table_name, "view")
-                            if self.inspector.default_schema_name == schema_name
-                            else (schema_name + "." + table_name, "view")
-                            for table_name in self.inspector.get_view_names(
-                                schema=schema_name
-                            )
-                            if table_name not in known_system_tables
-                        ]
-                    )
-                except NotImplementedError:
-                    # Not implemented by bigquery dialect
-                    pass
 
     ### Splitter methods for listing partitions ###
 
