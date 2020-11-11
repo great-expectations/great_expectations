@@ -842,13 +842,16 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
 
         success = None
-        if total_count is None or null_count is None:
+        if total_count is None:
             # Vacuously true
             success = True
-        elif (total_count - null_count) != 0:
+        elif null_count is not None and (total_count - null_count) != 0:
             success_ratio = (total_count - unexpected_count - null_count) / (
                 total_count - null_count
             )
+            success = success_ratio >= mostly
+        elif null_count is None:
+            success_ratio = (total_count - unexpected_count) / total_count
             success = success_ratio >= mostly
         elif total_count == 0:
             success = True
