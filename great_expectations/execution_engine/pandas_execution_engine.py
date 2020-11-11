@@ -104,22 +104,6 @@ Notes:
     def configure_validator(self, validator):
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
-    
-    def get_batch_data(
-        self,
-        batch_spec: BatchSpec,
-    ) -> Any :
-        """Interprets batch_data and returns the appropriate data.
-
-        This method is primarily useful for utility cases (e.g. testing) where
-        data is being fetched without a DataConnector and metadata like
-        batch_markers is unwanted
-
-        Note: this method is currently a thin wrapper for get_batch_data_and_markers.
-        It simply suppresses the batch_markers.
-        """
-        batch_data, _ = self.get_batch_data_and_markers(batch_spec)
-        return batch_data
 
     def get_batch_data_and_markers(
         self,
@@ -402,7 +386,7 @@ Notes:
     @staticmethod
     def _split_on_multi_column_values(
         df,
-        column_names: list,
+        column_names: List[str],
         partition_definition: dict,
     ):
         """Split on the joint values in the named columns"""

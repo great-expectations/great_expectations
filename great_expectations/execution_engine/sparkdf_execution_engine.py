@@ -29,8 +29,10 @@ except ImportError:
         "Unable to load pyspark; install optional spark dependency for support."
     )
 
+
+
 from great_expectations.core.id_dict import IDDict
-from great_expectations.core.batch import BatchSpec, Batch, BatchMarkers
+from great_expectations.core.batch import BatchSpec, BatchMarkers
 
 from great_expectations.execution_environment.types.batch_spec import(
     PathBatchSpec,
@@ -198,22 +200,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         return self.active_batch_data
 
-    def get_batch_data(
-        self,
-        batch_spec: BatchSpec,
-    ) -> Any :
-        """Interprets batch_data and returns the appropriate data.
-
-        This method is primarily useful for utility cases (e.g. testing) where
-        data is being fetched without a DataConnector and metadata like
-        batch_markers is unwanted
-
-        Note: this method is currently a thin wrapper for get_batch_data_and_markers.
-        It simply suppresses the batch_markers.
-        """
-        batch_data, _ = self.get_batch_data_and_markers(batch_spec)
-        return batch_data
-
     def get_batch_data_and_markers(
         self,
         batch_spec: BatchSpec
@@ -242,6 +228,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             reader_fn: Callable = self._get_reader_fn(reader, reader_method, path)
 
             batch_data = reader_fn(path, **reader_options)
+        elif isinstance(batch_spec, S3BatchSpec):
+            pass
         else:
             raise BatchSpecError(
             """
