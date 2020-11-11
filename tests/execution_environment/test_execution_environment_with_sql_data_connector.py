@@ -100,6 +100,8 @@ data_connectors:
     }
 
 def test_StreamlinedSqlExecutionEnvironment(empty_data_context):
+    return
+
     # This test mirrors the likely path to configure a StreamlinedSqlExecutionEnvironment
     random.seed(0)
 
@@ -116,63 +118,28 @@ connection_string: sqlite:///{db_file}
         "bar",
     ]
 
-    # my_data_connector = instantiate_class_from_config(
-    #     config,
-    #     config_defaults={
-    #         "module_name": "great_expectations.execution_environment"
-    #     },
-    #     runtime_environment={
-    #         "name" : "my_sql_execution_environment"
-    #     },
-    # )
+#TNote: Abe 2020111: this test belongs with the data_connector, not here.
+def test_introspect_db(empty_data_context):
+    # This test mirrors the likely path to configure a StreamlinedSqlExecutionEnvironment
+    random.seed(0)
 
-    # report = my_data_connector.self_check()
-    # print(json.dumps(report, indent=4))
+    db_file = os.path.join(os.getcwd(), "tests", "test_sets", "test_cases_for_sql_data_connector.db")
 
-    # assert report == {
-    #     "execution_engine": {
-    #         "class_name": "SqlAlchemyExecutionEngine"
-    #     },
-    #     "data_connectors": {
-    #         "count": 1,
-    #         "my_snowflake_db": {
-    #             "class_name": "SqlDataConnector",
-    #             "data_asset_count": 1,
-    #             "example_data_asset_names": [
-    #                 "table_partitioned_by_date_column__A"
-    #             ],
-    #             "data_assets": {
-    #                 "table_partitioned_by_date_column__A": {
-    #                     "batch_definition_count": 5,
-    #                     "example_data_references": [
-    #                         {
-    #                             "date": "2020-00"
-    #                         },
-    #                         {
-    #                             "date": "2020-01"
-    #                         },
-    #                         {
-    #                             "date": "2020-02"
-    #                         }
-    #                     ]
-    #                 }
-    #             },
-    #             "unmatched_data_reference_count": 0,
-    #             "example_unmatched_data_references": [],
-    #             "example_data_reference": {
-    #                 "batch_spec": {
-    #                     "table_name": "table_partitioned_by_date_column__A",
-    #                     "partition_definition": {
-    #                         "date": "2020-01"
-    #                     },
-    #                     "splitter_method": "_split_on_converted_datetime",
-    #                     "splitter_kwargs": {
-    #                         "column_name": "date",
-    #                         "date_format_string": "%Y-%W"
-    #                     }
-    #                 },
-    #                 "n_rows": 24
-    #             }
-    #         }
-    #     }
-    # }
+    #Absolutely minimal starting config
+    my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+class_name: StreamlinedSqlExecutionEnvironment
+connection_string: sqlite:///{db_file}
+""")
+
+    assert my_sql_execution_environment.data_connectors["ONLY_DATA_CONNECTOR"]._introspect_db() == [
+        'table_containing_id_spacers_for_D',
+        'table_partitioned_by_date_column__A',
+        'table_partitioned_by_foreign_key__F',
+        'table_partitioned_by_incrementing_batch_id__E',
+        'table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D',
+        'table_partitioned_by_multiple_columns__G',
+        'table_partitioned_by_regularly_spaced_incrementing_id_column__C',
+        'table_partitioned_by_timestamp_column__B',
+        'table_that_should_be_partitioned_by_random_hash__H',
+        'table_with_fk_reference_from_F'
+    ]
