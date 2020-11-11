@@ -7,6 +7,9 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import (
+    MetricPartialFunctionTypes,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -40,7 +43,8 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         return column.notin_(dup_query)
 
     @column_condition_partial(
-        engine=SparkDFExecutionEngine, metric_fn_type="window_condition_fn"
+        engine=SparkDFExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
     )
     def _spark(cls, column, **kwargs):
         return F.count(F.lit(1)).over(Window.partitionBy(column)) <= 1

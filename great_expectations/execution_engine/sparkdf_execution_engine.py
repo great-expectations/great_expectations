@@ -4,8 +4,6 @@ import logging
 import uuid
 from typing import Any, Callable, Dict, Iterable, Tuple, Union
 
-from ..expectations.metrics.metric_provider import MetricDomainTypes
-
 try:
     import pyspark.sql.functions as F
 except ImportError:
@@ -246,9 +244,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return batch_spec
 
     def get_compute_domain(
-        self,
-        domain_kwargs: dict,
-        domain_type: Union[str, MetricDomainTypes]
+        self, domain_kwargs: dict, domain_type: Union[str, "MetricDomainTypes"]
     ) -> Tuple["pyspark.sql.DataFrame", dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
@@ -361,6 +357,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             metric_to_resolve,
             engine_fn,
             compute_domain_kwargs,
+            accessor_domain_kwargs,
             metric_provider_kwargs,
         ) in metric_fn_bundle:
             if not isinstance(compute_domain_kwargs, IDDict):
@@ -375,12 +372,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             aggregates[domain_id]["column_aggregates"].append(engine_fn)
             aggregates[domain_id]["ids"].append(metric_to_resolve.id)
         for aggregate in aggregates.values():
-            df, compute_domain_kwargs, _ = self.get_compute_domain(
-                aggregate["domain_kwargs"]
+            compute_domain_kwargs = aggregate["domain_kwargs"]
+            df, _, _ = self.get_compute_domain(
+                compute_domain_kwargs, domain_type="identity"
             )
-            assert (
-                compute_domain_kwargs == aggregate["domain_kwargs"]
-            ), "Invalid compute domain returned from a bundled metric. Verify that its target compute domain is a valid compute domain."
             assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
             condition_ids = []
             aggregate_cols = []

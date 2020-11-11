@@ -6,12 +6,19 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    MetricPartialFunctionTypes,
+)
 from great_expectations.expectations.metrics.column_map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
-from great_expectations.expectations.metrics.metric_provider import metric_value_fn
+from great_expectations.expectations.metrics.metric_provider import (
+    metric_partial_fn,
+    metric_value_fn,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -31,10 +38,10 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         else:
             return series_diff <= 0
 
-    @metric_value_fn(
+    @metric_partial_fn(
         engine=SparkDFExecutionEngine,
-        metric_fn_type="window_condition_fn",
-        domain_type="column",
+        partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+        domain_type=MetricDomainTypes.COLUMN,
     )
     def _spark(
         cls,
@@ -67,7 +74,9 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             df,
             compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(compute_domain_kwargs)
+        ) = execution_engine.get_compute_domain(
+            compute_domain_kwargs, MetricDomainTypes.COLUMN
+        )
 
         # NOTE: 20201105 - parse_strings_as_datetimes is not supported here;
         # instead detect types naturally
@@ -88,6 +97,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             return (
                 F.when(diff >= 0, F.lit(True)).otherwise(F.lit(False)),
                 compute_domain_kwargs,
+                accessor_domain_kwargs,
             )
         # If we expect values to be flat or decreasing then unexpected values are those
         # that are decreasing
@@ -95,6 +105,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             return (
                 F.when(diff > 0, F.lit(True)).otherwise(F.lit(False)),
                 compute_domain_kwargs,
+                accessor_domain_kwargs,
             )
 
     @classmethod
@@ -116,4 +127,3 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
                     {"include_nested": True},
                 )
             }
-

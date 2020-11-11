@@ -8,11 +8,6 @@ from typing import Any, Callable, Dict, Iterable, List, Tuple, Union
 from urllib.parse import urlparse
 
 from great_expectations.core import IDDict
-from great_expectations.execution_environment.types import (
-    SqlAlchemyDatasourceQueryBatchSpec,
-    SqlAlchemyDatasourceTableBatchSpec,
-)
-from great_expectations.expectations.metrics.metric_provider import MetricDomainTypes
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
 from great_expectations.util import import_library_module
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -532,9 +527,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     def get_compute_domain(
-        self,
-        domain_kwargs: Dict,
-        domain_type: Union[str, MetricDomainTypes],
+        self, domain_kwargs: Dict, domain_type: Union[str, "MetricDomainTypes"],
     ) -> Tuple["sa.sql.Selectable", dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
@@ -629,6 +622,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             metric_to_resolve,
             engine_fn,
             compute_domain_kwargs,
+            accessor_domain_kwargs,
             metric_provider_kwargs,
         ) in metric_fn_bundle:
             if not isinstance(compute_domain_kwargs, IDDict):
@@ -645,12 +639,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
-            selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"]
+            selectable, _, _ = self.get_compute_domain(
+                query["domain_kwargs"], domain_type="identity"
             )
-            assert (
-                compute_domain_kwargs == query["domain_kwargs"]
-            ), "Invalid compute domain returned from a bundled metric. Verify that its target compute domain is a valid compute domain."
             assert len(query["select"]) == len(query["ids"])
             res = self.engine.execute(
                 sa.select(query["select"]).select_from(selectable)

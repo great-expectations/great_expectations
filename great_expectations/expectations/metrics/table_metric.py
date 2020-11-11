@@ -17,6 +17,7 @@ from great_expectations.expectations.metrics.metric_provider import (
 
 logger = logging.getLogger(__name__)
 
+
 class TableMetricProvider(MetricProvider):
     domain_keys = (
         "batch_id",
@@ -24,4 +25,3 @@ class TableMetricProvider(MetricProvider):
         "row_condition",
         "condition_parser",
     )
-    metric_fn_type = "aggregate_fn"

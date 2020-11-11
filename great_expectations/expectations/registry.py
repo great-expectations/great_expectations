@@ -99,12 +99,14 @@ def register_metric(
     execution_engine: Type["ExecutionEngine"],
     metric_class: Type["MetricProvider"],
     metric_provider: Union[Callable, None],
-    metric_fn_type: str,
+    metric_fn_type: Optional[
+        Union["MetricFunctionTypes", "MetricPartialFunctionTypes"]
+    ] = None,
 ) -> dict:
     res = dict()
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
-    if metric_provider is not None:
+    if metric_provider is not None and metric_fn_type is not None:
         metric_provider.metric_fn_type = metric_fn_type
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]

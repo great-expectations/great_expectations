@@ -17,8 +17,6 @@ from ..core.batch import Batch, BatchMarkers, BatchRequest
 from ..core.id_dict import BatchSpec
 from ..exceptions import BatchSpecError, ValidationError
 from ..execution_environment.util import hash_pandas_dataframe
-from ..expectations.metrics.metric_provider import MetricDomainTypes
-from ..validator.validation_graph import MetricConfiguration
 from .execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -295,9 +293,7 @@ operate.
         return batch_spec
 
     def get_compute_domain(
-        self,
-        domain_kwargs: dict,
-        domain_type: Union[str, MetricDomainTypes],
+        self, domain_kwargs: dict, domain_type: Union[str, "MetricDomainTypes"],
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas DataFrame. If the domain is a single column,

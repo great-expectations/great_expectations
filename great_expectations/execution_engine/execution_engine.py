@@ -1,11 +1,11 @@
 import copy
 import logging
+from enum import Enum
 from typing import Any, Dict, Iterable, Tuple, Union
 
 from ruamel.yaml import YAML
 
 from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.expectations.metrics.metric_provider import MetricDomainTypes
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.validation_graph import MetricConfiguration
 
@@ -159,12 +159,28 @@ class ExecutionEngine:
                 "runtime_configuration": runtime_configuration,
             }
             if metric_fn is None:
-                metric_fn, compute_domain_kwargs = metric_dependencies.pop("metric_partial_fn")
+                (
+                    metric_fn,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = metric_dependencies.pop("metric_partial_fn")
                 metric_fn_bundle.append(
-                    (metric_to_resolve, metric_fn, compute_domain_kwargs, metric_provider_kwargs)
+                    (
+                        metric_to_resolve,
+                        metric_fn,
+                        compute_domain_kwargs,
+                        accessor_domain_kwargs,
+                        metric_provider_kwargs,
+                    )
                 )
                 continue
-            metric_fn_type = getattr(metric_fn, "metric_fn_type", "value")
+            # NOTE: 20201111 - Would prefer to resolve the underlying import error here rather than
+            # use this workaround of re-converting to string
+            metric_fn_type = getattr(metric_fn, "metric_fn_type", None)
+            if metric_fn_type is not None:
+                metric_fn_type = metric_fn_type.value
+            else:
+                metric_fn_type = "value"
             if metric_fn_type in [
                 "map_fn",
                 "map_condition_fn",
@@ -198,9 +214,7 @@ class ExecutionEngine:
         raise NotImplementedError
 
     def get_compute_domain(
-        self,
-        domain_kwargs: dict,
-        domain_type: Union[str, MetricDomainTypes],
+        self, domain_kwargs: dict, domain_type: Union[str, "MetricDomainTypes"],
     ) -> Tuple[Any, dict, dict]:
         """get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
         and specific engine semantics.
@@ -248,3 +262,28 @@ class ExecutionEngine:
         new_domain_kwargs["condition_parser"] = "great_expectations__experimental__"
         new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
         return new_domain_kwargs
+
+
+class MetricPartialFunctionTypes(Enum):
+    MAP_FN = "map_fn"
+    MAP_SERIES = "map_series"
+    MAP_CONDITION_FN = "map_condition_fn"
+    MAP_CONDITION_SERIES = "map_condition_series"
+    WINDOW_FN = "window_fn"
+    WINDOW_CONDITION_FN = "window_condition_fn"
+    AGGREGATE_FN = "aggregate_fn"
+
+
+class MetricFunctionTypes(Enum):
+    VALUE = "value"
+    MAP_VALUES = "map_values"
+    WINDOW_VALUES = "window_values"
+    AGGREGATE_VALUE = "aggregate_value"
+
+
+class MetricDomainTypes(Enum):
+    IDENTITY = "identity"
+    COLUMN = "column"
+    COLUMN_PAIR = "column_pair"
+    TABLE = "table"
+    OTHER = "other"

@@ -50,9 +50,8 @@ def _build_pandas_engine(df):
 
 
 def test_metric_loads():
-    assert (
-        get_metric_provider("column.max", PandasExecutionEngine()) is not None
-    )
+    assert get_metric_provider("column.max", PandasExecutionEngine()) is not None
+
 
 def test_basic_metric():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
@@ -65,9 +64,7 @@ def test_basic_metric():
         metric_value_kwargs=dict(),
     )
 
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,)
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 3}
 
 
@@ -92,6 +89,7 @@ def test_basic_metric_sa(sa):
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     assert results == {desired_metric.id: 3}
+
 
 def test_column_max():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
@@ -244,33 +242,30 @@ def test_map_value_set_spark(spark_session):
 
 
 def test_map_column_value_lengths_between_pd():
-    # NOTE: 20201106 - JPC - this test is unusual because it's checking against the map_fn value.
-    # We plan to implement map_values in the future.
     engine = _build_pandas_engine(
         pd.DataFrame({"a": ["a", "aaa", "bcbc", "defgh", None]})
     )
     desired_metric = MetricConfiguration(
-        metric_name="column_values.value_length.map_fn",
+        metric_name="column_values.value_length.map",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"value_set": [1]},
+        metric_value_kwargs=dict(),
     )
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    # assert results == {desired_metric.id: 1}
     ser_expected_lengths = pd.Series([1, 3, 4, 5])
-    assert ser_expected_lengths.equals(results[desired_metric.id])
+    result_series, _, _ = results[desired_metric.id]
+    assert ser_expected_lengths.equals(result_series)
 
 
 def test_map_unique_pd():
     engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique",
+        metric_name="column_values.unique.condition",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"value_set": [1]},
+        metric_value_kwargs=dict(),
     )
 
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert list(results[desired_metric.id]) == [False, False, True, True]
+    assert list(results[desired_metric.id][0]) == [False, False, True, True]
 
 
 def test_map_unique_spark(spark_session):
@@ -285,11 +280,19 @@ def test_map_unique_spark(spark_session):
     )
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique",
+        metric_name="column_values.unique.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
+    #
+    # aggregate_fn = MetricConfiguration(
+    #     metric_name="column_values.unique.unexpected_count.aggregate_fn",
+    #     metric_domain_kwargs={"column": "a"},
+    #     metric_value_kwargs=dict(),
+    #     metric_dependencies={"unexpected_condition": condition_metric}
+    # )
+    # aggregate_fn_metrics = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn,), metrics=metrics)
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.unexpected_count",
@@ -428,10 +431,7 @@ def test_z_score_under_threshold_pd():
         metric_name="column_values.z_score.map_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={
-            "column.standard_deviation": stdev,
-            "column.mean": mean,
-        },
+        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean,},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -479,10 +479,7 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_name="column_values.z_score.map_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={
-            "column.standard_deviation": stdev,
-            "column.mean": mean,
-        },
+        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean,},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
