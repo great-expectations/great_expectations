@@ -1074,9 +1074,9 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_table_row_count_to_equal_other_table",
             "expect_column_values_to_be_unique",
             "expect_column_values_to_not_be_null",
-            "expect_column_values_to_be_null",
-            "expect_column_values_to_be_of_type",
-            "expect_column_values_to_be_in_type_list",
+            # "expect_column_values_to_be_null",
+            # "expect_column_values_to_be_of_type",
+            # "expect_column_values_to_be_in_type_list",
             # "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
             # "expect_column_values_to_be_between",
@@ -1133,9 +1133,9 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_table_row_count_to_equal_other_table",
             "expect_column_values_to_be_unique",
             "expect_column_values_to_not_be_null",
-            "expect_column_values_to_be_null",
-            "expect_column_values_to_be_of_type",
-            "expect_column_values_to_be_in_type_list",
+            # "expect_column_values_to_be_null",
+            # "expect_column_values_to_be_of_type",
+            # "expect_column_values_to_be_in_type_list",
             # "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
             # "expect_column_values_to_be_between",
@@ -1153,7 +1153,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_not_match_like_pattern_list",
             "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
-            "expect_column_values_to_be_json_parseable",
+            # "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
             "expect_column_distinct_values_to_be_in_set",
             "expect_column_distinct_values_to_contain_set",
@@ -1341,9 +1341,12 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
         result = getattr(validator, expectation_type)(*kwargs)
     # As well as keyword arguments
     else:
-        kwargs["result_format"] = "COMPLETE"
-        kwargs["include_config"] = False
-        result = getattr(validator, expectation_type)(**kwargs)
+        runtime_kwargs = {
+            "result_format": "COMPLETE",
+            "include_config": False
+        }
+        runtime_kwargs.update(kwargs)
+        result = getattr(validator, expectation_type)(**runtime_kwargs)
 
     check_json_test_result(
         test=test,
@@ -1355,7 +1358,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 def check_json_test_result(test, result, data_asset=None):
     # Check results
     if test["exact_match_out"] is True:
-        assert expectationValidationResultSchema.load(test["out"]) == result
+        assert result == expectationValidationResultSchema.load(test["out"])
     else:
         # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
