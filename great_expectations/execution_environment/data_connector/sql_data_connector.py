@@ -29,30 +29,17 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         execution_environment_name: str,
         execution_engine,
         data_assets: List[Dict],
-        # data_context_root_directory = None,
-        # include_introspected_whole_tables_as_data_assets=False,
     ):
         self._data_assets = data_assets
-        # self._include_introspected_whole_tables_as_data_assets = include_introspected_whole_tables_as_data_assets
 
         super(ConfiguredAssetSqlDataConnector, self).__init__(
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
-            # data_context_root_directory=data_context_root_directory,
         )
-
-        # This cache will contain a "config" for each data_asset discovered via introspection.
-        # This approach ensures that _data_assets and _introspected_data_assets_cache store objects of the same "type"
-        # self._introspected_data_assets_cache = {}
-        # if self._include_introspected_whole_tables_as_data_assets:
-        #     self._refresh_introspected_data_assets_cache()
 
     @property
     def data_assets(self) -> Dict[str, Asset]:
-        # if self._include_introspected_whole_tables_as_data_assets:
-        #     return {**self._data_assets, **self._introspected_data_assets_cache}
-        # else:
         return self._data_assets
 
     def add_data_asset(
@@ -65,9 +52,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _refresh_data_references_cache(self):
         self._data_references_cache = {}
 
-        # if self._include_introspected_whole_tables_as_data_assets:
-        #     self._refresh_introspected_data_assets_cache()
-        
         for data_asset_name in self.data_assets:
             data_asset = self.data_assets[data_asset_name]
             if "table_name" in data_asset:
@@ -98,15 +82,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             # TODO Will 20201102 : add sorting code here
 
             self._data_references_cache[data_asset_name] = partition_definition_list
-
-    # def _refresh_introspected_data_assets_cache(self):
-    #     introspected_table_metadata = self._introspect_db()
-    #     for metadata in introspected_table_metadata:
-    #         # Store a "config" for each introspected data asset.
-    #         data_asset_name = metadata["schema_name"]+"."+metadata["table_name"]+"__whole"
-    #         self._introspected_data_assets_cache[data_asset_name] = {
-    #             "table_name" : metadata["schema_name"]+"."+metadata["table_name"],
-    #         }
 
     def _get_column_names_from_splitter_kwargs(self, splitter_kwargs) -> List[str]:
         column_names: List[str] = []
@@ -192,8 +167,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             return report_object
 
         for data_asset_name, data_asset_return_obj in available_references:
-            # print(data_asset_name)
-            # print(json.dumps(data_asset_return_obj["example_data_references"], indent=2))
             if data_asset_return_obj["batch_definition_count"] > 0:
                 example_data_reference = random.choice(
                     data_asset_return_obj["example_data_references"]

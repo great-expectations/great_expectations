@@ -4,7 +4,6 @@ import copy
 
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment import BaseExecutionEnvironment
-# from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_environment.data_connector import (
     DataConnector,
     ConfiguredAssetSqlDataConnector,
@@ -26,13 +25,11 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
         url: str=None,
         credentials: dict=None,
         engine=None, #SqlAlchemyExecutionEngine
-        # data_context_root_directory=None,
         introspection: Dict={},
         tables: Dict={},
     ):
         super().__init__(
             name=name,
-            # data_context_root_directory=data_context_root_directory,
         )
 
         self._execution_engine_config = {
@@ -54,14 +51,8 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
             tables,
         )
 
-        # THIS IS WRONG.
+        # NOTE: Abe 20201111 : This is incorrect. Will need to be fixed when we reconcile all the configs.
         self._execution_environment_config = {}
-        #     "execution_engine": self._execution_engine_config,
-        #     "data_connectors" : {
-        #         self._data_connector_config["name"] : self._data_connector_config
-        #     },
-        # }
-
 
     def _init_data_connectors(
         self,
@@ -69,6 +60,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
         table_configs: Dict,
     ):
 
+        # First, build DataConnectors for introspected assets
         for name, config in introspection_configs.items():
             data_connector_config = dict(**{
                 "class_name": "InferredAssetSqlDataConnector",
@@ -79,30 +71,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
                 data_connector_config,
             )
 
-# tables:
-#     table_partitioned_by_date_column__A:
-#         partitioners:
-#             daily: 
-#                 data_asset_name_suffix: __daily
-#                 splitter_method: _split_on_converted_datetime
-#                 splitter_kwargs:
-#                     column_name: date
-#                     date_format_string: "%Y-%m-%d"
-#             weekly:
-#                 include_schema_name: False
-#                 data_asset_name_suffix: __some_other_string
-#                 splitter_method: _split_on_converted_datetime
-#                 splitter_kwargs:
-#                     column_name: date
-#                     date_format_string: "%Y-%W"
-#             by_id_dozens:
-#                 include_schema_name: True
-#                 # Note: no data_asset_name_suffix
-#                 splitter_method: _split_on_divided_integer
-#                 splitter_kwargs:
-#                     column_name: id
-#                     divisor: 12
-
+        # Second, build DataConnectors for tables. They will map to configured data_assets
         for table_name, table_config in table_configs.items():
             for partitioner_name, partitioner_config in table_config["partitioners"].items():
 
@@ -126,32 +95,6 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
                     data_asset_name,
                     data_asset_config,
                 )
-
-
-
-
-    # def _gen_configured_asset_data_connector_config(
-    #     self,
-    #     name: str,
-    #     config: Dict,
-    # ):
-    #     data_connector_config = {
-    #         "class_name": "ConfiguredAssetSqlDataConnector",
-    #         "name": name,
-    #         "data_assets": {},
-    #     }
-    #     return data_connector_config
-
-    # def _gen_introspecting_data_connector_config(
-    #     self,
-    #     name: str,
-    #     config: Dict,
-    # ):
-    #     data_connector_config = dict(**{
-    #         "class_name": "InferredAssetSqlDataConnector",
-    #         "name": name,
-    #     }, **config)
-    #     return data_connector_config
 
     def _build_data_connector_from_config(
         self,

@@ -268,48 +268,6 @@ tables:
 
     # Here we should test getting another batch
 
-#     # Add more introspection...
-# Gonna build this one in a notebook, to see how it feels...
-#     my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
-# class_name: StreamlinedSqlExecutionEnvironment
-# connection_string: sqlite:///{db_file}
-
-# introspection:
-#     whole_table:
-#         data_asset_name_suffix: __whole_table
-#         excluded_tables: []
-
-#     daily:
-#         included_tables: []
-
-#     weekly:
-#         included_tables: []
-
-#     by_batch:
-#         included_tables: []
-
-# """+"""
-# tables:
-#     table_partitioned_by_date_column__A:
-#         partitioners:
-#             whole_table: {}
-#             daily: 
-#                 splitter_method: _split_on_converted_datetime
-#                 splitter_kwargs:
-#                     column_name: date
-#                     date_format_string: "%Y-%m-%d"
-#             weekly:
-#                 splitter_method: _split_on_converted_datetime
-#                 splitter_kwargs:
-#                     column_name: date
-#                     date_format_string: "%Y-%W"
-#             by_id_dozens:
-#                 splitter_method: _split_on_divided_integer
-#                 splitter_kwargs:
-#                     column_name: id
-#                     divisor: 12
-# """)
-
     assert my_sql_execution_environment.get_available_data_asset_names() == {
         "whole_table": [
             "table_partitioned_by_date_column__A__whole_table",
@@ -349,7 +307,7 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
         },
     )
 
-    print(my_data_connector._introspect_db())
+    # print(my_data_connector._introspect_db())
     assert my_data_connector._introspect_db() == [
         {"schema_name": "main", "table_name": "table_containing_id_spacers_for_D", "type": "table"},
         {"schema_name": "main", "table_name": "table_partitioned_by_date_column__A", "type": "table"},
@@ -420,7 +378,7 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(test_cases_for_sql
     )
 
     report_object = my_data_connector.self_check()
-    print(json.dumps(report_object, indent=4))
+    # print(json.dumps(report_object, indent=4))
     assert report_object == {
         "class_name": "InferredAssetSqlDataConnector",
         "data_asset_count": 10,
@@ -484,28 +442,6 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(test_cases_
                 "data_asset_name_suffix": "__whole",
                 "include_schema_name": True,
             }
-            # "introspection": {
-            #     "daily" : {
-            #         "splitter_method": "_split_on_converted_datetime",
-            #         "splitter_kwargs": {
-            #             "column_name": "date",
-            #             "date_format_string": "%Y-%m-%d",
-            #         },
-            #         "include_list" : [
-
-            #         ]
-            #     },
-            #     "on_batch_id" : {
-            #         "splitter_method": "_split_on_divided_integer",
-            #         "splitter_kwargs": {
-            #             "column_name": "id",
-            #             "divisor": 50,
-            #         },
-            #         "include_list" : [
-                        
-            #         ]
-            #     }
-            # },
         },
         runtime_environment={
             "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
@@ -516,12 +452,7 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(test_cases_
         },
     )
 
-    print(my_data_connector.get_available_data_asset_names())
-    print(len(my_data_connector.get_available_data_asset_names()))
-
     report_object = my_data_connector.self_check()
-    print(json.dumps(report_object, indent=4))
-    print(my_data_connector.get_available_data_asset_names())
     assert report_object == {
         "class_name": "InferredAssetSqlDataConnector",
         "data_asset_count": 10,
