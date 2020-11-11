@@ -70,6 +70,6 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
 
         print("CCC")
 
-        self._data_connectors_cache = {
+        self._data_connectors = {
             "ONLY_DATA_CONNECTOR" : self._data_connector
         }
