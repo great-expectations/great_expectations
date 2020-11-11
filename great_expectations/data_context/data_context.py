@@ -565,7 +565,7 @@ class BaseDataContext:
                 print(f"\tInstantiating as a Store, since class_name is {class_name}")
                 instantiated_class = self._build_store_from_config("my_temp_store", config)
 
-            elif class_name in ["ExecutionEnvironment"]:
+            elif class_name in ["ExecutionEnvironment", "StreamlinedSqlExecutionEnvironment"]:
                 print(
                     f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}"
                 )

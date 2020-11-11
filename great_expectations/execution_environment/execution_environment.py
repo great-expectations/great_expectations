@@ -14,8 +14,7 @@ import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
-
-class ExecutionEnvironment:
+class BaseExecutionEnvironment:
     """
     An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
     """
@@ -25,9 +24,6 @@ class ExecutionEnvironment:
     def __init__(
         self,
         name: str,
-        execution_engine=None,
-        data_connectors=None,
-        data_context_root_directory: str = None,
     ):
         """
         Build a new ExecutionEnvironment.
@@ -38,23 +34,6 @@ class ExecutionEnvironment:
             data_connectors: DataConnectors to add to the datasource
         """
         self._name = name
-
-        self._data_context_root_directory = data_context_root_directory
-
-        self._execution_engine = instantiate_class_from_config(
-            config=execution_engine,
-            runtime_environment={},
-            config_defaults={"module_name": "great_expectations.execution_engine"},
-        )
-        self._execution_environment_config = {"execution_engine": execution_engine}
-
-        if data_connectors is None:
-            data_connectors = {}
-        self._execution_environment_config["data_connectors"] = data_connectors
-
-        self._data_connectors_cache = {}
-
-        self._build_data_connectors()
 
     def get_batch_from_batch_definition(
         self, batch_definition: BatchDefinition, batch_data: Any = None,
@@ -339,3 +318,43 @@ class ExecutionEnvironment:
                 match ExecutionEnvironment name: "{self.name}".
                 """
             )
+
+class ExecutionEnvironment(BaseExecutionEnvironment):
+
+    def __init__(
+        self,
+        name: str,
+        execution_engine=None,
+        data_connectors=None,
+        data_context_root_directory: str = None,
+    ):
+        """
+        Build a new ExecutionEnvironment.
+
+        Args:
+            name: the name for the datasource
+            execution_engine (ClassConfig): the type of compute engine to produce
+            data_connectors: DataConnectors to add to the datasource
+        """
+        super().__init__(
+            name=name,
+        )
+
+        self._data_context_root_directory = data_context_root_directory
+
+        self._execution_engine = instantiate_class_from_config(
+            config=execution_engine,
+            runtime_environment={},
+            config_defaults={"module_name": "great_expectations.execution_engine"},
+        )
+        self._execution_environment_config = {"execution_engine": execution_engine}
+
+        if data_connectors is None:
+            data_connectors = {}
+        self._execution_environment_config["data_connectors"] = data_connectors
+
+        self._data_connectors_cache = {}
+
+        self._build_data_connectors()
+
+        

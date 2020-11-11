@@ -24,6 +24,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         config_defaults = {}
 
     config = copy.deepcopy(config)
+    print(config)
 
     module_name = config.pop("module_name", None)
     if module_name is None:
