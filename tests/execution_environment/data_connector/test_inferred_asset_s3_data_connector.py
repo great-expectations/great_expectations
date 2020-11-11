@@ -349,7 +349,7 @@ def test_test_yaml_config(empty_data_context):
             Key=key
         )
 
-    return_object = empty_data_context.test_yaml_config(f"""
+    report_object = empty_data_context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: InferredAssetS3DataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -362,9 +362,9 @@ default_regex:
         - year_dir
         - month_dir
         - data_asset_name
-    """, return_mode="return_object")
+    """, return_mode="report_object")
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetS3DataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
@@ -414,7 +414,7 @@ def test_yaml_config_excluding_non_regex_matching_files(empty_data_context):
             Key=key
         )
 
-    return_object = empty_data_context.test_yaml_config(
+    report_object = empty_data_context.test_yaml_config(
         f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: InferredAssetS3DataConnector
@@ -431,10 +431,10 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
-        return_mode="return_object",
+        return_mode="report_object",
     )
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetS3DataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
