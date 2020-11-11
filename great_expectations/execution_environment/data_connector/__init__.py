@@ -8,6 +8,7 @@ from .inferred_asset_s3_data_connector import InferredAssetS3DataConnector
 from .configured_asset_s3_data_connector import ConfiguredAssetS3DataConnector
 from .runtime_data_connector import RuntimeDataConnector
 from .sql_data_connector import SqlDataConnector
+from .introspecting_sql_data_connector import IntrospectingSqlDataConnector
 
 # TODO: <Alex>Commenting not yet implemented Data Connectors for now, until they are properly implemented.</Alex>
 # from .query_data_connector import QueryDataConnector

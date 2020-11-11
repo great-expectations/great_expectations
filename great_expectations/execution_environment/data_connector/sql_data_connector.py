@@ -29,35 +29,37 @@ class SqlDataConnector(DataConnector):
         execution_environment_name: str,
         execution_engine,
         data_assets: List[Dict],
-        include_introspected_whole_tables_as_data_assets=False,
+        # data_context_root_directory = None,
+        # include_introspected_whole_tables_as_data_assets=False,
     ):
         self._data_assets = data_assets
-        self._include_introspected_whole_tables_as_data_assets = include_introspected_whole_tables_as_data_assets
+        # self._include_introspected_whole_tables_as_data_assets = include_introspected_whole_tables_as_data_assets
 
         super(SqlDataConnector, self).__init__(
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
+            # data_context_root_directory=data_context_root_directory,
         )
 
         # This cache will contain a "config" for each data_asset discovered via introspection.
         # This approach ensures that _data_assets and _introspected_data_assets_cache store objects of the same "type"
-        self._introspected_data_assets_cache = {}
-        if self._include_introspected_whole_tables_as_data_assets:
-            self._refresh_introspected_data_assets_cache()
+        # self._introspected_data_assets_cache = {}
+        # if self._include_introspected_whole_tables_as_data_assets:
+        #     self._refresh_introspected_data_assets_cache()
 
     @property
     def data_assets(self) -> Dict[str, Asset]:
-        if self._include_introspected_whole_tables_as_data_assets:
-            return {**self._data_assets, **self._introspected_data_assets_cache}
-        else:
-            return self._data_assets
+        # if self._include_introspected_whole_tables_as_data_assets:
+        #     return {**self._data_assets, **self._introspected_data_assets_cache}
+        # else:
+        return self._data_assets
 
     def _refresh_data_references_cache(self):
         self._data_references_cache = {}
 
-        if self._include_introspected_whole_tables_as_data_assets:
-            self._refresh_introspected_data_assets_cache()
+        # if self._include_introspected_whole_tables_as_data_assets:
+        #     self._refresh_introspected_data_assets_cache()
         
         for data_asset_name in self.data_assets:
             data_asset = self.data_assets[data_asset_name]
@@ -90,14 +92,14 @@ class SqlDataConnector(DataConnector):
 
             self._data_references_cache[data_asset_name] = partition_definition_list
 
-    def _refresh_introspected_data_assets_cache(self):
-        introspected_table_metadata = self._introspect_db()
-        for metadata in introspected_table_metadata:
-            # Store a "config" for each introspected data asset.
-            data_asset_name = metadata["schema_name"]+"."+metadata["table_name"]+"__whole"
-            self._introspected_data_assets_cache[data_asset_name] = {
-                "table_name" : metadata["schema_name"]+"."+metadata["table_name"],
-            }
+    # def _refresh_introspected_data_assets_cache(self):
+    #     introspected_table_metadata = self._introspect_db()
+    #     for metadata in introspected_table_metadata:
+    #         # Store a "config" for each introspected data asset.
+    #         data_asset_name = metadata["schema_name"]+"."+metadata["table_name"]+"__whole"
+    #         self._introspected_data_assets_cache[data_asset_name] = {
+    #             "table_name" : metadata["schema_name"]+"."+metadata["table_name"],
+    #         }
 
     def _get_column_names_from_splitter_kwargs(self, splitter_kwargs) -> List[str]:
         column_names: List[str] = []
@@ -216,74 +218,6 @@ class SqlDataConnector(DataConnector):
             print(pd.DataFrame(rows[:5]))
     
         return report_object
-
-    def _introspect_db(
-        self,
-        schema_name: str=None,
-        ignore_information_schemas_and_system_tables: bool=True,
-        information_schemas: List[str]= [
-            "INFORMATION_SCHEMA",  # snowflake, mssql, mysql, oracle
-            "information_schema",  # postgres, redshift, mysql
-            "performance_schema",  # mysql
-            "sys",  # mysql
-            "mysql",  # mysql
-        ],
-        system_tables: List[str] = ["sqlite_master"],  # sqlite
-        include_views = True,
-    ):
-        engine = self._execution_engine.engine
-        inspector = sa.inspect(engine)
-
-        selected_schema_name = schema_name
-
-        tables = []
-        for schema_name in inspector.get_schema_names():
-            if ignore_information_schemas_and_system_tables and schema_name in information_schemas:
-                continue
-
-            if selected_schema_name is not None and schema_name != selected_schema_name:
-                continue
-
-            if engine.dialect.name.lower() == "bigquery":
-                tables.extend(
-                    [
-                        {
-                            "schema_name": schema_name,
-                            "table_name": table_name,
-                            "type": "table",
-                        }
-                        
-                        for table_name in inspector.get_table_names(schema=schema_name)
-                        if not ignore_information_schemas_and_system_tables or table_name not in system_tables
-                    ]
-                )
-            else:
-                tables.extend(
-                    [
-                        {
-                            "schema_name": schema_name,
-                            "table_name": table_name,
-                            "type": "table",
-                        }
-                        for table_name in inspector.get_table_names(schema=schema_name)
-                        if not ignore_information_schemas_and_system_tables or table_name not in system_tables
-                    ]
-                )
-
-            if include_views:
-                # Note: this is not implemented for bigquery
-                tables.extend(
-                    [
-                        (table_name, "view")
-                        if inspector.default_schema_name == schema_name
-                        else (schema_name + "." + table_name, "view")
-                        for table_name in inspector.get_view_names(schema=schema_name)
-                        if not ignore_information_schemas_and_system_tables or table_name not in system_tables
-                    ]
-                )
-        
-        return tables
-
 
     ### Splitter methods for listing partitions ###
 
