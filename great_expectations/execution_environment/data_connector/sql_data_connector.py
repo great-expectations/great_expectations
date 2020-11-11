@@ -194,25 +194,28 @@ class SqlDataConnector(DataConnector):
     def _introspect_db(
         self,
         schema_name: str=None,
+        ignore_information_schemas_and_system_tables: bool=True,
+        information_schemas: List[str]= [
+            "INFORMATION_SCHEMA",  # snowflake, mssql, mysql, oracle
+            "information_schema",  # postgres, redshift, mysql
+            "performance_schema",  # mysql
+            "sys",  # mysql
+            "mysql",  # mysql
+        ],
+        system_tables: List[str] = ["sqlite_master"],  # sqlite
+        include_views = True,
     ):
         engine = self._execution_engine.engine
         inspector = sa.inspect(engine)
 
-        tables = []
-        
-        inspector.get_table_names()
-        print(tables)
+        selected_schema_name = schema_name
 
+        tables = []
         for schema_name in inspector.get_schema_names():
-            known_information_schemas = [
-                "INFORMATION_SCHEMA",  # snowflake, mssql, mysql, oracle
-                "information_schema",  # postgres, redshift, mysql
-                "performance_schema",  # mysql
-                "sys",  # mysql
-                "mysql",  # mysql
-            ]
-            known_system_tables = ["sqlite_master"]  # sqlite
-            if schema_name in known_information_schemas:
+            if ignore_information_schemas_and_system_tables and schema_name in information_schemas:
+                continue
+
+            if selected_schema_name is not None and schema_name != selected_schema_name:
                 continue
 
             if engine.dialect.name.lower() == "bigquery":
@@ -224,10 +227,8 @@ class SqlDataConnector(DataConnector):
                             "type": "table",
                         }
                         
-                        for table_name in inspector.get_table_names(
-                            schema=schema_name
-                        )
-                        if table_name not in known_system_tables
+                        for table_name in inspector.get_table_names(schema=schema_name)
+                        if not ignore_information_schemas_and_system_tables or table_name not in system_tables
                     ]
                 )
             else:
@@ -238,29 +239,22 @@ class SqlDataConnector(DataConnector):
                             "table_name": table_name,
                             "type": "table",
                         }
-#                         if inspector.default_schema_name == schema_name
-#                         else {
-#                             "schema_name": schema_name,
-#                             "table_name": table_name,
-#                             "type": "table",
-#                         }
-# (schema_name + "." + table_name, "table")
                         for table_name in inspector.get_table_names(schema=schema_name)
-                        if table_name not in known_system_tables
+                        if not ignore_information_schemas_and_system_tables or table_name not in system_tables
                     ]
                 )
-            try:
+
+            if include_views:
+                # Note: this is not implemented for bigquery
                 tables.extend(
                     [
                         (table_name, "view")
                         if inspector.default_schema_name == schema_name
                         else (schema_name + "." + table_name, "view")
                         for table_name in inspector.get_view_names(schema=schema_name)
-                        if table_name not in known_system_tables
+                        if not ignore_information_schemas_and_system_tables or table_name not in system_tables
                     ]
                 )
-            except NotImplementedError:
-                pass
         
         return tables
 

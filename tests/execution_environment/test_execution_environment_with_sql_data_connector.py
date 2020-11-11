@@ -116,6 +116,10 @@ connection_string: sqlite:///{db_file}
 
 #Note: Abe 2020111: this test belongs with the data_connector tests, not here.
 def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    #Note: Abe 2020111: this test currently only uses a sqlite fixture.
+    # We should extend this to at least include postgresql in the unit tests.
+    # Other DBs can be run as integration tests.
+    
     my_data_connector = instantiate_class_from_config(
         config={
             "class_name": "SqlDataConnector",
@@ -131,6 +135,7 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
         },
     )
 
+    print(my_data_connector._introspect_db())
     assert my_data_connector._introspect_db() == [
         {"schema_name": "main", "table_name": "table_containing_id_spacers_for_D", "type": "table"},
         {"schema_name": "main", "table_name": "table_partitioned_by_date_column__A", "type": "table"},
@@ -159,6 +164,22 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
         {"schema_name": "main", "table_name": "table_with_fk_reference_from_F", "type": "table"},
     ]
 
-    #Note: Abe 2020111: this test currently only uses a sqlite fixture.
-    # We should extend this to at least include postgresql in the unit tests.
-    # Other tests can be run as integration tests.
+    assert my_data_connector._introspect_db(
+        schema_name="waffle"
+    ) == []
+
+    # This is a weak test, since this db doesn't have any additional schemas or system tables to show.
+    assert my_data_connector._introspect_db(
+        ignore_information_schemas_and_system_tables=False
+    ) == [
+        {"schema_name": "main", "table_name": "table_containing_id_spacers_for_D", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_date_column__A", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_foreign_key__F", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_incrementing_batch_id__E", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_multiple_columns__G", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C", "type": "table"},
+        {"schema_name": "main", "table_name": "table_partitioned_by_timestamp_column__B", "type": "table"},
+        {"schema_name": "main", "table_name": "table_that_should_be_partitioned_by_random_hash__H", "type": "table"},
+        {"schema_name": "main", "table_name": "table_with_fk_reference_from_F", "type": "table"},
+    ]
