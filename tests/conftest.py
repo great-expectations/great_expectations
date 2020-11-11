@@ -2855,3 +2855,20 @@ def expectation_suite_identifier():
 @pytest.fixture
 def basic_sqlalchemy_datasource(sqlitedb_engine):
     return SqlAlchemyDatasource("basic_sqlalchemy_datasource", engine=sqlitedb_engine)
+
+
+@pytest.fixture
+def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
+    # TODO: Switch this to an actual ExecutionEngine
+
+    db_file = file_relative_path(
+        __file__, os.path.join("..", "..", "test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+    # db = sqlite3.connect(db_file)
+    # return db
+
+    engine = sa.create_engine(f"sqlite:////{db_file}")
+    conn = engine.connect()
+
+    # Build a SqlAlchemyDataset using that database
+    return SqlAlchemyExecutionEngine(name="test_sql_execution_engine", engine=conn,)

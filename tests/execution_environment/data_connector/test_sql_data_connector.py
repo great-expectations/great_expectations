@@ -13,24 +13,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlA
 from great_expectations.execution_environment.data_connector import SqlDataConnector
 from great_expectations.data_context.util import file_relative_path
 
-
-@pytest.fixture
-def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
-    # TODO: Switch this to an actual ExecutionEngine
-
-    db_file = file_relative_path(
-        __file__, os.path.join("..", "..", "test_sets", "test_cases_for_sql_data_connector.db"),
-    )
-    # db = sqlite3.connect(db_file)
-    # return db
-
-    engine = sa.create_engine(f"sqlite:////{db_file}")
-    conn = engine.connect()
-
-    # Build a SqlAlchemyDataset using that database
-    return SqlAlchemyExecutionEngine(name="test_sql_execution_engine", engine=conn,)
-
-
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
