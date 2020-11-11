@@ -3,23 +3,19 @@ import datetime
 import random
 import numpy as np
 import pandas as pd
-import hashlib
-from typing import List
 from great_expectations.core.batch import Batch
-
-from great_expectations.core.batch import BatchSpec
-from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, SparkDFDatasourceBatchSpec
-from great_expectations.execution_engine.pandas_execution_engine import PandasExecutionEngine
-
-from great_expectations.expectations.registry import get_metric_provider
-
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 
-import pyspark.sql.functions as F
-from pyspark.sql.types import IntegerType, StringType
+try:
+    import pyspark.sql.functions as F
+    from pyspark.sql.types import IntegerType, StringType
+except ImportError:
+    F = None
+    SparkSession = None
+
 
 def _build_spark_engine(spark_session, df):
     df = spark_session.createDataFrame(
