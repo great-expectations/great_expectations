@@ -32,7 +32,6 @@ except ImportError:
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.batch import BatchSpec, Batch, BatchMarkers
 
-from ..execution_environment.util import hash_spark_dataframe
 from great_expectations.execution_environment.types.batch_spec import(
     PathBatchSpec,
     S3BatchSpec,
@@ -325,10 +324,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             sampling_fn = getattr(self, sampling_method)
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
 
-        if batch_data is not None:
-            # <WILL> 20201110 find Spark equivalent of this
-            # if batch_data.memory_usage().sum() < HASH_THRESHOLD:
-            batch_markers["sparkdf_data_fingerprint"] = hash_spark_dataframe(batch_data)
         return batch_data, batch_markers
 
     @staticmethod

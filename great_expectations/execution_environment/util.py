@@ -62,10 +62,3 @@ def hash_pandas_dataframe(df):
         # In case of facing unhashable objects (like dict), use pickle
         obj = pickle.dumps(df, pickle.HIGHEST_PROTOCOL)
     return hashlib.md5(obj).hexdigest()
-
-
-def hash_spark_dataframe(df):
-    # <WILL> 20201110 what is the proper way to hash a spark dataframe?
-    df = df.filter(df[0] != 0)
-    obj = pickle.dumps(df.collect(), pickle.HIGHEST_PROTOCOL)
-    return hashlib.md5(obj).hexdigest()
