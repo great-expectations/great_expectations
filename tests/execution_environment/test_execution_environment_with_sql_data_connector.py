@@ -219,7 +219,7 @@ tables:
             "table_partitioned_by_date_column__A__some_other_string",
         ],
         "by_id_dozens": [
-            "main.table_partitioned_by_date_column__A__by_id_dozens",
+            "table_partitioned_by_date_column__A__by_id_dozens",
         ]
     }
 

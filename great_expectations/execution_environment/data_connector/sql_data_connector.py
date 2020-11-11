@@ -55,6 +55,13 @@ class SqlDataConnector(DataConnector):
         # else:
         return self._data_assets
 
+    def add_data_asset(
+        self,
+        name,
+        config,
+    ):
+        self._data_assets[name] = config
+
     def _refresh_data_references_cache(self):
         self._data_references_cache = {}
 
