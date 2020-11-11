@@ -27,7 +27,7 @@ execution_engine:
     connection_string: sqlite:///{db_file}
 
 data_connectors:
-    my_snowflake_db:
+    my_sqlite_db:
         class_name: SqlDataConnector
 
         data_assets:
@@ -60,7 +60,7 @@ data_connectors:
         },
         "data_connectors": {
             "count": 1,
-            "my_snowflake_db": {
+            "my_sqlite_db": {
                 "class_name": "SqlDataConnector",
                 "data_asset_count": 1,
                 "example_data_asset_names": [
