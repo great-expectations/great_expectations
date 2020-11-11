@@ -26,7 +26,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
             name=name,
         )
 
-        self._execution_environment_config = {
+        execution_engine_config = {
             "class_name": "SqlAlchemyExecutionEngine",
             "connection_string": connection_string,
             "url": url,
@@ -34,7 +34,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
             "engine": engine,
         }
         self._execution_engine = instantiate_class_from_config(
-            config=self._execution_environment_config,
+            config=execution_engine_config,
             runtime_environment={},
             config_defaults={"module_name": "great_expectations.execution_engine"},
         )
