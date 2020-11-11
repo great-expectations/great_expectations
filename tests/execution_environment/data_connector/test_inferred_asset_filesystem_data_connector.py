@@ -90,9 +90,9 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(tmp_path
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    self_check_return_object = my_data_connector.self_check()
+    self_check_report_object = my_data_connector.self_check()
 
-    assert self_check_return_object == {
+    assert self_check_report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
@@ -251,9 +251,9 @@ def test_self_check(tmp_path_factory):
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    self_check_return_object = my_data_connector.self_check()
+    self_check_report_object = my_data_connector.self_check()
 
-    assert self_check_return_object == {
+    assert self_check_report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
