@@ -115,14 +115,21 @@ connection_string: sqlite:///{db_file}
     ]
 
 #Note: Abe 2020111: this test belongs with the data_connector tests, not here.
-def test_introspect_db(empty_data_context):
-    db_file = os.path.join(os.getcwd(), "tests", "test_sets", "test_cases_for_sql_data_connector.db")
-    my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
-class_name: StreamlinedSqlExecutionEnvironment
-connection_string: sqlite:///{db_file}
-""")
-
-    my_data_connector = my_sql_execution_environment.data_connectors["ONLY_DATA_CONNECTOR"]
+def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "SqlDataConnector",
+            "name": "my_test_data_connector",
+            "data_assets": {},
+        },
+        runtime_environment={
+            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+            "execution_environment_name": "my_text_execution_environment",
+        },
+        config_defaults={
+            "module_name": "great_expectations.execution_environment.data_connector"
+        },
+    )
 
     assert my_data_connector._introspect_db() == [
         {"schema_name": "main", "table_name": "table_containing_id_spacers_for_D", "type": "table"},

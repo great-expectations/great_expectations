@@ -40,8 +40,6 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
             config_defaults={"module_name": "great_expectations.execution_engine"},
         )
 
-        print("AAA")
-
         self._data_connector_config = {
             "class_name": "SqlDataConnector",
             "name": "ONLY_DATA_CONNECTOR",
@@ -58,8 +56,6 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
             },
         )
 
-        print("BBB")
-
         # THIS IS WRONG.
         self._execution_environment_config = {}
         #     "execution_engine": self._execution_engine_config,
@@ -67,8 +63,6 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
         #         self._data_connector_config["name"] : self._data_connector_config
         #     },
         # }
-
-        print("CCC")
 
         self._data_connectors = {
             "ONLY_DATA_CONNECTOR" : self._data_connector
