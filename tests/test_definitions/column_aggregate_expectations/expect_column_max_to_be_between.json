@@ -34,7 +34,7 @@
       }
     },
     "tests" : [{
-      "title": "Basic positive test case",
+      "title": "basic_positive_test_case",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -47,7 +47,7 @@
         "observed_value": 5
       }
     },{
-      "title": "Basic negative test case",
+      "title": "basic_negative_test_case",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -60,7 +60,7 @@
         "observed_value": 5
       }
     },{
-      "title": "Test case with result_format=SUMMARY. Also verifies that max_value is inclusive",
+      "title": "test_case_with_result_format__summary___also_verifies_that_max_value_is_inclusive",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -73,7 +73,7 @@
         "observed_value": 5
       }
     },{
-      "title": "Test case with only a lower bound, and a missing value",
+      "title": "test_case_with_only_a_lower_bound__and_a_missing_value",
       "exact_match_out" : false,
       "in": {
         "column": "x",
@@ -84,7 +84,7 @@
         "observed_value": 9.0
       }
     },{
-      "title": "Negative test case with only a lower bound",
+      "title": "negative_test_case_with_only_a_lower_bound",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -95,7 +95,7 @@
         "observed_value": 5
       }
     },{
-      "title": "Test on a series containing dates, with an output_strftime_format value",
+      "title": "test_on_a_series_containing_dates__with_an_output_strftime_format_value",
       "exact_match_out" : false,
       "suppress_test_for": ["sqlalchemy"],
       "in": {
@@ -110,7 +110,7 @@
         "observed_value": "02/01/2017"
       }
     },{
-      "title": "Test on a date-like series containing strings",
+      "title": "test_on_a_date_like_series_containing_strings",
       "exact_match_out" : false,
       "in": {
         "column": "zzz",
@@ -123,7 +123,7 @@
         "observed_value": "3/1/2016"
       }
     },{
-      "title": "Test on strings",
+      "title": "test_on_strings",
       "exact_match_out" : false,
       "in": {
         "column": "z",
@@ -140,7 +140,7 @@
         "empty_column": []
       },
       "tests": [{
-        "title": "Test empty column; should be false (no observed value with which to compare)",
+        "title": "test_empty_column__should_be_false_no_observed_value_with_which_to_compare",
         "exact_match_out": false,
         "in": {
           "column": "empty_column",

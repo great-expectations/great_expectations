@@ -165,7 +165,9 @@ class DataConnector:
             print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
 
         for asset_name in asset_names[:max_examples]:
-            data_reference_list = self._get_data_reference_list_from_cache_by_data_asset_name(asset_name)
+            data_reference_list = self._get_data_reference_list_from_cache_by_data_asset_name(
+                data_asset_name=asset_name
+            )
             len_batch_definition_list = len(data_reference_list)
             example_data_references = data_reference_list[:max_examples]
 

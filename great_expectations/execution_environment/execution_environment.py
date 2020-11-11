@@ -1,16 +1,15 @@
 import copy
 import logging
-from typing import Union, List, Any, Optional
+from typing import Any, Dict, List, Optional, Union
 
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.data_connector.runtime_data_connector import RuntimeDataConnector
 from great_expectations.core.batch import (
-    BatchRequest,
-    BatchMarkers,
-    BatchDefinition,
     Batch,
+    BatchDefinition,
+    BatchMarkers,
+    BatchRequest,
 )
+from great_expectations.execution_environment.data_connector import DataConnector
+from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
@@ -58,9 +57,7 @@ class ExecutionEnvironment:
         self._build_data_connectors()
 
     def get_batch_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition,
-        batch_data: Any = None,
+        self, batch_definition: BatchDefinition, batch_data: Any = None,
     ) -> Batch:
         """
         Note: this method should *not* be used when getting a Batch from a BatchRequest, since it does not capture BatchRequest metadata.
@@ -101,7 +98,9 @@ class ExecutionEnvironment:
         data_connector: DataConnector = self.get_data_connector(
             name=batch_request.data_connector_name
         )
-        batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
+        batch_definition_list: List[
+            BatchDefinition
+        ] = data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
 
@@ -209,7 +208,7 @@ class ExecutionEnvironment:
         return data_connector
 
     def _build_data_connector_from_config(
-        self, name: str, config: dict,
+        self, name: str, config: Dict,
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         data_connector: DataConnector = instantiate_class_from_config(
@@ -244,7 +243,9 @@ class ExecutionEnvironment:
 
         return data_connectors
 
-    def get_available_data_asset_names(self, data_connector_names: Optional[Union[list, str]] = None) -> dict:
+    def get_available_data_asset_names(
+        self, data_connector_names: Optional[Union[list, str]] = None
+    ) -> dict:
         """
         Returns a dictionary of data_asset_names that the specified data
         connector can provide. Note that some data_connectors may not be
@@ -273,14 +274,17 @@ class ExecutionEnvironment:
             data_connector_names = [data_connector_names]
 
         for data_connector_name in data_connector_names:
-            data_connector: DataConnector = self.get_data_connector(name=data_connector_name)
-            available_data_asset_names[data_connector_name] = data_connector.get_available_data_asset_names()
+            data_connector: DataConnector = self.get_data_connector(
+                name=data_connector_name
+            )
+            available_data_asset_names[
+                data_connector_name
+            ] = data_connector.get_available_data_asset_names()
 
         return available_data_asset_names
 
     def get_available_batch_definitions(
-        self,
-        batch_request: BatchRequest
+        self, batch_request: BatchRequest
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
@@ -296,7 +300,7 @@ class ExecutionEnvironment:
     def self_check(self, pretty_print=True, max_examples=3):
         report_object = {
             "execution_engine": {
-                "class_name" : self.execution_engine.__class__.__name__,
+                "class_name": self.execution_engine.__class__.__name__,
             }
         }
 
@@ -313,10 +317,11 @@ class ExecutionEnvironment:
         }
 
         for data_connector in data_connector_list:
-            data_connector_obj: DataConnector = self.get_data_connector(name=data_connector["name"])
+            data_connector_obj: DataConnector = self.get_data_connector(
+                name=data_connector["name"]
+            )
             data_connector_return_obj = data_connector_obj.self_check(
-                pretty_print=pretty_print,
-                max_examples=max_examples
+                pretty_print=pretty_print, max_examples=max_examples
             )
             report_object["data_connectors"][
                 data_connector["name"]
@@ -330,7 +335,7 @@ class ExecutionEnvironment:
             or batch_request.execution_environment_name == self.name
         ):
             raise ValueError(
-                f'''execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not
+                f"""execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not
                 match ExecutionEnvironment name: "{self.name}".
-                '''
+                """
             )

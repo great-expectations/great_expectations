@@ -233,6 +233,44 @@ def get_filesystem_one_level_directory_glob_path_list(
     return path_list
 
 
+def list_s3_keys(s3, query_options: dict, iterator_dict: dict) -> str:
+    if iterator_dict is None:
+        iterator_dict = {}
+
+    if "continuation_token" in iterator_dict:
+        query_options.update(
+            {"ContinuationToken": iterator_dict["continuation_token"]}
+        )
+
+    logger.debug(f"Fetching objects from S3 with query options: {query_options}")
+
+    s3_objects_info: dict = s3.list_objects_v2(**query_options)
+
+    if not any(key in s3_objects_info for key in ["Contents", "CommonPrefixes"]):
+        raise ValueError("S3 query may not have been configured correctly.")
+
+    if "Contents" in s3_objects_info:
+        keys: List[str] = [
+            item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0
+        ]
+        yield from keys
+    if "CommonPrefixes" in s3_objects_info:
+        common_prefixes: List[Dict[str, Any]] = s3_objects_info["CommonPrefixes"]
+        for prefix_info in common_prefixes:
+            query_options_tmp: dict = copy.deepcopy(query_options)
+            query_options_tmp.update({"Prefix": prefix_info["Prefix"]})
+            # Recursively fetch from updated prefix
+            yield from list_s3_keys(s3=s3, query_options=query_options_tmp, iterator_dict={})
+    if s3_objects_info["IsTruncated"]:
+        iterator_dict["continuation_token"] = s3_objects_info["NextContinuationToken"]
+        # Recursively fetch more
+        yield from list_s3_keys(s3=s3, query_options=query_options, iterator_dict=iterator_dict)
+
+    if "continuation_token" in iterator_dict:
+        # Make sure we clear the token once we've gotten fully through
+        del iterator_dict["continuation_token"]
+
+
 # TODO: <Alex>We need to move sorters and _validate_sorters_configuration() to DataConnector</Alex>
 # TODO: <Alex>Will: Should this method be private?</Alex>
 def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:

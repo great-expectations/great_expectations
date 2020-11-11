@@ -19,7 +19,7 @@ def test_condition_parser():
     res = _parse_great_expectations_condition('col("foo") > 5')
     assert res["column"] == "foo"
     assert res["op"] == ">"
-    assert res["condition_value"] == "5"
+    assert res["fnumber"] == "5"
 
 
 def test_parse_condition_to_spark(spark_session):

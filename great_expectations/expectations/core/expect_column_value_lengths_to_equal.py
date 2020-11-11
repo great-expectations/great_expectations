@@ -81,7 +81,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     """
 
-    map_metric = "column_values.length_equals"
+    map_metric = "column_values.value_length.equals"
     success_keys = ("value", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
@@ -121,6 +121,9 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -163,48 +166,3 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 }
             )
         ]
-
-    # @PandasExecutionEngine.column_map_metric(
-    #     metric_name="column_values.length_equals",
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=("value",),
-    #     metric_dependencies=("column.value_lengths",),
-    #     filter_column_isnull=True,
-    # )
-    def _pandas_column_values_length_equals(
-        self,
-        series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        """Tests whether or not value lengths equal threshold"""
-        value = metric_value_kwargs["value"]
-        length_equals = series.str.len() == value
-        return pd.DataFrame({"column_values.length_equals": length_equals})
-
-    """ A metric decorator for individual value lengths"""
-
-    # @PandasExecutionEngine.metric(
-    #     metric_name="column.value_lengths",
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=(),
-    #     metric_dependencies=tuple(),
-    # )
-    def _pandas_value_lengths(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-    ):
-        """Extracts lengths of individual entries"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        return series.str.len()

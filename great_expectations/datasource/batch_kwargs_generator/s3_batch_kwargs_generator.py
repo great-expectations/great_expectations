@@ -225,7 +225,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         limit=None,
     ):
         batch_kwargs = {
-            "path": "s3a://" + self.bucket + "/" + key,
+            "s3": "s3a://" + self.bucket + "/" + key,
             "reader_options": self.reader_options,
         }
         if asset_config.get("reader_options"):

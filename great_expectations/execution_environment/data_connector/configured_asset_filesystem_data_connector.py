@@ -27,6 +27,7 @@ KNOWN_EXTENSIONS = [
 ]
 
 
+# TODO: <Alex>Clean up order of arguments.</Alex>
 class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnector):
     def __init__(
         self,
@@ -52,6 +53,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             data_context_root_directory=data_context_root_directory
         )
 
+        # TODO: <Alex>The next two properties must be private.</Alex>
         self.base_directory = normalize_directory_path(
             dir_path=base_directory,
             root_directory_path=data_context_root_directory
@@ -61,12 +63,16 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         data_asset_path: str = self.base_directory
-        if asset is not None and asset.base_directory:
-            data_asset_path = str(Path(self.base_directory).joinpath(asset.base_directory))
+        glob_directive: str = self.glob_directive
+        if asset is not None:
+            if asset.base_directory:
+                data_asset_path = str(Path(self.base_directory).joinpath(asset.base_directory))
+            if asset.glob_directive:
+                glob_directive = asset.glob_directive
 
         path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
             base_directory_path=data_asset_path,
-            glob_directive=self.glob_directive
+            glob_directive=glob_directive
         )
 
         return path_list

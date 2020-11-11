@@ -234,6 +234,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -322,3 +325,34 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 "content_blocks": [observed_value_content_block, observed_distribution],
             }
         )
+
+    @classmethod
+    @renderer(renderer_type="renderer.descriptive.histogram")
+    def _descriptive_histogram_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        assert result, "Must pass in result."
+        observed_partition_object = result.result["details"]["observed_partition"]
+        weights = observed_partition_object["weights"]
+        if len(weights) > 60:
+            return None
+
+        header = RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Histogram",
+                    "tooltip": {
+                        "content": "expect_column_kl_divergence_to_be_less_than"
+                    },
+                    "tag": "h6",
+                },
+            }
+        )
+
+        return cls._get_kl_divergence_chart(observed_partition_object, header)

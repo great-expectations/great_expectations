@@ -133,7 +133,7 @@ class ValidationResultsPageRenderer(Renderer):
             self._render_validation_info(validation_results=validation_results)
         ]
 
-        if validation_results["meta"].get("batch_markers"):
+        if validation_results.meta.get("batch_markers"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
                     input_dict=validation_results["meta"].get("batch_markers"),
@@ -141,34 +141,34 @@ class ValidationResultsPageRenderer(Renderer):
                 )
             )
 
-        if validation_results["meta"].get("batch_kwargs"):
+        if validation_results.meta.get("batch_kwargs"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_kwargs"),
+                    input_dict=validation_results.meta.get("batch_kwargs"),
                     header="Batch Kwargs",
                 )
             )
 
-        if validation_results["meta"].get("batch_parameters"):
+        if validation_results.meta.get("batch_parameters"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_parameters"),
+                    input_dict=validation_results.meta.get("batch_parameters"),
                     header="Batch Parameters",
                 )
             )
 
-        if validation_results["meta"].get("batch_spec"):
+        if validation_results.meta.get("batch_spec"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_spec"),
+                    input_dict=validation_results.meta.get("batch_spec"),
                     header="Batch Spec",
                 )
             )
 
-        if validation_results["meta"].get("batch_request"):
+        if validation_results.meta.get("batch_request"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_request"),
+                    input_dict=validation_results.meta.get("batch_request"),
                     header="Batch Definition",
                 )
             )
@@ -268,6 +268,12 @@ class ValidationResultsPageRenderer(Renderer):
         expectation_suite_path = (
             os.path.join(*expectation_suite_path_components) + ".html"
         )
+        # TODO: deprecate dual batch api support in 0.14
+        batch_kwargs = validation_results.meta.get(
+            "batch_kwargs", {}
+        ) or validation_results.meta.get("batch_spec", {})
+        data_asset_name = batch_kwargs.get("data_asset_name")
+
         if success:
             success = "Succeeded"
             html_success_icon = (
@@ -295,10 +301,11 @@ class ValidationResultsPageRenderer(Renderer):
                     **{
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "${suite_title} ${expectation_suite_name}\n${status_title} ${html_success_icon} ${success}",
+                            "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",
                             "params": {
                                 "suite_title": "Expectation Suite:",
                                 "data_asset": "Data asset:",
+                                "data_asset_name": data_asset_name,
                                 "status_title": "Status:",
                                 "expectation_suite_name": expectation_suite_name,
                                 "success": success,
@@ -472,7 +479,7 @@ class ValidationResultsPageRenderer(Renderer):
 
     @classmethod
     def _render_validation_statistics(cls, validation_results):
-        statistics = validation_results["statistics"]
+        statistics = validation_results.statistics
         statistics_dict = OrderedDict(
             [
                 ("evaluated_expectations", "Evaluated Expectations"),
@@ -777,7 +784,7 @@ class ProfilingResultsPageRenderer(Renderer):
             column_section_renderer = {
                 "class_name": "ProfilingResultsColumnSectionRenderer"
             }
-        module_name = "great_expectations.render.renderer.other_section_renderer"
+        module_name = "great_expectations.render.renderer.profiling_results_overview_section_renderer"
         self._overview_section_renderer = instantiate_class_from_config(
             config=overview_section_renderer,
             runtime_environment={},
