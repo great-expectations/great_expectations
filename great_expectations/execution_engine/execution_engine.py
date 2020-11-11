@@ -104,18 +104,6 @@ class ExecutionEngine:
         self._batch_data[batch_id] = batch_data
         self._active_batch_data_id = batch_id
 
-    def process_batch_request(self, batch_request, batch_spec):
-        """Use ExecutionEngine-specific configuration to translate any batch_request keys into batch_spec keys
-
-        Args:
-            batch_request (dict): batch_request to process
-            batch_spec (dict): batch_spec to map processed batch_request keys to
-
-        Returns:
-            batch_spec (dict)
-        """
-        raise NotImplementedError
-
     def resolve_metrics(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
