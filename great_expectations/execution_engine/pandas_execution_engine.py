@@ -402,14 +402,19 @@ Notes:
     @staticmethod
     def _split_on_multi_column_values(
         df,
+        column_names: list,
         partition_definition: dict,
     ):
         """Split on the joint values in the named columns"""
 
         subset_df = df.copy()
-        for column_name, value in partition_definition.items():
+        for column_name in column_names:
+            value = partition_definition.get(column_name)
+            if not value:
+                raise ValueError(f"In order for PandasExecution to `_split_on_multi_column_values`, "
+                                 f"all values in column_names must also exist in partition_definition. "
+                                 f"{column_name} was not found in partition_definition.")
             subset_df = subset_df[subset_df[column_name]==value]
-
         return subset_df
 
     @staticmethod

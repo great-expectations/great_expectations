@@ -1,10 +1,13 @@
 import pytest
 import datetime
 import random
+import os
 import numpy as np
 import pandas as pd
 from great_expectations.core.batch import Batch
-from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec
+
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
@@ -85,7 +88,7 @@ def test_basic_setup(spark_session):
         ],
         pd_df.columns.tolist(),
     )
-    batch_data = SparkDFExecutionEngine().load_batch(
+    batch_data = SparkDFExecutionEngine().get_batch_data(
         batch_spec=RuntimeDataBatchSpec(
             batch_data=df,
             data_asset_name="DATA_ASSET",
@@ -103,7 +106,27 @@ def test_get_batch_data(test_sparkdf):
     assert len(test_sparkdf.columns) == 10
 
 
+# TODO: Next PR for Will
+def test_get_batch_empty_splitter(test_sparkdf):
+    pass
+
+
+def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path):
+    # reader_method not configured because spark will configure own reader by default
+    test = PathBatchSpec(
+        path=os.path.join(test_folder_connection_path, "test.csv"),
+        splitter_method="_split_on_whole_table"
+        )
+    test_sparkdf = SparkDFExecutionEngine().get_batch_data(test)
+    assert test_sparkdf.count() == 6
+    assert len(test_sparkdf.columns) == 3
+
+
 def test_get_batch_with_split_on_whole_table(test_sparkdf):
+    db_file = file_relative_path(
+        __file__, os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
     test_sparkdf = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_sparkdf,
         splitter_method="_split_on_whole_table"
@@ -204,6 +227,7 @@ def test_get_batch_with_split_on_multi_column_values(test_sparkdf):
         batch_data=test_sparkdf,
         splitter_method="_split_on_multi_column_values",
         splitter_kwargs={
+            "column_names": ["y", "m", "d"],
             "partition_definition": {
                 "y": 2020,
                 "m": 1,
@@ -216,6 +240,20 @@ def test_get_batch_with_split_on_multi_column_values(test_sparkdf):
     collected = split_df.collect()
     for val in collected:
         assert val.date == datetime.date(2020, 1, 5)
+
+    with pytest.raises(ValueError):
+        split_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+            batch_data=test_sparkdf,
+            splitter_method="_split_on_multi_column_values",
+            splitter_kwargs={
+                "column_names": ["I", "dont", "exist"],
+                "partition_definition": {
+                    "y": 2020,
+                    "m": 1,
+                    "d": 5,
+                }
+            },
+        ))
 
 
 def test_get_batch_with_split_on_hashed_column(test_sparkdf):
@@ -235,6 +273,12 @@ def test_get_batch_with_split_on_hashed_column(test_sparkdf):
 
 
 # ### Sampling methods ###
+
+# TODO: Next PR for Will
+def test_get_batch_empty_sampler(test_sparkdf):
+    pass
+
+
 def test_sample_using_random(test_sparkdf):
     sampled_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_sparkdf,

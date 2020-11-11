@@ -1,12 +1,13 @@
 import pytest
 import datetime
 import random
+import os
 import pandas as pd
 import hashlib
 from typing import List
 
 from great_expectations.core.batch import BatchSpec
-from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec
+from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec
 from great_expectations.execution_engine.pandas_execution_engine import PandasExecutionEngine
 
 # def test_basic_setup():
@@ -79,7 +80,6 @@ def test_df(tmp_path_factory):
 
 def test_get_batch_data(test_df):
     print(test_df.T)
-
     split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_df,
     ))
@@ -101,6 +101,17 @@ def test_get_batch_with_split_on_whole_table(test_df):
         splitter_method="_split_on_whole_table"
     ))
     assert split_df.shape == (120, 10)
+
+
+def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path):
+    test = PathBatchSpec(
+        path=os.path.join(test_folder_connection_path, "test.csv"),
+        reader_method="read_csv",
+        splitter_method="_split_on_whole_table"
+        )
+    test_df = PandasExecutionEngine().get_batch_data(test)
+    assert test_df.shape == (5, 3)
+
 
 def test_get_batch_with_split_on_column_value(test_df):
 
@@ -180,7 +191,8 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
         batch_data=test_df,
         splitter_method="_split_on_multi_column_values",
         splitter_kwargs={
-            "partition_definition" : {
+            "column_names": ["y", "m", "d"],
+            "partition_definition": {
                 "y": 2020,
                 "m": 1,
                 "d": 5,
@@ -189,6 +201,20 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
     ))
     assert split_df.shape == (4, 10)
     assert (split_df.date == datetime.date(2020,1,5)).all()
+
+    with pytest.raises(ValueError):
+        split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+            batch_data=test_df,
+            splitter_method="_split_on_multi_column_values",
+            splitter_kwargs={
+                "column_names": ["I", "dont", "exist"],
+                "partition_definition": {
+                    "y": 2020,
+                    "m": 1,
+                    "d": 5,
+                }
+            },
+        ))
 
 def test_get_batch_with_split_on_hashed_column(test_df):
     split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
