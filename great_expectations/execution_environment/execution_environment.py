@@ -24,6 +24,7 @@ class BaseExecutionEnvironment:
     def __init__(
         self,
         name: str,
+        data_context_root_directory: str = None,
     ):
         """
         Build a new ExecutionEnvironment.
@@ -338,6 +339,7 @@ class ExecutionEnvironment(BaseExecutionEnvironment):
         """
         super().__init__(
             name=name,
+            data_context_root_directory=data_context_root_directory,
         )
 
         self._data_context_root_directory = data_context_root_directory
