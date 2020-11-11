@@ -44,6 +44,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
             "class_name": "SqlDataConnector",
             "name": "ONLY_DATA_CONNECTOR",
             "data_assets": {},
+            "include_introspected_whole_tables_as_data_assets": True,
         }
         self._data_connector = instantiate_class_from_config(
             config=self._data_connector_config,

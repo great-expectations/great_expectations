@@ -7,6 +7,9 @@ import sqlalchemy as sa
 from great_expectations.data_context.util import (
     instantiate_class_from_config
 )
+from great_expectations.core.batch import (
+    BatchRequest
+)
 
 def test_basic_instantiation():
     random.seed(0)
@@ -109,10 +112,22 @@ class_name: StreamlinedSqlExecutionEnvironment
 connection_string: sqlite:///{db_file}
 """)
 
-    assert my_sql_execution_environment.get_available_data_asset_names() == [
-        "foo",
-        "bar",
-    ]
+    print(my_sql_execution_environment.get_available_data_asset_names())
+    assert my_sql_execution_environment.get_available_data_asset_names() == {
+        "ONLY_DATA_CONNECTOR": [
+            "main.table_containing_id_spacers_for_D__whole",
+            "main.table_partitioned_by_date_column__A__whole",
+            "main.table_partitioned_by_foreign_key__F__whole",
+            "main.table_partitioned_by_incrementing_batch_id__E__whole",
+            "main.table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__whole",
+            "main.table_partitioned_by_multiple_columns__G__whole",
+            "main.table_partitioned_by_regularly_spaced_incrementing_id_column__C__whole",
+            "main.table_partitioned_by_timestamp_column__B__whole",
+            "main.table_that_should_be_partitioned_by_random_hash__H__whole",
+            "main.table_with_fk_reference_from_F__whole",
+        ]
+    }
+
 
 #Note: Abe 2020111: this test belongs with the data_connector tests, not here.
 def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine):
@@ -183,3 +198,43 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
         {"schema_name": "main", "table_name": "table_that_should_be_partitioned_by_random_hash__H", "type": "table"},
         {"schema_name": "main", "table_name": "table_with_fk_reference_from_F", "type": "table"},
     ]
+
+    #Need to test include_views, too.
+
+#Note: Abe 2020111: this test belongs with the data_connector tests, not here.
+def test_include_introspected_whole_tables_as_data_assets(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "SqlDataConnector",
+            "name": "my_test_data_connector",
+            "data_assets": {},
+            "include_introspected_whole_tables_as_data_assets": True,
+        },
+        runtime_environment={
+            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+            "execution_environment_name": "my_test_execution_environment",
+        },
+        config_defaults={
+            "module_name": "great_expectations.execution_environment.data_connector"
+        },
+    )
+
+    assert my_data_connector.get_available_data_asset_names() == [
+        "main.table_containing_id_spacers_for_D__whole",
+        "main.table_partitioned_by_date_column__A__whole",
+        "main.table_partitioned_by_foreign_key__F__whole",
+        "main.table_partitioned_by_incrementing_batch_id__E__whole",
+        "main.table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__whole",
+        "main.table_partitioned_by_multiple_columns__G__whole",
+        "main.table_partitioned_by_regularly_spaced_incrementing_id_column__C__whole",
+        "main.table_partitioned_by_timestamp_column__B__whole",
+        "main.table_that_should_be_partitioned_by_random_hash__H__whole",
+        "main.table_with_fk_reference_from_F__whole",
+    ]
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="my_test_execution_environment",
+        data_connector_name="my_test_data_connector",
+        data_asset_name="main.table_that_should_be_partitioned_by_random_hash__H__whole",
+    ))
+    assert len(batch_definition_list) == 1
