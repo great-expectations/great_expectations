@@ -147,49 +147,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
-        metric_dependencies = dependencies["metrics"]
+
         # We do not need this metric for a null metric
-        del metric_dependencies["column_values.nonnull.unexpected_count"]
-
-    def _validate(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-        total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get("column_values.null.unexpected_values")
-
-        success = None
-        if total_count != 0:
-            success_ratio = (total_count - unexpected_count) / (total_count)
-            success = success_ratio > mostly
-
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=success,
-            element_count=metrics.get("table.row_count"),
-            nonnull_count=metrics.get("table.row_count")
-            - metrics.get("column_values.nonnull.unexpected_count"),
-            unexpected_count=metrics.get("column_values.null.unexpected_count"),
-            unexpected_list=metrics.get("column_values.null.unexpected_values"),
-            unexpected_index_list=metrics.get(
-                self.map_metric + ".unexpected_index_list"
-            ),
-        )
+        del dependencies["metrics"]["column_values.nonnull.unexpected_count"]
+        return dependencies
