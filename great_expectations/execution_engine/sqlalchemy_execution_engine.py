@@ -426,13 +426,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.dialect = None
 
-        if self.engine and self.engine.dialect.name.lower() in [
-            "sqlite",
-            "mssql",
-            "snowflake",
-        ]:
-            # sqlite/mssql temp tables only persist within a connection so override the engine
-            self.engine = engine.connect()
+        # NOTE: Abe 20201111: I don't understand what this is supposed to do. It's untested, and it's breaking sqlite.
+        # if self.engine and self.engine.dialect.name.lower() in [
+        #     "sqlite",
+        #     "mssql",
+        #     "snowflake",
+        # ]:
+        #     # sqlite/mssql temp tables only persist within a connection so override the engine
+        #     self.engine = engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(

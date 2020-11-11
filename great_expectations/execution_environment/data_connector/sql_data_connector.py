@@ -58,16 +58,18 @@ class SqlDataConnector(DataConnector):
                     table_name=table_name,
                     **data_asset["splitter_kwargs"]
                 )
+
+                rows = self._execution_engine.engine.execute(split_query).fetchall()
+
+                # Zip up split parameters with column names
+                column_names = self._get_column_names_from_splitter_kwargs(
+                    data_asset["splitter_kwargs"]
+                )
+                partition_definition_list = [dict(zip(column_names, row)) for row in rows]
+
             else:
-                split_query = self._split_on_whole_table()
+                partition_definition_list = [{}]
 
-            rows = self._execution_engine.engine.execute(split_query).fetchall()
-
-            # Zip up split parameters with column names
-            column_names = self._get_column_names_from_splitter_kwargs(
-                data_asset["splitter_kwargs"]
-            )
-            partition_definition_list = [dict(zip(column_names, row)) for row in rows]
 
             # TODO Abe 20201029 : Apply sorters to partition_definition_list here
             # TODO Will 20201102 : add sorting code here
@@ -186,10 +188,14 @@ class SqlDataConnector(DataConnector):
 
     def _split_on_whole_table(
         self,
+        table_name: str,
     ):
-        """'Split' by returning the whole table"""
+        """'Split' by returning the whole table
+        
+        Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
+        """
 
-        return [0]
+        return sa.select([sa.true()])
 
     def _split_on_column_value(
         self, table_name: str, column_name: str,
