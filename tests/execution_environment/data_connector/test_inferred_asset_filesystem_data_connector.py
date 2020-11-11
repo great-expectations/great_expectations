@@ -90,9 +90,9 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(tmp_path
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    self_check_return_object = my_data_connector.self_check()
+    self_check_report_object = my_data_connector.self_check()
 
-    assert self_check_return_object == {
+    assert self_check_report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
@@ -251,9 +251,9 @@ def test_self_check(tmp_path_factory):
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    self_check_return_object = my_data_connector.self_check()
+    self_check_report_object = my_data_connector.self_check()
 
-    assert self_check_return_object == {
+    assert self_check_report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
@@ -290,7 +290,7 @@ def test_test_yaml_config(empty_data_context, tmp_path_factory):
         ],
     )
 
-    return_object = empty_data_context.test_yaml_config(f"""
+    report_object = empty_data_context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: InferredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -303,9 +303,9 @@ default_regex:
         - year_dir
         - month_dir
         - data_asset_name
-    """, return_mode="return_object")
+    """, return_mode="report_object")
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
@@ -347,7 +347,7 @@ def test_yaml_config_excluding_non_regex_matching_files(empty_data_context, tmp_
     # gamma-202001.csv and gamma-202002.csv do not match regex (which includes 2020/month directory).  They are not
     # considered as unmatched data references, because glob_directive causes these data references to not be listed.
 
-    return_object = empty_data_context.test_yaml_config(
+    report_object = empty_data_context.test_yaml_config(
         f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: InferredAssetFilesystemDataConnector
@@ -364,10 +364,10 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
-        return_mode="return_object",
+        return_mode="report_object",
     )
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
@@ -409,7 +409,7 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
         ]
     )
 
-    return_object = empty_data_context.test_yaml_config(f"""
+    report_object = empty_data_context.test_yaml_config(f"""
     module_name: great_expectations.execution_environment.data_connector
     class_name: InferredAssetFilesystemDataConnector
     execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -422,9 +422,9 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
             - letter
             - number
         pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
-        """, return_mode="return_object")
+        """, return_mode="report_object")
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 4,
         "example_data_asset_names": [
@@ -466,7 +466,7 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
         ]
     )
 
-    return_object = empty_data_context.test_yaml_config(f"""
+    report_object = empty_data_context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -481,9 +481,9 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
                 - data_asset_name
               pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
 
-              """, return_mode="return_object")
+              """, return_mode="report_object")
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
@@ -523,7 +523,7 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
 #             "2021/01/07/log_file-a21075a36eeddd084e17611a238c7101.txt.gz",
 #         ]
 #     )
-#     return_object = empty_data_context.test_yaml_config(f
+#     report_object = empty_data_context.test_yaml_config(f
 #           module_name: great_expectations.execution_environment.data_connector
 #           class_name: InferredAssetFilesystemDataConnector
 #           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -535,9 +535,9 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
 #               group_names:
 #                 - data_asset_name
 #               pattern: (\\d{{4}}\\/\\d{{2}}\\/\\d{{2}})/log_file-.*\\.txt\\.gz
-#               , return_mode="return_object")
+#               , return_mode="report_object")
 #
-#     return_object == {
+#     report_object == {
 #         "class_name": "InferredAssetFilesystemDataConnector",
 #         "data_asset_count": 7,
 #         "example_data_asset_names": [
@@ -579,7 +579,7 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
         ]
     )
 
-    return_object = empty_data_context.test_yaml_config(f"""
+    report_object = empty_data_context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -593,8 +593,8 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
                 - month
                 - day
               pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
-      """, return_mode="return_object")
-    assert return_object == {
+      """, return_mode="report_object")
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
@@ -628,7 +628,7 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context, t
         ]
     )
 
-    return_object = empty_data_context.test_yaml_config(f"""
+    report_object = empty_data_context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -642,9 +642,9 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context, t
                   - month
                   - day
               pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
-              """, return_mode="return_object")
+              """, return_mode="report_object")
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
