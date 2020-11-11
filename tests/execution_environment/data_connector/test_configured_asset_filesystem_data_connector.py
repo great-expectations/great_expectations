@@ -162,7 +162,7 @@ assets:
                 "batch_definition_count": 0
             },
         },
-        "example_unmatched_data_references": ['alpha-3.csv', 'alpha-2.csv', 'alpha-1.csv'],
+        "example_unmatched_data_references": ["alpha-3.csv", "alpha-2.csv", "alpha-1.csv"],
         "unmatched_data_reference_count": 3,
     }
 
@@ -193,7 +193,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 class_name: PandasExecutionEngine
             class_name: ConfiguredAssetFilesystemDataConnector
             base_directory: {base_directory}
-            glob_directive: '*.csv'
+            glob_directive: "*.csv"
             assets:
                 TestFiles:
             default_regex:
@@ -231,61 +231,61 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'james', 'timestamp': '20200810', 'price': '1003'}
+                            {"name": "james", "timestamp": "20200810", "price": "1003"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'abe', 'timestamp': '20200809', 'price': '1040'}
+                            {"name": "abe", "timestamp": "20200809", "price": "1040"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'eugene', 'timestamp': '20200809', 'price': '1500'}
+                            {"name": "eugene", "timestamp": "20200809", "price": "1500"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'alex', 'timestamp': '20200819', 'price': '1300'}
+                            {"name": "alex", "timestamp": "20200819", "price": "1300"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'alex', 'timestamp': '20200809', 'price': '1000'}
+                            {"name": "alex", "timestamp": "20200809", "price": "1000"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'will', 'timestamp': '20200810', 'price': '1001'}
+                            {"name": "will", "timestamp": "20200810", "price": "1001"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'eugene', 'timestamp': '20201129', 'price': '1900'}
+                            {"name": "eugene", "timestamp": "20201129", "price": "1900"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'will', 'timestamp': '20200809', 'price': '1002'}
+                            {"name": "will", "timestamp": "20200809", "price": "1002"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'james', 'timestamp': '20200811', 'price': '1009'}
+                            {"name": "james", "timestamp": "20200811", "price": "1009"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'james', 'timestamp': '20200713', 'price': '1567'}
+                            {"name": "james", "timestamp": "20200713", "price": "1567"}
                         )),
     ]
     assert expected == unsorted_batch_definition_list
@@ -325,7 +325,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
             class_name: PandasExecutionEngine
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
-        glob_directive: '*.csv'
+        glob_directive: "*.csv"
         assets:
             TestFiles:
         default_regex:
@@ -338,7 +338,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
             - orderby: asc
               class_name: LexicographicSorter
               name: name
-            - datetime_format: '%Y%m%d'
+            - datetime_format: "%Y%m%d"
               orderby: desc
               class_name: DateTimeSorter
               name: timestamp
@@ -379,61 +379,61 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'abe', 'timestamp': '20200809', 'price': '1040'}
+                            {"name": "abe", "timestamp": "20200809", "price": "1040"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'alex', 'timestamp': '20200819', 'price': '1300'}
+                            {"name": "alex", "timestamp": "20200819", "price": "1300"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'alex', 'timestamp': '20200809', 'price': '1000'}
+                            {"name": "alex", "timestamp": "20200809", "price": "1000"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'eugene', 'timestamp': '20201129', 'price': '1900'}
+                            {"name": "eugene", "timestamp": "20201129", "price": "1900"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'eugene', 'timestamp': '20200809', 'price': '1500'}
+                            {"name": "eugene", "timestamp": "20200809", "price": "1500"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'james', 'timestamp': '20200811', 'price': '1009'}
+                            {"name": "james", "timestamp": "20200811", "price": "1009"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'james', 'timestamp': '20200810', 'price': '1003'}
+                            {"name": "james", "timestamp": "20200810", "price": "1003"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'james', 'timestamp': '20200713', 'price': '1567'}
+                            {"name": "james", "timestamp": "20200713", "price": "1567"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'will', 'timestamp': '20200810', 'price': '1001'}
+                            {"name": "will", "timestamp": "20200810", "price": "1001"}
                         )),
         BatchDefinition(execution_environment_name="test_environment",
                         data_connector_name="general_filesystem_data_connector",
                         data_asset_name="TestFiles",
                         partition_definition=PartitionDefinition(
-                            {'name': 'will', 'timestamp': '20200809', 'price': '1002'}
+                            {"name": "will", "timestamp": "20200809", "price": "1002"}
                         )),
     ]
 
@@ -497,22 +497,22 @@ def test_alpha(tmp_path_factory):
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
-            'test_dir_alpha/A.csv',
-            'test_dir_alpha/B.csv',
-            'test_dir_alpha/C.csv',
-            'test_dir_alpha/D.csv',
+            "test_dir_alpha/A.csv",
+            "test_dir_alpha/B.csv",
+            "test_dir_alpha/C.csv",
+            "test_dir_alpha/D.csv",
         ]
     )
 
     my_data_connector_yaml = yaml.load(f"""
                 module_name: great_expectations.execution_environment.data_connector
                 class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {base_directory + "/test_dir_alpha"}
+                base_directory: {base_directory}/test_dir_alpha
                 assets:
                   A:
-                    glob_directive: '*.csv'
+                    glob_directive: "*.csv"
                 default_regex:
-                    pattern: (.*).csv
+                    pattern: (.+)\\.csv
                     group_names:
                     - part_1
             """, Loader=yaml.FullLoader)
@@ -576,27 +576,27 @@ def test_foxtrot(tmp_path_factory):
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
-            'test_dir_foxtrot/A/A-1.csv',
-            'test_dir_foxtrot/A/A-2.csv',
-            'test_dir_foxtrot/A/A-3.csv',
-            'test_dir_foxtrot/B/B-1.txt',
-            'test_dir_foxtrot/B/B-2.txt',
-            'test_dir_foxtrot/B/B-3.txt',
-            'test_dir_foxtrot/C/C-2017.csv',
-            'test_dir_foxtrot/C/C-2018.csv',
-            'test_dir_foxtrot/C/C-2019.csv',
-            'test_dir_foxtrot/D/D-aaa.csv',
-            'test_dir_foxtrot/D/D-bbb.csv',
-            'test_dir_foxtrot/D/D-ccc.csv',
-            'test_dir_foxtrot/D/D-ddd.csv',
-            'test_dir_foxtrot/D/D-eee.csv',
+            "test_dir_foxtrot/A/A-1.csv",
+            "test_dir_foxtrot/A/A-2.csv",
+            "test_dir_foxtrot/A/A-3.csv",
+            "test_dir_foxtrot/B/B-1.txt",
+            "test_dir_foxtrot/B/B-2.txt",
+            "test_dir_foxtrot/B/B-3.txt",
+            "test_dir_foxtrot/C/C-2017.csv",
+            "test_dir_foxtrot/C/C-2018.csv",
+            "test_dir_foxtrot/C/C-2019.csv",
+            "test_dir_foxtrot/D/D-aaa.csv",
+            "test_dir_foxtrot/D/D-bbb.csv",
+            "test_dir_foxtrot/D/D-ccc.csv",
+            "test_dir_foxtrot/D/D-ddd.csv",
+            "test_dir_foxtrot/D/D-eee.csv",
         ],
     )
 
     my_data_connector_yaml = yaml.load(f"""
             module_name: great_expectations.execution_environment.data_connector
             class_name: ConfiguredAssetFilesystemDataConnector
-            base_directory: {base_directory + "/test_dir_foxtrot"}
+            base_directory: {base_directory}/test_dir_foxtrot
             assets:
               A:
                 base_directory: A/
@@ -607,10 +607,10 @@ def test_foxtrot(tmp_path_factory):
                 - part_1
                 - part_2
               C:
-                glob_directive: '*'
+                glob_directive: "*"
                 base_directory: C/
               D:
-                glob_directive: '*'
+                glob_directive: "*"
                 base_directory: D/
             default_regex:
                 pattern: (.*)-(.*)\\.csv
@@ -712,7 +712,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             class_name: PandasExecutionEngine
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
-        glob_directive: '*.csv'
+        glob_directive: "*.csv"
         assets:
             TestFiles: 
                 pattern: (.+)_(.+)_(.+)\\.csv
@@ -728,7 +728,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             - orderby: asc
               class_name: LexicographicSorter
               name: name
-            - datetime_format: '%Y%m%d'
+            - datetime_format: "%Y%m%d"
               orderby: desc
               class_name: DateTimeSorter
               name: timestamp
@@ -777,7 +777,7 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
             class_name: PandasExecutionEngine
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
-        glob_directive: '*.csv'
+        glob_directive: "*.csv"
         assets:
             TestFiles: 
         default_regex:
@@ -788,7 +788,7 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
             - orderby: asc
               class_name: LexicographicSorter
               name: name
-            - datetime_format: '%Y%m%d'
+            - datetime_format: "%Y%m%d"
               orderby: desc
               class_name: DateTimeSorter
               name: timestamp
@@ -837,7 +837,7 @@ class_name: ConfiguredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
 base_directory: {base_directory}/my_base_directory/
 default_regex:
-    pattern: ^(.+)-(\\d\\d\\d\\d)(\\d\\d)\\.(csv|txt)$
+    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
     group_names:
         - data_asset_name
         - year_dir

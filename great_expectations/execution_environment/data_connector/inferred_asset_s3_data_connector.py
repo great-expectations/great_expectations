@@ -61,13 +61,13 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         This method is used to refresh the cache.
         """
         query_options: dict = {
-            "Delimiter": self._delimiter,
             "Bucket": self._bucket,
             "Prefix": self._prefix,
+            "Delimiter": self._delimiter,
             "MaxKeys": self._max_keys,
         }
         path_list: List[str] = [
-            key for key in list_s3_keys(s3=self._s3, query_options=query_options, iterator_dict={})
+            key for key in list_s3_keys(s3=self._s3, query_options=query_options, iterator_dict={}, recursive=True)
         ]
         return path_list
 
