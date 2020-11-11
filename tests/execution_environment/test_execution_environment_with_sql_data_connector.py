@@ -112,7 +112,6 @@ class_name: StreamlinedSqlExecutionEnvironment
 connection_string: sqlite:///{db_file}
 """)
 
-    print(my_sql_execution_environment.get_available_data_asset_names())
     assert my_sql_execution_environment.get_available_data_asset_names() == {
         "ONLY_DATA_CONNECTOR": [
             "main.table_containing_id_spacers_for_D__whole",
