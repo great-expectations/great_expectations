@@ -149,7 +149,14 @@ class SqlDataConnector(DataConnector):
             print("\n\tChoosing an example data reference...")
 
         example_data_reference =  None
-        for data_asset_name, data_asset_return_obj in report_object["data_assets"].items():
+
+        available_references = report_object["data_assets"].items()
+        if len(available_references) == 0:
+            if pretty_print:
+                print(f"\t\tNo references available.")
+            return report_object
+
+        for data_asset_name, data_asset_return_obj in available_references:
             # print(data_asset_name)
             # print(json.dumps(data_asset_return_obj["example_data_references"], indent=2))
             if data_asset_return_obj["batch_definition_count"] > 0:
@@ -181,7 +188,7 @@ class SqlDataConnector(DataConnector):
         if pretty_print:
             print(f"\n\t\tShowing 5 rows")
             print(pd.DataFrame(rows[:5]))
-        
+    
         return report_object
 
     ### Splitter methods for listing partitions ###
