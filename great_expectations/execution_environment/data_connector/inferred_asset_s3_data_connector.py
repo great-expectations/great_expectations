@@ -67,7 +67,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             "MaxKeys": self._max_keys,
         }
         path_list: List[str] = [
-            key for key in list_s3_keys(s3=self._s3, query_options=query_options, iterator_dict={})
+            key for key in list_s3_keys(s3=self._s3, query_options=query_options, iterator_dict={}, recursive=True)
         ]
         return path_list
 

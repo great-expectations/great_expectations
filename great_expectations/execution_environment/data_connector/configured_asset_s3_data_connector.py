@@ -76,7 +76,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
                 query_options["MaxKeys"] = asset.max_keys
 
         path_list: List[str] = [
-            key for key in list_s3_keys(s3=self._s3, query_options=query_options, iterator_dict={})
+            key for key in list_s3_keys(s3=self._s3, query_options=query_options, iterator_dict={}, recursive=False)
         ]
 
         return path_list
