@@ -13,24 +13,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlA
 from great_expectations.execution_environment.data_connector import SqlDataConnector
 from great_expectations.data_context.util import file_relative_path
 
-
-@pytest.fixture
-def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
-    # TODO: Switch this to an actual ExecutionEngine
-
-    db_file = file_relative_path(
-        __file__, os.path.join("..", "..", "test_sets", "test_cases_for_sql_data_connector.db"),
-    )
-    # db = sqlite3.connect(db_file)
-    # return db
-
-    engine = sa.create_engine(f"sqlite:////{db_file}")
-    conn = engine.connect()
-
-    # Build a SqlAlchemyDataset using that database
-    return SqlAlchemyExecutionEngine(name="test_sql_execution_engine", engine=conn,)
-
-
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
@@ -641,3 +623,138 @@ def test_sampling_method__md5(test_cases_for_sql_data_connector_sqlite_execution
     #         }
     #     })
     # )
+
+
+def test_to_make_sure_splitter_and_sampler_methods_are_optional(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=BatchSpec({
+            "table_name": "table_partitioned_by_date_column__A",
+            "partition_definition": {},
+            "sampling_method": "_sample_using_mod",
+            "sampling_kwargs": {
+                "column_name": "id",
+                "mod": 10,
+                "value": 8,
+            }
+        })
+    )
+
+    assert len(batch_data.fetchall()) == 12
+
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=BatchSpec({
+            "table_name": "table_partitioned_by_date_column__A",
+            "partition_definition": {},
+        })
+    )
+
+    assert len(batch_data.fetchall()) == 120
+
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=BatchSpec({
+            "table_name": "table_partitioned_by_date_column__A",
+            "partition_definition": {},
+            "splitter_method": "_split_on_whole_table",
+            "splitter_kwargs": {},
+        })
+    )
+
+    assert len(batch_data.fetchall()) == 120
+
+def test_default_behavior_with_no_splitter(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    config = yaml.load(
+        """
+    name: my_sql_data_connector
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+
+    data_assets:
+        table_partitioned_by_date_column__A: {}
+    """,
+        yaml.FullLoader,
+    )
+    config["execution_engine"] = db
+
+    my_data_connector = SqlDataConnector(**config)
+    report_object = my_data_connector.self_check()
+    print(json.dumps(report_object, indent=2))
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+        partition_request={}
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+        partition_request={
+            "partition_identifiers": {}
+        }
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}
+
+def test_behavior_with_whole_table_splitter(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    config = yaml.load(
+        """
+    name: my_sql_data_connector
+    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+
+    data_assets:
+        table_partitioned_by_date_column__A:
+            splitter_method : "_split_on_whole_table"
+            splitter_kwargs : {}
+    """,
+        yaml.FullLoader,
+    )
+    config["execution_engine"] = db
+
+    my_data_connector = SqlDataConnector(**config)
+    report_object = my_data_connector.self_check()
+    print(json.dumps(report_object, indent=2))
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+        partition_request={}
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+        partition_request={
+            "partition_identifiers": {}
+        }
+    ))
+    assert len(batch_definition_list) == 1
+    assert batch_definition_list[0]["partition_definition"] == {}

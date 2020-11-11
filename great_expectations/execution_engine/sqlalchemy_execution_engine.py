@@ -426,13 +426,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.dialect = None
 
-        if self.engine and self.engine.dialect.name.lower() in [
-            "sqlite",
-            "mssql",
-            "snowflake",
-        ]:
-            # sqlite/mssql temp tables only persist within a connection so override the engine
-            self.engine = engine.connect()
+        # NOTE: Abe 20201111: I don't understand what this is supposed to do. It's untested, and it's breaking sqlite.
+        # if self.engine and self.engine.dialect.name.lower() in [
+        #     "sqlite",
+        #     "mssql",
+        #     "snowflake",
+        # ]:
+        #     # sqlite/mssql temp tables only persist within a connection so override the engine
+        #     self.engine = engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -791,53 +792,46 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _build_selector_from_batch_spec(self, batch_spec):
         table_name = batch_spec["table_name"]
 
-        splitter_fn = getattr(self, batch_spec["splitter_method"])
+        if "splitter_method" in batch_spec:
+            splitter_fn = getattr(self, batch_spec["splitter_method"])
+            split_clause = splitter_fn(
+                table_name=table_name,
+                partition_definition=batch_spec["partition_definition"],
+                **batch_spec["splitter_kwargs"]
+            )
+
+        else:
+            split_clause = True
+
         if "sampling_method" in batch_spec:
             if batch_spec["sampling_method"] == "_sample_using_limit":
+                # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
+                # so the business logic for building the query needs to be different.
 
-                return (
-                    sa.select("*")
-                    .select_from(sa.text(table_name))
-                    .where(
-                        splitter_fn(
-                            table_name=table_name,
-                            partition_definition=batch_spec["partition_definition"],
-                            **batch_spec["splitter_kwargs"],
-                        )
-                    )
-                    .limit(batch_spec["sampling_kwargs"]["n"])
-                )
+                return sa.select('*').select_from(
+                    sa.text(table_name)
+                ).where(
+                    split_clause
+                ).limit(batch_spec["sampling_kwargs"]["n"])
 
             else:
 
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
-                return (
-                    sa.select("*")
-                    .select_from(sa.text(table_name))
-                    .where(
-                        sa.and_(
-                            splitter_fn(
-                                table_name=table_name,
-                                partition_definition=batch_spec["partition_definition"],
-                                **batch_spec["splitter_kwargs"],
-                            ),
-                            sampler_fn(**batch_spec["sampling_kwargs"]),
-                        )
+                return sa.select('*').select_from(
+                    sa.text(table_name)
+                ).where(
+                    sa.and_(
+                        split_clause,
+                        sampler_fn(**batch_spec["sampling_kwargs"]),
                     )
                 )
 
         else:
 
-            return (
-                sa.select("*")
-                .select_from(sa.text(table_name))
-                .where(
-                    splitter_fn(
-                        table_name=table_name,
-                        partition_definition=batch_spec["partition_definition"],
-                        **batch_spec["splitter_kwargs"],
-                    )
-                )
+            return sa.select('*').select_from(
+                sa.text(table_name)
+            ).where(
+                split_clause
             )
 
     def get_batch_data_and_markers(

@@ -51,19 +51,25 @@ class SqlDataConnector(DataConnector):
                 table_name = data_asset["table_name"]
             else:
                 table_name = data_asset_name
+            
+            if "splitter_method" in data_asset:
+                splitter_fn = getattr(self, data_asset["splitter_method"])
+                split_query = splitter_fn(
+                    table_name=table_name,
+                    **data_asset["splitter_kwargs"]
+                )
 
-            splitter_fn = getattr(self, data_asset["splitter_method"])
-            split_query = splitter_fn(
-                table_name=table_name, **data_asset["splitter_kwargs"]
-            )
+                rows = self._execution_engine.engine.execute(split_query).fetchall()
 
-            rows = self._execution_engine.engine.execute(split_query).fetchall()
+                # Zip up split parameters with column names
+                column_names = self._get_column_names_from_splitter_kwargs(
+                    data_asset["splitter_kwargs"]
+                )
+                partition_definition_list = [dict(zip(column_names, row)) for row in rows]
 
-            # Zip up split parameters with column names
-            column_names = self._get_column_names_from_splitter_kwargs(
-                data_asset["splitter_kwargs"]
-            )
-            partition_definition_list = [dict(zip(column_names, row)) for row in rows]
+            else:
+                partition_definition_list = [{}]
+
 
             # TODO Abe 20201029 : Apply sorters to partition_definition_list here
             # TODO Will 20201102 : add sorting code here
@@ -128,19 +134,22 @@ class SqlDataConnector(DataConnector):
 
         return batch_spec
 
-    def self_check(self, pretty_print=True, max_examples=3):
-        return_object = super().self_check(
-            pretty_print=pretty_print, max_examples=max_examples
+    def self_check(
+        self,
+        pretty_print=True,
+        max_examples=3
+    ):
+        report_object = super().self_check(
+            pretty_print=pretty_print,
+            max_examples=max_examples
         )
 
         # Choose an example data_reference
         if pretty_print:
             print("\n\tChoosing an example data reference...")
 
-        example_data_reference = None
-        for data_asset_name, data_asset_return_obj in return_object[
-            "data_assets"
-        ].items():
+        example_data_reference =  None
+        for data_asset_name, data_asset_return_obj in report_object["data_assets"].items():
             # print(data_asset_name)
             # print(json.dumps(data_asset_return_obj["example_data_references"], indent=2))
             if data_asset_return_obj["batch_definition_count"] > 0:
@@ -164,16 +173,16 @@ class SqlDataConnector(DataConnector):
             )
         )
         rows = batch_data.fetchall()
-        return_object["example_data_reference"] = {
-            "batch_spec": batch_spec,
-            "n_rows": len(rows),
+        report_object["example_data_reference"] = {
+            "batch_spec" : batch_spec,
+            "n_rows" : len(rows),
         }
 
         if pretty_print:
             print(f"\n\t\tShowing 5 rows")
             print(pd.DataFrame(rows[:5]))
-
-        return return_object
+        
+        return report_object
 
     ### Splitter methods for listing partitions ###
 
@@ -181,9 +190,12 @@ class SqlDataConnector(DataConnector):
         self,
         table_name: str,
     ):
-        """'Split' by returning the whole table"""
+        """'Split' by returning the whole table
+        
+        Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
+        """
 
-        return [0]
+        return sa.select([sa.true()])
 
     def _split_on_column_value(
         self, table_name: str, column_name: str,

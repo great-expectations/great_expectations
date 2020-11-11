@@ -5,6 +5,9 @@ import tempfile
 import pytest
 
 from tests.test_utils import create_files_in_directory
+from great_expectations.exceptions import (
+    PluginClassNotFoundError,
+)
 
 
 def test_empty_store(empty_data_context):
@@ -109,16 +112,7 @@ data_connectors:
             group_names:
             - letter
             - number
-        # assets: {{}}
-            
-        # partitioners:
-        #     my_regex_partitioner:
-        #         class_name: RegexPartitioner
-        #         pattern: {temp_dir}/(.+)(\\d+)\\.csv
-        #         group_names:
-        #         - letter
-        #         - number
-""", return_mode="return_object"
+""", return_mode="report_object"
     )
 
     print(json.dumps(return_obj, indent=2))
@@ -150,3 +144,59 @@ data_connectors:
             }
         }
     }
+
+def test_error_states(empty_data_context):
+
+    first_config = """
+class_name: ExecutionEnvironment
+
+execution_engine:
+    class_name: NOT_A_REAL_CLASS_NAME
+"""
+
+    with pytest.raises(PluginClassNotFoundError) as excinfo:
+        empty_data_context.test_yaml_config(
+            yaml_config=first_config
+        )
+    # print(excinfo.value.message)
+    # shortened_message_len = len(excinfo.value.message)
+    # print("="*80)
+
+    # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
+    # Note: a more thorough test could also verify that the traceback is indeed short.
+    empty_data_context.test_yaml_config(
+        yaml_config=first_config,
+        shorten_tracebacks=True,
+    )
+
+    # For good measure, do it again, with a different config and a different type of error
+    temp_dir = str(tempfile.mkdtemp())
+    second_config = f"""
+class_name: ExecutionEnvironment
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        # class_name: ConfiguredAssetFilesystemDataConnector
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: {temp_dir}
+        glob_directive: '*.csv'
+        default_regex:
+            pattern: (.+)_(\\d+)\\.csv
+            group_names:
+            - letter
+            - number
+        NOT_A_REAL_KEY: nothing
+"""
+
+    with pytest.raises(TypeError) as excinfo:
+        empty_data_context.test_yaml_config(
+            yaml_config=second_config,
+        )
+
+    empty_data_context.test_yaml_config(
+        yaml_config=second_config,
+        shorten_tracebacks=True
+    )
