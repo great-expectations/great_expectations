@@ -837,7 +837,7 @@ class_name: ConfiguredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
 base_directory: {base_directory}/my_base_directory/
 default_regex:
-    pattern: ^(.+)-(\\d\\d\\d\\d)(\\d\\d)\\.(csv|txt)$
+    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
     group_names:
         - data_asset_name
         - year_dir

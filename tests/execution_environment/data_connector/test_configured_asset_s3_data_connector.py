@@ -946,7 +946,7 @@ execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
 bucket: {bucket}
 prefix: my_base_directory/
 default_regex:
-    pattern: ^(.+)-(\\d\\d\\d\\d)(\\d\\d)\\.(csv|txt)$
+    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
     group_names:
         - data_asset_name
         - year_dir
@@ -954,12 +954,12 @@ default_regex:
 assets:
     alpha:
         prefix: my_base_directory/alpha/files/go/here/
-        pattern: ^(.+)-(\\d\\d\\d\\d)(\\d\\d)\\.csv$
+        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
     beta:
         prefix: my_base_directory/beta_here/
-        pattern: ^(.+)-(\\d\\d\\d\\d)(\\d\\d)\\.txt$
+        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.txt$
     gamma:
-        pattern: ^(.+)-(\\d\\d\\d\\d)(\\d\\d)\\.csv$
+        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
 
     """
     config = yaml.load(yaml_string, Loader=yaml.FullLoader)
