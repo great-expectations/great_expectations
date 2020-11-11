@@ -22,7 +22,7 @@ except ImportError:
     sa = None
 
 
-class SqlDataConnector(DataConnector):
+class ConfiguredAssetSqlDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
@@ -35,7 +35,7 @@ class SqlDataConnector(DataConnector):
         self._data_assets = data_assets
         # self._include_introspected_whole_tables_as_data_assets = include_introspected_whole_tables_as_data_assets
 
-        super(SqlDataConnector, self).__init__(
+        super(ConfiguredAssetSqlDataConnector, self).__init__(
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,

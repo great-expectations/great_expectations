@@ -28,7 +28,7 @@ execution_engine:
 
 data_connectors:
     my_sqlite_db:
-        class_name: SqlDataConnector
+        class_name: ConfiguredAssetSqlDataConnector
 
         data_assets:
 
@@ -61,7 +61,7 @@ data_connectors:
         "data_connectors": {
             "count": 1,
             "my_sqlite_db": {
-                "class_name": "SqlDataConnector",
+                "class_name": "ConfiguredAssetSqlDataConnector",
                 "data_asset_count": 1,
                 "example_data_asset_names": [
                     "table_partitioned_by_date_column__A"
@@ -337,7 +337,7 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
     
     my_data_connector = instantiate_class_from_config(
         config={
-            "class_name": "IntrospectingSqlDataConnector",
+            "class_name": "InferredAssetSqlDataConnector",
             "name": "my_test_data_connector",
         },
         runtime_environment={
@@ -401,10 +401,10 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
     #Need to test include_views, too.
 
 #Note: Abe 2020111: this test belongs with the data_connector tests, not here.
-def test_basic_instantiation_of_IntrospectingSqlDataConnector(test_cases_for_sql_data_connector_sqlite_execution_engine):
+def test_basic_instantiation_of_InferredAssetSqlDataConnector(test_cases_for_sql_data_connector_sqlite_execution_engine):
     my_data_connector = instantiate_class_from_config(
         config={
-            "class_name": "IntrospectingSqlDataConnector",
+            "class_name": "InferredAssetSqlDataConnector",
             "name": "whole_table",
             "partitioning_directives": {
                 "data_asset_name_suffix": "__whole"
@@ -422,7 +422,7 @@ def test_basic_instantiation_of_IntrospectingSqlDataConnector(test_cases_for_sql
     report_object = my_data_connector.self_check()
     print(json.dumps(report_object, indent=4))
     assert report_object == {
-        "class_name": "IntrospectingSqlDataConnector",
+        "class_name": "InferredAssetSqlDataConnector",
         "data_asset_count": 10,
         "example_data_asset_names": [
             "table_containing_id_spacers_for_D__whole",
@@ -475,10 +475,10 @@ def test_basic_instantiation_of_IntrospectingSqlDataConnector(test_cases_for_sql
     assert len(batch_definition_list) == 1
 
 #Note: Abe 2020111: this test belongs with the data_connector tests, not here.
-def test_more_complex_instantiation_of_IntrospectingSqlDataConnector(test_cases_for_sql_data_connector_sqlite_execution_engine):
+def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(test_cases_for_sql_data_connector_sqlite_execution_engine):
     my_data_connector = instantiate_class_from_config(
         config={
-            "class_name": "IntrospectingSqlDataConnector",
+            "class_name": "InferredAssetSqlDataConnector",
             "name": "whole_table",
             "partitioning_directives": {
                 "data_asset_name_suffix": "__whole",
@@ -523,7 +523,7 @@ def test_more_complex_instantiation_of_IntrospectingSqlDataConnector(test_cases_
     print(json.dumps(report_object, indent=4))
     print(my_data_connector.get_available_data_asset_names())
     assert report_object == {
-        "class_name": "IntrospectingSqlDataConnector",
+        "class_name": "InferredAssetSqlDataConnector",
         "data_asset_count": 10,
         "example_data_asset_names": [
             "main.table_containing_id_spacers_for_D__whole",

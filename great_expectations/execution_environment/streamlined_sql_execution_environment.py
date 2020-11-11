@@ -7,7 +7,7 @@ from great_expectations.execution_environment import BaseExecutionEnvironment
 # from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_environment.data_connector import (
     DataConnector,
-    SqlDataConnector,
+    ConfiguredAssetSqlDataConnector,
 )
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
 
         for name, config in introspection_configs.items():
             data_connector_config = dict(**{
-                "class_name": "IntrospectingSqlDataConnector",
+                "class_name": "InferredAssetSqlDataConnector",
                 "name": name,
             }, **config)
             self._build_data_connector_from_config(
@@ -109,7 +109,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
                 data_connector_name = partitioner_name
                 if not data_connector_name in self.data_connectors:
                     data_connector_config = {
-                        "class_name": "SqlDataConnector",
+                        "class_name": "ConfiguredAssetSqlDataConnector",
                         "data_assets": {}
                     }
                     self._build_data_connector_from_config(data_connector_name, data_connector_config)
@@ -136,7 +136,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
     #     config: Dict,
     # ):
     #     data_connector_config = {
-    #         "class_name": "SqlDataConnector",
+    #         "class_name": "ConfiguredAssetSqlDataConnector",
     #         "name": name,
     #         "data_assets": {},
     #     }
@@ -148,7 +148,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
     #     config: Dict,
     # ):
     #     data_connector_config = dict(**{
-    #         "class_name": "IntrospectingSqlDataConnector",
+    #         "class_name": "InferredAssetSqlDataConnector",
     #         "name": name,
     #     }, **config)
     #     return data_connector_config
