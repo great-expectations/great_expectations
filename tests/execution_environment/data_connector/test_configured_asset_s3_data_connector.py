@@ -165,7 +165,7 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_conte
             Key=key
         )
 
-    return_object = empty_data_context.test_yaml_config(f"""
+    report_object = empty_data_context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: ConfiguredAssetS3DataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -182,9 +182,9 @@ default_regex:
 assets:
     alpha:
 
-    """, return_mode="return_object")
+    """, return_mode="report_object")
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "ConfiguredAssetS3DataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [

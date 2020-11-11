@@ -116,9 +116,9 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check():
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    self_check_return_object = my_data_connector.self_check()
+    self_check_report_object = my_data_connector.self_check()
 
-    assert self_check_return_object == {
+    assert self_check_report_object == {
         "class_name": "InferredAssetS3DataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
@@ -299,9 +299,9 @@ def test_self_check():
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    self_check_return_object = my_data_connector.self_check()
+    self_check_report_object = my_data_connector.self_check()
 
-    assert self_check_return_object == {
+    assert self_check_report_object == {
         "class_name": "InferredAssetS3DataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": [
@@ -487,7 +487,7 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context):
             Key=key
         )
 
-    return_object = empty_data_context.test_yaml_config(f"""
+    report_object = empty_data_context.test_yaml_config(f"""
     module_name: great_expectations.execution_environment.data_connector
     class_name: InferredAssetS3DataConnector
     execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -500,9 +500,9 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context):
             - letter
             - number
         pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
-        """, return_mode="return_object")
+        """, return_mode="report_object")
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetS3DataConnector",
         "data_asset_count": 4,
         "example_data_asset_names": [
@@ -555,7 +555,7 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
             Key=key
         )
 
-    return_object = empty_data_context.test_yaml_config(f"""
+    report_object = empty_data_context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetS3DataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -570,9 +570,9 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
                 - data_asset_name
               pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
 
-              """, return_mode="return_object")
+              """, return_mode="report_object")
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetS3DataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
@@ -617,7 +617,7 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
             Key=key
         )
 
-    return_object = empty_data_context.test_yaml_config(f"""
+    report_object = empty_data_context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetS3DataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -631,8 +631,8 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
                 - month
                 - day
               pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
-      """, return_mode="return_object")
-    assert return_object == {
+      """, return_mode="report_object")
+    assert report_object == {
         "class_name": "InferredAssetS3DataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
@@ -677,7 +677,7 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context):
             Key=key
         )
 
-    return_object = empty_data_context.test_yaml_config(f"""
+    report_object = empty_data_context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetS3DataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -691,9 +691,9 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context):
                   - month
                   - day
               pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
-              """, return_mode="return_object")
+              """, return_mode="report_object")
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetS3DataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [

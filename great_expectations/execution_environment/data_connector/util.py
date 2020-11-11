@@ -234,6 +234,19 @@ def get_filesystem_one_level_directory_glob_path_list(
 
 
 def list_s3_keys(s3, query_options: dict, iterator_dict: dict, recursive: bool = False) -> str:
+    """
+    For InferredAssetS3DataConnector, we take bucket and prefix and search for files using RegEx at and below the level
+    specified by that bucket and prefix.  However, for ConfiguredAssetS3DataConnector, we take bucket and prefix and
+    search for files using RegEx only at the level specified by that bucket and prefix.  This restriction for the
+    ConfiguredAssetS3DataConnector is needed, because paths on S3 are comprised not only the leaf file name but the
+    full path that includes both the prefix and the file name.  Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible, due to the path ambiguity.
+    :param s3: s3 client connection
+    :param query_options: s3 query attributes ("Bucket", "Prefix", "Delimiter", "MaxKeys")
+    :param iterator_dict: dictionary to manage "NextContinuationToken" (if "IsTruncated" is returned from S3)
+    :param recursive: True for InferredAssetS3DataConnector and False for ConfiguredAssetS3DataConnector (see above)
+    :return: string valued key representing file path on S3 (full prefix and leaf file name)
+    """
     if iterator_dict is None:
         iterator_dict = {}
 
