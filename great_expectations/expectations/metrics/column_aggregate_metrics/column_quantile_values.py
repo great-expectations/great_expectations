@@ -30,10 +30,11 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
-    column_aggregate_partial, column_aggregate_value,
+    column_aggregate_partial,
+    column_aggregate_value,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
-from great_expectations.expectations.metrics.metric_provider import metric_value_fn
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,7 @@ class ColumnQuantileValues(ColumnMetricProvider):
             tuple(quantile_ranges["quantiles"],), interpolation="nearest"
         ).tolist()
 
-    @metric_value_fn(engine=SqlAlchemyExecutionEngine)
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
@@ -102,7 +103,7 @@ class ColumnQuantileValues(ColumnMetricProvider):
                 sqlalchemy_engine=sqlalchemy_engine,
             )
 
-    @metric_value_fn(engine=SparkDFExecutionEngine)
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",

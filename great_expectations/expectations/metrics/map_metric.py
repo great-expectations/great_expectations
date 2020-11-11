@@ -24,11 +24,9 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
-    metric_partial_fn,
-    metric_value_fn,
+    metric_partial,
 )
 from great_expectations.expectations.registry import (
-    get_metric_kwargs,
     get_metric_provider,
     register_metric,
 )
@@ -51,7 +49,7 @@ def column_function_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    domain_type = "column"
+    domain_type = MetricDomainTypes.COLUMN
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_SERIES
@@ -62,7 +60,7 @@ def column_function_partial(
             )
 
         def wrapper(metric_fn: Callable):
-            @metric_partial_fn(
+            @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
                 domain_type=domain_type,
@@ -112,7 +110,7 @@ def column_function_partial(
             )
 
         def wrapper(metric_fn: Callable):
-            @metric_partial_fn(
+            @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
                 domain_type=domain_type,
@@ -173,7 +171,7 @@ def column_function_partial(
             )
 
         def wrapper(metric_fn: Callable):
-            @metric_partial_fn(
+            @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
                 domain_type=domain_type,
@@ -258,7 +256,7 @@ def column_condition_partial(
             )
 
         def wrapper(metric_fn: Callable):
-            @metric_partial_fn(
+            @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
                 domain_type=domain_type,
@@ -313,7 +311,7 @@ def column_condition_partial(
             )
 
         def wrapper(metric_fn: Callable):
-            @metric_partial_fn(
+            @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
                 domain_type=domain_type,
@@ -383,7 +381,7 @@ def column_condition_partial(
             )
 
         def wrapper(metric_fn: Callable):
-            @metric_partial_fn(
+            @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
                 domain_type=domain_type,
@@ -472,11 +470,16 @@ def _pandas_column_map_condition_values(
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs, domain_type="identity"
     )
-    # filter_column_isnull = kwargs.get(
-    #     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-    # )
-    # if filter_column_isnull:
-    #     df = df[df[accessor_domain_kwargs["column"]].notnull()]
+    ###
+    # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
+    # currently handle filter_column_isnull differently than other map_fn / map_condition
+    # cases.
+    ###
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[accessor_domain_kwargs["column"]].notnull()]
 
     if "column" in accessor_domain_kwargs:
         domain_values = df[accessor_domain_kwargs["column"]]
@@ -493,6 +496,71 @@ def _pandas_column_map_condition_values(
             domain_values[boolean_map_unexpected_values == True][
                 : result_format["partial_unexpected_count"]
             ]
+        )
+
+
+def _pandas_column_map_series_and_domain_values(
+    cls,
+    execution_engine: "PandasExecutionEngine",
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    (
+        boolean_map_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics["unexpected_condition"]
+    (map_series, compute_domain_kwargs_2, accessor_domain_kwargs_2,) = metrics[
+        "metric_partial_fn"
+    ]
+    assert (
+        compute_domain_kwargs == compute_domain_kwargs_2
+    ), "map_series and condition must have the same compute domain"
+    assert (
+        accessor_domain_kwargs == accessor_domain_kwargs_2
+    ), "map_series and condition must have the same accessor kwargs"
+    df, _, _ = execution_engine.get_compute_domain(
+        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+    )
+    ###
+    # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
+    # currently handle filter_column_isnull differently than other map_fn / map_condition
+    # cases.
+    ###
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[accessor_domain_kwargs["column"]].notnull()]
+
+    if "column" in accessor_domain_kwargs:
+        domain_values = df[accessor_domain_kwargs["column"]]
+    else:
+        raise ValueError(
+            "_pandas_column_map_series_and_domain_values requires a column in accessor_domain_kwargs"
+        )
+
+    result_format = metric_value_kwargs["result_format"]
+    if result_format["result_format"] == "COMPLETE":
+        return (
+            list(domain_values[boolean_map_unexpected_values == True]),
+            list(map_series[boolean_map_unexpected_values == True]),
+        )
+    else:
+        return (
+            list(
+                domain_values[boolean_map_unexpected_values == True][
+                    : result_format["partial_unexpected_count"]
+                ]
+            ),
+            list(
+                map_series[boolean_map_unexpected_values == True][
+                    : result_format["partial_unexpected_count"]
+                ]
+            ),
         )
 
 
@@ -513,12 +581,17 @@ def _pandas_map_condition_index(
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs, domain_type="identity"
     )
-    # filter_column_isnull = kwargs.get(
-    #     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-    # )
-    # if filter_column_isnull:
-    #     df = df[df[accessor_domain_kwargs["column"]].notnull()]
-    # data = df[accessor_domain_kwargs["column"]]
+    ###
+    # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
+    # currently handle filter_column_isnull differently than other map_fn / map_condition
+    # cases.
+    ###
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[accessor_domain_kwargs["column"]].notnull()]
+    data = df[accessor_domain_kwargs["column"]]
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
@@ -549,12 +622,17 @@ def _pandas_column_map_condition_value_counts(
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs, domain_type="identity"
     )
-    # filter_column_isnull = kwargs.get(
-    #     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-    # )
-    # if filter_column_isnull:
-    #     df = df[df[accessor_domain_kwargs["column"]].notnull()]
-    # data = df[accessor_domain_kwargs["column"]]
+    ###
+    # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
+    # currently handle filter_column_isnull differently than other map_fn / map_condition
+    # cases.
+    ###
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[accessor_domain_kwargs["column"]].notnull()]
+    data = df[accessor_domain_kwargs["column"]]
     if "column" in accessor_domain_kwargs:
         domain_values = df[accessor_domain_kwargs["column"]]
     else:
@@ -605,12 +683,17 @@ def _pandas_map_condition_rows(
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs, domain_type="identity"
     )
-    # filter_column_isnull = kwargs.get(
-    #     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-    # )
-    # if filter_column_isnull:
-    #     df = df[df[accessor_domain_kwargs["column"]].notnull()]
-    # data = df[accessor_domain_kwargs["column"]]
+    ###
+    # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
+    # currently handle filter_column_isnull differently than other map_fn / map_condition
+    # cases.
+    ###
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[accessor_domain_kwargs["column"]].notnull()]
+    data = df[accessor_domain_kwargs["column"]]
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":

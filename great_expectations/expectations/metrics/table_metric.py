@@ -12,7 +12,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
-    metric_value_fn,
+    metric_value,
 )
 
 logger = logging.getLogger(__name__)

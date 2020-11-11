@@ -10,14 +10,14 @@ from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
     MetricPartialFunctionTypes,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
+from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
+from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
 from great_expectations.expectations.metrics.metric_provider import (
-    metric_partial_fn,
-    metric_value_fn,
+    metric_partial,
+    metric_value,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
@@ -38,7 +38,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         else:
             return series_diff <= 0
 
-    @metric_partial_fn(
+    @metric_partial(
         engine=SparkDFExecutionEngine,
         partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         domain_type=MetricDomainTypes.COLUMN,

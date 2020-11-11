@@ -9,12 +9,12 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
+from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
     column_function_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 

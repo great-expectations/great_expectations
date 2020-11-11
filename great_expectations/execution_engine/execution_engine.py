@@ -174,26 +174,22 @@ class ExecutionEngine:
                     )
                 )
                 continue
-            # NOTE: 20201111 - Would prefer to resolve the underlying import error here rather than
-            # use this workaround of re-converting to string
-            metric_fn_type = getattr(metric_fn, "metric_fn_type", None)
-            if metric_fn_type is not None:
-                metric_fn_type = metric_fn_type.value
-            else:
-                metric_fn_type = "value"
+            metric_fn_type = getattr(
+                metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
+            )
             if metric_fn_type in [
-                "map_fn",
-                "map_condition_fn",
-                "window_fn",
-                "window_condition_fn",
-                "aggregate_fn",
+                MetricPartialFunctionTypes.MAP_FN,
+                MetricPartialFunctionTypes.MAP_CONDITION_FN,
+                MetricPartialFunctionTypes.WINDOW_FN,
+                MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+                MetricPartialFunctionTypes.AGGREGATE_FN,
             ]:
                 # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
                 # than data to optimize compute in the future
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )
-            elif metric_fn_type == "value":
+            elif metric_fn_type == MetricFunctionTypes.VALUE:
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )

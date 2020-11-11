@@ -13,7 +13,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.metric_provider import metric_value_fn
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -24,7 +24,7 @@ class ColumnDistinctValues(ColumnMetricProvider):
     def _pandas(cls, column, **kwargs):
         return set(column.unique())
 
-    @metric_value_fn(engine=SqlAlchemyExecutionEngine)
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
@@ -36,7 +36,7 @@ class ColumnDistinctValues(ColumnMetricProvider):
         observed_value_counts = metrics["column.value_counts"]
         return set(observed_value_counts.index)
 
-    @metric_value_fn(engine=SparkDFExecutionEngine)
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",

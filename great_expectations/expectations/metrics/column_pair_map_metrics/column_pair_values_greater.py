@@ -2,13 +2,13 @@ from typing import Any, Dict, Tuple
 
 from dateutil.parser import parse
 
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    MetricPartialFunctionTypes,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
-    MapMetricProvider,
-)
-from great_expectations.expectations.metrics.metric_provider import metric_partial_fn
+from great_expectations.expectations.metrics.map_metric import MapMetricProvider
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 
 
@@ -22,7 +22,11 @@ class ColumnPairValuesAGreaterThanB(MapMetricProvider):
     )
     domain_keys = ("batch_id", "table", "column_A", "column_B")
 
-    @metric_partial_fn(engine=PandasExecutionEngine, partial_fn_type="map_condition_series", domain_type="column_pair")
+    @metric_partial(
+        engine=PandasExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
+        domain_type=MetricDomainTypes.COLUMN_PAIR,
+    )
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
@@ -44,7 +48,7 @@ class ColumnPairValuesAGreaterThanB(MapMetricProvider):
         )
 
         df, compute_domain, accessor_domain = execution_engine.get_compute_domain(
-            metric_domain_kwargs, "column_pair"
+            metric_domain_kwargs, MetricDomainTypes.COLUMN_PAIR
         )
 
         column_A, column_B = filter_pair_metric_nulls(

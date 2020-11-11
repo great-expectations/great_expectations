@@ -639,13 +639,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
-            selectable, _, _ = self.get_compute_domain(
+            selectable, compute_domain_kwargs, _ = self.get_compute_domain(
                 query["domain_kwargs"], domain_type="identity"
             )
             assert len(query["select"]) == len(query["ids"])
             res = self.engine.execute(
                 sa.select(query["select"]).select_from(selectable)
             ).fetchall()
+            logger.debug(
+                f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
+            )
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"

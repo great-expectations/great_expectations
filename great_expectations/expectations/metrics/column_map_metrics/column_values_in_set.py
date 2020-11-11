@@ -1,3 +1,5 @@
+import logging
+
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -5,13 +7,14 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
+from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-import logging
+
 logger = logging.getLogger(__name__)
 import numpy as np
+
 try:
     # import pyspark.sql.types as sparktypes
     # from pyspark.ml.feature import Bucketizer
@@ -27,9 +30,7 @@ try:
     #     isnan,
     #     lag,
     # )
-    from pyspark.sql.functions import (
-        lit,
-    )
+    from pyspark.sql.functions import lit
 except ImportError as e:
     logger.debug(str(e))
     logger.debug(

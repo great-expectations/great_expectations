@@ -7,11 +7,12 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import metric_value_fn
+from great_expectations.expectations.metrics.metric_provider import metric_value
 
 
 class ColumnValueCounts(ColumnMetricProvider):
@@ -20,7 +21,7 @@ class ColumnValueCounts(ColumnMetricProvider):
 
     default_kwarg_values = {"sort": "value", "collate": None}
 
-    @metric_value_fn(engine=PandasExecutionEngine)
+    @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
@@ -38,7 +39,7 @@ class ColumnValueCounts(ColumnMetricProvider):
             raise ValueError("collate parameter is not supported in PandasDataset")
 
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
-            metric_domain_kwargs
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
 
@@ -58,7 +59,7 @@ class ColumnValueCounts(ColumnMetricProvider):
         counts.index.name = "value"
         return counts
 
-    @metric_value_fn(engine=SqlAlchemyExecutionEngine)
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -76,7 +77,7 @@ class ColumnValueCounts(ColumnMetricProvider):
             raise ValueError("collate parameter is not supported in PandasDataset")
 
         selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
-            metric_domain_kwargs
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
 
@@ -114,7 +115,7 @@ class ColumnValueCounts(ColumnMetricProvider):
         )
         return series
 
-    @metric_value_fn(engine=SparkDFExecutionEngine)
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
@@ -132,7 +133,7 @@ class ColumnValueCounts(ColumnMetricProvider):
             raise ValueError("collate parameter is not supported in SparkDFDataset")
 
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
-            metric_domain_kwargs
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
 

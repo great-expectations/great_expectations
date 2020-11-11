@@ -11,12 +11,12 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
+from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
     column_function_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -28,10 +28,10 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
     )
     default_kwarg_values = {"double_sided": True, "threshold": None}
 
-    function_metric_name = "column_values.z_score.map_fn"
+    function_metric_name = "column_values.z_score"
     function_value_keys = tuple()
 
-    @column_function_partial(engine=PandasExecutionEngine, partial_fn_type="map_series")
+    @column_function_partial(engine=PandasExecutionEngine)
     def _pandas_function(self, column, _metrics, **kwargs):
         # return the z_score values
         mean = _metrics.get("column.mean")
@@ -45,13 +45,11 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
                 )
             )
 
-    @column_condition_partial(
-        engine=PandasExecutionEngine, partial_fn_type="map_condition_series"
-    )
+    @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas_condition(
         cls, column, _metrics, threshold, double_sided, **kwargs
     ) -> pd.Series:
-        z_score, _, _ = _metrics["column_values.z_score.map_series"]
+        z_score, _, _ = _metrics["column_values.z_score.map"]
         try:
             if double_sided:
                 under_threshold = z_score.abs() < abs(threshold)
@@ -63,18 +61,16 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
                 TypeError("Cannot check if a string lies under a numerical threshold")
             )
 
-    @column_function_partial(engine=SqlAlchemyExecutionEngine, partial_fn_type="map_fn")
+    @column_function_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy_function(cls, column, _metrics, _dialect, **kwargs):
         mean = _metrics["column.mean"]
         standard_deviation = _metrics["column.standard_deviation"]
         return (column - mean) / standard_deviation
 
-    @column_condition_partial(
-        engine=SqlAlchemyExecutionEngine, partial_fn_type="map_condition_fn"
-    )
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy_condition(cls, column, _metrics, threshold, double_sided, **kwargs):
 
-        z_score, _, _ = _metrics["column_values.z_score.map_fn"]
+        z_score, _, _ = _metrics["column_values.z_score.map"]
         if double_sided:
             under_threshold = sa.func.abs(z_score) < abs(threshold)
         else:
@@ -82,18 +78,16 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
 
         return under_threshold
 
-    @column_function_partial(engine=SparkDFExecutionEngine, partial_fn_type="map_fn")
+    @column_function_partial(engine=SparkDFExecutionEngine)
     def _spark_function(cls, column, _metrics, **kwargs):
         mean = _metrics["column.mean"]
         standard_deviation = _metrics["column.standard_deviation"]
 
         return (column - mean) / standard_deviation
 
-    @column_condition_partial(
-        engine=SparkDFExecutionEngine, partial_fn_type="map_condition_fn"
-    )
+    @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark_condition(cls, column, _metrics, threshold, double_sided, **kwargs):
-        z_score, _, _ = _metrics["column_values.z_score.map_fn"]
+        z_score, _, _ = _metrics["column_values.z_score.map"]
 
         if double_sided:
             threshold = abs(threshold)
@@ -111,29 +105,14 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
     ):
         """Returns a dictionary of given metric names and their corresponding configuration, specifying the metric
         types and their respective domains"""
-        if (
-            metric.metric_name
-            == "column_values.z_score.under_threshold.map_condition_series"
-        ):
+        if metric.metric_name == "column_values.z_score.under_threshold.condition":
             return {
-                "column_values.z_score.map_series": MetricConfiguration(
-                    "column_values.z_score.map_series", metric.metric_domain_kwargs
-                )
-            }
-        elif (
-            metric.metric_name
-            == "column_values.z_score.under_threshold.map_condition_fn"
-        ):
-            return {
-                "column_values.z_score.map_fn": MetricConfiguration(
-                    "column_values.z_score.map_fn", metric.metric_domain_kwargs
+                "column_values.z_score.map": MetricConfiguration(
+                    "column_values.z_score.map", metric.metric_domain_kwargs
                 )
             }
 
-        if metric.metric_name in [
-            "column_values.z_score.map_series",
-            "column_values.z_score.map_fn",
-        ]:
+        if metric.metric_name == "column_values.z_score.map":
             return {
                 "column.mean": MetricConfiguration(
                     "column.mean", metric.metric_domain_kwargs
@@ -142,10 +121,3 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
                     "column.standard_deviation", metric.metric_domain_kwargs
                 ),
             }
-
-        return super()._get_evaluation_dependencies(
-            metric=metric,
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
-        )

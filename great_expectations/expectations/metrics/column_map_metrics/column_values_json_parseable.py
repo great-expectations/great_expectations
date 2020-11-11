@@ -4,11 +4,11 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
+from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 
 
 class ColumnValuesJsonParseable(ColumnMapMetricProvider):

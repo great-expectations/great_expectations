@@ -9,9 +9,13 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import MapMetricProvider
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    MetricPartialFunctionTypes,
+)
 from great_expectations.expectations.metrics.import_manager import F, SQLContext
-from great_expectations.expectations.metrics.metric_provider import metric_partial_fn
+from great_expectations.expectations.metrics.map_metric import MapMetricProvider
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 
 
@@ -23,10 +27,10 @@ class ColumnPairValuesInSet(MapMetricProvider):
     )
     condition_domain_keys = ("batch_id", "table", "column_A", "column_B")
 
-    @metric_partial_fn(
+    @metric_partial(
         engine=PandasExecutionEngine,
-        partial_fn_type="map_condition_series",
-        domain_type="column_pair",
+        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
+        domain_type=MetricDomainTypes.COLUMN_PAIR,
     )
     def _pandas(
         cls,
@@ -47,7 +51,7 @@ class ColumnPairValuesInSet(MapMetricProvider):
             compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, domain_type="column_pair"
+            metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN_PAIR
         )
 
         column_A, column_B = filter_pair_metric_nulls(
@@ -79,10 +83,10 @@ class ColumnPairValuesInSet(MapMetricProvider):
 
         return pd.Series(results), compute_domain_kwargs, accessor_domain_kwargs
 
-    @metric_partial_fn(
+    @metric_partial(
         engine=SparkDFExecutionEngine,
         partial_fn_type="window_condition_fn",
-        domain_type="column_pair",
+        domain_type=MetricDomainTypes.COLUMN_PAIR,
     )
     def _spark(
         cls,
@@ -113,7 +117,7 @@ class ColumnPairValuesInSet(MapMetricProvider):
             compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
-            compute_domain_kwargs, domain_type="column_pair"
+            compute_domain_kwargs, domain_type=MetricDomainTypes.COLUMN_PAIR
         )
 
         df = df.withColumn(

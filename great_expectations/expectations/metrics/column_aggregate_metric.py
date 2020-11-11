@@ -3,6 +3,10 @@ from functools import wraps
 from typing import Any, Callable, Dict, Tuple, Type
 
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    MetricPartialFunctionTypes,
+)
 from great_expectations.execution_engine.sparkdf_execution_engine import (
     SparkDFExecutionEngine,
 )
@@ -11,8 +15,8 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     sa,
 )
 from great_expectations.expectations.metrics.metric_provider import (
-    metric_partial_fn,
-    metric_value_fn,
+    metric_partial,
+    metric_value,
 )
 from great_expectations.expectations.metrics.table_metric import TableMetricProvider
 
@@ -37,7 +41,7 @@ def column_aggregate_value(
     if issubclass(engine, PandasExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric_value_fn(
+            @metric_value(
                 engine=PandasExecutionEngine,
                 metric_fn_type=metric_fn_type,
                 domain_type=domain_type,
@@ -86,12 +90,12 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
     Returns:
 
     """
-    partial_fn_type = "aggregate_fn"
-    domain_type = "column"
+    partial_fn_type = MetricPartialFunctionTypes.AGGREGATE_FN
+    domain_type = MetricDomainTypes.COLUMN
     if issubclass(engine, SqlAlchemyExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric_partial_fn(
+            @metric_partial(
                 engine=SqlAlchemyExecutionEngine,
                 partial_fn_type=partial_fn_type,
                 domain_type=domain_type,
@@ -143,7 +147,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SparkDFExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric_partial_fn(
+            @metric_partial(
                 engine=SparkDFExecutionEngine,
                 partial_fn_type=partial_fn_type,
                 domain_type=domain_type,

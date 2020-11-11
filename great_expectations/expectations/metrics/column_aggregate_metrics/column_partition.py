@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
@@ -13,9 +13,10 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
-    column_aggregate_partial, column_aggregate_value,
+    column_aggregate_partial,
+    column_aggregate_value,
 )
-from great_expectations.expectations.metrics.metric_provider import metric_value_fn
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -28,7 +29,7 @@ class ColumnPartition(ColumnMetricProvider):
         "allow_relative_error": False,
     }
 
-    @metric_value_fn(engine=PandasExecutionEngine)
+    @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
@@ -41,20 +42,20 @@ class ColumnPartition(ColumnMetricProvider):
         n_bins = metric_value_kwargs["n_bins"]
         return _get_column_partition_using_metrics(bins, n_bins, metrics)
 
-    @metric_value_fn(engine=SqlAlchemyExecutionEngine)
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
-            cls,
-            execution_engine: PandasExecutionEngine,
-            metric_domain_kwargs: Dict,
-            metric_value_kwargs: Dict,
-            metrics: Dict[Tuple, Any],
-            runtime_configuration: Dict,
+        cls,
+        execution_engine: PandasExecutionEngine,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
     ):
         bins = metric_value_kwargs["bins"]
         n_bins = metric_value_kwargs["n_bins"]
         return _get_column_partition_using_metrics(bins, n_bins, metrics)
 
-    @metric_value_fn(engine=SparkDFExecutionEngine)
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: PandasExecutionEngine,

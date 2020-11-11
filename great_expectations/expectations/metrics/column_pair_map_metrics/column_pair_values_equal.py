@@ -5,11 +5,13 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
-    MapMetricProvider,
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F
-from great_expectations.expectations.metrics.metric_provider import metric_partial_fn
+from great_expectations.expectations.metrics.map_metric import MapMetricProvider
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 
 
@@ -19,7 +21,11 @@ class ColumnPairValuesEqual(MapMetricProvider):
     domain_keys = ("batch_id", "table", "column_A", "column_B")
     default_kwarg_values = {"ignore_row_if": "both_values_are_missing"}
 
-    @metric_partial_fn(engine=PandasExecutionEngine, partial_fn_type="map_condition_series", domain_type="column_pair")
+    @metric_partial(
+        engine=PandasExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
+        domain_type=MetricDomainTypes.COLUMN_PAIR,
+    )
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
@@ -31,9 +37,12 @@ class ColumnPairValuesEqual(MapMetricProvider):
         ignore_row_if = metric_value_kwargs.get("ignore_row_if")
         if not ignore_row_if:
             ignore_row_if = "both_values_are_missing"
-        df, compute_domain_kwargs, accessor_domain_kwargs = execution_engine.get_compute_domain(
-            metric_domain_kwargs,
-            "column_pair"
+        (
+            df,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN_PAIR
         )
 
         column_A, column_B = filter_pair_metric_nulls(
@@ -44,7 +53,11 @@ class ColumnPairValuesEqual(MapMetricProvider):
 
         return column_A == column_B, compute_domain_kwargs, accessor_domain_kwargs
 
-    @metric_partial_fn(engine=SparkDFExecutionEngine, partial_fn_type="map_condition_fn", domain_type="column_pair")
+    @metric_partial(
+        engine=SparkDFExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
+        domain_type=MetricDomainTypes.COLUMN_PAIR,
+    )
     def _spark(
         cls,
         execution_engine: "SparkDFExecutionEngine",
@@ -69,14 +82,17 @@ class ColumnPairValuesEqual(MapMetricProvider):
             )
             compute_domain_kwargs["condition_parser"] = "spark"
 
-        df, compute_domain_kwargs, accessor_domain_kwargs = execution_engine.get_compute_domain(
+        (
+            df,
             compute_domain_kwargs,
-            "column_pair"
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            compute_domain_kwargs, MetricDomainTypes.COLUMN_PAIR
         )
 
         return (
             df[metric_domain_kwargs["column_A"]]
             == df[metric_domain_kwargs["column_B"]],
             compute_domain_kwargs,
-            accessor_domain_kwargs
+            accessor_domain_kwargs,
         )

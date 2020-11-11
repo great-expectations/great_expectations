@@ -1,52 +1,54 @@
-from typing import Optional, Dict, Any, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine, SparkDFExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.metric_provider import metric_value_fn
-from great_expectations.expectations.metrics.table_metric import (
-    TableMetricProvider,
-)
+from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.expectations.metrics.table_metric import TableMetricProvider
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class TableColumnCount(TableMetricProvider):
     metric_name = "table.column_count"
 
-    @metric_value_fn(engine=PandasExecutionEngine)
+    @metric_value(engine=PandasExecutionEngine)
     def _sqlalchemy(
-            cls,
-            execution_engine: "ExecutionEngine",
-            metric_domain_kwargs: Dict,
-            metric_value_kwargs: Dict,
-            metrics: Dict[Tuple, Any],
-            runtime_configuration: Dict
+        cls,
+        execution_engine: "ExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
     ):
         columns = metrics.get("columns")
         return len(columns)
 
-    @metric_value_fn(engine=SqlAlchemyExecutionEngine)
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
-            cls,
-            execution_engine: "ExecutionEngine",
-            metric_domain_kwargs: Dict,
-            metric_value_kwargs: Dict,
-            metrics: Dict[Tuple, Any],
-            runtime_configuration: Dict
+        cls,
+        execution_engine: "ExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
     ):
         columns = metrics.get("columns")
         return len(columns)
 
-    @metric_value_fn(engine=SparkDFExecutionEngine)
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
-            cls,
-            execution_engine: "ExecutionEngine",
-            metric_domain_kwargs: Dict,
-            metric_value_kwargs: Dict,
-            metrics: Dict[Tuple, Any],
-            runtime_configuration: Dict
+        cls,
+        execution_engine: "ExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
     ):
         columns = metrics.get("columns")
         return len(columns)
