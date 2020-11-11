@@ -94,8 +94,6 @@ def test_get_batch_data(test_df):
     #     ))
 
 def test_get_batch_with_split_on_whole_table(test_df):
-    print(test_df.T)
-
     split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_df,
         splitter_method="_split_on_whole_table"
@@ -104,17 +102,17 @@ def test_get_batch_with_split_on_whole_table(test_df):
 
 
 def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path):
-    test = PathBatchSpec(
-        path=os.path.join(test_folder_connection_path, "test.csv"),
-        reader_method="read_csv",
-        splitter_method="_split_on_whole_table"
+    test_df = PandasExecutionEngine().get_batch_data(
+        PathBatchSpec(
+            path=os.path.join(test_folder_connection_path, "test.csv"),
+            reader_method="read_csv",
+            splitter_method="_split_on_whole_table"
         )
-    test_df = PandasExecutionEngine().get_batch_data(test)
+    )
     assert test_df.shape == (5, 3)
 
 
 def test_get_batch_with_split_on_column_value(test_df):
-
     split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_df,
         splitter_method="_split_on_column_value",

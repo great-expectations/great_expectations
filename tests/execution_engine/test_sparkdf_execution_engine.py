@@ -113,11 +113,12 @@ def test_get_batch_empty_splitter(test_sparkdf):
 
 def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path):
     # reader_method not configured because spark will configure own reader by default
-    test = PathBatchSpec(
-        path=os.path.join(test_folder_connection_path, "test.csv"),
-        splitter_method="_split_on_whole_table"
+    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
+        PathBatchSpec(
+            path=os.path.join(test_folder_connection_path, "test.csv"),
+            splitter_method="_split_on_whole_table"
         )
-    test_sparkdf = SparkDFExecutionEngine().get_batch_data(test)
+    )
     assert test_sparkdf.count() == 6
     assert len(test_sparkdf.columns) == 3
 
