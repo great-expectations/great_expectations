@@ -57,34 +57,19 @@ def test_sparkdf(spark_session):
     session_ids.sort()
     session_ids = [i-random.randint(0, 2) for i in session_ids]
 
-    events_df = pd.DataFrame({
-        "id": range(k),
-        "batch_id": batch_ids,
-        "date": date_list,
-        "y": [d.year for d in date_list],
-        "m": [d.month for d in date_list],
-        "d": [d.day for d in date_list],
-        "timestamp": timestamp_list,
-        "session_ids": session_ids,
-        "event_type": [random.choice(["start", "stop", "continue"]) for i in range(k)],
-        "favorite_color": ["#"+"".join([random.choice(list("0123456789ABCDEF")) for j in range(6)]) for i in range(k)]
-    })
-
-    spark_df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in events_df.to_records(index=False)
-        ],
-        events_df.columns.tolist(),
-    )
-
-    # TODO <WILL> - get rid of 1000000000
-    spark_df = spark_df \
-        .withColumn("timestamp", F.round(F.col("timestamp") / 1000000000)) \
-        .withColumn("timestamp", F.col("timestamp").cast(IntegerType()).cast(StringType()))
+    spark_df = spark_session.createDataFrame(data=pd.DataFrame({
+       "id": range(k),
+       "batch_id": batch_ids,
+       "date": date_list,
+       "y": [d.year for d in date_list],
+       "m": [d.month for d in date_list],
+       "d": [d.day for d in date_list],
+       "timestamp": timestamp_list,
+       "session_ids": session_ids,
+       "event_type": [random.choice(["start", "stop", "continue"]) for i in range(k)],
+       "favorite_color": ["#"+"".join([random.choice(list("0123456789ABCDEF")) for j in range(6)]) for i in range(k)]
+    }))
+    spark_df = spark_df.withColumn("timestamp", F.col("timestamp").cast(IntegerType()).cast(StringType()))
     return spark_df
 
 
