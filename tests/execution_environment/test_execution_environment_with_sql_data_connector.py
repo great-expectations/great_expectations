@@ -110,22 +110,194 @@ def test_StreamlinedSqlExecutionEnvironment(empty_data_context):
     my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
 class_name: StreamlinedSqlExecutionEnvironment
 connection_string: sqlite:///{db_file}
+
+introspection:
+    whole_table:
+        data_asset_name_suffix: __whole_table
+        excluded_tables: []
+
 """)
 
     assert my_sql_execution_environment.get_available_data_asset_names() == {
-        "ONLY_DATA_CONNECTOR": [
-            "main.table_containing_id_spacers_for_D__whole",
-            "main.table_partitioned_by_date_column__A__whole",
-            "main.table_partitioned_by_foreign_key__F__whole",
-            "main.table_partitioned_by_incrementing_batch_id__E__whole",
-            "main.table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__whole",
-            "main.table_partitioned_by_multiple_columns__G__whole",
-            "main.table_partitioned_by_regularly_spaced_incrementing_id_column__C__whole",
-            "main.table_partitioned_by_timestamp_column__B__whole",
-            "main.table_that_should_be_partitioned_by_random_hash__H__whole",
-            "main.table_with_fk_reference_from_F__whole",
+        "whole_table": [
+            "table_containing_id_spacers_for_D__whole_table",
+            "table_partitioned_by_date_column__A__whole_table",
+            "table_partitioned_by_foreign_key__F__whole_table",
+            "table_partitioned_by_incrementing_batch_id__E__whole_table",
+            "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__whole_table",
+            "table_partitioned_by_multiple_columns__G__whole_table",
+            "table_partitioned_by_regularly_spaced_incrementing_id_column__C__whole_table",
+            "table_partitioned_by_timestamp_column__B__whole_table",
+            "table_that_should_be_partitioned_by_random_hash__H__whole_table",
+            "table_with_fk_reference_from_F__whole_table",
         ]
     }
+
+    # Here we should test getting a batch
+
+    # Add some manually configured tables...
+    my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+class_name: StreamlinedSqlExecutionEnvironment
+connection_string: sqlite:///{db_file}
+
+introspection:
+    whole_table:
+        data_asset_name_suffix: __whole_table
+        excluded_tables:
+            - main.table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D
+            - main.table_partitioned_by_multiple_columns__G
+            - main.table_partitioned_by_regularly_spaced_incrementing_id_column__C
+            - main.table_partitioned_by_timestamp_column__B
+            - main.table_that_should_be_partitioned_by_random_hash__H
+            - main.table_with_fk_reference_from_F
+
+tables:
+    table_partitioned_by_date_column__A:
+        partitioners:
+            daily: 
+                data_asset_name_suffix: __daily
+                splitter_method: _split_on_converted_datetime
+                splitter_kwargs:
+                    column_name: date
+                    date_format_string: "%Y-%m-%d"
+            weekly:
+                include_schema_name: False
+                data_asset_name_suffix: __some_other_string
+                splitter_method: _split_on_converted_datetime
+                splitter_kwargs:
+                    column_name: date
+                    date_format_string: "%Y-%W"
+            by_id_dozens:
+                include_schema_name: True
+                # Note: no data_asset_name_suffix
+                splitter_method: _split_on_divided_integer
+                splitter_kwargs:
+                    column_name: id
+                    divisor: 12
+""")
+
+    assert my_sql_execution_environment.get_available_data_asset_names() == {
+        "whole_table": [
+            "table_containing_id_spacers_for_D__whole_table",
+            "table_partitioned_by_date_column__A__whole_table",
+            "table_partitioned_by_foreign_key__F__whole_table",
+            "table_partitioned_by_incrementing_batch_id__E__whole_table",
+        ],
+        "daily": [
+            "table_partitioned_by_date_column__A__daily",
+        ],
+        "weekly": [
+            "table_partitioned_by_date_column__A__some_other_string",
+        ],
+        "by_id_dozens": [
+            "main.table_partitioned_by_date_column__A__by_id_dozens",
+        ]
+    }
+
+    # Here we should test getting another batch
+
+    # Drop the introspection...
+    my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+class_name: StreamlinedSqlExecutionEnvironment
+connection_string: sqlite:///{db_file}
+"""+"""
+tables:
+    table_partitioned_by_date_column__A:
+        partitioners:
+            whole_table: {}
+            daily: 
+                splitter_method: _split_on_converted_datetime
+                splitter_kwargs:
+                    column_name: date
+                    date_format_string: "%Y-%m-%d"
+            weekly:
+                splitter_method: _split_on_converted_datetime
+                splitter_kwargs:
+                    column_name: date
+                    date_format_string: "%Y-%W"
+            by_id_dozens:
+                splitter_method: _split_on_divided_integer
+                splitter_kwargs:
+                    column_name: id
+                    divisor: 12
+""")
+
+    assert my_sql_execution_environment.get_available_data_asset_names() == {
+        "whole_table": [
+            "table_partitioned_by_date_column__A__whole_table",
+        ],
+        "daily": [
+            "table_partitioned_by_date_column__A__daily",
+        ],
+        "weekly": [
+            "table_partitioned_by_date_column__A__weekly",
+        ],
+        "by_id_dozens": [
+            "table_partitioned_by_date_column__A__by_id_dozens",
+        ]
+    }
+
+    # Here we should test getting another batch
+
+#     # Add more introspection...
+# Gonna build this one in a notebook, to see how it feels...
+#     my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+# class_name: StreamlinedSqlExecutionEnvironment
+# connection_string: sqlite:///{db_file}
+
+# introspection:
+#     whole_table:
+#         data_asset_name_suffix: __whole_table
+#         excluded_tables: []
+
+#     daily:
+#         included_tables: []
+
+#     weekly:
+#         included_tables: []
+
+#     by_batch:
+#         included_tables: []
+
+# """+"""
+# tables:
+#     table_partitioned_by_date_column__A:
+#         partitioners:
+#             whole_table: {}
+#             daily: 
+#                 splitter_method: _split_on_converted_datetime
+#                 splitter_kwargs:
+#                     column_name: date
+#                     date_format_string: "%Y-%m-%d"
+#             weekly:
+#                 splitter_method: _split_on_converted_datetime
+#                 splitter_kwargs:
+#                     column_name: date
+#                     date_format_string: "%Y-%W"
+#             by_id_dozens:
+#                 splitter_method: _split_on_divided_integer
+#                 splitter_kwargs:
+#                     column_name: id
+#                     divisor: 12
+# """)
+
+    assert my_sql_execution_environment.get_available_data_asset_names() == {
+        "whole_table": [
+            "table_partitioned_by_date_column__A__whole_table",
+        ],
+        "daily": [
+            "table_partitioned_by_date_column__A__daily",
+        ],
+        "weekly": [
+            "table_partitioned_by_date_column__A__weekly",
+        ],
+        "by_id_dozens": [
+            "table_partitioned_by_date_column__A__by_id_dozens",
+        ]
+    }
+
+    # Here we should test getting another batch
+
 
 
 #Note: Abe 2020111: this test belongs with the data_connector tests, not here.

@@ -42,7 +42,6 @@ class SqlDataConnector(DataConnector):
 
         # This cache will contain a "config" for each data_asset discovered via introspection.
         # This approach ensures that _data_assets and _introspected_data_assets_cache store objects of the same "type"
-        # Currently, the configs are empty dictionaries: {}
         self._introspected_data_assets_cache = {}
         if self._include_introspected_whole_tables_as_data_assets:
             self._refresh_introspected_data_assets_cache()
@@ -94,14 +93,11 @@ class SqlDataConnector(DataConnector):
     def _refresh_introspected_data_assets_cache(self):
         introspected_table_metadata = self._introspect_db()
         for metadata in introspected_table_metadata:
-            # Store a "config" (an empty dictionary) for each introspected data asset.
+            # Store a "config" for each introspected data asset.
             data_asset_name = metadata["schema_name"]+"."+metadata["table_name"]+"__whole"
             self._introspected_data_assets_cache[data_asset_name] = {
-                "table_name" : metadata["schema_name"]+"."+metadata["table_name"]
+                "table_name" : metadata["schema_name"]+"."+metadata["table_name"],
             }
-
-            # partition_definition = {}
-            # self._data_references_cache[data_asset_name] = partition_definition
 
     def _get_column_names_from_splitter_kwargs(self, splitter_kwargs) -> List[str]:
         column_names: List[str] = []
