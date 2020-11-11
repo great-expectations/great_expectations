@@ -24,7 +24,7 @@ class ColumnTypes(TableMetricProvider):
     default_kwarg_values = {"include_nested": True}
 
     @metric(engine=PandasExecutionEngine)
-    def _spark(
+    def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
