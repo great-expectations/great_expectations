@@ -286,7 +286,7 @@ class BaseExecutionEnvironment:
 
             batch_definitions = self.get_available_batch_definitions(batch_request)
             assert len(batch_definitions) == 1
-            return self.get_batch_from_batch_definition(batch_definition[0])
+            return self.get_batch_from_batch_definition(batch_definitions[0])
 
         else:
             if partition_request is None:
@@ -318,7 +318,7 @@ class BaseExecutionEnvironment:
 
             batch_definitions = self.get_available_batch_definitions(batch_request)
             assert len(batch_definitions) == 1
-            return self.get_batch_from_batch_definition(batch_definition[0])
+            return self.get_batch_from_batch_definition(batch_definitions[0])
 
     def self_check(self, pretty_print=True, max_examples=3):
         report_object = {

@@ -532,24 +532,33 @@ def sql_execution_environment_for_testing_get_batch(tmp_path_factory):
 
     config = yaml.load(
         f"""
-class_name: ExecutionEnvironment
+class_name: StreamlinedSqlExecutionEnvironment
+connection_string: sqlite:///{db_file}
+"""+"""
+introspection:
+    whole_table: {}
 
-execution_engine:
-    class_name: SqlAlchemyExecutionEngine
-    connection_string: sqlite:///{db_file}
+    daily:
+        partitioning_directives:
+            splitter_method: _split_on_converted_datetime
+            splitter_kwargs:
+                column_name: date
+                date_format_string: "%Y-%m-%d"
 
-data_connectors:
-    my_sqlite_db:
-        class_name: SqlDataConnector
+    weekly:
+        partitioning_directives:
+            splitter_method: _split_on_converted_datetime
+            splitter_kwargs:
+                column_name: date
+                date_format_string: "%Y-%W"
 
-        data_assets:
-
-            table_partitioned_by_date_column__A:
-                splitter_method: _split_on_converted_datetime
-                splitter_kwargs:
-                    column_name: date
-                    date_format_string: "%Y-%m-%d"
-    """,
+    by_id_dozens:
+        partitioning_directives:
+            splitter_method: _split_on_divided_integer
+            splitter_kwargs:
+                column_name: id
+                divisor: 12
+""",
         yaml.FullLoader,
     )
 

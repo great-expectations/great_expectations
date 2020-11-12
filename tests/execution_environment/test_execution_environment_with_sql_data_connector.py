@@ -188,10 +188,22 @@ introspection:
                 - main.table_that_should_be_partitioned_by_random_hash__H
                 - main.table_with_fk_reference_from_F
 
+    hourly:
+        partitioning_directives:
+            splitter_method: _split_on_converted_datetime
+            splitter_kwargs:
+                column_name: timestamp
+                date_format_string: "%Y-%m-%d:%H"
+        introspection_directives:
+            included_tables:
+                - main.table_partitioned_by_timestamp_column__B
+
+
+
 tables:
     table_partitioned_by_date_column__A:
         partitioners:
-            daily: 
+            daily:
                 data_asset_name_suffix: __daily
                 splitter_method: _split_on_converted_datetime
                 splitter_kwargs:
@@ -220,6 +232,9 @@ tables:
             "table_partitioned_by_date_column__A__whole_table",
             "table_partitioned_by_foreign_key__F__whole_table",
             "table_partitioned_by_incrementing_batch_id__E__whole_table",
+        ],
+        "hourly": [
+            "table_partitioned_by_timestamp_column__B__hourly",
         ],
         "daily": [
             "table_partitioned_by_date_column__A__daily",

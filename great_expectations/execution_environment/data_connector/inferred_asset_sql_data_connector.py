@@ -67,6 +67,10 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         self,
         data_asset_name_suffix: str=None,
         include_schema_name: bool=False,
+        splitter_method: str=None,
+        splitter_kwargs: dict=None,
+        sampling_method: str=None,
+        sampling_kwargs: dict=None,
     ):
         if data_asset_name_suffix is None:
             data_asset_name_suffix = "__"+self.name
@@ -80,10 +84,20 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             else:
                 data_asset_name = metadata["table_name"]+data_asset_name_suffix
             
-            # Store an asset config for each introspected data asset.
-            self._introspected_data_assets_cache[data_asset_name] = {
+            data_asset_config = {
                 "table_name" : metadata["schema_name"]+"."+metadata["table_name"],
             }
+            if not splitter_method is None:
+                data_asset_config["splitter_method"] = splitter_method
+            if not splitter_kwargs is None:
+                data_asset_config["splitter_kwargs"] = splitter_kwargs
+            if not sampling_method is None:
+                data_asset_config["sampling_method"] = sampling_method
+            if not sampling_kwargs is None:
+                data_asset_config["sampling_kwargs"] = sampling_kwargs
+
+            # Store an asset config for each introspected data asset.
+            self._introspected_data_assets_cache[data_asset_name] = data_asset_config
 
     def _introspect_db(
         self,
@@ -98,7 +112,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         ],
         system_tables: List[str] = ["sqlite_master"],  # sqlite
         include_views = True,
-        # included_tables = None,
+        included_tables = None,
         excluded_tables = None,
     ):
         engine = self._execution_engine.engine
@@ -114,42 +128,40 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             if selected_schema_name is not None and schema_name != selected_schema_name:
                 continue
 
-            if engine.dialect.name.lower() == "bigquery":
-                tables.extend(
-                    [
-                        {
-                            "schema_name": schema_name,
-                            "table_name": table_name,
-                            "type": "table",
-                        }
-                        
-                        for table_name in inspector.get_table_names(schema=schema_name)
-                        if (not ignore_information_schemas_and_system_tables or table_name not in system_tables) and (excluded_tables is None or schema_name+"."+table_name not in excluded_tables)
-                    ]
-                )
-            else:
-                tables.extend(
-                    [
-                        {
-                            "schema_name": schema_name,
-                            "table_name": table_name,
-                            "type": "table",
-                        }
-                        for table_name in inspector.get_table_names(schema=schema_name)
-                        if (not ignore_information_schemas_and_system_tables or table_name not in system_tables) and (excluded_tables is None or schema_name+"."+table_name not in excluded_tables)
-                    ]
-                )
+            for table_name in inspector.get_table_names(schema=schema_name):
+                if (included_tables is not None) and (schema_name+"."+table_name not in included_tables):
+                    continue
 
+                if (excluded_tables is not None) and (schema_name+"."+table_name in excluded_tables):
+                    continue
+
+                if (ignore_information_schemas_and_system_tables) and (table_name in system_tables):
+                    continue
+                
+                tables.append({
+                    "schema_name": schema_name,
+                    "table_name": table_name,
+                    "type": "table",
+                })
+
+            # Note Abe 20201112: This logic is currently untested.
             if include_views:
                 # Note: this is not implemented for bigquery
-                tables.extend(
-                    [
-                        (table_name, "view")
-                        if inspector.default_schema_name == schema_name
-                        else (schema_name + "." + table_name, "view")
-                        for table_name in inspector.get_view_names(schema=schema_name)
-                        if (not ignore_information_schemas_and_system_tables or table_name not in system_tables) and (excluded_tables is None or schema_name+"."+table_name not in excluded_tables)
-                    ]
-                )
+
+                for view_name in inspector.get_view_names(schema=schema_name):
+                    if (included_tables is not None) and (schema_name+"."+table_name not in included_tables):
+                        continue
+
+                    if (excluded_tables is not None) and (schema_name+"."+table_name in excluded_tables):
+                        continue
+
+                    if (ignore_information_schemas_and_system_tables) and (table_name in system_tables):
+                        continue
+                    
+                    tables.append({
+                        "schema_name": schema_name,
+                        "table_name": view_name,
+                        "type": "view",
+                    })
         
         return tables

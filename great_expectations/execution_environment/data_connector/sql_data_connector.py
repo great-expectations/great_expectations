@@ -195,7 +195,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         if pretty_print:
             print(f"\n\t\tShowing 5 rows")
-            print(pd.DataFrame(rows[:5]))
+            print(pd.DataFrame(
+                rows,
+                columns=batch_data._metadata.keys
+            )[:5])
     
         return report_object
 
