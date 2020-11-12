@@ -85,7 +85,7 @@ class ColumnPairValuesInSet(MapMetricProvider):
 
     @metric_partial(
         engine=SparkDFExecutionEngine,
-        partial_fn_type="window_condition_fn",
+        partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         domain_type=MetricDomainTypes.COLUMN_PAIR,
     )
     def _spark(

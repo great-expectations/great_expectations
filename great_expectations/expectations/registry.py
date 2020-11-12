@@ -168,10 +168,25 @@ def register_metric(
 
 def get_metric_provider(
     metric_name: str, execution_engine: "ExecutionEngine"
-) -> Callable:
+) -> Tuple["MetricProvider", Callable]:
     try:
         metric_definition = _registered_metrics[metric_name]
         return metric_definition["providers"][type(execution_engine).__name__]
+    except KeyError:
+        raise MetricProviderError(
+            f"No provider found for {metric_name} using {type(execution_engine).__name__}"
+        )
+
+
+def get_metric_function_type(
+    metric_name: str, execution_engine: "ExecutionEngine"
+) -> Union[None, "MetricPartialFunctionTypes", "MetricFunctionTypes"]:
+    try:
+        metric_definition = _registered_metrics[metric_name]
+        provider_fn, provider_class = metric_definition["providers"][
+            type(execution_engine).__name__
+        ]
+        return getattr(provider_fn, "metric_fn_type", None)
     except KeyError:
         raise MetricProviderError(
             f"No provider found for {metric_name} using {type(execution_engine).__name__}"
@@ -182,7 +197,7 @@ def get_metric_kwargs(
     metric_name: str,
     configuration: Optional["ExpectationConfiguration"] = None,
     runtime_configuration: Optional[dict] = None,
-) -> dict():
+) -> Dict:
     try:
         metric_definition = _registered_metrics.get(metric_name)
         if metric_definition is None:

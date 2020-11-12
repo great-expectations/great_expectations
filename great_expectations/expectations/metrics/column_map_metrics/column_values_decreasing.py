@@ -118,7 +118,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
     ):
         if (
             isinstance(execution_engine, SparkDFExecutionEngine)
-            and metric.metric_name == "column_values.decreasing"
+            and metric.metric_name == "column_values.decreasing.condition"
         ):
             return {
                 "table.column_types": MetricConfiguration(
@@ -127,3 +127,10 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
                     {"include_nested": True},
                 )
             }
+        else:
+            return super()._get_evaluation_dependencies(
+                metric=metric,
+                configuration=configuration,
+                execution_engine=execution_engine,
+                runtime_configuration=runtime_configuration,
+            )

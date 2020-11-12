@@ -4,13 +4,19 @@ from typing import Callable, Optional, Type, Union
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.util import nested_update
+from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
-from great_expectations.expectations.registry import register_metric, register_renderer
+from great_expectations.expectations.registry import (
+    get_metric_function_type,
+    get_metric_provider,
+    register_metric,
+    register_renderer,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -118,7 +124,9 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     )
                 else:
                     register_metric(
-                        metric_name=declared_metric_name + "." + metric_fn_type.value,
+                        metric_name=declared_metric_name
+                        + "."
+                        + metric_fn_type.metric_suffix,  # this will be a MetricPartial
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -155,15 +163,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
           ...
         }
         """
-        dependencies = dict()
-        for metric_partial_type in MetricPartialFunctionTypes:
-            if metric.metric_name.endswith(metric_partial_type.value):
-                dependencies["metric_partial_fn"] = MetricConfiguration(
-                    metric_name=metric.metric_name,
-                    metric_domain_kwargs=metric.metric_domain_kwargs,
-                    metric_value_kwargs=metric.metric_value_kwargs,
-                )
-        child_dependencies = (
+        return (
             cls._get_evaluation_dependencies(
                 metric=metric,
                 configuration=configuration,
@@ -172,8 +172,6 @@ class MetricProvider(metaclass=MetaMetricProvider):
             )
             or dict()
         )
-        nested_update(dependencies, child_dependencies)
-        return dependencies
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -183,4 +181,20 @@ class MetricProvider(metaclass=MetaMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        return dict()
+        metric_name = metric.metric_name
+        dependencies = dict()
+        for metric_fn_type in MetricPartialFunctionTypes:
+            metric_suffix = "." + metric_fn_type.value
+            try:
+                _ = get_metric_provider(metric_name + metric_suffix, execution_engine)
+                has_aggregate_fn = True
+            except MetricProviderError:
+                has_aggregate_fn = False
+            if has_aggregate_fn:
+                dependencies["metric_partial_fn"] = MetricConfiguration(
+                    metric_name + metric_suffix,
+                    metric.metric_domain_kwargs,
+                    metric.metric_value_kwargs,
+                )
+
+        return dependencies

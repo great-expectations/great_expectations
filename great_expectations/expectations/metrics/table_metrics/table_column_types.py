@@ -6,6 +6,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
 )
@@ -72,7 +73,9 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs)
+        df, _, _ = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+        )
         return _get_spark_column_metadata(
             df.schema, include_nested=metric_value_kwargs["include_nested"]
         )

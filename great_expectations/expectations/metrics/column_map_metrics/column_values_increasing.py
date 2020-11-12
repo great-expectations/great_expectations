@@ -125,7 +125,7 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
     ):
         if (
             isinstance(execution_engine, SparkDFExecutionEngine)
-            and metric.metric_name == "column_values.increasing"
+            and metric.metric_name == "column_values.increasing.condition"
         ):
             return {
                 "table.column_types": MetricConfiguration(

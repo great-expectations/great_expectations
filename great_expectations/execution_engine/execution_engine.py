@@ -159,11 +159,16 @@ class ExecutionEngine:
                 "runtime_configuration": runtime_configuration,
             }
             if metric_fn is None:
-                (
-                    metric_fn,
-                    compute_domain_kwargs,
-                    accessor_domain_kwargs,
-                ) = metric_dependencies.pop("metric_partial_fn")
+                try:
+                    (
+                        metric_fn,
+                        compute_domain_kwargs,
+                        accessor_domain_kwargs,
+                    ) = metric_dependencies.pop("metric_partial_fn")
+                except KeyError as e:
+                    raise GreatExpectationsError(
+                        f"Missing metric dependency: {str(e)} for metric "
+                    )
                 metric_fn_bundle.append(
                     (
                         metric_to_resolve,
@@ -269,12 +274,25 @@ class MetricPartialFunctionTypes(Enum):
     WINDOW_CONDITION_FN = "window_condition_fn"
     AGGREGATE_FN = "aggregate_fn"
 
+    @property
+    def metric_suffix(self):
+        if self.name in ["MAP_FN", "MAP_SERIES", "WINDOW_FN"]:
+            return "map"
+        elif self.name in [
+            "MAP_CONDITION_FN",
+            "MAP_CONDITION_SERIES",
+            "WINDOW_CONDITION_FN",
+        ]:
+            return "condition"
+        elif self.name in ["AGGREGATE_FN"]:
+            return "aggregate_fn"
+
 
 class MetricFunctionTypes(Enum):
     VALUE = "value"
-    MAP_VALUES = "map_values"
-    WINDOW_VALUES = "window_values"
-    AGGREGATE_VALUE = "aggregate_value"
+    MAP_VALUES = "value"  # "map_values"
+    WINDOW_VALUES = "value"  # "window_values"
+    AGGREGATE_VALUE = "value"  # "aggregate_value"
 
 
 class MetricDomainTypes(Enum):

@@ -1232,30 +1232,36 @@ class MapMetricProvider(MetricProvider):
         }
         dependencies = dict()
 
-        for metric_suffix in [".unexpected_count"]:
-            if metric_name.endswith(metric_suffix):
-                try:
-                    _ = get_metric_provider(
-                        metric_name + ".aggregate_fn", execution_engine
-                    )
-                    has_aggregate_fn = True
-                except MetricProviderError:
-                    has_aggregate_fn = False
-                if has_aggregate_fn:
-                    dependencies["metric_partial_fn"] = MetricConfiguration(
-                        metric_name + ".aggregate_fn",
-                        metric.metric_domain_kwargs,
-                        base_metric_value_kwargs,
-                    )
-                else:
-                    dependencies["unexpected_condition"] = MetricConfiguration(
-                        metric_name[: -len(metric_suffix)],
-                        metric.metric_domain_kwargs,
-                        base_metric_value_kwargs,
-                    )
+        metric_suffix = ".unexpected_count"
+        if metric_name.endswith(metric_suffix):
+            try:
+                _ = get_metric_provider(metric_name + ".aggregate_fn", execution_engine)
+                has_aggregate_fn = True
+            except MetricProviderError:
+                has_aggregate_fn = False
+            if has_aggregate_fn:
+                dependencies["metric_partial_fn"] = MetricConfiguration(
+                    metric_name + ".aggregate_fn",
+                    metric.metric_domain_kwargs,
+                    base_metric_value_kwargs,
+                )
+            else:
+                dependencies["unexpected_condition"] = MetricConfiguration(
+                    metric_name[: -len(metric_suffix)] + ".condition",
+                    metric.metric_domain_kwargs,
+                    base_metric_value_kwargs,
+                )
+
+        # MapMetric uses the condition to build unexpected_count.aggregate_fn as well
+        metric_suffix = ".unexpected_count.aggregate_fn"
+        if metric_name.endswith(metric_suffix):
+            dependencies["unexpected_condition"] = MetricConfiguration(
+                metric_name[: -len(metric_suffix)] + ".condition",
+                metric.metric_domain_kwargs,
+                base_metric_value_kwargs,
+            )
 
         for metric_suffix in [
-            ".unexpected_count.aggregate_fn",
             ".unexpected_values",
             ".unexpected_value_counts",
             ".unexpected_index_list",
