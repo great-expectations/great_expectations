@@ -15,7 +15,7 @@ from great_expectations.core.batch import (
     BatchRequest
 )
 
-def test_basic_instantiation():
+def test_basic_instantiation(sa):
     random.seed(0)
 
     db_file = file_relative_path(
@@ -108,7 +108,7 @@ data_connectors:
         }
     }
 
-def test_StreamlinedSqlExecutionEnvironment(empty_data_context):
+def test_StreamlinedSqlExecutionEnvironment(empty_data_context, sa):
     # This test mirrors the likely path to configure a StreamlinedSqlExecutionEnvironment
 
     db_file = file_relative_path(
