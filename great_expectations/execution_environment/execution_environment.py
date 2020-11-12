@@ -35,6 +35,8 @@ class BaseExecutionEnvironment:
             data_connectors: DataConnectors to add to the datasource
         """
         self._name = name
+        self._data_context_root_directory = data_context_root_directory
+
 
     def get_batch_from_batch_definition(
         self, batch_definition: BatchDefinition, batch_data: Any = None,
@@ -287,8 +289,6 @@ class ExecutionEnvironment(BaseExecutionEnvironment):
             name=name,
             data_context_root_directory=data_context_root_directory,
         )
-
-        self._data_context_root_directory = data_context_root_directory
 
         self._execution_engine = instantiate_class_from_config(
             config=execution_engine,
