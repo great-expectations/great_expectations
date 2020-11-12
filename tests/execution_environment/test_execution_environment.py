@@ -540,25 +540,22 @@ introspection:
     whole_table: {}
 
     daily:
-        partitioning_directives:
-            splitter_method: _split_on_converted_datetime
-            splitter_kwargs:
-                column_name: date
-                date_format_string: "%Y-%m-%d"
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: date
+            date_format_string: "%Y-%m-%d"
 
     weekly:
-        partitioning_directives:
-            splitter_method: _split_on_converted_datetime
-            splitter_kwargs:
-                column_name: date
-                date_format_string: "%Y-%W"
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: date
+            date_format_string: "%Y-%W"
 
     by_id_dozens:
-        partitioning_directives:
-            splitter_method: _split_on_divided_integer
-            splitter_kwargs:
-                column_name: id
-                divisor: 12
+        splitter_method: _split_on_divided_integer
+        splitter_kwargs:
+            column_name: id
+            divisor: 12
 """,
         yaml.FullLoader,
     )

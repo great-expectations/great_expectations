@@ -30,11 +30,28 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         name: str,
         execution_environment_name: str,
         execution_engine,
-        partitioning_directives: Dict={},
+        data_asset_name_suffix: str=None,
+        include_schema_name: bool=False,
+        splitter_method: str=None,
+        splitter_kwargs: dict=None,
+        sampling_method: str=None,
+        sampling_kwargs: dict=None,
+        excluded_tables: List=None,
+        included_tables: List=None,
+        skip_inapplicable_tables: bool=True,
         introspection_directives: Dict={},
         # data_context_root_directory=None,
     ):
-        self._partitioning_directives = partitioning_directives
+        self._data_asset_name_suffix = data_asset_name_suffix
+        self._include_schema_name = include_schema_name
+        self._splitter_method = splitter_method
+        self._splitter_kwargs = splitter_kwargs
+        self._sampling_method = sampling_method
+        self._sampling_kwargs = sampling_kwargs
+        self._excluded_tables = excluded_tables
+        self._included_tables = included_tables
+        self._skip_inapplicable_tables = skip_inapplicable_tables
+
         self._introspection_directives = introspection_directives
 
         super().__init__(
@@ -50,7 +67,15 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         # Note: We should probably turn them into AssetConfig objects
         self._introspected_data_assets_cache = {}
         self._refresh_introspected_data_assets_cache(
-            **self._partitioning_directives
+            self._data_asset_name_suffix,
+            self._include_schema_name,
+            self._splitter_method,
+            self._splitter_kwargs,
+            self._sampling_method,
+            self._sampling_kwargs,
+            self._excluded_tables,
+            self._included_tables,
+            self._skip_inapplicable_tables,
         )
 
     @property
@@ -59,7 +84,15 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
     def _refresh_data_references_cache(self):
         self._refresh_introspected_data_assets_cache(
-            **self._partitioning_directives
+            self._data_asset_name_suffix,
+            self._include_schema_name,
+            self._splitter_method,
+            self._splitter_kwargs,
+            self._sampling_method,
+            self._sampling_kwargs,
+            self._excluded_tables,
+            self._included_tables,
+            self._skip_inapplicable_tables,
         )
 
         super()._refresh_data_references_cache()

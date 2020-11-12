@@ -149,8 +149,7 @@ connection_string: sqlite:///{db_file}
 """+"""
 introspection:
     whole_table:
-        partitioning_directives:
-            data_asset_name_suffix: __whole_table
+        data_asset_name_suffix: __whole_table
         introspection_directives: {}
 """)
 
@@ -178,23 +177,21 @@ connection_string: sqlite:///{db_file}
 
 introspection:
     whole_table:
-        partitioning_directives:
-            excluded_tables:
-                - main.table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D
-                - main.table_partitioned_by_multiple_columns__G
-                - main.table_partitioned_by_regularly_spaced_incrementing_id_column__C
-                - main.table_partitioned_by_timestamp_column__B
-                - main.table_that_should_be_partitioned_by_random_hash__H
-                - main.table_with_fk_reference_from_F
+        excluded_tables:
+            - main.table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D
+            - main.table_partitioned_by_multiple_columns__G
+            - main.table_partitioned_by_regularly_spaced_incrementing_id_column__C
+            - main.table_partitioned_by_timestamp_column__B
+            - main.table_that_should_be_partitioned_by_random_hash__H
+            - main.table_with_fk_reference_from_F
 
     hourly:
-        partitioning_directives:
-            splitter_method: _split_on_converted_datetime
-            splitter_kwargs:
-                column_name: timestamp
-                date_format_string: "%Y-%m-%d:%H"
-            included_tables:
-                - main.table_partitioned_by_timestamp_column__B
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: timestamp
+            date_format_string: "%Y-%m-%d:%H"
+        included_tables:
+            - main.table_partitioned_by_timestamp_column__B
         introspection_directives:
             include_views: true
 
@@ -387,9 +384,7 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(test_cases_for_sql
         config={
             "class_name": "InferredAssetSqlDataConnector",
             "name": "whole_table",
-            "partitioning_directives": {
-                "data_asset_name_suffix": "__whole"
-            }
+            "data_asset_name_suffix": "__whole"
         },
         runtime_environment={
             "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
@@ -461,10 +456,8 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(test_cases_
         config={
             "class_name": "InferredAssetSqlDataConnector",
             "name": "whole_table",
-            "partitioning_directives": {
-                "data_asset_name_suffix": "__whole",
-                "include_schema_name": True,
-            }
+            "data_asset_name_suffix": "__whole",
+            "include_schema_name": True,
         },
         runtime_environment={
             "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
