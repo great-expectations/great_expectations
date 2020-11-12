@@ -873,6 +873,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             unexpected_index_list=metrics.get(
                 self.map_metric + ".unexpected_index_list"
             ),
+            skip_missing=True if configuration.expectation_type == "expect_column_values_to_not_be_null" else False
         )
 
 
@@ -884,6 +885,7 @@ def _format_map_output(
     unexpected_count,
     unexpected_list,
     unexpected_index_list,
+    skip_missing=False
 ):
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
     and file_lines_map_expectation).
@@ -900,8 +902,6 @@ def _format_map_output(
 
     if result_format["result_format"] == "BOOLEAN_ONLY":
         return return_obj
-
-    skip_missing = False
 
     if nonnull_count is None:
         missing_count = None
