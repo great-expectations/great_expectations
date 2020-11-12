@@ -49,34 +49,38 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     ):
         self._data_assets[name] = config
 
+    def _get_partition_definition_list_from_data_asset_config(self, data_asset_config):
+        if "table_name" in data_asset_config:
+            table_name = data_asset_config["table_name"]
+        else:
+            table_name = data_asset_config
+        
+        if "splitter_method" in data_asset_config:
+            splitter_fn = getattr(self, data_asset_config["splitter_method"])
+            split_query = splitter_fn(
+                table_name=table_name,
+                **data_asset_config["splitter_kwargs"]
+            )
+
+            rows = self._execution_engine.engine.execute(split_query).fetchall()
+
+            # Zip up split parameters with column names
+            column_names = self._get_column_names_from_splitter_kwargs(
+                data_asset_config["splitter_kwargs"]
+            )
+            partition_definition_list = [dict(zip(column_names, row)) for row in rows]
+
+        else:
+            partition_definition_list = [{}]
+
+        return partition_definition_list
+
     def _refresh_data_references_cache(self):
         self._data_references_cache = {}
 
         for data_asset_name in self.data_assets:
             data_asset = self.data_assets[data_asset_name]
-            if "table_name" in data_asset:
-                table_name = data_asset["table_name"]
-            else:
-                table_name = data_asset_name
-            
-            if "splitter_method" in data_asset:
-                splitter_fn = getattr(self, data_asset["splitter_method"])
-                split_query = splitter_fn(
-                    table_name=table_name,
-                    **data_asset["splitter_kwargs"]
-                )
-
-                rows = self._execution_engine.engine.execute(split_query).fetchall()
-
-                # Zip up split parameters with column names
-                column_names = self._get_column_names_from_splitter_kwargs(
-                    data_asset["splitter_kwargs"]
-                )
-                partition_definition_list = [dict(zip(column_names, row)) for row in rows]
-
-            else:
-                partition_definition_list = [{}]
-
+            partition_definition_list = self._get_partition_definition_list_from_data_asset_config(data_asset)
 
             # TODO Abe 20201029 : Apply sorters to partition_definition_list here
             # TODO Will 20201102 : add sorting code here

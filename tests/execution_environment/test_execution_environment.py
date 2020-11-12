@@ -591,3 +591,4 @@ def test_get_batch(sql_execution_environment_for_testing_get_batch):
     # Failed specification using a BatchDefinition
     # Successful specification using a BatchRequest
     # Failed specification using a BatchRequest
+

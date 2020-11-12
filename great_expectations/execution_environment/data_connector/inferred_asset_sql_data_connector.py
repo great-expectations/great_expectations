@@ -19,6 +19,7 @@ from great_expectations.execution_environment.data_connector import ConfiguredAs
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy.exc import OperationalError
 except ImportError:
     sa = None
 
@@ -71,6 +72,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         splitter_kwargs: dict=None,
         sampling_method: str=None,
         sampling_kwargs: dict=None,
+        skip_inapplicable_tables: bool=True,
     ):
         if data_asset_name_suffix is None:
             data_asset_name_suffix = "__"+self.name
@@ -95,6 +97,15 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                 data_asset_config["sampling_method"] = sampling_method
             if not sampling_kwargs is None:
                 data_asset_config["sampling_kwargs"] = sampling_kwargs
+
+            if skip_inapplicable_tables:
+                # Attempt to fetch a test batch from the table
+                print(data_asset_name)
+                print(data_asset_config)
+                try:
+                    self._get_partition_definition_list_from_data_asset_config(data_asset_config)
+                except OperationalError:
+                    continue
 
             # Store an asset config for each introspected data asset.
             self._introspected_data_assets_cache[data_asset_name] = data_asset_config
