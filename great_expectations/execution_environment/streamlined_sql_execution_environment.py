@@ -25,9 +25,12 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
         url: str=None,
         credentials: dict=None,
         engine=None, #SqlAlchemyExecutionEngine
-        introspection: Dict={},
-        tables: Dict={},
+        introspection: Dict=None,
+        tables: Dict=None,
     ):
+        introspection = introspection or {}
+        tables = tables or {}
+
         super().__init__(
             name=name,
         )
@@ -101,7 +104,11 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
         name: str,
         config: Dict,
     ) -> DataConnector:
-        """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
+        """Build a DataConnector using the provided configuration and return the newly-built DataConnector.
+        
+        Note: this method is identical to the method in the parent class,
+        except that it does not include data_context_root_directory
+        """
 
         new_data_connector: DataConnector = instantiate_class_from_config(
             config=config,

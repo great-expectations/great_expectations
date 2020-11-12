@@ -29,12 +29,12 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         name: str,
         execution_environment_name: str,
         execution_engine,
-        partitioning_directives: Dict={},
-        introspection_directives: Dict={},
+        partitioning_directives: Dict=None,
+        introspection_directives: Dict=None,
         # data_context_root_directory=None,
     ):
-        self._partitioning_directives = partitioning_directives
-        self._introspection_directives = introspection_directives
+        self._partitioning_directives = partitioning_directives or {}
+        self._introspection_directives = introspection_directives or {}
 
         super().__init__(
             name=name,
