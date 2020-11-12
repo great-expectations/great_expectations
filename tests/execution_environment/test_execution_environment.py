@@ -134,9 +134,7 @@ data_connectors:
 
 
 def test_some_very_basic_stuff(basic_execution_environment):
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = basic_execution_environment.get_data_connector(
-        name="my_filesystem_data_connector"
-    )
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = basic_execution_environment.data_connectors["my_filesystem_data_connector"]
     create_files_in_directory(
         my_data_connector.base_directory,
         ["A_1.csv", "A_2.csv", "A_3.csv", "B_1.csv", "B_2.csv", "B_3.csv"],
@@ -221,7 +219,7 @@ def test_get_batch_list_from_batch_request(basic_execution_environment):
     data_connector_name: str = "my_filesystem_data_connector"
     data_asset_name: str = "Titanic"
     titanic_csv_source_file_path: str = file_relative_path(__file__, "../test_sets/Titanic.csv")
-    base_directory: str = basic_execution_environment.get_data_connector(name=data_connector_name).base_directory
+    base_directory: str = basic_execution_environment.data_connectors[data_connector_name].base_directory
     titanic_csv_destination_file_path: str = str(os.path.join(base_directory, "Titanic_19120414.csv"))
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
