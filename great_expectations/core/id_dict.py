@@ -16,7 +16,6 @@ class IDDict(dict):
         elif len(id_keys) == 1:
             key = list(id_keys)[0]
             return key + "=" + str(self[key])
-
         _id_dict = {k: self[k] for k in id_keys}
         return hashlib.md5(
             json.dumps(_id_dict, sort_keys=True).encode("utf-8")
