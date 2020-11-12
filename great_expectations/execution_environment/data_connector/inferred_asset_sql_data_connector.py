@@ -72,6 +72,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         splitter_kwargs: dict=None,
         sampling_method: str=None,
         sampling_kwargs: dict=None,
+        excluded_tables: List=None,
+        included_tables: List=None,
         skip_inapplicable_tables: bool=True,
     ):
         if data_asset_name_suffix is None:
@@ -81,6 +83,12 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             **self._introspection_directives
         )
         for metadata in introspected_table_metadata:
+            if (excluded_tables is not None) and (metadata["schema_name"]+"."+metadata["table_name"] in excluded_tables):
+                continue
+
+            if (included_tables is not None) and (metadata["schema_name"]+"."+metadata["table_name"] not in included_tables):
+                continue
+
             if include_schema_name:
                 data_asset_name = metadata["schema_name"]+"."+metadata["table_name"]+data_asset_name_suffix
             else:
@@ -103,7 +111,10 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                 print(data_asset_name)
                 print(data_asset_config)
                 try:
-                    self._get_partition_definition_list_from_data_asset_config(data_asset_config)
+                    self._get_partition_definition_list_from_data_asset_config(
+                        data_asset_name,
+                        data_asset_config,
+                    )
                 except OperationalError:
                     continue
 
@@ -123,8 +134,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         ],
         system_tables: List[str] = ["sqlite_master"],  # sqlite
         include_views = True,
-        included_tables = None,
-        excluded_tables = None,
     ):
         engine = self._execution_engine.engine
         inspector = sa.inspect(engine)
@@ -140,11 +149,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                 continue
 
             for table_name in inspector.get_table_names(schema=schema_name):
-                if (included_tables is not None) and (schema_name+"."+table_name not in included_tables):
-                    continue
-
-                if (excluded_tables is not None) and (schema_name+"."+table_name in excluded_tables):
-                    continue
 
                 if (ignore_information_schemas_and_system_tables) and (table_name in system_tables):
                     continue
@@ -160,11 +164,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                 # Note: this is not implemented for bigquery
 
                 for view_name in inspector.get_view_names(schema=schema_name):
-                    if (included_tables is not None) and (schema_name+"."+table_name not in included_tables):
-                        continue
-
-                    if (excluded_tables is not None) and (schema_name+"."+table_name in excluded_tables):
-                        continue
 
                     if (ignore_information_schemas_and_system_tables) and (table_name in system_tables):
                         continue

@@ -49,11 +49,15 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     ):
         self._data_assets[name] = config
 
-    def _get_partition_definition_list_from_data_asset_config(self, data_asset_config):
+    def _get_partition_definition_list_from_data_asset_config(
+        self,
+        data_asset_name,
+        data_asset_config,
+    ):
         if "table_name" in data_asset_config:
             table_name = data_asset_config["table_name"]
         else:
-            table_name = data_asset_config
+            table_name = data_asset_name
         
         if "splitter_method" in data_asset_config:
             splitter_fn = getattr(self, data_asset_config["splitter_method"])
@@ -80,7 +84,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         for data_asset_name in self.data_assets:
             data_asset = self.data_assets[data_asset_name]
-            partition_definition_list = self._get_partition_definition_list_from_data_asset_config(data_asset)
+            partition_definition_list = self._get_partition_definition_list_from_data_asset_config(
+                data_asset_name,
+                data_asset,
+            )
 
             # TODO Abe 20201029 : Apply sorters to partition_definition_list here
             # TODO Will 20201102 : add sorting code here

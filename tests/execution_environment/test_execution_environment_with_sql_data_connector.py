@@ -146,13 +146,12 @@ introspection:
     my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
 class_name: StreamlinedSqlExecutionEnvironment
 connection_string: sqlite:///{db_file}
-
+"""+"""
 introspection:
     whole_table:
         partitioning_directives:
             data_asset_name_suffix: __whole_table
-        introspection_directives:
-            excluded_tables: []
+        introspection_directives: {}
 """)
 
     assert my_sql_execution_environment.get_available_data_asset_names() == {
@@ -179,7 +178,7 @@ connection_string: sqlite:///{db_file}
 
 introspection:
     whole_table:
-        introspection_directives:
+        partitioning_directives:
             excluded_tables:
                 - main.table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D
                 - main.table_partitioned_by_multiple_columns__G
@@ -194,10 +193,10 @@ introspection:
             splitter_kwargs:
                 column_name: timestamp
                 date_format_string: "%Y-%m-%d:%H"
-        introspection_directives:
             included_tables:
                 - main.table_partitioned_by_timestamp_column__B
-
+        introspection_directives:
+            include_views: true
 
 
 tables:
