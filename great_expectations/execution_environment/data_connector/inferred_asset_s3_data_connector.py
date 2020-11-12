@@ -38,7 +38,6 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
-            data_context_root_directory=None
         )
 
         self._bucket = bucket

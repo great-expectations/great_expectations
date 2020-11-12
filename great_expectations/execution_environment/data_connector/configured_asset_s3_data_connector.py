@@ -41,7 +41,6 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             default_regex=default_regex,
             assets=assets,
             sorters=sorters,
-            data_context_root_directory=None
         )
 
         self._bucket = bucket

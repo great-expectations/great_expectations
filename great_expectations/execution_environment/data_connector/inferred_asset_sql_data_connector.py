@@ -31,7 +31,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         execution_engine,
         partitioning_directives: Dict=None,
         introspection_directives: Dict=None,
-        # data_context_root_directory=None,
     ):
         self._partitioning_directives = partitioning_directives or {}
         self._introspection_directives = introspection_directives or {}
@@ -41,7 +40,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
             data_assets={},
-            # data_context_root_directory=data_context_root_directory,
         )
 
         # This cache will contain a "config" for each data_asset discovered via introspection.

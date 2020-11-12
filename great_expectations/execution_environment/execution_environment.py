@@ -2,6 +2,7 @@ import copy
 import logging
 from typing import Any, Dict, List, Optional, Union
 
+from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -10,9 +11,9 @@ from great_expectations.core.batch import (
 )
 from great_expectations.execution_environment.data_connector import DataConnector
 from great_expectations.data_context.util import instantiate_class_from_config
-import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
+
 
 class BaseExecutionEnvironment:
     """
@@ -83,7 +84,6 @@ class BaseExecutionEnvironment:
         )
 
         if batch_request["batch_data"] is None:
-
             batches: List[Batch] = []
             for batch_definition in batch_definition_list:
                 batch_data: Any
@@ -166,13 +166,13 @@ class BaseExecutionEnvironment:
             runtime_environment={
                 "name": name,
                 "execution_environment_name": self.name,
-                "data_context_root_directory": self._data_context_root_directory,
                 "execution_engine": self.execution_engine,
             },
             config_defaults={
                 "module_name": "great_expectations.execution_environment.data_connector"
             },
         )
+        new_data_connector.data_context_root_directory = self._data_context_root_directory
 
         self._data_connectors[name] = new_data_connector
         return new_data_connector
@@ -267,6 +267,7 @@ class BaseExecutionEnvironment:
                 match ExecutionEnvironment name: "{self.name}".
                 """
             )
+
 
 class ExecutionEnvironment(BaseExecutionEnvironment):
 

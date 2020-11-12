@@ -39,7 +39,6 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         glob_directive: str = "*",
         sorters: list = None,
         execution_engine: ExecutionEngine = None,
-        data_context_root_directory: str = None,
     ):
         logger.debug(f'Constructing ConfiguredAssetFilesystemDataConnector "{name}".')
 
@@ -50,13 +49,12 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             assets=assets,
             sorters=sorters,
             default_regex=default_regex,
-            data_context_root_directory=data_context_root_directory
         )
 
         # TODO: <Alex>The next two properties must be private.</Alex>
         self.base_directory = normalize_directory_path(
             dir_path=base_directory,
-            root_directory_path=data_context_root_directory
+            root_directory_path=self.data_context_root_directory
         )
 
         self.glob_directive = glob_directive
