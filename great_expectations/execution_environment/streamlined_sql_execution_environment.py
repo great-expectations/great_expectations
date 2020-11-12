@@ -1,13 +1,9 @@
 import logging
-from typing import List, Dict
 import copy
 
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment import BaseExecutionEnvironment
-from great_expectations.execution_environment.data_connector import (
-    DataConnector,
-    ConfiguredAssetSqlDataConnector,
-)
+from great_expectations.execution_environment.data_connector import DataConnector
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +21,8 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
         url: str=None,
         credentials: dict=None,
         engine=None, #SqlAlchemyExecutionEngine
-        introspection: Dict=None,
-        tables: Dict=None,
+        introspection: dict=None,
+        tables: dict=None,
     ):
         introspection = introspection or {}
         tables = tables or {}
@@ -49,7 +45,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
         )
 
         self._data_connectors = {}
-        self._init_data_connectors(
+        self._init_streamlined_sql_data_connectors(
             introspection,
             tables,
         )
@@ -57,10 +53,10 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
         # NOTE: Abe 20201111 : This is incorrect. Will need to be fixed when we reconcile all the configs.
         self._execution_environment_config = {}
 
-    def _init_data_connectors(
+    def _init_streamlined_sql_data_connectors(
         self,
-        introspection_configs: Dict,
-        table_configs: Dict,
+        introspection_configs: dict,
+        table_configs: dict,
     ):
 
         # First, build DataConnectors for introspected assets
@@ -102,7 +98,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
     def _build_data_connector_from_config(
         self,
         name: str,
-        config: Dict,
+        config: dict,
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector.
         
