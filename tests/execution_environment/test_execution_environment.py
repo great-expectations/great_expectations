@@ -524,3 +524,58 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
 
 def test_get_available_data_asset_names_with_caching():
     pass
+
+
+@pytest.fixture
+def sql_execution_environment_for_testing_get_batch(tmp_path_factory):
+    db_file = os.path.join(os.getcwd(), "tests", "test_sets", "test_cases_for_sql_data_connector.db")
+
+    config = yaml.load(
+        f"""
+class_name: ExecutionEnvironment
+
+execution_engine:
+    class_name: SqlAlchemyExecutionEngine
+    connection_string: sqlite:///{db_file}
+
+data_connectors:
+    my_sqlite_db:
+        class_name: SqlDataConnector
+
+        data_assets:
+
+            table_partitioned_by_date_column__A:
+                splitter_method: _split_on_converted_datetime
+                splitter_kwargs:
+                    column_name: date
+                    date_format_string: "%Y-%m-%d"
+    """,
+        yaml.FullLoader,
+    )
+
+    my_sql_execution_environment = instantiate_class_from_config(
+        config,
+        config_defaults={
+            "module_name": "great_expectations.execution_environment"
+        },
+        runtime_environment={
+            "name" : "my_sql_execution_environment"
+        },
+    )
+
+    return my_sql_execution_environment
+
+def test_get_batch(sql_execution_environment_for_testing_get_batch):
+    my_data_source = sql_execution_environment_for_testing_get_batch
+
+    # Successful specification using a BatchDefinition
+    my_data_source.get_batch(
+        execution_environment_name="my_sql_execution_environment",
+        data_connector_name="my_sqlite_db",
+        data_asset_name="table_partitioned_by_date_column__A",
+        date="2020-01-15",
+    )
+
+    # Failed specification using a BatchDefinition
+    # Successful specification using a BatchRequest
+    # Failed specification using a BatchRequest
