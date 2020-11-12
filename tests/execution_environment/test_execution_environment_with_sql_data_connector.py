@@ -2,7 +2,10 @@ import random
 import yaml
 import os
 import json
-import sqlalchemy as sa
+try:
+    import sqlalchemy as sa
+except ImportError:
+    sa = None
 
 from great_expectations.data_context.util import (
     instantiate_class_from_config
@@ -15,6 +18,8 @@ def test_basic_instantiation():
     random.seed(0)
 
     db_file = os.path.join(os.getcwd(), "tests", "test_sets", "test_cases_for_sql_data_connector.db")
+    print("^"*80)
+    print(db_file)
 
     # This is a basic intergration test demonstrating an ExecutionEnvironment containing a SQL data_connector
     # It also shows how to instantiate a SQLite SqlAlchemyExecutionEngine
@@ -105,6 +110,8 @@ data_connectors:
 def test_StreamlinedSqlExecutionEnvironment(empty_data_context):
     # This test mirrors the likely path to configure a StreamlinedSqlExecutionEnvironment
     db_file = os.path.join(os.getcwd(), "tests", "test_sets", "test_cases_for_sql_data_connector.db")
+    print("%"*80)
+    print(db_file)
 
     #Absolutely minimal starting config
     my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
