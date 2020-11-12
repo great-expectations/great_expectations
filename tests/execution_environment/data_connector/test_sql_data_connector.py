@@ -10,7 +10,7 @@ from great_expectations.core.batch import (
     BatchSpec,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_environment.data_connector import SqlDataConnector
+from great_expectations.execution_environment.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.data_context.util import file_relative_path
 
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
@@ -33,13 +33,13 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
     )
     config["execution_engine"] = execution_engine
 
-    my_data_connector = SqlDataConnector(**config)
+    my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
     assert report == {
-        "class_name": "SqlDataConnector",
+        "class_name": "ConfiguredAssetSqlDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": ["table_partitioned_by_date_column__A"],
         "data_assets": {
@@ -83,7 +83,7 @@ def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_co
     """, yaml.FullLoader)
     config["execution_engine"] = db
 
-    my_data_connector = SqlDataConnector(**config)
+    my_data_connector = ConfiguredAssetSqlDataConnector(**config)
     my_data_connector._refresh_data_references_cache()
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
@@ -113,7 +113,7 @@ def test_get_batch_definition_list_from_batch_request(test_cases_for_sql_data_co
     # Note: Abe 20201109: It would be nice to put in safeguards for mistakes like this.
     # In this case, "date" should go inside "partition_identifiers".
     # Currently, the method ignores "date" entirely, and matches on too many partitions.
-    # I don't think this is unique to SqlDataConnector.
+    # I don't think this is unique to ConfiguredAssetSqlDataConnector.
     # with pytest.raises(DataConnectorError) as e:
     #     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
     #         batch_request=BatchRequest(
@@ -174,13 +174,13 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
     )
     config["execution_engine"] = db
 
-    my_data_connector = SqlDataConnector(**config)
+    my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
     assert report == {
-        "class_name": "SqlDataConnector",
+        "class_name": "ConfiguredAssetSqlDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": ["table_partitioned_by_date_column__A"],
         "data_assets": {
@@ -226,13 +226,13 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
     )
     config["execution_engine"] = db
 
-    my_data_connector = SqlDataConnector(**config)
+    my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
     assert report == {
-        "class_name": "SqlDataConnector",
+        "class_name": "ConfiguredAssetSqlDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": ["table_partitioned_by_timestamp_column__B"],
         "data_assets": {
@@ -279,13 +279,13 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     )
     config["execution_engine"] = db
 
-    my_data_connector = SqlDataConnector(**config)
+    my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
     assert report == {
-        "class_name": "SqlDataConnector",
+        "class_name": "ConfiguredAssetSqlDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
             "table_partitioned_by_regularly_spaced_incrementing_id_column__C"
@@ -329,13 +329,13 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
     )
     config["execution_engine"] = db
 
-    my_data_connector = SqlDataConnector(**config)
+    my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
     assert report == {
-        "class_name": "SqlDataConnector",
+        "class_name": "ConfiguredAssetSqlDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": ["table_partitioned_by_incrementing_batch_id__E"],
         "data_assets": {
@@ -381,13 +381,13 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
     )
     config["execution_engine"] = db
 
-    my_data_connector = SqlDataConnector(**config)
+    my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
     assert report == {
-        "class_name": "SqlDataConnector",
+        "class_name": "ConfiguredAssetSqlDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": ["table_partitioned_by_foreign_key__F"],
         "data_assets": {
@@ -437,13 +437,13 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
     )
     config["execution_engine"] = db
 
-    my_data_connector = SqlDataConnector(**config)
+    my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=2))
 
     assert report == {
-        "class_name": "SqlDataConnector",
+        "class_name": "ConfiguredAssetSqlDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": ["table_partitioned_by_multiple_columns__G"],
         "data_assets": {
@@ -492,14 +492,14 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
     # """, yaml.FullLoader)
     # config["execution_engine"] = db
 
-    # my_data_connector = SqlDataConnector(**config)
+    # my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
     # report = my_data_connector.self_check()
     # print(json.dumps(report, indent=2))
 
     # # TODO: Flesh this out once the implementation actually works to this point
     # assert report == {
-    #     "class_name": "SqlDataConnector",
+    #     "class_name": "ConfiguredAssetSqlDataConnector",
     #     "data_asset_count": 1,
     #     "example_data_asset_names": [
     #         "table_that_should_be_partitioned_by_random_hash__H"
@@ -678,7 +678,7 @@ def test_default_behavior_with_no_splitter(test_cases_for_sql_data_connector_sql
     )
     config["execution_engine"] = db
 
-    my_data_connector = SqlDataConnector(**config)
+    my_data_connector = ConfiguredAssetSqlDataConnector(**config)
     report_object = my_data_connector.self_check()
     print(json.dumps(report_object, indent=2))
 
@@ -727,7 +727,7 @@ def test_behavior_with_whole_table_splitter(test_cases_for_sql_data_connector_sq
     )
     config["execution_engine"] = db
 
-    my_data_connector = SqlDataConnector(**config)
+    my_data_connector = ConfiguredAssetSqlDataConnector(**config)
     report_object = my_data_connector.self_check()
     print(json.dumps(report_object, indent=2))
 
