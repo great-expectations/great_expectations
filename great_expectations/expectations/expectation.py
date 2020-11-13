@@ -849,7 +849,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
                     total_count - null_count
             )
             success = success_ratio >= mostly
-        elif total_count == 0:
+        elif total_count == 0 or (total_count - null_count) == 0:
             success = True
 
         try:
