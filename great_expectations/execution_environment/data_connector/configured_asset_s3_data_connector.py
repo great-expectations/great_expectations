@@ -27,7 +27,6 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         assets: dict,
         execution_engine: ExecutionEngine = None,
         sorters: list = None,
-        data_context_root_directory: str = None,
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
@@ -42,7 +41,6 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             default_regex=default_regex,
             assets=assets,
             sorters=sorters,
-            data_context_root_directory=data_context_root_directory
         )
 
         self._bucket = bucket

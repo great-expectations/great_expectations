@@ -1,20 +1,16 @@
 import random
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import pandas as pd
 
 from great_expectations.core.batch import (
     BatchDefinition,
-    BatchMarkers,
-    BatchRequest,
     BatchSpec,
     PartitionDefinition,
-    PartitionRequest,
 )
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
-from great_expectations.data_context.util import instantiate_class_from_config
 
 try:
     import sqlalchemy as sa
@@ -22,17 +18,17 @@ except ImportError:
     sa = None
 
 
-class SqlDataConnector(DataConnector):
+class ConfiguredAssetSqlDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
         execution_environment_name: str,
         execution_engine,
-        data_assets: List[Dict],
+        data_assets: Dict[str, Asset],
     ):
         self._data_assets = data_assets
-        
-        super(SqlDataConnector, self).__init__(
+
+        super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
@@ -42,9 +38,16 @@ class SqlDataConnector(DataConnector):
     def data_assets(self) -> Dict[str, Asset]:
         return self._data_assets
 
+    def add_data_asset(
+        self,
+        name,
+        config,
+    ):
+        self._data_assets[name] = config
+
     def _refresh_data_references_cache(self):
         self._data_references_cache = {}
-        
+
         for data_asset_name in self.data_assets:
             data_asset = self.data_assets[data_asset_name]
             if "table_name" in data_asset:
@@ -94,6 +97,9 @@ class SqlDataConnector(DataConnector):
 
     def get_batch_definition_list_from_batch_request(self, batch_request):
         self._validate_batch_request(batch_request=batch_request)
+
+        if self._data_references_cache is None:
+            self._refresh_data_references_cache()
 
         batch_definition_list = []
         
@@ -147,9 +153,14 @@ class SqlDataConnector(DataConnector):
             print("\n\tChoosing an example data reference...")
 
         example_data_reference =  None
-        for data_asset_name, data_asset_return_obj in report_object["data_assets"].items():
-            # print(data_asset_name)
-            # print(json.dumps(data_asset_return_obj["example_data_references"], indent=2))
+
+        available_references = report_object["data_assets"].items()
+        if len(available_references) == 0:
+            if pretty_print:
+                print(f"\t\tNo references available.")
+            return report_object
+
+        for data_asset_name, data_asset_return_obj in available_references:
             if data_asset_return_obj["batch_definition_count"] > 0:
                 example_data_reference = random.choice(
                     data_asset_return_obj["example_data_references"]
@@ -179,7 +190,7 @@ class SqlDataConnector(DataConnector):
         if pretty_print:
             print(f"\n\t\tShowing 5 rows")
             print(pd.DataFrame(rows[:5]))
-        
+    
         return report_object
 
     ### Splitter methods for listing partitions ###

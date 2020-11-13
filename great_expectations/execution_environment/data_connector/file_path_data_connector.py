@@ -47,7 +47,6 @@ class FilePathDataConnector(DataConnector):
         default_regex: dict,
         execution_engine: ExecutionEngine = None,
         sorters: list = None,
-        data_context_root_directory: str = None,
     ):
         logger.debug(f'Constructing FilePathDataConnector "{name}".')
         super().__init__(
@@ -55,7 +54,6 @@ class FilePathDataConnector(DataConnector):
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
         )
-        self._data_context_root_directory = data_context_root_directory
 
         if default_regex is None:
             default_regex = {}
