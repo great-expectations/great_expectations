@@ -824,7 +824,6 @@ def test_validate():
     )
     assert validation_results.to_json_dict() == expected_results.to_json_dict()
 
-
 @mock.patch(
     "great_expectations.core.ExpectationValidationResult.validate_result_dict",
     return_value=False,

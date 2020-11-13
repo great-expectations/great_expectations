@@ -107,7 +107,6 @@ def test_resolve_metric_bundle():
     assert metrics[('column.aggregate.standard_deviation', 'column=a', ())] == 1.0, "standard deviation " \
                                                                                     "metric not properly computed"
 
-
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
 def test_resolve_metric_bundle_with_nonexistent_metric():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
@@ -141,9 +140,3 @@ def test_dataframe_property_given_loaded_batch():
 
     # Ensuring Data not distorted
     assert engine.dataframe.equals(df)
-
-
-
-
-
-

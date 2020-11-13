@@ -104,22 +104,6 @@ Notes:
     def configure_validator(self, validator):
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
-    
-    def get_batch_data(
-        self,
-        batch_spec: BatchSpec,
-    ) -> Any :
-        """Interprets batch_data and returns the appropriate data.
-
-        This method is primarily useful for utility cases (e.g. testing) where
-        data is being fetched without a DataConnector and metadata like
-        batch_markers is unwanted
-
-        Note: this method is currently a thin wrapper for get_batch_data_and_markers.
-        It simply suppresses the batch_markers.
-        """
-        batch_data, _ = self.get_batch_data_and_markers(batch_spec)
-        return batch_data
 
     def get_batch_data_and_markers(
         self,
@@ -364,14 +348,12 @@ Notes:
         df,
         column_name: str,
         partition_definition: dict,
-        date_format_string: str='%Y-%m-%d',
+        date_format_string: str = "%Y-%m-%d",
     ):
         """Convert the values in the named column to the given date_format, and split on that"""
-
         stringified_datetime_series = df[column_name].map(lambda x: x.strftime(date_format_string))
         matching_string = partition_definition[column_name]
-
-        return df[ stringified_datetime_series == matching_string ]
+        return df[stringified_datetime_series == matching_string]
 
     @staticmethod
     def _split_on_divided_integer(
@@ -410,9 +392,13 @@ Notes:
         """Split on the joint values in the named columns"""
 
         subset_df = df.copy()
-        for column_name, value in partition_definition.items():
+        for column_name in column_names:
+            value = partition_definition.get(column_name)
+            if not value:
+                raise ValueError(f"In order for PandasExecution to `_split_on_multi_column_values`, "
+                                 f"all values in column_names must also exist in partition_definition. "
+                                 f"{column_name} was not found in partition_definition.")
             subset_df = subset_df[subset_df[column_name]==value]
-
         return subset_df
 
     @staticmethod
