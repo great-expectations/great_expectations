@@ -140,15 +140,15 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                 data_asset_config["sampling_kwargs"] = sampling_kwargs
 
             if skip_inapplicable_tables:
-                # Attempt to fetch a test batch from the table
-                print(data_asset_name)
-                print(data_asset_config)
+                # Attempt to fetch a list of partition_definitions from the table
                 try:
                     self._get_partition_definition_list_from_data_asset_config(
                         data_asset_name,
                         data_asset_config,
                     )
                 except OperationalError:
+                    # If it doesn't work, no harm done.
+                    # Just don't include this table in the list of data_assets.
                     continue
 
             # Store an asset config for each introspected data asset.

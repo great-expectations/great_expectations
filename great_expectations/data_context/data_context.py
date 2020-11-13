@@ -1251,11 +1251,11 @@ class BaseDataContext:
     # Note: Abe 20201112 : This method name is probably temporary
     def get_batch_from_new_style_datasource(
         self,
-        batch_definition: BatchDefinition=None,
-        batch_request: BatchRequest=None,
         execution_environment_name: str=None,
         data_connector_name: str=None,
         data_asset_name: str=None,
+        batch_definition: BatchDefinition=None,
+        batch_request: BatchRequest=None,
         partition_request: Union[PartitionRequest, dict]=None,
         partition_identifiers: dict=None,
         limit: int=None,
@@ -1297,6 +1297,9 @@ class BaseDataContext:
         If 0 or more than batches would be returned, it raises an error.
         """
         if batch_definition:
+            if not isinstance(batch_definition, BatchDefinition):
+                raise TypeError(f"batch_definition must be an instance of BatchDefinition object, not {type(batch_definition)}")
+
             execution_environment_name = batch_definition.execution_environment_name
         elif batch_request:
             execution_environment_name = batch_request.execution_environment_name
@@ -1314,7 +1317,8 @@ class BaseDataContext:
             #TODO: Raise a warning if any parameters besides batch_requests are specified
 
             batch_definitions = execution_environment.get_available_batch_definitions(batch_request)
-            assert len(batch_definitions) == 1
+            if len(batch_definitions) != 1:
+                raise ValueError(f"Instead of 1 batch_definition, this batch_request matches {len(batch_definitions)}.")
             return execution_environment.get_batch_from_batch_definition(batch_definitions[0])
 
         else:
@@ -1346,7 +1350,8 @@ class BaseDataContext:
             )
 
             batch_definitions = execution_environment.get_available_batch_definitions(batch_request)
-            assert len(batch_definitions) == 1
+            if len(batch_definitions) != 1:
+                raise ValueError(f"Instead of 1 batch_definition, these parameters matche {len(batch_definitions)}.")
             return execution_environment.get_batch_from_batch_definition(batch_definitions[0])
 
 
