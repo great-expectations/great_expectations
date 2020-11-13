@@ -87,7 +87,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
             # TODO Abe 20201029 : Apply sorters to partition_definition_list here
             # TODO Will 20201102 : add sorting code here
-
             self._data_references_cache[data_asset_name] = partition_definition_list
 
     def _get_column_names_from_splitter_kwargs(self, splitter_kwargs) -> List[str]:

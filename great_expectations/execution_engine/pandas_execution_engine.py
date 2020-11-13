@@ -2,12 +2,13 @@ import copy
 import datetime
 import logging
 from functools import partial
-from io import StringIO
 import hashlib
 import random
 from typing import Any, Callable, Dict, Iterable, Tuple, List
 
 import pandas as pd
+
+import great_expectations.exceptions.exceptions as ge_exceptions
 
 from great_expectations.execution_environment.types import (
     PathBatchSpec,
@@ -15,7 +16,7 @@ from great_expectations.execution_environment.types import (
     RuntimeDataBatchSpec,
 )
 
-from ..core.batch import Batch, BatchMarkers, BatchRequest
+from ..core.batch import BatchMarkers
 from ..core.id_dict import BatchSpec
 from ..exceptions import BatchSpecError, ValidationError
 from ..execution_environment.util import hash_pandas_dataframe
@@ -152,23 +153,22 @@ Notes:
             raise BatchSpecError(
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
             )
-
-        splitter_method: str = batch_spec.get("splitter_method") or None
-        splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
-        if splitter_method:
-            splitter_fn = getattr(self, splitter_method)
-            batch_data = splitter_fn(batch_data, **splitter_kwargs)
-
-        sampling_method: str = batch_spec.get("sampling_method") or None
-        sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
-        if sampling_method:
-            sampling_fn = getattr(self, sampling_method)
-            batch_data = sampling_fn(batch_data, **sampling_kwargs)
-
+        batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
         if batch_data.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
-
         return batch_data, batch_markers
+
+    def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
+        if batch_spec.get("splitter_method"):
+            splitter_fn = getattr(self, batch_spec.get("splitter_method"))
+            splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
+            batch_data = splitter_fn(batch_data, **splitter_kwargs)
+
+        if batch_spec.get("sampling_method"):
+            sampling_fn = getattr(self, batch_spec.get("sampling_method"))
+            sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
+            batch_data = sampling_fn(batch_data, **sampling_kwargs)
+        return batch_data
 
     @property
     def dataframe(self):
@@ -324,10 +324,7 @@ Notes:
             )
         return resolved_metrics
 
-
-
     ### Splitter methods for partitioning dataframes ###
-
     @staticmethod
     def _split_on_whole_table(
         df,
@@ -407,13 +404,19 @@ Notes:
         column_name: str,
         hash_digits: int,
         partition_definition: dict,
+        hash_function_name: str = "md5",
+
     ):
         """Split on the hashed value of the named column"""
-
+        try:
+            hash_method = getattr(hashlib, hash_function_name)
+        except (TypeError, AttributeError) as e:
+            raise (ge_exceptions.ExecutionEngineError(
+                f'''The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found.'''))
         matching_rows = df[column_name].map(
-            lambda x: hashlib.md5(str(x).encode()).hexdigest()[-1*hash_digits:] == partition_definition["hash_value"]
+            lambda x: hash_method(str(x).encode()).hexdigest()[-1*hash_digits:] == partition_definition["hash_value"]
         )
-
         return df[matching_rows]
 
     ### Sampling methods ###
@@ -449,14 +452,22 @@ Notes:
         return df[df[column_name].isin(value_list)]
 
     @staticmethod
-    def _sample_using_md5(
+    def _sample_using_hash(
         df,
         column_name: str,
-        hash_digits: int=1,
-        hash_value: str='f',
+        hash_digits: int = 1,
+        hash_value: str = 'f',
+        hash_function_name: str = "md5",
     ):
         """Hash the values in the named column, and split on that"""
+        try:
+            hash_func = getattr(hashlib, hash_function_name)
+        except (TypeError, AttributeError) as e:
+            raise (ge_exceptions.ExecutionEngineError(
+                f'''The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.  
+                    Reference to {hash_function_name} cannot be found.'''))
+
         matches = df[column_name].map(
-            lambda x: hashlib.md5(str(x).encode()).hexdigest()[-1*hash_digits:] == hash_value
+            lambda x: hash_func(str(x).encode()).hexdigest()[-1*hash_digits:] == hash_value
         )
         return df[matches]
