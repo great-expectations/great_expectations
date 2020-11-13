@@ -25,7 +25,7 @@ from ..registry import extract_metrics
 
 class ExpectColumnDistinctValuesToContainSet(TableExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.value_counts",)
+    metric_dependencies = ("column.distinct_values",)
     success_keys = (
         "value_set",
         "parse_strings_as_datetimes",
@@ -198,4 +198,17 @@ class ExpectColumnDistinctValuesToContainSet(TableExpectation):
                 "observed_value": sorted(list(observed_value_set)),
                 "details": {"value_counts": observed_value_counts},
             },
+        }
+
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        column_distinct_values = metrics.get("column.distinct_values")
+        x = 1
+        return {
+            "success": True
         }
