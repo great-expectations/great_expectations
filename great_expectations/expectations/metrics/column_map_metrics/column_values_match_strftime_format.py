@@ -13,7 +13,7 @@ from great_expectations.expectations.metrics.map_metric import (
 
 class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
     condition_metric_name = "column_values.match_strftime_format"
-    condition_value_keys = "strftime_format"
+    condition_value_keys = ("strftime_format", )
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, strftime_format, **kwargs):
