@@ -17,7 +17,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         name (str): The name of this DataConnector
         execution_environment_name (str): The name of the ExecutionEnvironment that contains it
         execution_engine (ExecutionEngine): An ExecutionEngine
-        data_asset_name_suffix (str): An optional prefix to prepend to inferred data_asset_names
+        data_asset_name_prefix (str): An optional prefix to prepend to inferred data_asset_names
         data_asset_name_suffix (str): An optional suffix to append to inferred data_asset_names
         include_schema_name (bool): Should the data_asset_name include the schema as a prefix?
         splitter_method (str): A method to split the target table into multiple Batches
