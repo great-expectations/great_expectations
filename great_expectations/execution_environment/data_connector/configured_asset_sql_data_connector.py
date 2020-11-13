@@ -1,20 +1,16 @@
 import random
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import pandas as pd
 
 from great_expectations.core.batch import (
     BatchDefinition,
-    BatchMarkers,
-    BatchRequest,
     BatchSpec,
     PartitionDefinition,
-    PartitionRequest,
 )
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
-from great_expectations.data_context.util import instantiate_class_from_config
 
 try:
     import sqlalchemy as sa
@@ -28,11 +24,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         name: str,
         execution_environment_name: str,
         execution_engine,
-        data_assets: List[Dict],
+        data_assets: Dict[str, Asset],
     ):
         self._data_assets = data_assets
 
-        super(ConfiguredAssetSqlDataConnector, self).__init__(
+        super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,

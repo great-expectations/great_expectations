@@ -131,6 +131,7 @@ class ExecutionEnvironment(object):
             batch_definition = batch_definition_list[0]
             batch_data = batch_request["batch_data"]
 
+            # noinspection PyArgumentList
             typed_batch_data, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata(
                 batch_definition=batch_definition,
                 batch_data=batch_data,
