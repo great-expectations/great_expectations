@@ -260,8 +260,8 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
-    if isinstance(
-        dialect,
+    if issubclass(
+        dialect.dialect,
         (
             sa.dialects.sqlite.dialect,
             sa.dialects.postgresql.dialect,
