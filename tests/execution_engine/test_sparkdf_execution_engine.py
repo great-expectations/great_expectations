@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from great_expectations.core.batch import Batch
 
+import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec
 from great_expectations.execution_engine import (
@@ -217,9 +218,16 @@ def test_get_batch_data(test_sparkdf):
     assert len(test_sparkdf.columns) == 10
 
 
-# TODO: Next PR for Will
-def test_get_batch_empty_splitter(test_sparkdf):
-    pass
+def test_get_batch_empty_splitter(test_folder_connection_path):
+    # reader_method not configured because spark will configure own reader by default
+    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
+        PathBatchSpec(
+            path=os.path.join(test_folder_connection_path, "test.csv"),
+            splitter_method=None
+        )
+    )
+    assert test_sparkdf.count() == 6
+    assert len(test_sparkdf.columns) == 3
 
 
 def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path):
@@ -368,6 +376,22 @@ def test_get_batch_with_split_on_multi_column_values(test_sparkdf):
         ))
 
 
+def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(test_sparkdf):
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        split_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+            batch_data=test_sparkdf,
+            splitter_method="_split_on_hashed_column",
+            splitter_kwargs={
+                "column_name": "favorite_color",
+                "hash_digits": 1,
+                "hash_function_name": "I_wont_work",
+                "partition_definition": {
+                    "hash_value": "a",
+                }
+            }
+        ))
+
+
 def test_get_batch_with_split_on_hashed_column(test_sparkdf):
     split_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_sparkdf,
@@ -375,6 +399,7 @@ def test_get_batch_with_split_on_hashed_column(test_sparkdf):
         splitter_kwargs={
             "column_name": "favorite_color",
             "hash_digits": 1,
+            "hash_function_name": "sha256",
             "partition_definition": {
                 "hash_value": "a",
             }
@@ -385,10 +410,13 @@ def test_get_batch_with_split_on_hashed_column(test_sparkdf):
 
 
 # ### Sampling methods ###
-
-# TODO: Next PR for Will
 def test_get_batch_empty_sampler(test_sparkdf):
-    pass
+    sampled_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_sparkdf,
+        sampling_method=None
+    ))
+    assert sampled_df.count() == 120
+    assert len(sampled_df.columns) == 10
 
 
 def test_sample_using_random(test_sparkdf):
@@ -427,12 +455,24 @@ def test_sample_using_a_list(test_sparkdf):
     assert len(sampled_df.columns) == 10
 
 
+def test_sample_using_md5_wrong_hash_function_name(test_sparkdf):
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        sampled_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_sparkdf,
+        sampling_method="_sample_using_hash",
+        sampling_kwargs={
+            "column_name": "date",
+            "hash_function_name": "I_wont_work",
+            }
+        ))
+
 def test_sample_using_md5(test_sparkdf):
     sampled_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_sparkdf,
-        sampling_method="_sample_using_md5",
+        sampling_method="_sample_using_hash",
         sampling_kwargs={
             "column_name": "date",
+            "hash_function_name": "md5",
         }
     ))
     assert sampled_df.count() == 10
@@ -442,3 +482,27 @@ def test_sample_using_md5(test_sparkdf):
     for val in collected:
         assert val.date in [datetime.date(2020, 1, 15), datetime.date(2020, 1, 29)]
 
+
+def test_split_on_multi_column_values_and_sample_using_random(test_sparkdf):
+    returned_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_sparkdf,
+        splitter_method="_split_on_multi_column_values",
+        splitter_kwargs={
+            "column_names": ["y", "m", "d"],
+            "partition_definition": {
+                "y": 2020,
+                "m": 1,
+                "d": 5,
+                }
+            },
+        sampling_method="_sample_using_random",
+        sampling_kwargs={
+           "p": 0.5,
+        }
+    ))
+
+    assert returned_df.count() == 3
+    assert len(returned_df.columns) == 10
+    collected = returned_df.collect()
+    for val in collected:
+        assert val.date == datetime.date(2020, 1, 5)
