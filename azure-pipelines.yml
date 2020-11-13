@@ -64,9 +64,7 @@ stages:
     jobs:
       - job: compatibility_matrix
         variables:
-          #<Alex></Alex>
-          #GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
-          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt'
+          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
           matrix:
@@ -100,15 +98,13 @@ stages:
 
           - script: |
               pip install  $(GE_pytest_pip_opts)
-              #<Alex></Alex>
-              #pip install  --requirement requirements.txt
-              pip install  --requirement requirements.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt
+              pip install  --requirement requirements.txt
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install  .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install  pytest pytest-cov pytest-azurepipelines freezegun>=0.3.15 black==19.10b0
+              pip install  pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
@@ -164,9 +160,7 @@ stages:
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
-              #<Alex></Alex>
-              #pip install --requirement requirements.txt
-              pip install --requirement requirements.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt
+              pip install --requirement requirements.txt
               pip install $(GE_pytest_pip_opts)
               pip install  .
             displayName: 'Install dependencies'
@@ -210,17 +204,13 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-                #<Alex></Alex>
-                #pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt
-                pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt
+                pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt
                 pip install --requirement requirements.txt
                 pip install .
             displayName: 'Install dependencies'
 
           - script: |
-              #<Alex></Alex>
-              #pip install pytest pytest-azurepipelines
-              pip install pytest pytest-azurepipelines freezegun>=0.3.15 black==19.10b0
+              pip install pytest pytest-azurepipelines
               pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -262,19 +252,13 @@ stages:
 
           - script: |
               pip install -r requirements.txt
-              #<Alex></Alex>
-              #pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
-              #<Alex></Alex>
-              #pip install -r requirements.txt
-              pip install -r requirements.txt -r requirements-dev-spark.txt -r requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt
-              #<Alex></Alex>
-              #pip install  pytest pytest-cov pytest-azurepipelines
-              pip install  pytest pytest-cov pytest-azurepipelines freezegun>=0.3.15 black==19.10b0
+              pip install -r requirements.txt
+              pip install  pytest pytest-cov pytest-azurepipelines
               pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
@@ -299,9 +283,7 @@ stages:
 
           - script: |
               pip install -r requirements.txt
-              #<Alex></Alex>
-              #pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
 
