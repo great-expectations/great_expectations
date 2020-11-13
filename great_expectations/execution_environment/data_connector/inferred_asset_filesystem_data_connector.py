@@ -49,7 +49,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         )
         return path_list
 
-    def _get_full_file_path(self, path: str) -> str:
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
         return str(Path(self.base_directory).joinpath(path))
 
     @property

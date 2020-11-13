@@ -74,8 +74,15 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
 
         return path_list
 
-    def _get_full_file_path(self, path: str) -> str:
-        return str(Path(self.base_directory).joinpath(path))
+    def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset] = None) -> str:
+        base_directory: str = self.base_directory
+        if asset is not None:
+            if asset.base_directory:
+                base_directory = normalize_directory_path(
+                    dir_path=asset.base_directory,
+                    root_directory_path=self.data_context_root_directory
+                )
+        return str(Path(base_directory).joinpath(path))
 
     @property
     def base_directory(self):
