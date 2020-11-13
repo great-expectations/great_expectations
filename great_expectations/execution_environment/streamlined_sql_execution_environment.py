@@ -39,7 +39,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
         )
 
         self._data_connectors = {}
-        self._init_streamlined_sql_data_connectors(
+        self._init_data_connectors(
             introspection_configs=introspection,
             table_configs=tables,
         )
@@ -49,7 +49,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
 
     # noinspection PyMethodOverriding
     # Note: This method is meant to overwrite ExecutionEnvironment._init_data_connectors (dispite signature mismatch).
-    def _init_streamlined_sql_data_connectors(
+    def _init_data_connectors(
         self,
         introspection_configs: dict,
         table_configs: dict,
