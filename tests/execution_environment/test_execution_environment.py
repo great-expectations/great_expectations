@@ -571,21 +571,3 @@ introspection:
     )
 
     return my_sql_execution_environment
-
-def test_get_batch(sql_execution_environment_for_testing_get_batch):
-    my_data_source = sql_execution_environment_for_testing_get_batch
-
-    print(json.dumps(my_data_source.get_available_data_asset_names(), indent=4))
-
-    # Successful specification using a BatchDefinition
-    my_data_source.get_batch(
-        execution_environment_name="my_sql_execution_environment",
-        data_connector_name="daily",
-        data_asset_name="table_partitioned_by_date_column__A__daily",
-        date="2020-01-15",
-    )
-
-    # Failed specification using a BatchDefinition
-    # Successful specification using a BatchRequest
-    # Failed specification using a BatchRequest
-
