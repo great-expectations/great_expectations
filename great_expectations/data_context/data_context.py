@@ -1750,8 +1750,7 @@ class BaseDataContext:
     def _build_execution_environment_from_config(
         self,
         name: str,
-        config: CommentedMap,
-        runtime_environment: Union[dict, None] = None,
+        config: dict,
     ) -> ExecutionEnvironment:
         module_name: str = "great_expectations.execution_environment"
         runtime_environment: dict = {
@@ -1771,34 +1770,6 @@ class BaseDataContext:
             )
         self._cached_datasources[name] = new_execution_environment
         return new_execution_environment
-
-    # def get_available_partitions(
-    #     self,
-    #     execution_environment_name: str,
-    #     data_connector_name: str,
-    #     data_asset_name: str = None,
-    #     partition_request: Union[
-    #         Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None
-    #     ] = None,
-    #     in_memory_dataset: Any = None,
-    #     runtime_parameters: Union[dict, None] = None,
-    #     repartition: bool = False,
-    # ) -> List[Partition]:
-    #     execution_environment: ExecutionEnvironment = self.get_execution_environment(
-    #         execution_environment_name=execution_environment_name,
-    #         runtime_environment=runtime_environment,
-    #     )
-    #     available_partitions: List[
-    #         Partition
-    #     ] = execution_environment.get_available_partitions(
-    #         data_connector_name=data_connector_name,
-    #         data_asset_name=data_asset_name,
-    #         partition_request=partition_request,
-    #         in_memory_dataset=in_memory_dataset,
-    #         runtime_parameters=runtime_parameters,
-    #         repartition=repartition,
-    #     )
-    #     return available_partitions
 
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""

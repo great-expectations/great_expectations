@@ -62,7 +62,6 @@ introspection:
     return empty_data_context
 
 
-
 def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_batch):
     context = data_context_with_sql_execution_environment_for_testing_get_batch
 
