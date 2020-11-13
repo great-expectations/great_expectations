@@ -108,7 +108,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install  pytest pytest-cov pytest-azurepipelines
+              pip install  pytest pytest-cov pytest-azurepipelines freezegun>=0.3.15
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
@@ -218,7 +218,9 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-azurepipelines
+              #<Alex></Alex>
+              #pip install pytest pytest-azurepipelines
+              pip install pytest pytest-azurepipelines freezegun>=0.3.15
               pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -270,7 +272,9 @@ stages:
               #<Alex></Alex>
               #pip install -r requirements.txt
               pip install -r requirements.txt -r requirements-dev-spark.txt -r requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt
-              pip install  pytest pytest-cov pytest-azurepipelines
+              #<Alex></Alex>
+              #pip install  pytest pytest-cov pytest-azurepipelines
+              pip install  pytest pytest-cov pytest-azurepipelines freezegun>=0.3.15
               pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
