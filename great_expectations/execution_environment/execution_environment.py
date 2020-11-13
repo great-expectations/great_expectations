@@ -2,6 +2,7 @@ import copy
 import logging
 from typing import Any, Dict, List, Optional, Union, Callable
 
+from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -9,13 +10,14 @@ from great_expectations.core.batch import (
     BatchRequest,
     PartitionRequest,
 )
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector import DataConnector
 from great_expectations.data_context.util import instantiate_class_from_config
-import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
-class BaseExecutionEnvironment:
+
+class BaseExecutionEnvironment(object):
     """
     An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
     """
@@ -25,7 +27,8 @@ class BaseExecutionEnvironment:
     def __init__(
         self,
         name: str,
-        data_context_root_directory: str = None,
+        execution_engine=None,
+        data_context_root_directory: Optional[str] = None,
     ):
         """
         Build a new ExecutionEnvironment.
@@ -33,11 +36,23 @@ class BaseExecutionEnvironment:
         Args:
             name: the name for the datasource
             execution_engine (ClassConfig): the type of compute engine to produce
-            data_connectors: DataConnectors to add to the datasource
+            data_context_root_directory: Installation directory path (if installed on a filesystem).
         """
         self._name = name
+
         self._data_context_root_directory = data_context_root_directory
 
+        self._execution_engine = instantiate_class_from_config(
+            config=execution_engine,
+            runtime_environment={},
+            config_defaults={"module_name": "great_expectations.execution_engine"},
+        )
+
+        self._execution_environment_config = {
+            "execution_engine": execution_engine,
+        }
+
+        self._data_connectors = {}
 
     def get_batch_from_batch_definition(
         self, batch_definition: BatchDefinition, batch_data: Any = None,
@@ -84,7 +99,6 @@ class BaseExecutionEnvironment:
         )
 
         if batch_request["batch_data"] is None:
-
             batches: List[Batch] = []
             for batch_definition in batch_definition_list:
                 batch_data: Any
@@ -112,6 +126,7 @@ class BaseExecutionEnvironment:
             batch_definition = batch_definition_list[0]
             batch_data = batch_request["batch_data"]
 
+            # noinspection PyArgumentList
             typed_batch_data, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata(
                 batch_definition=batch_definition,
                 batch_data=batch_data,
@@ -127,39 +142,10 @@ class BaseExecutionEnvironment:
 
             return [new_batch]
 
-    @property
-    def name(self):
-        """
-        Property for datasource name
-        """
-        return self._name
-
-    @property
-    def execution_engine(self):
-        return self._execution_engine
-
-    @property
-    def data_connectors(self):
-        return self._data_connectors
-
-    @property
-    def config(self):
-        return copy.deepcopy(self._execution_environment_config)
-
-    def _init_data_connectors(
-        self,
-        data_connector_configs: Dict,
-    ):
-        for name, config in data_connector_configs.items():
-            self._build_data_connector_from_config(
-                name,
-                config,
-            )
-
     def _build_data_connector_from_config(
         self,
         name: str,
-        config: Dict,
+        config: Dict[str, Any],
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         new_data_connector: DataConnector = instantiate_class_from_config(
@@ -167,15 +153,15 @@ class BaseExecutionEnvironment:
             runtime_environment={
                 "name": name,
                 "execution_environment_name": self.name,
-                "data_context_root_directory": self._data_context_root_directory,
                 "execution_engine": self.execution_engine,
             },
             config_defaults={
                 "module_name": "great_expectations.execution_environment.data_connector"
             },
         )
+        new_data_connector.data_context_root_directory = self._data_context_root_directory
 
-        self._data_connectors[name] = new_data_connector
+        self.data_connectors[name] = new_data_connector
         return new_data_connector
 
     def get_available_data_asset_names(
@@ -260,8 +246,8 @@ class BaseExecutionEnvironment:
 
     def _validate_batch_request(self, batch_request: BatchRequest):
         if not (
-            batch_request.execution_environment_name is None
-            or batch_request.execution_environment_name == self.name
+                batch_request.execution_environment_name is None
+                or batch_request.execution_environment_name == self.name
         ):
             raise ValueError(
                 f"""execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not
@@ -269,40 +255,74 @@ class BaseExecutionEnvironment:
                 """
             )
 
+    @property
+    def name(self) -> str:
+        """
+        Property for datasource name
+        """
+        return self._name
+
+    @property
+    def execution_engine(self) -> ExecutionEngine:
+        return self._execution_engine
+
+    @property
+    def data_connectors(self):
+        return self._data_connectors
+
+    @property
+    def config(self):
+        return copy.deepcopy(self._execution_environment_config)
+
+
 class ExecutionEnvironment(BaseExecutionEnvironment):
+    """
+    An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
+    """
+
+    recognized_batch_parameters: set = {"limit"}
 
     def __init__(
         self,
         name: str,
         execution_engine=None,
         data_connectors=None,
-        data_context_root_directory: str = None,
+        data_context_root_directory: Optional[str] = None,
     ):
         """
-        Build a new ExecutionEnvironment.
+        Build a new ExecutionEnvironment with data connectors.
 
         Args:
             name: the name for the datasource
             execution_engine (ClassConfig): the type of compute engine to produce
             data_connectors: DataConnectors to add to the datasource
+            data_context_root_directory: Installation directory path (if installed on a filesystem).
         """
+        self._name = name
+
+        self._data_context_root_directory = data_context_root_directory
+
         super().__init__(
             name=name,
-            data_context_root_directory=data_context_root_directory,
+            execution_engine=execution_engine,
+            data_context_root_directory=data_context_root_directory
         )
-
-        self._execution_engine = instantiate_class_from_config(
-            config=execution_engine,
-            runtime_environment={},
-            config_defaults={"module_name": "great_expectations.execution_engine"},
-        )
-        self._execution_environment_config = {"execution_engine": execution_engine}
 
         if data_connectors is None:
             data_connectors = {}
-        self._execution_environment_config["data_connectors"] = data_connectors
+        self._data_connectors = data_connectors
+        self._init_data_connectors(data_connector_configs=data_connectors)
 
-        self._data_connectors = {}
-        self._init_data_connectors(data_connectors)
+        self._execution_environment_config.update({
+            "data_connectors": data_connectors
+        })
 
-        
+    def _init_data_connectors(
+        self,
+        data_connector_configs: Dict[str, Dict[str, Any]],
+    ):
+        for name, config in data_connector_configs.items():
+            self._build_data_connector_from_config(
+                name=name,
+                config=config,
+            )

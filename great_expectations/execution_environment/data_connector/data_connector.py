@@ -46,6 +46,8 @@ class DataConnector:
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache = None
 
+        self._data_context_root_directory = None
+
     @property
     def name(self) -> str:
         return self._name
@@ -53,6 +55,14 @@ class DataConnector:
     @property
     def execution_environment_name(self) -> str:
         return self._execution_environment_name
+
+    @property
+    def data_context_root_directory(self) -> str:
+        return self._data_context_root_directory
+
+    @data_context_root_directory.setter
+    def data_context_root_directory(self, data_context_root_directory: str):
+        self._data_context_root_directory = data_context_root_directory
 
     def get_batch_data_and_metadata(
         self, batch_definition: BatchDefinition,

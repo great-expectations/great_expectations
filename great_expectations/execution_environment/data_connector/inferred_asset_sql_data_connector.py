@@ -1,20 +1,6 @@
-import random
 from typing import Dict, List
 
-import pandas as pd
-
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchMarkers,
-    BatchRequest,
-    BatchSpec,
-    PartitionDefinition,
-    PartitionRequest,
-)
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
-from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment.data_connector import ConfiguredAssetSqlDataConnector
 
 try:
@@ -40,7 +26,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         included_tables: List=None,
         skip_inapplicable_tables: bool=True,
         introspection_directives: Dict={},
-        # data_context_root_directory=None,
     ):
         self._data_asset_name_suffix = data_asset_name_suffix
         self._include_schema_name = include_schema_name
@@ -59,7 +44,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
             data_assets={},
-            # data_context_root_directory=data_context_root_directory,
         )
 
         # This cache will contain a "config" for each data_asset discovered via introspection.
