@@ -79,7 +79,7 @@ class ExpectColumnSumToBeBetween(TableExpectation):
            """
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.sum",)
+    metric_dependencies = ("column.sum",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
     # Default values
@@ -99,7 +99,7 @@ class ExpectColumnSumToBeBetween(TableExpectation):
     """ A Column Map Metric Decorator for the Sum"""
 
     # @PandasExecutionEngine.metric(
-    #        metric_name="column.aggregate.sum",
+    #        metric_name="column.sum",
     #        metric_domain_keys=ColumnMapExpectation.domain_keys,
     #        metric_value_keys=(),
     #        metric_dependencies=tuple(),
@@ -278,7 +278,7 @@ class ExpectColumnSumToBeBetween(TableExpectation):
             result_format = configuration.kwargs.get(
                 "result_format", self.default_kwarg_values.get("result_format")
             )
-        column_sum = metric_vals.get("column.aggregate.sum")
+        column_sum = metric_vals.get("column.sum")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")

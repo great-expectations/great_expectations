@@ -180,11 +180,12 @@ class Validator:
                 meta = None
                 # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
                 # positional arguments to expectation methods
+                legacy_arg_names = expectation_impl.legacy_method_parameters.get(
+                    name, tuple()
+                )
                 for idx, arg in enumerate(args):
                     try:
-                        arg_name = expectation_impl.legacy_method_parameters.get(
-                            name, tuple()
-                        )[idx]
+                        arg_name = legacy_arg_names[idx]
                         if arg_name in allowed_config_keys:
                             expectation_kwargs[arg_name] = arg
                         if arg_name == "meta":
@@ -204,12 +205,12 @@ class Validator:
                 configuration = ExpectationConfiguration(
                     expectation_type=name, kwargs=expectation_kwargs, meta=meta
                 )
-                runtime_configuration = configuration.get_runtime_kwargs()
+                # runtime_configuration = configuration.get_runtime_kwargs()
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 validation_result = expectation.validate(
-                    validator=self, runtime_configuration=runtime_configuration,
+                    validator=self, runtime_configuration=basic_runtime_configuration
                 )
                 if isinstance(validation_result, dict):
                     validation_result = ExpectationValidationResult(**validation_result)
@@ -267,7 +268,7 @@ class Validator:
             metric=child_node,
             configuration=configuration,
             execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration
+            runtime_configuration=runtime_configuration,
         )
         child_node.metric_dependencies = metric_dependencies
 
@@ -279,6 +280,11 @@ class Validator:
 
         else:
             for metric_dependency in metric_dependencies.values():
+                if metric_dependency.id == child_node.id:
+                    logger.warning(
+                        f"Metric {str(child_node.id)} has created a circular dependency"
+                    )
+                    continue
                 self._populate_dependencies(
                     graph,
                     metric_dependency,

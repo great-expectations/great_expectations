@@ -3,8 +3,11 @@ from functools import wraps
 from typing import Any, Callable, Dict, Tuple, Type
 
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    MetricPartialFunctionTypes,
+)
 from great_expectations.execution_engine.sparkdf_execution_engine import (
-    F,
     SparkDFExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
@@ -12,15 +15,20 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     sa,
 )
 from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric,
+    metric_partial,
+    metric_value,
 )
 from great_expectations.expectations.metrics.table_metric import TableMetricProvider
 
 logger = logging.getLogger(__name__)
 
 
-def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
+def column_aggregate_value(
+    engine: Type[ExecutionEngine],
+    metric_fn_type="value",
+    domain_type="column",
+    **kwargs
+):
     """Return the column aggregate metric decorator for the specified engine.
 
     Args:
@@ -33,7 +41,11 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
     if issubclass(engine, PandasExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric(engine=PandasExecutionEngine, metric_fn_type="aggregate_fn")
+            @metric_value(
+                engine=PandasExecutionEngine,
+                metric_fn_type=metric_fn_type,
+                domain_type=domain_type,
+            )
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -48,7 +60,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                 )
 
                 df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
-                    domain_kwargs=metric_domain_kwargs,
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
                 if filter_column_isnull:
                     df = df[df[accessor_domain_kwargs["column"]].notnull()]
@@ -62,11 +74,32 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
             return inner_func
 
         return wrapper
+    else:
+        raise ValueError(
+            "column_aggregate_value decorator only supports PandasExecutionEngine"
+        )
 
-    elif issubclass(engine, SqlAlchemyExecutionEngine):
+
+def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
+    """Return the column aggregate metric decorator for the specified engine.
+
+    Args:
+        engine:
+        **kwargs:
+
+    Returns:
+
+    """
+    partial_fn_type = MetricPartialFunctionTypes.AGGREGATE_FN
+    domain_type = MetricDomainTypes.COLUMN
+    if issubclass(engine, SqlAlchemyExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric(engine=SqlAlchemyExecutionEngine, metric_fn_type="aggregate_fn")
+            @metric_partial(
+                engine=SqlAlchemyExecutionEngine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+            )
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -80,7 +113,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
                 if filter_column_isnull:
-                    compute_domain_kwargs = execution_engine.add_column_null_filter_row_condition(
+                    compute_domain_kwargs = execution_engine.add_column_row_condition(
                         metric_domain_kwargs
                     )
                 else:
@@ -90,7 +123,9 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                     selectable,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
-                ) = execution_engine.get_compute_domain(compute_domain_kwargs)
+                ) = execution_engine.get_compute_domain(
+                    compute_domain_kwargs, domain_type=domain_type
+                )
                 column_name = accessor_domain_kwargs["column"]
                 sqlalchemy_engine = execution_engine.engine
                 dialect = sqlalchemy_engine.dialect
@@ -103,7 +138,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                     _sqlalchemy_engine=sqlalchemy_engine,
                     _metrics=metrics,
                 )
-                return metric_aggregate, compute_domain_kwargs
+                return metric_aggregate, compute_domain_kwargs, accessor_domain_kwargs
 
             return inner_func
 
@@ -112,7 +147,11 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
     elif issubclass(engine, SparkDFExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric(engine=SparkDFExecutionEngine, metric_fn_type="aggregate_fn")
+            @metric_partial(
+                engine=SparkDFExecutionEngine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+            )
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -127,7 +166,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                 )
 
                 if filter_column_isnull:
-                    compute_domain_kwargs = execution_engine.add_column_null_filter_row_condition(
+                    compute_domain_kwargs = execution_engine.add_column_row_condition(
                         metric_domain_kwargs
                     )
                 else:
@@ -139,7 +178,7 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(
-                    domain_kwargs=compute_domain_kwargs
+                    domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
                 column_name = accessor_domain_kwargs["column"]
                 metric_aggregate = metric_fn(
@@ -149,14 +188,14 @@ def column_aggregate_metric(engine: Type[ExecutionEngine], **kwargs):
                     _table=data,
                     _metrics=metrics,
                 )
-                return metric_aggregate, compute_domain_kwargs
+                return metric_aggregate, compute_domain_kwargs, accessor_domain_kwargs
 
             return inner_func
 
         return wrapper
 
     else:
-        raise ValueError("Unsupported engine for column_aggregate_metric")
+        raise ValueError("Unsupported engine for column_aggregate_partial")
 
 
 class ColumnMetricProvider(TableMetricProvider):

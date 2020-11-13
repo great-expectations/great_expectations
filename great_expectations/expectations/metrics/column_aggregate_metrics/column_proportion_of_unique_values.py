@@ -11,15 +11,15 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
-    column_aggregate_metric,
+    column_aggregate_partial, column_aggregate_value,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-def unique_proportion(self, _metrics):
+def unique_proportion(_metrics):
     total_values = _metrics.get("table.row_count")
-    unique_values = _metrics.get("column.aggregate.unique_value_count")
+    unique_values = _metrics.get("column.unique_value_count")
 
     if total_values > 0:
         return unique_values / total_values
@@ -28,22 +28,22 @@ def unique_proportion(self, _metrics):
 
 
 class ColumnUniqueProportion(ColumnMetricProvider):
-    metric_name = "column.aggregate.unique_proportion"
+    metric_name = "column.unique_proportion"
 
-    @column_aggregate_metric(engine=PandasExecutionEngine)
+    @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, _metrics, **kwargs):
         return unique_proportion(_metrics)
 
-    @column_aggregate_metric(engine=SqlAlchemyExecutionEngine)
+    @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _metrics, **kwargs):
         return unique_proportion(_metrics)
 
-    @column_aggregate_metric(engine=SparkDFExecutionEngine)
+    @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _metrics, **kwargs):
         return unique_proportion(_metrics)
 
     @classmethod
-    def get_evaluation_dependencies(
+    def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -61,8 +61,8 @@ class ColumnUniqueProportion(ColumnMetricProvider):
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
         return {
-            "column.aggregate.unique_value_count": MetricConfiguration(
-                "column.aggregate.unique_value_count", metric.metric_domain_kwargs
+            "column.unique_value_count": MetricConfiguration(
+                "column.unique_value_count", metric.metric_domain_kwargs
             ),
             "table.row_count": MetricConfiguration(
                 "table.row_count", table_domain_kwargs

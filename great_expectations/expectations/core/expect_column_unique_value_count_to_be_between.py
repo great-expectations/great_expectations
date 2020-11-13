@@ -80,7 +80,7 @@ class ExpectColumnUniqueValueCountToBeBetween(TableExpectation):
             """
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.unique_value_count",)
+    metric_dependencies = ("column.unique_value_count",)
     success_keys = (
         "min_value",
         "max_value",
@@ -298,7 +298,7 @@ class ExpectColumnUniqueValueCountToBeBetween(TableExpectation):
         min_value = self.get_success_kwargs(configuration).get("min_value")
         max_value = self.get_success_kwargs(configuration).get("max_value")
 
-        unique_value_count = metric_vals.get("column.aggregate.unique_value_count")
+        unique_value_count = metric_vals.get("column.unique_value_count")
 
         if unique_value_count is None:
             return {"success": False, "result": {"observed_value": unique_value_count}}

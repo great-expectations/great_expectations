@@ -6,17 +6,17 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetricProvider,
-    column_map_condition,
-)
 from great_expectations.expectations.metrics.import_manager import F, sparktypes
+from great_expectations.expectations.metrics.map_metric import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
 
 
 class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
     condition_metric_name = "column_values.match_json_schema"
 
-    @column_map_condition(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, json_schema, **kwargs):
         def matches_json_schema(val):
             try:
@@ -34,7 +34,7 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
 
         return column.map(matches_json_schema)
 
-    @column_map_condition(engine=SparkDFExecutionEngine)
+    @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, json_schema, **kwargs):
         def matches_json_schema(val):
             try:

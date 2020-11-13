@@ -842,7 +842,10 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
 
         success = None
-        if (total_count - null_count) != 0:
+        if total_count is None or null_count is None:
+            # Vacuously true
+            success = True
+        elif (total_count - null_count) != 0:
             success_ratio = (total_count - unexpected_count - null_count) / (
                 total_count - null_count
             )
@@ -850,12 +853,18 @@ class ColumnMapExpectation(TableExpectation, ABC):
         elif total_count == 0:
             success = True
 
+        try:
+            nonnull_count = metrics.get("table.row_count") - metrics.get(
+                "column_values.nonnull.unexpected_count"
+            )
+        except TypeError:
+            nonnull_count = None
+
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=success,
             element_count=metrics.get("table.row_count"),
-            nonnull_count=metrics.get("table.row_count")
-            - metrics.get("column_values.nonnull.unexpected_count"),
+            nonnull_count=nonnull_count,
             unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
             unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
             unexpected_index_list=metrics.get(

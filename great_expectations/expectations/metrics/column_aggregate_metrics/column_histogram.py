@@ -17,7 +17,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
 )
 from great_expectations.expectations.metrics.import_manager import Bucketizer, F, sa
-from great_expectations.expectations.metrics.metric_provider import metric
+from great_expectations.expectations.metrics.metric_provider import metric_value
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class ColumnHistogram(ColumnMetricProvider):
     metric_name = "column.histogram"
     value_keys = ("bins",)
 
-    @metric(engine=PandasExecutionEngine)
+    @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
@@ -43,7 +43,7 @@ class ColumnHistogram(ColumnMetricProvider):
         hist, bin_edges = np.histogram(df[column], bins, density=False)
         return list(hist)
 
-    @metric(engine=SqlAlchemyExecutionEngine)
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -151,7 +151,7 @@ class ColumnHistogram(ColumnMetricProvider):
         )
         return hist
 
-    @metric(engine=SparkDFExecutionEngine)
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,

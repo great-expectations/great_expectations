@@ -9,11 +9,11 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetricProvider,
-    column_map_condition,
-)
 from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.metrics.map_metric import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
 from great_expectations.expectations.metrics.util import get_dialect_regex_expression
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
     condition_metric_name = "column_values.not_match_regex_list"
     condition_value_keys = ("regex_list",)
 
-    @column_map_condition(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, regex_list, **kwargs):
         regex_matches = []
         for regex in regex_list:
@@ -32,7 +32,7 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
 
         return ~regex_match_df.any(axis="columns")
 
-    @column_map_condition(engine=SqlAlchemyExecutionEngine)
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, regex_list, _dialect, **kwargs):
         if len(regex_list) == 0:
             raise ValueError("At least one regex must be supplied in the regex_list.")
@@ -51,7 +51,7 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
             ]
         )
 
-    @column_map_condition(engine=SparkDFExecutionEngine)
+    @column_condition_partial(engine=SparkDFExecutionEngine)
     def _sqlalchemy(cls, column, regex_list, **kwargs):
         for regex in regex_list:
             if compound is None:

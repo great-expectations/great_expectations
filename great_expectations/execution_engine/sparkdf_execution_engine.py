@@ -244,7 +244,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return batch_spec
 
     def get_compute_domain(
-        self, domain_kwargs: dict
+        self, domain_kwargs: dict, domain_type: Union[str, "MetricDomainTypes"]
     ) -> Tuple["pyspark.sql.DataFrame", dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
@@ -302,9 +302,40 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
-    def _get_eval_column_name(self, column):
-        """Given the name of a column (string), returns the name of the corresponding eval column"""
-        return "__eval_col_" + column.replace(".", "__").replace("`", "_")
+    def add_column_row_condition(
+        self, domain_kwargs, filter_null=True, filter_nan=False
+    ):
+        if filter_nan is False:
+            return super().add_column_row_condition(
+                domain_kwargs=domain_kwargs,
+                filter_null=filter_null,
+                filter_nan=filter_nan,
+            )
+
+        # We explicitly handle filter_nan for spark using a spark-native condition
+        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
+            raise GreatExpectationsError(
+                "ExecutionEngine does not support updating existing row_conditions."
+            )
+
+        new_domain_kwargs = copy.deepcopy(domain_kwargs)
+        assert "column" in domain_kwargs
+        column = domain_kwargs["column"]
+        if filter_null and filter_nan:
+            new_domain_kwargs[
+                "row_condition"
+            ] = f"NOT isnan({column}) AND {column} IS NOT NULL"
+        elif filter_null:
+            new_domain_kwargs["row_condition"] = f"{column} IS NOT NULL"
+        elif filter_nan:
+            new_domain_kwargs["row_condition"] = f"NOT isnan({column})"
+        else:
+            logger.warning(
+                "add_column_row_condition called without specifying a desired row condition"
+            )
+
+        new_domain_kwargs["condition_parser"] = "spark"
+        return new_domain_kwargs
 
     def resolve_metric_bundle(
         self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
@@ -324,32 +355,27 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         aggregates: Dict[Tuple, dict] = dict()
         for (
             metric_to_resolve,
-            metric_provider,
+            engine_fn,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
             metric_provider_kwargs,
         ) in metric_fn_bundle:
-            assert (
-                metric_provider.metric_fn_type == "aggregate_fn"
-            ), "resolve_metric_bundle only supports aggregate metrics"
-            # batch_id and table are the only determining factors for bundled metrics
-            column_aggregate, domain_kwargs = metric_provider(**metric_provider_kwargs)
-            if not isinstance(domain_kwargs, IDDict):
-                domain_kwargs = IDDict(domain_kwargs)
-            domain_id = domain_kwargs.to_id()
+            if not isinstance(compute_domain_kwargs, IDDict):
+                compute_domain_kwargs = IDDict(compute_domain_kwargs)
+            domain_id = compute_domain_kwargs.to_id()
             if domain_id not in aggregates:
                 aggregates[domain_id] = {
                     "column_aggregates": [],
                     "ids": [],
-                    "domain_kwargs": domain_kwargs,
+                    "domain_kwargs": compute_domain_kwargs,
                 }
-            aggregates[domain_id]["column_aggregates"].append(column_aggregate)
+            aggregates[domain_id]["column_aggregates"].append(engine_fn)
             aggregates[domain_id]["ids"].append(metric_to_resolve.id)
         for aggregate in aggregates.values():
-            df, compute_domain_kwargs, _ = self.get_compute_domain(
-                aggregate["domain_kwargs"]
+            compute_domain_kwargs = aggregate["domain_kwargs"]
+            df, _, _ = self.get_compute_domain(
+                compute_domain_kwargs, domain_type="identity"
             )
-            assert (
-                compute_domain_kwargs == aggregate["domain_kwargs"]
-            ), "Invalid compute domain returned from a bundled metric. Verify that its target compute domain is a valid compute domain."
             assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
             condition_ids = []
             aggregate_cols = []
@@ -365,8 +391,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             assert len(aggregate["ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
-            logger.warning(
-                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {domain_id}"
+            logger.debug(
+                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
             )
             for idx, id in enumerate(aggregate["ids"]):
                 resolved_metrics[id] = res[0][idx]
