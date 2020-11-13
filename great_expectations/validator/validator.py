@@ -280,6 +280,11 @@ class Validator:
 
         else:
             for metric_dependency in metric_dependencies.values():
+                if metric_dependency.id == child_node.id:
+                    logger.warning(
+                        f"Metric {str(child_node.id)} has created a circular dependency"
+                    )
+                    continue
                 self._populate_dependencies(
                     graph,
                     metric_dependency,

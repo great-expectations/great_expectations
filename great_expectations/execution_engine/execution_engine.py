@@ -1,6 +1,7 @@
 import copy
 import logging
-from typing import Any, Dict, Iterable, Tuple
+from enum import Enum
+from typing import Any, Dict, Iterable, Tuple, Union
 
 from ruamel.yaml import YAML
 
@@ -157,23 +158,43 @@ class ExecutionEngine:
                 "metrics": metric_dependencies,
                 "runtime_configuration": runtime_configuration,
             }
-            metric_fn_type = getattr(metric_fn, "metric_fn_type", "data")
-            if metric_fn_type in ["aggregate_fn"]:
+            if metric_fn is None:
+                try:
+                    (
+                        metric_fn,
+                        compute_domain_kwargs,
+                        accessor_domain_kwargs,
+                    ) = metric_dependencies.pop("metric_partial_fn")
+                except KeyError as e:
+                    raise GreatExpectationsError(
+                        f"Missing metric dependency: {str(e)} for metric "
+                    )
                 metric_fn_bundle.append(
-                    (metric_to_resolve, metric_fn, metric_provider_kwargs)
+                    (
+                        metric_to_resolve,
+                        metric_fn,
+                        compute_domain_kwargs,
+                        accessor_domain_kwargs,
+                        metric_provider_kwargs,
+                    )
                 )
-            elif metric_fn_type in [
-                "map_fn",
-                "map_condition_fn",
-                "window_fn",
-                "window_condition_fn",
+                continue
+            metric_fn_type = getattr(
+                metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
+            )
+            if metric_fn_type in [
+                MetricPartialFunctionTypes.MAP_FN,
+                MetricPartialFunctionTypes.MAP_CONDITION_FN,
+                MetricPartialFunctionTypes.WINDOW_FN,
+                MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+                MetricPartialFunctionTypes.AGGREGATE_FN,
             ]:
                 # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
                 # than data to optimize compute in the future
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )
-            elif metric_fn_type == "data":
+            elif metric_fn_type == MetricFunctionTypes.VALUE:
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )
@@ -193,7 +214,9 @@ class ExecutionEngine:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
-    def get_compute_domain(self, domain_kwargs: dict) -> Tuple[Any, dict, dict]:
+    def get_compute_domain(
+        self, domain_kwargs: dict, domain_type: Union[str, "MetricDomainTypes"],
+    ) -> Tuple[Any, dict, dict]:
         """get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
         and specific engine semantics.
 
@@ -240,3 +263,41 @@ class ExecutionEngine:
         new_domain_kwargs["condition_parser"] = "great_expectations__experimental__"
         new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
         return new_domain_kwargs
+
+
+class MetricPartialFunctionTypes(Enum):
+    MAP_FN = "map_fn"
+    MAP_SERIES = "map_series"
+    MAP_CONDITION_FN = "map_condition_fn"
+    MAP_CONDITION_SERIES = "map_condition_series"
+    WINDOW_FN = "window_fn"
+    WINDOW_CONDITION_FN = "window_condition_fn"
+    AGGREGATE_FN = "aggregate_fn"
+
+    @property
+    def metric_suffix(self):
+        if self.name in ["MAP_FN", "MAP_SERIES", "WINDOW_FN"]:
+            return "map"
+        elif self.name in [
+            "MAP_CONDITION_FN",
+            "MAP_CONDITION_SERIES",
+            "WINDOW_CONDITION_FN",
+        ]:
+            return "condition"
+        elif self.name in ["AGGREGATE_FN"]:
+            return "aggregate_fn"
+
+
+class MetricFunctionTypes(Enum):
+    VALUE = "value"
+    MAP_VALUES = "value"  # "map_values"
+    WINDOW_VALUES = "value"  # "window_values"
+    AGGREGATE_VALUE = "value"  # "aggregate_value"
+
+
+class MetricDomainTypes(Enum):
+    IDENTITY = "identity"
+    COLUMN = "column"
+    COLUMN_PAIR = "column_pair"
+    TABLE = "table"
+    OTHER = "other"

@@ -85,7 +85,7 @@ class ExpectColumnMeanToBeBetween(TableExpectation):
             """
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.mean",)
+    metric_dependencies = ("column.mean",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
     # Default values
@@ -277,7 +277,7 @@ class ExpectColumnMeanToBeBetween(TableExpectation):
             result_format = configuration.kwargs.get(
                 "result_format", self.default_kwarg_values.get("result_format")
             )
-        column_mean = metric_vals.get("column.aggregate.mean")
+        column_mean = metric_vals.get("column.mean")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")

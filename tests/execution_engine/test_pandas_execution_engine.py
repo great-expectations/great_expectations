@@ -90,12 +90,12 @@ def test_resolve_metric_bundle():
     # Building engine and configurations in attempt to resolve metrics
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     mean = MetricConfiguration(
-        metric_name="column.aggregate.mean",
+        metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     stdev = MetricConfiguration(
-        metric_name="column.aggregate.standard_deviation",
+        metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -103,8 +103,8 @@ def test_resolve_metric_bundle():
     metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
     # Ensuring metrics have been properly resolved
-    assert metrics[('column.aggregate.mean', 'column=a', ())] == 2.0, "mean metric not properly computed"
-    assert metrics[('column.aggregate.standard_deviation', 'column=a', ())] == 1.0, "standard deviation " \
+    assert metrics[('column.mean', 'column=a', ())] == 2.0, "mean metric not properly computed"
+    assert metrics[('column.standard_deviation', 'column=a', ())] == 1.0, "standard deviation " \
                                                                                     "metric not properly computed"
 
 
@@ -116,12 +116,12 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     # Building engine and configurations in attempt to resolve metrics
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     mean = MetricConfiguration(
-        metric_name="column.aggregate.i_don't_exist",
+        metric_name="column.i_don't_exist",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     stdev = MetricConfiguration(
-        metric_name="column.aggregate.nonexistent",
+        metric_name="column.nonexistent",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )

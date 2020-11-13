@@ -6,12 +6,19 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetricProvider,
-    column_map_condition,
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
-from great_expectations.expectations.metrics.metric_provider import metric
+from great_expectations.expectations.metrics.map_metric import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
+from great_expectations.expectations.metrics.metric_provider import (
+    metric_partial,
+    metric_value,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -20,7 +27,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
     condition_value_keys = ("strictly",)
     default_kwarg_values = {"strictly": False}
 
-    @column_map_condition(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, strictly, **kwargs):
         series_diff = column.diff()
         # The first element is null, so it gets a bye and is always treated as True
@@ -31,10 +38,10 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         else:
             return series_diff <= 0
 
-    @metric(
+    @metric_partial(
         engine=SparkDFExecutionEngine,
-        metric_fn_type="window_condition_fn",
-        domain_type="column",
+        partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+        domain_type=MetricDomainTypes.COLUMN,
     )
     def _spark(
         cls,
@@ -67,7 +74,9 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             df,
             compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(compute_domain_kwargs)
+        ) = execution_engine.get_compute_domain(
+            compute_domain_kwargs, MetricDomainTypes.COLUMN
+        )
 
         # NOTE: 20201105 - parse_strings_as_datetimes is not supported here;
         # instead detect types naturally
@@ -88,6 +97,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             return (
                 F.when(diff >= 0, F.lit(True)).otherwise(F.lit(False)),
                 compute_domain_kwargs,
+                accessor_domain_kwargs,
             )
         # If we expect values to be flat or decreasing then unexpected values are those
         # that are decreasing
@@ -95,10 +105,11 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             return (
                 F.when(diff > 0, F.lit(True)).otherwise(F.lit(False)),
                 compute_domain_kwargs,
+                accessor_domain_kwargs,
             )
 
     @classmethod
-    def get_evaluation_dependencies(
+    def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -107,7 +118,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
     ):
         if (
             isinstance(execution_engine, SparkDFExecutionEngine)
-            and metric.metric_name == "column_values.decreasing"
+            and metric.metric_name == "column_values.decreasing.condition"
         ):
             return {
                 "table.column_types": MetricConfiguration(
@@ -117,7 +128,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
                 )
             }
         else:
-            return super().get_evaluation_dependencies(
+            return super()._get_evaluation_dependencies(
                 metric=metric,
                 configuration=configuration,
                 execution_engine=execution_engine,

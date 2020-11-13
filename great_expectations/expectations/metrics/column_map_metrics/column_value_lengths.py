@@ -9,12 +9,12 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetricProvider,
-    column_map_condition,
-    column_map_function,
-)
 from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.map_metric import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+    column_function_partial,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -22,47 +22,49 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
     condition_metric_name = "column_values.value_length.equals"
     condition_value_keys = ("value",)
 
-    @column_map_condition(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, value, _metrics, **kwargs):
-        column_lengths = _metrics.get("column_values.value_length.map_fn")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map_series")
         return column_lengths == value
 
-    @column_map_condition(engine=SqlAlchemyExecutionEngine)
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, value, _metrics, **kwargs):
-        column_lengths, _ = _metrics.get("column_values.value_length.map_fn")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map_fn")
         return column_lengths == value
 
-    @column_map_condition(engine=SparkDFExecutionEngine)
+    @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, value, _metrics, **kwargs):
-        column_lengths, _ = _metrics.get("column_values.value_length.map_fn")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map_fn")
         return column_lengths == value
 
     @classmethod
-    def get_evaluation_dependencies(
+    def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        if metric.metric_name == "column_values.value_length.equals":
+        if metric.metric_name == "column_values.value_length.equals.map_condition_fn":
             return {
                 "column_values.value_length.map_fn": MetricConfiguration(
                     "column_values.value_length.map_fn", metric.metric_domain_kwargs
                 )
             }
-        else:
-            return super().get_evaluation_dependencies(
-                metric=metric,
-                configuration=configuration,
-                execution_engine=execution_engine,
-                runtime_configuration=runtime_configuration,
-            )
+        if (
+            metric.metric_name
+            == "column_values.value_length.equals.map_condition_series"
+        ):
+            return {
+                "column_values.value_length.map_series": MetricConfiguration(
+                    "column_values.value_length.map_series", metric.metric_domain_kwargs
+                )
+            }
 
 
 class ColumnValuesValueLength(ColumnMapMetricProvider):
     condition_metric_name = "column_values.value_length.between"
-    function_metric_name = "column_values.value_length.map_fn"
+    function_metric_name = "column_values.value_length"
 
     condition_value_keys = (
         "min_value",
@@ -71,19 +73,19 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         "strict_max",
     )
 
-    @column_map_function(engine=PandasExecutionEngine)
+    @column_function_partial(engine=PandasExecutionEngine)
     def _pandas_function(cls, column, **kwargs):
         return column.astype(str).str.len()
 
-    @column_map_function(engine=SqlAlchemyExecutionEngine)
+    @column_function_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy_function(cls, column, **kwargs):
         return sa.func.length(column)
 
-    @column_map_function(engine=SparkDFExecutionEngine)
+    @column_function_partial(engine=SparkDFExecutionEngine)
     def _spark_function(cls, column, **kwargs):
         return F.length(column)
 
-    @column_map_condition(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(
         cls,
         column,
@@ -94,7 +96,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         strict_max=None,
         **kwargs
     ):
-        column_lengths = _metrics.get("column_values.value_length.map_fn")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map_series")
 
         metric_series = None
         if min_value is not None and max_value is not None:
@@ -130,7 +132,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
 
         return metric_series
 
-    @column_map_condition(engine=SqlAlchemyExecutionEngine)
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         column,
@@ -141,7 +143,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         strict_max=None,
         **kwargs
     ):
-        column_lengths, _ = _metrics.get("column_values.value_length.map_fn")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map_fn")
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -166,7 +168,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         elif min_value is not None and max_value is None:
             return column_lengths >= min_value
 
-    @column_map_condition(engine=SparkDFExecutionEngine)
+    @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         column,
@@ -177,7 +179,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         strict_max=None,
         **kwargs
     ):
-        column_lengths, _ = _metrics.get("column_values.value_length.map_fn")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map_fn")
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -203,23 +205,26 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
             return column_lengths >= min_value
 
     @classmethod
-    def get_evaluation_dependencies(
+    def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        if metric.metric_name == "column_values.value_length.between":
+        if (
+            metric.metric_name
+            == "column_values.value_length.between.map_condition_series"
+        ):
+            return {
+                "column_values.value_length.map_series": MetricConfiguration(
+                    "column_values.value_length.map_series", metric.metric_domain_kwargs
+                )
+            }
+
+        if metric.metric_name == "column_values.value_length.between.map_condition_fn":
             return {
                 "column_values.value_length.map_fn": MetricConfiguration(
                     "column_values.value_length.map_fn", metric.metric_domain_kwargs
                 )
             }
-        else:
-            return super().get_evaluation_dependencies(
-                metric=metric,
-                configuration=configuration,
-                execution_engine=execution_engine,
-                runtime_configuration=runtime_configuration,
-            )

@@ -1,13 +1,69 @@
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, Tuple, Type
+from typing import Callable, Optional, Type, Union
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.util import nested_update
+from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.registry import register_metric, register_renderer
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    MetricFunctionTypes,
+    MetricPartialFunctionTypes,
+)
+from great_expectations.expectations.registry import (
+    get_metric_function_type,
+    get_metric_provider,
+    register_metric,
+    register_renderer,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
+
+
+def metric_value(
+    engine: Type[ExecutionEngine],
+    metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
+    **kwargs
+):
+    """The metric decorator annotates a method """
+
+    def wrapper(metric_fn: Callable):
+        @wraps(metric_fn)
+        def inner_func(*args, **kwargs):
+            return metric_fn(*args, **kwargs)
+
+        inner_func.metric_engine = engine
+        inner_func.metric_fn_type = MetricFunctionTypes(metric_fn_type)
+        inner_func.metric_definition_kwargs = kwargs
+        return inner_func
+
+    return wrapper
+
+
+def metric_partial(
+    engine: Type[ExecutionEngine],
+    partial_fn_type: Union[str, MetricPartialFunctionTypes],
+    domain_type: Union[str, MetricDomainTypes],
+    **kwargs
+):
+    """The metric decorator annotates a method """
+
+    def wrapper(metric_fn: Callable):
+        @wraps(metric_fn)
+        def inner_func(*args, **kwargs):
+            return metric_fn(*args, **kwargs)
+
+        inner_func.metric_engine = engine
+        inner_func.metric_fn_type = MetricPartialFunctionTypes(
+            partial_fn_type
+        )  # raises ValueError if unknown type
+        inner_func.domain_type = MetricDomainTypes(domain_type)
+        inner_func.metric_definition_kwargs = kwargs
+        return inner_func
+
+    return wrapper
 
 
 class MetaMetricProvider(type):
@@ -19,33 +75,9 @@ class MetaMetricProvider(type):
         return newclass
 
 
-def metric(
-    engine: Type[ExecutionEngine],
-    metric_name: str = None,
-    metric_fn_type: str = "data",
-    **kwargs
-):
-    """The metric decorator annotates a method """
-
-    def wrapper(metric_fn: Callable):
-        @wraps(metric_fn)
-        def inner_func(*args, **kwargs):
-            return metric_fn(*args, **kwargs)
-
-        if metric_name is not None:
-            inner_func.metric_name = metric_name
-        inner_func.metric_engine = engine
-        inner_func.metric_fn_type = metric_fn_type
-        inner_func.metric_definition_kwargs = kwargs
-        return inner_func
-
-    return wrapper
-
-
 class MetricProvider(metaclass=MetaMetricProvider):
     domain_keys = tuple()
     value_keys = tuple()
-    metric_fn_type = "data"
     default_kwarg_values = dict()
 
     @classmethod
@@ -68,7 +100,6 @@ class MetricProvider(metaclass=MetaMetricProvider):
                         "metric functions must be defined with an Execution Engine"
                     )
                 metric_fn = attr_obj
-                metric_name = getattr(metric_fn, "metric_name", metric_name)
                 if metric_name is None:
                     # No metric name has been defined
                     continue
@@ -79,17 +110,39 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     "metric_name_suffix", ""
                 )
                 metric_fn_type = getattr(
-                    metric_fn, "metric_fn_type", getattr(cls, "metric_fn_type", "data")
+                    metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
                 )
-                register_metric(
-                    metric_name=declared_metric_name,
-                    metric_domain_keys=metric_domain_keys,
-                    metric_value_keys=metric_value_keys,
-                    execution_engine=engine,
-                    metric_class=cls,
-                    metric_provider=metric_fn,
-                    metric_fn_type=metric_fn_type,
-                )
+                if metric_fn_type == MetricFunctionTypes.VALUE:
+                    register_metric(
+                        metric_name=declared_metric_name,
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=metric_value_keys,
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=metric_fn,
+                        metric_fn_type=metric_fn_type,
+                    )
+                else:
+                    register_metric(
+                        metric_name=declared_metric_name
+                        + "."
+                        + metric_fn_type.metric_suffix,  # this will be a MetricPartial
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=metric_value_keys,
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=metric_fn,
+                        metric_fn_type=metric_fn_type,
+                    )
+                    register_metric(
+                        metric_name=declared_metric_name,
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=metric_value_keys,
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=None,
+                        metric_fn_type=metric_fn_type,
+                    )
             elif hasattr(attr_obj, "_renderer_type"):
                 register_renderer(
                     object_name=metric_name, parent_class=cls, renderer_fn=attr_obj
@@ -110,4 +163,38 @@ class MetricProvider(metaclass=MetaMetricProvider):
           ...
         }
         """
-        return dict()
+        return (
+            cls._get_evaluation_dependencies(
+                metric=metric,
+                configuration=configuration,
+                execution_engine=execution_engine,
+                runtime_configuration=runtime_configuration,
+            )
+            or dict()
+        )
+
+    @classmethod
+    def _get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        metric_name = metric.metric_name
+        dependencies = dict()
+        for metric_fn_type in MetricPartialFunctionTypes:
+            metric_suffix = "." + metric_fn_type.value
+            try:
+                _ = get_metric_provider(metric_name + metric_suffix, execution_engine)
+                has_aggregate_fn = True
+            except MetricProviderError:
+                has_aggregate_fn = False
+            if has_aggregate_fn:
+                dependencies["metric_partial_fn"] = MetricConfiguration(
+                    metric_name + metric_suffix,
+                    metric.metric_domain_kwargs,
+                    metric.metric_value_kwargs,
+                )
+
+        return dependencies

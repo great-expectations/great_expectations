@@ -4,14 +4,10 @@ import json
 import logging
 import uuid
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Tuple, Union
 from urllib.parse import urlparse
 
 from great_expectations.core import IDDict
-from great_expectations.execution_environment.types import (
-    SqlAlchemyDatasourceQueryBatchSpec,
-    SqlAlchemyDatasourceTableBatchSpec,
-)
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
 from great_expectations.util import import_library_module
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -531,7 +527,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     def get_compute_domain(
-        self, domain_kwargs: dict = None
+        self, domain_kwargs: Dict, domain_type: Union[str, "MetricDomainTypes"],
     ) -> Tuple["sa.sql.Selectable", dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
@@ -602,7 +598,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
     def resolve_metric_bundle(
-        self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
+        self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
     ) -> dict:
         """For every metrics in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds a
         bundles the metrics into one large query dictionary so that they are all executed simultaneously. Will fail if
@@ -624,38 +620,35 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         queries: Dict[Tuple, dict] = dict()
         for (
             metric_to_resolve,
-            metric_provider,
+            engine_fn,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
             metric_provider_kwargs,
         ) in metric_fn_bundle:
-            # We have different semantics for bundled metric providers, so ensure we actually are working only with those.
-            assert (
-                metric_provider.metric_fn_type == "aggregate_fn"
-            ), "resolve_metric_bundle only supports aggregate metrics"
-            statement, domain_kwargs = metric_provider(**metric_provider_kwargs)
-            if not isinstance(domain_kwargs, IDDict):
-                domain_kwargs = IDDict(domain_kwargs)
-            domain_id = domain_kwargs.to_id()
+            if not isinstance(compute_domain_kwargs, IDDict):
+                compute_domain_kwargs = IDDict(compute_domain_kwargs)
+            domain_id = compute_domain_kwargs.to_id()
             if domain_id not in queries:
                 queries[domain_id] = {
                     "select": [],
                     "ids": [],
-                    "domain_kwargs": domain_kwargs,
+                    "domain_kwargs": compute_domain_kwargs,
                 }
             queries[domain_id]["select"].append(
-                statement.label(metric_to_resolve.metric_name)
+                engine_fn.label(metric_to_resolve.metric_name)
             )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"]
+                query["domain_kwargs"], domain_type="identity"
             )
-            assert (
-                compute_domain_kwargs == query["domain_kwargs"]
-            ), "Invalid compute domain returned from a bundled metric. Verify that its target compute domain is a valid compute domain."
             assert len(query["select"]) == len(query["ids"])
             res = self.engine.execute(
                 sa.select(query["select"]).select_from(selectable)
             ).fetchall()
+            logger.debug(
+                f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
+            )
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
