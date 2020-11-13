@@ -1,9 +1,10 @@
 import json
 import os
 import shutil
-from typing import List
 
 import pandas as pd
+from typing import List
+
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
@@ -1366,22 +1367,19 @@ def test_get_batch_when_passed_a_suite(titanic_data_context):
 
 # TODO: <Alex>If "batch_spec_passthrough" is decomissioned, the name of this method will need to change to reflect this (i.e., no "explicit_path").</Alex>
 def test_get_batch_list_from_new_style_datasource_based_on_explicit_data_reference_path(
-    execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_with_groups_with_sorters_data_context,
+    execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 ):
     execution_environment_name: str = "test_execution_environment"
     data_connector_name: str = "test_filesystem_data_connector"
     data_asset_name: str = "Titanic"
 
-    data_context: DataContext = execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_with_groups_with_sorters_data_context
+    data_context: DataContext = \
+        execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_with_groups_with_sorters_data_context
 
     context_path: str = data_context.root_directory
 
-    titanic_csv_source_file_path: str = file_relative_path(
-        __file__, "../test_sets/Titanic.csv"
-    )
-    titanic_csv_destination_file_path: str = str(
-        os.path.join(context_path, "data/Titanic_19120414_1313.csv")
-    )
+    titanic_csv_source_file_path: str = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    titanic_csv_destination_file_path: str = str(os.path.join(context_path, "data/Titanic_19120414_1313.csv"))
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
     batch_request: dict = {
@@ -1389,7 +1387,11 @@ def test_get_batch_list_from_new_style_datasource_based_on_explicit_data_referen
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
         "batch_data": None,
-        "partition_request": {"partition_identifiers": {"timestamp": "19120414"}},
+        "partition_request": {
+            "partition_identifiers": {
+                "timestamp": "19120414"
+            }
+        },
         "limit": None,
         # TODO: <Alex>Commenting out "batch_spec_passthrough" for now, until we have decided on whether or not it will be admitted.</Alex>
         # "batch_spec_passthrough": {

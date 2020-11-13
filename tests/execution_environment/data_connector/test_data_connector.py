@@ -2,6 +2,10 @@
 import pytest
 import yaml
 
+from great_expectations.execution_environment.data_connector import ConfiguredAssetFilesystemDataConnector
+from tests.test_utils import (
+    create_files_in_directory,
+)
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -9,13 +13,8 @@ from great_expectations.core.batch import (
     PartitionRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_environment.data_connector import (
-    ConfiguredAssetFilesystemDataConnector,
-)
-from great_expectations.execution_environment.data_connector.util import (
-    batch_definition_matches_batch_request,
-)
-from tests.test_utils import create_files_in_directory
+from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
+from great_expectations.data_context.util import instantiate_class_from_config
 
 
 @pytest.fixture
@@ -24,9 +23,8 @@ def basic_data_connector(tmp_path_factory):
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
     )
 
-    basic_data_connector = instantiate_class_from_config(
-        yaml.load(
-            f"""
+    basic_data_connector = instantiate_class_from_config(yaml.load(
+        f"""
 class_name: ConfiguredAssetFilesystemDataConnector
 base_directory: {base_directory}
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -38,10 +36,11 @@ default_regex:
 
 assets:
     my_asset_name: {{}}
-""",
-            Loader=yaml.FullLoader,
-        ),
-        runtime_environment={"name": "my_data_connector"},
+""", Loader=yaml.FullLoader
+    ),
+        runtime_environment={
+            "name": "my_data_connector"
+        },
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector"
         },
@@ -61,8 +60,13 @@ def test_basic_instantiation(tmp_path_factory):
         base_directory=base_directory,
         glob_directive="*.csv",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
-        default_regex={"pattern": "(.*)", "group_names": ["file_name"],},
-        assets={"my_asset_name": {}},
+        default_regex={
+            "pattern": "(.*)",
+            "group_names": ["file_name"],
+        },
+        assets={
+            "my_asset_name": {}
+        }
     )
 
 
@@ -96,8 +100,13 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         base_directory=base_directory,
         glob_directive="*/*/*.csv",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
-        default_regex={"pattern": "(.*).csv", "group_names": ["name"],},
-        assets={"stuff": {}},
+        default_regex={
+            "pattern" : "(.*).csv",
+            "group_names" : ["name"],
+        },
+        assets={
+            "stuff": {}
+        }
     )
 
     with pytest.raises(ValueError):
@@ -151,22 +160,33 @@ def test__batch_definition_matches_batch_request():
         execution_environment_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
-        partition_definition=PartitionDefinition({"id": "A",}),
-    )
-
-    assert batch_definition_matches_batch_request(
-        batch_definition=A, batch_request=BatchRequest(execution_environment_name="A")
-    )
-
-    assert not batch_definition_matches_batch_request(
-        batch_definition=A, batch_request=BatchRequest(execution_environment_name="B")
+        partition_definition=PartitionDefinition(
+            {
+               "id": "A",
+            }
+        )
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
-            execution_environment_name="A", data_connector_name="a",
-        ),
+            execution_environment_name="A"
+        )
+    )
+
+    assert not batch_definition_matches_batch_request(
+        batch_definition=A,
+        batch_request=BatchRequest(
+            execution_environment_name="B"
+        )
+    )
+
+    assert batch_definition_matches_batch_request(
+        batch_definition=A,
+        batch_request=BatchRequest(
+            execution_environment_name="A",
+            data_connector_name="a",
+        )
     )
 
     assert batch_definition_matches_batch_request(
@@ -175,7 +195,7 @@ def test__batch_definition_matches_batch_request():
             execution_environment_name="A",
             data_connector_name="a",
             data_asset_name="aaa",
-        ),
+        )
     )
 
     assert not batch_definition_matches_batch_request(
@@ -184,8 +204,9 @@ def test__batch_definition_matches_batch_request():
             execution_environment_name="A",
             data_connector_name="a",
             data_asset_name="bbb",
-        ),
+        )
     )
+
 
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
@@ -193,33 +214,39 @@ def test__batch_definition_matches_batch_request():
             execution_environment_name="A",
             data_connector_name="a",
             data_asset_name="aaa",
-            partition_request={"partition_identifiers": {"id": "B"},},
-        ),
+            partition_request={
+                "partition_identifiers": {
+                    "id": "B"
+                },
+            }
+        )
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
-            partition_request={"partition_identifiers": {"id": "A"},}
-        ),
+            partition_request={
+                "partition_identifiers": {
+                    "id": "A"
+                },
+            }
+        )
     )
 
     assert batch_definition_matches_batch_request(
-        batch_definition=BatchDefinition(
-            **{
-                "execution_environment_name": "FAKE_EXECUTION_ENVIRONMENT",
-                "data_connector_name": "TEST_DATA_CONNECTOR",
-                "data_asset_name": "DEFAULT_ASSET_NAME",
-                "partition_definition": PartitionDefinition({"index": "3"}),
-            }
-        ),
-        batch_request=BatchRequest(
-            **{
-                "execution_environment_name": "FAKE_EXECUTION_ENVIRONMENT",
-                "data_connector_name": "TEST_DATA_CONNECTOR",
-                "data_asset_name": "DEFAULT_ASSET_NAME",
-                "partition_request": None,
-            }
-        ),
+        batch_definition=BatchDefinition(**{
+            "execution_environment_name": "FAKE_EXECUTION_ENVIRONMENT",
+            "data_connector_name": "TEST_DATA_CONNECTOR",
+            "data_asset_name": "DEFAULT_ASSET_NAME",
+            "partition_definition": PartitionDefinition({
+                "index": "3"
+            })
+        }),
+        batch_request=BatchRequest(**{
+            "execution_environment_name": "FAKE_EXECUTION_ENVIRONMENT",
+            "data_connector_name": "TEST_DATA_CONNECTOR",
+            "data_asset_name": "DEFAULT_ASSET_NAME",
+            "partition_request": None
+        })
     )
     # TODO : Test cases to exercise ranges, etc.

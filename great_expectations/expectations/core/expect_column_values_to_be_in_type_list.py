@@ -2,10 +2,7 @@ from typing import Dict
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    TableExpectation,
-)
+from great_expectations.expectations.expectation import ColumnMapExpectation, TableExpectation
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -174,10 +171,8 @@ class ExpectColumnValuesToBeInTypeList(TableExpectation):
     ):
         column_name = configuration.kwargs.get("column")
         column_types_list = metrics.get("table.column_types")
-        column_type = [
-            type_dict["type"]
-            for type_dict in column_types_list
-            if type_dict["name"] == column_name
-        ][0]
+        column_type = [type_dict["type"] for type_dict in column_types_list if type_dict["name"] == column_name][0]
         test = 1
-        return {"success": True}
+        return {
+            "success": True
+        }

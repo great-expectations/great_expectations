@@ -7,12 +7,12 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-
+from great_expectations.expectations.metrics.import_manager import F
+import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 

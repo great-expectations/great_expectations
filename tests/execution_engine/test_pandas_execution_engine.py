@@ -5,11 +5,7 @@ import pytest
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.metrics import (
-    ColumnMean,
-    ColumnStandardDeviation,
-    ColumnValuesZScore,
-)
+from great_expectations.expectations.metrics import ColumnMean, ColumnStandardDeviation, ColumnValuesZScore
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -27,7 +23,7 @@ def test_reader_fn():
 
 def test_get_compute_domain_with_no_domain_kwargs():
     engine = PandasExecutionEngine()
-    df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+    df = pd.DataFrame({"a": [1, 2, 3, 4], "b":[2,3,4,None]})
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -43,9 +39,7 @@ def test_get_compute_domain_with_column_domain():
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"column": "a"}
-    )
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column": "a"})
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs is not None, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
@@ -54,23 +48,18 @@ def test_get_compute_domain_with_column_domain():
 def test_get_compute_domain_with_row_condition():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    expected_df = df[df["b"] > 2].reset_index()
+    expected_df = df[df['b'] > 2].reset_index()
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"row_condition": "b > 2", "condition_parser": "pandas"}
-    )
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 2",
+                                                                                     "condition_parser": "pandas"})
     # Ensuring data has been properly queried
-    assert data["b"].equals(
-        expected_df["b"]
-    ), "Data does not match after getting compute domain"
+    assert data['b'].equals(expected_df['b']), "Data does not match after getting compute domain"
 
     # Ensuring compute kwargs have not been modified
-    assert (
-        "row_condition" in compute_kwargs.keys()
-    ), "Row condition should be located within compute kwargs"
+    assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
@@ -78,23 +67,18 @@ def test_get_compute_domain_with_row_condition():
 def test_get_compute_domain_with_unmeetable_row_condition():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    expected_df = df[df["b"] > 24].reset_index()
+    expected_df = df[df['b'] > 24].reset_index()
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"row_condition": "b > 24", "condition_parser": "pandas"}
-    )
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 24",
+                                                                                     "condition_parser": "pandas"})
     # Ensuring data has been properly queried
-    assert data["b"].equals(
-        expected_df["b"]
-    ), "Data does not match after getting compute domain"
+    assert data['b'].equals(expected_df['b']), "Data does not match after getting compute domain"
 
     # Ensuring compute kwargs have not been modified
-    assert (
-        "row_condition" in compute_kwargs.keys()
-    ), "Row condition should be located within compute kwargs"
+    assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
@@ -119,12 +103,9 @@ def test_resolve_metric_bundle():
     metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
     # Ensuring metrics have been properly resolved
-    assert (
-        metrics[("column.mean", "column=a", ())] == 2.0
-    ), "mean metric not properly computed"
-    assert metrics[("column.standard_deviation", "column=a", ())] == 1.0, (
-        "standard deviation " "metric not properly computed"
-    )
+    assert metrics[('column.mean', 'column=a', ())] == 2.0, "mean metric not properly computed"
+    assert metrics[('column.standard_deviation', 'column=a', ())] == 1.0, "standard deviation " \
+                                                                                    "metric not properly computed"
 
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
@@ -160,3 +141,9 @@ def test_dataframe_property_given_loaded_batch():
 
     # Ensuring Data not distorted
     assert engine.dataframe.equals(df)
+
+
+
+
+
+

@@ -71,11 +71,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     """
 
     map_metric = "column_values.decreasing"
-    success_keys = (
-        "strictly",
-        "mostly",
-        "parse_strings_as_datetimes",
-    )
+    success_keys = ("strictly", "mostly", "parse_strings_as_datetimes",)
 
     default_kwarg_values = {
         "row_condition": None,

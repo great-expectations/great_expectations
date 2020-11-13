@@ -2,9 +2,9 @@ import datetime
 import logging
 from typing import Any
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.sorter.sorter import Sorter
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -36,9 +36,9 @@ class DateTimeSorter(Sorter):
 
         if datetime_format and not isinstance(datetime_format, str):
             raise ge_exceptions.SorterError(
-                f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
+                f'''DateTime parsing formatter "datetime_format_string" must have string type (actual type is
         "{str(type(datetime_format))}").
-                    """
+                    '''
             )
 
         self._datetime_format = datetime_format

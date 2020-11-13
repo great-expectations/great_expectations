@@ -56,14 +56,12 @@ from .expect_column_values_to_be_increasing import ExpectColumnValuesToBeIncreas
 from .expect_column_values_to_be_json_parseable import (
     ExpectColumnValuesToBeJsonParseable,
 )
+from .expect_column_values_to_match_like_pattern_list import ExpectColumnValuesToMatchLikePatternList
 from .expect_column_values_to_be_null import ExpectColumnValuesToBeNull
 from .expect_column_values_to_be_of_type import ExpectColumnValuesToBeOfType
 from .expect_column_values_to_be_unique import ExpectColumnValuesToBeUnique
 from .expect_column_values_to_match_json_schema import (
     ExpectColumnValuesToMatchJsonSchema,
-)
-from .expect_column_values_to_match_like_pattern_list import (
-    ExpectColumnValuesToMatchLikePatternList,
 )
 from .expect_column_values_to_match_regex import ExpectColumnValuesToMatchRegex
 from .expect_column_values_to_match_regex_list import ExpectColumnValuesToMatchRegexList
