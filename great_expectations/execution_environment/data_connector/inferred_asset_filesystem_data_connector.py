@@ -35,13 +35,8 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
             sorters=sorters,
         )
 
-        # TODO: <Alex>The next two properties must be private.</Alex>
-        self.base_directory = normalize_directory_path(
-            dir_path=base_directory,
-            root_directory_path=self.data_context_root_directory
-        )
-
-        self.glob_directive = glob_directive
+        self._base_directory = base_directory
+        self._glob_directive = glob_directive
 
     def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
@@ -50,9 +45,16 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         """
         path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
             base_directory_path=self.base_directory,
-            glob_directive=self.glob_directive
+            glob_directive=self._glob_directive
         )
         return path_list
 
     def _get_full_file_path(self, path: str) -> str:
         return str(Path(self.base_directory).joinpath(path))
+
+    @property
+    def base_directory(self):
+        return normalize_directory_path(
+            dir_path=self._base_directory,
+            root_directory_path=self.data_context_root_directory
+        )
