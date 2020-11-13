@@ -924,9 +924,7 @@ def _format_map_output(
         "element_count": element_count,
         "unexpected_count": unexpected_count,
         "unexpected_percent": unexpected_percent,
-        "partial_unexpected_list": unexpected_list[
-                                   : result_format["partial_unexpected_count"]
-                                   ],
+        "partial_unexpected_list": unexpected_list[ : result_format["partial_unexpected_count"]],
     }
 
     if not skip_missing:
@@ -959,10 +957,7 @@ def _format_map_output(
             return_obj["result"].update(
                 {
                     "partial_unexpected_index_list": unexpected_index_list[
-                                                     : result_format["partial_unexpected_count"]
-                                                     ]
-                    if unexpected_index_list is not None
-                    else None,
+                        : result_format["partial_unexpected_count"]] if unexpected_index_list is not None else None,
                     "partial_unexpected_counts": partial_unexpected_counts,
                 }
             )
