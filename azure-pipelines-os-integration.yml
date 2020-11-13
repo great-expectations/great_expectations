@@ -42,7 +42,7 @@ stages:
           - script: |
               #<Alex></Alex>
               #pip install pytest pytest-cov pytest-azurepipelines
-              pip install pytest pytest-cov pytest-azurepipelines freezegun>=0.3.15
+              pip install pytest pytest-cov pytest-azurepipelines freezegun>=0.3.15 black==19.10b0
               pytest $(GE_pytest_opts)
             displayName: 'pytest'
 
