@@ -2,10 +2,6 @@ import random
 import yaml
 import os
 import json
-try:
-    import sqlalchemy as sa
-except ImportError:
-    sa = None
 
 from great_expectations.data_context.util import (
     instantiate_class_from_config,

@@ -252,9 +252,11 @@ def sa(test_backends):
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
-        import sqlalchemy as sa
-
-        return sa
+        try:
+            import sqlalchemy as sa
+            return sa
+        except ImportError:
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
 
 @pytest.fixture
@@ -2121,8 +2123,12 @@ def sqlalchemy_dataset(test_backends):
 def sqlitedb_engine(test_backend):
     if test_backend == "sqlite":
         import sqlalchemy as sa
+        try:
+            import sqlalchemy as sa
+            return sa.create_engine("sqlite://")
+        except ImportError:
+            raise ValueError("sqlite tests require sqlalchemy to be installed")
 
-        return sa.create_engine("sqlite://")
     else:
         pytest.skip("Skipping test designed for sqlite on non-sqlite backend.")
 
@@ -2130,11 +2136,14 @@ def sqlitedb_engine(test_backend):
 @pytest.fixture
 def postgresql_engine(test_backend):
     if test_backend == "postgresql":
-        import sqlalchemy as sa
+        try:
+            import sqlalchemy as sa
+            engine = sa.create_engine("postgresql://postgres@localhost/test_ci").connect()
+            yield engine
+            engine.close()
+        except ImportError:
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
-        engine = sa.create_engine("postgresql://postgres@localhost/test_ci").connect()
-        yield engine
-        engine.close()
     else:
         pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
 
@@ -2250,12 +2259,15 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 @pytest.fixture
 def titanic_sqlite_db(sa):
-    from sqlalchemy import create_engine
-
-    titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
-    engine = create_engine("sqlite:///{}".format(titanic_db_path))
-    assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
-    return engine
+    try:
+        import sqlalchemy as sa
+        from sqlalchemy import create_engine
+        titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
+        engine = create_engine("sqlite:///{}".format(titanic_db_path))
+        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        return engine
+    except ImportError:
+        raise ValueError("sqlite tests require sqlalchemy to be installed")
 
 
 @pytest.fixture
@@ -2280,8 +2292,8 @@ def titanic_expectation_suite():
 def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
-
         engine = create_engine("sqlite://")
         assert engine.execute("select 1").fetchall()[0] == (1,)
         return engine
@@ -2775,18 +2787,21 @@ def evr_success():
 def sqlite_view_engine(test_backends):
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
-        import sqlalchemy as sa
+        try:
+            import sqlalchemy as sa
+            sqlite_engine = sa.create_engine("sqlite://")
+            df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
+            df.to_sql("test_table", con=sqlite_engine)
+            sqlite_engine.execute(
+                "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+            )
+            sqlite_engine.execute(
+                "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
+            )
+            return sqlite_engine
+        except ImportError:
+            sa = None
 
-        sqlite_engine = sa.create_engine("sqlite://")
-        df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-        df.to_sql("test_table", con=sqlite_engine)
-        sqlite_engine.execute(
-            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-        )
-        sqlite_engine.execute(
-            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-        )
-        return sqlite_engine
     else:
         pytest.skip("SqlAlchemy tests disabled; not testing views")
 
