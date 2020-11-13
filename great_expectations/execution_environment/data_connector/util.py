@@ -175,6 +175,8 @@ def _invert_regex_to_data_reference_template(
     data_reference_template: str = ""
     group_name_index: int = 0
 
+    num_groups = len(group_names)
+
     # print("-"*80)
     parsed_sre = sre_parse.parse(regex_pattern)
     for token, value in parsed_sre:
@@ -183,6 +185,8 @@ def _invert_regex_to_data_reference_template(
             data_reference_template += chr(value)
 
         elif token == sre_constants.SUBPATTERN:
+            if not (group_name_index < num_groups):
+                break
             # Replace the captured group with "{next_group_name}" in the template
             data_reference_template += "{"+group_names[group_name_index]+"}"
             group_name_index += 1
