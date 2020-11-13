@@ -90,7 +90,8 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
     map_metric = "column_values.match_regex_list"
     success_keys = (
         "regex_list",
-        "match_on" "mostly",
+        "match_on",
+        "mostly",
     )
 
     default_kwarg_values = {
