@@ -14,7 +14,7 @@ from great_expectations.core.id_dict import IDDict
 from ..exceptions import BatchKwargsError, GreatExpectationsError, ValidationError
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
-from .execution_engine import ExecutionEngine
+from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 logger = logging.getLogger(__name__)
 
@@ -253,6 +253,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
             batches (dict) - A dictionary specifying batch id and which batches to obtain
+            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity", "column",
+            "column_pair", "table" and "other".
 
         Returns:
             A tuple including:
@@ -297,8 +300,23 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     f"unrecognized condition_parser {str(condition_parser)}for Spark execution engine"
                 )
 
-        if "column" in compute_domain_kwargs:
-            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+        # If user has stated they want a column, checking if one is provided, and
+        if domain_type == "column" or domain_type == MetricDomainTypes.COLUMN:
+            if "column" in compute_domain_kwargs:
+                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+            else:
+                # If column not given
+                raise GreatExpectationsError("Column not provided in compute_domain_kwargs")
+        else:
+            # If column pair requested
+            if domain_type == "column_pair" or domain_type == MetricDomainTypes.COLUMN_PAIR:
+
+                # Ensuring column_A and column_B parameters provided
+                if "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs:
+                    accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
+                    accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
+                else:
+                    raise GreatExpectationsError("column_A or column_B not found within compute_domain_kwargs")
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
