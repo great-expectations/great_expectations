@@ -237,10 +237,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 Invalid batch_spec: batch_data is required for a SparkDFExecutionEngine to operate.
             """
             )
-        batch_data = self._split_or_sample(batch_spec, batch_data)
+        batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
         return batch_data, batch_markers
 
-    def _split_or_sample(self, batch_spec, batch_data):
+    def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
             splitter_fn = getattr(self, batch_spec.get("splitter_method"))
             splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}

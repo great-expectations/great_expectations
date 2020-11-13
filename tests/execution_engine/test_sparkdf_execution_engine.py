@@ -370,3 +370,28 @@ def test_sample_using_md5(test_sparkdf):
     collected = sampled_df.collect()
     for val in collected:
         assert val.date in [datetime.date(2020, 1, 15), datetime.date(2020, 1, 29)]
+
+
+def test_split_on_multi_column_values_and_sample_using_random(test_sparkdf):
+    returned_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_sparkdf,
+        splitter_method="_split_on_multi_column_values",
+        splitter_kwargs={
+            "column_names": ["y", "m", "d"],
+            "partition_definition": {
+                "y": 2020,
+                "m": 1,
+                "d": 5,
+                }
+            },
+        sampling_method="_sample_using_random",
+        sampling_kwargs={
+           "p": 0.5,
+        }
+    ))
+
+    assert returned_df.count() == 3
+    assert len(returned_df.columns) == 10
+    collected = returned_df.collect()
+    for val in collected:
+        assert val.date == datetime.date(2020, 1, 5)

@@ -153,12 +153,12 @@ Notes:
             raise BatchSpecError(
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
             )
-        batch_data = self._split_or_sample(batch_spec, batch_data)
+        batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
         if batch_data.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
         return batch_data, batch_markers
 
-    def _split_or_sample(self, batch_spec, batch_data):
+    def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
             splitter_fn = getattr(self, batch_spec.get("splitter_method"))
             splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
