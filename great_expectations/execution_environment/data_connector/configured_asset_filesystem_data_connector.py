@@ -72,7 +72,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             glob_directive=glob_directive
         )
 
-        return path_list
+        return sorted(path_list)
 
     def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset] = None) -> str:
         base_directory: str = self.base_directory

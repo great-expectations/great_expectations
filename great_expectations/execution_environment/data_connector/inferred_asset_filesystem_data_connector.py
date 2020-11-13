@@ -47,7 +47,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
             base_directory_path=self.base_directory,
             glob_directive=self._glob_directive
         )
-        return path_list
+        return sorted(path_list)
 
     def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
         return str(Path(self.base_directory).joinpath(path))
