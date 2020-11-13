@@ -2604,9 +2604,9 @@ def execution_environment_configured_asset_filesystem_data_connector_regex_parti
     data_context: DataContext = empty_data_context
     execution_environment_name: str = "test_execution_environment"
     data_context.add_execution_environment(
-        name=execution_environment_name,
-        initialize=True,
-        **execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
+        execution_environment_name=execution_environment_name,
+        # initialize=True,
+        execution_environment_config=execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
             use_group_names=True,
             use_sorters=True,
             default_base_directory=default_base_directory,
