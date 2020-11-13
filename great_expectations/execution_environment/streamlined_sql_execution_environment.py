@@ -1,13 +1,7 @@
 import logging
-from typing import List, Dict
 import copy
 
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment import BaseExecutionEnvironment
-from great_expectations.execution_environment.data_connector import (
-    DataConnector,
-    ConfiguredAssetSqlDataConnector,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -21,19 +15,15 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
     def __init__(
         self,
         name: str,
-        connection_string: str=None,
-        url: str=None,
-        credentials: dict=None,
-        engine=None, #SqlAlchemyExecutionEngine
-        introspection: Dict=None,
-        tables: Dict=None,
+        connection_string: str = None,
+        url: str = None,
+        credentials: dict = None,
+        engine=None,  # sqlalchemy.engine.Engine
+        introspection: dict = None,
+        tables: dict = None,
     ):
         introspection = introspection or {}
         tables = tables or {}
-
-        super().__init__(
-            name=name,
-        )
 
         self._execution_engine_config = {
             "class_name": "SqlAlchemyExecutionEngine",
@@ -42,25 +32,27 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
             "credentials": credentials,
             "engine": engine,
         }
-        self._execution_engine = instantiate_class_from_config(
-            config=self._execution_engine_config,
-            runtime_environment={},
-            config_defaults={"module_name": "great_expectations.execution_engine"},
+
+        super().__init__(
+            name=name,
+            execution_engine=self._execution_engine_config
         )
 
         self._data_connectors = {}
         self._init_data_connectors(
-            introspection,
-            tables,
+            introspection_configs=introspection,
+            table_configs=tables,
         )
 
         # NOTE: Abe 20201111 : This is incorrect. Will need to be fixed when we reconcile all the configs.
         self._execution_environment_config = {}
 
+    # noinspection PyMethodOverriding
+    # Note: This method is meant to overwrite ExecutionEnvironment._init_data_connectors (dispite signature mismatch).
     def _init_data_connectors(
         self,
-        introspection_configs: Dict,
-        table_configs: Dict,
+        introspection_configs: dict,
+        table_configs: dict,
     ):
 
         # First, build DataConnectors for introspected assets
@@ -98,29 +90,3 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
                     data_asset_name,
                     data_asset_config,
                 )
-
-    def _build_data_connector_from_config(
-        self,
-        name: str,
-        config: Dict,
-    ) -> DataConnector:
-        """Build a DataConnector using the provided configuration and return the newly-built DataConnector.
-        
-        Note: this method is identical to the method in the parent class,
-        except that it does not include data_context_root_directory
-        """
-
-        new_data_connector: DataConnector = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "name": name,
-                "execution_environment_name": self.name,
-                "execution_engine": self.execution_engine,
-            },
-            config_defaults={
-                "module_name": "great_expectations.execution_environment.data_connector"
-            },
-        )
-
-        self._data_connectors[name] = new_data_connector
-        return new_data_connector

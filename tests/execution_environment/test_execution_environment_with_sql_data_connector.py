@@ -15,6 +15,7 @@ from great_expectations.core.batch import (
     BatchRequest
 )
 
+
 def test_basic_instantiation(sa):
     random.seed(0)
 
@@ -53,7 +54,7 @@ data_connectors:
             "module_name": "great_expectations.execution_environment"
         },
         runtime_environment={
-            "name" : "my_sql_execution_environment"
+            "name": "my_sql_execution_environment"
         },
     )
 
@@ -108,7 +109,8 @@ data_connectors:
         }
     }
 
-def test_StreamlinedSqlExecutionEnvironment(empty_data_context, sa):
+
+def test_StreamlinedSqlExecutionEnvironment(empty_data_context):
     # This test mirrors the likely path to configure a StreamlinedSqlExecutionEnvironment
 
     db_file = file_relative_path(

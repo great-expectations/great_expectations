@@ -32,7 +32,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         execution_engine: ExecutionEngine = None,
         default_regex: dict = None,
         sorters: list = None,
-        data_context_root_directory: str = None,
     ):
         logger.debug(f'Constructing InferredAssetFilePathDataConnector "{name}".')
 
@@ -42,7 +41,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
-            data_context_root_directory=data_context_root_directory
         )
 
     def _refresh_data_references_cache(self):

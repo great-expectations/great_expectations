@@ -35,7 +35,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         assets: dict,
         sorters: list = None,
         execution_engine: ExecutionEngine = None,
-        data_context_root_directory: str = None,
     ):
         logger.debug(f'Constructing ConfiguredAssetFilePathDataConnector "{name}".')
         super().__init__(
@@ -44,7 +43,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
-            data_context_root_directory=data_context_root_directory
         )
 
         if assets is None:

@@ -24,7 +24,6 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         glob_directive: str = "*",
         execution_engine: ExecutionEngine = None,
         sorters: list = None,
-        data_context_root_directory: str = None,
     ):
         logger.debug(f'Constructing InferredAssetFilesystemDataConnector "{name}".')
 
@@ -34,13 +33,12 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
-            data_context_root_directory=data_context_root_directory
         )
 
         # TODO: <Alex>The next two properties must be private.</Alex>
         self.base_directory = normalize_directory_path(
             dir_path=base_directory,
-            root_directory_path=data_context_root_directory
+            root_directory_path=self.data_context_root_directory
         )
 
         self.glob_directive = glob_directive
