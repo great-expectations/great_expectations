@@ -1009,7 +1009,7 @@ class MapMetricProvider(MetricProvider):
                     condition_provider,
                     "domain_type",
                     metric_definition_kwargs.get(
-                        "domain_type", MetricDomainTypes.OTHER
+                        "domain_type", MetricDomainTypes.TABLE
                     ),
                 )
                 if issubclass(engine, PandasExecutionEngine):
