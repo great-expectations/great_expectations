@@ -76,6 +76,32 @@ def test_sparkdf(spark_session):
     return spark_df
 
 
+def test_reader_fn(spark_session):
+    engine = SparkDFExecutionEngine()
+    # Testing that can recognize basic csv file
+    fn = engine._get_reader_fn(reader=spark_session.read, path="myfile.csv")
+    assert "<bound method DataFrameReader.csv" in str(fn)
+
+    # Ensuring that other way around works as well - reader_method should always override path
+    fn_new = engine._get_reader_fn(reader=spark_session.read, reader_method="csv")
+    assert "<bound method DataFrameReader.csv" in str(fn_new)
+
+
+# TODO: <WILL> Get this to pass before 0.13
+def test_get_compute_domain_with_no_domain_kwargs():
+    pass
+
+
+# TODO: <WILL> Get this to pass before 0.13
+def test_get_compute_domain_with_column_domain():
+    pass
+
+
+# TODO: <WILL> Get this to pass before 0.13
+def test_get_compute_domain_with_row_condition():
+    pass
+
+
 def test_basic_setup(spark_session):
     pd_df = pd.DataFrame({"x": range(10)})
     df = spark_session.createDataFrame(
