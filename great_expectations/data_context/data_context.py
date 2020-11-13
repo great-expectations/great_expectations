@@ -35,6 +35,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.store import TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -282,6 +283,13 @@ class BaseDataContext:
     def _build_store(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
         try:
+            # Set expectations_store.store_backend_id to given val if it doesnt exist
+            if store_name == self.expectations_store_name:
+                store_config["store_backend"].update(
+                    {
+                        "manually_initialize_store_backend_id": self.anonymous_usage_statistics.data_context_id
+                    }
+                )
             new_store = instantiate_class_from_config(
                 config=store_config,
                 runtime_environment={"root_directory": self.root_directory,},
@@ -425,6 +433,32 @@ class BaseDataContext:
                 pass
         return False
 
+    def _construct_data_context_id(self) -> str:
+        """
+        Choose the id of the currently-configured expectations store, if available and a persistent store.
+        If not, it should choose the id stored in DataContextConfig.
+        Returns:
+            UUID to use as the data_context_id
+        """
+
+        # Choose the id of the currently-configured expectations store, if it is a persistent store
+        try:
+            expectations_store = self._stores[
+                self._project_config.expectations_store_name
+            ]
+            if isinstance(expectations_store.store_backend, TupleStoreBackend):
+                return expectations_store.store_backend_id
+            else:
+                # Otherwise choose the id stored in DataContextConfig
+                return (
+                    self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                )
+        except Exception:
+            # If there is no expectations_store setup choose the id stored in DataContextConfig
+            return (
+                self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+            )
+
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
     ):
@@ -436,7 +470,7 @@ class BaseDataContext:
 
         self._usage_statistics_handler = UsageStatisticsHandler(
             data_context=self,
-            data_context_id=usage_statistics_config.data_context_id,
+            data_context_id=self._construct_data_context_id(),
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
@@ -666,9 +700,7 @@ class BaseDataContext:
 
     @property
     def data_context_id(self):
-        return (
-            self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-        )
+        return self._construct_data_context_id()
 
     @property
     def instance_id(self):
