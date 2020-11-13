@@ -1,3 +1,4 @@
+import pytest
 import random
 import yaml
 import os
@@ -129,16 +130,16 @@ introspection:
 
     assert my_sql_execution_environment.get_available_data_asset_names() == {
         "whole_table": [
-            "table_containing_id_spacers_for_D__whole_table",
-            "table_partitioned_by_date_column__A__whole_table",
-            "table_partitioned_by_foreign_key__F__whole_table",
-            "table_partitioned_by_incrementing_batch_id__E__whole_table",
-            "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__whole_table",
-            "table_partitioned_by_multiple_columns__G__whole_table",
-            "table_partitioned_by_regularly_spaced_incrementing_id_column__C__whole_table",
-            "table_partitioned_by_timestamp_column__B__whole_table",
-            "table_that_should_be_partitioned_by_random_hash__H__whole_table",
-            "table_with_fk_reference_from_F__whole_table",
+            "table_containing_id_spacers_for_D",
+            "table_partitioned_by_date_column__A",
+            "table_partitioned_by_foreign_key__F",
+            "table_partitioned_by_incrementing_batch_id__E",
+            "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "table_partitioned_by_multiple_columns__G",
+            "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+            "table_partitioned_by_timestamp_column__B",
+            "table_that_should_be_partitioned_by_random_hash__H",
+            "table_with_fk_reference_from_F",
         ]
     }
 
@@ -209,6 +210,7 @@ tables:
                     date_format_string: "%Y-%m-%d"
             weekly:
                 include_schema_name: False
+                data_asset_name_prefix: some_string__
                 data_asset_name_suffix: __some_other_string
                 splitter_method: _split_on_converted_datetime
                 splitter_kwargs:
@@ -226,22 +228,22 @@ tables:
     print(json.dumps(my_sql_execution_environment.get_available_data_asset_names(), indent=4))
     assert my_sql_execution_environment.get_available_data_asset_names() == {
         "whole_table": [
-            "table_containing_id_spacers_for_D__whole_table",
-            "table_partitioned_by_date_column__A__whole_table",
-            "table_partitioned_by_foreign_key__F__whole_table",
-            "table_partitioned_by_incrementing_batch_id__E__whole_table",
+            "table_containing_id_spacers_for_D",
+            "table_partitioned_by_date_column__A",
+            "table_partitioned_by_foreign_key__F",
+            "table_partitioned_by_incrementing_batch_id__E",
         ],
         "hourly": [
-            "table_partitioned_by_timestamp_column__B__hourly",
+            "table_partitioned_by_timestamp_column__B",
         ],
         "daily": [
             "table_partitioned_by_date_column__A__daily",
         ],
         "weekly": [
-            "table_partitioned_by_date_column__A__some_other_string",
+            "some_string__table_partitioned_by_date_column__A__some_other_string",
         ],
         "by_id_dozens": [
-            "table_partitioned_by_date_column__A__by_id_dozens",
+            "table_partitioned_by_date_column__A",
         ]
     }
 
@@ -272,36 +274,19 @@ tables:
                     column_name: id
                     divisor: 12
 """)
-
+    print(json.dumps(my_sql_execution_environment.get_available_data_asset_names(), indent=4))
     assert my_sql_execution_environment.get_available_data_asset_names() == {
         "whole_table": [
-            "table_partitioned_by_date_column__A__whole_table",
+            "table_partitioned_by_date_column__A",
         ],
         "daily": [
-            "table_partitioned_by_date_column__A__daily",
+            "table_partitioned_by_date_column__A",
         ],
         "weekly": [
-            "table_partitioned_by_date_column__A__weekly",
+            "table_partitioned_by_date_column__A",
         ],
         "by_id_dozens": [
-            "table_partitioned_by_date_column__A__by_id_dozens",
-        ]
-    }
-
-    # Here we should test getting another batch
-
-    assert my_sql_execution_environment.get_available_data_asset_names() == {
-        "whole_table": [
-            "table_partitioned_by_date_column__A__whole_table",
-        ],
-        "daily": [
-            "table_partitioned_by_date_column__A__daily",
-        ],
-        "weekly": [
-            "table_partitioned_by_date_column__A__weekly",
-        ],
-        "by_id_dozens": [
-            "table_partitioned_by_date_column__A__by_id_dozens",
+            "table_partitioned_by_date_column__A",
         ]
     }
 
@@ -386,7 +371,8 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(test_cases_for_sql
         config={
             "class_name": "InferredAssetSqlDataConnector",
             "name": "whole_table",
-            "data_asset_name_suffix": "__whole"
+            "data_asset_name_prefix": "prexif__",
+            "data_asset_name_suffix": "__xiffus",
         },
         runtime_environment={
             "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
@@ -403,20 +389,20 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(test_cases_for_sql
         "class_name": "InferredAssetSqlDataConnector",
         "data_asset_count": 10,
         "example_data_asset_names": [
-            "table_containing_id_spacers_for_D__whole",
-            "table_partitioned_by_date_column__A__whole",
-            "table_partitioned_by_foreign_key__F__whole"
+            "prexif__table_containing_id_spacers_for_D__xiffus",
+            "prexif__table_partitioned_by_date_column__A__xiffus",
+            "prexif__table_partitioned_by_foreign_key__F__xiffus"
         ],
         "data_assets": {
-            "table_containing_id_spacers_for_D__whole": {
+            "prexif__table_containing_id_spacers_for_D__xiffus": {
                 "batch_definition_count": 1,
                 "example_data_references": [{}]
             },
-            "table_partitioned_by_date_column__A__whole": {
+            "prexif__table_partitioned_by_date_column__A__xiffus": {
                 "batch_definition_count": 1,
                 "example_data_references": [{}]
             },
-            "table_partitioned_by_foreign_key__F__whole": {
+            "prexif__table_partitioned_by_foreign_key__F__xiffus": {
                 "batch_definition_count": 1,
                 "example_data_references": [{}]
             }
@@ -433,22 +419,22 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(test_cases_for_sql
     }
 
     assert my_data_connector.get_available_data_asset_names() == [
-        "table_containing_id_spacers_for_D__whole",
-        "table_partitioned_by_date_column__A__whole",
-        "table_partitioned_by_foreign_key__F__whole",
-        "table_partitioned_by_incrementing_batch_id__E__whole",
-        "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__whole",
-        "table_partitioned_by_multiple_columns__G__whole",
-        "table_partitioned_by_regularly_spaced_incrementing_id_column__C__whole",
-        "table_partitioned_by_timestamp_column__B__whole",
-        "table_that_should_be_partitioned_by_random_hash__H__whole",
-        "table_with_fk_reference_from_F__whole",
+        "prexif__table_containing_id_spacers_for_D__xiffus",
+        "prexif__table_partitioned_by_date_column__A__xiffus",
+        "prexif__table_partitioned_by_foreign_key__F__xiffus",
+        "prexif__table_partitioned_by_incrementing_batch_id__E__xiffus",
+        "prexif__table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__xiffus",
+        "prexif__table_partitioned_by_multiple_columns__G__xiffus",
+        "prexif__table_partitioned_by_regularly_spaced_incrementing_id_column__C__xiffus",
+        "prexif__table_partitioned_by_timestamp_column__B__xiffus",
+        "prexif__table_that_should_be_partitioned_by_random_hash__H__xiffus",
+        "prexif__table_with_fk_reference_from_F__xiffus",
     ]
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
         execution_environment_name="my_test_execution_environment",
         data_connector_name="whole_table",
-        data_asset_name="table_that_should_be_partitioned_by_random_hash__H__whole",
+        data_asset_name="prexif__table_that_should_be_partitioned_by_random_hash__H__xiffus",
     ))
     assert len(batch_definition_list) == 1
 
@@ -523,3 +509,45 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(test_cases_
         data_asset_name="main.table_that_should_be_partitioned_by_random_hash__H__whole",
     ))
     assert len(batch_definition_list) == 1
+
+
+def test_skip_inapplicable_tables(empty_data_context):
+    # This test mirrors the likely path to configure a StreamlinedSqlExecutionEnvironment
+
+    db_file = file_relative_path(
+        __file__, os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+    my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+class_name: StreamlinedSqlExecutionEnvironment
+connection_string: sqlite:///{db_file}
+introspection:
+    daily:
+        skip_inapplicable_tables: true
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: date
+            date_format_string: "%Y-%m-%d"
+""")
+    print(json.dumps(my_sql_execution_environment.get_available_data_asset_names(), indent=4))
+
+    assert my_sql_execution_environment.get_available_data_asset_names() == {
+        "daily": [
+            "table_containing_id_spacers_for_D",
+            "table_partitioned_by_date_column__A",
+            "table_with_fk_reference_from_F"
+        ]
+    }
+
+    with pytest.raises(ValueError):
+        my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+class_name: StreamlinedSqlExecutionEnvironment
+connection_string: sqlite:///{db_file}
+introspection:
+    daily:
+        skip_inapplicable_tables: false
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: date
+            date_format_string: "%Y-%m-%d"
+    """)
