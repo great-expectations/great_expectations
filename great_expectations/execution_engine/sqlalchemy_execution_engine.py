@@ -7,14 +7,26 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Tuple
 from urllib.parse import urlparse
 
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.core import IDDict
+from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.execution_environment.types import (
     SqlAlchemyDatasourceQueryBatchSpec,
     SqlAlchemyDatasourceTableBatchSpec,
 )
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
-from great_expectations.util import import_library_module
 from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.util import import_library_module
+from great_expectations.exceptions import (
+    BatchSpecError,
+    DatasourceKeyPairAuthBadPassphraseError,
+    GreatExpectationsError,
+    InvalidConfigError,
+    ValidationError,
+)
+
+logger = logging.getLogger(__name__)
+
 
 try:
     import sqlalchemy as sa
@@ -30,17 +42,6 @@ except ImportError:
     TextClause = None
     quoted_name = None
 
-from great_expectations.core.batch import Batch, BatchMarkers
-from great_expectations.exceptions import (
-    BatchSpecError,
-    DatasourceKeyPairAuthBadPassphraseError,
-    GreatExpectationsError,
-    InvalidConfigError,
-    ValidationError,
-)
-from great_expectations.execution_engine import ExecutionEngine
-
-logger = logging.getLogger(__name__)
 
 try:
     import psycopg2
