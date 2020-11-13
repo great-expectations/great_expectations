@@ -435,6 +435,7 @@ project_path/
         great_expectations.yml
         checkpoints/
         expectations/
+            .ge_store_backend_id
             titanic/
                 subdir_reader/
                     Titanic/
@@ -456,6 +457,7 @@ project_path/
             config_variables.yml
             data_docs/
             validations/
+                .ge_store_backend_id
                 titanic/
                     subdir_reader/
                         Titanic/
@@ -497,6 +499,7 @@ project_path/
         == """\
 data_docs/
     local_site/
+        .ge_store_backend_id
         index.html
         expectations/
             random/
@@ -978,6 +981,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -995,6 +999,7 @@ great_expectations/
         config_variables.yml
         data_docs/
         validations/
+            .ge_store_backend_id
 """
     )
 
@@ -1008,6 +1013,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -1025,6 +1031,7 @@ great_expectations/
         config_variables.yml
         data_docs/
         validations/
+            .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, "great_expectations")
@@ -1050,6 +1057,7 @@ uncommitted/
     config_variables.yml
     data_docs/
     validations/
+        .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, "great_expectations")

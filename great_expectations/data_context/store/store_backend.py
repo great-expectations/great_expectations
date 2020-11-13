@@ -1,7 +1,8 @@
 import logging
+import uuid
 from abc import ABCMeta, abstractmethod
 
-from great_expectations.exceptions import StoreBackendError, StoreError
+from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +19,41 @@ class StoreBackend(metaclass=ABCMeta):
     """
 
     IGNORED_FILES = [".ipynb_checkpoints"]
+    STORE_BACKEND_ID_KEY = (".ge_store_backend_id",)
+    STORE_BACKEND_ID_PREFIX = "store_backend_id = "
 
-    def __init__(self, fixed_length_key=False):
+    def __init__(self, fixed_length_key=False, suppress_store_backend_id=False):
         self._fixed_length_key = fixed_length_key
+        self._suppress_store_backend_id = suppress_store_backend_id
 
     @property
     def fixed_length_key(self):
         return self._fixed_length_key
+
+    @property
+    def store_backend_id(self) -> str:
+        """
+        Create a store_backend_id if one does not exist, and return it if it exists
+        Returns:
+            store_backend_id which is a UUID(version=4)
+        """
+        try:
+            try:
+                return self.get(key=self.STORE_BACKEND_ID_KEY).replace(
+                    self.STORE_BACKEND_ID_PREFIX, ""
+                )
+            except InvalidKeyError:
+                store_id = str(uuid.uuid4())
+                self.set(
+                    key=self.STORE_BACKEND_ID_KEY,
+                    value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}",
+                )
+                return store_id
+        except Exception:
+            logger.warning(
+                "Invalid store configuration: store_backend_id cannot be retrieved or set."
+            )
+            return "00000000-0000-0000-0000-00000000e003"
 
     def get(self, key, **kwargs):
         self._validate_key(key)
@@ -115,9 +144,14 @@ class InMemoryStoreBackend(StoreBackend):
     def __init__(self, runtime_environment=None, fixed_length_key=False):
         super().__init__(fixed_length_key=fixed_length_key)
         self._store = {}
+        # Initialize with store_backend_id
+        _ = self.store_backend_id
 
     def _get(self, key):
-        return self._store[key]
+        try:
+            return self._store[key]
+        except KeyError as e:
+            raise InvalidKeyError(f"{str(e)}")
 
     def _set(self, key, value, **kwargs):
         self._store[key] = value

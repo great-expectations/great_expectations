@@ -3,6 +3,7 @@ import datetime
 import pytest
 from freezegun import freeze_time
 
+import tests.test_utils as test_utils
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuiteValidationResult,
@@ -36,6 +37,29 @@ from great_expectations.data_context.util import instantiate_class_from_config
     ]
 )
 def param_store(request, test_backends):
+    if "postgresql" not in test_backends:
+        pytest.skip("skipping fixture because postgresql not selected")
+
+    return instantiate_class_from_config(
+        config=request.param,
+        config_defaults={"module_name": "great_expectations.data_context.store",},
+        runtime_environment={},
+    )
+
+
+@pytest.fixture(
+    params=[
+        {
+            "class_name": "EvaluationParameterStore",
+            "store_backend": {"class_name": "InMemoryStoreBackend",},
+        },
+        {
+            "class_name": "EvaluationParameterStore",
+            "module_name": "great_expectations.data_context.store",
+        },
+    ]
+)
+def in_memory_param_store(request, test_backends):
     if "postgresql" not in test_backends:
         pytest.skip("skipping fixture because postgresql not selected")
 
@@ -149,6 +173,18 @@ def test_database_evaluation_parameter_store_basics(param_store):
     param_store.set(metric_identifier, metric_value)
     value = param_store.get(metric_identifier)
     assert value == metric_value
+
+
+def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_store):
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert in_memory_param_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(in_memory_param_store.store_backend_id)
 
 
 @freeze_time("09/26/2019 13:42:41")

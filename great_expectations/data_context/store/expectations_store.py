@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from great_expectations.core import ExpectationSuiteSchema
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
@@ -97,7 +99,7 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
 
     _key_class = ExpectationSuiteIdentifier
 
-    def __init__(self, store_backend=None, runtime_environment=None):
+    def __init__(self, store_backend: dict = None, runtime_environment: dict = None):
         self._expectationSuiteSchema = ExpectationSuiteSchema()
 
         if store_backend is not None:

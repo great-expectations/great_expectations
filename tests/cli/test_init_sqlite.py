@@ -108,6 +108,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
         warning.json
     notebooks/
         pandas/
@@ -126,6 +127,7 @@ great_expectations/
         config_variables.yml
         data_docs/
             local_site/
+                .ge_store_backend_id
                 index.html
                 expectations/
                     warning.html
@@ -160,6 +162,7 @@ great_expectations/
                             20190926T134241.000000Z/
                                 foobarbazguid.html
         validations/
+            .ge_store_backend_id
             warning/
                 20190926T134241.000000Z/
                     20190926T134241.000000Z/

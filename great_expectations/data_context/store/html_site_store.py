@@ -129,6 +129,7 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
                 "module_name": module_name,
                 "filepath_prefix": filepath_prefix,
                 "filepath_suffix": filepath_suffix,
+                "suppress_store_backend_id": True,
             },
         )
         if not expectation_suite_identifier_obj:
@@ -146,6 +147,7 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
                 "module_name": module_name,
                 "filepath_prefix": filepath_prefix,
                 "filepath_suffix": filepath_suffix,
+                "suppress_store_backend_id": True,
             },
         )
         if not validation_result_idendifier_obj:

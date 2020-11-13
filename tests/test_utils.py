@@ -3,6 +3,7 @@ import locale
 import os
 import random
 import string
+import uuid
 from functools import wraps
 from types import ModuleType
 from typing import Union
@@ -912,3 +913,33 @@ def safe_remove(path):
             os.remove(path)
         except OSError as e:
             print(e)
+
+
+def validate_uuid4(uuid_string: str) -> bool:
+    """
+    Validate that a UUID string is in fact a valid uuid4.
+    Happily, the uuid module does the actual checking for us.
+    It is vital that the 'version' kwarg be passed
+    to the UUID() call, otherwise any 32-character
+    hex string is considered valid.
+    From https://gist.github.com/ShawnMilo/7777304
+
+    Args:
+        uuid_string: string to check whether it is a valid UUID or not
+
+    Returns:
+        True if uuid_string is a valid UUID or False if not
+    """
+    try:
+        val = uuid.UUID(uuid_string, version=4)
+    except ValueError:
+        # If it's a value error, then the string
+        # is not a valid hex code for a UUID.
+        return False
+
+    # If the uuid_string is a valid hex code,
+    # but an invalid uuid4,
+    # the UUID.__init__ will convert it to a
+    # valid uuid4. This is bad for validation purposes.
+
+    return val.hex == uuid_string.replace("-", "")
