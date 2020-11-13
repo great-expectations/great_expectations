@@ -135,7 +135,7 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
                 )
             }
         else:
-            return super().get_evaluation_dependencies(
+            return super()._get_evaluation_dependencies(
                 metric=metric,
                 configuration=configuration,
                 execution_engine=execution_engine,

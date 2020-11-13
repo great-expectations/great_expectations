@@ -183,8 +183,10 @@ class ExecutionEngine:
                 metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
             )
             if metric_fn_type in [
+                MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.MAP_FN,
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
+                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
                 MetricPartialFunctionTypes.WINDOW_FN,
                 MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
                 MetricPartialFunctionTypes.AGGREGATE_FN,

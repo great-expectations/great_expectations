@@ -252,7 +252,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            batches (dict) - A dictionary specifying batch id and which batches to obtain
+            domain_type () - A dictionary specifying batch id and which batches to obtain
 
         Returns:
             A tuple including:

@@ -24,17 +24,17 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, value, _metrics, **kwargs):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map_series")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
         return column_lengths == value
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, value, _metrics, **kwargs):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map_fn")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
         return column_lengths == value
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, value, _metrics, **kwargs):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map_fn")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
         return column_lengths == value
 
     @classmethod
@@ -45,21 +45,18 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        if metric.metric_name == "column_values.value_length.equals.map_condition_fn":
+        if metric.metric_name == "column_values.value_length.equals.condition":
             return {
-                "column_values.value_length.map_fn": MetricConfiguration(
-                    "column_values.value_length.map_fn", metric.metric_domain_kwargs
+                "column_values.value_length.map": MetricConfiguration(
+                    "column_values.value_length.map", metric.metric_domain_kwargs
                 )
             }
-        if (
-            metric.metric_name
-            == "column_values.value_length.equals.map_condition_series"
-        ):
-            return {
-                "column_values.value_length.map_series": MetricConfiguration(
-                    "column_values.value_length.map_series", metric.metric_domain_kwargs
-                )
-            }
+        return super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
 
 
 class ColumnValuesValueLength(ColumnMapMetricProvider):
@@ -96,7 +93,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         strict_max=None,
         **kwargs
     ):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map_series")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
 
         metric_series = None
         if min_value is not None and max_value is not None:
@@ -143,7 +140,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         strict_max=None,
         **kwargs
     ):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map_fn")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -179,7 +176,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         strict_max=None,
         **kwargs
     ):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map_fn")
+        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -212,19 +209,15 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        if (
-            metric.metric_name
-            == "column_values.value_length.between.map_condition_series"
-        ):
+        if metric.metric_name == "column_values.value_length.between.condition":
             return {
-                "column_values.value_length.map_series": MetricConfiguration(
-                    "column_values.value_length.map_series", metric.metric_domain_kwargs
+                "column_values.value_length.map": MetricConfiguration(
+                    "column_values.value_length.map", metric.metric_domain_kwargs
                 )
             }
-
-        if metric.metric_name == "column_values.value_length.between.map_condition_fn":
-            return {
-                "column_values.value_length.map_fn": MetricConfiguration(
-                    "column_values.value_length.map_fn", metric.metric_domain_kwargs
-                )
-            }
+        return super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
