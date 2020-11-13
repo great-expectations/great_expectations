@@ -1,12 +1,12 @@
 import logging
 import copy
 
-from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment import BaseExecutionEnvironment
 
 logger = logging.getLogger(__name__)
 
 
-class StreamlinedSqlExecutionEnvironment(ExecutionEnvironment):
+class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
     """A specialized ExecutionEnvironment for SQL backends
 
     StreamlinedSqlExecutionEnvironment is designed to minimize boilerplate configuration and new concepts
