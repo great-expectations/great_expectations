@@ -104,9 +104,9 @@ def test_get_compute_domain_with_no_domain_kwargs(spark_session):
     engine.load_batch_data(batch_data=df, batch_id="1234")
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={})
     assert compute_kwargs is not None, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-    assert data.schema == df.schema, "Data does not match after getting compute domain"
-    assert data.collect() == df.collect(), "Data does not match after getting compute domain"
+    assert accessor_kwargs == {}
+    assert data.schema == df.schema
+    assert data.collect() == df.collect()
 
 
 def test_get_compute_domain_with_column_domain(spark_session):
@@ -125,9 +125,9 @@ def test_get_compute_domain_with_column_domain(spark_session):
     engine.load_batch_data(batch_data=df, batch_id="1234")
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column": "a"})
     assert compute_kwargs is not None, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
-    assert data.schema == df.schema, "Data does not match after getting compute domain"
-    assert data.collect() == df.collect(), "Data does not match after getting compute domain"
+    assert accessor_kwargs == {"column": "a"}
+    assert data.schema == df.schema
+    assert data.collect() == df.collect()
 
 
 def test_get_compute_domain_with_row_condition(spark_session):
@@ -150,12 +150,12 @@ def test_get_compute_domain_with_row_condition(spark_session):
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 2",
                                                                                      "condition_parser": "spark"})
     # Ensuring data has been properly queried
-    assert data.schema == expected_df.schema, "Data does not match after getting compute domain"
-    assert data.collect() == expected_df.collect(), "Data does not match after getting compute domain"
+    assert data.schema == expected_df.schema
+    assert data.collect() == expected_df.collect()
 
     # Ensuring compute kwargs have not been modified
     assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
+    assert accessor_kwargs == {}
 
 
 
@@ -180,12 +180,12 @@ def test_get_compute_domain_with_unmeetable_row_condition(spark_session):
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 24",
                                                                                      "condition_parser": "spark"})
     # Ensuring data has been properly queried
-    assert data.schema == expected_df.schema, "Data does not match after getting compute domain"
-    assert data.collect() == expected_df.collect(), "Data does not match after getting compute domain"
+    assert data.schema == expected_df.schema
+    assert data.collect() == expected_df.collect()
 
     # Ensuring compute kwargs have not been modified
-    assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
+    assert "row_condition" in compute_kwargs.keys()
+    assert accessor_kwargs == {}
 
 
 def test_basic_setup(spark_session):
