@@ -256,7 +256,7 @@ def sa(test_backends):
             import sqlalchemy as sa
             return sa
         except ImportError:
-            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+            return None
 
 
 @pytest.fixture
@@ -2818,6 +2818,9 @@ def basic_sqlalchemy_datasource(sqlitedb_engine):
 
 @pytest.fixture
 def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
+    if sa is None:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
+
 
     db_file = file_relative_path(
         __file__, os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),

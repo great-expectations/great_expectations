@@ -550,7 +550,6 @@ class BaseDataContext:
         if not return_mode in ["instantiated_class", "report_object"]:
                 raise ValueError(f"Unknown return_mode: {return_mode}.")
 
-
         config = yaml.load(yaml_config)
 
         if "class_name" in config:

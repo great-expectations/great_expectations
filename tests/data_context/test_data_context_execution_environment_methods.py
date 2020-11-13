@@ -4,6 +4,7 @@ import json
 import pandas as pd
 
 from great_expectations.core.batch import (
+    Batch,
     BatchDefinition,
     BatchRequest,
     PartitionDefinition,
@@ -20,6 +21,9 @@ except ImportError:
 
 @pytest.fixture
 def data_context_with_sql_execution_environment_for_testing_get_batch(empty_data_context):
+    if sa is None:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
+
     db_file = file_relative_path(
         __file__,
         "../test_sets/test_cases_for_sql_data_connector.db",
@@ -246,7 +250,10 @@ def test_get_batch_list_from_new_style_datasource_with_sql_execution_environment
     assert len(batch.data.fetchall()) == 4
 
 
-def test_get_batch_list_from_new_style_datasource_with_file_system_execution_environment(empty_data_context, tmp_path_factory):
+def test_get_batch_list_from_new_style_datasource_with_file_system_execution_environment(
+    empty_data_context,
+    tmp_path_factory
+):
     context = empty_data_context
 
     base_directory = str(tmp_path_factory.mktemp("test_get_batch_list_from_new_style_datasource_with_file_system_execution_environment"))
@@ -274,7 +281,7 @@ data_connectors:
         glob_directive: "*/*.csv"
 
         default_regex:
-            pattern: (.+)/(.+)-(\d+)\.csv
+            pattern: (.+)/(.+)-(\\d+)\\.csv
             group_names:
                 - data_asset_name
                 - letter
@@ -287,11 +294,11 @@ data_connectors:
     )
 
     batch_list = context.get_batch_list_from_new_style_datasource({
-        "execution_environment_name" : "my_execution_environment",
+        "execution_environment_name": "my_execution_environment",
         "data_connector_name": "my_data_connector",
         "data_asset_name": "path",
-        "partition_request" : {
-            "partition_identifiers" : {
+        "partition_request": {
+            "partition_identifiers": {
                 # "data_asset_name": "path",
                 "letter": "A",
                 "number": "101",
