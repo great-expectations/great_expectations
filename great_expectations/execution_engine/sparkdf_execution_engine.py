@@ -255,7 +255,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             batches (dict) - A dictionary specifying batch id and which batches to obtain
             domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
             like to be using, or a corresponding string value representing it. String types include "identity", "column",
-            "column_pair", "table" and "other".
+            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
+            MetricDomainTypes.
 
         Returns:
             A tuple including:
