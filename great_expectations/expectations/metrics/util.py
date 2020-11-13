@@ -66,7 +66,7 @@ from great_expectations.execution_engine.util import check_sql_engine_dialect
 def get_dialect_regex_expression(column, regex, dialect, positive=True):
     try:
         # postgres
-        if isinstance(dialect, sa.dialects.postgresql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
             if positive:
                 return BinaryExpression(
                     sa.column(column), literal(regex), custom_op("~")
@@ -80,7 +80,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # redshift
-        if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+        if issubclass(dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             if positive:
                 return BinaryExpression(
                     sa.column(column), literal(regex), custom_op("~")
@@ -97,7 +97,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # MySQL
-        if isinstance(dialect, sa.dialects.mysql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.mysql.dialect):
             if positive:
                 return BinaryExpression(
                     sa.column(column), literal(regex), custom_op("REGEXP")
@@ -111,7 +111,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # Snowflake
-        if isinstance(dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect,):
+        if issubclass(dialect.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect,):
             if positive:
                 return BinaryExpression(
                     sa.column(column), literal(regex), custom_op("RLIKE")
@@ -128,7 +128,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # Bigquery
-        if isinstance(dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+        if issubclass(dialect.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
             if positive:
                 return sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
             else:
