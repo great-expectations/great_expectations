@@ -102,7 +102,7 @@ stages:
               pip install  $(GE_pytest_pip_opts)
               #<Alex></Alex>
               #pip install  --requirement requirements.txt
-              pip install  --requirement requirements.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install  --requirement requirements.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install  .
             displayName: 'Install dependencies'
@@ -166,7 +166,7 @@ stages:
           - script: |
               #<Alex></Alex>
               #pip install --requirement requirements.txt
-              pip install --requirement requirements.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt
               pip install $(GE_pytest_pip_opts)
               pip install  .
             displayName: 'Install dependencies'
@@ -269,7 +269,7 @@ stages:
           - script: |
               #<Alex></Alex>
               #pip install -r requirements.txt
-              pip install -r requirements.txt -r requirements-dev-spark.txt -r requirements-dev-sqlalchemy.txt
+              pip install -r requirements.txt -r requirements-dev-spark.txt -r requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt
               pip install  pytest pytest-cov pytest-azurepipelines
               pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
