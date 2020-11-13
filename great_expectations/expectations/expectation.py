@@ -822,7 +822,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-
         if runtime_configuration:
             result_format = runtime_configuration.get(
                 "result_format",
@@ -842,25 +841,13 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
 
         success = None
-        if total_count is None:
+        if total_count is None or null_count is None:
             # Vacuously true
             success = True
-        elif null_count is not None and (total_count - null_count) != 0:
-            if configuration.expectation_type == "expect_column_values_to_not_be_null":
-                success_ratio = (total_count - unexpected_count) / (
-                        total_count
-                )
-                success = success_ratio >= mostly
-            else:
-                success_ratio = (total_count - unexpected_count - null_count) / (
+        elif (total_count - null_count) != 0:
+            success_ratio = (total_count - unexpected_count - null_count) / (
                     total_count - null_count
-                )
-                success = success_ratio >= mostly
-        elif null_count is not None and (total_count - null_count) == 0:
-            success_ratio = (total_count - unexpected_count) / total_count
-            success = success_ratio >= mostly
-        elif null_count is None:
-            success_ratio = (total_count - unexpected_count) / total_count
+            )
             success = success_ratio >= mostly
         elif total_count == 0:
             success = True
@@ -882,7 +869,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
             unexpected_index_list=metrics.get(
                 self.map_metric + ".unexpected_index_list"
             ),
-            skip_missing=True if configuration.expectation_type == "expect_column_values_to_not_be_null" else False
         )
 
 
@@ -894,7 +880,6 @@ def _format_map_output(
     unexpected_count,
     unexpected_list,
     unexpected_index_list,
-    skip_missing=False
 ):
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
     and file_lines_map_expectation).
@@ -911,6 +896,8 @@ def _format_map_output(
 
     if result_format["result_format"] == "BOOLEAN_ONLY":
         return return_obj
+
+    skip_missing = False
 
     if nonnull_count is None:
         missing_count = None
@@ -938,8 +925,8 @@ def _format_map_output(
         "unexpected_count": unexpected_count,
         "unexpected_percent": unexpected_percent,
         "partial_unexpected_list": unexpected_list[
-            : result_format["partial_unexpected_count"]
-        ],
+                                   : result_format["partial_unexpected_count"]
+                                   ],
     }
 
     if not skip_missing:
@@ -972,8 +959,8 @@ def _format_map_output(
             return_obj["result"].update(
                 {
                     "partial_unexpected_index_list": unexpected_index_list[
-                        : result_format["partial_unexpected_count"]
-                    ]
+                                                     : result_format["partial_unexpected_count"]
+                                                     ]
                     if unexpected_index_list is not None
                     else None,
                     "partial_unexpected_counts": partial_unexpected_counts,
