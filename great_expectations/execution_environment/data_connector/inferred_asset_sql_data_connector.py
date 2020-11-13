@@ -20,9 +20,9 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         data_asset_name_suffix (str): An optional prefix to prepend to inferred data_asset_names
         data_asset_name_suffix (str): An optional suffix to append to inferred data_asset_names
         include_schema_name (bool): Should the data_asset_name include the schema as a prefix?
-        splitter_method (str): A method to 
+        splitter_method (str): A method to split the target table into multiple Batches
         splitter_kwargs (dict): Keyword arguments to pass to splitter_method
-        sampling_method (str): A 
+        sampling_method (str): A method to downsample within a target Batch
         sampling_kwargs (dict): Keyword arguments to pass to sampling_method
         excluded_tables (List): A list of tables to ignore when inferring data asset_names
         included_tables (List): If not None, only include tables in this list when inferring data asset_names
