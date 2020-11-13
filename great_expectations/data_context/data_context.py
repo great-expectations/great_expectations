@@ -1741,7 +1741,6 @@ class BaseDataContext:
         execution_environment: ExecutionEnvironment = self._build_execution_environment_from_config(
             name=execution_environment_name,
             config=execution_environment_config,
-            runtime_environment=runtime_environment,
         )
         self._cached_execution_environments[
             execution_environment_name

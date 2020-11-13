@@ -1504,6 +1504,7 @@ def safe_remove(path):
 
 # TODO: <Alex>Replace this all-purpose configuration with purpose-fit configuration sections using YAML.</Alex>
 def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
+    data_context_root_directory: str,
     use_group_names: bool = False,
     use_sorters: bool = False,
     default_base_directory="data",
@@ -1556,6 +1557,7 @@ def execution_environment_configured_asset_filesystem_data_connector_regex_parti
 
     execution_environments_config: dict = {
         "test_execution_environment": {
+            "data_context_root_directory": data_context_root_directory,
             "class_name": "ExecutionEnvironment",
             "execution_engine": {
                 "module_name": "great_expectations.execution_engine",

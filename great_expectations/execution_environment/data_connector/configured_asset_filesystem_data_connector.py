@@ -51,25 +51,24 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             default_regex=default_regex,
         )
 
-        # TODO: <Alex>The next two properties must be private.</Alex>
-        self.base_directory = normalize_directory_path(
-            dir_path=base_directory,
-            root_directory_path=self.data_context_root_directory
-        )
-
-        self.glob_directive = glob_directive
+        self._base_directory = base_directory
+        self._glob_directive = glob_directive
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
-        data_asset_path: str = self.base_directory
-        glob_directive: str = self.glob_directive
+        base_directory: str = self.base_directory
+        glob_directive: str = self._glob_directive
+
         if asset is not None:
             if asset.base_directory:
-                data_asset_path = str(Path(self.base_directory).joinpath(asset.base_directory))
+                base_directory = normalize_directory_path(
+                    dir_path=asset.base_directory,
+                    root_directory_path=base_directory
+                )
             if asset.glob_directive:
                 glob_directive = asset.glob_directive
 
         path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
-            base_directory_path=data_asset_path,
+            base_directory_path=base_directory,
             glob_directive=glob_directive
         )
 
@@ -77,3 +76,10 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
 
     def _get_full_file_path(self, path: str) -> str:
         return str(Path(self.base_directory).joinpath(path))
+
+    @property
+    def base_directory(self):
+        return normalize_directory_path(
+            dir_path=self._base_directory,
+            root_directory_path=self.data_context_root_directory
+        )
