@@ -264,6 +264,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
+        # if domain type is an enum, getting the string value for future comparisons
+        if isinstance(domain_type, MetricDomainTypes):
+            domain_type = domain_type.value
+
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -301,22 +305,30 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 )
 
         # If user has stated they want a column, checking if one is provided, and
-        if domain_type == "column" or domain_type == MetricDomainTypes.COLUMN:
+        if domain_type == "column":
             if "column" in compute_domain_kwargs:
                 accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
             else:
                 # If column not given
                 raise GreatExpectationsError("Column not provided in compute_domain_kwargs")
-        else:
-            # If column pair requested
-            if domain_type == "column_pair" or domain_type == MetricDomainTypes.COLUMN_PAIR:
 
+        # Else, if column pair values requested
+        elif domain_type == "column_pair":
                 # Ensuring column_A and column_B parameters provided
                 if "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs:
                     accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
                     accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
                 else:
                     raise GreatExpectationsError("column_A or column_B not found within compute_domain_kwargs")
+
+        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+        else:
+            if domain_type in ["identity", "table", "other"] and ("column" in compute_domain_kwargs or "column_A"
+                    in compute_domain_kwargs or "column_B" in compute_domain_kwargs):
+                # Throwing a warning
+                print("WARNING: Compute domain kwargs for this domain type received unexpected column key, which"
+                      "was ignored. If you would like to specify a column, please define domain type as a column"
+                      "or column_pair domain, depending on which one better fits your desired domain.")
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
