@@ -6,9 +6,9 @@ import pandas as pd
 import hashlib
 from typing import List
 
-from great_expectations.core.batch import BatchSpec
 from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec
 from great_expectations.execution_engine.pandas_execution_engine import PandasExecutionEngine
+import great_expectations.exceptions.exceptions as ge_exceptions
 
 # def test_basic_setup():
 #     df = pd.DataFrame({"x": range(10)})
@@ -215,15 +215,33 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
         ))
 
 def test_get_batch_with_split_on_hashed_column(test_df):
+
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+            batch_data=test_df,
+            splitter_method="_split_on_hashed_column",
+            splitter_kwargs={
+                "column_name":"favorite_color",
+                "hash_digits":1,
+                "partition_definition":{
+                    "hash_value": "a",
+                },
+                "hash_function_name": "I_am_not_valid",
+
+            }
+        ))
+
     split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_df,
         splitter_method="_split_on_hashed_column",
         splitter_kwargs={
-            "column_name":"favorite_color",
-            "hash_digits":1,
-            "partition_definition":{
+            "column_name": "favorite_color",
+            "hash_digits": 1,
+            "partition_definition": {
                 "hash_value": "a",
-            }
+            },
+            "hash_function_name": "sha256",
+
         }
     ))
     assert split_df.shape == (8, 10)
@@ -263,11 +281,22 @@ def test_sample_using_a_list(test_df):
     assert sampled_df.shape == (4, 10)
 
 def test_sample_using_md5(test_df):
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        sampled_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+            batch_data=test_df,
+            sampling_method="_sample_using_hash",
+            sampling_kwargs={
+                "column_name": "date",
+                "hash_function_name": "I_am_not_valid"
+            }
+        ))
+
     sampled_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_df,
-        sampling_method="_sample_using_md5",
+        sampling_method="_sample_using_hash",
         sampling_kwargs={
-            "column_name": "date",    
+            "column_name": "date",
+            "hash_function_name": "md5"
         }
     ))
     assert sampled_df.shape == (10, 10)
@@ -275,3 +304,24 @@ def test_sample_using_md5(test_df):
         datetime.date(2020,1,15),
         datetime.date(2020,1,29),
     ]).all()
+
+
+def test_get_batch_with_split_on_multi_column_values_and_sample_using_random(test_df):
+    split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
+        splitter_method="_split_on_multi_column_values",
+        splitter_kwargs={
+            "column_names": ["y", "m", "d"],
+            "partition_definition": {
+                "y": 2020,
+                "m": 1,
+                "d": 5,
+            }
+        },
+        sampling_method="_sample_using_random",
+        sampling_kwargs={
+            "p": 0.5,
+        }
+    ))
+    assert split_df.shape == (3, 10)
+    assert (split_df.date == datetime.date(2020, 1, 5)).all()

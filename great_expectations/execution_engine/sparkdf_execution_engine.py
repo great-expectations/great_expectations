@@ -4,7 +4,7 @@ import logging
 import uuid
 import hashlib
 
-from typing import Any, Callable, Dict, Iterable, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +33,7 @@ except ImportError:
 
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.batch import BatchSpec, BatchMarkers
+from great_expectations.exceptions import exceptions as ge_exceptions
 
 from great_expectations.execution_environment.types.batch_spec import(
     PathBatchSpec,
@@ -176,7 +177,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         self._spark_config = kwargs.pop("spark_config", {})
         try:
             builder = SparkSession.builder
-            app_name: Union[str, None] = self._spark_config.pop("spark.app.name", None)
+            app_name: Optional[str] = self._spark_config.pop("spark.app.name", None)
             if app_name:
                 builder.appName(app_name)
             for k, v in self._spark_config.items():
@@ -224,7 +225,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             reader_options: dict = batch_spec.get("reader_options") or {}
 
             path: str = batch_spec["path"]
-            reader = self.spark.read # <WILL> IS THIS THE RIGHT WAY?
+            reader = self.spark.read
             reader_fn: Callable = self._get_reader_fn(reader, reader_method, path)
 
             batch_data = reader_fn(path, **reader_options)
@@ -236,18 +237,20 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 Invalid batch_spec: batch_data is required for a SparkDFExecutionEngine to operate.
             """
             )
-        splitter_method: str = batch_spec.get("splitter_method") or None
-        splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
-        if splitter_method:
-            splitter_fn = getattr(self, splitter_method)
-            batch_data = splitter_fn(batch_data, **splitter_kwargs)
-        sampling_method: str = batch_spec.get("sampling_method") or None
-        sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
-        if sampling_method:
-            sampling_fn = getattr(self, sampling_method)
-            batch_data = sampling_fn(batch_data, **sampling_kwargs)
-
+        batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
         return batch_data, batch_markers
+
+    def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
+        if batch_spec.get("splitter_method"):
+            splitter_fn = getattr(self, batch_spec.get("splitter_method"))
+            splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
+            batch_data = splitter_fn(batch_data, **splitter_kwargs)
+
+        if batch_spec.get("sampling_method"):
+            sampling_fn = getattr(self, batch_spec.get("sampling_method"))
+            sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
+            batch_data = sampling_fn(batch_data, **sampling_kwargs)
+        return batch_data
 
     @staticmethod
     def guess_reader_method_from_path(path):
@@ -529,13 +532,23 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             column_name: str,
             hash_digits: int,
             partition_definition: dict,
+            hash_function_name: str = "sha256",
     ):
         """Split on the hashed value of the named column"""
-        def encrypt_value_sha256(to_encode):
-            sha_value = hashlib.sha256(to_encode.encode()).hexdigest()[-1 * hash_digits:]
-            return sha_value
-        spark_udf = F.udf(encrypt_value_sha256, StringType())
-        res = df.withColumn('encrypted_value', spark_udf(column_name)) \
+        try:
+            getattr(hashlib, hash_function_name)
+        except (TypeError, AttributeError) as e:
+            raise (ge_exceptions.ExecutionEngineError(
+                f'''The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name. 
+                    Reference to {hash_function_name} cannot be found.'''))
+
+        def _encrypt_value(to_encode):
+            hash_func = getattr(hashlib, hash_function_name)
+            hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits:]
+            return hashed_value
+
+        encrypt_udf = F.udf(_encrypt_value, StringType())
+        res = df.withColumn('encrypted_value', encrypt_udf(column_name)) \
             .filter(F.col("encrypted_value") == partition_definition["hash_value"]) \
             .drop("encrypted_value")
         return res
@@ -577,18 +590,28 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return df.where(F.col(column_name).isin(value_list))
 
     @staticmethod
-    def _sample_using_md5(
+    def _sample_using_hash(
         df,
         column_name: str,
         hash_digits: int = 1,
         hash_value: str = 'f',
+        hash_function_name: str = "md5"
     ):
-        def _encrypt_value_md5(to_encode):
+        try:
+            getattr(hashlib, str(hash_function_name))
+        except (TypeError, AttributeError) as e:
+            raise (ge_exceptions.ExecutionEngineError(
+                f'''The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name. 
+                    Reference to {hash_function_name} cannot be found.'''))
+
+        def _encrypt_value(to_encode):
             to_encode_str = str(to_encode)
-            sha_value = hashlib.md5(to_encode_str.encode()).hexdigest()[-1 * hash_digits:]
-            return sha_value
-        encrypt_value_md5_udf = F.udf(_encrypt_value_md5, StringType())
-        res = df.withColumn('encrypted_value', encrypt_value_md5_udf(column_name)) \
+            hash_func = getattr(hashlib, hash_function_name)
+            hashed_value = hash_func(to_encode_str.encode()).hexdigest()[-1 * hash_digits:]
+            return hashed_value
+
+        encrypt_udf = F.udf(_encrypt_value, StringType())
+        res = df.withColumn('encrypted_value', encrypt_udf(column_name)) \
             .filter(F.col("encrypted_value") == hash_value) \
             .drop("encrypted_value")
         return res
