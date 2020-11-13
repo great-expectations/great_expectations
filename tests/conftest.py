@@ -29,7 +29,6 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 from .test_utils import (
     create_files_for_regex_partitioner,
-    execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config,
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
@@ -2565,63 +2564,6 @@ def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
         },
     )
     return empty_data_context
-
-
-@pytest.fixture()
-def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_no_groups_no_sorters_data_context(
-    empty_data_context: DataContext,
-    default_base_directory: str = "data",
-    data_asset_base_directory: str = None,
-):
-    data_context: DataContext = empty_data_context
-    execution_environment_name: str = "test_execution_environment"
-    data_context.add_execution_environment(
-        name=execution_environment_name,
-        initialize=True,
-        **execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
-            use_group_names=False,
-            use_sorters=False,
-            default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory,
-        )[
-            "test_execution_environment"
-        ],
-    )
-    base_directory_names: list = [default_base_directory, data_asset_base_directory]
-    root_directory_path: str = data_context.root_directory
-    create_files_for_regex_partitioner(
-        root_directory_path=root_directory_path, directory_paths=base_directory_names
-    )
-    return data_context
-
-
-@pytest.fixture()
-def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_with_groups_with_sorters_data_context(
-    empty_data_context: DataContext,
-    default_base_directory: str = "data",
-    data_asset_base_directory: str = None,
-):
-    data_context: DataContext = empty_data_context
-    execution_environment_name: str = "test_execution_environment"
-    root_directory_path: str = data_context.root_directory
-    data_context.add_execution_environment(
-        execution_environment_name=execution_environment_name,
-        # initialize=True,
-        execution_environment_config=execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
-            data_context_root_directory=root_directory_path,
-            use_group_names=True,
-            use_sorters=True,
-            default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory,
-        )[
-            "test_execution_environment"
-        ],
-    )
-    base_directory_names: list = [default_base_directory, data_asset_base_directory]
-    create_files_for_regex_partitioner(
-        root_directory_path=root_directory_path, directory_paths=base_directory_names
-    )
-    return data_context
 
 
 @pytest.fixture
