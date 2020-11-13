@@ -152,23 +152,22 @@ Notes:
             raise BatchSpecError(
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
             )
-
-        splitter_method: str = batch_spec.get("splitter_method") or None
-        splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
-        if splitter_method:
-            splitter_fn = getattr(self, splitter_method)
-            batch_data = splitter_fn(batch_data, **splitter_kwargs)
-
-        sampling_method: str = batch_spec.get("sampling_method") or None
-        sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
-        if sampling_method:
-            sampling_fn = getattr(self, sampling_method)
-            batch_data = sampling_fn(batch_data, **sampling_kwargs)
-
+        batch_data = self._split_or_sample(batch_spec, batch_data)
         if batch_data.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
-
         return batch_data, batch_markers
+
+    def _split_or_sample(self, batch_spec, batch_data):
+        if batch_spec.get("splitter_method"):
+            splitter_fn = getattr(self, batch_spec.get("splitter_method"))
+            splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
+            batch_data = splitter_fn(batch_data, **splitter_kwargs)
+
+        if batch_spec.get("sampling_method"):
+            sampling_fn = getattr(self, batch_spec.get("sampling_method"))
+            sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
+            batch_data = sampling_fn(batch_data, **sampling_kwargs)
+        return batch_data
 
     @property
     def dataframe(self):
@@ -407,11 +406,13 @@ Notes:
         column_name: str,
         hash_digits: int,
         partition_definition: dict,
+        hash_method: str = "md5",
+
     ):
         """Split on the hashed value of the named column"""
-
+        hash_method = getattr(hashlib, hash_method)
         matching_rows = df[column_name].map(
-            lambda x: hashlib.md5(str(x).encode()).hexdigest()[-1*hash_digits:] == partition_definition["hash_value"]
+            lambda x: hash_method(str(x).encode()).hexdigest()[-1*hash_digits:] == partition_definition["hash_value"]
         )
 
         return df[matching_rows]
@@ -449,14 +450,16 @@ Notes:
         return df[df[column_name].isin(value_list)]
 
     @staticmethod
-    def _sample_using_md5(
+    def _sample_using_hash(
         df,
         column_name: str,
         hash_digits: int=1,
         hash_value: str='f',
+        hash_method: str="md5",
     ):
         """Hash the values in the named column, and split on that"""
+        hash_func = getattr(hashlib, hash_method)
         matches = df[column_name].map(
-            lambda x: hashlib.md5(str(x).encode()).hexdigest()[-1*hash_digits:] == hash_value
+            lambda x: hash_func(str(x).encode()).hexdigest()[-1*hash_digits:] == hash_value
         )
         return df[matches]

@@ -265,9 +265,10 @@ def test_sample_using_a_list(test_df):
 def test_sample_using_md5(test_df):
     sampled_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_df,
-        sampling_method="_sample_using_md5",
+        sampling_method="_sample_using_hash",
         sampling_kwargs={
-            "column_name": "date",    
+            "column_name": "date",
+            "hash_method": "md5"
         }
     ))
     assert sampled_df.shape == (10, 10)
