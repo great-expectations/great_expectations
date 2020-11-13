@@ -96,6 +96,8 @@ class Store:
             value = self._store_backend.get(self.key_to_tuple(key))
             if value:
                 return self.deserialize(key, value)
+            else:
+                return None
 
     def set(self, key, value):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
