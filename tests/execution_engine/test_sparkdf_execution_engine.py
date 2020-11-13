@@ -77,6 +77,117 @@ def test_sparkdf(spark_session):
     return spark_df
 
 
+def test_reader_fn(spark_session):
+    engine = SparkDFExecutionEngine()
+    # Testing that can recognize basic csv file
+    fn = engine._get_reader_fn(reader=spark_session.read, path="myfile.csv")
+    assert "<bound method DataFrameReader.csv" in str(fn)
+
+    # Ensuring that other way around works as well - reader_method should always override path
+    fn_new = engine._get_reader_fn(reader=spark_session.read, reader_method="csv")
+    assert "<bound method DataFrameReader.csv" in str(fn_new)
+
+
+def test_get_compute_domain_with_no_domain_kwargs(spark_session):
+    pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = SparkDFExecutionEngine()
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={})
+    assert compute_kwargs is not None, "Compute domain kwargs should be existent"
+    assert accessor_kwargs == {}
+    assert data.schema == df.schema
+    assert data.collect() == df.collect()
+
+
+def test_get_compute_domain_with_column_domain(spark_session):
+    pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = SparkDFExecutionEngine()
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column": "a"})
+    assert compute_kwargs is not None, "Compute domain kwargs should be existent"
+    assert accessor_kwargs == {"column": "a"}
+    assert data.schema == df.schema
+    assert data.collect() == df.collect()
+
+
+def test_get_compute_domain_with_row_condition(spark_session):
+    pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    expected_df = df.filter(F.col('b') > 2)
+
+    engine = SparkDFExecutionEngine()
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 2",
+                                                                                     "condition_parser": "spark"})
+    # Ensuring data has been properly queried
+    assert data.schema == expected_df.schema
+    assert data.collect() == expected_df.collect()
+
+    # Ensuring compute kwargs have not been modified
+    assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
+    assert accessor_kwargs == {}
+
+
+
+# What happens when we filter such that no value meets the condition?
+def test_get_compute_domain_with_unmeetable_row_condition(spark_session):
+    pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    expected_df = df.filter(F.col('b') > 24)
+
+    engine = SparkDFExecutionEngine()
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 24",
+                                                                                     "condition_parser": "spark"})
+    # Ensuring data has been properly queried
+    assert data.schema == expected_df.schema
+    assert data.collect() == expected_df.collect()
+
+    # Ensuring compute kwargs have not been modified
+    assert "row_condition" in compute_kwargs.keys()
+    assert accessor_kwargs == {}
+
+
 def test_basic_setup(spark_session):
     pd_df = pd.DataFrame({"x": range(10)})
     df = spark_session.createDataFrame(
