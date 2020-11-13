@@ -2,6 +2,7 @@ import pytest
 import os
 import yaml
 import json
+import sqlalchemy
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.core.batch import (
@@ -209,3 +210,32 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
             "date": "2020-01-15"
         }
     )
+
+
+def test_get_batch_list_from_new_style_datasource(
+    data_context_with_sql_execution_environment_for_testing_get_batch
+):
+    context = data_context_with_sql_execution_environment_for_testing_get_batch
+    
+    batch_list = context.get_batch_list_from_new_style_datasource({
+        "execution_environment_name" : "my_sqlite_db",
+        "data_connector_name": "daily",
+        "data_asset_name": "table_partitioned_by_date_column__A__daily",
+        "partition_request" : {
+            "partition_identifiers" : {
+                "date": "2020-01-15"
+            }
+        }
+    })
+
+    assert len(batch_list) == 1
+
+    batch: Batch = batch_list[0]
+
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "table_partitioned_by_date_column__A__daily"
+    assert batch.batch_definition["partition_definition"] == {
+        "date": "2020-01-15"
+    }
+    assert isinstance(batch.data, sqlalchemy.engine.result.ResultProxy)
+    assert len(batch.data.fetchall()) == 4
