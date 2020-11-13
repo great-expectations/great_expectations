@@ -265,6 +265,22 @@ def test_get_batch_with_split_on_multi_column_values(test_sparkdf):
         ))
 
 
+def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(test_sparkdf):
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        split_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+            batch_data=test_sparkdf,
+            splitter_method="_split_on_hashed_column",
+            splitter_kwargs={
+                "column_name": "favorite_color",
+                "hash_digits": 1,
+                "hash_function_name": "I_wont_work",
+                "partition_definition": {
+                    "hash_value": "a",
+                }
+            }
+        ))
+
+
 def test_get_batch_with_split_on_hashed_column(test_sparkdf):
     split_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_sparkdf,
@@ -272,7 +288,7 @@ def test_get_batch_with_split_on_hashed_column(test_sparkdf):
         splitter_kwargs={
             "column_name": "favorite_color",
             "hash_digits": 1,
-            "hash_algo": "md5",
+            "hash_function_name": "sha256",
             "partition_definition": {
                 "hash_value": "a",
             }
@@ -328,25 +344,24 @@ def test_sample_using_a_list(test_sparkdf):
     assert len(sampled_df.columns) == 10
 
 
-def test_sample_using_md5(test_sparkdf):
-    # sampled_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
-    # batch_data=test_sparkdf,
-    # sampling_method="_sample_using_hash",
-    # sampling_kwargs={
-    #     "column_name": "date",
-    #     "hash_algo": "hi_gina",
-    #     }
-    # )
-    # )
-    # with pytest.raises(AttributeError):
-    #     sampled_df.collect()
+def test_sample_using_md5_wrong_hash_function_name(test_sparkdf):
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        sampled_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_sparkdf,
+        sampling_method="_sample_using_hash",
+        sampling_kwargs={
+            "column_name": "date",
+            "hash_function_name": "I_wont_work",
+            }
+        ))
 
+def test_sample_using_md5(test_sparkdf):
     sampled_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_sparkdf,
         sampling_method="_sample_using_hash",
         sampling_kwargs={
             "column_name": "date",
-            "hash_algo": "md5",
+            "hash_function_name": "md5",
         }
     ))
     assert sampled_df.count() == 10

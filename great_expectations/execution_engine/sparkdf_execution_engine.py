@@ -532,16 +532,23 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             column_name: str,
             hash_digits: int,
             partition_definition: dict,
-            hash_algo: str = "sha256",
+            hash_function_name: str = "sha256",
     ):
         """Split on the hashed value of the named column"""
-        def _encrypt_value(to_encode):
-            hash_method = getattr(hashlib, hash_algo)
-            hash_value = hash_method(to_encode.encode()).hexdigest()[-1 * hash_digits:]
-            return hash_value
+        try:
+            getattr(hashlib, hash_function_name)
+        except (TypeError, AttributeError) as e:
+            raise (ge_exceptions.ExecutionEngineError(
+                f'''The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name. 
+                    Reference to {hash_function_name} cannot be found.'''))
 
-        spark_udf = F.udf(_encrypt_value, StringType())
-        res = df.withColumn('encrypted_value', spark_udf(column_name)) \
+        def _encrypt_value(to_encode):
+            hash_func = getattr(hashlib, hash_function_name)
+            hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits:]
+            return hashed_value
+
+        encrypt_udf = F.udf(_encrypt_value, StringType())
+        res = df.withColumn('encrypted_value', encrypt_udf(column_name)) \
             .filter(F.col("encrypted_value") == partition_definition["hash_value"]) \
             .drop("encrypted_value")
         return res
@@ -588,13 +595,20 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         column_name: str,
         hash_digits: int = 1,
         hash_value: str = 'f',
-        hash_algo: str = "md5",
+        hash_function_name: str = "md5"
     ):
+        try:
+            getattr(hashlib, str(hash_function_name))
+        except (TypeError, AttributeError) as e:
+            raise (ge_exceptions.ExecutionEngineError(
+                f'''The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name. 
+                    Reference to {hash_function_name} cannot be found.'''))
+
         def _encrypt_value(to_encode):
             to_encode_str = str(to_encode)
-            hash_method = getattr(hashlib, hash_algo)
-            sha_value = hash_method(to_encode_str.encode()).hexdigest()[-1 * hash_digits:]
-            return sha_value
+            hash_func = getattr(hashlib, hash_function_name)
+            hashed_value = hash_func(to_encode_str.encode()).hexdigest()[-1 * hash_digits:]
+            return hashed_value
 
         encrypt_udf = F.udf(_encrypt_value, StringType())
         res = df.withColumn('encrypted_value', encrypt_udf(column_name)) \

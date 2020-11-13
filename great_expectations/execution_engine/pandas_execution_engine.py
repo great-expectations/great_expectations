@@ -2,12 +2,13 @@ import copy
 import datetime
 import logging
 from functools import partial
-from io import StringIO
 import hashlib
 import random
 from typing import Any, Callable, Dict, Iterable, Tuple, List
 
 import pandas as pd
+
+import great_expectations.exceptions.exceptions as ge_exceptions
 
 from great_expectations.execution_environment.types import (
     PathBatchSpec,
@@ -15,7 +16,7 @@ from great_expectations.execution_environment.types import (
     RuntimeDataBatchSpec,
 )
 
-from ..core.batch import Batch, BatchMarkers, BatchRequest
+from ..core.batch import BatchMarkers
 from ..core.id_dict import BatchSpec
 from ..exceptions import BatchSpecError, ValidationError
 from ..execution_environment.util import hash_pandas_dataframe
@@ -323,10 +324,7 @@ Notes:
             )
         return resolved_metrics
 
-
-
     ### Splitter methods for partitioning dataframes ###
-
     @staticmethod
     def _split_on_whole_table(
         df,
@@ -406,15 +404,19 @@ Notes:
         column_name: str,
         hash_digits: int,
         partition_definition: dict,
-        hash_method: str = "md5",
+        hash_function_name: str = "md5",
 
     ):
         """Split on the hashed value of the named column"""
-        hash_method = getattr(hashlib, hash_method)
+        try:
+            hash_method = getattr(hashlib, hash_function_name)
+        except (TypeError, AttributeError) as e:
+            raise (ge_exceptions.ExecutionEngineError(
+                f'''The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found.'''))
         matching_rows = df[column_name].map(
             lambda x: hash_method(str(x).encode()).hexdigest()[-1*hash_digits:] == partition_definition["hash_value"]
         )
-
         return df[matching_rows]
 
     ### Sampling methods ###
@@ -453,12 +455,18 @@ Notes:
     def _sample_using_hash(
         df,
         column_name: str,
-        hash_digits: int=1,
-        hash_value: str='f',
-        hash_method: str="md5",
+        hash_digits: int = 1,
+        hash_value: str = 'f',
+        hash_function_name: str = "md5",
     ):
         """Hash the values in the named column, and split on that"""
-        hash_func = getattr(hashlib, hash_method)
+        try:
+            hash_func = getattr(hashlib, hash_function_name)
+        except (TypeError, AttributeError) as e:
+            raise (ge_exceptions.ExecutionEngineError(
+                f'''The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.  
+                    Reference to {hash_function_name} cannot be found.'''))
+
         matches = df[column_name].map(
             lambda x: hash_func(str(x).encode()).hexdigest()[-1*hash_digits:] == hash_value
         )
