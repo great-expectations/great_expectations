@@ -254,7 +254,6 @@ def test_return_all_batch_definitions_unsorted():
         runtime_environment={
             "name": "general_s3_data_connector",
             "execution_environment_name": "test_environment",
-            "data_context_root_directory": None,
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
@@ -409,7 +408,6 @@ def test_return_all_batch_definitions_sorted():
         runtime_environment={
             "name": "general_s3_data_connector",
             "execution_environment_name": "test_environment",
-            "data_context_root_directory": None,
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
@@ -589,7 +587,6 @@ def test_alpha():
         runtime_environment={
             "name": "general_s3_data_connector",
             "execution_environment_name": "BASE",
-            "data_context_root_directory": None,
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
@@ -701,7 +698,6 @@ def test_foxtrot():
         runtime_environment={
             "name": "general_s3_data_connector",
             "execution_environment_name": "BASE",
-            "data_context_root_directory": None,
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
@@ -827,7 +823,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             runtime_environment={
                 "name": "general_s3_data_connector",
                 "execution_environment_name": "test_environment",
-                "data_context_root_directory": None,
                 "execution_engine": "BASE_ENGINE",
             },
             config_defaults={
@@ -900,7 +895,6 @@ def test_return_all_batch_definitions_too_many_sorters():
             runtime_environment={
                 "name": "general_s3_data_connector",
                 "execution_environment_name": "test_environment",
-                "data_context_root_directory": None,
                 "execution_engine": "BASE_ENGINE",
             },
             config_defaults={

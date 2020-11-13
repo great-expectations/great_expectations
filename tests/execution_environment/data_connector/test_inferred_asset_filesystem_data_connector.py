@@ -645,7 +645,6 @@ def test_redundant_information_in_naming_convention_bucket_sorted(empty_data_con
         runtime_environment={
             "name": "my_inferred_asset_filesystem_data_connector",
             "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
@@ -750,7 +749,6 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
             runtime_environment={
                 "name": "my_inferred_asset_filesystem_data_connector",
                 "execution_environment_name": "test_environment",
-                "data_context_root_directory": base_directory,
                 "execution_engine": "BASE_ENGINE",
             },
             config_defaults={
@@ -805,7 +803,6 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(tmp_
             runtime_environment={
                 "name": "my_inferred_asset_filesystem_data_connector",
                 "execution_environment_name": "test_environment",
-                "data_context_root_directory": base_directory,
                 "execution_engine": "BASE_ENGINE",
             },
             config_defaults={

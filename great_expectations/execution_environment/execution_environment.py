@@ -9,13 +9,14 @@ from great_expectations.core.batch import (
     BatchMarkers,
     BatchRequest,
 )
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector import DataConnector
 from great_expectations.data_context.util import instantiate_class_from_config
 
 logger = logging.getLogger(__name__)
 
 
-class BaseExecutionEnvironment:
+class ExecutionEnvironment(object):
     """
     An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
     """
@@ -25,7 +26,9 @@ class BaseExecutionEnvironment:
     def __init__(
         self,
         name: str,
-        data_context_root_directory: str = None,
+        execution_engine=None,
+        data_connectors=None,
+        data_context_root_directory: Optional[str] = None,
     ):
         """
         Build a new ExecutionEnvironment.
@@ -34,10 +37,27 @@ class BaseExecutionEnvironment:
             name: the name for the datasource
             execution_engine (ClassConfig): the type of compute engine to produce
             data_connectors: DataConnectors to add to the datasource
+            data_context_root_directory: Installation directory path (if installed on a filesystem).
         """
         self._name = name
+
         self._data_context_root_directory = data_context_root_directory
 
+        self._execution_engine = instantiate_class_from_config(
+            config=execution_engine,
+            runtime_environment={},
+            config_defaults={"module_name": "great_expectations.execution_engine"},
+        )
+
+        if data_connectors is None:
+            data_connectors = {}
+        self._data_connectors = data_connectors
+        self._init_data_connectors(data_connector_configs=data_connectors)
+
+        self._execution_environment_config = {
+            "execution_engine": execution_engine,
+            "data_connectors": data_connectors
+        }
 
     def get_batch_from_batch_definition(
         self, batch_definition: BatchDefinition, batch_data: Any = None,
@@ -126,39 +146,20 @@ class BaseExecutionEnvironment:
 
             return [new_batch]
 
-    @property
-    def name(self):
-        """
-        Property for datasource name
-        """
-        return self._name
-
-    @property
-    def execution_engine(self):
-        return self._execution_engine
-
-    @property
-    def data_connectors(self):
-        return self._data_connectors
-
-    @property
-    def config(self):
-        return copy.deepcopy(self._execution_environment_config)
-
     def _init_data_connectors(
         self,
-        data_connector_configs: Dict,
+        data_connector_configs: Dict[str, Dict[str, Any]],
     ):
         for name, config in data_connector_configs.items():
             self._build_data_connector_from_config(
-                name,
-                config,
+                name=name,
+                config=config,
             )
 
     def _build_data_connector_from_config(
         self,
         name: str,
-        config: Dict,
+        config: Dict[str, Any],
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         new_data_connector: DataConnector = instantiate_class_from_config(
@@ -174,7 +175,7 @@ class BaseExecutionEnvironment:
         )
         new_data_connector.data_context_root_directory = self._data_context_root_directory
 
-        self._data_connectors[name] = new_data_connector
+        self.data_connectors[name] = new_data_connector
         return new_data_connector
 
     def get_available_data_asset_names(
@@ -268,41 +269,21 @@ class BaseExecutionEnvironment:
                 """
             )
 
-
-class ExecutionEnvironment(BaseExecutionEnvironment):
-
-    def __init__(
-        self,
-        name: str,
-        execution_engine=None,
-        data_connectors=None,
-        data_context_root_directory: str = None,
-    ):
+    @property
+    def name(self) -> str:
         """
-        Build a new ExecutionEnvironment.
-
-        Args:
-            name: the name for the datasource
-            execution_engine (ClassConfig): the type of compute engine to produce
-            data_connectors: DataConnectors to add to the datasource
+        Property for datasource name
         """
-        super().__init__(
-            name=name,
-            data_context_root_directory=data_context_root_directory,
-        )
+        return self._name
 
-        self._execution_engine = instantiate_class_from_config(
-            config=execution_engine,
-            runtime_environment={},
-            config_defaults={"module_name": "great_expectations.execution_engine"},
-        )
-        self._execution_environment_config = {"execution_engine": execution_engine}
+    @property
+    def execution_engine(self) -> ExecutionEngine:
+        return self._execution_engine
 
-        if data_connectors is None:
-            data_connectors = {}
-        self._execution_environment_config["data_connectors"] = data_connectors
+    @property
+    def data_connectors(self):
+        return self._data_connectors
 
-        self._data_connectors = {}
-        self._init_data_connectors(data_connectors)
-
-        
+    @property
+    def config(self):
+        return copy.deepcopy(self._execution_environment_config)

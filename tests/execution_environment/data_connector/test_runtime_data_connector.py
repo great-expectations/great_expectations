@@ -45,7 +45,6 @@ execution_engine:
         ),
         runtime_environment={
             "name": "my_execution_environment",
-            "data_context_root_directory": base_directory
         },
         config_defaults={
           "module_name": "great_expectations.execution_environment",

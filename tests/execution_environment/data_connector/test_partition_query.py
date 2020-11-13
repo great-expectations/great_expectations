@@ -76,7 +76,6 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
         runtime_environment={
             "name": "general_filesystem_data_connector",
             "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={

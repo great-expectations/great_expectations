@@ -209,7 +209,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         runtime_environment={
             "name": "general_filesystem_data_connector",
             "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
@@ -353,7 +352,6 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
         runtime_environment={
             "name": "general_filesystem_data_connector",
             "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
@@ -522,7 +520,6 @@ def test_alpha(tmp_path_factory):
         runtime_environment={
             "name": "general_filesystem_data_connector",
             "execution_environment_name": "BASE",
-            "data_context_root_directory": base_directory,
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
@@ -624,7 +621,6 @@ def test_foxtrot(tmp_path_factory):
         runtime_environment={
             "name": "general_filesystem_data_connector",
             "execution_environment_name": "BASE",
-            "data_context_root_directory": base_directory,
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
@@ -743,7 +739,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             runtime_environment={
                 "name": "general_filesystem_data_connector",
                 "execution_environment_name": "test_environment",
-                "data_context_root_directory": base_directory,
                 "execution_engine": "BASE_ENGINE",
             },
             config_defaults={
@@ -804,7 +799,6 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
             runtime_environment={
                 "name": "general_filesystem_data_connector",
                 "execution_environment_name": "test_environment",
-                "data_context_root_directory": base_directory,
                 "execution_engine": "BASE_ENGINE",
             },
             config_defaults={
