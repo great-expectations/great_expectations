@@ -15,9 +15,9 @@ from great_expectations.execution_environment.types import (
 
 from ..core.batch import Batch, BatchMarkers, BatchRequest
 from ..core.id_dict import BatchSpec
-from ..exceptions import BatchSpecError, ValidationError
+from ..exceptions import BatchSpecError, ValidationError, GreatExpectationsError
 from ..execution_environment.util import hash_pandas_dataframe
-from .execution_engine import ExecutionEngine
+from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 logger = logging.getLogger(__name__)
 
@@ -309,6 +309,10 @@ operate.
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
+        # Extracting value from enum if it is given for future computation
+        if isinstance(domain_type, MetricDomainTypes):
+            domain_type = domain_type.value
+
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -345,7 +349,32 @@ operate.
                     drop=True
                 )
 
-        if "column" in compute_domain_kwargs:
-            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+                # If user has stated they want a column, checking if one is provided, and
+                if domain_type == "column":
+                    if "column" in compute_domain_kwargs:
+                        accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+                    else:
+                        # If column not given
+                        raise GreatExpectationsError("Column not provided in compute_domain_kwargs")
+
+                # Else, if column pair values requested
+                elif domain_type == "column_pair":
+                    # Ensuring column_A and column_B parameters provided
+                    if "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs:
+                        accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
+                        accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
+                    else:
+                        raise GreatExpectationsError("column_A or column_B not found within compute_domain_kwargs")
+
+                # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+                else:
+                    if domain_type in ["identity", "table", "other"] and (
+                            "column" in compute_domain_kwargs or "column_A"
+                            in compute_domain_kwargs or "column_B" in compute_domain_kwargs):
+                        # Throwing a warning
+                        print(
+                            "WARNING: Compute domain kwargs for this domain type received unexpected column key, which"
+                            "was ignored. If you would like to specify a column, please define domain type as a column"
+                            "or column_pair domain, depending on which one better fits your desired domain.")
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
