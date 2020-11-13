@@ -5,6 +5,7 @@ from great_expectations.execution_environment.data_connector import ConfiguredAs
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy.exc import OperationalError
 except ImportError:
     sa = None
 
@@ -15,11 +16,28 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         name: str,
         execution_environment_name: str,
         execution_engine,
-        partitioning_directives: dict = None,
-        introspection_directives: dict = None,
+        data_asset_name_suffix: str=None,
+        include_schema_name: bool=False,
+        splitter_method: str=None,
+        splitter_kwargs: dict=None,
+        sampling_method: str=None,
+        sampling_kwargs: dict=None,
+        excluded_tables: List=None,
+        included_tables: List=None,
+        skip_inapplicable_tables: bool=True,
+        introspection_directives: Dict={},
     ):
-        self._partitioning_directives = partitioning_directives or {}
-        self._introspection_directives = introspection_directives or {}
+        self._data_asset_name_suffix = data_asset_name_suffix
+        self._include_schema_name = include_schema_name
+        self._splitter_method = splitter_method
+        self._splitter_kwargs = splitter_kwargs
+        self._sampling_method = sampling_method
+        self._sampling_kwargs = sampling_kwargs
+        self._excluded_tables = excluded_tables
+        self._included_tables = included_tables
+        self._skip_inapplicable_tables = skip_inapplicable_tables
+
+        self._introspection_directives = introspection_directives
 
         super().__init__(
             name=name,
@@ -33,7 +51,15 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         # Note: We should probably turn them into AssetConfig objects
         self._introspected_data_assets_cache = {}
         self._refresh_introspected_data_assets_cache(
-            **self._partitioning_directives
+            self._data_asset_name_suffix,
+            self._include_schema_name,
+            self._splitter_method,
+            self._splitter_kwargs,
+            self._sampling_method,
+            self._sampling_kwargs,
+            self._excluded_tables,
+            self._included_tables,
+            self._skip_inapplicable_tables,
         )
 
     @property
@@ -42,7 +68,15 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
     def _refresh_data_references_cache(self):
         self._refresh_introspected_data_assets_cache(
-            **self._partitioning_directives
+            self._data_asset_name_suffix,
+            self._include_schema_name,
+            self._splitter_method,
+            self._splitter_kwargs,
+            self._sampling_method,
+            self._sampling_kwargs,
+            self._excluded_tables,
+            self._included_tables,
+            self._skip_inapplicable_tables,
         )
 
         super()._refresh_data_references_cache()
@@ -51,6 +85,13 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         self,
         data_asset_name_suffix: str=None,
         include_schema_name: bool=False,
+        splitter_method: str=None,
+        splitter_kwargs: dict=None,
+        sampling_method: str=None,
+        sampling_kwargs: dict=None,
+        excluded_tables: List=None,
+        included_tables: List=None,
+        skip_inapplicable_tables: bool=True,
     ):
         if data_asset_name_suffix is None:
             data_asset_name_suffix = "__"+self.name
@@ -59,15 +100,43 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             **self._introspection_directives
         )
         for metadata in introspected_table_metadata:
+            if (excluded_tables is not None) and (metadata["schema_name"]+"."+metadata["table_name"] in excluded_tables):
+                continue
+
+            if (included_tables is not None) and (metadata["schema_name"]+"."+metadata["table_name"] not in included_tables):
+                continue
+
             if include_schema_name:
                 data_asset_name = metadata["schema_name"]+"."+metadata["table_name"]+data_asset_name_suffix
             else:
                 data_asset_name = metadata["table_name"]+data_asset_name_suffix
             
-            # Store an asset config for each introspected data asset.
-            self._introspected_data_assets_cache[data_asset_name] = {
+            data_asset_config = {
                 "table_name" : metadata["schema_name"]+"."+metadata["table_name"],
             }
+            if not splitter_method is None:
+                data_asset_config["splitter_method"] = splitter_method
+            if not splitter_kwargs is None:
+                data_asset_config["splitter_kwargs"] = splitter_kwargs
+            if not sampling_method is None:
+                data_asset_config["sampling_method"] = sampling_method
+            if not sampling_kwargs is None:
+                data_asset_config["sampling_kwargs"] = sampling_kwargs
+
+            if skip_inapplicable_tables:
+                # Attempt to fetch a list of partition_definitions from the table
+                try:
+                    self._get_partition_definition_list_from_data_asset_config(
+                        data_asset_name,
+                        data_asset_config,
+                    )
+                except OperationalError:
+                    # If it doesn't work, no harm done.
+                    # Just don't include this table in the list of data_assets.
+                    continue
+
+            # Store an asset config for each introspected data asset.
+            self._introspected_data_assets_cache[data_asset_name] = data_asset_config
 
     def _introspect_db(
         self,
@@ -82,8 +151,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         ],
         system_tables: List[str] = ["sqlite_master"],  # sqlite
         include_views = True,
-        # included_tables = None,
-        excluded_tables = None,
     ):
         engine = self._execution_engine.engine
         inspector = sa.inspect(engine)
@@ -98,42 +165,30 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             if selected_schema_name is not None and schema_name != selected_schema_name:
                 continue
 
-            if engine.dialect.name.lower() == "bigquery":
-                tables.extend(
-                    [
-                        {
-                            "schema_name": schema_name,
-                            "table_name": table_name,
-                            "type": "table",
-                        }
-                        
-                        for table_name in inspector.get_table_names(schema=schema_name)
-                        if (not ignore_information_schemas_and_system_tables or table_name not in system_tables) and (excluded_tables is None or schema_name+"."+table_name not in excluded_tables)
-                    ]
-                )
-            else:
-                tables.extend(
-                    [
-                        {
-                            "schema_name": schema_name,
-                            "table_name": table_name,
-                            "type": "table",
-                        }
-                        for table_name in inspector.get_table_names(schema=schema_name)
-                        if (not ignore_information_schemas_and_system_tables or table_name not in system_tables) and (excluded_tables is None or schema_name+"."+table_name not in excluded_tables)
-                    ]
-                )
+            for table_name in inspector.get_table_names(schema=schema_name):
 
+                if (ignore_information_schemas_and_system_tables) and (table_name in system_tables):
+                    continue
+                
+                tables.append({
+                    "schema_name": schema_name,
+                    "table_name": table_name,
+                    "type": "table",
+                })
+
+            # Note Abe 20201112: This logic is currently untested.
             if include_views:
                 # Note: this is not implemented for bigquery
-                tables.extend(
-                    [
-                        (table_name, "view")
-                        if inspector.default_schema_name == schema_name
-                        else (schema_name + "." + table_name, "view")
-                        for table_name in inspector.get_view_names(schema=schema_name)
-                        if (not ignore_information_schemas_and_system_tables or table_name not in system_tables) and (excluded_tables is None or schema_name+"."+table_name not in excluded_tables)
-                    ]
-                )
+
+                for view_name in inspector.get_view_names(schema=schema_name):
+
+                    if (ignore_information_schemas_and_system_tables) and (table_name in system_tables):
+                        continue
+                    
+                    tables.append({
+                        "schema_name": schema_name,
+                        "table_name": view_name,
+                        "type": "view",
+                    })
         
         return tables

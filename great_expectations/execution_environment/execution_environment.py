@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Callable
 
 from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.core.batch import (
@@ -8,6 +8,7 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
     BatchRequest,
+    PartitionRequest,
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector import DataConnector
