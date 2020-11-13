@@ -17,16 +17,19 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         name (str): The name of this DataConnector
         execution_environment_name (str): The name of the ExecutionEnvironment that contains it
         execution_engine (ExecutionEngine): An ExecutionEngine
-        data_asset_name_suffix (str): An optional suffix
-        include_schema_name (bool):
-        splitter_method (str):
-        splitter_kwargs (dict):
-        sampling_method (str):
-        sampling_kwargs (dict):
-        excluded_tables (List):
-        included_tables (List):
+        data_asset_name_suffix (str): An optional prefix to prepend to inferred data_asset_names
+        data_asset_name_suffix (str): An optional suffix to append to inferred data_asset_names
+        include_schema_name (bool): Should the data_asset_name include the schema as a prefix?
+        splitter_method (str): A method to 
+        splitter_kwargs (dict): Keyword arguments to pass to splitter_method
+        sampling_method (str): A 
+        sampling_kwargs (dict): Keyword arguments to pass to sampling_method
+        excluded_tables (List): A list of tables to ignore when inferring data asset_names
+        included_tables (List): If not None, only include tables in this list when inferring data asset_names
         skip_inapplicable_tables (bool):
-        introspection_directives (Dic):
+            If True, tables that can't be successfully queried using sampling and splitter methods are excluded from inferred data_asset_names.
+            If False, the class will throw an error during initialization if any such tables are encountered.
+        introspection_directives (Dict): Arguments passed to the introspection method to guide introspection
     """
     def __init__(
         self,
@@ -43,7 +46,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         excluded_tables: List=None,
         included_tables: List=None,
         skip_inapplicable_tables: bool=True,
-        introspection_directives: Dict={},
+        introspection_directives: Dict=None,
     ):
         self._data_asset_name_prefix = data_asset_name_prefix
         self._data_asset_name_suffix = data_asset_name_suffix
@@ -56,7 +59,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         self._included_tables = included_tables
         self._skip_inapplicable_tables = skip_inapplicable_tables
 
-        self._introspection_directives = introspection_directives
+        self._introspection_directives = introspection_directives or {}
 
         super().__init__(
             name=name,
