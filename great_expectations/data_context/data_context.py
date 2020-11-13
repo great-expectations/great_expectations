@@ -1352,7 +1352,7 @@ class BaseDataContext:
 
             batch_definitions = execution_environment.get_available_batch_definitions(batch_request)
             if len(batch_definitions) != 1:
-                raise ValueError(f"Instead of 1 batch_definition, these parameters matche {len(batch_definitions)}.")
+                raise ValueError(f"Instead of 1 batch_definition, these parameters match {len(batch_definitions)}.")
             return execution_environment.get_batch_from_batch_definition(batch_definitions[0])
 
 
