@@ -11,7 +11,8 @@ from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-
+from great_expectations.expectations.metrics.import_manager import F
+import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 
@@ -60,5 +61,5 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
     def _spark(cls, column, value_set, **kwargs):
         if value_set is None:
             # vacuously true
-            return column.isin(column)
+            return F.lit(True)
         return column.isin(value_set)
