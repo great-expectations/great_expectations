@@ -1,14 +1,8 @@
 import pytest
-import os
 import yaml
 import json
-import sqlalchemy
 import pandas as pd
 
-from great_expectations.data_context.util import (
-    file_relative_path,
-    instantiate_class_from_config,
-)
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -16,6 +10,13 @@ from great_expectations.core.batch import (
     PartitionRequest,
 )
 from ..test_utils import create_files_in_directory
+from great_expectations.data_context.util import file_relative_path
+
+try:
+    import sqlalchemy as sa
+except ImportError:
+    sa = None
+
 
 @pytest.fixture
 def data_context_with_sql_execution_environment_for_testing_get_batch(empty_data_context):
@@ -242,7 +243,7 @@ def test_get_batch_list_from_new_style_datasource_with_sql_execution_environment
     assert batch.batch_definition["partition_definition"] == {
         "date": "2020-01-15"
     }
-    assert isinstance(batch.data, sqlalchemy.engine.result.ResultProxy)
+    assert isinstance(batch.data, sa.engine.result.ResultProxy)
     assert len(batch.data.fetchall()) == 4
 
 
