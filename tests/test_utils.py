@@ -1341,10 +1341,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
         result = getattr(validator, expectation_type)(*kwargs)
     # As well as keyword arguments
     else:
-        runtime_kwargs = {
-            "result_format": "COMPLETE",
-            "include_config": False
-        }
+        runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
         runtime_kwargs.update(kwargs)
         result = getattr(validator, expectation_type)(**runtime_kwargs)
 

@@ -846,7 +846,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             success = True
         elif (total_count - null_count) != 0:
             success_ratio = (total_count - unexpected_count - null_count) / (
-                    total_count - null_count
+                total_count - null_count
             )
             success = success_ratio >= mostly
         elif total_count == 0:
@@ -925,8 +925,8 @@ def _format_map_output(
         "unexpected_count": unexpected_count,
         "unexpected_percent": unexpected_percent,
         "partial_unexpected_list": unexpected_list[
-                                   : result_format["partial_unexpected_count"]
-                                   ],
+            : result_format["partial_unexpected_count"]
+        ],
     }
 
     if not skip_missing:
@@ -959,8 +959,8 @@ def _format_map_output(
             return_obj["result"].update(
                 {
                     "partial_unexpected_index_list": unexpected_index_list[
-                                                     : result_format["partial_unexpected_count"]
-                                                     ]
+                        : result_format["partial_unexpected_count"]
+                    ]
                     if unexpected_index_list is not None
                     else None,
                     "partial_unexpected_counts": partial_unexpected_counts,

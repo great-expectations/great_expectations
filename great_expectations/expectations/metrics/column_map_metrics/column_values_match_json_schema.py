@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics.map_metric import (
 
 class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
     condition_metric_name = "column_values.match_json_schema"
-    condition_value_keys = ("json_schema", )
+    condition_value_keys = ("json_schema",)
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, json_schema, **kwargs):

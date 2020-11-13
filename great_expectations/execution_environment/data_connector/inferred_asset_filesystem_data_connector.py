@@ -1,29 +1,29 @@
-from typing import List, Optional, Iterator
 import copy
-
 import logging
+from typing import Iterator, List, Optional
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.data_connector import SinglePartitionerDataConnector
-from great_expectations.execution_environment.data_connector.sorter import Sorter
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequest,
+from great_expectations.execution_environment.data_connector import (
+    SinglePartitionerDataConnector,
+)
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
 )
 from great_expectations.execution_environment.data_connector.partition_query import (
     PartitionQuery,
     build_partition_query,
 )
-from great_expectations.execution_environment.types import PathBatchSpec
+from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
-    map_data_reference_string_to_batch_definition_list_using_regex,
-    map_batch_definition_to_data_reference_string_using_regex,
-    get_filesystem_one_level_directory_glob_path_list,
     build_sorters_from_config,
+    get_filesystem_one_level_directory_glob_path_list,
+    map_batch_definition_to_data_reference_string_using_regex,
+    map_data_reference_string_to_batch_definition_list_using_regex,
 )
-import great_expectations.exceptions as ge_exceptions
+from great_expectations.execution_environment.types import PathBatchSpec
 
 logger = logging.getLogger(__name__)
 
@@ -51,35 +51,36 @@ class InferredAssetFilesystemDataConnector(SinglePartitionerDataConnector):
             sorters=sorters,
         )
 
-    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
+    def _get_data_reference_list(
+        self, data_asset_name: Optional[str] = None
+    ) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
         """
         path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
-            base_directory_path=self.base_directory,
-            glob_directive=self.glob_directive
+            base_directory_path=self.base_directory, glob_directive=self.glob_directive
         )
         return path_list
 
     def _generate_batch_spec_parameters_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition
+        self, batch_definition: BatchDefinition
     ) -> dict:
-        path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
+        path: str = self._map_batch_definition_to_data_reference(
+            batch_definition=batch_definition
+        )
         if not path:
             raise ValueError(
-                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
+                f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
 partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
-                '''
+                """
             )
-        return {
-            "path": path
-        }
+        return {"path": path}
 
     def _build_batch_spec_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition
+        self, batch_definition: BatchDefinition
     ) -> PathBatchSpec:
-        batch_spec = super()._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
+        batch_spec = super()._build_batch_spec_from_batch_definition(
+            batch_definition=batch_definition
+        )
         return PathBatchSpec(batch_spec)
