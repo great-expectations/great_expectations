@@ -19,12 +19,12 @@ from ..expectation import (
     Expectation,
     InvalidExpectationConfigurationError,
     TableExpectation,
-    _format_map_output,
+    _format_map_output, ColumnExpectation,
 )
 from ..registry import extract_metrics
 
 
-class ExpectColumnMedianToBeBetween(TableExpectation):
+class ExpectColumnMedianToBeBetween(ColumnExpectation):
     """Expect the column median to be between a minimum value and a maximum value.
 
             expect_column_median_to_be_between is a \
