@@ -28,10 +28,15 @@ from great_expectations.util import import_library_module
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 from .test_utils import (
-    create_files_for_regex_partitioner,
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
+
+try:
+    import pyspark
+except ImportError:
+    pyspark = None
+
 
 ###
 #
@@ -263,9 +268,13 @@ def sa(test_backends):
 def spark_session(test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
-    from pyspark.sql import SparkSession
-
-    return SparkSession.builder.getOrCreate()
+    if pyspark is None:
+        pytest.skip("Spark tests require pyspark to be installed.")
+    try:
+        from pyspark.sql import SparkSession
+        return SparkSession.builder.getOrCreate()
+    except ImportError:
+        raise ValueError("spark tests are requested, but SparkSession could not be imported from pyspark.sql")
 
 
 @pytest.fixture
