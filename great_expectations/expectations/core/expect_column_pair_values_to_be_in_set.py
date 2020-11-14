@@ -68,17 +68,21 @@ class ExpectColumnPairValuesToBeInSet(TableExpectation):
 
     """
 
-    metric_dependencies = ("column_pair_values.in_set",)
-    success_keys = (
+    metric_dependencies = ("column_pair_values.in_set.unexpected_count",)
+    domain_keys = (
+        "batch_id",
+        "table",
+        "row_condition",
+        "condition_parser",
         "column_A",
-        "column_B",
+        "column_B"
+    )
+    success_keys = (
         "value_pairs_set"
         "ignore_row_if",
     )
 
     default_kwarg_values = {
-        "column_A": None,
-        "column_B": None,
         "ignore_row_if": "both_values_are_missing",
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
