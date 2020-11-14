@@ -4,17 +4,11 @@ import logging
 from functools import partial
 import hashlib
 import random
+import pandas as pd
 from typing import Any, Callable, Dict, Iterable, Tuple, List
 
-import boto3
 from ruamel.yaml.compat import StringIO
-
-import pandas as pd
-
 import great_expectations.exceptions.exceptions as ge_exceptions
-
-from great_expectations.execution_environment.util import S3Url
-
 from great_expectations.execution_environment.data_connector import ConfiguredAssetS3DataConnector, InferredAssetS3DataConnector
 
 from great_expectations.execution_environment.types import (
