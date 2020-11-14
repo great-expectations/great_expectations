@@ -239,34 +239,10 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        column_mean = metrics.get("column.mean")
-
-        # Obtaining components needed for validation
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
-
-        if column_mean is None:
-            return {"success": False, "result": {"observed_value": column_mean}}
-
-        # Checking if mean lies between thresholds
-        if min_value is not None:
-            if strict_min:
-                above_min = column_mean > min_value
-            else:
-                above_min = column_mean >= min_value
-        else:
-            above_min = True
-
-        if max_value is not None:
-            if strict_max:
-                below_max = column_mean < max_value
-            else:
-                below_max = column_mean <= max_value
-        else:
-            below_max = True
-
-        success = above_min and below_max
-
-        return {"success": success, "result": {"observed_value": column_mean}}
+        return self._validate_metric_value_between(
+            metric_name="column.mean",
+            configuration=configuration,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+            execution_engine=execution_engine
+        )

@@ -684,6 +684,46 @@ class TableExpectation(Expectation, ABC):
 class ColumnExpectation(TableExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
 
+    def _validate_metric_value_between(
+            self,
+            metric_name,
+            configuration: ExpectationConfiguration,
+            metrics: Dict,
+            runtime_configuration: dict = None,
+            execution_engine: ExecutionEngine = None,
+    ):
+        metric_value = metrics.get(metric_name)
+
+        # Obtaining components needed for validation
+        min_value = self.get_success_kwargs(configuration).get("min_value")
+        strict_min = self.get_success_kwargs(configuration).get("strict_min")
+        max_value = self.get_success_kwargs(configuration).get("max_value")
+        strict_max = self.get_success_kwargs(configuration).get("strict_max")
+
+        if metric_value is None:
+            return {"success": False, "result": {"observed_value": metric_value}}
+
+        # Checking if mean lies between thresholds
+        if min_value is not None:
+            if strict_min:
+                above_min = metric_value > min_value
+            else:
+                above_min = metric_value >= min_value
+        else:
+            above_min = True
+
+        if max_value is not None:
+            if strict_max:
+                below_max = metric_value < max_value
+            else:
+                below_max = metric_value <= max_value
+        else:
+            below_max = True
+
+        success = above_min and below_max
+
+        return {"success": success, "result": {"observed_value": metric_value}}
+
 
 class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
