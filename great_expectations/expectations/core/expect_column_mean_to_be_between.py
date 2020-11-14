@@ -1,11 +1,7 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
@@ -15,16 +11,13 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
     InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
+    ColumnExpectation,
 )
 from ..registry import extract_metrics
 
 
-class ExpectColumnMeanToBeBetween(TableExpectation):
+class ExpectColumnMeanToBeBetween(ColumnExpectation):
     """Expect the column mean to be between a minimum value and a maximum value (inclusive).
 
             expect_column_mean_to_be_between is a \
