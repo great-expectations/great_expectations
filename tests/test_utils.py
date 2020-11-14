@@ -1373,9 +1373,9 @@ def check_json_test_result(test, result, data_asset=None):
             elif key == "observed_value":
                 if "tolerance" in test:
                     if isinstance(value, dict):
-                        assert set(value.keys()) == set(
+                        assert set(
                             result["result"]["observed_value"].keys()
-                        )
+                        ) == set(value.keys())
                         for k, v in value.items():
                             assert np.allclose(
                                 result["result"]["observed_value"][k],
@@ -1389,7 +1389,7 @@ def check_json_test_result(test, result, data_asset=None):
                             rtol=test["tolerance"],
                         )
                 else:
-                    assert value == result["result"]["observed_value"]
+                    assert result["result"]["observed_value"] == value
 
             # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
             # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
