@@ -92,8 +92,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Aggregate MetricProvider Decorator for the Mean"""
-
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -130,9 +128,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
 
         try:
             # Ensuring Proper interval has been provided
-            assert (
-                min_val is not None or max_val is not None
-            ), "min_value and max_value cannot both be none"
             assert min_val is None or isinstance(
                 min_val, (float, int)
             ), "Provided min threshold must be a number"
@@ -237,43 +232,23 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
             "{:.2f}".format(result.result["observed_value"]),
         ]
 
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
+    def _validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        """Validates the given data against the set boundaries for mean to ensure it lies within proper range"""
-        # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        column_mean = metric_vals.get("column.mean")
+        column_mean = metrics.get("column.mean")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
         strict_min = self.get_success_kwargs(configuration).get("strict_min")
         max_value = self.get_success_kwargs(configuration).get("max_value")
         strict_max = self.get_success_kwargs(configuration).get("strict_max")
+
+        if column_mean is None:
+            return {"success": False, "result": {"observed_value": column_mean}}
 
         # Checking if mean lies between thresholds
         if min_value is not None:
