@@ -192,7 +192,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "ValueError"
+            "traceback_substring": "AssertionError"
           }
         },
         {
@@ -204,7 +204,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "ValueError"
+            "traceback_substring": "AssertionError"
           }
         }]},
     {
