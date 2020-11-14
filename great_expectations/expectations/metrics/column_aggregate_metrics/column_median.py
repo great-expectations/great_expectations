@@ -24,7 +24,7 @@ from great_expectations.expectations.metrics.metric_provider import (
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnMedian(MetricProvider):
+class ColumnMedian(ColumnMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.median"
