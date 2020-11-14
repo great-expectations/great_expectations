@@ -1,5 +1,6 @@
 import os
 from typing import List, Optional
+from great_expectations.execution_environment.util import S3Url
 
 try:
     import boto3
@@ -11,6 +12,8 @@ import logging
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector import InferredAssetFilePathDataConnector
 from great_expectations.execution_environment.data_connector.util import list_s3_keys
+
+from great_expectations.core.batch import BatchSpec
 
 logger = logging.getLogger(__name__)
 
@@ -71,3 +74,8 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
 
     def _get_full_file_path(self, path: str) -> str:
         return f"s3a://{os.path.join(self._bucket, path)}"
+
+    def get_s3_object_and_url_from_batch_spec(self, batch_spec: BatchSpec):
+        s3 = self._s3
+        url = S3Url(batch_spec.get("s3"))
+        return s3, url

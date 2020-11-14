@@ -104,10 +104,22 @@ Notes:
     }
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
+        # only used when loading data from S3
+        self._data_connector = kwargs.pop(
+            "data_connector", None
+        )
+        super().__init__(*args, **kwargs)
+
+    @property
+    def data_connector(self):
+        return self._data_connector
+
+    @data_connector.setter
+    def data_connector(self, data_connector):
+        self._data_connector = data_connector
 
     def configure_validator(self, validator):
         super().configure_validator(validator)
@@ -143,19 +155,27 @@ Notes:
             batch_data = reader_fn(path, **reader_options)
 
         elif isinstance(batch_spec, S3BatchSpec):
-            # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
-            # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
+            if self._data_connector is None:
+                raise ge_exceptions.ExecutionEngineError(f'''
+                    PandasExecutionEngine requires a data_connector be configured when passing in a S3BatchSpec.
+                    S3BatchSpec is compatible with ConfiguredAssetS3DataConnector and InferredAssetS3DataConnector.
+                    ''')
+            if not isinstance(self._data_connector, ConfiguredAssetS3DataConnector) and not isinstance(self._data_connector, InferredAssetS3DataConnector):
+                raise ge_exceptions.ExecutionEngineError(f'''
+                    PandasExecutionEngine requires a data_connector be configured when passing in a S3BatchSpec.
+                    S3BatchSpec is compatible with ConfiguredAssetS3DataConnector and InferredAssetS3DataConnector, 
+                    but the current data_connector is of type {type(self.data_connector)}.
+                    ''')
+
+            s3_engine, s3_url = self.data_connector.get_s3_object_and_url_from_batch_spec(batch_spec=batch_spec)
             reader_method: str = batch_spec.get("reader_method")
             reader_options: dict = batch_spec.get("reader_options") or {}
-            boto3_options: dict = batch_spec.get("boto_options") or {}
-            s3_url = S3Url(batch_spec.get("s3"))
+
+            s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
 
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(s3_url.bucket, s3_url.key)
             )
-
-            s3 = boto3.client("s3", **boto3_options)
-            s3_object = s3.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
             reader_fn = self._get_reader_fn(reader_method, s3_url.key)
             batch_data = reader_fn(
                 StringIO(
