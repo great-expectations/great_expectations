@@ -13,7 +13,7 @@ from great_expectations.expectations.metrics.map_metric import (
 
 class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
     condition_metric_name = "column_values.match_strftime_format"
-    condition_value_keys = ("strftime_format", )
+    condition_value_keys = ("strftime_format",)
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, strftime_format, **kwargs):
@@ -42,6 +42,8 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
             raise ValueError(f"Unable to use provided strftime_format: {str(e)}")
 
         def is_parseable_by_format(val):
+            if val is None:
+                return False
             try:
                 datetime.strptime(val, strftime_format)
                 return True

@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics.map_metric import (
 
 class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
     condition_metric_name = "column_values.match_json_schema"
-    condition_value_keys = ("json_schema", )
+    condition_value_keys = ("json_schema",)
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, json_schema, **kwargs):
@@ -38,6 +38,8 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, json_schema, **kwargs):
         def matches_json_schema(val):
+            if val is None:
+                return False
             try:
                 val_json = json.loads(val)
                 jsonschema.validate(val_json, json_schema)

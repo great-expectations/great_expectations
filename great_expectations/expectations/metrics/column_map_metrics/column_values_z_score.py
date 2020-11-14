@@ -121,3 +121,10 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
                     "column.standard_deviation", metric.metric_domain_kwargs
                 ),
             }
+
+        return super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )

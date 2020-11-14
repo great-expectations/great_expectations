@@ -159,7 +159,7 @@ class SqlAlchemyBatchData:
             raise ValueError("No table_name provided.")
 
         if use_quoted_name:
-            table_name = quoted_name(table_name)
+            table_name = quoted_name(table_name, quote=True)
 
         if engine.dialect.name.lower() == "bigquery":
             # In BigQuery the table name is already qualified with its schema name
@@ -590,7 +590,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if "column" in compute_domain_kwargs:
             if self.active_batch_data.use_quoted_name:
                 accessor_domain_kwargs["column"] = quoted_name(
-                    compute_domain_kwargs.pop("column")
+                    compute_domain_kwargs.pop("column"), quote=True
                 )
             else:
                 accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")

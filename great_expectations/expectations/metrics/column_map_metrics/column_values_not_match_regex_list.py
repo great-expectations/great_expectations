@@ -52,7 +52,8 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
         )
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _sqlalchemy(cls, column, regex_list, **kwargs):
+    def _spark(cls, column, regex_list, **kwargs):
+        compound = None
         for regex in regex_list:
             if compound is None:
                 compound = column.rlike(regex)
