@@ -145,7 +145,6 @@ Notes:
         elif isinstance(batch_spec, S3BatchSpec):
             # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
             # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
-            #
             # if self.data_connector is None:
             #     raise ge_exceptions.ExecutionEngineError(f'''
             #         S3BatchSpec requires that a data_connector is configured for PandasExecutionEngine. Please add appropriate DataConnector and try again
@@ -158,7 +157,6 @@ Notes:
             #                         The current data_connector is of type {type(self.data_connector)}.
             #                         Please check documentation for more information
             #                         ''')
-
             #url, s3_object = self.data_connector.get_s3_object(batch_spec=batch_spec)
             reader_method = batch_spec.get("reader_method")
             reader_options: dict = batch_spec.get("reader_options") or {}

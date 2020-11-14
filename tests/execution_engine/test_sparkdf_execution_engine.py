@@ -159,7 +159,6 @@ def test_get_compute_domain_with_row_condition(spark_session):
     assert accessor_kwargs == {}
 
 
-
 # What happens when we filter such that no value meets the condition?
 def test_get_compute_domain_with_unmeetable_row_condition(spark_session):
     pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
@@ -258,8 +257,8 @@ def test_get_batch_with_split_on_whole_table_s3_real_data():
 
 
 def test_get_batch_with_split_on_whole_table_s3(spark_session):
-    def mocked_get_reader_function(**kwargs):
-        def mocked_reader_function(**kwargs):
+    def mocked_get_reader_function(*args, **kwargs):
+        def mocked_reader_function(*args, **kwargs):
             pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
             df = spark_session.createDataFrame(
                 [
@@ -276,6 +275,7 @@ def test_get_batch_with_split_on_whole_table_s3(spark_session):
 
     spark_engine = SparkDFExecutionEngine()
     spark_engine._get_reader_fn = mocked_get_reader_function
+    
     test_sparkdf = spark_engine.get_batch_data(
         S3BatchSpec(
             s3="s3://bucket/test/test.csv",
