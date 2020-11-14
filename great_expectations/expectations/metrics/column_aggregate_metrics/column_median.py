@@ -133,19 +133,27 @@ class ColumnMedian(ColumnMetricProvider):
           ...
         }
         """
+
+        dependencies = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration
+        )
+
         table_domain_kwargs = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
 
-        dependencies = {
+        dependencies.update({
             "table.row_count": MetricConfiguration(
                 "table.row_count", table_domain_kwargs
             )
-        }
+        })
+
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-            dependencies["column_values.nonnull.count"] = (
-                MetricConfiguration(
-                    "column_values.nonnull.count", metric.metric_domain_kwargs
-                ),
+            dependencies["column_values.nonnull.count"] = MetricConfiguration(
+                "column_values.nonnull.count", metric.metric_domain_kwargs
             )
+
         return dependencies
