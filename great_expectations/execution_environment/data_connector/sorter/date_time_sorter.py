@@ -36,9 +36,9 @@ class DateTimeSorter(Sorter):
 
         if datetime_format and not isinstance(datetime_format, str):
             raise ge_exceptions.SorterError(
-                f'''DateTime parsing formatter "datetime_format_string" must have string type (actual type is
+                f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
         "{str(type(datetime_format))}").
-                    '''
+                    """
             )
 
         self._datetime_format = datetime_format

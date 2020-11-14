@@ -19,7 +19,8 @@ from ..expectation import (
     Expectation,
     InvalidExpectationConfigurationError,
     TableExpectation,
-    _format_map_output, ColumnExpectation,
+    _format_map_output,
+    ColumnExpectation,
 )
 from ..registry import extract_metrics
 
@@ -151,8 +152,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             "success": observed_value_set.issuperset(expected_value_set),
             "result": {
                 "observed_value": sorted(list(observed_value_set)),
-                "details": {
-                    "value_counts": observed_value_counts
-                }
-            }
+                "details": {"value_counts": observed_value_counts},
+            },
         }

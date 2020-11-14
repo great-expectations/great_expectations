@@ -68,12 +68,14 @@ class ColumnDistinctValues(ColumnMetricProvider):
         if isinstance(
             ExecutionEngine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)
         ):
-            dependencies.update({
-                "column.value_counts": MetricConfiguration(
-                    metric_name="column.value_counts",
-                    metric_domain_kwargs=metric.metric_domain_kwargs,
-                    metric_value_kwargs={"sort": "value", "collate": None},
-                )
-            })
+            dependencies.update(
+                {
+                    "column.value_counts": MetricConfiguration(
+                        metric_name="column.value_counts",
+                        metric_domain_kwargs=metric.metric_domain_kwargs,
+                        metric_value_kwargs={"sort": "value", "collate": None},
+                    )
+                }
+            )
 
         return dependencies

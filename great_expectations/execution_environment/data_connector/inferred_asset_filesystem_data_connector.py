@@ -4,8 +4,12 @@ import copy
 import logging
 
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.data_connector import SinglePartitionerDataConnector
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
+from great_expectations.execution_environment.data_connector import (
+    SinglePartitionerDataConnector,
+)
 from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -51,35 +55,36 @@ class InferredAssetFilesystemDataConnector(SinglePartitionerDataConnector):
             sorters=sorters,
         )
 
-    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
+    def _get_data_reference_list(
+        self, data_asset_name: Optional[str] = None
+    ) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
         """
         path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
-            base_directory_path=self.base_directory,
-            glob_directive=self.glob_directive
+            base_directory_path=self.base_directory, glob_directive=self.glob_directive
         )
         return path_list
 
     def _generate_batch_spec_parameters_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition
+        self, batch_definition: BatchDefinition
     ) -> dict:
-        path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
+        path: str = self._map_batch_definition_to_data_reference(
+            batch_definition=batch_definition
+        )
         if not path:
             raise ValueError(
-                f'''No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
+                f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
 partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
-                '''
+                """
             )
-        return {
-            "path": path
-        }
+        return {"path": path}
 
     def _build_batch_spec_from_batch_definition(
-        self,
-        batch_definition: BatchDefinition
+        self, batch_definition: BatchDefinition
     ) -> PathBatchSpec:
-        batch_spec = super()._build_batch_spec_from_batch_definition(batch_definition=batch_definition)
+        batch_spec = super()._build_batch_spec_from_batch_definition(
+            batch_definition=batch_definition
+        )
         return PathBatchSpec(batch_spec)

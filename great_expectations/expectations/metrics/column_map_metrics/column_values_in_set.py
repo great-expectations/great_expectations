@@ -13,6 +13,7 @@ from great_expectations.expectations.metrics.map_metric import (
 )
 from great_expectations.expectations.metrics.import_manager import F
 import logging
+
 logger = logging.getLogger(__name__)
 import numpy as np
 

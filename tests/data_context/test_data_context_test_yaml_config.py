@@ -119,35 +119,32 @@ data_connectors:
         #         - letter
         #         - number
         # default_partitioner_name: my_regex_partitioner
-""", return_mode="return_object"
+""",
+        return_mode="return_object",
     )
 
     print(json.dumps(return_obj, indent=2))
 
     assert return_obj == {
-        "execution_engine": {
-            "class_name": "PandasExecutionEngine"
-        },
+        "execution_engine": {"class_name": "PandasExecutionEngine"},
         "data_connectors": {
             "count": 1,
             "my_filesystem_data_connector": {
                 "class_name": "InferredAssetFilesystemDataConnector",
                 "data_asset_count": 1,
-                "example_data_asset_names": [
-                    "DEFAULT_ASSET_NAME"
-                ],
+                "example_data_asset_names": ["DEFAULT_ASSET_NAME"],
                 "data_assets": {
                     "DEFAULT_ASSET_NAME": {
                         "batch_definition_count": 10,
                         "example_data_references": [
                             "abe_20200809_1040.csv",
                             "alex_20200809_1000.csv",
-                            "alex_20200819_1300.csv"
-                        ]
+                            "alex_20200819_1300.csv",
+                        ],
                     }
                 },
                 "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": []
-            }
-        }
+                "example_unmatched_data_references": [],
+            },
+        },
     }

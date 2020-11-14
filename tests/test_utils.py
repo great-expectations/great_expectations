@@ -1341,10 +1341,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
         result = getattr(validator, expectation_type)(*kwargs)
     # As well as keyword arguments
     else:
-        runtime_kwargs = {
-            "result_format": "COMPLETE",
-            "include_config": False
-        }
+        runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
         runtime_kwargs.update(kwargs)
         result = getattr(validator, expectation_type)(**runtime_kwargs)
 
@@ -1373,9 +1370,9 @@ def check_json_test_result(test, result, data_asset=None):
             elif key == "observed_value":
                 if "tolerance" in test:
                     if isinstance(value, dict):
-                        assert set(
-                            result["result"]["observed_value"].keys()
-                        ) == set(value.keys())
+                        assert set(result["result"]["observed_value"].keys()) == set(
+                            value.keys()
+                        )
                         for k, v in value.items():
                             assert np.allclose(
                                 result["result"]["observed_value"][k],

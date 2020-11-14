@@ -5,7 +5,9 @@ import logging
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector import DataConnector
-from great_expectations.execution_environment.data_connector import SinglePartitionerDataConnector
+from great_expectations.execution_environment.data_connector import (
+    SinglePartitionerDataConnector,
+)
 from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -42,15 +44,15 @@ class SinglePartitionerDictDataConnector(SinglePartitionerDataConnector):
             data_reference_dict = {}
         logger.debug(f'Constructing SinglePartitionerDictDataConnector "{name}".')
         super().__init__(
-            name=name,
-            sorters=sorters,
-            **kwargs,
+            name=name, sorters=sorters, **kwargs,
         )
 
         # This simulates the underlying filesystem
         self.data_reference_dict = data_reference_dict
 
-    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
+    def _get_data_reference_list(
+        self, data_asset_name: Optional[str] = None
+    ) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.

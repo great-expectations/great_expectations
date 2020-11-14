@@ -28,14 +28,16 @@ DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
 
 
 def batch_definition_matches_batch_request(
-    batch_definition: BatchDefinition,
-    batch_request: BatchRequest,
+    batch_definition: BatchDefinition, batch_request: BatchRequest,
 ) -> bool:
     assert isinstance(batch_definition, BatchDefinition)
     assert isinstance(batch_request, BatchRequest)
 
     if batch_request.execution_environment_name:
-        if batch_request.execution_environment_name != batch_definition.execution_environment_name:
+        if (
+            batch_request.execution_environment_name
+            != batch_definition.execution_environment_name
+        ):
             return False
     if batch_request.data_connector_name:
         if batch_request.data_connector_name != batch_definition.data_connector_name:
@@ -46,13 +48,16 @@ def batch_definition_matches_batch_request(
 
     if batch_request.partition_request:
         assert isinstance(batch_request.partition_request, dict)
-        partition_identifiers: Any = batch_request.partition_request.get("partition_identifiers")
+        partition_identifiers: Any = batch_request.partition_request.get(
+            "partition_identifiers"
+        )
         if partition_identifiers:
             assert isinstance(partition_identifiers, dict)
             for key in partition_identifiers.keys():
                 if not (
-                    key in batch_definition.partition_definition and batch_definition.partition_definition[key] ==
-                    partition_identifiers[key]
+                    key in batch_definition.partition_definition
+                    and batch_definition.partition_definition[key]
+                    == partition_identifiers[key]
                 ):
                     return False
     return True
@@ -88,9 +93,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
 
 
 def convert_data_reference_string_to_batch_request_using_regex(
-    data_reference: str,
-    regex_pattern: str,
-    group_names: List[str],
+    data_reference: str, regex_pattern: str, group_names: List[str],
 ) -> Optional[BatchRequest]:
     # noinspection PyUnresolvedReferences
     matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
@@ -108,38 +111,32 @@ def convert_data_reference_string_to_batch_request_using_regex(
         data_asset_name = partition_definition.pop("data_asset_name")
 
     batch_request: BatchRequest = BatchRequest(
-        data_asset_name=data_asset_name,
-        partition_request=partition_definition,
+        data_asset_name=data_asset_name, partition_request=partition_definition,
     )
 
     return batch_request
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
-    batch_definition: BatchDefinition,
-    regex_pattern: str,
-    group_names: List[str],
+    batch_definition: BatchDefinition, regex_pattern: str, group_names: List[str],
 ) -> str:
     data_asset_name: str = batch_definition.data_asset_name
     partition_definition: PartitionDefinition = batch_definition.partition_definition
     partition_request: dict = partition_definition
     batch_request: BatchRequest = BatchRequest(
-        data_asset_name=data_asset_name,
-        partition_request=partition_request,
+        data_asset_name=data_asset_name, partition_request=partition_request,
     )
     data_reference: str = convert_batch_request_to_data_reference_string_using_regex(
         batch_request=batch_request,
         regex_pattern=regex_pattern,
-        group_names=group_names
+        group_names=group_names,
     )
     return data_reference
 
 
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
 def convert_batch_request_to_data_reference_string_using_regex(
-    batch_request: BatchRequest,
-    regex_pattern: str,
-    group_names: List[str],
+    batch_request: BatchRequest, regex_pattern: str, group_names: List[str],
 ) -> str:
     if not isinstance(batch_request, BatchRequest):
         raise TypeError("batch_request is not of an instance of type BatchRequest")
@@ -150,20 +147,16 @@ def convert_batch_request_to_data_reference_string_using_regex(
         template_arguments["data_asset_name"] = batch_request.data_asset_name
 
     filepath_template: str = _invert_regex_to_data_reference_template(
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+        regex_pattern=regex_pattern, group_names=group_names,
     )
-    converted_string = filepath_template.format(
-        **template_arguments
-    )
+    converted_string = filepath_template.format(**template_arguments)
 
     return converted_string
 
 
 # noinspection PyUnresolvedReferences
 def _invert_regex_to_data_reference_template(
-    regex_pattern: str,
-    group_names: List[str],
+    regex_pattern: str, group_names: List[str],
 ) -> str:
     """
     NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
@@ -180,7 +173,7 @@ def _invert_regex_to_data_reference_template(
 
         elif token == sre_constants.SUBPATTERN:
             # Replace the captured group with "{next_group_name}" in the template
-            data_reference_template += "{"+group_names[group_name_index]+"}"
+            data_reference_template += "{" + group_names[group_name_index] + "}"
             group_name_index += 1
 
         elif token in [
@@ -199,7 +192,9 @@ def _invert_regex_to_data_reference_template(
         ]:
             pass
         else:
-            raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
+            raise ValueError(
+                f"Unrecognized regex token {token} in regex pattern {regex_pattern}."
+            )
 
     # Collapse adjacent wildcards into a single wildcard
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)
@@ -207,8 +202,7 @@ def _invert_regex_to_data_reference_template(
 
 
 def get_filesystem_one_level_directory_glob_path_list(
-    base_directory_path: str,
-    glob_directive: str
+    base_directory_path: str, glob_directive: str
 ) -> List[str]:
     """
     List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
@@ -217,7 +211,10 @@ def get_filesystem_one_level_directory_glob_path_list(
     :returns -- list of relative file paths
     """
     globbed_paths = Path(base_directory_path).glob(glob_directive)
-    path_list: List[str] = [os.path.relpath(str(posix_path), base_directory_path) for posix_path in globbed_paths]
+    path_list: List[str] = [
+        os.path.relpath(str(posix_path), base_directory_path)
+        for posix_path in globbed_paths
+    ]
     return path_list
 
 
@@ -230,7 +227,7 @@ def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dic
                 return None
             if "name" not in sorter_config:
                 raise ValueError("Sorter config should have a name")
-            sorter_name = sorter_config['name']
+            sorter_name = sorter_config["name"]
             new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)
             sorter_dict[sorter_name] = new_sorter
     return sorter_dict
@@ -238,14 +235,12 @@ def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dic
 
 def _build_sorter_from_config(sorter_config) -> Sorter:
     """Build a Sorter using the provided configuration and return the newly-built Sorter."""
-    runtime_environment: dict = {
-        "name": sorter_config['name']
-    }
+    runtime_environment: dict = {"name": sorter_config["name"]}
     sorter: Sorter = instantiate_class_from_config(
         config=sorter_config,
         runtime_environment=runtime_environment,
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector.sorter"
-        }
+        },
     )
     return sorter

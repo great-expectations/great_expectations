@@ -75,12 +75,9 @@ class ExpectColumnPairValuesToBeInSet(TableExpectation):
         "row_condition",
         "condition_parser",
         "column_A",
-        "column_B"
+        "column_B",
     )
-    success_keys = (
-        "value_pairs_set"
-        "ignore_row_if",
-    )
+    success_keys = ("value_pairs_set" "ignore_row_if",)
 
     default_kwarg_values = {
         "ignore_row_if": "both_values_are_missing",
@@ -100,7 +97,9 @@ class ExpectColumnPairValuesToBeInSet(TableExpectation):
                 "column_A" in configuration.kwargs
                 and "column_B" in configuration.kwargs
             ), "both columns must be provided"
-            assert "value_pairs_set" in configuration.kwargs, "must provide value_pairs_set"
+            assert (
+                "value_pairs_set" in configuration.kwargs
+            ), "must provide value_pairs_set"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
@@ -144,6 +143,4 @@ class ExpectColumnPairValuesToBeInSet(TableExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         equal_columns = metrics.get("column_pair_values.in_set")
-        return {
-            "success": equal_columns.all()
-        }
+        return {"success": equal_columns.all()}

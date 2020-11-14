@@ -42,12 +42,14 @@ class CustomListSorter(Sorter):
         if partition_value in self._reference_list:
             return self._reference_list.index(partition_value)
         else:
-            raise ge_exceptions.SorterError(f'Source {partition_value} was not found in Reference list.  Try again...')
+            raise ge_exceptions.SorterError(
+                f"Source {partition_value} was not found in Reference list.  Try again..."
+            )
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "name": self.name,
             "reverse": self.reverse,
-            "type": "CustomListSorter"
+            "type": "CustomListSorter",
         }
         return str(doc_fields_dict)

@@ -146,11 +146,9 @@ class ExpectColumnDistinctValuesToEqualSet(TableExpectation):
         expected_value_set = set(parsed_value_set)
 
         return {
-            "success": observed_value_set ==expected_value_set,
+            "success": observed_value_set == expected_value_set,
             "result": {
                 "observed_value": sorted(list(observed_value_set)),
-                "details": {
-                    "value_counts": observed_value_counts
-                }
-            }
+                "details": {"value_counts": observed_value_counts},
+            },
         }
