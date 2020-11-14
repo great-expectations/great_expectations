@@ -654,27 +654,27 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
-
             # If we would like our data to become a single column
             if "column" in compute_domain_kwargs:
-                data = pd.DataFrame(data[compute_domain_kwargs["column"]])
+                if self.active_batch_data.use_quoted_name:
+                    selectable = sa.select(quoted_name(compute_domain_kwargs["column"]))
+                else:
+                    selectable = sa.select(compute_domain_kwargs["column"])
 
             # If we would like our data to now become a column pair
             elif ("column_A" in compute_domain_kwargs) and ("column_B" in compute_domain_kwargs):
-                data = data.get(compute_domain_kwargs["column_A"], compute_domain_kwargs["column_B"])
+                if self.active_batch_data.use_quoted_name:
+                    selectable = sa.select(quoted_name(compute_domain_kwargs["column_A", "column_B"]))
+                else:
+                    selectable = sa.select(compute_domain_kwargs["column_A", "column_B"])
             else:
-
                 # If we would like our data to become a multicolumn
                 if "columns" in compute_domain_kwargs:
-                    data = data.get(compute_domain_kwargs["columns"])
+                    if self.active_batch_data.use_quoted_name:
+                        selectable = sa.select(quoted_name(compute_domain_kwargs["columns"]))
+                    else:
+                        selectable = sa.select(compute_domain_kwargs["columns"])
 
-
-        if self.active_batch_data.use_quoted_name:
-            accessor_domain_kwargs["column"] = quoted_name(
-                compute_domain_kwargs.pop("column")
-            )
-        else:
-            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
 
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
