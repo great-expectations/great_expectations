@@ -6,9 +6,16 @@ import hashlib
 import random
 from typing import Any, Callable, Dict, Iterable, Tuple, List
 
+import boto3
+from ruamel.yaml.compat import StringIO
+
 import pandas as pd
 
 import great_expectations.exceptions.exceptions as ge_exceptions
+
+from great_expectations.execution_environment.util import S3Url
+
+from great_expectations.execution_environment.data_connector import ConfiguredAssetS3DataConnector, InferredAssetS3DataConnector
 
 from great_expectations.execution_environment.types import (
     PathBatchSpec,
@@ -123,6 +130,7 @@ Notes:
         )
 
         if isinstance(batch_spec, RuntimeDataBatchSpec):
+            # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
 
         elif isinstance(batch_spec, PathBatchSpec):
@@ -137,18 +145,39 @@ Notes:
         elif isinstance(batch_spec, S3BatchSpec):
             # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
             # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
-            # url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
-            # reader_method = batch_spec.get("reader_method")
-            # reader_fn = self._get_reader_fn(reader_method, url.key)
-            # batch_data = reader_fn(
-            #     StringIO(
-            #         s3_object["Body"]
-            #         .read()
-            #         .decode(s3_object.get("ContentEncoding", "utf-8"))
-            #     ),
-            #     **reader_options,
-            # )
-            pass
+            #
+            # if self.data_connector is None:
+            #     raise ge_exceptions.ExecutionEngineError(f'''
+            #         S3BatchSpec requires that a data_connector is configured for PandasExecutionEngine. Please add appropriate DataConnector and try again
+            #         You can either use a ConfiguredAssetS3DataConnector or InferredAssetS3DataConnector.
+            #         Please check documentation for more information
+            #         ''')
+            # if not isinstance(self.data_connector, ConfiguredAssetS3DataConnector) or not isinstance(self.data_connector, InferredAssetS3DataConnector):
+            #     raise ge_exceptions.ExecutionEngineError(f'''
+            #                         S3BatchSpec requires a connection to ConfiguredAssetS3DataConnector or InferredAssetS3DataConnector.
+            #                         The current data_connector is of type {type(self.data_connector)}.
+            #                         Please check documentation for more information
+            #                         ''')
+
+            #url, s3_object = self.data_connector.get_s3_object(batch_spec=batch_spec)
+            reader_method = batch_spec.get("reader_method")
+            reader_options: dict = batch_spec.get("reader_options") or {}
+            url = S3Url(batch_spec.get("s3"))
+            print(
+                "Fetching s3 object. Bucket: {} Key: {}".format(url.bucket, url.key)
+            )
+            boto3_options = {}
+            s3 = boto3.client("s3", **boto3_options)
+            s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
+            reader_fn = self._get_reader_fn(reader_method, url.key)
+            batch_data = reader_fn(
+                StringIO(
+                    s3_object["Body"]
+                    .read()
+                    .decode(s3_object.get("ContentEncoding", "utf-8"))
+                ),
+                **reader_options,
+            )
         else:
             raise BatchSpecError(
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"

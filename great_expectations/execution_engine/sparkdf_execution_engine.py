@@ -3,8 +3,11 @@ import datetime
 import logging
 import uuid
 import hashlib
+import boto3
 
-from typing import Any, Callable, Dict, Iterable, Tuple, Optional
+from typing import Any, Callable, Dict, Iterable, Tuple, Optional, List
+
+from ruamel.yaml.compat import StringIO
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +37,7 @@ except ImportError:
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.batch import BatchSpec, BatchMarkers
 from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.execution_environment.util import S3Url
 
 from great_expectations.execution_environment.types.batch_spec import(
     PathBatchSpec,
@@ -227,10 +231,15 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             path: str = batch_spec["path"]
             reader = self.spark.read
             reader_fn: Callable = self._get_reader_fn(reader, reader_method, path)
-
             batch_data = reader_fn(path, **reader_options)
         elif isinstance(batch_spec, S3BatchSpec):
-            pass
+
+            reader_method = batch_spec.get("reader_method")
+            reader_options: dict = batch_spec.get("reader_options") or {}
+            url = batch_spec.get("s3")
+            reader_fn = self._get_reader_fn(reader=self.spark.read, reader_method=reader_method, path=url)
+            batch_data = reader_fn(path=url, **reader_options)
+
         else:
             raise BatchSpecError(
             """

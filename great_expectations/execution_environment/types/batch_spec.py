@@ -77,7 +77,7 @@ class S3BatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "s3" not in self:
-            raise InvalidBatchSpecError("S3BatchSpec requires a path element")
+            raise InvalidBatchSpecError("S3BatchSpec requires a S3 path element")
 
     @property
     def s3(self):

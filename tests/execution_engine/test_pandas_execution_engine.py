@@ -2,16 +2,21 @@ import pytest
 import datetime
 import random
 import os
+import boto3
 import pandas as pd
+
+from moto import mock_s3
+
+from typing import List
 
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.validator.validation_graph import MetricConfiguration
 
-from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec
+from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec
 from great_expectations.execution_engine.pandas_execution_engine import PandasExecutionEngine
-import great_expectations.exceptions.exceptions as ge_exceptions
 
+import great_expectations.exceptions.exceptions as ge_exceptions
 
 @pytest.fixture
 def test_df(tmp_path_factory):
@@ -190,19 +195,14 @@ def test_dataframe_property_given_loaded_batch():
 
 
 def test_get_batch_data(test_df):
-    print(test_df.T)
     split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_df,
     ))
     assert split_df.shape == (120, 10)
 
-    # TODO Abe 20201105: We should change RuntimeDataBatchSpec so that this test passes, but that should be a different PR.
     # No dataset passed to RuntimeDataBatchSpec
-    # with pytest.raises(ValueError):
-    #     PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
-
-    #         # batch_data=test_df,
-    #     ))
+    with pytest.raises(ge_exceptions.InvalidBatchSpecError):
+        PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec())
 
 
 def test_get_batch_with_split_on_whole_table(test_df):
@@ -222,6 +222,39 @@ def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_p
         )
     )
     assert test_df.shape == (5, 3)
+
+@mock_s3
+def test_get_batch_with_split_on_whole_table_s3():
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client = boto3.client("s3", region_name=region_name)
+
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+    ]
+    for key in keys:
+        client.put_object(
+            Bucket=bucket,
+            Body=test_df.to_csv(index=False).encode("utf-8"),
+            Key=key
+        )
+    path = "path/A-100.csv"
+    full_path = f"s3a://{os.path.join(bucket, path)}"
+
+    me = S3BatchSpec(
+           s3=full_path,
+           reader_method="read_csv",
+           splitter_method="_split_on_whole_table"
+    )
+
+    test_df = PandasExecutionEngine().get_batch_data(batch_spec=me)
+    assert test_df.shape == (2, 2)
 
 
 def test_get_batch_with_split_on_column_value(test_df):

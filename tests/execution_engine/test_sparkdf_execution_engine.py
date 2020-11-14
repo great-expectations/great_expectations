@@ -6,9 +6,11 @@ import numpy as np
 import pandas as pd
 from great_expectations.core.batch import Batch
 
+from unittest.mock import MagicMock, patch
+
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec
+from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
@@ -35,7 +37,6 @@ def _build_spark_engine(spark_session, df):
     batch = Batch(data=df)
     engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
     return engine
-
 
 @pytest.fixture
 def test_sparkdf(spark_session):
@@ -240,6 +241,52 @@ def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_p
     )
     assert test_sparkdf.count() == 6
     assert len(test_sparkdf.columns) == 3
+
+
+def test_get_batch_with_split_on_whole_table_s3_real_data():
+    # reader_method not configured because spark will configure own reader by default
+    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
+        S3BatchSpec(
+            s3="s3a://alex.dev/data_assets/movies.csv",
+            reader_method="csv",
+            reader_options={
+                "header": True
+            },
+            splitter_method="_split_on_whole_table"
+    ))
+    assert test_sparkdf.count() == 58098
+
+
+def test_get_batch_with_split_on_whole_table_s3(spark_session):
+    def mocked_get_reader_function(**kwargs):
+        def mocked_reader_function(**kwargs):
+            pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+            df = spark_session.createDataFrame(
+                [
+                    tuple(
+                        None if isinstance(x, (float, int)) and np.isnan(x) else x
+                        for x in record.tolist()
+                    )
+                    for record in pd_df.to_records(index=False)
+                ],
+                pd_df.columns.tolist(),
+            )
+            return df
+        return mocked_reader_function
+
+    spark_engine = SparkDFExecutionEngine()
+    spark_engine._get_reader_fn = mocked_get_reader_function
+    test_sparkdf = spark_engine.get_batch_data(
+        S3BatchSpec(
+            s3="s3://bucket/test/test.csv",
+            reader_method="csv",
+            reader_options={
+                "header": True
+            },
+            splitter_method="_split_on_whole_table"
+    ))
+    assert test_sparkdf.count() == 4
+    assert len(test_sparkdf.columns) == 2
 
 
 def test_get_batch_with_split_on_whole_table(test_sparkdf):
