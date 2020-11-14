@@ -3,7 +3,7 @@ import datetime
 import logging
 from functools import partial
 from io import StringIO
-from typing import Any, Callable, Dict, Iterable, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, Tuple, Union, Optional
 
 import pandas as pd
 
@@ -308,7 +308,8 @@ operate.
             like to be using, or a corresponding string value representing it. String types include "identity", "column",
             "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
             MetricDomainTypes.
-            accessor_keys: (str iterable): keys that are part of the compute domain but should be ignored when describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
+             the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
@@ -343,23 +344,30 @@ operate.
                 "PandasExecutionEngine does not currently support multiple named tables."
             )
 
+        # Filtering by row condition
         row_condition = domain_kwargs.get("row_condition", None)
         if row_condition:
             condition_parser = domain_kwargs.get("condition_parser", None)
+
+            # Ensuring proper condition parser has been provided
             if condition_parser not in ["python", "pandas"]:
                 raise ValueError(
                     "condition_parser is required when setting a row_condition,"
                     " and must be 'python' or 'pandas'"
                 )
             else:
+                # Querying row condition
                 data = data.query(row_condition, parser=condition_parser).reset_index(
                     drop=True
                 )
 
+        # If given table (this is default), get all unexpected accessor_keys (an optional parameters allowing us to
+        # modify domain access)
         if domain_type == MetricDomainTypes.TABLE:
             for key in accessor_keys:
                 accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
             for key in compute_domain_kwargs.keys():
+                # Warning user if kwarg not "normal"
                 if key not in ["batch_id", "table", "row_condition", "condition_parser"]:
                     logger.warning(f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}")
             return data, compute_domain_kwargs, accessor_domain_kwargs
@@ -407,10 +415,5 @@ operate.
                 # If we would like our data to become a multicolumn
                 if "columns" in compute_domain_kwargs:
                     data = data.get(compute_domain_kwargs["columns"])
-
-
-
-
-
 
         return data, compute_domain_kwargs, accessor_domain_kwargs

@@ -4,10 +4,11 @@ import json
 import logging
 import uuid
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Tuple, Union, Optional
 from urllib.parse import urlparse
 
 from great_expectations.core import IDDict
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
 from great_expectations.util import import_library_module
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -527,7 +528,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     def get_compute_domain(
-        self, domain_kwargs: Dict, domain_type: Union[str, "MetricDomainTypes"],
+        self,
+        domain_kwargs: Dict,
+        domain_type: Union[str, "MetricDomainTypes"],
+        accessor_keys: Optional[Iterable[str]] = None
     ) -> Tuple["sa.sql.Selectable", dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
@@ -538,10 +542,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             like to be using, or a corresponding string value representing it. String types include "identity", "column",
             "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
             MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
+            the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             SqlAlchemy column
         """
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -591,13 +599,82 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
                 )
 
-        if "column" in compute_domain_kwargs:
-            if self.active_batch_data.use_quoted_name:
-                accessor_domain_kwargs["column"] = quoted_name(
-                    compute_domain_kwargs.pop("column")
-                )
+        if domain_type == MetricDomainTypes.TABLE:
+            for key in accessor_keys:
+                accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
+            for key in compute_domain_kwargs.keys():
+                # Warning user if kwarg not "normal"
+                if key not in ["batch_id", "table", "row_condition", "condition_parser"]:
+                    logger.warning(f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}")
+            return selectable, compute_domain_kwargs, accessor_domain_kwargs
+
+        # If user has stated they want a column, checking if one is provided, and
+        elif domain_type == MetricDomainTypes.COLUMN:
+            if "column" in compute_domain_kwargs:
+                # Checking if case- sensitive and using appropriate name
+                if self.active_batch_data.use_quoted_name:
+                    accessor_domain_kwargs["column"] = quoted_name(
+                        compute_domain_kwargs.pop("column")
+                    )
+                else:
+                    accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
             else:
-                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+                # If column not given
+                raise GreatExpectationsError("Column not provided in compute_domain_kwargs")
+
+        # Else, if column pair values requested
+        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+            # Ensuring column_A and column_B parameters provided
+            if "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs:
+                if self.active_batch_data.use_quoted_name:
+                    # If case matters...
+                    accessor_domain_kwargs["column_A"] = quoted_name(compute_domain_kwargs.pop("column_A"))
+                    accessor_domain_kwargs["column_B"] = quoted_name(compute_domain_kwargs.pop("column_B"))
+                else:
+                    accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
+                    accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
+            else:
+                raise GreatExpectationsError("column_A or column_B not found within compute_domain_kwargs")
+
+        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+        elif domain_type == MetricDomainTypes.MULTICOLUMN:
+            if "columns" in compute_domain_kwargs:
+                # If columns exist
+                for column in compute_domain_kwargs["columns"]:
+                    try:
+                        # Checking if capitalization matters
+                        if self.active_batch_data.use_quoted_name:
+                            accessor_domain_kwargs[column] = quoted_name(compute_domain_kwargs.pop(column))
+                        else:
+                            accessor_domain_kwargs[column] = compute_domain_kwargs.pop(column)
+
+                    # Raising an error if column doesn't exist
+                    except KeyError as k:
+                        raise KeyError(f"Column {column} not found within compute_domain_kwargs")
+
+        # Filtering if identity
+        elif domain_type == MetricDomainTypes.IDENTITY:
+
+            # If we would like our data to become a single column
+            if "column" in compute_domain_kwargs:
+                data = pd.DataFrame(data[compute_domain_kwargs["column"]])
+
+            # If we would like our data to now become a column pair
+            elif ("column_A" in compute_domain_kwargs) and ("column_B" in compute_domain_kwargs):
+                data = data.get(compute_domain_kwargs["column_A"], compute_domain_kwargs["column_B"])
+            else:
+
+                # If we would like our data to become a multicolumn
+                if "columns" in compute_domain_kwargs:
+                    data = data.get(compute_domain_kwargs["columns"])
+
+
+        if self.active_batch_data.use_quoted_name:
+            accessor_domain_kwargs["column"] = quoted_name(
+                compute_domain_kwargs.pop("column")
+            )
+        else:
+            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
 
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
