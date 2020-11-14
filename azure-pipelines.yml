@@ -251,8 +251,6 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              #<Alex></Alex>
-              pip install --requirement requirements-dev-spark.txt
               pip install --requirement requirements.txt
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
@@ -284,8 +282,6 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              #<Alex></Alex>
-              pip install --requirement requirements-dev-spark.txt
               pip install --requirement requirements.txt
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .

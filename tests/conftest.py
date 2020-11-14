@@ -32,11 +32,6 @@ from .test_utils import (
     get_dataset,
 )
 
-try:
-    import pyspark
-except ImportError:
-    pyspark = None
-
 
 ###
 #
@@ -96,6 +91,7 @@ def build_test_backends_list(metafunc):
     no_spark = metafunc.config.getoption("--no-spark")
     if not no_spark:
         try:
+            import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
             raise ValueError("spark tests are requested, but pyspark is not installed")
@@ -161,6 +157,7 @@ def build_test_backends_list_cfe(metafunc):
     no_spark = metafunc.config.getoption("--no-spark")
     if not no_spark:
         try:
+            import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
             raise ValueError("spark tests are requested, but pyspark is not installed")
@@ -268,13 +265,12 @@ def sa(test_backends):
 def spark_session(test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
-    if pyspark is None:
-        pytest.skip("Spark tests require pyspark to be installed.")
     try:
+        import pyspark
         from pyspark.sql import SparkSession
         return SparkSession.builder.getOrCreate()
     except ImportError:
-        raise ValueError("spark tests are requested, but SparkSession could not be imported from pyspark.sql")
+        raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
@@ -2137,7 +2133,6 @@ def sqlitedb_engine(test_backend):
             return sa.create_engine("sqlite://")
         except ImportError:
             raise ValueError("sqlite tests require sqlalchemy to be installed")
-
     else:
         pytest.skip("Skipping test designed for sqlite on non-sqlite backend.")
 
@@ -2152,7 +2147,6 @@ def postgresql_engine(test_backend):
             engine.close()
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
-
     else:
         pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
 
@@ -2810,7 +2804,6 @@ def sqlite_view_engine(test_backends):
             return sqlite_engine
         except ImportError:
             sa = None
-
     else:
         pytest.skip("SqlAlchemy tests disabled; not testing views")
 
@@ -2828,8 +2821,7 @@ def basic_sqlalchemy_datasource(sqlitedb_engine):
 @pytest.fixture
 def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
     if sa is None:
-        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
-
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
     db_file = file_relative_path(
         __file__, os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),

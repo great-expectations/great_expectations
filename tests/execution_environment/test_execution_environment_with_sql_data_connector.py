@@ -4,24 +4,19 @@ import yaml
 import os
 import json
 
-try:
-    import sqlalchemy
-except ImportError:
-    sqlalchemy = None
-
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     file_relative_path,
 )
-from great_expectations.core.batch import (
-    BatchRequest
-)
+from great_expectations.core.batch import BatchRequest
+
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
 
 
 def test_basic_instantiation(sa):
-    if sa is None:
-        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
-
     random.seed(0)
 
     db_file = file_relative_path(
@@ -116,9 +111,6 @@ data_connectors:
 
 
 def test_StreamlinedSqlExecutionEnvironment(empty_data_context):
-    if sqlalchemy is None:
-        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
-
     # This test mirrors the likely path to configure a StreamlinedSqlExecutionEnvironment
 
     db_file = file_relative_path(

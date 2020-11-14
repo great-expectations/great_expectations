@@ -24,8 +24,11 @@ logger = logging.getLogger(__name__)
 
 try:
     import pyspark
+    from pyspark.sql import (
+        SparkSession,
+        DataFrame,
+    )
     import pyspark.sql.functions as F
-    from pyspark.sql import DataFrame, SparkSession
     from pyspark.sql.types import (
         StructType,
         StructField,
@@ -36,10 +39,17 @@ try:
         BooleanType,
     )
 except ImportError:
-    F = None
     pyspark = None
     SparkSession = None
     DataFrame = None
+    F = None
+    StructType = None,
+    StructField = None,
+    IntegerType = None,
+    FloatType = None,
+    StringType = None,
+    DateType = None,
+    BooleanType = None,
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )

@@ -8,17 +8,24 @@ from great_expectations.core.batch import Batch
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec
-from great_expectations.execution_engine import (
-    SparkDFExecutionEngine,
+from great_expectations.execution_environment.types.batch_spec import (
+    RuntimeDataBatchSpec,
+    PathBatchSpec
 )
+from great_expectations.execution_engine import SparkDFExecutionEngine
 
 try:
+    pyspark = pytest.importorskip("pyspark")
     import pyspark.sql.functions as F
-    from pyspark.sql.types import IntegerType, StringType
+    from pyspark.sql.types import (
+        IntegerType,
+        StringType,
+    )
 except ImportError:
+    pyspark = None
     F = None
-    SparkSession = None
+    IntegerType = None
+    StringType = None
 
 
 def _build_spark_engine(spark_session, df):
@@ -472,6 +479,7 @@ def test_sample_using_md5_wrong_hash_function_name(test_sparkdf):
             "hash_function_name": "I_wont_work",
             }
         ))
+
 
 def test_sample_using_md5(test_sparkdf):
     sampled_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(

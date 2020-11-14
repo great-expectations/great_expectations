@@ -12,6 +12,7 @@ from great_expectations.core.batch import (
 )
 from ..test_utils import create_files_in_directory
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.util import is_library_loadable
 
 try:
     import sqlalchemy as sa
@@ -21,9 +22,6 @@ except ImportError:
 
 @pytest.fixture
 def data_context_with_sql_execution_environment_for_testing_get_batch(empty_data_context):
-    if sa is None:
-        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
-
     db_file = file_relative_path(
         __file__,
         "../test_sets/test_cases_for_sql_data_connector.db",
@@ -58,10 +56,13 @@ introspection:
         yaml.FullLoader,
     )
 
-    empty_data_context.add_execution_environment(
-        "my_sqlite_db",
-        config
-    )
+    try:
+        empty_data_context.add_execution_environment(
+            "my_sqlite_db",
+            config
+        )
+    except AttributeError:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
     return empty_data_context
 
@@ -221,13 +222,17 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
     )
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="sqlalchemy"),
+    reason="requires sqlalchemy to be installed",
+)
 def test_get_batch_list_from_new_style_datasource_with_sql_execution_environment(
     data_context_with_sql_execution_environment_for_testing_get_batch
 ):
     context = data_context_with_sql_execution_environment_for_testing_get_batch
     
     batch_list = context.get_batch_list_from_new_style_datasource({
-        "execution_environment_name" : "my_sqlite_db",
+        "execution_environment_name": "my_sqlite_db",
         "data_connector_name": "daily",
         "data_asset_name": "table_partitioned_by_date_column__A__daily",
         "partition_request" : {
