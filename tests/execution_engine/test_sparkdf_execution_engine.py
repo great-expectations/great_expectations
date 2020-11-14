@@ -6,8 +6,6 @@ import numpy as np
 import pandas as pd
 from great_expectations.core.batch import Batch
 
-from unittest.mock import MagicMock, patch
-
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec
@@ -275,7 +273,7 @@ def test_get_batch_with_split_on_whole_table_s3(spark_session):
 
     spark_engine = SparkDFExecutionEngine()
     spark_engine._get_reader_fn = mocked_get_reader_function
-    
+
     test_sparkdf = spark_engine.get_batch_data(
         S3BatchSpec(
             s3="s3://bucket/test/test.csv",

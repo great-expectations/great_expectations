@@ -32,8 +32,6 @@ class ExecutionEngine:
         batch_spec_defaults=None,
         batch_data_dict=None,
         validator=None,
-        # only used for accessing data in S3
-        data_connector=None,
     ):
         self.name = name
         self._validator = validator
@@ -67,10 +65,6 @@ class ExecutionEngine:
         self._batch_data = batch_data_dict
         self._active_batch_data_id = None
 
-        # only for accessing S3
-        self._data_connector = data_connector
-
-
     def configure_validator(self, validator):
         """Optionally configure the validator as appropriate for the execution engine."""
         pass
@@ -103,15 +97,6 @@ class ExecutionEngine:
     def loaded_batch_data(self):
         """The current dictionary of batches."""
         return self._batch_data
-
-    @property
-    def data_connector(self):
-        return self._data_connector
-
-    @data_connector.setter
-    def data_connector(self, data_connector):
-        self._data_connector = data_connector
-
 
     def get_batch_data(
         self,
