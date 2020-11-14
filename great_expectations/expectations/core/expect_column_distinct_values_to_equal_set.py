@@ -6,7 +6,6 @@ import pandas as pd
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from ..metrics.util import parse_value_set
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
@@ -21,6 +20,7 @@ from ..expectation import (
     TableExpectation,
     _format_map_output,
 )
+from ..metrics.util import parse_value_set
 from ..registry import extract_metrics
 
 

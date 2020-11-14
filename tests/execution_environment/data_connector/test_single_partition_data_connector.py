@@ -1,23 +1,20 @@
+from typing import List
+
 import pytest
 import yaml
 
-from typing import List
-
-from great_expectations.execution_environment.data_connector import (
-    SinglePartitionerDictDataConnector,
-    InferredAssetFilesystemDataConnector,
-)
+import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     PartitionDefinition,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from tests.test_utils import (
-    create_fake_data_frame,
-    create_files_in_directory,
+from great_expectations.execution_environment.data_connector import (
+    InferredAssetFilesystemDataConnector,
+    SinglePartitionerDictDataConnector,
 )
-import great_expectations.exceptions.exceptions as ge_exceptions
+from tests.test_utils import create_fake_data_frame, create_files_in_directory
 
 
 def test_basic_instantiation():

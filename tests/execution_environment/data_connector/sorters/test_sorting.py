@@ -1,19 +1,16 @@
-import pytest
 from typing import Iterator
-from great_expectations.core.batch import (
-    BatchDefinition,
-    PartitionDefinition,
-)
 
-from great_expectations.execution_environment.data_connector.sorter import (
-    Sorter,
-    LexicographicSorter,
-    NumericSorter,
-    DateTimeSorter,
-    CustomListSorter,
-)
+import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchDefinition, PartitionDefinition
+from great_expectations.execution_environment.data_connector.sorter import (
+    CustomListSorter,
+    DateTimeSorter,
+    LexicographicSorter,
+    NumericSorter,
+    Sorter,
+)
 
 
 @pytest.fixture()

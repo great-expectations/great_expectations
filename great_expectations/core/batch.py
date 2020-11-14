@@ -1,8 +1,7 @@
 import datetime
 import hashlib
 import json
-from typing import Union
-from typing import Union, Any, Optional
+from typing import Any, Optional, Union
 
 from great_expectations.core.id_dict import (
     BatchKwargs,

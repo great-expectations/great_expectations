@@ -2,24 +2,22 @@
 
 # Utility methods for dealing with DataConnector objects
 
-import os
-from typing import List, Dict, Any, Optional
 import copy
-from pathlib import Path
-import re
-import sre_parse
-import sre_constants
-
 import logging
+import os
+import re
+import sre_constants
+import sre_parse
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.id_dict import (
-    PartitionDefinitionSubset,
     PartitionDefinition,
+    PartitionDefinitionSubset,
 )
-from great_expectations.core.batch import BatchDefinition
-from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_environment.data_connector.sorter import Sorter
 
 logger = logging.getLogger(__name__)
 

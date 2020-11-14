@@ -1,23 +1,20 @@
-import pytest
-import pandas as pd
-import yaml
-
 from typing import List
 
-from great_expectations.execution_environment.execution_environment import (
-    ExecutionEnvironment,
-)
+import pandas as pd
+import pytest
+import yaml
+
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.id_dict import PartitionDefinition
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment.data_connector import (
     PipelineDataConnector,
 )
-from great_expectations.core.id_dict import PartitionDefinition
-from great_expectations.core.batch import (
-    BatchRequest,
-    BatchDefinition,
+from great_expectations.execution_environment.execution_environment import (
+    ExecutionEnvironment,
 )
 from great_expectations.execution_environment.types import InMemoryBatchSpec
-from great_expectations.data_context.util import instantiate_class_from_config
-import great_expectations.exceptions as ge_exceptions
 
 
 @pytest.fixture
