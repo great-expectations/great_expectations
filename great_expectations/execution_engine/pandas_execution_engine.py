@@ -293,7 +293,10 @@ operate.
         return batch_spec
 
     def get_compute_domain(
-        self, domain_kwargs: dict, domain_type: Union[str, "MetricDomainTypes"],
+        self,
+        domain_kwargs: dict,
+        domain_type: Union[str, "MetricDomainTypes"],
+        accessor_keys: Optional[Iterable[str]] = None
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas DataFrame. If the domain is a single column,
@@ -305,6 +308,7 @@ operate.
             like to be using, or a corresponding string value representing it. String types include "identity", "column",
             "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
             MetricDomainTypes.
+            accessor_keys: (str iterable): keys that are part of the compute domain but should be ignored when describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
@@ -314,8 +318,7 @@ operate.
                 identify the domain within the compute domain
         """
         # Extracting value from enum if it is given for future computation
-        if isinstance(domain_type, MetricDomainTypes):
-            domain_type = domain_type.value
+        domain_type = MetricDomainTypes(domain_type)
 
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
@@ -353,32 +356,61 @@ operate.
                     drop=True
                 )
 
-                # If user has stated they want a column, checking if one is provided, and
-                if domain_type == "column":
-                    if "column" in compute_domain_kwargs:
-                        accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
-                    else:
-                        # If column not given
-                        raise GreatExpectationsError("Column not provided in compute_domain_kwargs")
+        if domain_type == MetricDomainTypes.TABLE:
+            for key in accessor_keys:
+                accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
+            for key in compute_domain_kwargs.keys():
+                if key not in ["batch_id", "table", "row_condition", "condition_parser"]:
+                    logger.warning(f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}")
+            return data, compute_domain_kwargs, accessor_domain_kwargs
 
-                # Else, if column pair values requested
-                elif domain_type == "column_pair":
-                    # Ensuring column_A and column_B parameters provided
-                    if "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs:
-                        accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
-                        accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
-                    else:
-                        raise GreatExpectationsError("column_A or column_B not found within compute_domain_kwargs")
+        # If user has stated they want a column, checking if one is provided, and
+        elif domain_type == MetricDomainTypes.COLUMN:
+            if "column" in compute_domain_kwargs:
+                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+            else:
+                # If column not given
+                raise GreatExpectationsError("Column not provided in compute_domain_kwargs")
 
-                # Checking if table or identity or other provided, column is not specified. If it is, warning the user
-                else:
-                    if domain_type in ["identity", "table", "other"] and (
-                            "column" in compute_domain_kwargs or "column_A"
-                            in compute_domain_kwargs or "column_B" in compute_domain_kwargs):
-                        # Throwing a warning
-                        print(
-                            "WARNING: Compute domain kwargs for this domain type received unexpected column key, which"
-                            "was ignored. If you would like to specify a column, please define domain type as a column"
-                            "or column_pair domain, depending on which one better fits your desired domain.")
+        # Else, if column pair values requested
+        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+            # Ensuring column_A and column_B parameters provided
+            if "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs:
+                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
+                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
+            else:
+                raise GreatExpectationsError("column_A or column_B not found within compute_domain_kwargs")
+
+        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+        elif domain_type == MetricDomainTypes.MULTICOLUMN:
+                if "columns" in compute_domain_kwargs:
+                    # If columns exist
+                    for column in compute_domain_kwargs["columns"]:
+                        try:
+                            accessor_domain_kwargs[column] = compute_domain_kwargs.pop(column)
+                        # Raising an error if column doesn't exist
+                        except KeyError as k:
+                            raise KeyError(f"Column {column} not found within compute_domain_kwargs")
+
+        # Filtering if identity
+        elif domain_type == MetricDomainTypes.IDENTITY:
+
+            # If we would like our data to become a single column
+            if "column" in compute_domain_kwargs:
+                data = pd.DataFrame(data[compute_domain_kwargs["column"]])
+
+            # If we would like our data to now become a column pair
+            elif ("column_A" in compute_domain_kwargs) and ("column_B" in compute_domain_kwargs):
+                data = data.get(compute_domain_kwargs["column_A"], compute_domain_kwargs["column_B"])
+            else:
+
+                # If we would like our data to become a multicolumn
+                if "columns" in compute_domain_kwargs:
+                    data = data.get(compute_domain_kwargs["columns"])
+
+
+
+
+
 
         return data, compute_domain_kwargs, accessor_domain_kwargs

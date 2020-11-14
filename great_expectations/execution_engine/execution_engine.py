@@ -300,4 +300,4 @@ class MetricDomainTypes(Enum):
     COLUMN = "column"
     COLUMN_PAIR = "column_pair"
     TABLE = "table"
-    OTHER = "other"
+    MULTICOLUMN = "multi_column"

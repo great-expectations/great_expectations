@@ -534,6 +534,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
             batches (dict) - A dictionary specifying batch id and which batches to obtain
+            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity", "column",
+            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
+            MetricDomainTypes.
 
         Returns:
             SqlAlchemy column
