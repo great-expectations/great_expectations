@@ -3,11 +3,8 @@ import datetime
 import logging
 import uuid
 import hashlib
-import boto3
 
-from typing import Any, Callable, Dict, Iterable, Tuple, Optional, List
-
-from ruamel.yaml.compat import StringIO
+from typing import Any, Callable, Dict, Iterable, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
