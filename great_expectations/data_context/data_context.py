@@ -1600,11 +1600,12 @@ class BaseDataContext:
             execution_environment (ExecutionEnvironment)
         """
 
-        self._project_config["datasources"][execution_environment_name] = execution_environment_config
-        return self._build_execution_environment_from_config(
+        new_execution_environment = self._build_execution_environment_from_config(
             execution_environment_name,
             execution_environment_config,
         )
+        self._project_config["datasources"][execution_environment_name] = execution_environment_config
+        return new_execution_environment
 
     # TODO: deprecate
     def add_batch_kwargs_generator(
@@ -1764,12 +1765,17 @@ class BaseDataContext:
             runtime_environment=runtime_environment,
             config_defaults={"module_name": module_name},
         )
+        
         if not new_execution_environment:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
                 class_name=config["class_name"],
             )
+        
+        if not isinstance(new_execution_environment, ExecutionEnvironment):
+            raise TypeError(f"Newly instantiated component {name} is not an instance of ExecutionEnvironment. Please check class_name in the config.")
+
         self._cached_datasources[name] = new_execution_environment
         return new_execution_environment
 
@@ -3032,6 +3038,17 @@ class DataContext(BaseDataContext):
         self._save_project_config()
 
         return delete_datasource
+
+    def add_execution_environment(self, execution_environment_name, execution_environment_config):
+        logger.debug("Starting DataContext.add_execution_environment for execution_environment %s" % execution_environment_name)
+
+        new_execution_environment = super().add_execution_environment(
+            execution_environment_name,
+            execution_environment_config
+        )
+        self._save_project_config()
+
+        return new_execution_environment
 
     @classmethod
     def find_context_root_dir(cls):
