@@ -68,6 +68,5 @@ def test_add_execution_environment(empty_data_context):
         }
     )
     assert "my_new_execution_environment" in context.datasources
-    context.get_config()
     assert "my_new_execution_environment" in read_config_from_file(config_filename)
 
