@@ -275,7 +275,9 @@ def test_self_check(tmp_path_factory):
     }
 
 
-def test_test_yaml_config(empty_data_context, tmp_path_factory):
+def test_test_yaml_config(empty_data_context_v3, tmp_path_factory):
+    context = empty_data_context_v3
+
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
         directory=base_directory,
@@ -290,7 +292,7 @@ def test_test_yaml_config(empty_data_context, tmp_path_factory):
         ],
     )
 
-    report_object = empty_data_context.test_yaml_config(f"""
+    report_object = context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: InferredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -327,7 +329,9 @@ default_regex:
     }
 
 
-def test_yaml_config_excluding_non_regex_matching_files(empty_data_context, tmp_path_factory):
+def test_yaml_config_excluding_non_regex_matching_files(empty_data_context_v3, tmp_path_factory):
+    context = empty_data_context_v3
+
     base_directory = str(tmp_path_factory.mktemp("test_yaml_config_excluding_non_regex_matching_files"))
     create_files_in_directory(
         directory=base_directory,
@@ -347,7 +351,7 @@ def test_yaml_config_excluding_non_regex_matching_files(empty_data_context, tmp_
     # gamma-202001.csv and gamma-202002.csv do not match regex (which includes 2020/month directory).  They are not
     # considered as unmatched data references, because glob_directive causes these data references to not be listed.
 
-    report_object = empty_data_context.test_yaml_config(
+    report_object = context.test_yaml_config(
         f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: InferredAssetFilesystemDataConnector
@@ -389,7 +393,9 @@ default_regex:
     }
 
 
-def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path_factory):
+def test_nested_directory_data_asset_name_in_folder(empty_data_context_v3, tmp_path_factory):
+    context = empty_data_context_v3
+
     base_directory = str(tmp_path_factory.mktemp("test_nested_directory_data_asset_name_in_folder"))
     create_files_in_directory(
         directory=base_directory,
@@ -409,7 +415,7 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
         ]
     )
 
-    report_object = empty_data_context.test_yaml_config(f"""
+    report_object = context.test_yaml_config(f"""
     module_name: great_expectations.execution_environment.data_connector
     class_name: InferredAssetFilesystemDataConnector
     execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -451,7 +457,9 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context, tmp_path
     }
 
 
-def test_redundant_information_in_naming_convention_random_hash(empty_data_context, tmp_path_factory):
+def test_redundant_information_in_naming_convention_random_hash(empty_data_context_v3, tmp_path_factory):
+    context = empty_data_context_v3
+
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
         directory=base_directory,
@@ -466,7 +474,7 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
         ]
     )
 
-    report_object = empty_data_context.test_yaml_config(f"""
+    report_object = context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -502,7 +510,9 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
     }
 
 
-def test_redundant_information_in_naming_convention_timestamp(empty_data_context, tmp_path_factory):
+def test_redundant_information_in_naming_convention_timestamp(empty_data_context_v3, tmp_path_factory):
+    context = empty_data_context_v3
+
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
         directory=base_directory,
@@ -517,7 +527,7 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
         ]
     )
 
-    report_object = empty_data_context.test_yaml_config(f"""
+    report_object = context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -551,7 +561,9 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
     }
 
 
-def test_redundant_information_in_naming_convention_bucket(empty_data_context, tmp_path_factory):
+def test_redundant_information_in_naming_convention_bucket(empty_data_context_v3, tmp_path_factory):
+    context = empty_data_context_v3
+
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
         directory=base_directory,
@@ -566,7 +578,7 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context, t
         ]
     )
 
-    report_object = empty_data_context.test_yaml_config(f"""
+    report_object = context.test_yaml_config(f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT

@@ -111,7 +111,8 @@ data_connectors:
     }
 
 
-def test_StreamlinedSqlExecutionEnvironment(empty_data_context):
+def test_StreamlinedSqlExecutionEnvironment(empty_data_context_v3):
+    context = empty_data_context_v3
     # This test mirrors the likely path to configure a StreamlinedSqlExecutionEnvironment
 
     db_file = file_relative_path(
@@ -119,7 +120,7 @@ def test_StreamlinedSqlExecutionEnvironment(empty_data_context):
     )
 
     #Absolutely minimal starting config
-    my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+    my_sql_execution_environment = context.test_yaml_config(f"""
 class_name: StreamlinedSqlExecutionEnvironment
 connection_string: sqlite:///{db_file}
 """+"""
@@ -146,7 +147,7 @@ introspection:
     # Here we should test getting a batch
 
     #Very thin starting config
-    my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+    my_sql_execution_environment = context.test_yaml_config(f"""
 class_name: StreamlinedSqlExecutionEnvironment
 connection_string: sqlite:///{db_file}
 """+"""
@@ -174,7 +175,7 @@ introspection:
     # Here we should test getting a batch
 
     # Add some manually configured tables...
-    my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+    my_sql_execution_environment = context.test_yaml_config(f"""
 class_name: StreamlinedSqlExecutionEnvironment
 connection_string: sqlite:///{db_file}
 
@@ -250,7 +251,7 @@ tables:
     # Here we should test getting another batch
 
     # Drop the introspection...
-    my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+    my_sql_execution_environment = context.test_yaml_config(f"""
 class_name: StreamlinedSqlExecutionEnvironment
 connection_string: sqlite:///{db_file}
 """+"""
@@ -511,14 +512,15 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(test_cases_
     assert len(batch_definition_list) == 1
 
 
-def test_skip_inapplicable_tables(empty_data_context):
+def test_skip_inapplicable_tables(empty_data_context_v3):
+    context = empty_data_context_v3
     # This test mirrors the likely path to configure a StreamlinedSqlExecutionEnvironment
 
     db_file = file_relative_path(
         __file__, os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
     )
 
-    my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+    my_sql_execution_environment = context.test_yaml_config(f"""
 class_name: StreamlinedSqlExecutionEnvironment
 connection_string: sqlite:///{db_file}
 introspection:
@@ -540,7 +542,7 @@ introspection:
     }
 
     with pytest.raises(ValueError):
-        my_sql_execution_environment = empty_data_context.test_yaml_config(f"""
+        my_sql_execution_environment = context.test_yaml_config(f"""
 class_name: StreamlinedSqlExecutionEnvironment
 connection_string: sqlite:///{db_file}
 introspection:
