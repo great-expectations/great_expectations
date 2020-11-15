@@ -2148,6 +2148,15 @@ def empty_data_context(tmp_path_factory):
     os.makedirs(asset_config_path, exist_ok=True)
     return context
 
+@pytest.fixture
+def empty_data_context_v3(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp("empty_data_context_v3"))
+    context = ge.data_context.DataContextV3.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    return context
+
 
 @pytest.fixture
 def empty_data_context_with_config_variables(monkeypatch, empty_data_context):

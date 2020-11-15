@@ -377,6 +377,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         super().__init__(name=name, batch_data_dict=batch_data_dict, **kwargs)
         self._name = name
+
+        self._credentials = credentials
+        self._connection_string = connection_string
+        self._url = url
+
         if engine is not None:
             if credentials is not None:
                 logger.warning(
@@ -450,6 +455,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 },
                 success=True,
             )
+
+    @property
+    def credentials(self):
+        return self._credentials
+
+    @property
+    def connection_string(self):
+        return self._connection_string
+
+    @property
+    def url(self):
+        return self._url
 
     def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":
         """

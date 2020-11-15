@@ -552,9 +552,24 @@ class BaseDataContext:
 
         if not return_mode in ["instantiated_class", "report_object"]:
                 raise ValueError(f"Unknown return_mode: {return_mode}.")
+        
+        substituted_config_variables = substitute_all_config_variables(
+            dict(self._load_config_variables_file()),
+            dict(os.environ),
+        )
 
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
 
-        config = yaml.load(yaml_config)
+        config_str_with_substituted_variables = substitute_all_config_variables(
+            yaml_config,
+            substitutions,
+        )
+
+        config = yaml.load(config_str_with_substituted_variables)
 
         if "class_name" in config:
             class_name = config["class_name"]
