@@ -71,7 +71,10 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
-from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment import (
+    ExecutionEnvironment,
+    BaseExecutionEnvironment,
+)
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -1773,8 +1776,8 @@ class BaseDataContext:
                 class_name=config["class_name"],
             )
         
-        if not isinstance(new_execution_environment, ExecutionEnvironment):
-            raise TypeError(f"Newly instantiated component {name} is not an instance of ExecutionEnvironment. Please check class_name in the config.")
+        if not isinstance(new_execution_environment, BaseExecutionEnvironment):
+            raise TypeError(f"Newly instantiated component {name} is not an instance of BaseExecutionEnvironment. Please check class_name in the config.")
 
         self._cached_datasources[name] = new_execution_environment
         return new_execution_environment
