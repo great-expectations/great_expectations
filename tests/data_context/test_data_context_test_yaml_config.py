@@ -62,9 +62,7 @@ store_backend:
 
 
 def test_empty_store2(empty_data_context):
-
-    # noinspection PyUnusedLocal
-    my_expectation_store = empty_data_context.test_yaml_config(
+    empty_data_context.test_yaml_config(
         yaml_config="""
 class_name: ValidationsStore
 store_backend:
