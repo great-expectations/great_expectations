@@ -1,14 +1,17 @@
 import os
 import logging
 import traceback
+import copy
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.compat import StringIO
 
 from great_expectations.data_context.util import (
     substitute_all_config_variables,
     instantiate_class_from_config,
 )
 
-from .data_context import DataContext
+from great_expectations.data_context import DataContext
+from great_expectations.data_context.types.base import dataContextConfigSchema
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -17,7 +20,36 @@ yaml.default_flow_style = False
 
 class DataContextV3(DataContext):
     """Class implementing the v3 spec for DataContext configs, plus API changes for the 0.13+ series."""
-    
+
+    def get_config(self, mode="typed"):
+        config = super().get_config()
+
+        if mode=="typed":
+            return config
+
+        elif mode=="commented_map":
+            return config.commented_map
+
+        elif mode=="dict":
+            return dict(config.commented_map)
+
+        elif mode=="yaml":
+            commented_map = copy.deepcopy(config.commented_map)
+            commented_map.update(dataContextConfigSchema.dump(config))
+
+            stream = StringIO()
+            yaml.dump(commented_map, stream)
+            yaml_string = stream.getvalue()
+
+            # print(commented_map)
+            # print(commented_map.__dict__)
+            # print(str(commented_map))
+            return yaml_string
+            # config.commented_map.update(dataContextConfigSchema.dump(self))
+
+        else:
+            raise ValueError(f"Unknown config mode {mode}")
+
     @property
     def config_variables(self):
         # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
