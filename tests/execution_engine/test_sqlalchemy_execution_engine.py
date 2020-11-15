@@ -24,9 +24,9 @@ def dataframes_equal(first_table, second_table):
 # Builds a Spark Execution Engine
 def _build_sqlalchemy_engine(df):
 
-    df.to_sql("z_score_test_data", postgresql_engine, if_exists="replace")
+    df.to_sql("test_data", postgresql_engine, if_exists="replace")
     batch_data = SqlAlchemyBatchData(
-        engine=postgresql_engine, table_name="z_score_test_data")
+        engine=postgresql_engine, table_name="test_data")
 
     batch = Batch(data=batch_data)
     engine = SqlAlchemyExecutionEngine(

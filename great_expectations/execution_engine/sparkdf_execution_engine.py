@@ -247,7 +247,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         self,
         domain_kwargs: dict,
         domain_type: Union[str, "MetricDomainTypes"],
-        accessor_keys: Optional[Iterable[str]] = None
+        accessor_keys: Optional[Iterable[str]] = []
     ) -> Tuple["pyspark.sql.DataFrame", dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
@@ -339,28 +339,23 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
             if "columns" in compute_domain_kwargs:
                 # If columns exist
-                for column in compute_domain_kwargs["columns"]:
-                    try:
-                        accessor_domain_kwargs[column] = compute_domain_kwargs.pop(column)
-                    # Raising an error if column doesn't exist
-                    except KeyError as k:
-                        raise KeyError(f"Column {column} not found within compute_domain_kwargs")
+                accessor_domain_kwargs["columns"] = compute_domain_kwargs["columns"]
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
 
             # If we would like our data to become a single column
             if "column" in compute_domain_kwargs:
-                data = pd.DataFrame(data[compute_domain_kwargs["column"]])
+                data = data.select(compute_domain_kwargs["column"])
 
             # If we would like our data to now become a column pair
             elif ("column_A" in compute_domain_kwargs) and ("column_B" in compute_domain_kwargs):
-                data = data.get(compute_domain_kwargs["column_A"], compute_domain_kwargs["column_B"])
+                data = data.select(compute_domain_kwargs["column_A"], compute_domain_kwargs["column_B"])
             else:
 
                 # If we would like our data to become a multicolumn
                 if "columns" in compute_domain_kwargs:
-                    data = data.get(compute_domain_kwargs["columns"])
+                    data = data.select(compute_domain_kwargs["columns"])
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
