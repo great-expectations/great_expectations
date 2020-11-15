@@ -1600,11 +1600,12 @@ class BaseDataContext:
             execution_environment (ExecutionEnvironment)
         """
 
-        self._project_config["datasources"][execution_environment_name] = execution_environment_config
-        return self._build_execution_environment_from_config(
+        new_execution_environment = self._build_execution_environment_from_config(
             execution_environment_name,
             execution_environment_config,
         )
+        self._project_config["datasources"][execution_environment_name] = execution_environment_config
+        return new_execution_environment
 
     # TODO: deprecate
     def add_batch_kwargs_generator(
@@ -1764,12 +1765,17 @@ class BaseDataContext:
             runtime_environment=runtime_environment,
             config_defaults={"module_name": module_name},
         )
+        
         if not new_execution_environment:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
                 class_name=config["class_name"],
             )
+        
+        if not isinstance(new_execution_environment, ExecutionEnvironment):
+            raise TypeError(f"Newly instantiated component {name} is not an instance of ExecutionEnvironment. Please check class_name in the config.")
+
         self._cached_datasources[name] = new_execution_environment
         return new_execution_environment
 
