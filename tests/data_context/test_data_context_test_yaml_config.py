@@ -235,17 +235,3 @@ introspection:
     print(json.dumps(report_object, indent=2))
     assert report_object["data_connectors"]["count"] == 1
     assert set(report_object["data_connectors"].keys()) == {"count", "my_very_awesome_data_connector"}
-
-
-
-# Note: Abe 2020/11/14: These tests will eventually need to go live in separate tests for DataContextV3
-
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    dataContextConfigSchema,
-)
-
-def test_config_variables(empty_data_context_v3):
-    context = empty_data_context_v3
-    assert type(context.config_variables) == dict
-    assert set(context.config_variables.keys()) == {"instance_id"}
