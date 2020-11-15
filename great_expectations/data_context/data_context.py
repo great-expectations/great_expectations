@@ -3039,6 +3039,17 @@ class DataContext(BaseDataContext):
 
         return delete_datasource
 
+    def add_execution_environment(self, execution_environment_name, execution_environment_config):
+        logger.debug("Starting DataContext.add_execution_environment for execution_environment %s" % execution_environment_name)
+
+        new_execution_environment = super().add_execution_environment(
+            execution_environment_name,
+            execution_environment_config
+        )
+        self._save_project_config()
+
+        return new_execution_environment
+
     @classmethod
     def find_context_root_dir(cls):
         result = None
