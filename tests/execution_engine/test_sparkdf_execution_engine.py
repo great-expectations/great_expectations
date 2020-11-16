@@ -246,20 +246,6 @@ def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_p
     assert len(test_sparkdf.columns) == 3
 
 
-def test_get_batch_with_split_on_whole_table_s3_real_data():
-    # reader_method not configured because spark will configure own reader by default
-    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
-        S3BatchSpec(
-            s3="s3a://alex.dev/data_assets/movies.csv",
-            reader_method="csv",
-            reader_options={
-                "header": True
-            },
-            splitter_method="_split_on_whole_table"
-    ))
-    assert test_sparkdf.count() == 58098
-
-
 def test_get_batch_with_split_on_whole_table_s3(spark_session):
     def mocked_get_reader_function(*args, **kwargs):
         def mocked_reader_function(*args, **kwargs):
