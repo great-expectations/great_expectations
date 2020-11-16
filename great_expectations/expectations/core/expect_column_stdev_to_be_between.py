@@ -100,43 +100,17 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        super().validate_configuration(configuration)
-        min_val = None
-        max_val = None
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        neccessary configuration arguments have been provided for the validation of the expectation.
 
-        # Ensuring basic configuration parameters are properly set
-        try:
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-        # Validating that Minimum and Maximum values are of the proper format and type
-        if "min_value" in configuration.kwargs:
-            min_val = configuration.kwargs["min_value"]
-
-        if "max_value" in configuration.kwargs:
-            max_val = configuration.kwargs["max_value"]
-
-        try:
-            # Ensuring Proper interval has been provided
-            assert min_val is None or isinstance(
-                min_val, (float, int)
-            ), "Provided min threshold must be a number"
-            assert max_val is None or isinstance(
-                max_val, (float, int)
-            ), "Provided max threshold must be a number"
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-        if min_val is not None and max_val is not None and min_val > max_val:
-            raise InvalidExpectationConfigurationError(
-                "Minimum Threshold cannot be larger than Maximum Threshold"
-            )
-
-        return True
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            True if the configuration has been validated successfully. Otherwise, raises an exception
+        """
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
