@@ -10,6 +10,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.validation_operators import (
     SlackNotificationAction,
     PagerdutyAlertAction,
+    OpsgenieAlertAction,
     StoreValidationResultAction,
 )
 
@@ -134,6 +135,44 @@ def test_PagerdutyAlertAction(
         validation_result_suite=validation_result_suite,
         data_asset=None,
     ) == {"pagerduty_alert_result": "none sent"}
+
+
+def test_OpsgenieAlertAction(
+        data_context_parameterized_expectation_suite,
+        validation_result_suite,
+        validation_result_suite_id
+    ):
+
+    renderer = {
+        "module_name": "great_expectations.render.renderer.opsgenie_renderer",
+        "class_name": "OpsgenieRenderer",
+    }
+    opsgenie_action = OpsgenieAlertAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        api_key='testapikey',
+        region=None,
+        priority='P3',
+        notify_on='all'
+    )
+
+    # Make sure the alert is sent by default when the validation has success = False
+    validation_result_suite.success = False
+
+    assert opsgenie_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"opsgenie_alert_result": "error"}
+
+    # Make sure the alert is not sent by default when the validation has success = True
+    validation_result_suite.success = True
+
+    assert opsgenie_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"opsgenie_alert_result": "error"}
 
 # def test_ExtractAndStoreEvaluationParamsAction():
 #     fake_in_memory_store = ValidationsStore(
