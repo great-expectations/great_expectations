@@ -15,7 +15,7 @@ import pyspark.sql.functions as F
 
 
 # Function to test for spark dataframe equality
-from tests.conftest import postgresql_engine
+from tests.test_utils import _build_sa_engine
 
 
 def dataframes_equal(first_table, second_table):
@@ -26,25 +26,12 @@ def dataframes_equal(first_table, second_table):
     return True
 
 
-# Builds a Spark Execution Engine
-def _build_sa_engine(df):
-    df.to_sql("z_score_test_data", postgresql_engine, if_exists="replace")
-    batch_data = SqlAlchemyBatchData(
-        engine=postgresql_engine, table_name="z_score_test_data"
-    )
-    batch = Batch(data=batch_data)
-    engine = SqlAlchemyExecutionEngine(
-        engine=postgresql_engine, batch_data_dict={batch.id: batch_data}
-    )
-    return engine
-
-
+# Testing batching of aggregate metrics
 def test_sa_batch_aggregate_metrics(caplog, sa):
     import datetime
 
     engine = _build_sa_engine(
-        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
-    )
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}))
 
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
@@ -145,26 +132,27 @@ def test_get_compute_domain_with_no_domain_kwargs():
 
 
 # Testing for only untested use case - multicolumn
-def test_get_compute_domain_with_column_pair():
+def test_get_compute_domain_with_column_pair(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
-    df = engine.dataframe
 
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
+    # Fetching data, compute_domain_kwargs, accessor_kwargs
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column_A": "a", "column_B" : "b"},
                                                                       domain_type="column_pair")
 
+    raw_data = engine.engine.execute(sa.select(["*"]).select_from(engine.active_batch_data.selectable)).fetchall()
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
     # Ensuring that with no domain nothing happens to the data itself
-    assert dataframes_equal(data, df), "Data does not match after getting compute domain"
-    assert compute_kwargs is not None, "Compute domain kwargs should be existent"
+    assert raw_data == domain_data, "Data does not match after getting compute domain"
+    assert "column_A" not in compute_kwargs.keys() and "column_B" not in compute_kwargs.keys(),"domain kwargs should be existent"
     assert accessor_kwargs == {"column_A": "a", "column_B" : "b"}, "Accessor kwargs have been modified"
 
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column_A": "a", "column_B": "b"},
                                                                       domain_type="identity")
 
     # Ensuring that with no domain nothing happens to the data itself
-    assert dataframes_equal(data, df), "Data does not match after getting compute domain"
-    assert compute_kwargs is not None, "Compute domain kwargs should be existent"
+    assert raw_data == domain_data, "Data does not match after getting compute domain"
+    assert compute_kwargs == {"column_A": "a", "column_B" : "b"}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 

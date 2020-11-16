@@ -339,7 +339,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
             if "columns" in compute_domain_kwargs:
                 # If columns exist
-                accessor_domain_kwargs["columns"] = compute_domain_kwargs["columns"]
+                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:

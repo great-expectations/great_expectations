@@ -392,7 +392,7 @@ operate.
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
                 if "columns" in compute_domain_kwargs:
-                    accessor_domain_kwargs['columns'] = compute_domain_kwargs['columns']
+                    accessor_domain_kwargs['columns'] = compute_domain_kwargs.pop("columns")
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
