@@ -21,9 +21,10 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 def unique_proportion(_metrics):
     total_values = _metrics.get("table.row_count")
     unique_values = _metrics.get("column.unique_value_count")
+    null_count = _metrics.get("column_values.nonnull.unexpected_count")
 
     if total_values > 0:
-        return unique_values / total_values
+        return unique_values / (total_values - null_count)
     else:
         return 0
 
@@ -68,4 +69,7 @@ class ColumnUniqueProportion(ColumnMetricProvider):
             "table.row_count": MetricConfiguration(
                 "table.row_count", table_domain_kwargs
             ),
+            "column_values.nonnull.unexpected_count": MetricConfiguration(
+                "column_values.nonnull.unexpected_count", metric.metric_domain_kwargs
+            )
         }
