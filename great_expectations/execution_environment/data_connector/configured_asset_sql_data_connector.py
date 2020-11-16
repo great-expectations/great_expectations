@@ -118,7 +118,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         try:
             sub_cache = self._data_references_cache[batch_request.data_asset_name]
         except KeyError as e:
-            raise KeyError(f"{self.__class__.__name__}.get_batch_definition_list_from_batch_request can't handle a batch_request without a valid data_asset_name")
+            raise KeyError(f"data_asset_name {batch_request.data_asset_name} is not recognized.")
 
         for partition_definition in sub_cache:
             batch_definition = BatchDefinition(
