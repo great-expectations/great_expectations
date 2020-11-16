@@ -225,5 +225,5 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
             configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
-            execution_engine=execution_engine
+            execution_engine=execution_engine,
         )

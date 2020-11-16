@@ -138,18 +138,20 @@ class ColumnMedian(ColumnMetricProvider):
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration
+            runtime_configuration=runtime_configuration,
         )
 
         table_domain_kwargs = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
 
-        dependencies.update({
-            "table.row_count": MetricConfiguration(
-                "table.row_count", table_domain_kwargs
-            )
-        })
+        dependencies.update(
+            {
+                "table.row_count": MetricConfiguration(
+                    "table.row_count", table_domain_kwargs
+                )
+            }
+        )
 
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
             dependencies["column_values.nonnull.count"] = MetricConfiguration(

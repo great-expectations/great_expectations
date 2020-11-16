@@ -15,11 +15,12 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
+    ColumnExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     TableExpectation,
-    _format_map_output, ColumnExpectation,
+    _format_map_output,
 )
 from ..registry import extract_metrics
 
@@ -232,5 +233,5 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
             configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
-            execution_engine=execution_engine
+            execution_engine=execution_engine,
         )
