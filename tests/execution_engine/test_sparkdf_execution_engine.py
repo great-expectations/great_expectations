@@ -433,13 +433,12 @@ def test_sample_using_random(test_sparkdf):
         batch_data=test_sparkdf,
         sampling_method="_sample_using_random"
     ))
-    # ATTENTION: The following line is commented out, because random number generators across processes produce
-    # different outcomes in different environments.  Since Spark runs in a different process, the Python
-    # "random.random*(seed)" and "pyspark.sql.functions.rand(seed)" are not synchronized, even if both functions used
-    # the same value of the "seed" argument.  Developers who need to re-test the assertion on the number of rows should
-    # uncomment this line, validate the behavior, and then comment it out again to support multi-environmental tests.
-    # assert sampled_df.count() == 14
+    # The test dataframe contains 10 columns and 120 rows.
     assert len(sampled_df.columns) == 10
+    assert 0 <= sampled_df.count() <= 120
+    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.1 (the equivalent of an
+    # unfair coin with the 10% chance of coming up as "heads").  Hence, we should never get as much as 20% of the rows.
+    assert sampled_df.count() < 25
 
 
 def test_sample_using_mod(test_sparkdf):
