@@ -83,8 +83,9 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
                 data_asset_config = copy.deepcopy(partitioner_config)
                 data_asset_config["table_name"] = table_name
 
-                data_asset_name_suffix = data_asset_config.pop("data_asset_name_suffix", "__"+data_connector_name)
-                data_asset_name = table_name+data_asset_name_suffix
+                data_asset_name_prefix = data_asset_config.pop("data_asset_name_prefix", "")
+                data_asset_name_suffix = data_asset_config.pop("data_asset_name_suffix", "")
+                data_asset_name = data_asset_name_prefix+table_name+data_asset_name_suffix
 
                 data_connector.add_data_asset(
                     data_asset_name,

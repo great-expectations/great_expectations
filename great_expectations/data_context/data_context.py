@@ -71,7 +71,10 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
-from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment import (
+    ExecutionEnvironment,
+    BaseExecutionEnvironment,
+)
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -1542,52 +1545,6 @@ class BaseDataContext:
 
         return datasource
 
-    # TODO Abe 20201015 : This is copied from an outdated method of instantiating a class from a config.
-    # We should look at re-implementing this using add_store and _build_store as the model.
-
-    # TODO: update usage statistics
-    # @usage_statistics_enabled_method(
-    #     event_name="data_context.add_execution_environment",
-    #     args_payload_fn=add_execution_environment_usage_statistics,
-    # )
-    # def add_execution_environment(self, name, initialize=True, **kwargs):
-    #     """Add a new execution_environment to the data context, with configuration provided as kwargs.
-    #     Args:
-    #         name: the name for the new execution_environment to add
-    #         initialize: if False, add the execution_environment to the config, but do not
-    #             initialize it, for example if a user needs to debug database connectivity.
-    #         kwargs (keyword arguments): the configuration for the new execution_environment
-
-    #     Returns:
-    #         execution_environment (ExecutionEnvironment)
-    #     """
-    #     logger.debug("Starting BaseDataContext.add_execution_environment for %s" % name)
-    #     module_name = kwargs.get(
-    #         "module_name", "great_expectations.execution_environment"
-    #     )
-    #     verify_dynamic_loading_support(module_name=module_name)
-    #     class_name = kwargs.get("class_name")
-    #     execution_environment_class = load_class(
-    #         module_name=module_name, class_name=class_name
-    #     )
-
-    #     config: dict = kwargs
-
-    #     self._project_config["execution_environments"][name] = config
-
-    #     # We perform variable substitution in the execution_environment's config here before using the config
-    #     # to instantiate the execution_environment object. Variable substitution is a service that the data
-    #     # context provides. ExecutionEnvironments should not see unsubstituted variables in their config.
-    #     if initialize:
-    #         execution_environment = self._build_execution_environment_from_config(
-    #             name, config
-    #         )
-    #         self._cached_execution_environments[name] = execution_environment
-    #     else:
-    #         execution_environment = None
-
-    #     return execution_environment
-
     def add_execution_environment(self, execution_environment_name, execution_environment_config):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
@@ -1599,11 +1556,12 @@ class BaseDataContext:
             execution_environment (ExecutionEnvironment)
         """
 
-        self._project_config["datasources"][execution_environment_name] = execution_environment_config
-        return self._build_execution_environment_from_config(
+        new_execution_environment = self._build_execution_environment_from_config(
             execution_environment_name,
             execution_environment_config,
         )
+        self._project_config["datasources"][execution_environment_name] = execution_environment_config
+        return new_execution_environment
 
     # TODO: deprecate
     def add_batch_kwargs_generator(
@@ -1627,29 +1585,6 @@ class BaseDataContext:
             name=batch_kwargs_generator_name, class_name=class_name, **kwargs
         )
         return generator
-
-    # TODO: <Alex>Can this be deleted?</Alex>
-    # def add_data_connector(
-    #     self, execution_environment_name, data_connector_name, class_name, **kwargs
-    # ):
-    #     """
-    #     Add a data connector to the named execution_environment, using the provided
-    #     configuration.
-    #
-    #     Args:
-    #         execution_environment_name: name of execution_environment to which to add the new data connector
-    #         data_connector_name: name of the data_connector to add
-    #         class_name: class of the data connector to add
-    #         **kwargs: data connector configuration, provided as kwargs
-    #
-    #     Returns:
-    #
-    #     """
-    #     execution_environment_obj = self.get_execution_environment(execution_environment_name)
-    #     data_connector = execution_environment_obj.add_data_connector(
-    #         name=data_connector_name, class_name=class_name, **kwargs
-    #     )
-    #     return data_connector_name
 
     def get_config(self):
         return self._project_config
@@ -1706,46 +1641,6 @@ class BaseDataContext:
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
-    def get_execution_environment(
-        self, execution_environment_name: str = "default",
-    ) -> ExecutionEnvironment:
-        """Get the named execution_environment
-
-        Args:
-            execution_environment_name (str): the name of the execution_environment from the configuration
-
-        Returns:
-            execution_environment (ExecutionEnvironment)
-        """
-        if execution_environment_name in self._cached_execution_environments:
-            return self._cached_execution_environments[execution_environment_name]
-        if (
-            execution_environment_name
-            in self._project_config_with_variables_substituted.execution_environments
-        ):
-            execution_environment_config: dict = copy.deepcopy(
-                self._project_config_with_variables_substituted.execution_environments[
-                    execution_environment_name
-                ]
-            )
-        else:
-            raise ValueError(
-                f"Unable to load execution_environment `{execution_environment_name}` -- no configuration found or "
-                f"invalid "
-                f"configuration."
-            )
-        execution_environment_config: CommentedMap = executionEnvironmentConfigSchema.load(
-            execution_environment_config
-        )
-        execution_environment: ExecutionEnvironment = self._build_execution_environment_from_config(
-            name=execution_environment_name,
-            config=execution_environment_config,
-        )
-        self._cached_execution_environments[
-            execution_environment_name
-        ] = execution_environment
-        return execution_environment
-
     def _build_execution_environment_from_config(
         self,
         name: str,
@@ -1761,12 +1656,17 @@ class BaseDataContext:
             runtime_environment=runtime_environment,
             config_defaults={"module_name": module_name},
         )
+        
         if not new_execution_environment:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
                 class_name=config["class_name"],
             )
+        
+        if not isinstance(new_execution_environment, BaseExecutionEnvironment):
+            raise TypeError(f"Newly instantiated component {name} is not an instance of BaseExecutionEnvironment. Please check class_name in the config.")
+
         self._cached_datasources[name] = new_execution_environment
         return new_execution_environment
 
@@ -3001,6 +2901,17 @@ class DataContext(BaseDataContext):
         self._save_project_config()
 
         return delete_datasource
+
+    def add_execution_environment(self, execution_environment_name, execution_environment_config):
+        logger.debug("Starting DataContext.add_execution_environment for execution_environment %s" % execution_environment_name)
+
+        new_execution_environment = super().add_execution_environment(
+            execution_environment_name,
+            execution_environment_config
+        )
+        self._save_project_config()
+
+        return new_execution_environment
 
     @classmethod
     def find_context_root_dir(cls):
