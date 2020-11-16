@@ -1,8 +1,7 @@
 import datetime
 import hashlib
 import json
-from typing import Union
-from typing import Union, Any, Optional
+from typing import Any, Optional, Union
 
 from great_expectations.core.id_dict import (
     BatchKwargs,
@@ -13,7 +12,6 @@ from great_expectations.core.id_dict import (
 )
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot
-
 
 
 class BatchDefinition(DictDot):
@@ -137,18 +135,17 @@ class BatchDefinition(DictDot):
     def __str__(self):
         return json.dumps(self.get_json_dict(), indent=2)
 
-
     def __hash__(self) -> int:
         """Overrides the default implementation"""
-        _result_hash: int = hash(self.execution_environment_name) ^ \
-                            hash(self.data_connector_name) ^ \
-                            hash(self.data_asset_name)
+        _result_hash: int = hash(self.execution_environment_name) ^ hash(
+            self.data_connector_name
+        ) ^ hash(self.data_asset_name)
         if self.definition is not None:
             for key, value in self.partition_definition.items():
                 _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
         return _result_hash
 
-  
+
 class BatchRequest(DictDot):
     """
     This class contains all attributes of a batch_request.

@@ -1,11 +1,7 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
@@ -14,17 +10,11 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
+from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
 from ..registry import extract_metrics
 
 
-class ExpectColumnMeanToBeBetween(TableExpectation):
+class ExpectColumnMeanToBeBetween(ColumnExpectation):
     """Expect the column mean to be between a minimum value and a maximum value (inclusive).
 
             expect_column_mean_to_be_between is a \
@@ -90,19 +80,14 @@ class ExpectColumnMeanToBeBetween(TableExpectation):
 
     # Default values
     default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
         "min_value": None,
         "max_value": None,
         "strict_min": None,
         "strict_max": None,
-        "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
     }
-
-    """ A Column Aggregate MetricProvider Decorator for the Mean"""
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -115,50 +100,8 @@ class ExpectColumnMeanToBeBetween(TableExpectation):
         Returns:
             True if the configuration has been validated successfully. Otherwise, raises an exception
         """
-        min_val = None
-        max_val = None
-
-        # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # Ensuring basic configuration parameters are properly set
-        try:
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-        # Validating that Minimum and Maximum values are of the proper format and type
-        if "min_value" in configuration.kwargs:
-            min_val = configuration.kwargs["min_value"]
-
-        if "max_value" in configuration.kwargs:
-            max_val = configuration.kwargs["max_value"]
-
-        try:
-            # Ensuring Proper interval has been provided
-            assert (
-                min_val is not None or max_val is not None
-            ), "min_value and max_value cannot both be none"
-            assert min_val is None or isinstance(
-                min_val, (float, int)
-            ), "Provided min threshold must be a number"
-            assert max_val is None or isinstance(
-                max_val, (float, int)
-            ), "Provided max threshold must be a number"
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-        if min_val is not None and max_val is not None and min_val > max_val:
-            raise InvalidExpectationConfigurationError(
-                "Minimum Threshold cannot be larger than Maximum Threshold"
-            )
-
-        return True
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -247,61 +190,17 @@ class ExpectColumnMeanToBeBetween(TableExpectation):
             "{:.2f}".format(result.result["observed_value"]),
         ]
 
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
+    def _validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        """Validates the given data against the set boundaries for mean to ensure it lies within proper range"""
-        # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
+        return self._validate_metric_value_between(
+            metric_name="column.mean",
+            configuration=configuration,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+            execution_engine=execution_engine,
         )
-
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        column_mean = metric_vals.get("column.mean")
-
-        # Obtaining components needed for validation
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
-
-        # Checking if mean lies between thresholds
-        if min_value is not None:
-            if strict_min:
-                above_min = column_mean > min_value
-            else:
-                above_min = column_mean >= min_value
-        else:
-            above_min = True
-
-        if max_value is not None:
-            if strict_max:
-                below_max = column_mean < max_value
-            else:
-                below_max = column_mean <= max_value
-        else:
-            below_max = True
-
-        success = above_min and below_max
-
-        return {"success": success, "result": {"observed_value": column_mean}}

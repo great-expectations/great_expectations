@@ -160,7 +160,7 @@ class SqlAlchemyBatchData:
             raise ValueError("No table_name provided.")
 
         if use_quoted_name:
-            table_name = quoted_name(table_name)
+            table_name = quoted_name(table_name, quote=True)
 
         if engine.dialect.name.lower() == "bigquery":
             # In BigQuery the table name is already qualified with its schema name

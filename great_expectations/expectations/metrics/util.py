@@ -68,13 +68,9 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         # postgres
         if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
             if positive:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("~")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("~"))
             else:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("!~")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("!~"))
     except AttributeError:
         pass
 
@@ -82,13 +78,9 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         # redshift
         if issubclass(dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             if positive:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("~")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("~"))
             else:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("!~")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("!~"))
     except (
         AttributeError,
         TypeError,
@@ -99,27 +91,21 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         # MySQL
         if issubclass(dialect.dialect, sa.dialects.mysql.dialect):
             if positive:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("REGEXP")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("REGEXP"))
             else:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("NOT REGEXP")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("NOT REGEXP"))
     except AttributeError:
         pass
 
     try:
         # Snowflake
-        if issubclass(dialect.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect,):
+        if issubclass(
+            dialect.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
+        ):
             if positive:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("RLIKE")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
             else:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("NOT RLIKE")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("NOT RLIKE"))
     except (
         AttributeError,
         TypeError,
@@ -130,11 +116,9 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         # Bigquery
         if issubclass(dialect.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
             if positive:
-                return sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
+                return sa.func.REGEXP_CONTAINS(column, literal(regex))
             else:
-                return sa.not_(
-                    sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
-                )
+                return sa.not_(sa.func.REGEXP_CONTAINS(column, literal(regex)))
     except (
         AttributeError,
         TypeError,
@@ -280,9 +264,9 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     if dialect_supported:
         try:
             if positive:
-                return sa.column(column).like(literal(like_pattern))
+                return column.like(literal(like_pattern))
             else:
-                return sa.not_(sa.column(column).like(literal(like_pattern)))
+                return sa.not_(column.like(literal(like_pattern)))
         except AttributeError:
             pass
 

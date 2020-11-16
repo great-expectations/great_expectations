@@ -15,6 +15,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
+    ColumnExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
@@ -24,7 +25,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnMedianToBeBetween(TableExpectation):
+class ExpectColumnMedianToBeBetween(ColumnExpectation):
     """Expect the column median to be between a minimum value and a maximum value.
 
             expect_column_median_to_be_between is a \
@@ -90,13 +91,10 @@ class ExpectColumnMedianToBeBetween(TableExpectation):
 
     # Default values
     default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
         "min_value": None,
         "max_value": None,
         "strict_min": None,
         "strict_max": None,
-        "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -113,50 +111,8 @@ class ExpectColumnMedianToBeBetween(TableExpectation):
         Returns:
             True if the configuration has been validated successfully. Otherwise, raises an exception
         """
-        min_val = None
-        max_val = None
-
-        # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # Ensuring basic configuration parameters are properly set
-        try:
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-        # Validating that Minimum and Maximum values are of the proper format and type
-        if "min_value" in configuration.kwargs:
-            min_val = configuration.kwargs["min_value"]
-
-        if "max_value" in configuration.kwargs:
-            max_val = configuration.kwargs["max_value"]
-
-        try:
-            # Ensuring Proper interval has been provided
-            assert (
-                min_val is not None or max_val is not None
-            ), "min_value and max_value cannot both be none"
-            assert min_val is None or isinstance(
-                min_val, (float, int)
-            ), "Provided min threshold must be a number"
-            assert max_val is None or isinstance(
-                max_val, (float, int)
-            ), "Provided max threshold must be a number"
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-        if min_val is not None and max_val is not None and min_val > max_val:
-            raise InvalidExpectationConfigurationError(
-                "Minimum Threshold cannot be larger than Maximum Threshold"
-            )
-
-        return True
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -281,3 +237,18 @@ class ExpectColumnMedianToBeBetween(TableExpectation):
         success = above_min and below_max
 
         return {"success": success, "result": {"observed_value": column_median}}
+
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        return self._validate_metric_value_between(
+            metric_name="column.median",
+            configuration=configuration,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+            execution_engine=execution_engine,
+        )

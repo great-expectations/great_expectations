@@ -24,7 +24,7 @@ from great_expectations.expectations.metrics.metric_provider import (
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnMedian(MetricProvider):
+class ColumnMedian(ColumnMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.median"
@@ -133,19 +133,29 @@ class ColumnMedian(MetricProvider):
           ...
         }
         """
+
+        dependencies = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
         table_domain_kwargs = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
 
-        dependencies = {
-            "table.row_count": MetricConfiguration(
-                "table.row_count", table_domain_kwargs
-            )
-        }
+        dependencies.update(
+            {
+                "table.row_count": MetricConfiguration(
+                    "table.row_count", table_domain_kwargs
+                )
+            }
+        )
+
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-            dependencies["column_values.nonnull.count"] = (
-                MetricConfiguration(
-                    "column_values.nonnull.count", metric.metric_domain_kwargs
-                ),
+            dependencies["column_values.nonnull.count"] = MetricConfiguration(
+                "column_values.nonnull.count", metric.metric_domain_kwargs
             )
+
         return dependencies

@@ -322,7 +322,6 @@ class Validator:
         for configuration in configurations:
             # Validating
             try:
-                # Todo: try to find a way to access table columns so as to verify column is in table
                 assert (
                     configuration.expectation_type is not None
                 ), "Given configuration should include expectation type"

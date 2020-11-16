@@ -58,15 +58,24 @@ class ColumnDistinctValues(ColumnMetricProvider):
     ):
         """Returns a dictionary of given metric names and their corresponding configuration,
         specifying the metric types and their respective domains"""
+        dependencies = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
         if isinstance(
             ExecutionEngine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)
         ):
-            return {
-                "column.value_counts": MetricConfiguration(
-                    metric_name="column.value_counts",
-                    metric_domain_kwargs=metric.metric_domain_kwargs,
-                    metric_value_kwargs={"sort": "value", "collate": None},
-                )
-            }
+            dependencies.update(
+                {
+                    "column.value_counts": MetricConfiguration(
+                        metric_name="column.value_counts",
+                        metric_domain_kwargs=metric.metric_domain_kwargs,
+                        metric_value_kwargs={"sort": "value", "collate": None},
+                    )
+                }
+            )
 
-        return dict()
+        return dependencies

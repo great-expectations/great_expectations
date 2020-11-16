@@ -680,9 +680,91 @@ class TableExpectation(Expectation, ABC):
 
         return dependencies
 
+    def validate_metric_value_between_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ):
+        # Validating that Minimum and Maximum values are of the proper format and type
+        min_val = None
+        max_val = None
+
+        if "min_value" in configuration.kwargs:
+            min_val = configuration.kwargs["min_value"]
+
+        if "max_value" in configuration.kwargs:
+            max_val = configuration.kwargs["max_value"]
+
+        try:
+            # Ensuring Proper interval has been provided
+            assert min_val is None or isinstance(
+                min_val, (float, int)
+            ), "Provided min threshold must be a number"
+            assert max_val is None or isinstance(
+                max_val, (float, int)
+            ), "Provided max threshold must be a number"
+
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+
+        if min_val is not None and max_val is not None and min_val > max_val:
+            raise InvalidExpectationConfigurationError(
+                "Minimum Threshold cannot be larger than Maximum Threshold"
+            )
+
+        return True
+
+    def _validate_metric_value_between(
+        self,
+        metric_name,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        metric_value = metrics.get(metric_name)
+
+        # Obtaining components needed for validation
+        min_value = self.get_success_kwargs(configuration).get("min_value")
+        strict_min = self.get_success_kwargs(configuration).get("strict_min")
+        max_value = self.get_success_kwargs(configuration).get("max_value")
+        strict_max = self.get_success_kwargs(configuration).get("strict_max")
+
+        if metric_value is None:
+            return {"success": False, "result": {"observed_value": metric_value}}
+
+        # Checking if mean lies between thresholds
+        if min_value is not None:
+            if strict_min:
+                above_min = metric_value > min_value
+            else:
+                above_min = metric_value >= min_value
+        else:
+            above_min = True
+
+        if max_value is not None:
+            if strict_max:
+                below_max = metric_value < max_value
+            else:
+                below_max = metric_value <= max_value
+        else:
+            below_max = True
+
+        success = above_min and below_max
+
+        return {"success": success, "result": {"observed_value": metric_value}}
+
 
 class ColumnExpectation(TableExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        # Ensuring basic configuration parameters are properly set
+        try:
+            assert (
+                "column" in configuration.kwargs
+            ), "'column' parameter is required for column expectations"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+        return True
 
 
 class ColumnMapExpectation(TableExpectation, ABC):
@@ -846,7 +928,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             success = True
         elif (total_count - null_count) != 0:
             success_ratio = (total_count - unexpected_count - null_count) / (
-                    total_count - null_count
+                total_count - null_count
             )
             success = success_ratio >= mostly
         elif total_count == 0 or (total_count - null_count) == 0:
@@ -924,7 +1006,9 @@ def _format_map_output(
         "element_count": element_count,
         "unexpected_count": unexpected_count,
         "unexpected_percent": unexpected_percent,
-        "partial_unexpected_list": unexpected_list[ : result_format["partial_unexpected_count"]],
+        "partial_unexpected_list": unexpected_list[
+            : result_format["partial_unexpected_count"]
+        ],
     }
 
     if not skip_missing:
@@ -957,7 +1041,10 @@ def _format_map_output(
             return_obj["result"].update(
                 {
                     "partial_unexpected_index_list": unexpected_index_list[
-                        : result_format["partial_unexpected_count"]] if unexpected_index_list is not None else None,
+                        : result_format["partial_unexpected_count"]
+                    ]
+                    if unexpected_index_list is not None
+                    else None,
                     "partial_unexpected_counts": partial_unexpected_counts,
                 }
             )

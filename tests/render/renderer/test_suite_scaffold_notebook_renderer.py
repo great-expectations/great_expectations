@@ -163,7 +163,9 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_doc
     assert not os.path.isfile(notebook_path)
 
     # Create notebook
-    renderer = SuiteScaffoldNotebookRenderer(titanic_data_context, suite, batch_kwargs)
+    renderer = SuiteScaffoldNotebookRenderer(
+        titanic_data_context_no_data_docs, suite, batch_kwargs
+    )
     renderer.render_to_disk(notebook_path)
     assert os.path.isfile(notebook_path)
 

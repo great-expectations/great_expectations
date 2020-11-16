@@ -1069,7 +1069,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_table_column_count_to_equal",
             "expect_column_to_exist",
             "expect_table_columns_to_match_ordered_list",
-            "expect_table_row_count_to_be_between",
+            # "expect_table_row_count_to_be_between",
             "expect_table_row_count_to_equal",
             "expect_table_row_count_to_equal_other_table",
             # "expect_column_values_to_be_unique",
@@ -1098,17 +1098,17 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_match_json_schema",
             "expect_column_distinct_values_to_be_in_set",
             # "expect_column_distinct_values_to_contain_set",
-            "expect_column_distinct_values_to_equal_set",
-            "expect_column_mean_to_be_between",
-            "expect_column_median_to_be_between",
+            # "expect_column_distinct_values_to_equal_set",
+            # "expect_column_mean_to_be_between",
+            # "expect_column_median_to_be_between",
             "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
             "expect_column_unique_value_count_to_be_between",
-            "expect_column_proportion_of_unique_values_to_be_between",
+            # "expect_column_proportion_of_unique_values_to_be_between",
             "expect_column_most_common_value_to_be_in_set",
-            "expect_column_max_to_be_between",
-            "expect_column_min_to_be_between",
-            "expect_column_sum_to_be_between",
+            # "expect_column_max_to_be_between",
+            # "expect_column_min_to_be_between",
+            # "expect_column_sum_to_be_between",
             "expect_column_pair_values_A_to_be_greater_than_B",
             "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_to_be_in_set",
@@ -1128,7 +1128,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_table_column_count_to_equal",
             "expect_column_to_exist",
             "expect_table_columns_to_match_ordered_list",
-            "expect_table_row_count_to_be_between",
+            # "expect_table_row_count_to_be_between",
             "expect_table_row_count_to_equal",
             "expect_table_row_count_to_equal_other_table",
             # "expect_column_values_to_be_unique",
@@ -1157,17 +1157,17 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_values_to_match_json_schema",
             "expect_column_distinct_values_to_be_in_set",
             # "expect_column_distinct_values_to_contain_set",
-            "expect_column_distinct_values_to_equal_set",
-            "expect_column_mean_to_be_between",
-            "expect_column_median_to_be_between",
+            # "expect_column_distinct_values_to_equal_set",
+            # "expect_column_mean_to_be_between",
+            # "expect_column_median_to_be_between",
             "expect_column_quantile_values_to_be_between",
-            "expect_column_stdev_to_be_between",
+            # "expect_column_stdev_to_be_between",
             "expect_column_unique_value_count_to_be_between",
-            "expect_column_proportion_of_unique_values_to_be_between",
+            # "expect_column_proportion_of_unique_values_to_be_between",
             "expect_column_most_common_value_to_be_in_set",
-            "expect_column_max_to_be_between",
-            "expect_column_min_to_be_between",
-            "expect_column_sum_to_be_between",
+            # "expect_column_max_to_be_between",
+            # "expect_column_min_to_be_between",
+            # "expect_column_sum_to_be_between",
             "expect_column_pair_values_A_to_be_greater_than_B",
             "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_to_be_in_set",
@@ -1222,11 +1222,11 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_quantile_values_to_be_between",
             # "expect_column_stdev_to_be_between",
             "expect_column_unique_value_count_to_be_between",
-            "expect_column_proportion_of_unique_values_to_be_between",
+            # "expect_column_proportion_of_unique_values_to_be_between",
             "expect_column_most_common_value_to_be_in_set",
             # "expect_column_max_to_be_between",
             # "expect_column_min_to_be_between",
-            "expect_column_sum_to_be_between",
+            # "expect_column_sum_to_be_between",
             "expect_column_pair_values_A_to_be_greater_than_B",
             "expect_column_pair_values_to_be_equal",
             # "expect_column_pair_values_to_be_in_set",
@@ -1341,10 +1341,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
         result = getattr(validator, expectation_type)(*kwargs)
     # As well as keyword arguments
     else:
-        runtime_kwargs = {
-            "result_format": "COMPLETE",
-            "include_config": False
-        }
+        runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
         runtime_kwargs.update(kwargs)
         result = getattr(validator, expectation_type)(**runtime_kwargs)
 
@@ -1373,8 +1370,8 @@ def check_json_test_result(test, result, data_asset=None):
             elif key == "observed_value":
                 if "tolerance" in test:
                     if isinstance(value, dict):
-                        assert set(value.keys()) == set(
-                            result["result"]["observed_value"].keys()
+                        assert set(result["result"]["observed_value"].keys()) == set(
+                            value.keys()
                         )
                         for k, v in value.items():
                             assert np.allclose(
@@ -1389,7 +1386,7 @@ def check_json_test_result(test, result, data_asset=None):
                             rtol=test["tolerance"],
                         )
                 else:
-                    assert value == result["result"]["observed_value"]
+                    assert result["result"]["observed_value"] == value
 
             # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
             # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.

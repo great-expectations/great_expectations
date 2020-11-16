@@ -4,7 +4,9 @@ import copy
 import logging
 
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
 from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -75,17 +77,22 @@ class SinglePartitionerDataConnector(DataConnector):
         self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
-            mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(
-                data_reference=data_reference,
-                data_asset_name=None
+            mapped_batch_definition_list: List[
+                BatchDefinition
+            ] = self._map_data_reference_to_batch_definition_list(
+                data_reference=data_reference, data_asset_name=None
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
-    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[str]:
+    def _get_data_reference_list_from_cache_by_data_asset_name(
+        self, data_asset_name: str
+    ) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache.
         """
         # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
-        batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
+        batch_definition_list: List[
+            BatchDefinition
+        ] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,
@@ -101,7 +108,7 @@ class SinglePartitionerDataConnector(DataConnector):
             map_batch_definition_to_data_reference_string_using_regex(
                 batch_definition=batch_definition,
                 regex_pattern=pattern,
-                group_names=group_names
+                group_names=group_names,
             )
             for batch_definition in batch_definition_list
         ]
@@ -116,7 +123,9 @@ class SinglePartitionerDataConnector(DataConnector):
 
     def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
-            raise ValueError('_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?')
+            raise ValueError(
+                '_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?'
+            )
 
         return [k for k, v in self._data_references_cache.items() if v is None]
 
@@ -125,20 +134,24 @@ class SinglePartitionerDataConnector(DataConnector):
             self.refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
-        batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
+        batch_definition_list: List[
+            BatchDefinition
+        ] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,
             )
         )
 
-        data_asset_names: List[str] = [batch_definition.data_asset_name for batch_definition in batch_definition_list]
+        data_asset_names: List[str] = [
+            batch_definition.data_asset_name
+            for batch_definition in batch_definition_list
+        ]
 
         return list(set(data_asset_names))
 
     def get_batch_definition_list_from_batch_request(
-        self,
-        batch_request: BatchRequest,
+        self, batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
         self._validate_sorters_configuration()
@@ -149,14 +162,13 @@ class SinglePartitionerDataConnector(DataConnector):
         batch_definition_list: List[BatchDefinition] = list(
             filter(
                 lambda batch_definition: batch_definition_matches_batch_request(
-                    batch_definition=batch_definition,
-                    batch_request=batch_request
+                    batch_definition=batch_definition, batch_request=batch_request
                 ),
                 [
                     batch_definitions[0]
                     for batch_definitions in self._data_references_cache.values()
                     if batch_definitions is not None
-                ]
+                ],
             )
         )
 
@@ -169,7 +181,9 @@ class SinglePartitionerDataConnector(DataConnector):
             )
 
         if len(self._sorters) > 0:
-            sorted_batch_definition_list = self._sort_batch_definition_list(batch_definition_list)
+            sorted_batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list
+            )
             return sorted_batch_definition_list
         else:
             return batch_definition_list
@@ -181,15 +195,15 @@ class SinglePartitionerDataConnector(DataConnector):
             group_names: List[str] = regex_config["group_names"]
             if any([sorter not in group_names for sorter in self.sorters]):
                 raise ge_exceptions.DataConnectorError(
-                    f'''InferredAssetDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+                    f"""InferredAssetDataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 configured group_name.
-                    '''
+                    """
                 )
             if len(group_names) < len(self.sorters):
                 raise ge_exceptions.DataConnectorError(
-                    f'''InferredAssetDataConnector "{self.name}" is configured with {len(group_names)} group names; this is
+                    f"""InferredAssetDataConnector "{self.name}" is configured with {len(group_names)} group names; this is
 fewer than number of sorters specified, which is {len(self.sorters)}.
-                    '''
+                    """
                 )
 
     def _sort_batch_definition_list(self, batch_definition_list):
@@ -198,13 +212,13 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
             sorters_list.append(sorter)
         sorters: Iterator[Sorter] = reversed(sorters_list)
         for sorter in sorters:
-            batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
+            batch_definition_list = sorter.get_sorted_batch_definitions(
+                batch_definitions=batch_definition_list
+            )
         return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(
-        self,
-        data_reference: str,
-        data_asset_name: Optional[str] = None
+        self, data_reference: str, data_asset_name: Optional[str] = None
     ) -> Optional[List[BatchDefinition]]:
         regex_config: dict = copy.deepcopy(self._default_regex)
         pattern: str = regex_config["pattern"]
@@ -216,10 +230,12 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
             data_asset_name=data_asset_name,
             data_reference=data_reference,
             regex_pattern=pattern,
-            group_names=group_names
+            group_names=group_names,
         )
 
-    def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> str:
+    def _map_batch_definition_to_data_reference(
+        self, batch_definition: BatchDefinition
+    ) -> str:
         regex_config: dict = copy.deepcopy(self._default_regex)
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
@@ -227,7 +243,7 @@ fewer than number of sorters specified, which is {len(self.sorters)}.
         return map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=batch_definition,
             regex_pattern=pattern,
-            group_names=group_names
+            group_names=group_names,
         )
 
     # TODO: <Alex>This method should be implemented in every subclass.</Alex>
