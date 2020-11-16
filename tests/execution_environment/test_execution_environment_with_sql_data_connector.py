@@ -3,18 +3,17 @@ import random
 import yaml
 import os
 import json
-try:
-    import sqlalchemy as sa
-except ImportError:
-    sa = None
 
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     file_relative_path,
 )
-from great_expectations.core.batch import (
-    BatchRequest
-)
+from great_expectations.core.batch import BatchRequest
+
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
 
 
 def test_basic_instantiation(sa):
@@ -294,7 +293,6 @@ tables:
     # Here we should test getting another batch
 
 
-
 #Note: Abe 2020111: this test belongs with the data_connector tests, not here.
 def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine):
     #Note: Abe 2020111: this test currently only uses a sqlite fixture.
@@ -365,6 +363,7 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
     ]
 
     #Need to test include_views, too.
+
 
 #Note: Abe 2020111: this test belongs with the data_connector tests, not here.
 def test_basic_instantiation_of_InferredAssetSqlDataConnector(test_cases_for_sql_data_connector_sqlite_execution_engine):
@@ -438,6 +437,7 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(test_cases_for_sql
         data_asset_name="prexif__table_that_should_be_partitioned_by_random_hash__H__xiffus",
     ))
     assert len(batch_definition_list) == 1
+
 
 #Note: Abe 2020111: this test belongs with the data_connector tests, not here.
 def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(test_cases_for_sql_data_connector_sqlite_execution_engine):

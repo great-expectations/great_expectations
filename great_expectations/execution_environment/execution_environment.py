@@ -300,8 +300,6 @@ class ExecutionEnvironment(BaseExecutionEnvironment):
         """
         self._name = name
 
-        self._data_context_root_directory = data_context_root_directory
-
         super().__init__(
             name=name,
             execution_engine=execution_engine,

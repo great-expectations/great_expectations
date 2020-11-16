@@ -184,7 +184,7 @@ class FilePathDataConnector(DataConnector):
 partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
                 '''
             )
-        path = self._get_full_file_path(path=path)
+        path = self._get_full_file_path(path=path, data_asset_name=batch_definition.data_asset_name)
         return {
             "path": path
         }
@@ -217,5 +217,5 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
         raise NotImplementedError
 
-    def _get_full_file_path(self, path: str) -> str:
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
         raise NotImplementedError
