@@ -724,6 +724,54 @@ class ColumnExpectation(TableExpectation, ABC):
 
         return {"success": success, "result": {"observed_value": metric_value}}
 
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        # Ensuring basic configuration parameters are properly set
+        try:
+            assert (
+                    "column" in configuration.kwargs
+            ), "'column' parameter is required for column expectations"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+        return True
+
+    def validate_metric_value_between_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        # Ensuring basic configuration parameters are properly set
+        try:
+            assert (
+                    "column" in configuration.kwargs
+            ), "'column' parameter is required for column expectations"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+
+        # Validating that Minimum and Maximum values are of the proper format and type
+        min_val = None
+        max_val = None
+
+        if "min_value" in configuration.kwargs:
+            min_val = configuration.kwargs["min_value"]
+
+        if "max_value" in configuration.kwargs:
+            max_val = configuration.kwargs["max_value"]
+
+        try:
+            # Ensuring Proper interval has been provided
+            assert min_val is None or isinstance(
+                min_val, (float, int)
+            ), "Provided min threshold must be a number"
+            assert max_val is None or isinstance(
+                max_val, (float, int)
+            ), "Provided max threshold must be a number"
+
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+
+        if min_val is not None and max_val is not None and min_val > max_val:
+            raise InvalidExpectationConfigurationError(
+                "Minimum Threshold cannot be larger than Maximum Threshold"
+            )
+
+        return True
+
 
 class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
