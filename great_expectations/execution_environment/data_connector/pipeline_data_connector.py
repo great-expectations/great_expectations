@@ -1,21 +1,20 @@
-from typing import List, Any, Optional, Union
 import logging
+from typing import Any, List, Optional, Union
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.id_dict import (
+    PartitionDefinition,
+    PartitionDefinitionSubset,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import (
     DataConnector,
 )
-from great_expectations.core.batch import BatchRequest
-from great_expectations.core.id_dict import (
-    PartitionDefinitionSubset,
-    PartitionDefinition,
-)
-from great_expectations.execution_environment.types import InMemoryBatchSpec
-from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
 )
-import great_expectations.exceptions as ge_exceptions
+from great_expectations.execution_environment.types import InMemoryBatchSpec
 
 logger = logging.getLogger(__name__)
 

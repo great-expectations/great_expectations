@@ -680,7 +680,9 @@ class TableExpectation(Expectation, ABC):
 
         return dependencies
 
-    def validate_metric_value_between_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_metric_value_between_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ):
         # Validating that Minimum and Maximum values are of the proper format and type
         min_val = None
         max_val = None
@@ -711,12 +713,12 @@ class TableExpectation(Expectation, ABC):
         return True
 
     def _validate_metric_value_between(
-            self,
-            metric_name,
-            configuration: ExpectationConfiguration,
-            metrics: Dict,
-            runtime_configuration: dict = None,
-            execution_engine: ExecutionEngine = None,
+        self,
+        metric_name,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
         metric_value = metrics.get(metric_name)
 
@@ -758,7 +760,7 @@ class ColumnExpectation(TableExpectation, ABC):
         # Ensuring basic configuration parameters are properly set
         try:
             assert (
-                    "column" in configuration.kwargs
+                "column" in configuration.kwargs
             ), "'column' parameter is required for column expectations"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

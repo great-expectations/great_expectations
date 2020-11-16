@@ -2,15 +2,11 @@ import copy
 import itertools
 import json
 import logging
-from typing import Any, Callable, Dict, List, Tuple, Union, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.core.batch import (
-    BatchMarkers,
-    BatchDefinition,
-)
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

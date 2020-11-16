@@ -67,7 +67,8 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     See Also:
         expect_table_row_count_to_equal
     """
-    metric_dependencies = ("table.row_count", )
+
+    metric_dependencies = ("table.row_count",)
 
     success_keys = (
         "min_value",
@@ -166,16 +167,16 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         ]
 
     def _validate(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: Dict,
-            runtime_configuration: dict = None,
-            execution_engine: ExecutionEngine = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
             metric_name="table.row_count",
             configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
-            execution_engine=execution_engine
+            execution_engine=execution_engine,
         )
