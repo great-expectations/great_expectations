@@ -323,7 +323,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_int(cr
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
+            partition_definition=PartitionDefinition({'name': 'abe', 'timestamp': '20200809', 'price': '1040'}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -395,7 +395,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_list(c
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'abe', 'timestamp': '20200809', 'price': '1040'}),
+            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20201129', 'price': '1900'}),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
@@ -437,7 +437,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_tuple(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20201129', 'price': '1900'}),
+            partition_definition=PartitionDefinition({'name': 'abe', 'timestamp': '20200809', 'price': '1040'}),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
@@ -479,13 +479,13 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_str(cr
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20201129', 'price': '1900'}),
+            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200811', 'price': '1009'}),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200811', 'price': '1009'}),
+            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -521,13 +521,13 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(creat
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20201129', 'price': '1900'}),
+            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200811', 'price': '1009'}),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200811', 'price': '1009'}),
+            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -598,7 +598,7 @@ def test_partition_request_partition_request_partition_identifiers_1_key_and_ind
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
+            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200713', 'price': '1567'}),
         ),
     ]
     assert returned_batch_definition_list == expected

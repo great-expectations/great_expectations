@@ -78,7 +78,7 @@ def test__get_instantiation_through_instantiate_class_from_config(basic_data_con
     assert data_references == []
 
 
-# TODO: <Alex>This test should be renamed properly and moved to "tests/execution_environment/data_connector/test_configured_filesystem_asset_data_connector.py".</Alex>
+# TODO: <Alex>This test should be renamed properly and moved to "tests/execution_environment/data_connector/test_configured_asset_filesystem_data_connector.py".</Alex>
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")

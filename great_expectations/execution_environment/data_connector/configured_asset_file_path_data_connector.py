@@ -159,6 +159,12 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         ]
         return batch_definition_list
 
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
+        asset: Optional[Asset] = None
+        if data_asset_name:
+            asset = self._get_asset(data_asset_name=data_asset_name)
+        return self._get_full_file_path_for_asset(path=path, asset=asset)
+
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
         regex_config: dict = copy.deepcopy(self._default_regex)
         asset: Optional[Asset] = None
@@ -179,4 +185,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return asset
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+        raise NotImplementedError
+
+    def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset]) -> str:
         raise NotImplementedError
