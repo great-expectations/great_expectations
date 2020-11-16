@@ -7,10 +7,9 @@ from great_expectations.core.batch import Batch
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
     Expectation,
     TableExpectation,
-    renderer,
+    renderer, ColumnExpectation,
 )
 from great_expectations.expectations.registry import extract_metrics
 from great_expectations.render.renderer.renderer import renderer
@@ -180,16 +179,16 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
         ]
 
     def _validate(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+            self,
+            configuration: ExpectationConfiguration,
+            metrics: Dict,
+            runtime_configuration: dict = None,
+            execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.standard_deviation",
             configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
-            execution_engine=execution_engine,
+            execution_engine=execution_engine
         )

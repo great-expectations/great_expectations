@@ -15,12 +15,11 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import (
-    ColumnExpectation,
     ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     TableExpectation,
-    _format_map_output,
+    _format_map_output, ColumnExpectation,
 )
 from ..registry import extract_metrics
 
@@ -207,16 +206,16 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         ]
 
     def _validate(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+            self,
+            configuration: ExpectationConfiguration,
+            metrics: Dict,
+            runtime_configuration: dict = None,
+            execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.min",
             configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
-            execution_engine=execution_engine,
+            execution_engine=execution_engine
         )

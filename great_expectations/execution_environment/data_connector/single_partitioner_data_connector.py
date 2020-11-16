@@ -1,26 +1,30 @@
+from typing import List, Optional, Iterator
 import copy
-import logging
-from typing import Iterator, List, Optional
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+import logging
+
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import (
     DataConnector,
+)
+from great_expectations.execution_environment.data_connector.sorter import Sorter
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchRequest,
 )
 from great_expectations.execution_environment.data_connector.partition_query import (
     PartitionQuery,
     build_partition_query,
 )
-from great_expectations.execution_environment.data_connector.sorter import Sorter
+from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
-    build_sorters_from_config,
-    get_filesystem_one_level_directory_glob_path_list,
-    map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
+    map_batch_definition_to_data_reference_string_using_regex,
+    get_filesystem_one_level_directory_glob_path_list,
+    build_sorters_from_config,
 )
-from great_expectations.execution_environment.types import PathBatchSpec
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
