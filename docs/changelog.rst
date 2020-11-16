@@ -6,15 +6,20 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] Add OpsgenieAlertAction
 * [ENHANCEMENT] Snowflake uses temp tables by default while still allowing transient tables.
 * [ENHANCEMENT] Enabled use of lowercase table and column names in GE with the `use_quoted_name` key in batch_kwargs
+* [BUGFIX] Basic suite builder profiler (suite scaffold) skips excluded expectations
 
 0.12.7
 -----------------
 * [ENHANCEMENT] CLI supports s3a:// or gs:// paths for Pandas Datasources (issue #2006)
 * [ENHANCEMENT] Escape $ characters in configuration, support multiple substitutions (#2005 & #2015)
+* [ENHANCEMENT] Implement Skip prompt flag on datasource profile cli (#1881 Thanks @thcidale0808!)
 * [BUGFIX] Fixed bug where slack messages cause stacktrace when data docs pages have issue
+* [DOCS] How to use docker images (#1797)
 * [DOCS] Remove incorrect doc line from PagerdutyAlertAction (Thanks @niallrees!)
+* [MAINTENANCE] Update broken link (Thanks @noklam!)
 * [MAINTENANCE] Fix path for how-to guide (Thanks @gauthamzz!)
 
 0.12.6
