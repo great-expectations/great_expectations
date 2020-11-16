@@ -4,7 +4,7 @@
 Changelog
 #########
 
-Develop
+0.12.8
 -----------------
 * [FEATURE] Add OpsgenieAlertAction #2012 (thanks @miike!)
 * [FEATURE] Add S3SubdirReaderBatchKwargsGenerator #2001 (thanks @noklam)
