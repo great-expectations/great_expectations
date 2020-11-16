@@ -10,6 +10,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.core.batch import (
+    Batch,
     BatchDefinition,
     BatchRequest,
     PartitionDefinition,
