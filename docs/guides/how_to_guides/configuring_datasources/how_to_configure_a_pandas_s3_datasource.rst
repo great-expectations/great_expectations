@@ -25,6 +25,9 @@ To add an S3-backed Pandas datasource do this:
         datasources:
           pandas_s3:
             class_name: PandasDatasource
+            data_asset_type:
+              class_name: PandasDataset
+              module_name: great_expectations.dataset
 
 #. **Load data from S3 using native S3 path-based Batch Kwargs.**
 
