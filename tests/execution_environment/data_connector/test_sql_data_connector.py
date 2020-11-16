@@ -1,5 +1,4 @@
 import json
-import os
 import random
 
 import pytest
@@ -9,9 +8,8 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchSpec,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_environment.data_connector import ConfiguredAssetSqlDataConnector
-from great_expectations.data_context.util import file_relative_path
+
 
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)

@@ -553,7 +553,6 @@ class BaseDataContext:
         if not return_mode in ["instantiated_class", "report_object"]:
                 raise ValueError(f"Unknown return_mode: {return_mode}.")
 
-
         config = yaml.load(yaml_config)
 
         if "class_name" in config:
@@ -1645,8 +1644,7 @@ class BaseDataContext:
     def _build_execution_environment_from_config(
         self,
         name: str,
-        config: CommentedMap,
-        runtime_environment: Union[dict, None] = None,
+        config: dict,
     ) -> ExecutionEnvironment:
         module_name: str = "great_expectations.execution_environment"
         runtime_environment: dict = {
