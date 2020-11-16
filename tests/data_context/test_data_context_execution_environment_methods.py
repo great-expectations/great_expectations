@@ -1,21 +1,24 @@
 import pytest
-import os
 import yaml
 import json
-import sqlalchemy
 import pandas as pd
 
-from great_expectations.data_context.util import (
-    file_relative_path,
-    instantiate_class_from_config,
-)
 from great_expectations.core.batch import (
+    Batch,
     BatchDefinition,
     BatchRequest,
     PartitionDefinition,
     PartitionRequest,
 )
 from ..test_utils import create_files_in_directory
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.util import is_library_loadable
+
+try:
+    import sqlalchemy as sa
+except ImportError:
+    sa = None
+
 
 @pytest.fixture
 def data_context_with_sql_execution_environment_for_testing_get_batch(empty_data_context):
@@ -53,13 +56,15 @@ introspection:
         yaml.FullLoader,
     )
 
-    empty_data_context.add_execution_environment(
-        "my_sqlite_db",
-        config
-    )
+    try:
+        empty_data_context.add_execution_environment(
+            "my_sqlite_db",
+            config
+        )
+    except AttributeError:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
     return empty_data_context
-
 
 
 def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_batch):
@@ -72,7 +77,7 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
         batch_definition=BatchDefinition(
             execution_environment_name="my_sqlite_db",
             data_connector_name="daily",
-            data_asset_name="table_partitioned_by_date_column__A__daily",
+            data_asset_name="table_partitioned_by_date_column__A",
             partition_definition=PartitionDefinition(
                 date="2020-01-15",
             )
@@ -85,7 +90,7 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
             batch_definition=BatchRequest(
                 execution_environment_name="my_sqlite_db",
                 data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A__daily",
+                data_asset_name="table_partitioned_by_date_column__A",
                 partition_request=PartitionRequest(
                     partition_identifiers={
                         "date": "2020-01-15"
@@ -99,7 +104,7 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
         batch_request=BatchRequest(
             execution_environment_name="my_sqlite_db",
             data_connector_name="daily",
-            data_asset_name="table_partitioned_by_date_column__A__daily",
+            data_asset_name="table_partitioned_by_date_column__A",
             partition_request=PartitionRequest(
                 partition_identifiers={
                     "date": "2020-01-15"
@@ -114,7 +119,7 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
             batch_request={
                 "execution_environment_name" : "my_sqlite_db",
                 "data_connector_name" : "daily",
-                "data_asset_name" : "table_partitioned_by_date_column__A__daily",
+                "data_asset_name" : "table_partitioned_by_date_column__A",
                 "partition_request" : {
                     "partition_identifiers" : {
                         "date": "2020-01-15"
@@ -129,7 +134,7 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
             batch_request=BatchRequest(
                 execution_environment_name="my_sqlite_db",
                 data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A__daily",
+                data_asset_name="table_partitioned_by_date_column__A",
                 partition_request=PartitionRequest(
                     partition_identifiers={}
                 )
@@ -142,7 +147,7 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
             batch_request=BatchRequest(
                 execution_environment_name="my_sqlite_db",
                 data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A__daily",
+                data_asset_name="table_partitioned_by_date_column__A",
             )
         )
 
@@ -162,7 +167,7 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
             batch_request=BatchRequest(
                 # execution_environment_name=MISSING
                 data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A__daily",
+                data_asset_name="table_partitioned_by_date_column__A",
                 partition_request=PartitionRequest(
                     partition_identifiers={}
                 )
@@ -173,7 +178,7 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
     context.get_batch_from_new_style_datasource(
         execution_environment_name="my_sqlite_db",
         data_connector_name="daily",
-        data_asset_name="table_partitioned_by_date_column__A__daily",
+        data_asset_name="table_partitioned_by_date_column__A",
         date="2020-01-15",
     )
 
@@ -182,7 +187,7 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
     context.get_batch_from_new_style_datasource(
         "my_sqlite_db",
         "daily",
-        "table_partitioned_by_date_column__A__daily",
+        "table_partitioned_by_date_column__A",
         date="2020-01-15",
     )
 
@@ -191,14 +196,14 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
     context.get_batch_from_new_style_datasource(
         "my_sqlite_db",
         "whole_table",
-        "table_partitioned_by_date_column__A__whole_table",
+        "table_partitioned_by_date_column__A",
     )
 
     # Successful specification using parameters and partition_request
     context.get_batch_from_new_style_datasource(
         "my_sqlite_db",
         "daily",
-        "table_partitioned_by_date_column__A__daily",
+        "table_partitioned_by_date_column__A",
         partition_request=PartitionRequest({
             "partition_identifiers": {
                 "date": "2020-01-15"
@@ -210,22 +215,26 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
     context.get_batch_from_new_style_datasource(
         "my_sqlite_db",
         "daily",
-        "table_partitioned_by_date_column__A__daily",
+        "table_partitioned_by_date_column__A",
         partition_identifiers={
             "date": "2020-01-15"
         }
     )
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="sqlalchemy"),
+    reason="requires sqlalchemy to be installed",
+)
 def test_get_batch_list_from_new_style_datasource_with_sql_execution_environment(
     data_context_with_sql_execution_environment_for_testing_get_batch
 ):
     context = data_context_with_sql_execution_environment_for_testing_get_batch
     
     batch_list = context.get_batch_list_from_new_style_datasource({
-        "execution_environment_name" : "my_sqlite_db",
+        "execution_environment_name": "my_sqlite_db",
         "data_connector_name": "daily",
-        "data_asset_name": "table_partitioned_by_date_column__A__daily",
+        "data_asset_name": "table_partitioned_by_date_column__A",
         "partition_request" : {
             "partition_identifiers" : {
                 "date": "2020-01-15"
@@ -238,15 +247,18 @@ def test_get_batch_list_from_new_style_datasource_with_sql_execution_environment
     batch: Batch = batch_list[0]
 
     assert batch.batch_spec is not None
-    assert batch.batch_definition["data_asset_name"] == "table_partitioned_by_date_column__A__daily"
+    assert batch.batch_definition["data_asset_name"] == "table_partitioned_by_date_column__A"
     assert batch.batch_definition["partition_definition"] == {
         "date": "2020-01-15"
     }
-    assert isinstance(batch.data, sqlalchemy.engine.result.ResultProxy)
+    assert isinstance(batch.data, sa.engine.result.ResultProxy)
     assert len(batch.data.fetchall()) == 4
 
 
-def test_get_batch_list_from_new_style_datasource_with_file_system_execution_environment(empty_data_context, tmp_path_factory):
+def test_get_batch_list_from_new_style_datasource_with_file_system_execution_environment(
+    empty_data_context,
+    tmp_path_factory
+):
     context = empty_data_context
 
     base_directory = str(tmp_path_factory.mktemp("test_get_batch_list_from_new_style_datasource_with_file_system_execution_environment"))
@@ -274,7 +286,7 @@ data_connectors:
         glob_directive: "*/*.csv"
 
         default_regex:
-            pattern: (.+)/(.+)-(\d+)\.csv
+            pattern: (.+)/(.+)-(\\d+)\\.csv
             group_names:
                 - data_asset_name
                 - letter
@@ -287,11 +299,11 @@ data_connectors:
     )
 
     batch_list = context.get_batch_list_from_new_style_datasource({
-        "execution_environment_name" : "my_execution_environment",
+        "execution_environment_name": "my_execution_environment",
         "data_connector_name": "my_data_connector",
         "data_asset_name": "path",
-        "partition_request" : {
-            "partition_identifiers" : {
+        "partition_request": {
+            "partition_identifiers": {
                 # "data_asset_name": "path",
                 "letter": "A",
                 "number": "101",

@@ -8,17 +8,24 @@ from great_expectations.core.batch import Batch
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec
-from great_expectations.execution_engine import (
-    SparkDFExecutionEngine,
+from great_expectations.execution_environment.types.batch_spec import (
+    RuntimeDataBatchSpec,
+    PathBatchSpec
 )
+from great_expectations.execution_engine import SparkDFExecutionEngine
 
 try:
+    pyspark = pytest.importorskip("pyspark")
     import pyspark.sql.functions as F
-    from pyspark.sql.types import IntegerType, StringType
+    from pyspark.sql.types import (
+        IntegerType,
+        StringType,
+    )
 except ImportError:
+    pyspark = None
     F = None
-    SparkSession = None
+    IntegerType = None
+    StringType = None
 
 
 def _build_spark_engine(spark_session, df):
@@ -45,21 +52,23 @@ def test_sparkdf(spark_session):
         end_date=datetime.date(2020, 12, 31)
     ):
         start_time = datetime.datetime(start_date.year, start_date.month, start_date.day)
-        days_between_dates = (end_date - start_date).total_seconds()
-        datetime_list = [start_time + datetime.timedelta(seconds=random.randrange(days_between_dates)) for i in range(k)]
+        seconds_between_dates = (end_date - start_date).total_seconds()
+        datetime_list = [
+            start_time + datetime.timedelta(seconds=random.randrange(seconds_between_dates)) for i in range(k)
+        ]
         datetime_list.sort()
         return datetime_list
 
     k = 120
     random.seed(1)
-    timestamp_list = generate_ascending_list_of_datetimes(k, end_date=datetime.date(2020,1,31))
+    timestamp_list = generate_ascending_list_of_datetimes(k, end_date=datetime.date(2020, 1, 31))
     date_list = [datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list]
 
     batch_ids = [random.randint(0, 10) for i in range(k)]
     batch_ids.sort()
     session_ids = [random.randint(2, 60) for i in range(k)]
-    session_ids.sort()
     session_ids = [i-random.randint(0, 2) for i in session_ids]
+    session_ids.sort()
 
     spark_df = spark_session.createDataFrame(data=pd.DataFrame({
        "id": range(k),
@@ -424,7 +433,12 @@ def test_sample_using_random(test_sparkdf):
         batch_data=test_sparkdf,
         sampling_method="_sample_using_random"
     ))
-    assert sampled_df.count() == 14
+    # ATTENTION: The following line is commented out, because random number generators across processes produce
+    # different outcomes in different environments.  Since Spark runs in a different process, the Python
+    # "random.random*(seed)" and "pyspark.sql.functions.rand(seed)" are not synchronized, even if both functions used
+    # the same value of the "seed" argument.  Developers who need to re-test the assertion on the number of rows should
+    # uncomment this line, validate the behavior, and then comment it out again to support multi-environmental tests.
+    # assert sampled_df.count() == 14
     assert len(sampled_df.columns) == 10
 
 
@@ -465,6 +479,7 @@ def test_sample_using_md5_wrong_hash_function_name(test_sparkdf):
             "hash_function_name": "I_wont_work",
             }
         ))
+
 
 def test_sample_using_md5(test_sparkdf):
     sampled_df = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(

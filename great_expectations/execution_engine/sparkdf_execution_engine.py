@@ -6,12 +6,29 @@ import hashlib
 
 from typing import Any, Callable, Dict, Iterable, Tuple, Optional
 
+from .execution_engine import ExecutionEngine
+from great_expectations.core.id_dict import IDDict
+from great_expectations.core.batch import BatchSpec, BatchMarkers
+from great_expectations.execution_environment.types.batch_spec import(
+    PathBatchSpec,
+    S3BatchSpec,
+    RuntimeDataBatchSpec,
+)
+from ..exceptions import BatchKwargsError, GreatExpectationsError, ValidationError, BatchSpecError
+from ..expectations.row_conditions import parse_condition_to_spark
+from ..validator.validation_graph import MetricConfiguration
+from great_expectations.exceptions import exceptions as ge_exceptions
+
+
 logger = logging.getLogger(__name__)
 
 try:
     import pyspark
+    from pyspark.sql import (
+        SparkSession,
+        DataFrame,
+    )
     import pyspark.sql.functions as F
-    from pyspark.sql import SparkSession
     from pyspark.sql.types import (
         StructType,
         StructField,
@@ -22,36 +39,17 @@ try:
         BooleanType,
     )
 except ImportError:
-    F = None
     pyspark = None
     SparkSession = None
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
-
-
-
-from great_expectations.core.id_dict import IDDict
-from great_expectations.core.batch import BatchSpec, BatchMarkers
-from great_expectations.exceptions import exceptions as ge_exceptions
-
-from great_expectations.execution_environment.types.batch_spec import(
-    PathBatchSpec,
-    S3BatchSpec,
-    RuntimeDataBatchSpec,
-)
-
-from ..exceptions import BatchKwargsError, GreatExpectationsError, ValidationError, BatchSpecError
-from ..expectations.row_conditions import parse_condition_to_spark
-from ..validator.validation_graph import MetricConfiguration
-from .execution_engine import ExecutionEngine
-
-
-try:
-    from pyspark.sql import DataFrame, SparkSession
-except ImportError:
     DataFrame = None
-    SparkSession = None
+    F = None
+    StructType = None,
+    StructField = None,
+    IntegerType = None,
+    FloatType = None,
+    StringType = None,
+    DateType = None,
+    BooleanType = None,
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )

@@ -28,10 +28,10 @@ from great_expectations.util import import_library_module
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 from .test_utils import (
-    create_files_for_regex_partitioner,
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
+
 
 ###
 #
@@ -91,6 +91,7 @@ def build_test_backends_list(metafunc):
     no_spark = metafunc.config.getoption("--no-spark")
     if not no_spark:
         try:
+            import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
             raise ValueError("spark tests are requested, but pyspark is not installed")
@@ -156,6 +157,7 @@ def build_test_backends_list_cfe(metafunc):
     no_spark = metafunc.config.getoption("--no-spark")
     if not no_spark:
         try:
+            import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
             raise ValueError("spark tests are requested, but pyspark is not installed")
@@ -252,18 +254,23 @@ def sa(test_backends):
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
-        import sqlalchemy as sa
-
-        return sa
+        try:
+            import sqlalchemy as sa
+            return sa
+        except ImportError:
+            return None
 
 
 @pytest.fixture
 def spark_session(test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
-    from pyspark.sql import SparkSession
-
-    return SparkSession.builder.getOrCreate()
+    try:
+        import pyspark
+        from pyspark.sql import SparkSession
+        return SparkSession.builder.getOrCreate()
+    except ImportError:
+        raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
@@ -2121,8 +2128,11 @@ def sqlalchemy_dataset(test_backends):
 def sqlitedb_engine(test_backend):
     if test_backend == "sqlite":
         import sqlalchemy as sa
-
-        return sa.create_engine("sqlite://")
+        try:
+            import sqlalchemy as sa
+            return sa.create_engine("sqlite://")
+        except ImportError:
+            raise ValueError("sqlite tests require sqlalchemy to be installed")
     else:
         pytest.skip("Skipping test designed for sqlite on non-sqlite backend.")
 
@@ -2130,11 +2140,13 @@ def sqlitedb_engine(test_backend):
 @pytest.fixture
 def postgresql_engine(test_backend):
     if test_backend == "postgresql":
-        import sqlalchemy as sa
-
-        engine = sa.create_engine("postgresql://postgres@localhost/test_ci").connect()
-        yield engine
-        engine.close()
+        try:
+            import sqlalchemy as sa
+            engine = sa.create_engine("postgresql://postgres@localhost/test_ci").connect()
+            yield engine
+            engine.close()
+        except ImportError:
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
         pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
 
@@ -2259,12 +2271,15 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 @pytest.fixture
 def titanic_sqlite_db(sa):
-    from sqlalchemy import create_engine
-
-    titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
-    engine = create_engine("sqlite:///{}".format(titanic_db_path))
-    assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
-    return engine
+    try:
+        import sqlalchemy as sa
+        from sqlalchemy import create_engine
+        titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
+        engine = create_engine("sqlite:///{}".format(titanic_db_path))
+        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        return engine
+    except ImportError:
+        raise ValueError("sqlite tests require sqlalchemy to be installed")
 
 
 @pytest.fixture
@@ -2289,8 +2304,8 @@ def titanic_expectation_suite():
 def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
-
         engine = create_engine("sqlite://")
         assert engine.execute("select 1").fetchall()[0] == (1,)
         return engine
@@ -2784,18 +2799,20 @@ def evr_success():
 def sqlite_view_engine(test_backends):
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
-        import sqlalchemy as sa
-
-        sqlite_engine = sa.create_engine("sqlite://")
-        df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-        df.to_sql("test_table", con=sqlite_engine)
-        sqlite_engine.execute(
-            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-        )
-        sqlite_engine.execute(
-            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-        )
-        return sqlite_engine
+        try:
+            import sqlalchemy as sa
+            sqlite_engine = sa.create_engine("sqlite://")
+            df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
+            df.to_sql("test_table", con=sqlite_engine)
+            sqlite_engine.execute(
+                "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+            )
+            sqlite_engine.execute(
+                "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
+            )
+            return sqlite_engine
+        except ImportError:
+            sa = None
     else:
         pytest.skip("SqlAlchemy tests disabled; not testing views")
 
@@ -2812,6 +2829,8 @@ def basic_sqlalchemy_datasource(sqlitedb_engine):
 
 @pytest.fixture
 def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
+    if sa is None:
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
     db_file = file_relative_path(
         __file__, os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
