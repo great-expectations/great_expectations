@@ -92,13 +92,10 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
 
     # Default values
     default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
         "min_value": None,
         "max_value": None,
         "strict_min": None,
         "strict_max": None,
-        "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -117,45 +114,8 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         Returns:
             True if the configuration has been validated successfully. Otherwise, raises an exception
         """
-
-        # Setting up a configuration
         super().validate_configuration(configuration)
-        min_val = None
-        max_val = None
-
-        # Ensuring basic configuration parameters are properly set
-        try:
-            assert (
-                    "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-        # Validating that Minimum and Maximum values are of the proper format and type
-        if "min_value" in configuration.kwargs:
-            min_val = configuration.kwargs["min_value"]
-
-        if "max_value" in configuration.kwargs:
-            max_val = configuration.kwargs["max_value"]
-
-        try:
-            # Ensuring Proper interval has been provided
-            assert min_val is None or isinstance(
-                min_val, (float, int)
-            ), "Provided min threshold must be a number"
-            assert max_val is None or isinstance(
-                max_val, (float, int)
-            ), "Provided max threshold must be a number"
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-        if min_val is not None and max_val is not None and min_val > max_val:
-            raise InvalidExpectationConfigurationError(
-                "Minimum Threshold cannot be larger than Maximum Threshold"
-            )
-
-        return True
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
