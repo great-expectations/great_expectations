@@ -91,13 +91,10 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
 
     # Default values
     default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
         "min_value": None,
         "max_value": None,
         "strict_min": None,
         "strict_max": None,
-        "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -114,6 +111,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         Returns:
             True if the configuration has been validated successfully. Otherwise, raises an exception
         """
+        super().validate_configuration(configuration=configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod

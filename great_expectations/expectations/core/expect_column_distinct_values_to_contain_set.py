@@ -35,11 +35,8 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
 
     # Default values
     default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
         "value_set": None,
         "parse_strings_as_datetimes": None,
-        "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
