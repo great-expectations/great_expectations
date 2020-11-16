@@ -202,7 +202,7 @@ data_connectors:
     )
 
 
-def test_config_variables_in_test_yaml_config(empty_data_context_v3):
+def test_config_variables_in_test_yaml_config(empty_data_context_v3, sa):
     context = empty_data_context_v3
 
     db_file = file_relative_path(
