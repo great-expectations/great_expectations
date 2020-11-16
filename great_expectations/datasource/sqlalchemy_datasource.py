@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy
     from sqlalchemy import create_engine
+    from sqlalchemy.sql.elements import quoted_name
+
 except ImportError:
     sqlalchemy = None
     create_engine = None
@@ -372,7 +374,7 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
         if "bigquery_temp_table" in batch_kwargs:
             query_support_table_name = batch_kwargs.get("bigquery_temp_table")
         elif "snowflake_transient_table" in batch_kwargs:
-            # Snowflake uses a transient table, so we expect a table_name to be provided
+            # Snowflake can use either a transient or temp table, so we allow a table_name to be provided
             query_support_table_name = batch_kwargs.get("snowflake_transient_table")
         else:
             query_support_table_name = None
@@ -397,6 +399,9 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
             )
         elif "table" in batch_kwargs:
             table = batch_kwargs["table"]
+            if batch_kwargs.get("use_quoted_name"):
+                table = quoted_name(table, quote=True)
+
             limit = batch_kwargs.get("limit")
             offset = batch_kwargs.get("offset")
             if limit is not None or offset is not None:
@@ -409,9 +414,11 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
                 logger.info(
                     "Generating query from table batch_kwargs based on limit and offset"
                 )
+
                 # In BigQuery the table name is already qualified with its schema name
                 if self.engine.dialect.name.lower() == "bigquery":
                     schema = None
+
                 else:
                     schema = batch_kwargs.get("schema")
                 raw_query = (
