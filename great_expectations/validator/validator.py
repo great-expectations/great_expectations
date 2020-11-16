@@ -373,23 +373,23 @@ class Validator:
     def _parse_validation_graph(self, validation_graph, metrics):
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
-        needed_metric_ids = set()
-        needed_metrics = set()
-        ready_metric_ids = set()
-        ready_metrics = set()
+        unmet_dependency_ids = set()
+        unmet_dependency = set()
+        maybe_ready_ids = set()
+        maybe_ready = set()
 
         for edge in validation_graph.edges:
             if edge.left.id not in metrics:
                 if edge.right is None or edge.right.id in metrics:
-                    if edge.left.id not in ready_metric_ids:
-                        ready_metric_ids.add(edge.left.id)
-                        ready_metrics.add(edge.left)
+                    if edge.left.id not in maybe_ready_ids:
+                        maybe_ready_ids.add(edge.left.id)
+                        maybe_ready.add(edge.left)
                 else:
-                    if edge.left.id not in needed_metric_ids:
-                        needed_metric_ids.add(edge.left.id)
-                        needed_metrics.add(edge.left)
+                    if edge.left.id not in unmet_dependency_ids:
+                        unmet_dependency_ids.add(edge.left.id)
+                        unmet_dependency.add(edge.left)
 
-        return ready_metrics, needed_metrics
+        return maybe_ready - unmet_dependency, unmet_dependency
 
     def _resolve_metrics(
         self,
