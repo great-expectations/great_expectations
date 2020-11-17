@@ -18,14 +18,6 @@ import pyspark.sql.functions as F
 from tests.test_utils import _build_sa_engine
 
 
-def dataframes_equal(first_table, second_table):
-    if first_table.schema != second_table.schema:
-        return False
-    if first_table.collect() != second_table.collect():
-        return False
-    return True
-
-
 # Testing batching of aggregate metrics
 def test_sa_batch_aggregate_metrics(caplog, sa):
     import datetime
@@ -132,7 +124,7 @@ def test_get_compute_domain_with_no_domain_kwargs(sa):
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
-# Testing for only untested use case - multicolumn
+# Testing for only untested use case - column_pair
 def test_get_compute_domain_with_column_pair(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
 
@@ -149,8 +141,14 @@ def test_get_compute_domain_with_column_pair(sa):
     assert "column_A" not in compute_kwargs.keys() and "column_B" not in compute_kwargs.keys(),"domain kwargs should be existent"
     assert accessor_kwargs == {"column_A": "a", "column_B" : "b"}, "Accessor kwargs have been modified"
 
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column_A": "a", "column_B": "b"},
+    # Building new engine so that values still found
+    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
+    data2, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column_A": "a", "column_B": "b"},
                                                                       domain_type="identity")
+
+    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
+    raw_data = engine.engine.execute(sa.select(["*"]).select_from(engine.active_batch_data.selectable)).fetchall()
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data2)).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -162,13 +160,16 @@ def test_get_compute_domain_with_column_pair(sa):
 def test_get_compute_domain_with_multicolumn(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1,2,3, None]}))
 
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
+    # Obtaining compute domain
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"columns": ["a", "b", "c"]},
                                                                       domain_type="multicolumn")
 
+    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
+    raw_data = engine.engine.execute(sa.select(["*"]).select_from(engine.active_batch_data.selectable)).fetchall()
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
     # Ensuring that with no domain nothing happens to the data itself
-    assert dataframes_equal(data, df), "Data does not match after getting compute domain"
+    assert raw_data == domain_data, "Data does not match after getting compute domain"
     assert compute_kwargs is not None, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {"columns" : ["a", "b", "c"]}, "Accessor kwargs have been modified"
 
@@ -177,8 +178,12 @@ def test_get_compute_domain_with_multicolumn(sa):
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"columns": ["a", "b", "c"]},
                                                                       domain_type="identity")
 
+    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
+    raw_data = engine.engine.execute(sa.select(["*"]).select_from(engine.active_batch_data.selectable)).fetchall()
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
     # Ensuring that with no domain nothing happens to the data itself
-    assert dataframes_equal(data, df), "Data does not match after getting compute domain"
+    assert raw_data == domain_data, "Data does not match after getting compute domain"
     assert compute_kwargs is not None, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
@@ -353,6 +358,7 @@ def test_resolve_metric_bundle_with_nonaggregate_metric(caplog):
          found_message = True
     assert found_message
 
+
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
 def test_resolve_metric_bundle_with_nonexistent_metric():
     engine = _build_sa_engine(
@@ -393,18 +399,4 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
      print(e)
 
 
-# Making sure dataframe property is functional
-def test_dataframe_property_given_loaded_batch():
-    from pyspark.sql import SparkSession
-    engine = SparkDFExecutionEngine()
-
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(df)
-
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
-
-    # Ensuring Data not distorted
-    assert engine.dataframe == df
 
