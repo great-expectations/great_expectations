@@ -342,6 +342,8 @@ class Validator:
                     runtime_configuration=runtime_configuration,
                 )
 
+        if metrics is None:
+            metrics = dict()
         metrics = self.resolve_validation_graph(graph, metrics, runtime_configuration)
 
         evrs = list()

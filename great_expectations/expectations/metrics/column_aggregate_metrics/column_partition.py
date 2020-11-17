@@ -106,9 +106,8 @@ class ColumnPartition(ColumnMetricProvider):
             }
         elif bins == "auto":
             return {
-                "column_values.nonnull.unexpected_count": MetricConfiguration(
-                    "column_values.nonnull.unexpected_count",
-                    metric.metric_domain_kwargs,
+                "column_values.nonnull.count": MetricConfiguration(
+                    "column_values.nonnull.count", metric.metric_domain_kwargs,
                 ),
                 "column.quantile_values": MetricConfiguration(
                     "column.quantile_values",
@@ -135,7 +134,7 @@ def _get_column_partition_using_metrics(bins, n_bins, _metrics):
         bins = _metrics["column.quantile_values"]
     elif bins == "auto":
         # Use the method from numpy histogram_bin_edges
-        nonnull_count = _metrics["column_values.nonnull.unexpected_count"]
+        nonnull_count = _metrics["column_values.nonnull.count"]
         sturges = np.log2(nonnull_count + 1)
         min_, _25, _75, max_ = _metrics["column.quantile_values"]
         iqr = _75 - _25
