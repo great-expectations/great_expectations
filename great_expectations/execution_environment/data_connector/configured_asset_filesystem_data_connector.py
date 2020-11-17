@@ -12,20 +12,6 @@ from great_expectations.execution_environment.data_connector.util import (
 
 logger = logging.getLogger(__name__)
 
-# TODO: <Alex>Should we make this a "set" object?</Alex>
-# TODO: <Alex>Is this actually needed?</Alex>
-KNOWN_EXTENSIONS = [
-    ".csv",
-    ".tsv",
-    ".parquet",
-    ".xls",
-    ".xlsx",
-    ".json",
-    ".csv.gz",
-    ".tsv.gz",
-    ".feather",
-]
-
 
 class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnector):
     def __init__(

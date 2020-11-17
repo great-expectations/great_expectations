@@ -24,20 +24,6 @@ import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
-# TODO: <Alex>Should we make this a "set" object?</Alex>
-# TODO: <Alex>Is this actually needed?</Alex>
-KNOWN_EXTENSIONS = [
-    ".csv",
-    ".tsv",
-    ".parquet",
-    ".xls",
-    ".xlsx",
-    ".json",
-    ".csv.gz",
-    ".tsv.gz",
-    ".feather",
-]
-
 
 class FilePathDataConnector(DataConnector):
     def __init__(
