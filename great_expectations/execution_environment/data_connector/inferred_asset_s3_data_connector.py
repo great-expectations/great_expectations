@@ -14,16 +14,15 @@ from great_expectations.execution_environment.data_connector.util import list_s3
 logger = logging.getLogger(__name__)
 
 
-# TODO: <Alex>Clean up order of arguments.</Alex>
 class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
     def __init__(
         self,
         name: str,
         execution_environment_name: str,
         bucket: str,
-        default_regex: dict,
-        execution_engine: ExecutionEngine = None,
-        sorters: list = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        default_regex: Optional[dict] = None,
+        sorters: Optional[list] = None,
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,

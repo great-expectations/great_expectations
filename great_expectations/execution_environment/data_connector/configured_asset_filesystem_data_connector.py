@@ -27,28 +27,27 @@ KNOWN_EXTENSIONS = [
 ]
 
 
-# TODO: <Alex>Clean up order of arguments.</Alex>
 class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnector):
     def __init__(
         self,
         name: str,
         execution_environment_name: str,
         base_directory: str,
-        default_regex: dict,
         assets: dict,
+        execution_engine: Optional[ExecutionEngine] = None,
+        default_regex: Optional[dict] = None,
         glob_directive: str = "*",
-        sorters: list = None,
-        execution_engine: ExecutionEngine = None,
+        sorters: Optional[list] = None,
     ):
         logger.debug(f'Constructing ConfiguredAssetFilesystemDataConnector "{name}".')
 
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,
-            execution_engine=execution_engine,
             assets=assets,
-            sorters=sorters,
+            execution_engine=execution_engine,
             default_regex=default_regex,
+            sorters=sorters,
         )
 
         self._base_directory = base_directory

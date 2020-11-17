@@ -1,5 +1,5 @@
 import random
-from typing import Dict, List, Any
+from typing import Dict, List, Optional
 
 import pandas as pd
 
@@ -8,6 +8,7 @@ from great_expectations.core.batch import (
     BatchSpec,
     PartitionDefinition,
 )
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
 from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
@@ -23,8 +24,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self,
         name: str,
         execution_environment_name: str,
-        execution_engine,
-        data_assets: Dict[str, Asset],
+        execution_engine: Optional[ExecutionEngine] = None,
+        data_assets: Optional[Dict[str, Asset]] = None,
     ):
         self._data_assets = data_assets
 
