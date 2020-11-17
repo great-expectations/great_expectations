@@ -2940,9 +2940,9 @@ SELECT EXISTS (
    SELECT FROM information_schema.tables 
    WHERE  table_schema = 'connection_test'
    AND    table_name   = 'test_df'
-   );
+);
 """).fetchall()
-    if len(table_check_results) == 0:
+    if table_check_results == ["FALSE"]:
         test_df.to_sql("test_df", con=engine, index=True, schema="test")
 
     # Return a connection string to this newly-created db	

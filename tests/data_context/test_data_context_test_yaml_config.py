@@ -257,7 +257,7 @@ introspection:
     whole_table_with_limits:
         sampling_method: _sample_using_limit
         sampling_kwargs:
-            n: 100
+            n: 10
 """
     report_object = context.test_yaml_config(
         name="my_datasource",
@@ -272,3 +272,11 @@ introspection:
         "whole_table_with_limits",
         "test_df",
     )
+    assert len(my_batch.data.fetchall()) == 10
+
+    with pytest.raises(KeyError):
+        my_batch = context.get_batch_from_new_style_datasource(
+            "my_datasource",
+            "whole_table_with_limits",
+            "DOES_NOT_EXIST",
+        )
