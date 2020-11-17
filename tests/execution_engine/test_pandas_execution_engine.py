@@ -263,16 +263,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
         }
     )
 
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
-        PandasExecutionEngine().get_batch_data(
-            S3BatchSpec(
-                s3=full_path,
-                reader_method="read_csv",
-                splitter_method="_split_on_whole_table"
-            )
-        )
-
-    test_df = PandasExecutionEngine(data_connector=my_data_connector).get_batch_data(batch_spec=
+    test_df = PandasExecutionEngine().get_batch_data(batch_spec=
             S3BatchSpec(
                 s3=full_path,
                 reader_method="read_csv",
@@ -282,7 +273,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
 
 
 @mock_s3
-def test_get_batch_with_split_on_whole_table_s3_with_inferred_asset_s3_data_connector():
+def test_get_batch_with_split_on_whole_table_s3():
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
@@ -306,18 +297,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_inferred_asset_s3_data_conn
     path = "path/A-100.csv"
     full_path = f"s3a://{os.path.join(bucket, path)}"
 
-    my_data_connector = InferredAssetS3DataConnector(
-        name="my_data_connector",
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        default_regex={
-            "pattern": "(.*)-(.*)\\.csv",
-            "group_names": ["data_asset_name", "index"],
-        },
-        bucket=bucket,
-        prefix="",
-    )
-
-    test_df = PandasExecutionEngine(data_connector=my_data_connector).get_batch_data(batch_spec=
+    test_df = PandasExecutionEngine().get_batch_data(batch_spec=
             S3BatchSpec(
                 s3=full_path,
                 reader_method="read_csv",

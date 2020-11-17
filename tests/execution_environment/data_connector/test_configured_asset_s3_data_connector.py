@@ -10,6 +10,7 @@ from moto import mock_s3
 import pandas as pd
 
 from great_expectations.execution_environment.data_connector import ConfiguredAssetS3DataConnector
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
@@ -107,23 +108,19 @@ def test_instantiation_from_a_config(empty_data_context):
             Body=test_df.to_csv(index=False).encode("utf-8"),
             Key=key
         )
-
     report_object = empty_data_context.test_yaml_config(f"""
-module_name: great_expectations.execution_environment.data_connector
-class_name: ConfiguredAssetS3DataConnector
-execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
-name: TEST_DATA_CONNECTOR
-
-default_regex:
-    pattern: alpha-(.*)\\.csv
-    group_names:
-        - index
-
-bucket: {bucket}
-prefix: ""
-
-assets:
-    alpha:
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: ConfiguredAssetS3DataConnector
+        execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
+        name: TEST_DATA_CONNECTOR
+        default_regex:
+            pattern: alpha-(.*)\\.csv
+            group_names:
+                - index
+        bucket: {bucket}
+        prefix: ""
+        assets:
+            alpha:        
     """, return_mode="report_object")
 
     assert report_object == {

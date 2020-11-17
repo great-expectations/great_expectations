@@ -11,11 +11,19 @@ from ruamel.yaml.compat import StringIO
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.execution_environment.data_connector import ConfiguredAssetS3DataConnector, InferredAssetS3DataConnector
 
+from great_expectations.execution_environment.util import S3Url
+
 from great_expectations.execution_environment.types import (
     PathBatchSpec,
     S3BatchSpec,
     RuntimeDataBatchSpec,
 )
+
+try:
+    import boto3
+except ImportError:
+    boto3 = None
+
 
 from ..core.batch import BatchMarkers
 from ..core.id_dict import BatchSpec
@@ -101,19 +109,19 @@ Notes:
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
-        # only used when loading data from S3
-        self._data_connector = kwargs.pop(
-            "data_connector", None
-        )
+        boto3_options: dict = None
+        if boto3_options is None:
+            boto3_options = {}
+        self._s3 = None
+
+        # try initializing
+        try:
+           self._s3 = boto3.client("s3", **boto3_options)
+        except TypeError:
+            pass
+
         super().__init__(*args, **kwargs)
 
-    @property
-    def data_connector(self):
-        return self._data_connector
-
-    @data_connector.setter
-    def data_connector(self, data_connector):
-        self._data_connector = data_connector
 
     def configure_validator(self, validator):
         super().configure_validator(validator)
@@ -149,19 +157,10 @@ Notes:
             batch_data = reader_fn(path, **reader_options)
 
         elif isinstance(batch_spec, S3BatchSpec):
-            if self._data_connector is None:
-                raise ge_exceptions.ExecutionEngineError(f'''
-                    PandasExecutionEngine requires a data_connector be configured when passing in a S3BatchSpec.
-                    S3BatchSpec is compatible with ConfiguredAssetS3DataConnector and InferredAssetS3DataConnector.
-                    ''')
-            if not isinstance(self._data_connector, ConfiguredAssetS3DataConnector) and not isinstance(self._data_connector, InferredAssetS3DataConnector):
-                raise ge_exceptions.ExecutionEngineError(f'''
-                    PandasExecutionEngine requires a data_connector be configured when passing in a S3BatchSpec.
-                    S3BatchSpec is compatible with ConfiguredAssetS3DataConnector and InferredAssetS3DataConnector, 
-                    but the current data_connector is of type {type(self.data_connector)}.
-                    ''')
+            if self._s3 is None:
+                raise ge_exceptions.ExecutionEngineError("PandasExecutionEngine has been passed a S3BatchSpec, but does not have an S3 connection configured")
 
-            s3_engine, s3_url = self.data_connector.get_s3_object_and_url_from_batch_spec(batch_spec=batch_spec)
+            s3_engine, s3_url = self._get_s3_object_and_url_from_batch_spec(batch_spec=batch_spec)
             reader_method: str = batch_spec.get("reader_method")
             reader_options: dict = batch_spec.get("reader_options") or {}
 
@@ -354,6 +353,12 @@ Notes:
             )
         return resolved_metrics
 
+    def _get_s3_object_and_url_from_batch_spec(self, batch_spec: BatchSpec):
+        s3 = self._s3
+        url = S3Url(batch_spec.get("s3"))
+        return s3, url
+
+
     ### Splitter methods for partitioning dataframes ###
     @staticmethod
     def _split_on_whole_table(
@@ -501,3 +506,8 @@ Notes:
             lambda x: hash_func(str(x).encode()).hexdigest()[-1*hash_digits:] == hash_value
         )
         return df[matches]
+
+    def _get_s3_object_and_url_from_batch_spec(self, batch_spec: BatchSpec):
+        s3 = self._s3
+        url = S3Url(batch_spec.get("s3"))
+        return s3, url
