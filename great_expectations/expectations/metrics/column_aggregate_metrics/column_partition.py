@@ -113,7 +113,7 @@ class ColumnPartition(ColumnMetricProvider):
                     "column.quantile_values",
                     metric.metric_domain_kwargs,
                     {
-                        "quantiles": (0, 0.25, 0.75, 1.0),
+                        "quantiles": (0.0, 0.25, 0.75, 1.0),
                         "allow_relative_error": allow_relative_error,
                     },
                 ),

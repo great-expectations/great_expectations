@@ -118,19 +118,19 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         elif max_value is None:
             if strict_min:
-                condition = min_value < column
+                condition = column > min_value
             else:
-                condition = min_value <= column
+                condition = column >= min_value
 
         else:
             if strict_min and strict_max:
-                condition = sa.and_(min_value < column, column < max_value)
+                condition = sa.and_(column > min_value, column < max_value)
             elif strict_min:
-                condition = sa.and_(min_value < column, column <= max_value)
+                condition = sa.and_(column > min_value, column <= max_value)
             elif strict_max:
-                condition = sa.and_(min_value <= column, column < max_value)
+                condition = sa.and_(column >= min_value, column < max_value)
             else:
-                condition = sa.and_(min_value <= column, column <= max_value)
+                condition = sa.and_(column >= min_value, column <= max_value)
 
         return execution_engine.engine.execute(
             sa.select([sa.func.count()]).select_from(selectable).where(condition)
@@ -178,18 +178,18 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         elif max_value is None:
             if strict_min:
-                condition = min_value < column
+                condition = column > min_value
             else:
-                condition = min_value <= column
+                condition = column >= min_value
 
         else:
             if strict_min and strict_max:
-                condition = (min_value < column) & (column < max_value)
+                condition = (column > min_value) & (column < max_value)
             elif strict_min:
-                condition = (min_value < column) & (column <= max_value)
+                condition = (column > min_value) & (column <= max_value)
             elif strict_max:
-                condition = (min_value <= column) & (column < max_value)
+                condition = (column >= min_value) & (column < max_value)
             else:
-                condition = (min_value <= column) & (column <= max_value)
+                condition = (column >= min_value) & (column <= max_value)
 
         return df.filter(condition).count()
