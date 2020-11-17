@@ -292,13 +292,16 @@ class BaseDataContext:
     def _build_store(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
         try:
-            # Set expectations_store.store_backend_id to given data_context_id if it doesnt exist
+            # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+            # the expectations_store doesnt yet exist by:
+            # adding the data_context_id from the project_config
+            # to the store_config under the key manually_initialize_store_backend_id
             if (store_name == self.expectations_store_name) and store_config.get(
                 "store_backend"
             ):
                 store_config["store_backend"].update(
                     {
-                        "manually_initialize_store_backend_id": self.anonymous_usage_statistics.data_context_id
+                        "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
                     }
                 )
             new_store = instantiate_class_from_config(
