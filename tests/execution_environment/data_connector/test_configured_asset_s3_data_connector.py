@@ -10,6 +10,7 @@ from moto import mock_s3
 import pandas as pd
 
 from great_expectations.execution_environment.data_connector import ConfiguredAssetS3DataConnector
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.core.batch import (
     BatchRequest,
     BatchDefinition,
@@ -89,7 +90,7 @@ def test_basic_instantiation():
 @mock_s3
 def test_instantiation_from_a_config(empty_data_context_v3):
     context = empty_data_context_v3
-    
+
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
@@ -109,23 +110,19 @@ def test_instantiation_from_a_config(empty_data_context_v3):
             Body=test_df.to_csv(index=False).encode("utf-8"),
             Key=key
         )
-
     report_object = context.test_yaml_config(f"""
-module_name: great_expectations.execution_environment.data_connector
-class_name: ConfiguredAssetS3DataConnector
-execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
-name: TEST_DATA_CONNECTOR
-
-default_regex:
-    pattern: alpha-(.*)\\.csv
-    group_names:
-        - index
-
-bucket: {bucket}
-prefix: ""
-
-assets:
-    alpha:
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: ConfiguredAssetS3DataConnector
+        execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
+        name: TEST_DATA_CONNECTOR
+        default_regex:
+            pattern: alpha-(.*)\\.csv
+            group_names:
+                - index
+        bucket: {bucket}
+        prefix: ""
+        assets:
+            alpha:
     """, return_mode="report_object")
 
     assert report_object == {
@@ -798,7 +795,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
         class_name: ConfiguredAssetS3DataConnector
         bucket: bucket
         assets:
-            TestFiles: 
+            TestFiles:
                 pattern: (.+)_(.+)_(.+)\\.csv
                 group_names:
                     - name
@@ -874,7 +871,7 @@ def test_return_all_batch_definitions_too_many_sorters():
         bucket: {bucket}
         prefix: ""
         assets:
-            TestFiles: 
+            TestFiles:
         default_regex:
             pattern: (.+)_.+_.+\\.csv
             group_names:

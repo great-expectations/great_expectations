@@ -225,10 +225,15 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             path: str = batch_spec["path"]
             reader = self.spark.read
             reader_fn: Callable = self._get_reader_fn(reader, reader_method, path)
-
             batch_data = reader_fn(path, **reader_options)
         elif isinstance(batch_spec, S3BatchSpec):
-            pass
+
+            reader_method = batch_spec.get("reader_method")
+            reader_options: dict = batch_spec.get("reader_options") or {}
+            url = batch_spec.get("s3")
+            reader_fn = self._get_reader_fn(reader=self.spark.read, reader_method=reader_method, path=url)
+            batch_data = reader_fn(path=url, **reader_options)
+
         else:
             raise BatchSpecError(
             """
@@ -537,7 +542,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError) as e:
             raise (ge_exceptions.ExecutionEngineError(
-                f'''The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name. 
+                f'''The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
                     Reference to {hash_function_name} cannot be found.'''))
 
         def _encrypt_value(to_encode):
@@ -599,7 +604,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             getattr(hashlib, str(hash_function_name))
         except (TypeError, AttributeError) as e:
             raise (ge_exceptions.ExecutionEngineError(
-                f'''The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name. 
+                f'''The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
                     Reference to {hash_function_name} cannot be found.'''))
 
         def _encrypt_value(to_encode):
