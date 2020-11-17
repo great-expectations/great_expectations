@@ -12,9 +12,8 @@ from great_expectations.data_context.util import (
     file_relative_path
 )
 
-def test_empty_store(empty_data_context):
-
-    my_expectation_store = empty_data_context.test_yaml_config(
+def test_empty_store(empty_data_context_v3):
+    my_expectation_store = empty_data_context_v3.test_yaml_config(
         yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -28,10 +27,10 @@ store_backend:
     # assert False
 
 
-def test_config_with_yaml_error(empty_data_context):
+def test_config_with_yaml_error(empty_data_context_v3):
 
     with pytest.raises(Exception):
-        my_expectation_store = empty_data_context.test_yaml_config(
+        my_expectation_store = empty_data_context_v3.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -43,14 +42,14 @@ EGREGIOUS FORMATTING ERROR
         )
 
 
-def test_filesystem_store(empty_data_context):
+def test_filesystem_store(empty_data_context_v3):
     tmp_dir = str(tempfile.mkdtemp())
     with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:
         f_.write("\n")
     with open(os.path.join(tmp_dir, "expectations_A2.json"), "w") as f_:
         f_.write("\n")
 
-    my_expectation_store = empty_data_context.test_yaml_config(
+    my_expectation_store = empty_data_context_v3.test_yaml_config(
         yaml_config=f"""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -63,8 +62,8 @@ store_backend:
     )
 
 
-def test_empty_store2(empty_data_context):
-    empty_data_context.test_yaml_config(
+def test_empty_store2(empty_data_context_v3):
+    empty_data_context_v3.test_yaml_config(
         yaml_config="""
 class_name: ValidationsStore
 store_backend:
@@ -75,7 +74,7 @@ store_backend:
     )
 
 
-def test_execution_environment_config(empty_data_context):
+def test_execution_environment_config(empty_data_context_v3):
     temp_dir = str(tempfile.mkdtemp())
     create_files_in_directory(
         directory=temp_dir,
@@ -94,7 +93,7 @@ def test_execution_environment_config(empty_data_context):
     )
     print(temp_dir)
 
-    return_obj = empty_data_context.test_yaml_config(
+    return_obj = empty_data_context_v3.test_yaml_config(
         yaml_config=f"""
 class_name: ExecutionEnvironment
 
@@ -145,7 +144,7 @@ data_connectors:
         }
     }
 
-def test_error_states(empty_data_context):
+def test_error_states(empty_data_context_v3):
 
     first_config = """
 class_name: ExecutionEnvironment
@@ -155,7 +154,7 @@ execution_engine:
 """
 
     with pytest.raises(PluginClassNotFoundError) as excinfo:
-        empty_data_context.test_yaml_config(
+        empty_data_context_v3.test_yaml_config(
             yaml_config=first_config
         )
     # print(excinfo.value.message)
@@ -164,7 +163,7 @@ execution_engine:
 
     # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
     # Note: a more thorough test could also verify that the traceback is indeed short.
-    empty_data_context.test_yaml_config(
+    empty_data_context_v3.test_yaml_config(
         yaml_config=first_config,
         shorten_tracebacks=True,
     )
@@ -192,11 +191,11 @@ data_connectors:
 """
 
     with pytest.raises(TypeError) as excinfo:
-        empty_data_context.test_yaml_config(
+        empty_data_context_v3.test_yaml_config(
             yaml_config=second_config,
         )
 
-    empty_data_context.test_yaml_config(
+    empty_data_context_v3.test_yaml_config(
         yaml_config=second_config,
         shorten_tracebacks=True
     )
