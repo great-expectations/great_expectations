@@ -255,7 +255,6 @@ credentials:
 
 introspection:
     whole_table_with_limits:
-        #!!! We should be able to specify
         sampling_method: _sample_using_limit
         sampling_kwargs:
             n: 100
