@@ -8,6 +8,11 @@ Develop
 -----------------
 * [ENHANCEMENT] Add a store_backend_id property to StoreBackend #2030
 
+0.12.9
+-----------------
+* [BUGFIX] Fixed the import of s3fs to use the optional import pattern - issue #2053
+* [DOCS] Updated the title styling and added a Discuss comment article for the OpsgenieAlertAction how-to guide
+
 0.12.8
 -----------------
 * [FEATURE] Add OpsgenieAlertAction #2012 (thanks @miike!)

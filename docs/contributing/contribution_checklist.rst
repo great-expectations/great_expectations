@@ -45,7 +45,7 @@ Once your code is ready, please go through the following checklist before submit
 
 **5. Have you added a bullet with your changes under the "develop" heading in the Changelog?**
 
-    * Please add a bullet point to ``docs/changelog/changelog.rst``, in the ``develop`` section.
+    * Please add a bullet point to ``docs/changelog.rst``, in the ``develop`` section.
         * Please group in the following order: [BREAKING], [FEATURE], [ENHANCEMENT], [BUGFIX], [DOCS], [MAINTENANCE]
     * You can see the past Changelog here: :ref:`changelog`
 
