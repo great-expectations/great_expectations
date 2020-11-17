@@ -11,6 +11,9 @@ from great_expectations.exceptions import (
 from great_expectations.data_context.util import (
     file_relative_path
 )
+from great_expectations.core import (
+    ExpectationSuite
+)
 
 def test_empty_store(empty_data_context_v3):
     my_expectation_store = empty_data_context_v3.test_yaml_config(
@@ -264,8 +267,8 @@ introspection:
         yaml_config=yaml_config,
         return_mode="report_object",
     )
-    print(json.dumps(report_object, indent=2))
-    print(context.datasources)
+    # print(json.dumps(report_object, indent=2))
+    # print(context.datasources)
 
     my_batch = context.get_batch(
         "my_datasource",
@@ -285,7 +288,13 @@ introspection:
         "my_datasource",
         "whole_table_with_limits",
         "test_df",
-        expectation_suite_name="my_expectation_suite",
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
-    evr = my_validator.expect_table_columns_to_match_ordered_list([])
-    assert evr.success == True
+    # my_evr = my_validator.expect_column_values_to_be_between(
+    #     column="a",
+    #     min_value=10,
+    #     max_value=100,
+    # )
+    # assert my_evr.success == True
+    # # my_evr.my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["a", "b", "c"])
+    # assert my_evr.success == True
