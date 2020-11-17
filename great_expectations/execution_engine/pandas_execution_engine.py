@@ -108,7 +108,8 @@ Notes:
         boto3_options: dict = None
         if boto3_options is None:
             boto3_options = {}
-        # try initializing
+
+        # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
         try:
             self._s3 = boto3.client("s3", **boto3_options)
         except TypeError:
@@ -152,7 +153,7 @@ Notes:
             if self._s3 is None:
                 raise ge_exceptions.ExecutionEngineError(
                     f'''PandasExecutionEngine has been passed a S3BatchSpec, 
-                        but the ExecutionEngine does not have a boto3 configured. Please check the config.''')
+                        but the ExecutionEngine does not have a boto3 client configured. Please check your config.''')
             s3_engine = self._s3
             s3_url = S3Url(batch_spec.get("s3"))
             reader_method: str = batch_spec.get("reader_method")
