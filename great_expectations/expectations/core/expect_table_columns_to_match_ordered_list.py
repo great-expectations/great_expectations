@@ -93,9 +93,10 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         # Ensuring that a proper value has been provided
         try:
             assert "column_list" in configuration.kwargs, "column_list is required"
-            assert isinstance(
-                configuration.kwargs["column_list"], (list, set)
-            ) or configuration.kwargs["column_list"] is None, "column_list must be a list, set, or None"
+            assert (
+                isinstance(configuration.kwargs["column_list"], (list, set))
+                or configuration.kwargs["column_list"] is None
+            ), "column_list must be a list, set, or None"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -156,8 +157,13 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         expected_column_list = self.get_success_kwargs(configuration).get("column_list")
         actual_column_list = metrics.get("table.columns")
 
-        if expected_column_list is None or list(actual_column_list) == list(expected_column_list):
-            return {"success": True, "result": {"observed_value": list(actual_column_list)}}
+        if expected_column_list is None or list(actual_column_list) == list(
+            expected_column_list
+        ):
+            return {
+                "success": True,
+                "result": {"observed_value": list(actual_column_list)},
+            }
         else:
             # In the case of differing column lengths between the defined expectation and the observed column set, the
             # max is determined to generate the column_index.
@@ -166,7 +172,9 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
 
             # Create a list of the mismatched details
             compared_lists = list(
-                zip_longest(column_index, list(expected_column_list), list(actual_column_list))
+                zip_longest(
+                    column_index, list(expected_column_list), list(actual_column_list)
+                )
             )
             mismatched = [
                 {"Expected Column Position": i, "Expected": k, "Found": v}

@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -43,9 +43,10 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         # Ensuring that a proper value has been provided
         try:
             assert "column_set" in configuration.kwargs, "column_set is required"
-            assert isinstance(
-                configuration.kwargs["column_set"], (list, set)
-            ) or configuration.kwargs["column_set"] is None, "column_set must be a list, set, or None"
+            assert (
+                isinstance(configuration.kwargs["column_set"], (list, set))
+                or configuration.kwargs["column_set"] is None
+            ), "column_set must be a list, set, or None"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -111,7 +112,9 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
     ):
         # Obtaining columns and ordered list for sake of comparison
         expected_column_set = self.get_success_kwargs(configuration).get("column_set")
-        expected_column_set = set(expected_column_set) if expected_column_set is not None else set()
+        expected_column_set = (
+            set(expected_column_set) if expected_column_set is not None else set()
+        )
         actual_column_list = metrics.get("table.columns")
         actual_column_set = set(actual_column_list)
         exact_match = self.get_success_kwargs(configuration).get("exact_match")

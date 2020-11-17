@@ -9,8 +9,8 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 
 
 class ExpectTableRowCountToEqualOtherTable(TableExpectation):
-    metric_dependencies = ("table.row_count", )
-    success_keys = ("other_table_name", )
+    metric_dependencies = ("table.row_count",)
+    success_keys = ("other_table_name",)
     default_kwarg_values = {
         "other_table_name": None,
         "result_format": "BASIC",
@@ -104,7 +104,5 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
 
         return {
             "success": actual_table_row_count == expected_table_row_count,
-            "result": {
-                "observed_value": actual_table_row_count
-            }
+            "result": {"observed_value": actual_table_row_count},
         }

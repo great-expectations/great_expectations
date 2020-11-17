@@ -130,8 +130,10 @@ class ExpectColumnToExist(TableExpectation):
             assert isinstance(
                 configuration.kwargs["column"], str
             ), "Column name must be a string"
-            assert isinstance(configuration.kwargs.get("column_index"), int) or configuration.kwargs.get(
-                "column_index") is None, "column_index must be an integer or None"
+            assert (
+                isinstance(configuration.kwargs.get("column_index"), int)
+                or configuration.kwargs.get("column_index") is None
+            ), "column_index must be an integer or None"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
@@ -199,8 +201,6 @@ class ExpectColumnToExist(TableExpectation):
             validation_dependencies, metrics, configuration, runtime_configuration
         )
 
-
-
         columns = metric_vals.get("columns")
         column = self.get_success_kwargs().get(
             "column", self.default_kwarg_values.get("column")
@@ -237,6 +237,4 @@ class ExpectColumnToExist(TableExpectation):
         else:
             success = expected_column_name in actual_columns
 
-        return {
-            "success": success
-        }
+        return {"success": success}

@@ -2,7 +2,10 @@ from typing import Dict
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import ColumnMapExpectation, TableExpectation
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    TableExpectation,
+)
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (

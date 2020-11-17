@@ -36,7 +36,10 @@ except ImportError:
 
 class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
     map_metric = "column_values.not_match_like_pattern"
-    success_keys = ("mostly", "like_pattern",)
+    success_keys = (
+        "mostly",
+        "like_pattern",
+    )
 
     default_kwarg_values = {
         "like_pattern": None,
@@ -51,9 +54,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
         try:
-            assert (
-                "like_pattern" in configuration.kwargs
-            ), "Must provide like_pattern"
+            assert "like_pattern" in configuration.kwargs, "Must provide like_pattern"
             assert isinstance(
                 configuration.kwargs.get("like_pattern"), str
             ), "like_pattern must be a string"

@@ -58,7 +58,8 @@ class ExpectTableRowCountToEqual(TableExpectation):
     See Also:
         expect_table_row_count_to_be_between
     """
-    metric_dependencies = ("table.row_count", )
+
+    metric_dependencies = ("table.row_count",)
 
     success_keys = ("value",)
 
@@ -155,7 +156,5 @@ class ExpectTableRowCountToEqual(TableExpectation):
 
         return {
             "success": actual_table_row_count == expected_table_row_count,
-            "result": {
-                "observed_value": actual_table_row_count
-            }
+            "result": {"observed_value": actual_table_row_count},
         }

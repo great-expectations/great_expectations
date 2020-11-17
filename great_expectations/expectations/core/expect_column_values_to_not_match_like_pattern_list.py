@@ -36,7 +36,10 @@ except ImportError:
 
 class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
     map_metric = "column_values.not_match_like_pattern_list"
-    success_keys = ("mostly", "like_pattern_list",)
+    success_keys = (
+        "mostly",
+        "like_pattern_list",
+    )
 
     default_kwarg_values = {
         "like_pattern_list": None,
