@@ -2943,7 +2943,6 @@ SELECT EXISTS (
    AND    table_name   = 'test_df'
 );
 """).fetchall()
-    print(table_check_results)
     if table_check_results != [(True,)]:
         test_df.to_sql("test_df", con=engine, index=True, schema="connection_test")
 
