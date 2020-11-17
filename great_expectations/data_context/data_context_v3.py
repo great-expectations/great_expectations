@@ -10,7 +10,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 
-from great_expectations.data_context import DataContext
+from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import dataContextConfigSchema
 
 logger = logging.getLogger(__name__)
