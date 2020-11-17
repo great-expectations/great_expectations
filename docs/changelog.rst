@@ -7,6 +7,9 @@ Changelog
 Develop
 -----------------
 
+* [BUGFIX] Fixed the import of s3fs to use the optional import pattern - issue #2053
+
+
 0.12.8
 -----------------
 * [FEATURE] Add OpsgenieAlertAction #2012 (thanks @miike!)
