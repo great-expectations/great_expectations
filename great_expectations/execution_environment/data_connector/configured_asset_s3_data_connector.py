@@ -1,18 +1,17 @@
 import os
 from typing import List, Optional
 
+import logging
+
 try:
     import boto3
 except ImportError:
     boto3 = None
 
-import logging
-
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.asset import Asset
 from great_expectations.execution_environment.data_connector import ConfiguredAssetFilePathDataConnector
 from great_expectations.execution_environment.data_connector.util import list_s3_keys
-
 logger = logging.getLogger(__name__)
 
 
@@ -41,7 +40,6 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             default_regex=default_regex,
             sorters=sorters,
         )
-
         self._bucket = bucket
         self._prefix = os.path.join(prefix, "")
         self._delimiter = delimiter
@@ -75,7 +73,6 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         path_list: List[str] = [
             key for key in list_s3_keys(s3=self._s3, query_options=query_options, iterator_dict={}, recursive=False)
         ]
-
         return path_list
 
     def _get_full_file_path(self, path: str) -> str:

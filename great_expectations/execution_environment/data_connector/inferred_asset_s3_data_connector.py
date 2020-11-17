@@ -1,17 +1,16 @@
 import os
 from typing import List, Optional
 
+import logging
+
 try:
     import boto3
 except ImportError:
     boto3 = None
 
-import logging
-
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector import InferredAssetFilePathDataConnector
 from great_expectations.execution_environment.data_connector.util import list_s3_keys
-
 logger = logging.getLogger(__name__)
 
 
@@ -52,6 +51,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         except TypeError:
             raise ImportError("Unable to load boto3 (it is required for InferredAssetS3DataConnector).")
 
+
     def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
 
@@ -63,6 +63,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             "Delimiter": self._delimiter,
             "MaxKeys": self._max_keys,
         }
+
         path_list: List[str] = [
             key for key in list_s3_keys(s3=self._s3, query_options=query_options, iterator_dict={}, recursive=True)
         ]

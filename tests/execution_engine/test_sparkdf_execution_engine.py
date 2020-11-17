@@ -8,10 +8,7 @@ from great_expectations.core.batch import Batch
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_environment.types.batch_spec import (
-    RuntimeDataBatchSpec,
-    PathBatchSpec
-)
+from great_expectations.execution_environment.types.batch_spec import RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec
 from great_expectations.execution_engine import SparkDFExecutionEngine
 
 try:
@@ -42,7 +39,6 @@ def _build_spark_engine(spark_session, df):
     batch = Batch(data=df)
     engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
     return engine
-
 
 @pytest.fixture
 def test_sparkdf(spark_session):
@@ -167,7 +163,6 @@ def test_get_compute_domain_with_row_condition(spark_session):
     assert accessor_kwargs == {}
 
 
-
 # What happens when we filter such that no value meets the condition?
 def test_get_compute_domain_with_unmeetable_row_condition(spark_session):
     pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
@@ -249,6 +244,39 @@ def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_p
     )
     assert test_sparkdf.count() == 6
     assert len(test_sparkdf.columns) == 3
+
+
+def test_get_batch_with_split_on_whole_table_s3(spark_session):
+    def mocked_get_reader_function(*args, **kwargs):
+        def mocked_reader_function(*args, **kwargs):
+            pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+            df = spark_session.createDataFrame(
+                [
+                    tuple(
+                        None if isinstance(x, (float, int)) and np.isnan(x) else x
+                        for x in record.tolist()
+                    )
+                    for record in pd_df.to_records(index=False)
+                ],
+                pd_df.columns.tolist(),
+            )
+            return df
+        return mocked_reader_function
+
+    spark_engine = SparkDFExecutionEngine()
+    spark_engine._get_reader_fn = mocked_get_reader_function
+
+    test_sparkdf = spark_engine.get_batch_data(
+        S3BatchSpec(
+            s3="s3://bucket/test/test.csv",
+            reader_method="csv",
+            reader_options={
+                "header": True
+            },
+            splitter_method="_split_on_whole_table"
+    ))
+    assert test_sparkdf.count() == 4
+    assert len(test_sparkdf.columns) == 2
 
 
 def test_get_batch_with_split_on_whole_table(test_sparkdf):

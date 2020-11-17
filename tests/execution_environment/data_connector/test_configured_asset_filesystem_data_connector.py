@@ -710,7 +710,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
         execution_engine:
             BASE_ENGINE:
             class_name: PandasExecutionEngine
-        class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
         glob_directive: "*.csv"
         assets:

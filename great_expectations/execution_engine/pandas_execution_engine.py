@@ -4,17 +4,22 @@ import logging
 from functools import partial
 import hashlib
 import random
+import pandas as pd
 from typing import Any, Callable, Dict, Iterable, Tuple, List
 
-import pandas as pd
-
+from ruamel.yaml.compat import StringIO
 import great_expectations.exceptions.exceptions as ge_exceptions
-
+from great_expectations.execution_environment.util import S3Url
 from great_expectations.execution_environment.types import (
     PathBatchSpec,
     S3BatchSpec,
     RuntimeDataBatchSpec,
 )
+
+try:
+    import boto3
+except ImportError:
+    boto3 = None
 
 from ..core.batch import BatchMarkers
 from ..core.id_dict import BatchSpec
@@ -97,10 +102,19 @@ Notes:
     }
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
+        boto3_options: dict = None
+        if boto3_options is None:
+            boto3_options = {}
+
+        # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
+        try:
+            self._s3 = boto3.client("s3", **boto3_options)
+        except TypeError:
+            self._s3 = None
+        super().__init__(*args, **kwargs)
 
     def configure_validator(self, validator):
         super().configure_validator(validator)
@@ -123,6 +137,7 @@ Notes:
         )
 
         if isinstance(batch_spec, RuntimeDataBatchSpec):
+            # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
 
         elif isinstance(batch_spec, PathBatchSpec):
@@ -135,20 +150,29 @@ Notes:
             batch_data = reader_fn(path, **reader_options)
 
         elif isinstance(batch_spec, S3BatchSpec):
-            # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
-            # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
-            # url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
-            # reader_method = batch_spec.get("reader_method")
-            # reader_fn = self._get_reader_fn(reader_method, url.key)
-            # batch_data = reader_fn(
-            #     StringIO(
-            #         s3_object["Body"]
-            #         .read()
-            #         .decode(s3_object.get("ContentEncoding", "utf-8"))
-            #     ),
-            #     **reader_options,
-            # )
-            pass
+            if self._s3 is None:
+                raise ge_exceptions.ExecutionEngineError(
+                    f'''PandasExecutionEngine has been passed a S3BatchSpec, 
+                        but the ExecutionEngine does not have a boto3 client configured. Please check your config.''')
+            s3_engine = self._s3
+            s3_url = S3Url(batch_spec.get("s3"))
+            reader_method: str = batch_spec.get("reader_method")
+            reader_options: dict = batch_spec.get("reader_options") or {}
+
+            s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
+
+            logger.debug(
+                "Fetching s3 object. Bucket: {} Key: {}".format(s3_url.bucket, s3_url.key)
+            )
+            reader_fn = self._get_reader_fn(reader_method, s3_url.key)
+            batch_data = reader_fn(
+                StringIO(
+                    s3_object["Body"]
+                    .read()
+                    .decode(s3_object.get("ContentEncoding", "utf-8"))
+                ),
+                **reader_options,
+            )
         else:
             raise BatchSpecError(
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
