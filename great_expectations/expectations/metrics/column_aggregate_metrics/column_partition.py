@@ -97,9 +97,9 @@ class ColumnPartition(ColumnMetricProvider):
                     "column.quantile_values",
                     metric.metric_domain_kwargs,
                     {
-                        "quantiles": tuple(
-                            np.linspace(start=0, stop=1, num=n_bins + 1)
-                        ),
+                        "quantiles": np.linspace(
+                            start=0, stop=1, num=n_bins + 1
+                        ).tolist(),
                         "allow_relative_error": allow_relative_error,
                     },
                 )
@@ -129,7 +129,7 @@ def _get_column_partition_using_metrics(bins, n_bins, _metrics):
         # PRECISION NOTE: some implementations of quantiles could produce
         # varying levels of precision (e.g. a NUMERIC column producing
         # Decimal from a SQLAlchemy source, so we cast to float for numpy)
-        bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins + 1)
+        bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins + 1).tolist()
     elif bins in ["ntile", "quantile", "percentile"]:
         bins = _metrics["column.quantile_values"]
     elif bins == "auto":
@@ -143,7 +143,7 @@ def _get_column_partition_using_metrics(bins, n_bins, _metrics):
         else:
             fd = (2 * float(iqr)) / (nonnull_count ** (1 / 3))
             n_bins = max(int(np.ceil(sturges)), int(np.ceil(float(max_ - min_) / fd)))
-        bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins + 1)
+        bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins + 1).tolist()
     else:
         raise ValueError("Invalid parameter for bins argument")
     return bins
