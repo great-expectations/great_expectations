@@ -167,7 +167,7 @@ class ExecutionEngine:
                     ) = metric_dependencies.pop("metric_partial_fn")
                 except KeyError as e:
                     raise GreatExpectationsError(
-                        f"Missing metric dependency: {str(e)} for metric "
+                        f"Missing metric dependency: {str(e)} for metric {metric_to_resolve.metric_name}"
                     )
                 metric_fn_bundle.append(
                     (
