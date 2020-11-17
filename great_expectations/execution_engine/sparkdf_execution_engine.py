@@ -604,7 +604,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             getattr(hashlib, str(hash_function_name))
         except (TypeError, AttributeError) as e:
             raise (ge_exceptions.ExecutionEngineError(
-                f'''The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.
+                f'''The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
                     Reference to {hash_function_name} cannot be found.'''))
 
         def _encrypt_value(to_encode):
