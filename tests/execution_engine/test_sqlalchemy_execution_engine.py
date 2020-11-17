@@ -306,17 +306,17 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
      metric_value_kwargs=dict(),
     )
     desired_metric_2 = MetricConfiguration(
-     metric_name="column.aggregate.min",
+     metric_name="column.min",
      metric_domain_kwargs={"column": "a"},
      metric_value_kwargs=dict(),
     )
     desired_metric_3 = MetricConfiguration(
-     metric_name="column.aggregate.max",
+     metric_name="column.max",
      metric_domain_kwargs={"column": "b"},
      metric_value_kwargs=dict(),
     )
     desired_metric_4 = MetricConfiguration(
-     metric_name="column.aggregate.does_not_exist",
+     metric_name="column.does_not_exist",
      metric_domain_kwargs={"column": "b"},
      metric_value_kwargs=dict(),
     )
