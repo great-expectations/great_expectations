@@ -25,7 +25,11 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validation_graph import (
+    MetricConfiguration,
+    ValidationGraph,
+)
+from great_expectations.validator.validator import Validator
 
 
 class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
@@ -199,9 +203,21 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                         "allow_relative_error": False,
                     },
                 )
-                bins = execution_engine.resolve_metrics(
-                    [partition_metric_configuration]
-                )[partition_metric_configuration.id]
+                #
+                # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
+                # dependencies, so we use a validator
+                #
+                validator = Validator(execution_engine=execution_engine)
+                graph = ValidationGraph()
+                validator.build_metric_dependency_graph(
+                    graph=graph,
+                    child_node=partition_metric_configuration,
+                    configuration=configuration,
+                    execution_engine=execution_engine,
+                )
+                bins = validator.resolve_validation_graph(graph, metrics=dict())[
+                    partition_metric_configuration.id
+                ]
                 hist_metric_configuration = MetricConfiguration(
                     "column.histogram",
                     metric_domain_kwargs=domain_kwargs,

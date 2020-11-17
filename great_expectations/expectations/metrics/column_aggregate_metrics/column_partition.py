@@ -68,6 +68,7 @@ class ColumnPartition(ColumnMetricProvider):
         n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
         return _get_column_partition_using_metrics(bins, n_bins, metrics)
 
+    @classmethod
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
@@ -93,7 +94,7 @@ class ColumnPartition(ColumnMetricProvider):
         elif bins in ["ntile", "quantile", "percentile"]:
             return {
                 "column.quantile_values": MetricConfiguration(
-                    "column.quantile.values",
+                    "column.quantile_values",
                     metric.metric_domain_kwargs,
                     {
                         "quantiles": tuple(
@@ -110,7 +111,7 @@ class ColumnPartition(ColumnMetricProvider):
                     metric.metric_domain_kwargs,
                 ),
                 "column.quantile_values": MetricConfiguration(
-                    "column.quantile.values",
+                    "column.quantile_values",
                     metric.metric_domain_kwargs,
                     {
                         "quantiles": (0, 0.25, 0.75, 1.0),
