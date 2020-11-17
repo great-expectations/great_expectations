@@ -60,6 +60,7 @@ class DataContextV3(DataContext):
     def test_yaml_config(
         self,
         yaml_config: str,
+        name = None,
         pretty_print=True,
         return_mode="instantiated_class",
         shorten_tracebacks=False,
@@ -80,6 +81,9 @@ class DataContextV3(DataContext):
         ----------
         yaml_config : str
             A string containing the yaml config to be tested
+
+        name: str
+            (Optional) A string containing the name of the component to instantiate
 
         pretty_print : bool
             Determines whether to print human-readable output
@@ -109,7 +113,7 @@ class DataContextV3(DataContext):
                 raise ValueError(f"Unknown return_mode: {return_mode}.")
         
         substituted_config_variables = substitute_all_config_variables(
-            dict(self._load_config_variables_file()),
+            self.config_variables,
             dict(os.environ),
         )
 
@@ -147,14 +151,7 @@ class DataContextV3(DataContext):
                 print(
                     f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}"
                 )
-                instantiated_class = instantiate_class_from_config(
-                    config,
-                    runtime_environment={},
-                    config_defaults={
-                        "name": "my_temp_execution_environment",
-                        "module_name": "great_expectations.execution_environment",
-                    },
-                )
+                instantiated_class = self._build_execution_environment_from_config("my_temp_store", config)
 
             else:
                 print(

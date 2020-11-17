@@ -13,49 +13,6 @@ from great_expectations.execution_engine.pandas_execution_engine import PandasEx
 import great_expectations.exceptions.exceptions as ge_exceptions
 
 
-@pytest.fixture
-def test_df(tmp_path_factory):
-    def generate_ascending_list_of_datetimes(
-            k,
-            start_date=datetime.date(2020, 1, 1),
-            end_date=datetime.date(2020, 12, 31)
-    ):
-        start_time = datetime.datetime(start_date.year, start_date.month, start_date.day)
-        days_between_dates = (end_date - start_date).total_seconds()
-
-        datetime_list = [start_time + datetime.timedelta(seconds=random.randrange(days_between_dates)) for i in
-                         range(k)]
-        datetime_list.sort()
-        return datetime_list
-
-    k = 120
-    random.seed(1)
-
-    timestamp_list = generate_ascending_list_of_datetimes(k, end_date=datetime.date(2020, 1, 31))
-    date_list = [datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list]
-
-    batch_ids = [random.randint(0, 10) for i in range(k)]
-    batch_ids.sort()
-
-    session_ids = [random.randint(2, 60) for i in range(k)]
-    session_ids.sort()
-    session_ids = [i - random.randint(0, 2) for i in session_ids]
-
-    events_df = pd.DataFrame({
-        "id": range(k),
-        "batch_id": batch_ids,
-        "date": date_list,
-        "y": [d.year for d in date_list],
-        "m": [d.month for d in date_list],
-        "d": [d.day for d in date_list],
-        "timestamp": timestamp_list,
-        "session_ids": session_ids,
-        "event_type": [random.choice(["start", "stop", "continue"]) for i in range(k)],
-        "favorite_color": ["#" + "".join([random.choice(list("0123456789ABCDEF")) for j in range(6)]) for i in range(k)]
-    })
-    return events_df
-
-
 def test_reader_fn():
     engine = PandasExecutionEngine()
 
