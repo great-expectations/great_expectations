@@ -38,8 +38,8 @@ class ColumnPartition(ColumnMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        bins = metric_value_kwargs["bins"]
-        n_bins = metric_value_kwargs["n_bins"]
+        bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
+        n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
         return _get_column_partition_using_metrics(bins, n_bins, metrics)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -51,8 +51,8 @@ class ColumnPartition(ColumnMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        bins = metric_value_kwargs["bins"]
-        n_bins = metric_value_kwargs["n_bins"]
+        bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
+        n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
         return _get_column_partition_using_metrics(bins, n_bins, metrics)
 
     @metric_value(engine=SparkDFExecutionEngine)
@@ -64,8 +64,8 @@ class ColumnPartition(ColumnMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        bins = metric_value_kwargs["bins"]
-        n_bins = metric_value_kwargs["n_bins"]
+        bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
+        n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
         return _get_column_partition_using_metrics(bins, n_bins, metrics)
 
     def _get_evaluation_dependencies(
@@ -75,8 +75,10 @@ class ColumnPartition(ColumnMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        bins = metric.metric_value_kwargs["bins"]
-        n_bins = metric.metric_value_kwargs["n_bins"]
+        bins = metric.metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
+        n_bins = metric.metric_value_kwargs.get(
+            "n_bins", cls.default_kwarg_values["n_bins"]
+        )
         allow_relative_error = metric.metric_value_kwargs["allow_relative_error"]
 
         if bins == "uniform":
