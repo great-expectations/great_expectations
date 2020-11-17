@@ -600,7 +600,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
 
         if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and (accessor_keys) > 0:
+            if accessor_keys is not None and len(accessor_keys) > 0:
                 for key in accessor_keys:
                     accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
             if len(domain_kwargs.keys()) > 0:

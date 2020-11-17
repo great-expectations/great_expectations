@@ -11,6 +11,7 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlAlchemyBatchData, \
     SqlAlchemyExecutionEngine
 from great_expectations.expectations.metrics import ColumnMean, ColumnStandardDeviation, ColumnValuesZScore
+from great_expectations.expectations.metrics import ColumnValuesInSet
 from great_expectations.validator.validation_graph import MetricConfiguration
 import pyspark.sql.functions as F
 
@@ -223,20 +224,21 @@ def test_get_compute_domain_with_column_domain(sa):
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
-# Todo - Fix this test
 # What happens when we filter such that no value meets the condition?
-def test_get_compute_domain_with_unmeetable_row_condition():
+def test_get_compute_domain_with_unmeetable_row_condition(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
 
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
-
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 24",
-                                                                                  "condition_parser": "spark", },
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": 'col("b") > 24',
+                                                                                  "condition_parser": "great_expectations__experimental__", },
                                                                                     domain_type= "identity")
-    # Ensuring data has been properly queried
-    assert dataframes_equal(data, expected_df), "Data does not match after getting compute domain"
 
+    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
+    raw_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable).where(sa.column('b') > 24)).fetchall()
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
+    assert raw_data == domain_data, "Data does not match after getting compute domain"
     # Ensuring compute kwargs have not been modified
     assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
@@ -244,23 +246,22 @@ def test_get_compute_domain_with_unmeetable_row_condition():
 
 # Todo - Fix this test
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
-def test_get_compute_domain_with_ge_experimental_condition_parser():
+def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
-    df = engine.dataframe
-
-    # Filtering expected data based on row condition
-    expected_df = df.where('b == 2')
-
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
 
     # Obtaining data from computation
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column": "b",
                                                                                   "row_condition": 'col("b") == 2',
                                                                                   "condition_parser": "great_expectations__experimental__"},
                                                                                    domain_type = "column")
-    # Ensuring data has been properly queried
-    assert dataframes_equal(data, expected_df), "Data does not match after getting compute domain"
+
+    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
+    raw_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable).where(sa.column('b') == 2)).fetchall()
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
+    assert raw_data == domain_data, "Data does not match after getting compute domain"
 
     # Ensuring compute kwargs have not been modified
     assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
@@ -271,8 +272,13 @@ def test_get_compute_domain_with_ge_experimental_condition_parser():
                                                                                      "row_condition": 'col("b") == 2',
                                                                                      "condition_parser": "great_expectations__experimental__"},
                                                                                         domain_type="identity")
+
     # Ensuring data has been properly queried
-    assert dataframes_equal(data, expected_df.select('b')), "Data does not match after getting compute domain"
+    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
+    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
+    raw_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable).where(sa.column('b') == 2)).fetchall()
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
     # Ensuring compute kwargs have not been modified
     assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
@@ -289,60 +295,86 @@ def test_get_compute_domain_with_nonexistent_condition_parser():
                                                                        domain_type = MetricDomainTypes.TABLE)
 
 
-# Todo - Complete this
-# Testing that non-aggregate metrics aren't bundled
-def test_resolve_metric_bundle_with_nonaggregate_metric(caplog):
+# Testing that non-aggregate metrics aren't bundled - only aggregates
+def test_sa_resolve_metric_bundle_with_aggregates_and_non_aggregates(caplog, sa):
     import datetime
 
     engine = _build_sa_engine(
-     pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
-    )
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}))
 
-    # Non-aggregate metric configurations
     desired_metric_1 = MetricConfiguration(
-         metric_name="column_values.unique",
-         metric_domain_kwargs={"column": "a"},
-         metric_value_kwargs=dict(),
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
     )
     desired_metric_2 = MetricConfiguration(
-     metric_name="column_values.in_set",
-     metric_domain_kwargs={"column": "a"},
-     metric_value_kwargs={"value_set": [1,2,3,4,5]},
+        metric_name="column.min.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
     )
-
-    # Aggregate metric configurations
     desired_metric_3 = MetricConfiguration(
-     metric_name="column.aggregate.max",
-     metric_domain_kwargs={"column": "b"},
-     metric_value_kwargs=dict(),
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
     )
     desired_metric_4 = MetricConfiguration(
-     metric_name="column.aggregate.min",
-     metric_domain_kwargs={"column": "b"},
-     metric_value_kwargs=dict(),
+        metric_name="column_values.in_set",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={"value_set": [1, 2, 3, 4]},
     )
+    metrics = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        )
+    )
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_1},
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_2},
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_3},
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column_values.in_set",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_4},
+    )
+    caplog.clear()
+    caplog.set_level(logging.DEBUG, logger="great_expectations")
+    start = datetime.datetime.now()
     res = engine.resolve_metrics(
-     metrics_to_resolve=(
-         desired_metric_1,
-         desired_metric_2,
-         desired_metric_3,
-         desired_metric_4,
-     )
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        ),
+        metrics=metrics,
     )
-    # Ensuring that metric ideas of nonaggregates actually represent computation
-    assert res[desired_metric_1.id] != 3
-    assert res[desired_metric_2.id] != 1
-    assert res[desired_metric_3.id] == 4
-    assert res[desired_metric_4.id] == 4
 
-    # Check that all only aggregate metrics are computed over a single domain
+    # Check that all four of these metrics were computed on a single domain
     found_message = False
     for record in caplog.records:
-     if (
-             record.message
-             == "SparkDFExecutionEngine computed 2 metrics on domain_id ()"
-     ):
-         found_message = True
+        if (
+            record.message
+            == "SqlAlchemyExecutionEngine computed 3 metrics on domain_id ()"
+        ):
+            found_message = True
     assert found_message
 
 
