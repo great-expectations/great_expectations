@@ -642,42 +642,35 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
             if "columns" in compute_domain_kwargs:
                 # If columns exist
-                for column in compute_domain_kwargs["columns"]:
-                    try:
-                        # Checking if capitalization matters
-                        if self.active_batch_data.use_quoted_name:
-                            accessor_domain_kwargs[column] = quoted_name(compute_domain_kwargs.pop(column))
-                        else:
-                            accessor_domain_kwargs[column] = compute_domain_kwargs.pop(column)
-
-                    # Raising an error if column doesn't exist
-                    except KeyError as k:
-                        raise KeyError(f"Column {column} not found within compute_domain_kwargs")
+                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
             # If we would like our data to become a single column
             if "column" in compute_domain_kwargs:
                 if self.active_batch_data.use_quoted_name:
-                    selectable = sa.select(quoted_name(compute_domain_kwargs["column"]))
+                    selectable = sa.select([sa.column(quoted_name(compute_domain_kwargs["column"]))]).select_from(selectable)
                 else:
-                    selectable = sa.select(compute_domain_kwargs["column"])
+                    selectable = sa.select([sa.column(compute_domain_kwargs["column"])]).select_from(selectable)
 
             # If we would like our data to now become a column pair
             elif ("column_A" in compute_domain_kwargs) and ("column_B" in compute_domain_kwargs):
                 if self.active_batch_data.use_quoted_name:
-                    selectable = sa.select([sa.column(quoted_name(compute_domain_kwargs["column_A"])),
-                                            sa.column(quoted_name(compute_domain_kwargs["column_B"]))])
+                    selectable =(sa.select([sa.column(quoted_name(compute_domain_kwargs["column_A"])),
+                                             sa.column(quoted_name(compute_domain_kwargs["column_B"]))]).select_from(selectable))
                 else:
-                    selectable = sa.select([sa.column(compute_domain_kwargs["column_A"]), sa.column(compute_domain_kwargs["column_B"])])
+                    selectable = (sa.select([sa.column(compute_domain_kwargs["column_A"]),
+                                             sa.column(compute_domain_kwargs["column_B"])]).select_from(selectable))
             else:
                 # If we would like our data to become a multicolumn
                 if "columns" in compute_domain_kwargs:
                     if self.active_batch_data.use_quoted_name:
                         # Building a list of column objects used for sql alchemy selection
-                        selectable = sa.select([sa.column(quoted_name(col)) for col in compute_domain_kwargs["columns"]])
+                        to_select = [sa.column(quoted_name(col)) for col in compute_domain_kwargs["columns"]]
+                        selectable = sa.select(to_select).select_from(selectable)
                     else:
-                        selectable = sa.select([sa.column(col) for col in compute_domain_kwargs["columns"]])
+                        to_select = [sa.column(col) for col in compute_domain_kwargs["columns"]]
+                        selectable = sa.select(to_select).select_from(selectable)
 
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
 

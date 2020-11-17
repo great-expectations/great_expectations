@@ -7,6 +7,7 @@ from great_expectations.core.batch import Batch
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import PandasExecutionEngine, SparkDFExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlAlchemyBatchData, \
     SqlAlchemyExecutionEngine
 from great_expectations.expectations.metrics import ColumnMean, ColumnStandardDeviation, ColumnValuesZScore
@@ -147,7 +148,7 @@ def test_get_compute_domain_with_column_pair(sa):
                                                                       domain_type="identity")
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = engine.engine.execute(sa.select(["*"]).select_from(engine.active_batch_data.selectable)).fetchall()
+    raw_data = engine.engine.execute(sa.select([sa.column('a'), sa.column('b')]).select_from(engine.active_batch_data.selectable)).fetchall()
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data2)).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
@@ -174,61 +175,58 @@ def test_get_compute_domain_with_multicolumn(sa):
     assert accessor_kwargs == {"columns" : ["a", "b", "c"]}, "Accessor kwargs have been modified"
 
     # Checking for identity
-    engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"columns": ["a", "b", "c"]},
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"columns": ["a", "b",  "c"]},
                                                                       domain_type="identity")
+
+    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
+    raw_data = engine.engine.execute(sa.select([sa.column('a'), sa.column('b'),
+                                                sa.column('c')]).select_from(engine.active_batch_data.selectable)).fetchall()
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    # Ensuring that with no domain nothing happens to the data itself
+    assert raw_data == domain_data, "Data does not match after getting compute domain"
+    assert compute_kwargs == {"columns": ["a", "b",  "c"]}, "Compute domain kwargs should be existent"
+    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
+
+
+# Testing whether compute domain is properly calculated, but this time obtaining a column
+def test_get_compute_domain_with_column_domain(sa):
+    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
+
+    # Loading batch data
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column": "a"},
+                                                                      domain_type= MetricDomainTypes.COLUMN)
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
     raw_data = engine.engine.execute(sa.select(["*"]).select_from(engine.active_batch_data.selectable)).fetchall()
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
-    # Ensuring that with no domain nothing happens to the data itself
-    assert raw_data == domain_data, "Data does not match after getting compute domain"
-    assert compute_kwargs is not None, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
-
-# Testing whether compute domain is properly calculated, but this time obtaining a column
-def test_get_compute_domain_with_column_domain():
-    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
-    df = engine.dataframe
-
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column": "a"})
-
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
-    assert dataframes_equal(data, df), "Data does not match after getting compute domain"
-    assert compute_kwargs is not None, "Compute domain kwargs should be existent"
+    assert raw_data == domain_data, "Data does not match after getting compute domain"
+    assert compute_kwargs == {}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
 
-
-# Using an unmeetable row condition to see if empty dataset will result in errors
-def test_get_compute_domain_with_row_condition():
+    # Testing for identity
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
-    df = engine.dataframe
-    expected_df = df.where('b > 2')
 
     # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column": "a"},
+                                                                      domain_type= MetricDomainTypes.IDENTITY)
 
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 2",
-                                                                              "condition_parser": "spark"},
-                                                                                domain_type="identity")
+    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
+    raw_data = engine.engine.execute(sa.select([sa.column('a')]).select_from(engine.active_batch_data.selectable)).fetchall()
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
-    # Ensuring data has been properly queried
-    assert dataframes_equal(data, expected_df), "Data does not match after getting compute domain"
-
-    # Ensuring compute kwargs have not been modified
-    assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
+    # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
+    assert raw_data == domain_data, "Data does not match after getting compute domain"
+    assert compute_kwargs == {"column": "a"}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
+# Todo - Fix this test
 # What happens when we filter such that no value meets the condition?
 def test_get_compute_domain_with_unmeetable_row_condition():
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
-    df = engine.dataframe
-    expected_df = df.where('b > 24')
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -243,17 +241,8 @@ def test_get_compute_domain_with_unmeetable_row_condition():
     assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
-    # Ensuring errors for column and column_ pair domains are caught
-    with pytest.raises(GreatExpectationsError) as e:
-        data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 24",
-                                                                                         "condition_parser": "spark", },
-                                                                                            domain_type="column")
-    with pytest.raises(GreatExpectationsError) as g:
-        data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 24",
-                                                                                         "condition_parser": "spark", },
-                                                                                            domain_type="column_pair")
 
-
+# Todo - Fix this test
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
 def test_get_compute_domain_with_ge_experimental_condition_parser():
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
@@ -292,17 +281,15 @@ def test_get_compute_domain_with_ge_experimental_condition_parser():
 
 def test_get_compute_domain_with_nonexistent_condition_parser():
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
-    df = engine.dataframe
-
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
 
     # Expect GreatExpectationsError because parser doesn't exist
     with pytest.raises(GreatExpectationsError) as e:
      data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 24",
-                                                                                  "condition_parser": "nonexistent"})
+                                                                                  "condition_parser": "nonexistent"},
+                                                                       domain_type = MetricDomainTypes.TABLE)
 
 
+# Todo - Complete this
 # Testing that non-aggregate metrics aren't bundled
 def test_resolve_metric_bundle_with_nonaggregate_metric(caplog):
     import datetime
