@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [BUGFIX] Updated develop environment requirements
 
 0.12.8
 -----------------
