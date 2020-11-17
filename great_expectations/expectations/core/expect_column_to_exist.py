@@ -57,7 +57,7 @@ class ExpectColumnToExist(TableExpectation):
 
     """
 
-    metric_dependencies = ("columns",)
+    metric_dependencies = ("table.columns",)
     success_keys = (
         "column",
         "column_index",
@@ -123,8 +123,6 @@ class ExpectColumnToExist(TableExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
 
         # Ensuring that a proper value has been provided
         try:
@@ -132,7 +130,8 @@ class ExpectColumnToExist(TableExpectation):
             assert isinstance(
                 configuration.kwargs["column"], str
             ), "Column name must be a string"
-
+            assert isinstance(configuration.kwargs.get("column_index"), int) or configuration.kwargs.get(
+                "column_index") is None, "column_index must be an integer or None"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
@@ -200,18 +199,7 @@ class ExpectColumnToExist(TableExpectation):
             validation_dependencies, metrics, configuration, runtime_configuration
         )
 
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
+
 
         columns = metric_vals.get("columns")
         column = self.get_success_kwargs().get(
@@ -229,3 +217,26 @@ class ExpectColumnToExist(TableExpectation):
             }
         else:
             return {"success": False}
+
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        actual_columns = metrics.get("table.columns")
+        expected_column_name = self.get_success_kwargs().get("column")
+        expected_column_index = self.get_success_kwargs().get("column_index")
+
+        if expected_column_index:
+            try:
+                success = actual_columns[expected_column_index] == expected_column_name
+            except IndexError:
+                success = False
+        else:
+            success = expected_column_name in actual_columns
+
+        return {
+            "success": success
+        }
