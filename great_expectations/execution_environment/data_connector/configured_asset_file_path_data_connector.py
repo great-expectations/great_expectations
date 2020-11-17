@@ -31,10 +31,10 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         self,
         name: str,
         execution_environment_name: str,
-        default_regex: dict,
         assets: dict,
-        sorters: list = None,
-        execution_engine: ExecutionEngine = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        default_regex: Optional[dict] = None,
+        sorters: Optional[list] = None,
     ):
         logger.debug(f'Constructing ConfiguredAssetFilePathDataConnector "{name}".')
         super().__init__(

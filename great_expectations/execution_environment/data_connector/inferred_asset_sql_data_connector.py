@@ -1,7 +1,8 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
-from great_expectations.execution_environment.data_connector.asset.asset import Asset
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.execution_environment.data_connector.asset import Asset
 
 try:
     import sqlalchemy as sa
@@ -35,7 +36,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         self,
         name: str,
         execution_environment_name: str,
-        execution_engine,
+        execution_engine: Optional[ExecutionEngine] = None,
         data_asset_name_prefix: str="",
         data_asset_name_suffix: str="",
         include_schema_name: bool=False,
@@ -65,7 +66,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
-            data_assets={},
+            data_assets=None,
         )
 
         # This cache will contain a "config" for each data_asset discovered via introspection.

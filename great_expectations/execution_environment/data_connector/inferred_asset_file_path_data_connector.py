@@ -29,9 +29,9 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         self,
         name: str,
         execution_environment_name: str,
-        execution_engine: ExecutionEngine = None,
-        default_regex: dict = None,
-        sorters: list = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        default_regex: Optional[dict] = None,
+        sorters: Optional[list] = None,
     ):
         logger.debug(f'Constructing InferredAssetFilePathDataConnector "{name}".')
 
