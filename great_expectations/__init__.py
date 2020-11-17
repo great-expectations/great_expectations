@@ -4,7 +4,10 @@ from ._version import get_versions  # isort:skip
 __version__ = get_versions()["version"]  # isort:skip
 del get_versions  # isort:skip
 
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import (
+    DataContext,
+    DataContextV3,
+)
 
 from .util import (
     from_pandas,
@@ -17,6 +20,7 @@ from .util import (
     read_pickle,
     read_table,
     validate,
+    get_context,
 )
 
 # from great_expectations.expectations.core import *

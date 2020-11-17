@@ -258,7 +258,7 @@ def sa(test_backends):
             import sqlalchemy as sa
             return sa
         except ImportError:
-            return None
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
 
 @pytest.fixture
@@ -2160,6 +2160,15 @@ def empty_data_context(tmp_path_factory):
     os.makedirs(asset_config_path, exist_ok=True)
     return context
 
+@pytest.fixture
+def empty_data_context_v3(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp("empty_data_context_v3"))
+    context = ge.data_context.DataContextV3.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    return context
+
 
 @pytest.fixture
 def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
@@ -2840,3 +2849,24 @@ def test_folder_connection_path(tmp_path_factory):
     path = str(tmp_path_factory.mktemp("test_folder_connection_path"))
     df1.to_csv(os.path.join(path, "test.csv"))
     return str(path)
+
+@pytest.fixture
+def test_db_connection_string(tmp_path_factory, test_backends):
+    if "sqlite" not in test_backends:
+        pytest.skip("skipping fixture because sqlite not selected")
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    df2 = pd.DataFrame({"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]})
+
+    try:
+        import sqlalchemy as sa
+        basepath = str(tmp_path_factory.mktemp("db_context"))
+        path = os.path.join(basepath, "test.db")
+        engine = sa.create_engine("sqlite:///" + str(path))
+        df1.to_sql("table_1", con=engine, index=True)
+        df2.to_sql("table_2", con=engine, index=True, schema="main")
+
+        # Return a connection string to this newly-created db
+        return "sqlite:///" + str(path)
+    except ImportError:
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+

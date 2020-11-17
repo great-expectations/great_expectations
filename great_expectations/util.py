@@ -687,3 +687,9 @@ def lint_code(code):
         return linted_code
     except (black.NothingChanged, RuntimeError):
         return code
+
+
+def get_context():
+    from great_expectations.data_context.data_context_v3 import DataContextV3
+
+    return DataContextV3()

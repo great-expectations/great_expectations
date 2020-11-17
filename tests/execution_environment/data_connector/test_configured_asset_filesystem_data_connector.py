@@ -74,7 +74,9 @@ def test_basic_instantiation(tmp_path_factory):
         )))
 
 
-def test_instantiation_from_a_config(empty_data_context, tmp_path_factory):
+def test_instantiation_from_a_config(empty_data_context_v3, tmp_path_factory):
+    context = empty_data_context_v3
+
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
         directory=base_directory,
@@ -85,7 +87,7 @@ def test_instantiation_from_a_config(empty_data_context, tmp_path_factory):
         ]
     )
 
-    report_object = empty_data_context.test_yaml_config(f"""
+    report_object = context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: ConfiguredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -120,7 +122,9 @@ assets:
     }
 
 
-def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context, tmp_path_factory):
+def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context_v3, tmp_path_factory):
+    context = empty_data_context_v3
+    
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
         directory=base_directory,
@@ -131,7 +135,7 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_conte
         ]
     )
 
-    report_object = empty_data_context.test_yaml_config(f"""
+    report_object = context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: ConfiguredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
