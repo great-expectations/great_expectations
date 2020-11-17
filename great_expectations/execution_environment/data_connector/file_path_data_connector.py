@@ -24,20 +24,6 @@ import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
-# TODO: <Alex>Should we make this a "set" object?</Alex>
-# TODO: <Alex>Is this actually needed?</Alex>
-KNOWN_EXTENSIONS = [
-    ".csv",
-    ".tsv",
-    ".parquet",
-    ".xls",
-    ".xlsx",
-    ".json",
-    ".csv.gz",
-    ".tsv.gz",
-    ".feather",
-]
-
 
 class FilePathDataConnector(DataConnector):
     def __init__(
@@ -75,7 +61,6 @@ class FilePathDataConnector(DataConnector):
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
 
-        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
         batch_definition_list = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,

@@ -289,7 +289,9 @@ def list_s3_keys(s3, query_options: dict, iterator_dict: dict, recursive: bool =
 
 
 # TODO: <Alex>We need to move sorters and _validate_sorters_configuration() to DataConnector</Alex>
-# TODO: <Alex>Will: Should this method be private?</Alex>
+# As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is
+# called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this
+# method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).
 def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
     sorter_dict: Dict[str, Sorter] = {}
     if config_list is not None:
