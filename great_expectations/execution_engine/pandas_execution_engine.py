@@ -348,12 +348,6 @@ Notes:
             )
         return resolved_metrics
 
-    def _get_s3_object_and_url_from_batch_spec(self, batch_spec: BatchSpec):
-        s3 = self._s3
-        url = S3Url(batch_spec.get("s3"))
-        return s3, url
-
-
     ### Splitter methods for partitioning dataframes ###
     @staticmethod
     def _split_on_whole_table(
