@@ -23,6 +23,7 @@ from ruamel.yaml.constructor import DuplicateKeyError
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
+    BatchRequest,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id

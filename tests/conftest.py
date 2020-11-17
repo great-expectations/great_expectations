@@ -6,6 +6,7 @@ import shutil
 from types import ModuleType
 from typing import Union
 import random
+import yaml
 
 import numpy as np
 import pandas as pd
@@ -2947,3 +2948,51 @@ SELECT EXISTS (
 
     # Return a connection string to this newly-created db	
     return engine
+
+@pytest.fixture
+def data_context_with_sql_execution_environment_for_testing_get_batch(empty_data_context_v3):
+    context = empty_data_context_v3
+
+    db_file = file_relative_path(
+        __file__,
+        "test_sets/test_cases_for_sql_data_connector.db",
+    )
+
+    config = yaml.load(
+        f"""
+class_name: StreamlinedSqlExecutionEnvironment
+connection_string: sqlite:///{db_file}
+"""+"""
+introspection:
+    whole_table: {}
+
+    daily:
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: date
+            date_format_string: "%Y-%m-%d"
+
+    weekly:
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: date
+            date_format_string: "%Y-%W"
+
+    by_id_dozens:
+        splitter_method: _split_on_divided_integer
+        splitter_kwargs:
+            column_name: id
+            divisor: 12
+""",
+        yaml.FullLoader,
+    )
+
+    try:
+        context.add_execution_environment(
+            "my_sqlite_db",
+            config
+        )
+    except AttributeError:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
+
+    return context
