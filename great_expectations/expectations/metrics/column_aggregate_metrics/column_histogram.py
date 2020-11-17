@@ -10,6 +10,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
@@ -36,7 +37,7 @@ class ColumnHistogram(ColumnMetricProvider):
         runtime_configuration: Dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
-            domain_kwargs=metric_domain_kwargs,
+            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
         bins = metric_value_kwargs["bins"]
@@ -59,7 +60,7 @@ class ColumnHistogram(ColumnMetricProvider):
              bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
          """
         selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
-            domain_kwargs=metric_domain_kwargs,
+            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
         bins = metric_value_kwargs["bins"]
@@ -161,7 +162,7 @@ class ColumnHistogram(ColumnMetricProvider):
         runtime_configuration: Dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
-            domain_kwargs=metric_domain_kwargs,
+            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
         bins = metric_value_kwargs["bins"]
         column = metric_domain_kwargs["column"]

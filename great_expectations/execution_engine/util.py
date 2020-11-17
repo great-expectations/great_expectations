@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from great_expectations.validator.validation_graph import MetricConfiguration
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -103,137 +105,14 @@ def is_valid_continuous_partition_object(partition_object):
     )
 
 
-def categorical_partition_data(data):
-    """Convenience method for creating weights from categorical data.
-
-    Args:
-        data (list-like): The data from which to construct the estimate.
-
-    Returns:
-        A new partition object::
-
-            {
-                "values": (list) The categorical values present in the data
-                "weights": (list) The weights of the values in the partition.
-            }
-
-        See :ref:`partition_object`.
-    """
-
-    # Make dropna explicit (even though it defaults to true)
-    series = pd.Series(data)
-    value_counts = series.value_counts(dropna=True)
-
-    # Compute weights using denominator only of nonnull values
-    null_indexes = series.isnull()
-    nonnull_count = (null_indexes == False).sum()
-
-    weights = value_counts.values / nonnull_count
-    return {"values": value_counts.index.tolist(), "weights": weights}
-
-
-def kde_partition_data(data, estimate_tails=True):
-    """Convenience method for building a partition and weights using a gaussian Kernel Density Estimate and default bandwidth.
-
-    Args:
-        data (list-like): The data from which to construct the estimate
-        estimate_tails (bool): Whether to estimate the tails of the distribution to keep the partition object finite
-
-    Returns:
-        A new partition_object::
-
-        {
-            "bins": (list) The endpoints of the partial partition of reals,
-            "weights": (list) The densities of the bins implied by the partition.
-        }
-
-        See :ref:`partition_object`.
-    """
-    kde = stats.kde.gaussian_kde(data)
-    evaluation_bins = np.linspace(
-        start=np.min(data) - (kde.covariance_factor() / 2),
-        stop=np.max(data) + (kde.covariance_factor() / 2),
-        num=np.floor(
-            ((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1
-        ).astype(int),
-    )
-    cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_bins]
-    evaluation_weights = np.diff(cdf_vals)
-
-    if estimate_tails:
-        bins = np.concatenate(
-            (
-                [np.min(data) - (1.5 * kde.covariance_factor())],
-                evaluation_bins,
-                [np.max(data) + (1.5 * kde.covariance_factor())],
-            )
-        )
-    else:
-        bins = np.concatenate(([-np.inf], evaluation_bins, [np.inf]))
-
-    weights = np.concatenate(([cdf_vals[0]], evaluation_weights, [1 - cdf_vals[-1]]))
-
-    return {"bins": bins, "weights": weights}
-
-
-def partition_data(data, bins="auto", n_bins=10):
-    warnings.warn(
-        "partition_data is deprecated and will be removed. Use either continuous_partition_data or \
-                    categorical_partition_data instead.",
-        DeprecationWarning,
-    )
-    return continuous_partition_data(data, bins, n_bins)
-
-
-def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
-    """Convenience method for building a partition object on continuous data
-
-    Args:
-        data (list-like): The data from which to construct the estimate.
-        bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto'
-            (for automatically spaced bins)
-        n_bins (int): Ignored if bins is auto.
-        kwargs (mapping): Additional keyword arguments to be passed to numpy histogram
-
-    Returns:
-        A new partition_object::
-
-        {
-            "bins": (list) The endpoints of the partial partition of reals,
-            "weights": (list) The densities of the bins implied by the partition.
-        }
-        See :ref:`partition_object`.
-    """
-    if bins == "uniform":
-        bins = np.linspace(start=np.min(data), stop=np.max(data), num=n_bins + 1)
-    elif bins == "ntile":
-        bins = np.percentile(data, np.linspace(start=0, stop=100, num=n_bins + 1))
-    elif bins != "auto":
-        raise ValueError("Invalid parameter for bins argument")
-
-    try:
-        hist, bin_edges = np.histogram(data, bins, density=False, **kwargs)
-    except ValueError as e:
-        raise ValueError(
-            "Unable to compute histogram. Did you know you can pass additional kwargs to numpy histogram,"
-            "such as a range? Numpy error was: " + str(e)
-        )
-    except TypeError as e:
-        raise TypeError(
-            "Unable to compute histogram. numpy histogram raised error: " + str(e)
-        )
-
-    return {"bins": bin_edges, "weights": hist / len(data)}
-
-
 def build_continuous_partition_object(
-    dataset, column, bins="auto", n_bins=10, allow_relative_error=False
+    execution_engine, domain_kwargs, bins="auto", n_bins=10, allow_relative_error=False
 ):
     """Convenience method for building a partition object on continuous data from a dataset and column
 
     Args:
-        dataset (GE Dataset): the dataset for which to compute the partition
-        column (string): The name of the column for which to construct the estimate.
+        execution_engine (ExecutionEngine): the execution engine with which to compute the partition
+        domain_kwargs (dict): The domain kwargs describing the domain for which to compute the partition
         bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto'
             (for automatically spaced bins)
         n_bins (int): Ignored if bins is auto.
@@ -253,14 +132,37 @@ def build_continuous_partition_object(
 
             See :ref:`partition_object`.
     """
-    bins = dataset.get_column_partition(column, bins, n_bins, allow_relative_error)
+    partition_metric_configuration = MetricConfiguration(
+        "column.partition",
+        metric_domain_kwargs=domain_kwargs,
+        metric_value_kwargs={
+            "bins": bins,
+            "n_bins": n_bins,
+            "allow_relative_error": allow_relative_error,
+        },
+    )
+    bins = execution_engine.resolve_metrics([partition_metric_configuration])[
+        partition_metric_configuration.id
+    ]
     if isinstance(bins, np.ndarray):
         bins = bins.tolist()
     else:
         bins = list(bins)
+    hist_metric_configuration = MetricConfiguration(
+        "column.histogram",
+        metric_domain_kwargs=domain_kwargs,
+        metric_value_kwargs={"bins": tuple(bins),},
+    )
+    nonnull_configuration = MetricConfiguration(
+        "column_values.nonnull.count",
+        metric_domain_kwargs=domain_kwargs,
+        metric_value_kwargs={"bins": tuple(bins),},
+    )
+    metrics = execution_engine.resolve_metrics(
+        (hist_metric_configuration, nonnull_configuration)
+    )
     weights = list(
-        np.array(dataset.get_column_hist(column, tuple(bins)))
-        / dataset.get_column_nonnull_count(column)
+        metrics[hist_metric_configuration.id] / metrics[nonnull_configuration.id]
     )
     tail_weights = (1 - sum(weights)) / 2
     partition_object = {
@@ -271,12 +173,12 @@ def build_continuous_partition_object(
     return partition_object
 
 
-def build_categorical_partition_object(dataset, column, sort="value"):
+def build_categorical_partition_object(execution_engine, domain_kwargs, sort="value"):
     """Convenience method for building a partition object on categorical data from a dataset and column
 
     Args:
-        dataset (GE Dataset): the dataset for which to compute the partition
-        column (string): The name of the column for which to construct the estimate.
+        execution_engine (ExecutionEngine): the execution engine with which to compute the partition
+        domain_kwargs (dict): The domain kwargs describing the domain for which to compute the partition
         sort (string): must be one of "value", "count", or "none".
             - if "value" then values in the resulting partition object will be sorted lexigraphically
             - if "count" then values will be sorted according to descending count (frequency)
@@ -291,10 +193,24 @@ def build_categorical_partition_object(dataset, column, sort="value"):
         }
         See :ref:`partition_object`.
     """
-    counts = dataset.get_column_value_counts(column, sort)
+    counts_configuration = MetricConfiguration(
+        "column.partition",
+        metric_domain_kwargs=domain_kwargs,
+        metric_value_kwargs={"sort": sort,},
+    )
+    nonnull_configuration = MetricConfiguration(
+        "column_values.nonnull.count", metric_domain_kwargs=domain_kwargs,
+    )
+    metrics = execution_engine.resolve_metrics(
+        (counts_configuration, nonnull_configuration)
+    )
+
     return {
-        "values": list(counts.index),
-        "weights": list(np.array(counts) / dataset.get_column_nonnull_count(column)),
+        "values": list(metrics[counts_configuration.id].index),
+        "weights": list(
+            np.array(metrics[counts_configuration.id])
+            / metrics[nonnull_configuration.id]
+        ),
     }
 
 
