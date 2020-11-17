@@ -1,9 +1,5 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
@@ -13,18 +9,11 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
+from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
 from ..metrics.util import parse_value_set
-from ..registry import extract_metrics
 
 
-class ExpectColumnDistinctValuesToEqualSet(TableExpectation):
+class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.value_counts",)
     success_keys = (

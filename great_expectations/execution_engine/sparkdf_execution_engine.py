@@ -2,7 +2,7 @@ import copy
 import datetime
 import logging
 import uuid
-from typing import Any, Callable, Dict, Iterable, Tuple, Union, Optional
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
 try:
     import pyspark.sql.functions as F
@@ -247,7 +247,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         self,
         domain_kwargs: dict,
         domain_type: Union[str, "MetricDomainTypes"],
-        accessor_keys: Optional[Iterable[str]] = []
+        accessor_keys: Optional[Iterable[str]] = [],
     ) -> Tuple["pyspark.sql.DataFrame", dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
@@ -309,8 +309,14 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 )
 
         # Warning user if accessor keys are in any domain that is not of type table, will be ignored
-        if domain_type != MetricDomainTypes.TABLE and accessor_keys is not None and len(accessor_keys) > 0:
-            logger.warning("Accessor keys ignored since Metric Domain Type is not 'table")
+        if (
+            domain_type != MetricDomainTypes.TABLE
+            and accessor_keys is not None
+            and len(accessor_keys) > 0
+        ):
+            logger.warning(
+                "Accessor keys ignored since Metric Domain Type is not 'table"
+            )
 
         if domain_type == MetricDomainTypes.TABLE:
             if accessor_keys is not None and len(accessor_keys) > 0:
@@ -319,8 +325,15 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             if len(compute_domain_kwargs.keys()) > 0:
                 for key in compute_domain_kwargs.keys():
                     # Warning user if kwarg not "normal"
-                    if key not in ["batch_id", "table", "row_condition", "condition_parser"]:
-                        logger.warning(f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}")
+                    if key not in [
+                        "batch_id",
+                        "table",
+                        "row_condition",
+                        "condition_parser",
+                    ]:
+                        logger.warning(
+                            f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}"
+                        )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
         # If user has stated they want a column, checking if one is provided, and
@@ -329,16 +342,27 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
             else:
                 # If column not given
-                raise GreatExpectationsError("Column not provided in compute_domain_kwargs")
+                raise GreatExpectationsError(
+                    "Column not provided in compute_domain_kwargs"
+                )
 
         # Else, if column pair values requested
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
             # Ensuring column_A and column_B parameters provided
-            if "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs:
-                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
-                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
+            if (
+                "column_A" in compute_domain_kwargs
+                and "column_B" in compute_domain_kwargs
+            ):
+                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
+                    "column_A"
+                )
+                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
+                    "column_B"
+                )
             else:
-                raise GreatExpectationsError("column_A or column_B not found within compute_domain_kwargs")
+                raise GreatExpectationsError(
+                    "column_A or column_B not found within compute_domain_kwargs"
+                )
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
@@ -354,8 +378,12 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 data = data.select(compute_domain_kwargs["column"])
 
             # If we would like our data to now become a column pair
-            elif ("column_A" in compute_domain_kwargs) and ("column_B" in compute_domain_kwargs):
-                data = data.select(compute_domain_kwargs["column_A"], compute_domain_kwargs["column_B"])
+            elif ("column_A" in compute_domain_kwargs) and (
+                "column_B" in compute_domain_kwargs
+            ):
+                data = data.select(
+                    compute_domain_kwargs["column_A"], compute_domain_kwargs["column_B"]
+                )
             else:
 
                 # If we would like our data to become a multicolumn
@@ -365,11 +393,12 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
     def add_column_row_condition(
-        self, domain_kwargs, filter_null=True, filter_nan=False
+        self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
     ):
         if filter_nan is False:
             return super().add_column_row_condition(
                 domain_kwargs=domain_kwargs,
+                column_name=column_name,
                 filter_null=filter_null,
                 filter_nan=filter_nan,
             )
@@ -381,8 +410,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
 
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
-        assert "column" in domain_kwargs
-        column = domain_kwargs["column"]
+        assert "column" in domain_kwargs or column_name is not None
+        if column_name is not None:
+            column = column_name
+        else:
+            column = domain_kwargs["column"]
         if filter_null and filter_nan:
             new_domain_kwargs[
                 "row_condition"

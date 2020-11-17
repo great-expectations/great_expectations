@@ -42,13 +42,14 @@ def pytest_generate_tests(metafunc):
 
     parametrized_tests = []
     ids = []
+    backends = build_test_backends_list_cfe(metafunc)
 
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        for c in build_test_backends_list_cfe(metafunc):
+        for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)
                 test_configuration = json.load(file)

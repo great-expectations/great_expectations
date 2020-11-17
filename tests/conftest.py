@@ -3,6 +3,7 @@ import json
 import locale
 import os
 import shutil
+import threading
 from types import ModuleType
 from typing import Union
 
@@ -38,7 +39,29 @@ from .test_utils import (
 # NOTE: THESE TESTS ARE WRITTEN WITH THE en_US.UTF-8 LOCALE AS DEFAULT FOR STRING FORMATTING
 #
 ###
+
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+
+
+class LockingConnectionCheck:
+    def __init__(self, sa, connection_string):
+        self.lock = threading.Lock()
+        self.sa = sa
+        self.connection_string = connection_string
+        self._is_valid = None
+
+    def is_valid(self):
+        with self.lock:
+            if self._is_valid is None:
+                try:
+                    engine = self.sa.create_engine(self.connection_string)
+                    conn = engine.connect()
+                    conn.close()
+                    self._is_valid = True
+                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
+                    print(f"{str(e)}")
+                    self._is_valid = False
+            return self._is_valid
 
 
 def pytest_configure(config):
@@ -111,16 +134,15 @@ def build_test_backends_list(metafunc):
             # Be sure to ensure that tests (and users!) understand that subtlety,
             # which can be important for distributional expectations, for example.
             ###
-            try:
-                engine = sa.create_engine("postgresql://postgres@localhost/test_ci")
-                conn = engine.connect()
-                conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "postgresql tests are requested, but unable to connect to the postgresql database at "
-                    "'postgresql://postgres@localhost/test_ci'"
+            connection_string = "postgresql://postgres@localhost/test_ci"
+            checker = LockingConnectionCheck(sa, connection_string)
+            if checker.is_valid() is True:
+                test_backends += ["postgresql"]
+            else:
+                raise ValueError(
+                    f"backend-specific tests are requested, but unable to connect to the database at "
+                    f"{connection_string}"
                 )
-            test_backends += ["postgresql"]
         mysql = metafunc.config.getoption("--mysql")
         if sa and mysql:
             try:

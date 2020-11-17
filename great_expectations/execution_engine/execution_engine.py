@@ -237,11 +237,17 @@ class ExecutionEngine:
         raise NotImplementedError
 
     def add_column_row_condition(
-        self, domain_kwargs, filter_null=True, filter_nan=False
+        self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
     ):
         """EXPERIMENTAL
 
         Add a row condition for handling null filter.
+
+        Args:
+            domain_kwargs: the domain kwargs to use as the base and to which to add the condition
+            column_name: if provided, use this name to add the condition; otherwise, will use "column" key from table_domain_kwargs
+            filter_null: if true, add a filter for null values
+            filter_nan: if true, add a filter for nan values
         """
         if filter_null is False and filter_nan is False:
             logger.warning(
@@ -260,8 +266,11 @@ class ExecutionEngine:
             )
 
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
-        assert "column" in domain_kwargs
-        column = domain_kwargs["column"]
+        assert "column" in domain_kwargs or column_name is not None
+        if column_name is not None:
+            column = column_name
+        else:
+            column = domain_kwargs["column"]
         new_domain_kwargs["condition_parser"] = "great_expectations__experimental__"
         new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
         return new_domain_kwargs

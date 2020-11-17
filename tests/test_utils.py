@@ -1,11 +1,9 @@
 import copy
-import datetime
 import locale
 import os
 import random
 import string
 from functools import wraps
-from types import ModuleType
 from typing import List, Union
 
 import numpy as np
@@ -14,7 +12,6 @@ import pytest
 from dateutil.parser import parse
 
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationConfigurationSchema,
     ExpectationSuite,
     ExpectationSuiteSchema,
@@ -34,12 +31,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_environment.types import (
-    BatchSpec,
-    SqlAlchemyDatasourceBatchSpec,
-    SqlAlchemyDatasourceTableBatchSpec,
-)
-from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.validator.validator import Validator
 
@@ -927,6 +918,7 @@ def _build_sa_validator_with_data(
     batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
+    conn.close()
 
     return Validator(execution_engine=execution_engine, batches=(batch,))
 

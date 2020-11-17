@@ -420,7 +420,7 @@ def column_condition_partial(
                 if partial_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN:
                     if filter_column_isnull:
                         compute_domain_kwargs = execution_engine.add_column_row_condition(
-                            metric_domain_kwargs
+                            compute_domain_kwargs, column_name=column_name
                         )
                     unexpected_condition = ~expected_condition
                 else:

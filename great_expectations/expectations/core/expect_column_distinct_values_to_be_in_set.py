@@ -1,10 +1,8 @@
 from typing import Dict, List, Optional, Union
 
 import altair as alt
-import numpy as np
 import pandas as pd
 
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
@@ -14,15 +12,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ...validator.validation_graph import MetricConfiguration
-from ..expectation import (
-    ColumnExpectation,
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
+from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
 from ..registry import extract_metrics
 
 
@@ -277,7 +267,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    def validate(
+    def _validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
