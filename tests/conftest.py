@@ -2915,6 +2915,8 @@ def test_df(tmp_path_factory):
 
 @pytest.fixture	
 def test_connectable_postgresql_db(sa, test_backends, test_df):
+    """Populates a postgres DB with a `test_df` table in the `connection_test` schema to test DataConnectors against"""
+
     if "postgresql" not in test_backends:	
         pytest.skip("skipping fixture because postgresql not selected")	
 
@@ -2929,16 +2931,14 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
     )
     engine = sa.create_engine(url)
 
-    schema_check_results = engine.execute("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'test';").fetchall()
-    print(schema_check_results)
-    print(len(schema_check_results))
+    schema_check_results = engine.execute("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';").fetchall()
     if len(schema_check_results) == 0:
-        engine.execute("CREATE SCHEMA test;")
+        engine.execute("CREATE SCHEMA connection_test;")
 
     table_check_results = engine.execute("""
 SELECT EXISTS (
    SELECT FROM information_schema.tables 
-   WHERE  table_schema = 'test'
+   WHERE  table_schema = 'connection_test'
    AND    table_name   = 'test_df'
    );
 """).fetchall()
