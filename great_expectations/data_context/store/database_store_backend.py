@@ -68,7 +68,8 @@ class DatabaseStoreBackend(StoreBackend):
         except NoSuchTableError:
             table = Table(table_name, meta, *cols)
             try:
-                self.engine.execute(f"CREATE SCHEMA IF NOT EXISTS {schema};")
+                if schema:
+                    self.engine.execute(f"CREATE SCHEMA IF NOT EXISTS {schema};")
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
                 raise ge_exceptions.StoreBackendError(
