@@ -62,6 +62,7 @@ from .expect_column_values_to_be_unique import ExpectColumnValuesToBeUnique
 from .expect_column_values_to_match_json_schema import (
     ExpectColumnValuesToMatchJsonSchema,
 )
+from .expect_column_values_to_match_like_pattern import ExpectColumnValuesToMatchLikePattern
 from .expect_column_values_to_match_like_pattern_list import (
     ExpectColumnValuesToMatchLikePatternList,
 )
@@ -72,6 +73,8 @@ from .expect_column_values_to_match_strftime_format import (
 )
 from .expect_column_values_to_not_be_in_set import ExpectColumnValuesToNotBeInSet
 from .expect_column_values_to_not_be_null import ExpectColumnValuesToNotBeNull
+from .expect_column_values_to_not_match_like_pattern import ExpectColumnValuesToNotMatchLikePattern
+from .expect_column_values_to_not_match_like_pattern_list import ExpectColumnValuesToNotMatchLikePatternList
 from .expect_column_values_to_not_match_regex import ExpectColumnValuesToNotMatchRegex
 from .expect_column_values_to_not_match_regex_list import (
     ExpectColumnValuesToNotMatchRegexList,
