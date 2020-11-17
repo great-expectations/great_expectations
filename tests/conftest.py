@@ -259,7 +259,7 @@ def sa(test_backends):
             import sqlalchemy as sa
             return sa
         except ImportError:
-            return None
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
 
 @pytest.fixture
