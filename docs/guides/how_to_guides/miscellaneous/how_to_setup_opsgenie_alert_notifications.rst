@@ -1,8 +1,7 @@
 .. _how_to_guides__miscellaneous__how_to_setup_opsgenie_alert_notifications:
 
 How to setup Opsgenie alert notifications
-
-===============================
+=========================================
 
 This guide will help you setup Opsgenie alert notifications when running Great Expectations. This is useful as it can provide alerting when Great Expectations is run, or certain expectations begin failing (or passing!).
 
@@ -69,4 +68,4 @@ Comments
 --------
 
 .. discourse::
-   :topic_identifier: 123
+   :topic_identifier: 500
