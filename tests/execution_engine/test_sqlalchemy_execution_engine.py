@@ -46,7 +46,10 @@ def test_instantiation_via_url(sa):
         }
     ))
 
-def test_instantiation_via_credentials(sa):
+def test_instantiation_via_credentials(sa, test_backends):
+    if "postgresql" not in test_backends:
+        pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
+        
     my_execution_engine = SqlAlchemyExecutionEngine(
         credentials={
             "drivername": "postgresql",
