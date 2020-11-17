@@ -29,7 +29,7 @@ Steps
             password: '<your_password>'
             database: '<your_database_name>'
     
-    It is also possible to specify `schema` as an additional keyword argument if you would like to use a schema as the backend, but this is entirely optional.
+    It is also possible to specify `schema` as an additional keyword argument if you would like to use a specific schema as the backend, but this is entirely optional.
 
     .. code-block:: yaml
 
