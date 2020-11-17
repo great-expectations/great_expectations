@@ -267,7 +267,7 @@ introspection:
     print(json.dumps(report_object, indent=2))
     print(context.datasources)
 
-    my_batch = context.get_batch_from_new_style_datasource(
+    my_batch = context.get_batch(
         "my_datasource",
         "whole_table_with_limits",
         "test_df",
@@ -275,7 +275,7 @@ introspection:
     assert len(my_batch.data.fetchall()) == 10
 
     with pytest.raises(KeyError):
-        my_batch = context.get_batch_from_new_style_datasource(
+        my_batch = context.get_batch(
             "my_datasource",
             "whole_table_with_limits",
             "DOES_NOT_EXIST",
