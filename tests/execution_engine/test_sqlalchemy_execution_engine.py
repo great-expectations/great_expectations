@@ -244,7 +244,6 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
-# Todo - Fix this test
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
 def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
@@ -293,89 +292,6 @@ def test_get_compute_domain_with_nonexistent_condition_parser():
      data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 24",
                                                                                   "condition_parser": "nonexistent"},
                                                                        domain_type = MetricDomainTypes.TABLE)
-
-
-# Testing that non-aggregate metrics aren't bundled - only aggregates
-def test_sa_resolve_metric_bundle_with_aggregates_and_non_aggregates(caplog, sa):
-    import datetime
-
-    engine = _build_sa_engine(
-        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}))
-
-    desired_metric_1 = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
-    )
-    desired_metric_2 = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
-    )
-    desired_metric_3 = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
-        metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
-    )
-    desired_metric_4 = MetricConfiguration(
-        metric_name="column_values.in_set",
-        metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs={"value_set": [1, 2, 3, 4]},
-    )
-    metrics = engine.resolve_metrics(
-        metrics_to_resolve=(
-            desired_metric_1,
-            desired_metric_2,
-            desired_metric_3,
-            desired_metric_4,
-        )
-    )
-    desired_metric_1 = MetricConfiguration(
-        metric_name="column.max",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_1},
-    )
-    desired_metric_2 = MetricConfiguration(
-        metric_name="column.min",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_2},
-    )
-    desired_metric_3 = MetricConfiguration(
-        metric_name="column.max",
-        metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_3},
-    )
-    desired_metric_4 = MetricConfiguration(
-        metric_name="column_values.in_set",
-        metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_4},
-    )
-    caplog.clear()
-    caplog.set_level(logging.DEBUG, logger="great_expectations")
-    start = datetime.datetime.now()
-    res = engine.resolve_metrics(
-        metrics_to_resolve=(
-            desired_metric_1,
-            desired_metric_2,
-            desired_metric_3,
-            desired_metric_4,
-        ),
-        metrics=metrics,
-    )
-
-    # Check that all four of these metrics were computed on a single domain
-    found_message = False
-    for record in caplog.records:
-        if (
-            record.message
-            == "SqlAlchemyExecutionEngine computed 3 metrics on domain_id ()"
-        ):
-            found_message = True
-    assert found_message
 
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
