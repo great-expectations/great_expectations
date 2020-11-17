@@ -10,6 +10,8 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.util import (
     build_categorical_partition_object,
     build_continuous_partition_object,
+    is_valid_categorical_partition_object,
+    is_valid_partition_object,
 )
 from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.render.renderer.renderer import renderer
@@ -176,18 +178,25 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        dependencies = dict()
+        all_dependencies = super().get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )
+        dependencies = all_dependencies["metrics"]
         partition_object = configuration.kwargs["partition_object"]
+        domain_kwargs = configuration.get_domain_kwargs()
+        is_categorical = None
+        bins = None
         if partition_object is None:
-            if configuration.kwargs["bucketize_data"]:
+            if configuration.kwargs.get(
+                "bucketize_data", self.default_kwarg_values["bucketize_data"]
+            ):
+                is_categorical = False
                 partition_metric_configuration = MetricConfiguration(
                     "column.partition",
-                    metric_domain_kwargs=configuration.get_domain_kwargs(),
+                    metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs={
                         "bins": "auto",
-                        "allow_relative_error": configuration.kwargs[
-                            "allow_relative_error"
-                        ],
+                        "allow_relative_error": False,
                     },
                 )
                 bins = execution_engine.resolve_metrics(
@@ -195,44 +204,105 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 )[partition_metric_configuration.id]
                 hist_metric_configuration = MetricConfiguration(
                     "column.histogram",
-                    metric_domain_kwargs=configuration.get_domain_kwargs(),
+                    metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs={"bins": tuple(bins),},
                 )
                 nonnull_configuration = MetricConfiguration(
-                    "column_values.null.unexpected_count",
-                    metric_domain_kwargs=configuration.get_domain_kwargs(),
+                    "column_values.nonnull.count",
+                    metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs=dict(),
                 )
                 dependencies["column.histogram"] = hist_metric_configuration
-                dependencies[
-                    "column_values.null.unexpected_count"
-                ] = nonnull_configuration
+                dependencies["column_values.nonnull.count"] = nonnull_configuration
             else:
-                dependencies[
-                    "categorical_partition"
-                ] = build_categorical_partition_object(
-                    execution_engine=execution_engine,
-                    domain_kwargs=configuration.get_domain_kwargs(),
+                is_categorical = True
+                counts_configuration = MetricConfiguration(
+                    "column.value_counts",
+                    metric_domain_kwargs=domain_kwargs,
+                    metric_value_kwargs={"sort": "value",},
                 )
+                nonnull_configuration = MetricConfiguration(
+                    "column_values.nonnull.count", metric_domain_kwargs=domain_kwargs,
+                )
+                dependencies["column.value_counts"] = counts_configuration
+                dependencies["column_values.nonnull.count"] = nonnull_configuration
+        if is_categorical is True or is_valid_categorical_partition_object(
+            partition_object
+        ):
+            dependencies["column.value_counts"] = MetricConfiguration(
+                "column.value_counts",
+                metric_domain_kwargs=domain_kwargs,
+                metric_value_kwargs={"sort": "value"},
+            )
+            dependencies["column_values.nonnull.count"] = MetricConfiguration(
+                "column_values.nonnull.count", domain_kwargs
+            )
+        else:
+            if (
+                bins is None
+            ):  # if the user did not supply a partition_object, so we just computed it
+                if not is_valid_partition_object(partition_object):
+                    raise ValueError("Invalid partition_object provided")
+                bins = partition_object["bins"]
+            hist_metric_configuration = MetricConfiguration(
+                "column.histogram",
+                metric_domain_kwargs=domain_kwargs,
+                metric_value_kwargs={"bins": bins,},
+            )
+            nonnull_configuration = MetricConfiguration(
+                "column_values.nonnull.count",
+                metric_domain_kwargs=domain_kwargs,
+                metric_value_kwargs=dict(),
+            )
+            dependencies["column.histogram"] = hist_metric_configuration
+            dependencies["column_values.nonnull.count"] = nonnull_configuration
+            below_partition = MetricConfiguration(
+                "column_values.between.count",
+                metric_domain_kwargs=domain_kwargs,
+                metric_value_kwargs={"max_value": bins[0]},
+            )
+            above_partition = MetricConfiguration(
+                "column_values.between.count",
+                metric_domain_kwargs=domain_kwargs,
+                metric_value_kwargs={"min_value": bins[-1], "strict_min": True},
+            )
+            dependencies["below_partition"] = below_partition
+            dependencies["above_partition"] = above_partition
+        return all_dependencies
 
-    def _validates(
+    def _validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        bucketize_data = configuration.kwargs["bucketize_data"]
-        partition_object = configuration.kwargs["partition_object"]
-        threshold = configuration.kwargs["threshold"]
+        bucketize_data = configuration.kwargs.get(
+            "bucketize_data", self.default_kwarg_values["bucketize_data"]
+        )
+        partition_object = configuration.kwargs.get(
+            "partition_object", self.default_kwarg_values["partition_object"]
+        )
+        threshold = configuration.kwargs.get(
+            "threshold", self.default_kwarg_values["threshold"]
+        )
+        tail_weight_holdout = configuration.kwargs.get(
+            "tail_weight_holdout", self.default_kwarg_values["tail_weight_holdout"]
+        )
+        internal_weight_holdout = configuration.kwargs.get(
+            "internal_weight_holdout",
+            self.default_kwarg_values["internal_weight_holdout"],
+        )
         if partition_object is None:
             if bucketize_data:
                 partition_object = build_continuous_partition_object(
-                    dataset=self, column=column
+                    execution_engine=execution_engine,
+                    domain_kwargs=configuration.get_domain_kwargs(),
                 )
             else:
                 partition_object = build_categorical_partition_object(
-                    dataset=self, column=column
+                    execution_engine=execution_engine,
+                    domain_kwargs=configuration.get_domain_kwargs(),
                 )
 
         if not is_valid_partition_object(partition_object):
@@ -272,9 +342,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 )
 
             # Data are expected to be discrete, use value_counts
-            observed_weights = self.get_column_value_counts(
-                column
-            ) / self.get_column_nonnull_count(column)
+            observed_weights = (
+                metrics["column.value_counts"] / metrics["column_values.nonnull.count"]
+            )
             expected_weights = pd.Series(
                 partition_object["weights"],
                 index=partition_object["values"],
@@ -337,23 +407,15 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                     "parameter set to false."
                 )
             # Build the histogram first using expected bins so that the largest bin is >=
-            hist = np.array(
-                self.get_column_hist(column, tuple(partition_object["bins"]))
-            )
-            # np.histogram(column, partition_object['bins'], density=False)
-            bin_edges = partition_object["bins"]
+            nonnull_count = metrics["column_values.nonnull.count"]
+            hist = np.array(metrics["column.histogram"])
+
             # Add in the frequencies observed above or below the provided partition
-            # below_partition = len(np.where(column < partition_object['bins'][0])[0])
-            # above_partition = len(np.where(column > partition_object['bins'][-1])[0])
-            below_partition = self.get_column_count_in_range(
-                column, max_val=partition_object["bins"][0]
-            )
-            above_partition = self.get_column_count_in_range(
-                column, min_val=partition_object["bins"][-1], strict_min=True
-            )
+            below_partition = metrics["below_partition"]
+            above_partition = metrics["above_partition"]
 
             # Observed Weights is just the histogram values divided by the total number of observations
-            observed_weights = np.array(hist) / self.get_column_nonnull_count(column)
+            observed_weights = np.array(hist) / nonnull_count
 
             # Adjust expected_weights to account for tail_weight and internal_weight
             if "tail_weights" in partition_object:
@@ -429,17 +491,11 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 expected_weights = expected_weights[1:]
 
                 comb_observed_weights = np.concatenate(
-                    (
-                        observed_weights,
-                        [above_partition / self.get_column_nonnull_count(column)],
-                    )
+                    (observed_weights, [above_partition / nonnull_count],)
                 )
                 # Set aside left tail weight and above partition weight
                 observed_tail_weights = np.concatenate(
-                    (
-                        [observed_weights[0]],
-                        [above_partition / self.get_column_nonnull_count(column)],
-                    )
+                    ([observed_weights[0]], [above_partition / nonnull_count],)
                 )
                 # Remove left tail weight from main observed_weights
                 observed_weights = observed_weights[1:]
@@ -465,17 +521,11 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 expected_weights = expected_weights[:-1]
 
                 comb_observed_weights = np.concatenate(
-                    (
-                        [below_partition / self.get_column_nonnull_count(column)],
-                        observed_weights,
-                    )
+                    ([below_partition / nonnull_count], observed_weights,)
                 )
                 # Set aside right tail weight and below partition weight
                 observed_tail_weights = np.concatenate(
-                    (
-                        [below_partition / self.get_column_nonnull_count(column)],
-                        [observed_weights[-1]],
-                    )
+                    ([below_partition / nonnull_count], [observed_weights[-1]],)
                 )
                 # Remove right tail weight from main observed_weights
                 observed_weights = observed_weights[:-1]
@@ -506,15 +556,16 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
 
                 comb_observed_weights = np.concatenate(
                     (
-                        [below_partition / self.get_column_nonnull_count(column)],
+                        [below_partition / nonnull_count],
                         observed_weights,
-                        [above_partition / self.get_column_nonnull_count(column)],
+                        [above_partition / nonnull_count],
                     )
                 )
                 # Tail weights are just the counts on either side of the partition
-                observed_tail_weights = np.concatenate(
-                    ([below_partition], [above_partition])
-                ) / self.get_column_nonnull_count(column)
+                observed_tail_weights = (
+                    np.concatenate(([below_partition], [above_partition]))
+                    / nonnull_count
+                )
 
                 # Main expected_weights and main observed weights had no tail_weights, so nothing needs to be removed.
 

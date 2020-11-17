@@ -154,7 +154,7 @@ def build_continuous_partition_object(
         metric_value_kwargs={"bins": tuple(bins),},
     )
     nonnull_configuration = MetricConfiguration(
-        "column_values.null.unexpected_count",
+        "column_values.nonnull.count",
         metric_domain_kwargs=domain_kwargs,
         metric_value_kwargs={"bins": tuple(bins),},
     )
@@ -199,7 +199,7 @@ def build_categorical_partition_object(execution_engine, domain_kwargs, sort="va
         metric_value_kwargs={"sort": sort,},
     )
     nonnull_configuration = MetricConfiguration(
-        "column_values.null.unexpected_count", metric_domain_kwargs=domain_kwargs,
+        "column_values.nonnull.count", metric_domain_kwargs=domain_kwargs,
     )
     metrics = execution_engine.resolve_metrics(
         (counts_configuration, nonnull_configuration)

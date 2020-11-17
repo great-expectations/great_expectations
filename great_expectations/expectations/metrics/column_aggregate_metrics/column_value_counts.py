@@ -30,8 +30,10 @@ class ColumnValueCounts(ColumnMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        sort = metric_value_kwargs["sort"]
-        collate = metric_value_kwargs["collate"]
+        sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
+        collate = metric_value_kwargs.get(
+            "collate", cls.default_kwarg_values["collate"]
+        )
 
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
@@ -68,8 +70,10 @@ class ColumnValueCounts(ColumnMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        sort = metric_value_kwargs["sort"]
-        collate = metric_value_kwargs["collate"]
+        sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
+        collate = metric_value_kwargs.get(
+            "collate", cls.default_kwarg_values["collate"]
+        )
 
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
@@ -124,8 +128,10 @@ class ColumnValueCounts(ColumnMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        sort = metric_value_kwargs["sort"]
-        collate = metric_value_kwargs["collate"]
+        sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
+        collate = metric_value_kwargs.get(
+            "collate", cls.default_kwarg_values["collate"]
+        )
 
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")

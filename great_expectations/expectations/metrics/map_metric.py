@@ -1069,7 +1069,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
 
-                if issubclass(engine, SqlAlchemyExecutionEngine):
+                elif issubclass(engine, SqlAlchemyExecutionEngine):
                     register_metric(
                         metric_name=metric_name + ".condition",
                         metric_domain_keys=metric_domain_keys,
