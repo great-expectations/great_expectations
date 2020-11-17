@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file
 
 0.12.9
 -----------------
