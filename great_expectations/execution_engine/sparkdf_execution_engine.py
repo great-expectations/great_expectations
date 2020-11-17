@@ -309,6 +309,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     f"unrecognized condition_parser {str(condition_parser)}for Spark execution engine"
                 )
 
+        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
+        if domain_type != MetricDomainTypes.TABLE and accessor_keys is not None and len(accessor_keys) > 0:
+            logger.warning("Accessor keys ignored since Metric Domain Type is not 'table")
+
         if domain_type == MetricDomainTypes.TABLE:
             if accessor_keys is not None and len(accessor_keys) > 0:
                 for key in accessor_keys:

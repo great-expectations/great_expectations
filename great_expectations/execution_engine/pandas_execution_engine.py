@@ -361,6 +361,10 @@ operate.
                     drop=True
                 )
 
+        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
+        if domain_type != MetricDomainTypes.TABLE and accessor_keys is not None and len(accessor_keys) > 0:
+            logger.warning("Accessor keys ignored since Metric Domain Type is not 'table")
+
         # If given table (this is default), get all unexpected accessor_keys (an optional parameters allowing us to
         # modify domain access)
         if domain_type == MetricDomainTypes.TABLE:
