@@ -4,6 +4,7 @@ import traceback
 import copy
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.compat import StringIO
+from typing import Callable, Union
 
 from great_expectations.data_context.util import (
     substitute_all_config_variables,
@@ -12,6 +13,18 @@ from great_expectations.data_context.util import (
 
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import dataContextConfigSchema
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    BatchDefinition,
+    PartitionRequest,
+)
+from great_expectations.core import (
+    ExpectationSuite,
+)
+from great_expectations.validator.validator import (
+    Validator
+)
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -191,6 +204,111 @@ class DataContextV3(DataContext):
             else:
                 raise(e)
 
+
+    def get_batch(
+        execution_environment_name: str=None,
+        data_connector_name: str=None,
+        data_asset_name: str=None,
+        batch_definition: BatchDefinition=None,
+        batch_request: BatchRequest=None,
+        partition_request: Union[PartitionRequest, dict]=None,
+        partition_identifiers: dict=None,
+        limit: int=None,
+        index=None,
+        custom_filter_function: Callable=None,
+        sampling_method: str=None,
+        sampling_kwargs: dict=None,
+        **kwargs,
+    ) -> Batch:
+        """Get exactly one batch, based on a variety of flexible input types.
+
+        Args:
+            batch_definition
+            batch_request
+
+            execution_environment_name
+            data_connector_name
+            data_asset_name
+            partition_request
+
+            partition_identifiers
+
+            limit
+            index
+            custom_filter_function
+            sampling_method
+            sampling_kwargs
+
+            **kwargs
+
+        Returns:
+            (Batch) The requested batch
+
+        `get_batch` is the main user-facing API for getting batches.
+        In contrast to virtually all other methods on the class, it does not require typed or nested inputs.
+        Instead, this method is intended to help the user pick the right parameters
+
+        This method attempts returns exactly one batch.
+        If 0 or more than batches would be returned, it raises an error.
+        """
+        if batch_definition:
+            if not isinstance(batch_definition, BatchDefinition):
+                raise TypeError(f"batch_definition must be an instance of BatchDefinition object, not {type(batch_definition)}")
+
+            execution_environment_name = batch_definition.execution_environment_name
+        elif batch_request:
+            execution_environment_name = batch_request.execution_environment_name
+        else:
+            execution_environment_name = execution_environment_name
+
+        execution_environment = self.datasources[execution_environment_name]
+
+        if batch_definition:
+            #TODO: Raise a warning if any parameters besides batch_definition are specified
+
+            return execution_environment.get_batch_from_batch_definition(batch_definition)
+
+        elif batch_request:
+            #TODO: Raise a warning if any parameters besides batch_requests are specified
+
+            batch_definitions = execution_environment.get_available_batch_definitions(batch_request)
+            if len(batch_definitions) != 1:
+                raise ValueError(f"Instead of 1 batch_definition, this batch_request matches {len(batch_definitions)}.")
+            return execution_environment.get_batch_from_batch_definition(batch_definitions[0])
+
+        else:
+            if partition_request is None:
+                if partition_identifiers is None:
+                    partition_identifiers = kwargs
+                else:
+                    #Raise a warning if kwargs exist
+                    pass
+
+                partition_request = PartitionRequest({
+                    "partition_identifiers": partition_identifiers,
+                    "limit": limit,
+                    "index": index,
+                    "custom_filter_function": custom_filter_function,
+                    "sampling_method": sampling_method,
+                    "sampling_kwargs": sampling_kwargs,
+                })
+
+            else:
+                #Raise a warning if partition_identifiers or kwargs exist
+                partition_request = PartitionRequest(partition_request)
+
+            batch_request = BatchRequest(
+                execution_environment_name=execution_environment_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                partition_request=partition_request,
+            )
+
+            batch_definitions = execution_environment.get_available_batch_definitions(batch_request)
+            if len(batch_definitions) != 1:
+                raise ValueError(f"Instead of 1 batch_definition, these parameters match {len(batch_definitions)}.")
+            return execution_environment.get_batch_from_batch_definition(batch_definitions[0])
+
     def get_validator(
         self,
         execution_environment_name: str=None,
@@ -208,7 +326,7 @@ class DataContextV3(DataContext):
         expectation_suite_name: str=None,
         expectation_suite: ExpectationSuite=None,
         **kwargs,
-    ):
+    ) -> Validator:
         if expectation_suite_name is None:
             if not expectation_suite_name is None:
                 expectation_suite = self.get_expectation_suite(expectation_suite_name)
@@ -219,6 +337,8 @@ class DataContextV3(DataContext):
             if not expectation_suite_name is None:
                 raise Warning("get_validator recieved values for both expectation_suite and expectation_suite_name. Defaulting to expectation_suite.")
 
+        print(batch_definition)
+        
         batch = self.get_batch_from_new_style_datasource(
             execution_environment_name,
             data_connector_name,
