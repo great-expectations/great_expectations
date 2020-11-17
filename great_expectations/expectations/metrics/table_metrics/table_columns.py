@@ -58,6 +58,7 @@ class TableColumns(TableMetricProvider):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
 
+    @classmethod
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
