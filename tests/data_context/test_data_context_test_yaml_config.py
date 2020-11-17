@@ -13,7 +13,6 @@ from great_expectations.data_context.util import (
 )
 
 def test_empty_store(empty_data_context_v3):
-
     my_expectation_store = empty_data_context_v3.test_yaml_config(
         yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
