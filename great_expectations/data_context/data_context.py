@@ -1137,6 +1137,63 @@ class BaseDataContext:
             batch_request=batch_request
         )
 
+    def get_batch(	
+        self,	
+        batch_kwargs: Union[dict, BatchKwargs],	
+        expectation_suite_name: Union[str, ExpectationSuite],	
+        data_asset_type=None,	
+        batch_parameters=None,	
+    ) -> DataAsset:	
+        """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If	
+        batch_parameters are included, they will be available as attributes of the batch.	
+        Args:	
+            batch_kwargs: the batch_kwargs to use; must include a datasource key	
+            expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get	
+            data_asset_type: the type of data_asset to build, with associated expectation implementations. This can	
+                generally be inferred from the datasource.	
+            batch_parameters: optional parameters to store as the reference description of the batch. They should	
+                reflect parameters that would provide the passed BatchKwargs.	
+        Returns:	
+            DataAsset	
+        """	
+        if isinstance(batch_kwargs, dict):	
+            batch_kwargs = BatchKwargs(batch_kwargs)	
+
+        if not isinstance(batch_kwargs, BatchKwargs):	
+            raise ge_exceptions.BatchKwargsError(	
+                "BatchKwargs must be a BatchKwargs object or dictionary."	
+            )	
+
+        if not isinstance(	
+            expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, str)	
+        ):	
+            raise ge_exceptions.DataContextError(	
+                "expectation_suite_name must be an ExpectationSuite, "	
+                "ExpectationSuiteIdentifier or string."	
+            )	
+
+        if isinstance(expectation_suite_name, ExpectationSuite):	
+            expectation_suite = expectation_suite_name	
+        elif isinstance(expectation_suite_name, ExpectationSuiteIdentifier):	
+            expectation_suite = self.get_expectation_suite(	
+                expectation_suite_name.expectation_suite_name	
+            )	
+        else:	
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)	
+
+        datasource = self.get_datasource(batch_kwargs.get("datasource"))	
+        batch = datasource.get_batch(	
+            batch_kwargs=batch_kwargs, batch_parameters=batch_parameters	
+        )	
+        if data_asset_type is None:	
+            data_asset_type = datasource.config.get("data_asset_type")	
+        validator = BridgeValidator(	
+            batch=batch,	
+            expectation_suite=expectation_suite,	
+            expectation_engine=data_asset_type,	
+        )	
+        return validator.get_dataset()
+
     @usage_statistics_enabled_method(
         event_name="data_context.run_validation_operator",
         args_payload_fn=run_validation_operator_usage_statistics,
