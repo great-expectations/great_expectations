@@ -310,12 +310,14 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 )
 
         if domain_type == MetricDomainTypes.TABLE:
-            for key in accessor_keys:
-                accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
-            for key in compute_domain_kwargs.keys():
-                # Warning user if kwarg not "normal"
-                if key not in ["batch_id", "table", "row_condition", "condition_parser"]:
-                    logger.warning(f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}")
+            if accessor_keys is not None and (accessor_keys) > 0:
+                for key in accessor_keys:
+                    accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
+            if len(compute_domain_kwargs.keys()) > 0:
+                for key in compute_domain_kwargs.keys():
+                    # Warning user if kwarg not "normal"
+                    if key not in ["batch_id", "table", "row_condition", "condition_parser"]:
+                        logger.warning(f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}")
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
         # If user has stated they want a column, checking if one is provided, and

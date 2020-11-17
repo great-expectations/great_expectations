@@ -117,17 +117,18 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
 
 
 # Ensuring functionality of compute_domain when no domain kwargs are given
-def test_get_compute_domain_with_no_domain_kwargs():
+def test_get_compute_domain_with_no_domain_kwargs(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b":[2,3,4,None]}))
-    df = engine.dataframe
 
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={}, domain_type="table")
 
+    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
+    raw_data = engine.engine.execute(sa.select(["*"]).select_from(engine.active_batch_data.selectable)).fetchall()
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
     # Ensuring that with no domain nothing happens to the data itself
-    assert dataframes_equal(data, df), "Data does not match after getting compute domain"
-    assert compute_kwargs is not None, "Compute domain kwargs should be existent"
+    assert raw_data == domain_data, "Data does not match after getting compute domain"
+    assert compute_kwargs == {}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
@@ -139,6 +140,7 @@ def test_get_compute_domain_with_column_pair(sa):
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column_A": "a", "column_B" : "b"},
                                                                       domain_type="column_pair")
 
+    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
     raw_data = engine.engine.execute(sa.select(["*"]).select_from(engine.active_batch_data.selectable)).fetchall()
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
@@ -157,9 +159,8 @@ def test_get_compute_domain_with_column_pair(sa):
 
 
 # Testing for only untested use case - multicolumn
-def test_get_compute_domain_with_multicolumn():
+def test_get_compute_domain_with_multicolumn(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1,2,3, None]}))
-    df = engine.dataframe
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
