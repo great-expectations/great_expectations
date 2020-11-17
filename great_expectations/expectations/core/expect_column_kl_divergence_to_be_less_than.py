@@ -25,7 +25,11 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validation_graph import (
+    MetricConfiguration,
+    ValidationGraph,
+)
+from great_expectations.validator.validator import Validator
 
 
 class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
@@ -199,9 +203,21 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                         "allow_relative_error": False,
                     },
                 )
-                bins = execution_engine.resolve_metrics(
-                    [partition_metric_configuration]
-                )[partition_metric_configuration.id]
+                #
+                # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
+                # dependencies, so we use a validator
+                #
+                validator = Validator(execution_engine=execution_engine)
+                graph = ValidationGraph()
+                validator.build_metric_dependency_graph(
+                    graph=graph,
+                    child_node=partition_metric_configuration,
+                    configuration=configuration,
+                    execution_engine=execution_engine,
+                )
+                bins = validator.resolve_validation_graph(graph, metrics=dict())[
+                    partition_metric_configuration.id
+                ]
                 hist_metric_configuration = MetricConfiguration(
                     "column.histogram",
                     metric_domain_kwargs=domain_kwargs,
@@ -212,6 +228,12 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                     metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs=dict(),
                 )
+                #
+                # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuraiton here,
+                # since we have already evaluated it, and its result is in the kwargs for the histogram.
+                # However, currently the dependencies' configurations are not passed to the _validate method
+                #
+                dependencies["column.partition"] = partition_metric_configuration
                 dependencies["column.histogram"] = hist_metric_configuration
                 dependencies["column_values.nonnull.count"] = nonnull_configuration
             else:
@@ -295,15 +317,26 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         )
         if partition_object is None:
             if bucketize_data:
-                partition_object = build_continuous_partition_object(
-                    execution_engine=execution_engine,
-                    domain_kwargs=configuration.get_domain_kwargs(),
+                # in this case, we have requested a partition, histogram using said partition, and nonnull count
+                bins = list(metrics["column.partition"])
+                weights = list(
+                    np.array(metrics["column.histogram"])
+                    / metrics["column_values.nonnull.count"]
                 )
+                tail_weights = (1 - sum(weights)) / 2
+                partition_object = {
+                    "bins": bins,
+                    "weights": weights,
+                    "tail_weights": [tail_weights, tail_weights],
+                }
             else:
-                partition_object = build_categorical_partition_object(
-                    execution_engine=execution_engine,
-                    domain_kwargs=configuration.get_domain_kwargs(),
-                )
+                partition_object = {
+                    "values": list(metrics["column.value_counts"].index),
+                    "weights": list(
+                        np.array(metrics["column.value_counts"])
+                        / metrics["column_values.nonnull.count"]
+                    ),
+                }
 
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")

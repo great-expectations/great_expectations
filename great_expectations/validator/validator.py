@@ -248,7 +248,7 @@ class Validator:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
-    def _populate_dependencies(
+    def build_metric_dependency_graph(
         self,
         graph: ValidationGraph,
         child_node: MetricConfiguration,
@@ -285,7 +285,7 @@ class Validator:
                         f"Metric {str(child_node.id)} has created a circular dependency"
                     )
                     continue
-                self._populate_dependencies(
+                self.build_metric_dependency_graph(
                     graph,
                     metric_dependency,
                     configuration,
@@ -334,7 +334,7 @@ class Validator:
             )["metrics"]
 
             for metric in validation_dependencies.values():
-                self._populate_dependencies(
+                self.build_metric_dependency_graph(
                     graph,
                     metric,
                     configuration,
@@ -344,7 +344,20 @@ class Validator:
 
         if metrics is None:
             metrics = dict()
+        metrics = self.resolve_validation_graph(graph, metrics, runtime_configuration)
 
+        evrs = list()
+        for configuration in configurations:
+            evrs.append(
+                configuration.metrics_validate(
+                    metrics,
+                    execution_engine=self._execution_engine,
+                    runtime_configuration=runtime_configuration,
+                )
+            )
+        return evrs
+
+    def resolve_validation_graph(self, graph, metrics, runtime_configuration=None):
         done: bool = False
         while not done:
             ready_metrics, needed_metrics = self._parse_validation_graph(graph, metrics)
@@ -359,16 +372,7 @@ class Validator:
             if len(ready_metrics) + len(needed_metrics) == 0:
                 done = True
 
-        evrs = list()
-        for configuration in configurations:
-            evrs.append(
-                configuration.metrics_validate(
-                    metrics,
-                    execution_engine=self._execution_engine,
-                    runtime_configuration=runtime_configuration,
-                )
-            )
-        return evrs
+        return metrics
 
     def _parse_validation_graph(self, validation_graph, metrics):
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of

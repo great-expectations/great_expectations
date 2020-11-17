@@ -41,7 +41,7 @@ def test_parse_validation_graph():
         ).get_validation_dependencies(configuration, engine)
 
         for metric_configuration in validation_dependencies["metrics"].values():
-            Validator(execution_engine=engine)._populate_dependencies(
+            Validator(execution_engine=engine).build_metric_dependency_graph(
                 graph, metric_configuration, configuration, execution_engine=engine
             )
     ready_metrics, needed_metrics = Validator(engine)._parse_validation_graph(
@@ -70,7 +70,7 @@ def test_parse_validation_graph_with_bad_metrics_args():
         ).get_validation_dependencies(configuration, execution_engine=engine,)
 
         for metric_configuration in validation_dependencies["metrics"].values():
-            validator._populate_dependencies(
+            validator.build_metric_dependency_graph(
                 graph, metric_configuration, configuration, execution_engine=engine
             )
     ready_metrics, needed_metrics = validator._parse_validation_graph(
@@ -98,7 +98,7 @@ def test_populate_dependencies():
         ).get_validation_dependencies(configuration, engine,)
 
         for metric_configuration in validation_dependencies["metrics"].values():
-            Validator(execution_engine=engine)._populate_dependencies(
+            Validator(execution_engine=engine).build_metric_dependency_graph(
                 graph, metric_configuration, configuration, execution_engine=engine
             )
     assert len(graph.edges) == 10
@@ -123,7 +123,7 @@ def test_populate_dependencies_with_incorrect_metric_name():
         ).get_validation_dependencies(configuration, engine,)
 
         try:
-            Validator(execution_engine=engine)._populate_dependencies(
+            Validator(execution_engine=engine).build_metric_dependency_graph(
                 graph,
                 MetricConfiguration("column_values.not_a_metric", IDDict()),
                 configuration,

@@ -162,7 +162,8 @@ def build_continuous_partition_object(
         (hist_metric_configuration, nonnull_configuration)
     )
     weights = list(
-        metrics[hist_metric_configuration.id] / metrics[nonnull_configuration.id]
+        np.array(metrics[hist_metric_configuration.id])
+        / metrics[nonnull_configuration.id]
     )
     tail_weights = (1 - sum(weights)) / 2
     partition_object = {

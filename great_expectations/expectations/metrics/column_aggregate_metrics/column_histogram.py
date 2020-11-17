@@ -67,7 +67,10 @@ class ColumnHistogram(ColumnMetricProvider):
 
         case_conditions = []
         idx = 0
-        bins = list(bins)
+        if isinstance(bins, np.ndarray):
+            bins = bins.tolist()
+        else:
+            bins = list(bins)
 
         # If we have an infinte lower bound, don't express that in sql
         if (
