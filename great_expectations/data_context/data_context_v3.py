@@ -57,6 +57,11 @@ class DataContextV3(DataContext):
             self._load_config_variables_file()
         )
 
+    @property
+    def datasources(self):
+        """A single holder for all Datasources in this context"""
+        return self._cached_datasources
+
     def test_yaml_config(
         self,
         yaml_config: str,
@@ -151,7 +156,11 @@ class DataContextV3(DataContext):
                 print(
                     f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}"
                 )
-                instantiated_class = self._build_execution_environment_from_config("my_temp_store", config)
+                execution_environment_name = name or "my_temp_execution_environment"
+                instantiated_class = self._build_execution_environment_from_config(
+                    execution_environment_name,
+                    config,
+                )
 
             else:
                 print(

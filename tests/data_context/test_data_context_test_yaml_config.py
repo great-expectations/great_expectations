@@ -264,3 +264,10 @@ introspection:
         return_mode="report_object",
     )
     print(json.dumps(report_object, indent=2))
+    print(context.datasources)
+
+    my_batch = context.get_batch_from_new_style_datasource(
+        "my_datasource",
+        "whole_table_with_limits",
+        "test_df",
+    )
