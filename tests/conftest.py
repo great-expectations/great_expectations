@@ -2943,8 +2943,9 @@ SELECT EXISTS (
    AND    table_name   = 'test_df'
 );
 """).fetchall()
-    if table_check_results == ["FALSE"]:
-        test_df.to_sql("test_df", con=engine, index=True, schema="test")
+    print(table_check_results)
+    if table_check_results != [(True,)]:
+        test_df.to_sql("test_df", con=engine, index=True, schema="connection_test")
 
     # Return a connection string to this newly-created db	
     return engine
