@@ -672,6 +672,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         to_select = [sa.column(col) for col in compute_domain_kwargs["columns"]]
                         selectable = sa.select(to_select).select_from(selectable)
 
+        # Letting selectable fall through
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
     def resolve_metric_bundle(
