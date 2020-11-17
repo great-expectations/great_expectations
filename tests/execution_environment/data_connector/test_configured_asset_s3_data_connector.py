@@ -110,7 +110,7 @@ def test_instantiation_from_a_config(empty_data_context_v3):
             Body=test_df.to_csv(index=False).encode("utf-8"),
             Key=key
         )
-    report_object = empty_data_context.test_yaml_config(f"""
+    report_object = context.test_yaml_config(f"""
         module_name: great_expectations.execution_environment.data_connector
         class_name: ConfiguredAssetS3DataConnector
         execution_environment_name: FAKE_EXECUTION_ENVIRONMENT

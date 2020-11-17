@@ -9,10 +9,7 @@ from typing import Any, Callable, Dict, Iterable, Tuple, List
 
 from ruamel.yaml.compat import StringIO
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.execution_environment.data_connector import ConfiguredAssetS3DataConnector, InferredAssetS3DataConnector
-
 from great_expectations.execution_environment.util import S3Url
-
 from great_expectations.execution_environment.types import (
     PathBatchSpec,
     S3BatchSpec,
@@ -23,7 +20,6 @@ try:
     import boto3
 except ImportError:
     boto3 = None
-
 
 from ..core.batch import BatchMarkers
 from ..core.id_dict import BatchSpec
@@ -112,16 +108,12 @@ Notes:
         boto3_options: dict = None
         if boto3_options is None:
             boto3_options = {}
-        self._s3 = None
-
         # try initializing
         try:
-           self._s3 = boto3.client("s3", **boto3_options)
+            self._s3 = boto3.client("s3", **boto3_options)
         except TypeError:
-            pass
-
+            self._s3 = None
         super().__init__(*args, **kwargs)
-
 
     def configure_validator(self, validator):
         super().configure_validator(validator)
@@ -158,9 +150,11 @@ Notes:
 
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
-                raise ge_exceptions.ExecutionEngineError("PandasExecutionEngine has been passed a S3BatchSpec, but does not have an S3 connection configured")
-
-            s3_engine, s3_url = self._get_s3_object_and_url_from_batch_spec(batch_spec=batch_spec)
+                raise ge_exceptions.ExecutionEngineError(
+                    f'''PandasExecutionEngine has been passed a S3BatchSpec, 
+                        but the ExecutionEngine does not have a boto3 configured. Please check the config.''')
+            s3_engine = self._s3
+            s3_url = S3Url(batch_spec.get("s3"))
             reader_method: str = batch_spec.get("reader_method")
             reader_options: dict = batch_spec.get("reader_options") or {}
 
@@ -506,8 +500,3 @@ Notes:
             lambda x: hash_func(str(x).encode()).hexdigest()[-1*hash_digits:] == hash_value
         )
         return df[matches]
-
-    def _get_s3_object_and_url_from_batch_spec(self, batch_spec: BatchSpec):
-        s3 = self._s3
-        url = S3Url(batch_spec.get("s3"))
-        return s3, url
