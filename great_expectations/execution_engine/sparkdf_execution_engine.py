@@ -2,7 +2,7 @@ import copy
 import datetime
 import logging
 import uuid
-from typing import Any, Callable, Dict, Iterable, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, Tuple, Union, Optional
 
 try:
     import pyspark.sql.functions as F
@@ -14,7 +14,7 @@ from great_expectations.core.id_dict import IDDict
 from ..exceptions import BatchKwargsError, GreatExpectationsError, ValidationError
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
-from .execution_engine import ExecutionEngine
+from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 logger = logging.getLogger(__name__)
 
@@ -244,7 +244,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return batch_spec
 
     def get_compute_domain(
-        self, domain_kwargs: dict, domain_type: Union[str, "MetricDomainTypes"]
+        self,
+        domain_kwargs: dict,
+        domain_type: Union[str, "MetricDomainTypes"],
+        accessor_keys: Optional[Iterable[str]] = []
     ) -> Tuple["pyspark.sql.DataFrame", dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
@@ -252,7 +255,12 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type () - A dictionary specifying batch id and which batches to obtain
+            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity", "column",
+            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
+            MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
+            the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
@@ -261,6 +269,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
+
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -297,8 +308,59 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     f"unrecognized condition_parser {str(condition_parser)}for Spark execution engine"
                 )
 
-        if "column" in compute_domain_kwargs:
-            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
+        if domain_type != MetricDomainTypes.TABLE and accessor_keys is not None and len(accessor_keys) > 0:
+            logger.warning("Accessor keys ignored since Metric Domain Type is not 'table")
+
+        if domain_type == MetricDomainTypes.TABLE:
+            if accessor_keys is not None and len(accessor_keys) > 0:
+                for key in accessor_keys:
+                    accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
+            if len(compute_domain_kwargs.keys()) > 0:
+                for key in compute_domain_kwargs.keys():
+                    # Warning user if kwarg not "normal"
+                    if key not in ["batch_id", "table", "row_condition", "condition_parser"]:
+                        logger.warning(f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}")
+            return data, compute_domain_kwargs, accessor_domain_kwargs
+
+        # If user has stated they want a column, checking if one is provided, and
+        elif domain_type == MetricDomainTypes.COLUMN:
+            if "column" in compute_domain_kwargs:
+                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+            else:
+                # If column not given
+                raise GreatExpectationsError("Column not provided in compute_domain_kwargs")
+
+        # Else, if column pair values requested
+        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+            # Ensuring column_A and column_B parameters provided
+            if "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs:
+                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
+                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
+            else:
+                raise GreatExpectationsError("column_A or column_B not found within compute_domain_kwargs")
+
+        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+        elif domain_type == MetricDomainTypes.MULTICOLUMN:
+            if "columns" in compute_domain_kwargs:
+                # If columns exist
+                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
+
+        # Filtering if identity
+        elif domain_type == MetricDomainTypes.IDENTITY:
+
+            # If we would like our data to become a single column
+            if "column" in compute_domain_kwargs:
+                data = data.select(compute_domain_kwargs["column"])
+
+            # If we would like our data to now become a column pair
+            elif ("column_A" in compute_domain_kwargs) and ("column_B" in compute_domain_kwargs):
+                data = data.select(compute_domain_kwargs["column_A"], compute_domain_kwargs["column_B"])
+            else:
+
+                # If we would like our data to become a multicolumn
+                if "columns" in compute_domain_kwargs:
+                    data = data.select(compute_domain_kwargs["columns"])
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
