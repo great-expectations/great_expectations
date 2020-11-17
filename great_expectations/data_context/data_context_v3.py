@@ -239,7 +239,7 @@ class DataContextV3(DataContext):
             (Batch) The requested batch
 
         `get_batch` is the main user-facing API for getting batches.
-        In contrast to virtually all other methods on the class, it does not require typed or nested inputs.
+        In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
         Instead, this method is intended to help the user pick the right parameters
 
         This method attempts returns exactly one batch.
