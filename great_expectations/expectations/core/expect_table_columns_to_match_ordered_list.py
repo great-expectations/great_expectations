@@ -52,8 +52,8 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
 
     """
 
-    metric_dependencies = ("columns",)
-    success_keys = ("ordered_list",)
+    metric_dependencies = ("table.columns",)
+    success_keys = ("column_list",)
     domain_keys = (
         "batch_id",
         "table",
@@ -64,7 +64,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "ordered_list": None,
+        "column_list": None,
         "result_format": "BASIC",
         "column": None,
         "column_index": None,
@@ -74,30 +74,6 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
     }
 
     """ A Metric Decorator for the table columns"""
-
-    # @PandasExecutionEngine.metric(
-    #        metric_name="columns",
-    #        metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),
-    #        metric_value_keys=(),
-    #        metric_dependencies=(),
-    #        filter_column_isnull=False,
-    #    )
-    def _pandas_columns(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-    ):
-        """Metric which returns all columns in a DataFrame"""
-        df = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        cols = df.columns
-        return cols.tolist()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -118,10 +94,10 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
 
         # Ensuring that a proper value has been provided
         try:
-            assert "ordered_list" in configuration.kwargs, "ordered_list is required"
+            assert "column_list" in configuration.kwargs, "column_list is required"
             assert isinstance(
-                configuration.kwargs["ordered_list"], (list, set)
-            ), "ordered_list must be a list or a set"
+                configuration.kwargs["column_list"], (list, set)
+            ) or configuration.kwargs["column_list"] is None, "column_list must be a list, set, or None"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -171,52 +147,28 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
             )
         ]
 
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
+    def _validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        """Validates given column count against expected value"""
-        # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
         # Obtaining columns and ordered list for sake of comparison
-        columns = metric_vals.get("columns")
-        column_list = self.get_success_kwargs(configuration).get("ordered_list")
+        expected_column_list = self.get_success_kwargs(configuration).get("column_list")
+        actual_column_list = metrics.get("table.columns")
 
-        if column_list is None or list(columns) == list(column_list):
-            return {"success": True, "result": {"observed_value": list(columns)}}
+        if expected_column_list is None or list(actual_column_list) == list(expected_column_list):
+            return {"success": True, "result": {"observed_value": list(actual_column_list)}}
         else:
             # In the case of differing column lengths between the defined expectation and the observed column set, the
             # max is determined to generate the column_index.
-            number_of_columns = max(len(column_list), len(columns))
+            number_of_columns = max(len(expected_column_list), len(actual_column_list))
             column_index = range(number_of_columns)
 
             # Create a list of the mismatched details
             compared_lists = list(
-                zip_longest(column_index, list(column_list), list(columns))
+                zip_longest(column_index, list(expected_column_list), list(actual_column_list))
             )
             mismatched = [
                 {"Expected Column Position": i, "Expected": k, "Found": v}
@@ -226,7 +178,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
             return {
                 "success": False,
                 "result": {
-                    "observed_value": list(columns),
+                    "observed_value": list(actual_column_list),
                     "details": {"mismatched": mismatched},
                 },
             }
