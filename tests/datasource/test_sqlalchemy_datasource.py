@@ -15,27 +15,6 @@ from great_expectations.validator.validator import BridgeValidator, Validator
 yaml = YAML()
 
 
-@pytest.fixture
-def test_db_connection_string(tmp_path_factory, test_backends):
-    if "sqlite" not in test_backends:
-        pytest.skip("skipping fixture because sqlite not selected")
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    df2 = pd.DataFrame({"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]})
-
-    try:
-        import sqlalchemy as sa
-        basepath = str(tmp_path_factory.mktemp("db_context"))
-        path = os.path.join(basepath, "test.db")
-        engine = sa.create_engine("sqlite:///" + str(path))
-        df1.to_sql("table_1", con=engine, index=True)
-        df2.to_sql("table_2", con=engine, index=True, schema="main")
-
-        # Return a connection string to this newly-created db
-        return "sqlite:///" + str(path)
-    except ImportError:
-        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
-
-
 def test_sqlalchemy_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite, test_db_connection_string
 ):

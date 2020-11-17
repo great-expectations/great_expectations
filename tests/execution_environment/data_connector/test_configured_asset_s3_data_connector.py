@@ -88,7 +88,9 @@ def test_basic_instantiation():
 
 
 @mock_s3
-def test_instantiation_from_a_config(empty_data_context):
+def test_instantiation_from_a_config(empty_data_context_v3):
+    context = empty_data_context_v3
+
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
@@ -120,7 +122,7 @@ def test_instantiation_from_a_config(empty_data_context):
         bucket: {bucket}
         prefix: ""
         assets:
-            alpha:        
+            alpha:
     """, return_mode="report_object")
 
     assert report_object == {
@@ -141,7 +143,9 @@ def test_instantiation_from_a_config(empty_data_context):
 
 
 @mock_s3
-def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context):
+def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context_v3):
+    context = empty_data_context_v3
+
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
@@ -162,7 +166,7 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_conte
             Key=key
         )
 
-    report_object = empty_data_context.test_yaml_config(f"""
+    report_object = context.test_yaml_config(f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: ConfiguredAssetS3DataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -791,7 +795,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
         class_name: ConfiguredAssetS3DataConnector
         bucket: bucket
         assets:
-            TestFiles: 
+            TestFiles:
                 pattern: (.+)_(.+)_(.+)\\.csv
                 group_names:
                     - name
@@ -867,7 +871,7 @@ def test_return_all_batch_definitions_too_many_sorters():
         bucket: {bucket}
         prefix: ""
         assets:
-            TestFiles: 
+            TestFiles:
         default_regex:
             pattern: (.+)_.+_.+\\.csv
             group_names:
