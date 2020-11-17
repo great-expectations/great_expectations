@@ -33,7 +33,7 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs)
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
         return [
             {"name": name, "type": dtype}
             for (name, dtype) in zip(df.columns, df.dtypes)
