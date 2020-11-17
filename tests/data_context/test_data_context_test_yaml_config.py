@@ -236,6 +236,7 @@ introspection:
     assert set(report_object["data_connectors"].keys()) == {"count", "my_very_awesome_data_connector"}
 
 def test_golden_path_sql_execution_environment_configuration(sa, empty_data_context_v3, test_connectable_postgresql_db):
+    """Tests the golden path for setting up a StreamlinedSQLExecutionEnvironment using test_yaml_config"""
     context = empty_data_context_v3
 
     os.chdir(context.root_directory)
@@ -254,6 +255,7 @@ credentials:
 
 introspection:
     whole_table_with_limits:
+        #!!! We should be able to specify
         sampling_method: _sample_using_limit
         sampling_kwargs:
             n: 100
