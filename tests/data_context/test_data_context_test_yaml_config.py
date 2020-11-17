@@ -234,3 +234,49 @@ introspection:
     print(json.dumps(report_object, indent=2))
     assert report_object["data_connectors"]["count"] == 1
     assert set(report_object["data_connectors"].keys()) == {"count", "my_very_awesome_data_connector"}
+
+def test_golden_path_sql_execution_environment_configuration(sa, empty_data_context_v3, test_connectable_postgresql_db):
+    """Tests the golden path for setting up a StreamlinedSQLExecutionEnvironment using test_yaml_config"""
+    context = empty_data_context_v3
+
+    os.chdir(context.root_directory)
+    import great_expectations as ge
+    context = ge.get_context()
+
+    yaml_config = """
+class_name: StreamlinedSqlExecutionEnvironment
+credentials:
+    drivername: postgresql
+    username: postgres
+    password: ""
+    host: localhost
+    port: 5432
+    database: test_ci
+
+introspection:
+    whole_table_with_limits:
+        sampling_method: _sample_using_limit
+        sampling_kwargs:
+            n: 10
+"""
+    report_object = context.test_yaml_config(
+        name="my_datasource",
+        yaml_config=yaml_config,
+        return_mode="report_object",
+    )
+    print(json.dumps(report_object, indent=2))
+    print(context.datasources)
+
+    my_batch = context.get_batch_from_new_style_datasource(
+        "my_datasource",
+        "whole_table_with_limits",
+        "test_df",
+    )
+    assert len(my_batch.data.fetchall()) == 10
+
+    with pytest.raises(KeyError):
+        my_batch = context.get_batch_from_new_style_datasource(
+            "my_datasource",
+            "whole_table_with_limits",
+            "DOES_NOT_EXIST",
+        )
