@@ -37,7 +37,7 @@ class DataConnector:
         self,
         name: str,
         execution_environment_name: str,
-        execution_engine: ExecutionEngine = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         self._name = name
         self._execution_environment_name = execution_environment_name

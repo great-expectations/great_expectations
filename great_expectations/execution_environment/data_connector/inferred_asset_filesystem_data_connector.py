@@ -13,17 +13,16 @@ from great_expectations.execution_environment.data_connector.util import (
 logger = logging.getLogger(__name__)
 
 
-# TODO: <Alex>Clean up order of arguments.</Alex>
 class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
     def __init__(
         self,
         name: str,
         execution_environment_name: str,
         base_directory: str,
-        default_regex: dict,
+        execution_engine: Optional[ExecutionEngine] = None,
+        default_regex: Optional[dict] = None,
         glob_directive: str = "*",
-        execution_engine: ExecutionEngine = None,
-        sorters: list = None,
+        sorters: Optional[list] = None,
     ):
         logger.debug(f'Constructing InferredAssetFilesystemDataConnector "{name}".')
 

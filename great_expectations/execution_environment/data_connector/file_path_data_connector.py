@@ -44,11 +44,12 @@ class FilePathDataConnector(DataConnector):
         self,
         name: str,
         execution_environment_name: str,
-        default_regex: dict,
-        execution_engine: ExecutionEngine = None,
-        sorters: list = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        default_regex: Optional[dict] = None,
+        sorters: Optional[list] = None,
     ):
         logger.debug(f'Constructing FilePathDataConnector "{name}".')
+
         super().__init__(
             name=name,
             execution_environment_name=execution_environment_name,

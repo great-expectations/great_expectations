@@ -31,8 +31,8 @@ class RuntimeDataConnector(DataConnector):
         self,
         name: str,
         execution_environment_name: str,
-        execution_engine: ExecutionEngine = None,
-        runtime_keys: list = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_keys: Optional[list] = None,
     ):
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
