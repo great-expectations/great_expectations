@@ -48,6 +48,8 @@ def test_setting_config_variables_is_visible_immediately(
 ):
     context = data_context_with_variables_in_config
 
+    assert type(context.get_config()) == DataContextConfig
+
     config_variables_file_path = context.get_config()["config_variables_file_path"]
 
     assert config_variables_file_path == "uncommitted/config_variables.yml"
