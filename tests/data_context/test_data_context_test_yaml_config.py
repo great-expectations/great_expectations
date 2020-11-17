@@ -5,11 +5,15 @@ import tempfile
 import pytest
 
 from tests.test_utils import create_files_in_directory
+from great_expectations.exceptions import (
+    PluginClassNotFoundError,
+)
+from great_expectations.data_context.util import (
+    file_relative_path
+)
 
-
-def test_empty_store(empty_data_context):
-
-    my_expectation_store = empty_data_context.test_yaml_config(
+def test_empty_store(empty_data_context_v3):
+    my_expectation_store = empty_data_context_v3.test_yaml_config(
         yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -23,10 +27,10 @@ store_backend:
     # assert False
 
 
-def test_config_with_yaml_error(empty_data_context):
+def test_config_with_yaml_error(empty_data_context_v3):
 
     with pytest.raises(Exception):
-        my_expectation_store = empty_data_context.test_yaml_config(
+        my_expectation_store = empty_data_context_v3.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -38,14 +42,14 @@ EGREGIOUS FORMATTING ERROR
         )
 
 
-def test_filesystem_store(empty_data_context):
+def test_filesystem_store(empty_data_context_v3):
     tmp_dir = str(tempfile.mkdtemp())
     with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:
         f_.write("\n")
     with open(os.path.join(tmp_dir, "expectations_A2.json"), "w") as f_:
         f_.write("\n")
 
-    my_expectation_store = empty_data_context.test_yaml_config(
+    my_expectation_store = empty_data_context_v3.test_yaml_config(
         yaml_config=f"""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -58,10 +62,8 @@ store_backend:
     )
 
 
-def test_empty_store2(empty_data_context):
-
-    # noinspection PyUnusedLocal
-    my_expectation_store = empty_data_context.test_yaml_config(
+def test_empty_store2(empty_data_context_v3):
+    empty_data_context_v3.test_yaml_config(
         yaml_config="""
 class_name: ValidationsStore
 store_backend:
@@ -72,7 +74,7 @@ store_backend:
     )
 
 
-def test_execution_environment_config(empty_data_context):
+def test_execution_environment_config(empty_data_context_v3):
     temp_dir = str(tempfile.mkdtemp())
     create_files_in_directory(
         directory=temp_dir,
@@ -91,7 +93,7 @@ def test_execution_environment_config(empty_data_context):
     )
     print(temp_dir)
 
-    return_obj = empty_data_context.test_yaml_config(
+    return_obj = empty_data_context_v3.test_yaml_config(
         yaml_config=f"""
 class_name: ExecutionEnvironment
 
@@ -109,17 +111,7 @@ data_connectors:
             group_names:
             - letter
             - number
-        # assets: {{}}
-            
-        # partitioners:
-        #     my_regex_partitioner:
-        #         class_name: RegexPartitioner
-        #         pattern: {temp_dir}/(.+)(\\d+)\\.csv
-        #         group_names:
-        #         - letter
-        #         - number
-        # default_partitioner_name: my_regex_partitioner
-""", return_mode="return_object"
+""", return_mode="report_object"
     )
 
     print(json.dumps(return_obj, indent=2))
@@ -151,3 +143,94 @@ data_connectors:
             }
         }
     }
+
+def test_error_states(empty_data_context_v3):
+
+    first_config = """
+class_name: ExecutionEnvironment
+
+execution_engine:
+    class_name: NOT_A_REAL_CLASS_NAME
+"""
+
+    with pytest.raises(PluginClassNotFoundError) as excinfo:
+        empty_data_context_v3.test_yaml_config(
+            yaml_config=first_config
+        )
+    # print(excinfo.value.message)
+    # shortened_message_len = len(excinfo.value.message)
+    # print("="*80)
+
+    # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
+    # Note: a more thorough test could also verify that the traceback is indeed short.
+    empty_data_context_v3.test_yaml_config(
+        yaml_config=first_config,
+        shorten_tracebacks=True,
+    )
+
+    # For good measure, do it again, with a different config and a different type of error
+    temp_dir = str(tempfile.mkdtemp())
+    second_config = f"""
+class_name: ExecutionEnvironment
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        # class_name: ConfiguredAssetFilesystemDataConnector
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: {temp_dir}
+        glob_directive: '*.csv'
+        default_regex:
+            pattern: (.+)_(\\d+)\\.csv
+            group_names:
+            - letter
+            - number
+        NOT_A_REAL_KEY: nothing
+"""
+
+    with pytest.raises(TypeError) as excinfo:
+        empty_data_context_v3.test_yaml_config(
+            yaml_config=second_config,
+        )
+
+    empty_data_context_v3.test_yaml_config(
+        yaml_config=second_config,
+        shorten_tracebacks=True
+    )
+
+
+def test_config_variables_in_test_yaml_config(empty_data_context_v3, sa):
+    context = empty_data_context_v3
+
+    db_file = file_relative_path(
+        __file__, os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+    context.save_config_variable("db_file", db_file)
+    context.save_config_variable("data_connector_name", "my_very_awesome_data_connector")
+    context.save_config_variable("suffix", "__whole_table")
+    context.save_config_variable("sampling_n", "10")
+
+    print(context.config_variables)
+
+    first_config = """
+class_name: StreamlinedSqlExecutionEnvironment
+connection_string: sqlite:///${db_file}
+
+introspection:
+    ${data_connector_name}:
+        data_asset_name_suffix: ${suffix}
+        sampling_method: _sample_using_limit
+        sampling_kwargs:
+            n: ${sampling_n}
+"""
+
+    my_execution_environment = context.test_yaml_config(first_config)
+    assert "test_cases_for_sql_data_connector.db" in my_execution_environment.execution_engine.connection_string
+
+    report_object = context.test_yaml_config(first_config, return_mode="report_object")
+    print(json.dumps(report_object, indent=2))
+    assert report_object["data_connectors"]["count"] == 1
+    assert set(report_object["data_connectors"].keys()) == {"count", "my_very_awesome_data_connector"}

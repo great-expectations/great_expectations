@@ -1,8 +1,5 @@
-import copy
-import itertools
-import json
 import logging
-from typing import Any, Callable, Dict, List, Tuple, Union, Optional
+from typing import Any, List, Tuple, Optional
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.core.batch import BatchRequest
@@ -49,6 +46,8 @@ class DataConnector:
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache = None
 
+        self._data_context_root_directory = None
+
     @property
     def name(self) -> str:
         return self._name
@@ -57,14 +56,22 @@ class DataConnector:
     def execution_environment_name(self) -> str:
         return self._execution_environment_name
 
-    def get_batch_data_and_metadata_from_batch_definition(
+    @property
+    def data_context_root_directory(self) -> str:
+        return self._data_context_root_directory
+
+    @data_context_root_directory.setter
+    def data_context_root_directory(self, data_context_root_directory: str):
+        self._data_context_root_directory = data_context_root_directory
+
+    def get_batch_data_and_metadata(
         self, batch_definition: BatchDefinition,
     ) -> Tuple[
         Any,  # batch_data
         BatchSpec,
         BatchMarkers,
     ]:
-        batch_spec: BatchSpec = self._build_batch_spec_from_batch_definition(
+        batch_spec: BatchSpec = self.build_batch_spec(
             batch_definition=batch_definition
         )
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
@@ -74,7 +81,7 @@ class DataConnector:
             batch_markers,
         )
 
-    def _build_batch_spec_from_batch_definition(
+    def build_batch_spec(
         self, batch_definition: BatchDefinition
     ) -> BatchSpec:
         batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
@@ -84,16 +91,15 @@ class DataConnector:
         batch_spec: BatchSpec = BatchSpec(
             **batch_spec_params
         )
-
         return batch_spec
 
-    def refresh_data_references_cache(
+    def _refresh_data_references_cache(
         self,
     ):
         raise NotImplementedError
 
     def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
-        """List objects in the underlying data store to create a list of data_references.	
+        """List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache.
         """
         raise NotImplementedError
@@ -146,7 +152,7 @@ class DataConnector:
         max_examples=3
     ):
         if self._data_references_cache is None:
-            self.refresh_data_references_cache()
+            self._refresh_data_references_cache()
 
         if pretty_print:
             print("\t" + self.name, ":", self.__class__.__name__)
@@ -169,7 +175,9 @@ class DataConnector:
             print(f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):")
 
         for asset_name in asset_names[:max_examples]:
-            data_reference_list = self._get_data_reference_list_from_cache_by_data_asset_name(asset_name)
+            data_reference_list = self._get_data_reference_list_from_cache_by_data_asset_name(
+                data_asset_name=asset_name
+            )
             len_batch_definition_list = len(data_reference_list)
             example_data_references = data_reference_list[:max_examples]
 
@@ -200,13 +208,13 @@ class DataConnector:
             or batch_request.execution_environment_name == self.execution_environment_name
         ):
             raise ValueError(
-                f'''execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not 
+                f'''execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not
 match DataConnector execution_environment_name: "{self.execution_environment_name}".
                 '''
             )
         if not (batch_request.data_connector_name is None or batch_request.data_connector_name == self.name):
             raise ValueError(
-                f'''data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match 
+                f'''data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match
 DataConnector name: "{self.name}".
                 '''
             )

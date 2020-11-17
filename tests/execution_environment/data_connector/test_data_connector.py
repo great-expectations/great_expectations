@@ -10,9 +10,7 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     PartitionDefinition,
-    PartitionRequest,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
 from great_expectations.data_context.util import instantiate_class_from_config
 
@@ -80,7 +78,7 @@ def test__get_instantiation_through_instantiate_class_from_config(basic_data_con
     assert data_references == []
 
 
-# TODO: <Alex>This test should be renamed properly and moved to "tests/execution_environment/data_connector/test_configured_filesystem_asset_data_connector.py".</Alex>
+# TODO: <Alex>This test should be renamed properly and moved to "tests/execution_environment/data_connector/test_configured_asset_filesystem_data_connector.py".</Alex>
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
@@ -115,7 +113,8 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     with pytest.raises(ValueError):
         my_data_connector.get_unmatched_data_references()
 
-    my_data_connector.refresh_data_references_cache()
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
 
     assert len(my_data_connector.get_unmatched_data_references()) == 0
     assert my_data_connector.get_data_reference_list_count() == 4
@@ -129,7 +128,7 @@ def test_build_batch_spec_from_batch_definition():
     pass
 
 
-def test_get_batch_data_and_metadata_from_batch_definition():
+def test_get_batch_data_and_metadata():
     pass
 
 

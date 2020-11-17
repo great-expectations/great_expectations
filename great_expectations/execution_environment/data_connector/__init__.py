@@ -1,10 +1,14 @@
 from .data_connector import DataConnector
-from .single_partitioner_data_connector import SinglePartitionerDataConnector
-from .single_partitioner_dict_data_connector import SinglePartitionerDictDataConnector
+from .file_path_data_connector import FilePathDataConnector
+from .configured_asset_file_path_data_connector import ConfiguredAssetFilePathDataConnector
 from .configured_asset_filesystem_data_connector import ConfiguredAssetFilesystemDataConnector
+from .inferred_asset_file_path_data_connector import InferredAssetFilePathDataConnector
 from .inferred_asset_filesystem_data_connector import InferredAssetFilesystemDataConnector
-from .pipeline_data_connector import PipelineDataConnector
-from .sql_data_connector import SqlDataConnector
+from .inferred_asset_s3_data_connector import InferredAssetS3DataConnector
+from .configured_asset_s3_data_connector import ConfiguredAssetS3DataConnector
+from .runtime_data_connector import RuntimeDataConnector
+from .configured_asset_sql_data_connector import ConfiguredAssetSqlDataConnector
+from .inferred_asset_sql_data_connector import InferredAssetSqlDataConnector
 
 # TODO: <Alex>Commenting not yet implemented Data Connectors for now, until they are properly implemented.</Alex>
 # from .query_data_connector import QueryDataConnector

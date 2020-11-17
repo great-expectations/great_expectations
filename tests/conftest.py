@@ -25,13 +25,13 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.util import import_library_module
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 from .test_utils import (
-    create_files_for_regex_partitioner,
-    execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config,
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
+
 
 ###
 #
@@ -91,6 +91,7 @@ def build_test_backends_list(metafunc):
     no_spark = metafunc.config.getoption("--no-spark")
     if not no_spark:
         try:
+            import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
             raise ValueError("spark tests are requested, but pyspark is not installed")
@@ -156,6 +157,7 @@ def build_test_backends_list_cfe(metafunc):
     no_spark = metafunc.config.getoption("--no-spark")
     if not no_spark:
         try:
+            import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
             raise ValueError("spark tests are requested, but pyspark is not installed")
@@ -252,18 +254,23 @@ def sa(test_backends):
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
-        import sqlalchemy as sa
-
-        return sa
+        try:
+            import sqlalchemy as sa
+            return sa
+        except ImportError:
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
 
 @pytest.fixture
 def spark_session(test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
-    from pyspark.sql import SparkSession
-
-    return SparkSession.builder.getOrCreate()
+    try:
+        import pyspark
+        from pyspark.sql import SparkSession
+        return SparkSession.builder.getOrCreate()
+    except ImportError:
+        raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
@@ -2121,8 +2128,11 @@ def sqlalchemy_dataset(test_backends):
 def sqlitedb_engine(test_backend):
     if test_backend == "sqlite":
         import sqlalchemy as sa
-
-        return sa.create_engine("sqlite://")
+        try:
+            import sqlalchemy as sa
+            return sa.create_engine("sqlite://")
+        except ImportError:
+            raise ValueError("sqlite tests require sqlalchemy to be installed")
     else:
         pytest.skip("Skipping test designed for sqlite on non-sqlite backend.")
 
@@ -2130,11 +2140,13 @@ def sqlitedb_engine(test_backend):
 @pytest.fixture
 def postgresql_engine(test_backend):
     if test_backend == "postgresql":
-        import sqlalchemy as sa
-
-        engine = sa.create_engine("postgresql://postgres@localhost/test_ci").connect()
-        yield engine
-        engine.close()
+        try:
+            import sqlalchemy as sa
+            engine = sa.create_engine("postgresql://postgres@localhost/test_ci").connect()
+            yield engine
+            engine.close()
+        except ImportError:
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
         pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
 
@@ -2143,6 +2155,15 @@ def postgresql_engine(test_backend):
 def empty_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = ge.data_context.DataContext.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    return context
+
+@pytest.fixture
+def empty_data_context_v3(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp("empty_data_context_v3"))
+    context = ge.data_context.DataContextV3.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
@@ -2250,12 +2271,15 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 @pytest.fixture
 def titanic_sqlite_db(sa):
-    from sqlalchemy import create_engine
-
-    titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
-    engine = create_engine("sqlite:///{}".format(titanic_db_path))
-    assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
-    return engine
+    try:
+        import sqlalchemy as sa
+        from sqlalchemy import create_engine
+        titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
+        engine = create_engine("sqlite:///{}".format(titanic_db_path))
+        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        return engine
+    except ImportError:
+        raise ValueError("sqlite tests require sqlalchemy to be installed")
 
 
 @pytest.fixture
@@ -2280,8 +2304,8 @@ def titanic_expectation_suite():
 def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
-
         engine = create_engine("sqlite://")
         assert engine.execute("select 1").fetchall()[0] == (1,)
         return engine
@@ -2566,62 +2590,6 @@ def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
     return empty_data_context
 
 
-@pytest.fixture()
-def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_no_groups_no_sorters_data_context(
-    empty_data_context: DataContext,
-    default_base_directory: str = "data",
-    data_asset_base_directory: str = None,
-):
-    data_context: DataContext = empty_data_context
-    execution_environment_name: str = "test_execution_environment"
-    data_context.add_execution_environment(
-        name=execution_environment_name,
-        initialize=True,
-        **execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
-            use_group_names=False,
-            use_sorters=False,
-            default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory,
-        )[
-            "test_execution_environment"
-        ],
-    )
-    base_directory_names: list = [default_base_directory, data_asset_base_directory]
-    root_directory_path: str = data_context.root_directory
-    create_files_for_regex_partitioner(
-        root_directory_path=root_directory_path, directory_paths=base_directory_names
-    )
-    return data_context
-
-
-@pytest.fixture()
-def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_with_groups_with_sorters_data_context(
-    empty_data_context: DataContext,
-    default_base_directory: str = "data",
-    data_asset_base_directory: str = None,
-):
-    data_context: DataContext = empty_data_context
-    execution_environment_name: str = "test_execution_environment"
-    data_context.add_execution_environment(
-        name=execution_environment_name,
-        initialize=True,
-        **execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
-            use_group_names=True,
-            use_sorters=True,
-            default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory,
-        )[
-            "test_execution_environment"
-        ],
-    )
-    base_directory_names: list = [default_base_directory, data_asset_base_directory]
-    root_directory_path: str = data_context.root_directory
-    create_files_for_regex_partitioner(
-        root_directory_path=root_directory_path, directory_paths=base_directory_names
-    )
-    return data_context
-
-
 @pytest.fixture
 def filesystem_csv(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("filesystem_csv")
@@ -2831,18 +2799,20 @@ def evr_success():
 def sqlite_view_engine(test_backends):
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
-        import sqlalchemy as sa
-
-        sqlite_engine = sa.create_engine("sqlite://")
-        df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-        df.to_sql("test_table", con=sqlite_engine)
-        sqlite_engine.execute(
-            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-        )
-        sqlite_engine.execute(
-            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-        )
-        return sqlite_engine
+        try:
+            import sqlalchemy as sa
+            sqlite_engine = sa.create_engine("sqlite://")
+            df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
+            df.to_sql("test_table", con=sqlite_engine)
+            sqlite_engine.execute(
+                "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+            )
+            sqlite_engine.execute(
+                "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
+            )
+            return sqlite_engine
+        except ImportError:
+            sa = None
     else:
         pytest.skip("SqlAlchemy tests disabled; not testing views")
 
@@ -2855,3 +2825,48 @@ def expectation_suite_identifier():
 @pytest.fixture
 def basic_sqlalchemy_datasource(sqlitedb_engine):
     return SqlAlchemyDatasource("basic_sqlalchemy_datasource", engine=sqlitedb_engine)
+
+
+@pytest.fixture
+def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
+    if sa is None:
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+
+    db_file = file_relative_path(
+        __file__, os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+    engine = sa.create_engine(f"sqlite:////{db_file}")
+    conn = engine.connect()
+
+    # Build a SqlAlchemyDataset using that database
+    return SqlAlchemyExecutionEngine(name="test_sql_execution_engine", engine=conn,)
+
+
+@pytest.fixture()
+def test_folder_connection_path(tmp_path_factory):
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    path = str(tmp_path_factory.mktemp("test_folder_connection_path"))
+    df1.to_csv(os.path.join(path, "test.csv"))
+    return str(path)
+
+@pytest.fixture
+def test_db_connection_string(tmp_path_factory, test_backends):
+    if "sqlite" not in test_backends:
+        pytest.skip("skipping fixture because sqlite not selected")
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    df2 = pd.DataFrame({"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]})
+
+    try:
+        import sqlalchemy as sa
+        basepath = str(tmp_path_factory.mktemp("db_context"))
+        path = os.path.join(basepath, "test.db")
+        engine = sa.create_engine("sqlite:///" + str(path))
+        df1.to_sql("table_1", con=engine, index=True)
+        df2.to_sql("table_2", con=engine, index=True, schema="main")
+
+        # Return a connection string to this newly-created db
+        return "sqlite:///" + str(path)
+    except ImportError:
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+

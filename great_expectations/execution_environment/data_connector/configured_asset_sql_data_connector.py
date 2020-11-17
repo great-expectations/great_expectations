@@ -1,20 +1,16 @@
 import random
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import pandas as pd
 
 from great_expectations.core.batch import (
     BatchDefinition,
-    BatchMarkers,
-    BatchRequest,
     BatchSpec,
     PartitionDefinition,
-    PartitionRequest,
 )
+from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
-from great_expectations.execution_environment.data_connector.data_connector import (
-    DataConnector,
-)
+from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
 
 try:
     import sqlalchemy as sa
@@ -22,15 +18,15 @@ except ImportError:
     sa = None
 
 
-class SqlDataConnector(DataConnector):
+class ConfiguredAssetSqlDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
         execution_environment_name: str,
         execution_engine,
-        assets: List[Dict],
+        data_assets: Dict[str, Asset],
     ):
-        self._assets = assets
+        self._data_assets = data_assets
 
         super().__init__(
             name=name,
@@ -39,35 +35,58 @@ class SqlDataConnector(DataConnector):
         )
 
     @property
-    def assets(self) -> Dict[str, Asset]:
-        return self._assets
+    def data_assets(self) -> Dict[str, Asset]:
+        return self._data_assets
 
-    def refresh_data_references_cache(self):
-        self._data_references_cache = {}
+    def add_data_asset(
+        self,
+        name,
+        config,
+    ):
+        self._data_assets[name] = config
 
-        for data_asset_name in self._assets:
-            data_asset = self._assets[data_asset_name]
-            if "table_name" in data_asset:
-                table_name = data_asset["table_name"]
-            else:
-                table_name = data_asset_name
-
-            splitter_fn = getattr(self, data_asset["splitter_method"])
+    def _get_partition_definition_list_from_data_asset_config(
+        self,
+        data_asset_name,
+        data_asset_config,
+    ):
+        if "table_name" in data_asset_config:
+            table_name = data_asset_config["table_name"]
+        else:
+            table_name = data_asset_name
+        
+        if "splitter_method" in data_asset_config:
+            splitter_fn = getattr(self, data_asset_config["splitter_method"])
             split_query = splitter_fn(
-                table_name=table_name, **data_asset["splitter_kwargs"]
+                table_name=table_name,
+                **data_asset_config["splitter_kwargs"]
             )
 
             rows = self._execution_engine.engine.execute(split_query).fetchall()
 
             # Zip up split parameters with column names
             column_names = self._get_column_names_from_splitter_kwargs(
-                data_asset["splitter_kwargs"]
+                data_asset_config["splitter_kwargs"]
             )
             partition_definition_list = [dict(zip(column_names, row)) for row in rows]
 
+        else:
+            partition_definition_list = [{}]
+
+        return partition_definition_list
+
+    def _refresh_data_references_cache(self):
+        self._data_references_cache = {}
+
+        for data_asset_name in self.data_assets:
+            data_asset = self.data_assets[data_asset_name]
+            partition_definition_list = self._get_partition_definition_list_from_data_asset_config(
+                data_asset_name,
+                data_asset,
+            )
+
             # TODO Abe 20201029 : Apply sorters to partition_definition_list here
             # TODO Will 20201102 : add sorting code here
-
             self._data_references_cache[data_asset_name] = partition_definition_list
 
     def _get_column_names_from_splitter_kwargs(self, splitter_kwargs) -> List[str]:
@@ -81,24 +100,34 @@ class SqlDataConnector(DataConnector):
         return column_names
 
     def get_available_data_asset_names(self):
-        return list(self.assets.keys())
-
-    def get_unmatched_data_references(self):
+        return list(self.data_assets.keys())
+    
+    def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
-            raise ValueError(
-                "_data_references_cache is None. Have you called refresh_data_references_cache yet?"
-            )
-
-        return [k for k, v in self._data_references_cache.items() if v is None]
+            raise ValueError("_data_references_cache is None. Have you called _refresh_data_references_cache yet?")
+        return []
 
     def get_batch_definition_list_from_batch_request(self, batch_request):
-        batch_definition_list = []
+        self._validate_batch_request(batch_request=batch_request)
 
-        sub_cache = self._data_references_cache[batch_request.data_asset_name]
-        for batch_definition in sub_cache:
-            if self._batch_definition_matches_batch_request(
-                batch_definition, batch_request
-            ):
+        if self._data_references_cache is None:
+            self._refresh_data_references_cache()
+
+        batch_definition_list = []
+        
+        try:
+            sub_cache = self._data_references_cache[batch_request.data_asset_name]
+        except KeyError as e:
+            raise KeyError(f"data_asset_name {batch_request.data_asset_name} is not recognized.")
+
+        for partition_definition in sub_cache:
+            batch_definition = BatchDefinition(
+                execution_environment_name=self.execution_environment_name,
+                data_connector_name=self.name,
+                data_asset_name=batch_request.data_asset_name,
+                partition_definition=PartitionDefinition(partition_definition)
+            )
+            if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
         return batch_definition_list
@@ -108,35 +137,42 @@ class SqlDataConnector(DataConnector):
     ) -> List[str]:
         return self._data_references_cache[data_asset_name]
 
-    def _build_batch_spec_from_batch_definition(
-        self, batch_definition: BatchDefinition
+    def build_batch_spec(
+        self,
+        batch_definition: BatchDefinition
     ):
         data_asset_name = batch_definition.data_asset_name
-        batch_spec = BatchSpec(
-            {
-                "table_name": data_asset_name,
-                "partition_definition": batch_definition.partition_definition,
-                **self.assets[data_asset_name],
-            }
-        )
+        batch_spec = BatchSpec({
+            "table_name" : data_asset_name,
+            "partition_definition": batch_definition.partition_definition,
+            **self.data_assets[data_asset_name],
+        })
 
         return batch_spec
 
-    def self_check(self, pretty_print=True, max_examples=3):
-        return_object = super().self_check(
-            pretty_print=pretty_print, max_examples=max_examples
+    def self_check(
+        self,
+        pretty_print=True,
+        max_examples=3
+    ):
+        report_object = super().self_check(
+            pretty_print=pretty_print,
+            max_examples=max_examples
         )
 
         # Choose an example data_reference
         if pretty_print:
             print("\n\tChoosing an example data reference...")
 
-        example_data_reference = None
-        for data_asset_name, data_asset_return_obj in return_object[
-            "data_assets"
-        ].items():
-            # print(data_asset_name)
-            # print(json.dumps(data_asset_return_obj["example_data_references"], indent=2))
+        example_data_reference =  None
+
+        available_references = report_object["data_assets"].items()
+        if len(available_references) == 0:
+            if pretty_print:
+                print(f"\t\tNo references available.")
+            return report_object
+
+        for data_asset_name, data_asset_return_obj in available_references:
             if data_asset_return_obj["batch_definition_count"] > 0:
                 example_data_reference = random.choice(
                     data_asset_return_obj["example_data_references"]
@@ -149,11 +185,7 @@ class SqlDataConnector(DataConnector):
         # ...and fetch it.
         if pretty_print:
             print(f"\n\t\tFetching batch data..")
-        (
-            batch_data,
-            batch_spec,
-            batch_markers,
-        ) = self.get_batch_data_and_metadata_from_batch_definition(
+        batch_data, batch_spec, batch_markers = self.get_batch_data_and_metadata(
             BatchDefinition(
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,
@@ -162,25 +194,32 @@ class SqlDataConnector(DataConnector):
             )
         )
         rows = batch_data.fetchall()
-        return_object["example_data_reference"] = {
-            "batch_spec": batch_spec,
-            "n_rows": len(rows),
+        report_object["example_data_reference"] = {
+            "batch_spec" : batch_spec,
+            "n_rows" : len(rows),
         }
 
         if pretty_print:
             print(f"\n\t\tShowing 5 rows")
-            print(pd.DataFrame(rows[:5]))
-
-        return return_object
+            print(pd.DataFrame(
+                rows,
+                columns=batch_data._metadata.keys
+            )[:5])
+    
+        return report_object
 
     ### Splitter methods for listing partitions ###
 
     def _split_on_whole_table(
-        self, table_name: str, column_name: str,
+        self,
+        table_name: str,
     ):
-        """'Split' by returning the whole table"""
+        """'Split' by returning the whole table
+        
+        Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
+        """
 
-        return [0]
+        return sa.select([sa.true()])
 
     def _split_on_column_value(
         self, table_name: str, column_name: str,

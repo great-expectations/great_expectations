@@ -18,15 +18,6 @@ yaml = YAML()
 
 
 @pytest.fixture(scope="module")
-def test_folder_connection_path(tmp_path_factory):
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    path = str(tmp_path_factory.mktemp("test_folder_connection_path"))
-    df1.to_csv(os.path.join(path, "test.csv"))
-
-    return str(path)
-
-
-@pytest.fixture(scope="module")
 def test_parquet_folder_connection_path(tmp_path_factory):
     pandas_version = re.match(r"(\d+)\.(\d+)\..+", pd.__version__)
     if pandas_version is None:

@@ -5,7 +5,6 @@ import os
 import random
 import string
 from functools import wraps
-from types import ModuleType
 from typing import List, Union
 
 import numpy as np
@@ -14,14 +13,12 @@ import pytest
 from dateutil.parser import parse
 
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationConfigurationSchema,
     ExpectationSuite,
     ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
-from great_expectations.core.batch import Batch
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
@@ -39,7 +36,6 @@ from great_expectations.execution_environment.types import (
     SqlAlchemyDatasourceBatchSpec,
     SqlAlchemyDatasourceTableBatchSpec,
 )
-from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.validator.validator import Validator
 
@@ -1506,126 +1502,6 @@ def safe_remove(path):
             print(e)
 
 
-# TODO: <Alex>Replace this all-purpose configuration with purpose-fit configuration sections using YAML.</Alex>
-def execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config(
-    use_group_names: bool = False,
-    use_sorters: bool = False,
-    default_base_directory="data",
-    data_asset_base_directory=None,
-):
-    if not use_group_names and use_sorters:
-        raise ValueError(
-            "The presently available data_connector and partitioner tests match sorters with group names."
-        )
-
-    group_names: Union[list, None]
-    if use_group_names:
-        group_names = ["name", "timestamp", "price"]
-    else:
-        group_names = None
-
-    sorters: Union[list, None]
-    if use_sorters:
-        sorters = [
-            # {
-            #     "name": "name",
-            #     "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-            #     "class_name": "LexicographicSorter",
-            #     "orderby": "asc",
-            # },
-            {
-                "name": "timestamp",
-                "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                "class_name": "DateTimeSorter",
-                "orderby": "desc",
-                "datetime_format": "%Y%m%d",
-            },
-            {
-                "name": "price",
-                "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter",
-                "class_name": "NumericSorter",
-                "orderby": "desc",
-            },
-        ]
-    else:
-        sorters = None
-
-    test_asset_0 = {
-        "module_name": "great_expectations.execution_environment.data_connector.asset",
-        # "partitioner_name": "test_regex_partitioner",
-        # "glob_directive": "alex*",
-        "glob_directive": "Titanic*",
-    }
-    if data_asset_base_directory is not None:
-        test_asset_0["base_directory"] = data_asset_base_directory
-
-    execution_environments_config: dict = {
-        "test_execution_environment": {
-            "class_name": "ExecutionEnvironment",
-            "execution_engine": {
-                "module_name": "great_expectations.execution_engine",
-                "class_name": "PandasExecutionEngine",
-                "caching": True,
-                "batch_spec_defaults": {},
-            },
-            "data_connectors": {
-                "test_pipeline_data_connector": {
-                    "module_name": "great_expectations.execution_environment.data_connector",
-                    "class_name": "PipelineDataConnector",
-                    "runtime_keys": ["pipeline_stage_name", "run_id", "custom_key_0",],
-                    # "partitioners": {
-                    #     "test_pipeline_partitioner": {
-                    #         "module_name": "great_expectations.execution_environment.data_connector.partitioner",
-                    #         "class_name": "PipelinePartitioner",
-                    #         "allow_multipart_partitions": False,
-                    #         "runtime_keys": [
-                    #             "run_id",
-                    #             "custom_key_0",
-                    #         ]
-                    #     }
-                    # },
-                    # "default_partitioner_name": "test_pipeline_partitioner",
-                    # "assets": {
-                    #     "test_asset_1": {
-                    #         # "partitioner_name": "test_pipeline_partitioner"
-                    #     }
-                    # }
-                },
-                "test_filesystem_data_connector": {
-                    "module_name": "great_expectations.execution_environment.data_connector",
-                    "class_name": "ConfiguredAssetFilesystemDataConnector",
-                    "base_directory": default_base_directory,
-                    "glob_directive": "*",
-                    # "partitioners": {
-                    #     "test_regex_partitioner": {
-                    #         "module_name": "great_expectations.execution_environment.data_connector.partitioner",
-                    #         "class_name": "RegexPartitioner",
-                    #         "pattern": r"(.+)_(.+)_(.+)\.csv",
-                    #         "group_names": group_names,
-                    #         "allow_multipart_partitions": False,
-                    #         "sorters": sorters,
-                    #         "runtime_keys": [
-                    #             "run_id",
-                    #             "custom_key_0",
-                    #         ]
-                    #     }
-                    # },
-                    "default_regex": {
-                        "pattern": r"(.+)_(.+)_(.+)\.csv",
-                        "group_names": group_names,
-                    },
-                    # "default_partitioner_name": "test_regex_partitioner",
-                    "assets": {
-                        # "test_asset_0": test_asset_0,
-                        "Titanic": test_asset_0,
-                    },
-                },
-            },
-        }
-    }
-    return execution_environments_config
-
-
 def create_files_for_regex_partitioner(
     root_directory_path: str, directory_paths: list = None, test_file_names: list = None
 ):
@@ -1683,3 +1559,4 @@ def create_files_in_directory(
 
 def create_fake_data_frame():
     return pd.DataFrame({"x": range(10), "y": list("ABCDEFGHIJ"),})
+
