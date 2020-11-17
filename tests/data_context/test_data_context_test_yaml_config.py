@@ -280,3 +280,12 @@ introspection:
             "whole_table_with_limits",
             "DOES_NOT_EXIST",
         )
+
+    my_validator = context.get_validator(
+        "my_datasource",
+        "whole_table_with_limits",
+        "test_df",
+        expectation_suite_name="my_expectation_suite",
+    )
+    evr = my_validator.expect_table_columns_to_match_ordered_list([])
+    assert evr.success == True
