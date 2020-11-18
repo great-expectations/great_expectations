@@ -401,7 +401,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             raise InvalidConfigError(
                 "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
             )
-        self.engine.connect()
+        connection = self.engine.connect()
+        connection.close()
 
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in [
