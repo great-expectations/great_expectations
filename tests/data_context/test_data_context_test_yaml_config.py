@@ -288,11 +288,11 @@ introspection:
         "test_df",
         expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
-    # my_evr = my_validator.expect_column_values_to_be_between(
-    #     column="a",
-    #     min_value=10,
-    #     max_value=100,
-    # )
+    my_evr = my_validator.expect_column_values_to_be_between(
+        column="a",
+        min_value=10,
+        max_value=100,
+    )
     # assert my_evr.success == True
     # # my_evr.my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["a", "b", "c"])
     # assert my_evr.success == True

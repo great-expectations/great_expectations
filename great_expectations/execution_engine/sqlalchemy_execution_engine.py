@@ -123,14 +123,33 @@ class SqlAlchemyBatchData:
     and several getters used to access various properties."""
 
     def __init__(
-        self, engine, table_name=None, schema=None, query=None, use_quoted_name=False
+        self,
+        engine,
+        record_set_name: str = None,
+
+        # Option 1
+        schema_name: str=None,      
+        table_name: str=None,
+
+        # Option 2
+        query: str=None,
+
+        # Option 3
+        selectable=None,
+
+        create_temp_table : bool=True,
+        temp_table_schema_name: str = None,
+        use_quoted_name : bool=False
     ):
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
 
             Args:
-                engine (SqlAlchemyExecutionEngineExecutionEngine): \
-                    A SqlAlchemy Execution Engine that will act upon the data
+                engine (SqlAlchemy Engine): \
+                    A SqlAlchemy Engine or connection that will be used to access the data
+                record_set_name: (string or None): \
+                    The name of the record set available as a domain kwarg for Great Expectations validations. record_set_name
+                    can usually be None, but is required when there are multiple record_sets in the same Batch.
                 table_name (string or None): \
                     The name of the table that will be accessed. Either this parameter or the query parameter must be
                     specified. Default is 'None'.
@@ -138,20 +157,46 @@ class SqlAlchemyBatchData:
                     The name of the schema in which the databases lie
                 query (string or None): \
                     A query string representing a domain, which will be used to create a temporary table
-            """
+                selectable (Sqlalchemy Selectable or None): \
+                    A SqlAlchemy selectable representing a domain, which will be used to create a temporary table
+                create_temp_table (bool): \
+                    When building the batch data object from a query, this flag determines whether a temporary table should
+                    be created against which to validate data from the query. If False, a subselect statement will be used 
+                    in each validation.
+                temp_table_schema_name (str or None): \
+                    The name of the schema in which a temporary table should be created. If None, the default schema will be
+                    used if a temporary table is requested.
+                use_quoted_name (bool): \
+                    If true, names should be quoted to preserve case sensitivity on databases that usually normalize them
+
+        The query that will be executed against the DB can be determined in any of three ways:
+        
+            1. Specify a `schema_name` and `table_name`. This will query the whole table as a record_set. If schema_name is None, then the default schema will be used.
+            2. Specify a `query`, which will be executed as-is to fetch the record_set. NOTE Abe 20201118 : This functionality is currently untested.
+            3. Specify a `selectable`, which will be to fetch the record_set. This is the primary path used by DataConnectors.
+
+        In the case of (2) and (3) you have the option to execute the query either as a temporary table, or as a subselect statement.
+        
+        In general, temporary tables invite more optimization from the query engine itself. Subselect statements may sometimes be preffered, because they do not require write access on the database.
+
+                    
+        """
         self._engine = engine
+        self._record_set_name = record_set_name
         self._table_name = table_name
-        self._schema = schema
+        self._schema_name = schema_name
         self._query = query
+        self._create_temp_table = create_temp_table
         self._use_quoted_name = use_quoted_name
 
-        if table_name is None and query is None:
-            raise ValueError("Table_name or query must be specified")
+        if table_name is None and query is None and selectable is None:
+            raise ValueError("Exactly one of table_name, query, or selectable must be specified")
+
 
         if query and not table_name:
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
-            schema = None
+            schema_name = None
             table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
@@ -168,22 +213,31 @@ class SqlAlchemyBatchData:
 
         if engine.dialect.name.lower() == "bigquery":
             # In BigQuery the table name is already qualified with its schema name
-            self._table = sa.Table(table_name, sa.MetaData(), schema=None)
+            self._table = sa.Table(table_name, sa.MetaData(), schema_name=None)
 
         else:
-            self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
+            self._table = sa.Table(table_name, sa.MetaData(), schema_name=schema)
 
         if schema is not None and query is not None:
-            # temporary table will be written to temp schema, so don't allow
-            # a user-defined schema
-            # NOTE: 20200306 - JPC - Previously, this would disallow both custom_sql (a query) and a schema, but
+            # tem
+            if query:porary table will be written to temp schema, so don't allow
+                # a user-defined schema
+
+            else:
+                self._create_temporary_table(generated_table_name, selectable, schema_name=temp_table_schema_name)            # NOTE: 20200306 - JPC - Previously, this would disallow both custom_sql (a query) and a schema, but
             # that is overly restrictive -- snowflake could have had a schema specified, for example, in which to create
             # a temporary table.
             # raise ValueError("Cannot specify both schema and custom_sql.")
             pass
 
-        if query is not None and engine.dialect.name.lower() == "bigquery":
-            if generated_table_name is not None and engine.dialect.dataset_id is None:
+        if query 
+            self._selectable = sa.Table(generated_table_name, sa.MetaData(), schema_name=temp_table_schema_name)is not None and engine.dialect.name.lower() == "bigquery":
+        
+        else:
+            if query:
+                self._selectable = sa.text(query)
+            else:
+                self._selectable = selectable
                 raise ValueError(
                     "No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
                     "default dataset in engine url"
@@ -208,69 +262,79 @@ class SqlAlchemyBatchData:
             # reflection will not find the temporary schema
             self.columns = self.column_reflection_fallback()
 
-        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
         if len(self.columns) == 0:
-            self.columns = self.column_reflection_fallback()
+temp_table_temp_table_sql            self.columns = self.column_reflection_fallback()
 
-    @property
     def sql_engine_dialect(self) -> DefaultDialect:
-        """Returns the Batches' current engine dialect"""
-        return self._engine.dialect
-
-    @property
-    def table(self):
-        """Returns a table of the data inside the sqlalchemy_execution_engine"""
-        return self._table
-
-    @property
-    def use_quoted_name(self):
-        """Returns a table of the data inside the sqlalchemy_execution_engine"""
-        return self._use_quoted_name
-
-    @property
-    def schema(self):
-        return self._schema
-
-    @property
-    def selectable(self):
-        if self._table is not None:
-            return self._table
-        else:
-            return sa.text(self._query)
-
+        if isinstance(temp_table_sql, sa.Selectable):
+            temp_table_sql = temp_table_sql.compile(
+                    dialect=self.sql_engine_dialect, compile_kwargs={"literal_binds": True}
+            )ternal method; needs cleanup post-Tal-Snowflake updates
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
         """
-        Create Temporary table based on sql query. This will be used as a basis for executing expectations.
+        Create Temporary table based on sql query. This will betemp_table_sql basis for executing expectations.
         :param custom_sql:
-        """
+temp_table_sqltemp_table_sql        """
 
         ###
-        # NOTE: 20200310 - The update to support snowflake transient table creation revealed several
+temp_table_schema_name        # NOTE: 20200310 - Thtemp_table_schema_name support snowflake transient table creation revealed several
         # import cases that are not fully handled.
-        # The snowflake-related change updated behavior to allow both custom_sql and schema to be specified. But
+temp_table_sql        # The snowflake-related change temp_table_sqlhtemp_table_sqlllow both custom_sql and schema to be specified. But
         # the underlying incomplete handling of schema remains.
         #
         # Several cases we need to consider:
         #
-        # 1. Distributed backends (e.g. Snowflake and BigQuery) often use a `<database>.<schema>.<table>`
-        # syntax, but currently we are biased towards only allowing schema.table
+        # 1. Distributed backends (e.g. Snowflake and BigQuetemp_table_sqluse a `<database>.<schema>.<table>`
+        # syntax, but currently we are temp_table_sqlatemp_table_sqlllowing schema.table
         #
         # 2. In the wild, we see people using several ways to declare the schema they want to use:
         # a. In the connection string, the original RFC only specifies database, but schema is supported by some
         # backends (Snowflake) as a query parameter.
-        # b. As a default for a user (the equivalent of USE SCHEMA being provided at the beginning of a session)
+        # b. As a default for a utemp_table_sqlquivalent of USE SCHEMA being provided at the beginning of a session)
         # c. As part of individual queries.
         #
-        # 3. We currently don't make it possible to select from a table in one query, but create a temporary
+temp_table_sql        # 3. We currently don't make it possible to select from a table in one query, but create a temporary
         # table in
         # another schema, except for with BigQuery and (now) snowflake, where you can specify the table name (and
-        # potentially triple of database, schema, table) in the batch_kwargs.
+        # potemp_table_sql_tripletemp_table_sqlse, schema, table) in the batch_kwargs.
         #
-        # The SqlAlchemyDataset interface essentially predates the batch_kwargs concept and so part of what's going
+        # The Sqtemp_table_sql_taset interface essentially predatestemp_table_sql_modargs concept and so part of what's going
         # on, I think, is a mismatch between those. I think we should rename custom_sql -> "temp_table_query" or
         # similar, for example.
         ###
-
+temp_table_sql
+temp_table_sqltemp_table_sql        if self.sql_engine_dialect.name.lower() == "bigquery":
+            stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
+        elif self.sql_engine_dialect.name.lower() == "snowflake":
+            if schema_name is not None:
+                table_name = schema_name + "." + table_name
+            stmt = "CREATE OR REPLACE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
+        elif self.sql_engine_dialect.name == "mysql":
+            # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the
+            # generic case.
+            stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
+        elif self.sql_engine_dialect.name == "mssql":
+            # Insert "into #{table_name}" in the custom sql query right before the "from" clause
+            # Split is case sensitive so detect case.
+            # Note: transforming custom_sql to uppercase/lowercase has uninteded consequences (i.e.,
+            # changing column names), so this is not an option!
+            if "from" in custom_sql:
+                strsep = "from"
+            else:
+                strsep = "FROM"
+            custom_sqlmod = custom_sql.split(strsep, maxsplit=1)
+            stmt = (
+                custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]
+            ).format(table_name=table_name)
+        else:
+            stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
+                table_name=table_name, custom_sql=custom_sql
         if self.sql_engine_dialect.name.lower() == "bigquery":
             stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
@@ -306,6 +370,7 @@ class SqlAlchemyBatchData:
             )
         self._engine.execute(stmt)
 
+    #!!! Move this to the table.columns Metric
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
         col_info_dict_list: List[Dict]
@@ -934,7 +999,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def _build_selector_from_batch_spec(self, batch_spec):
+    def _build_selectable_from_batch_spec(self, batch_spec):
         table_name = batch_spec["table_name"]
 
         if "splitter_method" in batch_spec:
@@ -981,14 +1046,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self, batch_spec
     ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
 
-        selector = self._build_selector_from_batch_spec(batch_spec)
-        batch_data = self.engine.execute(selector)
+        selectable = self._build_selectable_from_batch_spec(batch_spec)
+        # batch_data = self.engine.execute(selector)
         # TODO: Abe 20201030: This method should return a SqlAlchemyBatchData as its first object, but that probably requires deeper changes.
-        # SqlAlchemyBatchData(
-        #     engine=self.engine,
-        #     table_name=batch_spec.get("table"),
-        #     schema=batch_spec.get("schema"),
-        # )
+        batch_data = SqlAlchemyBatchData(
+            engine=self.engine,
+            selectable=selectable,
+            # table_name=batch_spec.get("table"),
+            # schema=batch_spec.get("schema"),
+        )
 
         batch_markers = BatchMarkers(
             {
