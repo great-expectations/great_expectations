@@ -236,6 +236,7 @@ introspection:
     assert report_object["data_connectors"]["count"] == 1
     assert set(report_object["data_connectors"].keys()) == {"count", "my_very_awesome_data_connector"}
 
+
 def test_golden_path_sql_execution_environment_configuration(sa, empty_data_context_v3, test_connectable_postgresql_db):
     """Tests the golden path for setting up a StreamlinedSQLExecutionEnvironment using test_yaml_config"""
     context = empty_data_context_v3
@@ -260,11 +261,11 @@ introspection:
         sampling_kwargs:
             n: 10
 """
-    report_object = context.test_yaml_config(
-        name="my_datasource",
-        yaml_config=yaml_config,
-        return_mode="report_object",
-    )
+    # report_object = context.test_yaml_config(
+    #     name="my_datasource",
+    #     yaml_config=yaml_config,
+    #     return_mode="report_object",
+    # )
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
 
@@ -288,11 +289,97 @@ introspection:
         "test_df",
         expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
-    # my_evr = my_validator.expect_column_values_to_be_between(
-    #     column="a",
-    #     min_value=10,
-    #     max_value=100,
-    # )
-    # assert my_evr.success == True
-    # # my_evr.my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["a", "b", "c"])
-    # assert my_evr.success == True
+    my_evr = my_validator.expect_column_values_to_be_between(
+        column="a",
+        min_value=10,
+        max_value=100,
+    )
+    assert my_evr.success
+
+    # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["a", "b", "c"])
+    # assert my_evr.success
+
+
+def test_golden_path_pandas_execution_environment_configuration(empty_data_context_v3, tmp_path_factory):
+    """
+    Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
+    """
+    context = empty_data_context_v3
+
+    os.chdir(context.root_directory)
+    import great_expectations as ge
+    context = ge.get_context()
+
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_golden_path_pandas_execution_environment_configuration"
+        )
+    )
+
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "C-100.csv",
+            "B-10.csv",
+            "A-1.csv",
+        ],
+        file_content_fn=lambda: "x,y,z\n11,12,13\n87,88,89"
+    )
+
+    yaml_config = f"""
+class_name: ExecutionEnvironment
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: {base_directory}
+        # glob_directive: "*"
+
+        default_regex:
+            pattern: (.+)\\.csv
+            group_names:
+                - data_asset_name
+"""
+
+    # A method, such as the one in the line below, needs to be called in order to populate the cache(s).
+    report_object = context.test_yaml_config(
+        name="my_directory_datasource",
+        yaml_config=yaml_config,
+        return_mode="report_object",
+    )
+    # print(json.dumps(report_object, indent=2))
+    # print(context.datasources)
+
+    my_batch = context.get_batch(
+        "my_directory_datasource",
+        "my_filesystem_data_connector",
+        "A-1",
+    )
+    assert my_batch.batch_markers["pandas_data_fingerprint"] == "46e3908e5fbf959c959a5e8af4c73435"
+
+    with pytest.raises(ValueError):
+        my_batch = context.get_batch(
+            "my_directory_datasource",
+            "my_filesystem_data_connector",
+            "DOES_NOT_EXIST",
+        )
+
+    my_validator = context.get_validator(
+        "my_directory_datasource",
+        "my_filesystem_data_connector",
+        "A-1",
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
+        # attach_new_expectation_suite=True, # The implementation of this argument is currently work-in-progress.
+    )
+    my_evr = my_validator.expect_column_values_to_be_between(
+        column="z",
+        min_value=10,
+        max_value=90,
+    )
+    assert my_evr.success
+
+    # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
+    # assert my_evr.success

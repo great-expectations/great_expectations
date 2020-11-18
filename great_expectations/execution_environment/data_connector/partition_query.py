@@ -158,6 +158,8 @@ class PartitionQuery:
         "partition_identifiers",
         "index",
         "limit",
+        "sampling_method",
+        "sampling_kwargs",
     }
 
     def __init__(
