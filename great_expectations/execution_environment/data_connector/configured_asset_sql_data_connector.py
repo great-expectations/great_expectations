@@ -143,6 +143,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         data_reference,#: Any,
         data_asset_name: Optional[str] = None
     ) -> Optional[List[BatchDefinition]]:
+# Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries, allowing us to invoke `PartitionDefinition(data_reference)`
 
         return [BatchDefinition(
             execution_environment_name=self.execution_environment_name,
