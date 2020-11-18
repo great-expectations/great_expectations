@@ -206,7 +206,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         Any,  # batch_data
         BatchMarkers
     ]:
-        batch_data: Any = None
+        batch_data: DataFrame
 
         # We need to build a batch_markers to be used in the dataframe
         batch_markers: BatchMarkers = BatchMarkers(
@@ -216,42 +216,39 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 )
             }
         )
+
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             batch_data = batch_spec.batch_data
-        elif isinstance(batch_spec, PathBatchSpec):
+        elif isinstance(batch_spec, (PathBatchSpec, S3BatchSpec)):
             reader_method: str = batch_spec.get("reader_method")
             reader_options: dict = batch_spec.get("reader_options") or {}
-
-            path: str = batch_spec["path"]
-            reader = self.spark.read
-            reader_fn: Callable = self._get_reader_fn(reader, reader_method, path)
-            batch_data = reader_fn(path, **reader_options)
-        elif isinstance(batch_spec, S3BatchSpec):
-
-            reader_method = batch_spec.get("reader_method")
-            reader_options: dict = batch_spec.get("reader_options") or {}
-            url = batch_spec.get("s3")
-            reader_fn = self._get_reader_fn(reader=self.spark.read, reader_method=reader_method, path=url)
-            batch_data = reader_fn(path=url, **reader_options)
-
+            path: str = batch_spec.get("path") or batch_spec.get("s3")
+            reader_fn: Callable = self._get_reader_fn(
+                reader=self.spark.read.options(**reader_options),
+                reader_method=reader_method,
+                path=path
+            )
+            batch_data = reader_fn(path=path)
         else:
             raise BatchSpecError(
-            """
+                """
                 Invalid batch_spec: batch_data is required for a SparkDFExecutionEngine to operate.
-            """
+                """
             )
+
         batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
+
         return batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
             splitter_fn = getattr(self, batch_spec.get("splitter_method"))
-            splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
+            splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
         if batch_spec.get("sampling_method"):
             sampling_fn = getattr(self, batch_spec.get("sampling_method"))
-            sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
+            sampling_kwargs: dict = batch_spec.get("sampling_kwargs") or {}
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
         return batch_data
 
@@ -268,9 +265,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         """
         if path.endswith(".csv") or path.endswith(".tsv"):
-            return {"reader_method": "csv"}
+            return "csv"
         elif path.endswith(".parquet"):
-            return {"reader_method": "parquet"}
+            return "parquet"
 
         raise BatchKwargsError(
             "Unable to determine reader method from path: %s" % path, {"path": path}
@@ -295,34 +292,18 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
 
         if reader_method is None:
-            reader_method = self.guess_reader_method_from_path(path=path)[
-                "reader_method"
-            ]
+            reader_method = self.guess_reader_method_from_path(path=path)
 
+        reader_method_op: str = reader_method.lower()
         try:
-            if reader_method.lower() == "delta":
-                return reader.format("delta").load
+            if reader_method_op == "delta":
+                return reader.format(reader_method_op).load
             return getattr(reader, reader_method)
         except AttributeError:
             raise BatchKwargsError(
                 "Unable to find reader_method %s in spark." % reader_method,
                 {"reader_method": reader_method},
             )
-
-    def process_batch_definition(self, batch_definition, batch_spec):
-        """Given that the batch definition has a limit state, transfers the limit dictionary entry from the batch_definition
-        to the batch_spec.
-        Args:
-            batch_definition: The batch definition to use in configuring the batch spec's limit
-            batch_spec: a batch_spec dictionary whose limit needs to be configured
-        Returns:
-            ReaderMethod to use for the filepath
-        """
-        limit = batch_definition.get("limit")
-        if limit is not None:
-            if not batch_spec.get("limit"):
-                batch_spec["limit"] = limit
-        return batch_spec
 
     def get_compute_domain(
         self, domain_kwargs: dict
