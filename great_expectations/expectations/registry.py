@@ -1,14 +1,17 @@
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.metric import Metric
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
-from great_expectations.validator.validation_graph import MetricEdgeKey
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
 _registered_expectations = dict()
 _registered_metrics = dict()
+_registered_renderers = dict()
+
 """
 {
   "metric_name"
@@ -19,6 +22,49 @@ _registered_metrics = dict()
       engine: provider
 }
 """
+
+
+def register_renderer(
+    object_name: str,
+    parent_class: Type[Union["Expectation", "Metric"]],
+    renderer_fn: Callable,
+):
+    renderer_name = renderer_fn._renderer_type
+    if object_name not in _registered_renderers:
+        logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
+        _registered_renderers[object_name] = {
+            renderer_name: (parent_class, renderer_fn)
+        }
+        return
+
+    if renderer_name in _registered_renderers[object_name]:
+        if _registered_renderers[object_name][renderer_name] == (
+            parent_class,
+            renderer_fn,
+        ):
+            logger.info(
+                f"Multiple declarations of {renderer_name} renderer for expectation_type {object_name} "
+                f"found."
+            )
+            return
+        else:
+            logger.warning(
+                f"Overwriting declaration of {renderer_name} renderer for expectation_type "
+                f"{object_name}."
+            )
+            _registered_renderers[object_name][renderer_name] = (
+                parent_class,
+                renderer_fn,
+            )
+        return
+    else:
+        logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
+        _registered_renderers[object_name][renderer_name] = (parent_class, renderer_fn)
+        return
+
+
+def get_renderer_impl(object_name, renderer_type):
+    return _registered_renderers.get(object_name, {}).get(renderer_type)
 
 
 def register_expectation(expectation: Type["Expectation"]) -> None:
@@ -48,30 +94,19 @@ def _add_response_key(res, key, value):
 
 def register_metric(
     metric_name: str,
-    metric_domain_keys: Tuple[str],
-    metric_value_keys: Tuple[str],
+    metric_domain_keys: Tuple[str, ...],
+    metric_value_keys: Tuple[str, ...],
     execution_engine: Type["ExecutionEngine"],
-    metric_dependencies: Tuple[str],
+    metric_class: Type["MetricProvider"],
     metric_provider: Callable,
-    bundle_computation: bool = False,
-    filter_column_isnull: bool = True,
+    metric_fn_type: str,
 ) -> dict:
     res = dict()
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
-    metric_provider._can_be_bundled = bundle_computation
+    metric_provider.metric_fn_type = metric_fn_type
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]
-        current_dependencies = metric_definition.get("metric_dependencies", set())
-        if set(current_dependencies) != set(metric_dependencies):
-            logger.warning(
-                f"metric {metric_name} is being registered with different dependencies; overwriting dependencies"
-            )
-            _add_response_key(
-                res,
-                "warning",
-                f"metric {metric_name} is being registered with different dependencies; overwriting dependencies",
-            )
         current_domain_keys = metric_definition.get("metric_domain_keys", set())
         if set(current_domain_keys) != set(metric_domain_keys):
             logger.warning(
@@ -94,7 +129,7 @@ def register_metric(
             )
         providers = metric_definition.get("providers", dict())
         if execution_engine_name in providers:
-            current_provider_fn = providers[execution_engine_name]
+            current_provider_cls, current_provider_fn = providers[execution_engine_name]
             if current_provider_fn != metric_provider:
                 logger.warning(
                     f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider"
@@ -104,7 +139,7 @@ def register_metric(
                     "warning",
                     f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider",
                 )
-                providers[execution_engine_name] = metric_provider
+                providers[execution_engine_name] = metric_class, metric_provider
             else:
                 logger.info(
                     f"Multiple declarations of metric {metric_name} for engine {execution_engine_name}."
@@ -115,14 +150,13 @@ def register_metric(
                     f"Multiple declarations of metric {metric_name} for engine {execution_engine_name}.",
                 )
         else:
-            providers[execution_engine_name] = metric_provider
+            providers[execution_engine_name] = metric_class, metric_provider
     else:
         metric_definition = {
             "metric_domain_keys": metric_domain_keys,
             "metric_value_keys": metric_value_keys,
-            "metric_dependencies": metric_dependencies,
-            "providers": {execution_engine_name: metric_provider},
-            "filter_column_isnull": filter_column_isnull,
+            "default_kwarg_values": metric_class.default_kwarg_values,
+            "providers": {execution_engine_name: (metric_class, metric_provider)},
         }
         _registered_metrics[metric_name] = metric_definition
     res["success"] = True
@@ -133,20 +167,12 @@ def get_metric_provider(
     metric_name: str, execution_engine: "ExecutionEngine"
 ) -> Callable:
     try:
-        metric_definition = _registered_metrics.get(metric_name, dict())
+        metric_definition = _registered_metrics[metric_name]
         return metric_definition["providers"][type(execution_engine).__name__]
     except KeyError:
         raise MetricProviderError(
             f"No provider found for {metric_name} using {type(execution_engine).__name__}"
         )
-
-
-def get_metric_dependencies(metric_name: str) -> Tuple[str]:
-    try:
-        metric_definition = _registered_metrics.get(metric_name, dict())
-        return metric_definition["metric_dependencies"]
-    except KeyError:
-        raise MetricProviderError(f"No definition found for {metric_name}")
 
 
 def get_metric_kwargs(
@@ -155,21 +181,23 @@ def get_metric_kwargs(
     runtime_configuration: Optional[dict] = None,
 ) -> dict():
     try:
-        metric_definition = _registered_metrics.get(metric_name, dict())
+        metric_definition = _registered_metrics.get(metric_name)
+        if metric_definition is None:
+            raise MetricProviderError(f"No definition found for {metric_name}")
+        default_kwarg_values = metric_definition["default_kwarg_values"]
         metric_kwargs = {
             "metric_domain_keys": metric_definition["metric_domain_keys"],
             "metric_value_keys": metric_definition["metric_value_keys"],
-            "filter_column_isnull": metric_definition["filter_column_isnull"],
         }
         if configuration:
             expectation_impl = get_expectation_impl(configuration.expectation_type)
-            configuration_kwargs = expectation_impl(
-                configuration=configuration
-            ).get_runtime_kwargs(runtime_configuration=runtime_configuration)
+            configuration_kwargs = expectation_impl().get_runtime_kwargs(
+                configuration=configuration, runtime_configuration=runtime_configuration
+            )
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {
-                        k: configuration_kwargs.get(k)
+                        k: configuration_kwargs.get(k, default_kwarg_values.get(k))
                         for k in metric_kwargs["metric_domain_keys"]
                     }
                 )
@@ -178,7 +206,7 @@ def get_metric_kwargs(
             if len(metric_kwargs["metric_value_keys"]) > 0:
                 metric_value_kwargs = IDDict(
                     {
-                        k: configuration_kwargs.get(k)
+                        k: configuration_kwargs.get(k, default_kwarg_values.get(k))
                         for k in metric_kwargs["metric_value_keys"]
                     }
                 )
@@ -201,11 +229,10 @@ def extract_metrics(
     for metric_name in metric_names:
         kwargs = get_metric_kwargs(metric_name, configuration, runtime_configuration)
         res[metric_name] = metrics[
-            MetricEdgeKey(
+            MetricConfiguration(
                 metric_name,
                 kwargs["metric_domain_kwargs"],
                 kwargs["metric_value_kwargs"],
-                kwargs["filter_column_isnull"],
             ).id
         ]
     return res

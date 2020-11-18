@@ -161,7 +161,7 @@
           ]
         },
         {
-          "title": "negative_test_sqlalchemy_float_values_are_not_TEXT",
+          "title": "negative_test_sqlalchemy_float_values_are_not_text",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -177,7 +177,7 @@
           ]
         },
         {
-          "title": "negative_test_spark_float_values_are_not_StringType",
+          "title": "negative_test_spark_float_values_are_not_stringtype",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -260,7 +260,7 @@
           ]
         },
         {
-          "title": "positive_test_TEXT_values",
+          "title": "positive_test_text_values",
           "exact_match_out": false,
           "in": {
             "column": "z",
@@ -277,7 +277,7 @@
           ]
         },
         {
-          "title": "positive_test_StringType_values",
+          "title": "positive_test_stringtype_values",
           "exact_match_out": false,
           "in": {
             "column": "z",
@@ -393,7 +393,7 @@
           ]
         },
         {
-          "title": "positive_test_TEXT_and_INTEGER_values",
+          "title": "positive_test_text_and_integer_values",
           "exact_match_out": false,
           "in": {
             "column": "s",
@@ -411,7 +411,7 @@
           ]
         },
         {
-          "title": "positive_test_StringType_and_IntegerType_values",
+          "title": "positive_test_stringtype_and_integertype_values",
           "exact_match_out": false,
           "in": {
             "column": "s",

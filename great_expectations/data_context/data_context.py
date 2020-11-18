@@ -11,13 +11,20 @@ import sys
 import uuid
 import warnings
 import webbrowser
-from typing import Dict, List, Optional, Callable, Union, Any
+import traceback
+from collections import OrderedDict
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+)
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -37,7 +44,6 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
-from ruamel.yaml.comments import CommentedMap
 from great_expectations.data_context.types.base import (  # TODO: deprecate
     CURRENT_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
@@ -63,16 +69,17 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
-from great_expectations.execution_environment import ExecutionEnvironment
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.execution_environment import (
+    ExecutionEnvironment,
+    BaseExecutionEnvironment,
+)
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequest
+from great_expectations.exceptions import (
+    DataContextError
 )
 
 try:
@@ -216,6 +223,7 @@ class BaseDataContext:
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
+    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     @classmethod
     def validate_config(cls, project_config):
@@ -492,70 +500,6 @@ class BaseDataContext:
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
 
-    def test_yaml_config(
-        self,
-        yaml_config: str,
-        pretty_print=True,
-        return_mode="instantiated_class",
-    ):
-        """ Convenience method for testing yaml configs for Datasources, Checkpoints, and Stores
-        """
-        if pretty_print:
-            print("Attempting to instantiate class from config...")
-
-        config = yaml.load(yaml_config)
-
-        if "class_name" in config:
-            class_name = config["class_name"]
-        else:
-            class_name = None
- 
-        if class_name in [
-            "ExpectationsStore",
-            "ValidationsStore",
-            "HtmlSiteStore",
-            "EvaluationParameterStore",
-            "MetricStore",
-            "SqlAlchemyQueryStore",
-        ]:
-            print(f"\tInstantiating as a Store, since class_name is {class_name}")
-            instantiated_class = self._build_store_from_config("my_temp_store", config)
-
-        elif class_name in ["ExecutionEnvironment"]:
-            print(f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}")
-            instantiated_class = instantiate_class_from_config(
-                config,
-                runtime_environment={},
-                config_defaults={
-                    "name" : "my_temp_execution_environment",
-                    "module_name": "great_expectations.execution_environment",
-                }
-            )
-
-        else:
-            print("\tNo matching class found. Attempting to instantiate class from the raw config...")
-            instantiated_class = instantiate_class_from_config(
-                config,
-                runtime_environment={},
-                config_defaults={}
-            )
-
-        if pretty_print:        
-            print(f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}")
-            print()
-
-        return_object = instantiated_class.self_check(pretty_print)
-        
-        if return_mode == "instantiated_class":
-            return instantiated_class
-        
-        elif return_mode == "return_object":
-            return return_object
-
-        else:
-            raise ValueError(f"Unknown return_mode: {return_mode}.")
-
-
     def _normalize_absolute_or_relative_path(self, path):
         if path is None:
             return
@@ -577,6 +521,7 @@ class BaseDataContext:
         resource_identifier=None,
         site_name: Optional[str] = None,
         only_if_exists=True,
+        site_names: Optional[List[str]] = None,
     ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
@@ -591,12 +536,24 @@ class BaseDataContext:
                 the URLs of the index page.
             site_name: Optionally specify which site to open. If not specified,
                 return all urls in the project.
+            site_names: Optionally specify which sites are active. Sites not in
+                this list are not processed, even if specified in site_name.
 
         Returns:
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        sites = self._project_config_with_variables_substituted.data_docs_sites
+        unfiltered_sites = (
+            self._project_config_with_variables_substituted.data_docs_sites
+        )
+
+        # Filter out sites that are not in site_names
+        sites = (
+            {k: v for k, v in unfiltered_sites.items() if k in site_names}
+            if site_names
+            else unfiltered_sites
+        )
+
         if not sites:
             logger.debug("Found no data_docs_sites.")
             return []
@@ -717,7 +674,9 @@ class BaseDataContext:
     def execution_environments(self) -> Dict[str, ExecutionEnvironment]:
         """A single holder for all ExecutionEnvironments in this context"""
         return {
-            execution_environment: self.get_execution_environment(execution_environment_name=execution_environment)
+            execution_environment: self.get_execution_environment(
+                execution_environment_name=execution_environment
+            )
             for execution_environment in self._project_config_with_variables_substituted.execution_environments
         }
 
@@ -779,7 +738,9 @@ class BaseDataContext:
             config = self._project_config
 
         substituted_config_variables = substitute_all_config_variables(
-            dict(self._load_config_variables_file()), dict(os.environ)
+            dict(self._load_config_variables_file()),
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
         substitutions = {
@@ -789,8 +750,39 @@ class BaseDataContext:
         }
 
         return DataContextConfig(
-            **substitute_all_config_variables(config, substitutions)
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
         )
+
+    def escape_all_config_variables(
+        self,
+        value: Union[str, dict, list],
+        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+    ) -> Union[str, dict, list]:
+        """
+        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
+
+        Args:
+            value: config variable value
+            dollar_sign_escape_string: replaces instances of `$`
+
+        Returns:
+            input value with all `$` characters replaced with the escape string
+        """
+
+        if isinstance(value, dict) or isinstance(value, OrderedDict):
+            return {
+                k: self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for k, v in value.items()
+            }
+
+        elif isinstance(value, list):
+            return [
+                self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for v in value
+            ]
+        return value.replace("$", dollar_sign_escape_string)
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
@@ -803,6 +795,7 @@ class BaseDataContext:
             None
         """
         config_variables = self._load_config_variables_file()
+        value = self.escape_all_config_variables(value, self.DOLLAR_SIGN_ESCAPE_STRING)
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:
@@ -955,135 +948,6 @@ class BaseDataContext:
 
         return data_asset_names
 
-    # TODO: <Alex>Does this commented code and the "TODO" below still need to be here?</Alex>
-    # # TODO: deprecate "datasource" in favor of "execution_environment"
-    # def get_available_data_asset_names(
-    #     self,
-    #     datasource_names=None,
-    #     batch_kwargs_generator_names=None,
-    #     execution_environment_names=None,
-    #     data_connector_names=None,
-    # ):
-    #     """Inspect execution environment (AKA datasource) and data connectors (AKA batch kwargs generators) to provide
-    #     available
-    #     data_asset
-    #     objects.
-    #
-    #     Args:
-    #         datasource_names: list of datasources for which to provide available data_asset_name objects. If None, \
-    #         return available data assets for all datasources.
-    #         batch_kwargs_generator_names: list of batch kwargs generators for which to provide available
-    #         data_asset_name objects.
-    #         execution_environment_names: list of execution_environments for which to provide available data_asset_name
-    #         objects. If
-    #         None, \
-    #         return available data assets for all execution_environments.
-    #         data_connector_names: list of batch kwargs generators for which to provide available
-    #         data_asset_name objects.
-    #
-    #     Returns:
-    #         data_asset_names (dict): Dictionary describing available data assets
-    #         ::
-    #
-    #             {
-    #               execution_environment_name: {
-    #                 data_connector_name: [ data_asset_1, data_asset_2, ... ]
-    #                 ...
-    #               }
-    #               ...
-    #             }
-    #
-    #     """
-    #     assert (datasource_names and not execution_environment_names) or (
-    #         not datasource_names and execution_environment_names
-    #     ), "Please provide either datasource_names or execution_environment_names."
-    #     if datasource_names:
-    #         warnings.warn(
-    #             "The 'datasource_names' argument will be deprecated and renamed to 'execution_environment_names'. "
-    #             "Please update code accordingly.",
-    #             DeprecationWarning,
-    #         )
-    #         execution_environment_names = datasource_names
-    #
-    #     assert (batch_kwargs_generator_names and not data_connector_names) or (
-    #         not batch_kwargs_generator_names and data_connector_names
-    #     ), "Please provide either batch_kwargs_generator_names or data_connector_names."
-    #     if batch_kwargs_generator_names:
-    #         warnings.warn(
-    #             "The 'batch_kwargs_generator_names' argument will be deprecated and renamed to 'data_connector_names'. "
-    #             "Please update code accordingly.",
-    #             DeprecationWarning,
-    #         )
-    #         data_connector_names = batch_kwargs_generator_names
-    #
-    #     data_asset_names = {}
-    #     if execution_environment_names is None:
-    #         execution_environment_names = [
-    #             execution_environment["name"]
-    #             for execution_environment in self.list_execution_environments()
-    #         ]
-    #     elif isinstance(execution_environment_names, str):
-    #         execution_environment_names = [execution_environment_names]
-    #     elif not isinstance(execution_environment_names, list):
-    #         raise ValueError(
-    #             "Execution environment names must be a execution_environment name, list of execution_environment names "
-    #             "or None ("
-    #             "to "
-    #             "list "
-    #             "all "
-    #             "execution_environments)"
-    #         )
-    #
-    #     if data_connector_names is not None:
-    #         if isinstance(data_connector_names, str):
-    #             data_connector_names = [data_connector_names]
-    #         if len(data_connector_names) == len(
-    #             execution_environment_names
-    #         ):  # Iterate over both together
-    #             for idx, execution_environment_name in enumerate(
-    #                 execution_environment_names
-    #             ):
-    #                 execution_environment = self.get_execution_environment(
-    #                     execution_environment_name
-    #                 )
-    #                 data_asset_names[
-    #                     execution_environment_name
-    #                 ] = execution_environment.get_available_data_asset_names(
-    #                     data_connector_names[idx]
-    #                 )
-    #
-    #         elif len(data_connector_names) == 1:
-    #             execution_environment = self.get_execution_environment(
-    #                 execution_environment_names[0]
-    #             )
-    #             execution_environment_names[
-    #                 execution_environment_names[0]
-    #             ] = execution_environment.get_available_data_asset_names(
-    #                 data_connector_names
-    #             )
-    #
-    #         else:
-    #             raise ValueError(
-    #                 "If providing data connector, you must either specify one for each execution_environment "
-    #                 "or "
-    #                 "only "
-    #                 "one execution_environment."
-    #             )
-    #     else:  # data_connector_names is None
-    #         for execution_environment_name in execution_environment_names:
-    #             try:
-    #                 execution_environment = self.get_execution_environment(
-    #                     execution_environment_name
-    #                 )
-    #                 data_asset_names[
-    #                     execution_environment_name
-    #                 ] = execution_environment.get_available_data_asset_names()
-    #             except ValueError:
-    #                 # handle the edge case of a non-existent execution_environment
-    #                 data_asset_names[execution_environment_name] = {}
-    #
-    #     return data_asset_names
-
     def build_batch_kwargs(
         self,
         datasource,
@@ -1123,103 +987,82 @@ class BaseDataContext:
         )
         return batch_kwargs
 
-    # new get_batch
-    def get_batch_from_new_style_datasource(
-        self,
-        batch_request: dict
-    ) -> Batch:
-        execution_environment_name: str = batch_request.get("execution_environment")
+    # New get_batch (note: it returns the List of Batch objects, not a single Batch object).
+    def get_batch_list_from_new_style_datasource(
+        self, batch_request: dict
+    ) -> List[Batch]:
+        execution_environment_name: str = batch_request.get(
+            "execution_environment_name"
+        )
         if not execution_environment_name:
             raise ge_exceptions.ExecutionEnvironmentError(
                 message="Batch request must specify an execution_environment."
             )
 
-        execution_environment: ExecutionEnvironment = self.get_execution_environment(
-            execution_environment_name=execution_environment_name
-        )
+        # execution_environment: ExecutionEnvironment = self.get_execution_environment(
+        #     execution_environment_name=execution_environment_name
+        # )
+        execution_environment: ExecutionEnvironment = self.datasources[execution_environment_name]
         batch_request: BatchRequest = BatchRequest(**batch_request)
-        return execution_environment.get_batch(
+        return execution_environment.get_batch_list_from_batch_request(
             batch_request=batch_request
         )
 
-    def get_validator(
-        self,
-        batch_request,
-        expectation_suite_name: Union[str, ExpectationSuite],
-        in_memory_dataset: Any = None
-    ):
-        # execution_environment_name: str = batch_request.get("execution_environment")
-        # runtime_environment: dict = {}
-        # if in_memory_dataset is not None:
-        #     runtime_environment.update({"in_memory_dataset": in_memory_dataset})
-        # execution_environment: ExecutionEnvironment = self.get_execution_environment(
-        #     execution_environment_name=execution_environment_name,
-        #     runtime_environment=runtime_environment
-        # )
-        # return execution_environment.get_validator(
-        #     batch_request=batch_request,
-        #     expectation_suite_name=expectation_suite_name
-        # )
-        # TODO?
-        raise NotImplementedError
+    def get_batch(	
+        self,	
+        batch_kwargs: Union[dict, BatchKwargs],	
+        expectation_suite_name: Union[str, ExpectationSuite],	
+        data_asset_type=None,	
+        batch_parameters=None,	
+    ) -> DataAsset:	
+        """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If	
+        batch_parameters are included, they will be available as attributes of the batch.	
+        Args:	
+            batch_kwargs: the batch_kwargs to use; must include a datasource key	
+            expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get	
+            data_asset_type: the type of data_asset to build, with associated expectation implementations. This can	
+                generally be inferred from the datasource.	
+            batch_parameters: optional parameters to store as the reference description of the batch. They should	
+                reflect parameters that would provide the passed BatchKwargs.	
+        Returns:	
+            DataAsset	
+        """	
+        if isinstance(batch_kwargs, dict):	
+            batch_kwargs = BatchKwargs(batch_kwargs)	
 
-    def get_batch(
-        self,
-        batch_kwargs: Union[dict, BatchKwargs],
-        expectation_suite_name: Union[str, ExpectationSuite],
-        data_asset_type=None,
-        batch_parameters=None,
-    ) -> DataAsset:
-        """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
-        batch_parameters are included, they will be available as attributes of the batch.
+        if not isinstance(batch_kwargs, BatchKwargs):	
+            raise ge_exceptions.BatchKwargsError(	
+                "BatchKwargs must be a BatchKwargs object or dictionary."	
+            )	
 
-        Args:
-            batch_kwargs: the batch_kwargs to use; must include a datasource key
-            expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get
-            data_asset_type: the type of data_asset to build, with associated expectation implementations. This can
-                generally be inferred from the datasource.
-            batch_parameters: optional parameters to store as the reference description of the batch. They should
-                reflect parameters that would provide the passed BatchKwargs.
+        if not isinstance(	
+            expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, str)	
+        ):	
+            raise ge_exceptions.DataContextError(	
+                "expectation_suite_name must be an ExpectationSuite, "	
+                "ExpectationSuiteIdentifier or string."	
+            )	
 
-        Returns:
-            DataAsset
-        """
-        if isinstance(batch_kwargs, dict):
-            batch_kwargs = BatchKwargs(batch_kwargs)
+        if isinstance(expectation_suite_name, ExpectationSuite):	
+            expectation_suite = expectation_suite_name	
+        elif isinstance(expectation_suite_name, ExpectationSuiteIdentifier):	
+            expectation_suite = self.get_expectation_suite(	
+                expectation_suite_name.expectation_suite_name	
+            )	
+        else:	
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)	
 
-        if not isinstance(batch_kwargs, BatchKwargs):
-            raise ge_exceptions.BatchKwargsError(
-                "BatchKwargs must be a BatchKwargs object or dictionary."
-            )
-
-        if not isinstance(
-            expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, str)
-        ):
-            raise ge_exceptions.DataContextError(
-                "expectation_suite_name must be an ExpectationSuite, "
-                "ExpectationSuiteIdentifier or string."
-            )
-
-        if isinstance(expectation_suite_name, ExpectationSuite):
-            expectation_suite = expectation_suite_name
-        elif isinstance(expectation_suite_name, ExpectationSuiteIdentifier):
-            expectation_suite = self.get_expectation_suite(
-                expectation_suite_name.expectation_suite_name
-            )
-        else:
-            expectation_suite = self.get_expectation_suite(expectation_suite_name)
-
-        datasource = self.get_datasource(batch_kwargs.get("datasource"))
-        batch = datasource.get_batch(
-            batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
-        )
-        if data_asset_type is None:
-            data_asset_type = datasource.config.get("data_asset_type")
-        validator = BridgeValidator(
-            batch=batch,
-            expectation_suite=expectation_suite,
-            expectation_engine=data_asset_type,
-        )
+        datasource = self.get_datasource(batch_kwargs.get("datasource"))	
+        batch = datasource.get_batch(	
+            batch_kwargs=batch_kwargs, batch_parameters=batch_parameters	
+        )	
+        if data_asset_type is None:	
+            data_asset_type = datasource.config.get("data_asset_type")	
+        validator = BridgeValidator(	
+            batch=batch,	
+            expectation_suite=expectation_suite,	
+            expectation_engine=data_asset_type,	
+        )	
         return validator.get_dataset()
 
     @usage_statistics_enabled_method(
@@ -1344,60 +1187,23 @@ class BaseDataContext:
 
         return datasource
 
-    # TODO Abe 20201015 : This is copied from an outdated method of instantiating a class from a config.
-    # We look at should re-implementing this using add_store and _build_store as the model.
+    def add_execution_environment(self, execution_environment_name, execution_environment_config):
+        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
-    # TODO: update usage statistics
-    # @usage_statistics_enabled_method(
-    #     event_name="data_context.add_execution_environment",
-    #     args_payload_fn=add_execution_environment_usage_statistics,
-    # )
-    def add_execution_environment(self, name, initialize=True, **kwargs):
-        """Add a new execution_environment to the data context, with configuration provided as kwargs.
         Args:
-            name: the name for the new execution_environment to add
-            initialize: if False, add the execution_environment to the config, but do not
-                initialize it, for example if a user needs to debug database connectivity.
-            kwargs (keyword arguments): the configuration for the new execution_environment
+            execution_environment_name (str): a key for the new ExecutionEnvironment in in self._datasources
+            execution_environment_config (dict): a config for the ExecutionEnvironment to add
 
         Returns:
             execution_environment (ExecutionEnvironment)
         """
-        logger.debug("Starting BaseDataContext.add_execution_environment for %s" % name)
-        module_name = kwargs.get(
-            "module_name", "great_expectations.execution_environment"
+
+        new_execution_environment = self._build_execution_environment_from_config(
+            execution_environment_name,
+            execution_environment_config,
         )
-        verify_dynamic_loading_support(module_name=module_name)
-        class_name = kwargs.get("class_name")
-        execution_environment_class = load_class(
-            module_name=module_name, class_name=class_name
-        )
-
-        # For any class that should be loaded, it may control its configuration construction
-        # by implementing a classmethod called build_configuration
-        if hasattr(execution_environment_class, "build_configuration"):
-            config = execution_environment_class.build_configuration(**kwargs)
-        else:
-            config = kwargs
-
-        config = executionEnvironmentConfigSchema.load(config)
-        self._project_config["execution_environments"][name] = config
-
-        # We perform variable substitution in the execution_environment's config here before using the config
-        # to instantiate the execution_environment object. Variable substitution is a service that the data
-        # context provides. ExecutionEnvironments should not see unsubstituted variables in their config.
-        if initialize:
-            execution_environment = self._build_execution_environment_from_config(
-                name,
-                self._project_config_with_variables_substituted.execution_environments[
-                    name
-                ],
-            )
-            self._cached_execution_environments[name] = execution_environment
-        else:
-            execution_environment = None
-
-        return execution_environment
+        self._project_config["datasources"][execution_environment_name] = execution_environment_config
+        return new_execution_environment
 
     # TODO: deprecate
     def add_batch_kwargs_generator(
@@ -1421,29 +1227,6 @@ class BaseDataContext:
             name=batch_kwargs_generator_name, class_name=class_name, **kwargs
         )
         return generator
-
-    # TODO: <Alex>Can this be deleted?</Alex>
-    # def add_data_connector(
-    #     self, execution_environment_name, data_connector_name, class_name, **kwargs
-    # ):
-    #     """
-    #     Add a data connector to the named execution_environment, using the provided
-    #     configuration.
-    #
-    #     Args:
-    #         execution_environment_name: name of execution_environment to which to add the new data connector
-    #         data_connector_name: name of the data_connector to add
-    #         class_name: class of the data connector to add
-    #         **kwargs: data connector configuration, provided as kwargs
-    #
-    #     Returns:
-    #
-    #     """
-    #     execution_environment_obj = self.get_execution_environment(execution_environment_name)
-    #     data_connector = execution_environment_obj.add_data_connector(
-    #         name=data_connector_name, class_name=class_name, **kwargs
-    #     )
-    #     return data_connector_name
 
     def get_config(self):
         return self._project_config
@@ -1500,95 +1283,34 @@ class BaseDataContext:
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
-    def get_execution_environment(
-        self,
-        execution_environment_name: str
-    ) -> ExecutionEnvironment:
-        """Get the named execution_environment
-
-        Args:
-            execution_environment_name (str): the name of the execution_environment from the configuration
-
-        Returns:
-            execution_environment (ExecutionEnvironment)
-        """
-        if execution_environment_name in self._cached_execution_environments:
-            return self._cached_execution_environments[execution_environment_name]
-        if (
-            execution_environment_name
-            in self._project_config_with_variables_substituted.execution_environments
-        ):
-            execution_environment_config: dict = copy.deepcopy(
-                self._project_config_with_variables_substituted.execution_environments[
-                    execution_environment_name
-                ]
-            )
-        else:
-            raise ValueError(
-                f"Unable to load execution_environment `{execution_environment_name}` -- no configuration found or "
-                f"invalid "
-                f"configuration."
-            )
-        execution_environment_config: CommentedMap = executionEnvironmentConfigSchema.load(
-            execution_environment_config
-        )
-        execution_environment: ExecutionEnvironment = self._build_execution_environment_from_config(
-            name=execution_environment_name,
-            config=execution_environment_config
-        )
-        self._cached_execution_environments[
-            execution_environment_name
-        ] = execution_environment
-        return execution_environment
-
     def _build_execution_environment_from_config(
         self,
         name: str,
-        config: CommentedMap
+        config: dict,
     ) -> ExecutionEnvironment:
-        # We convert from the type back to a dictionary for purposes of instantiation.
-        if isinstance(config, ExecutionEnvironmentConfig):
-            config: dict = executionEnvironmentConfigSchema.dump(config)
         module_name: str = "great_expectations.execution_environment"
         runtime_environment: dict = {
             "name": name,
-            "data_context_root_directory": self.root_directory
+            "data_context_root_directory": self.root_directory,
         }
-        execution_environment: ExecutionEnvironment = instantiate_class_from_config(
+        new_execution_environment: ExecutionEnvironment = instantiate_class_from_config(
             config=config,
             runtime_environment=runtime_environment,
             config_defaults={"module_name": module_name},
         )
-        if not execution_environment:
+        
+        if not new_execution_environment:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
                 class_name=config["class_name"],
             )
-        return execution_environment
+        
+        if not isinstance(new_execution_environment, BaseExecutionEnvironment):
+            raise TypeError(f"Newly instantiated component {name} is not an instance of BaseExecutionEnvironment. Please check class_name in the config.")
 
-    def get_available_partitions(
-        self,
-        execution_environment_name: str,
-        data_connector_name: str,
-        data_asset_name: str = None,
-        partition_request: Union[Dict[str, Union[int, list, tuple, slice, str, Dict, Callable, None]], None] = None,
-        in_memory_dataset: Any = None,
-        runtime_parameters: Union[dict, None] = None,
-        repartition: bool = False
-    ) -> List[Partition]:
-        execution_environment: ExecutionEnvironment = self.get_execution_environment(
-            execution_environment_name=execution_environment_name
-        )
-        available_partitions: List[Partition] = execution_environment.get_available_partitions(
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            in_memory_dataset=in_memory_dataset,
-            runtime_parameters=runtime_parameters,
-            repartition=repartition
-        )
-        return available_partitions
+        self._cached_datasources[name] = new_execution_environment
+        return new_execution_environment
 
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""
@@ -2012,7 +1734,7 @@ class BaseDataContext:
             for site_name, site_config in sites.items():
                 logger.debug("Building Data Docs Site %s" % site_name,)
 
-                if (site_names and site_name in site_names) or not site_names:
+                if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
                     module_name = "great_expectations.render.renderer.site_builder"
                     site_builder = instantiate_class_from_config(
@@ -2822,6 +2544,17 @@ class DataContext(BaseDataContext):
 
         return delete_datasource
 
+    def add_execution_environment(self, execution_environment_name, execution_environment_config):
+        logger.debug("Starting DataContext.add_execution_environment for execution_environment %s" % execution_environment_name)
+
+        new_execution_environment = super().add_execution_environment(
+            execution_environment_name,
+            execution_environment_config
+        )
+        self._save_project_config()
+
+        return new_execution_environment
+
     @classmethod
     def find_context_root_dir(cls):
         result = None
@@ -2976,7 +2709,7 @@ class DataContext(BaseDataContext):
             logger.debug(e)
 
     @staticmethod
-    def _validate_checkpoint(checkpoint: dict, checkpoint_name: str) -> dict:
+    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
         if checkpoint is None:
             raise ge_exceptions.CheckpointError(
                 f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."

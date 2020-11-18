@@ -12,6 +12,10 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
+from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (
+    ExpectColumnKlDivergenceToBeLessThan,
+)
+from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render.renderer.content_block import (
     ExceptionListContentBlockRenderer,
 )
@@ -60,51 +64,33 @@ class ColumnSectionRenderer(Renderer):
 
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
-    def __init__(
-        self,
-        overview_table_renderer=None,
-        expectation_string_renderer=None,
-        runtime_environment=None,
-    ):
+    def __init__(self, properties_table_renderer=None, runtime_environment=None):
         super().__init__()
-        if overview_table_renderer is None:
-            overview_table_renderer = {
-                "class_name": "ProfilingOverviewTableContentBlockRenderer"
+        if properties_table_renderer is None:
+            properties_table_renderer = {
+                "class_name": "ProfilingColumnPropertiesTableContentBlockRenderer"
             }
-        if expectation_string_renderer is None:
-            expectation_string_renderer = {"class_name": "ExpectationStringRenderer"}
         module_name = "great_expectations.render.renderer.content_block"
-        self._overview_table_renderer = instantiate_class_from_config(
-            config=overview_table_renderer,
+        self._properties_table_renderer = instantiate_class_from_config(
+            config=properties_table_renderer,
             runtime_environment=runtime_environment,
             config_defaults={"module_name": module_name},
         )
-        if not self._overview_table_renderer:
+        if not self._properties_table_renderer:
             raise ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=overview_table_renderer["class_name"],
-            )
-        self._expectation_string_renderer = instantiate_class_from_config(
-            config=expectation_string_renderer,
-            runtime_environment=runtime_environment,
-            config_defaults={"module_name": module_name},
-        )
-        if not self._expectation_string_renderer:
-            raise ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=expectation_string_renderer["class_name"],
+                class_name=properties_table_renderer["class_name"],
             )
 
         self.content_block_function_names = [
             "_render_header",
-            "_render_overview_table",
+            "_render_properties_table",
             "_render_quantile_table",
             "_render_stats_table",
             "_render_values_set",
             "_render_histogram",
-            "_render_bar_chart_table",
+            "_render_value_counts_bar_chart",
             "_render_failed",
         ]
 
@@ -267,20 +253,21 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
         )
 
-    def _render_overview_table(self, evrs):
-        unique_n = self._find_evr_by_type(
-            evrs, "expect_column_unique_value_count_to_be_between"
-        )
-        unique_proportion = self._find_evr_by_type(
-            evrs, "expect_column_proportion_of_unique_values_to_be_between"
-        )
-        null_evr = self._find_evr_by_type(evrs, "expect_column_values_to_not_be_null")
-        evrs = [
-            evr for evr in [unique_n, unique_proportion, null_evr] if (evr is not None)
+    def _render_properties_table(self, evrs):
+        evr_list = [
+            self._find_evr_by_type(
+                evrs, "expect_column_unique_value_count_to_be_between"
+            ),
+            self._find_evr_by_type(
+                evrs, "expect_column_proportion_of_unique_values_to_be_between"
+            ),
+            self._find_evr_by_type(evrs, "expect_column_values_to_not_be_null"),
+            self._find_evr_by_type(evrs, "expect_column_values_to_not_match_regex"),
         ]
+        evrs = [evr for evr in evr_list if (evr is not None)]
 
         if len(evrs) > 0:
-            new_content_block = self._overview_table_renderer.render(evrs)
+            new_content_block = self._properties_table_renderer.render(evrs)
             new_content_block.header = RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
@@ -298,8 +285,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def _render_quantile_table(cls, evrs):
-        table_rows = []
-
         quantile_evr = cls._find_evr_by_type(
             evrs, "expect_column_quantile_values_to_be_between"
         )
@@ -307,110 +292,29 @@ diagnose and repair the underlying issue.  Detailed information follows:
         if not quantile_evr or quantile_evr.exception_info["raised_exception"]:
             return
 
-        quantiles = quantile_evr.result["observed_value"]["quantiles"]
-        quantile_ranges = quantile_evr.result["observed_value"]["values"]
-
-        quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
-
-        for idx, quantile in enumerate(quantiles):
-            quantile_string = quantile_strings.get(quantile)
-            table_rows.append(
-                [
-                    {
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": quantile_string
-                            if quantile_string
-                            else "{:3.2f}".format(quantile),
-                            "tooltip": {
-                                "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"
-                                if quantile == 0.50
-                                else "expect_column_quantile_values_to_be_between"
-                            },
-                        },
-                    },
-                    quantile_ranges[idx],
-                ]
-            )
-
-        return RenderedTableContent(
-            **{
-                "content_block_type": "table",
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {"template": "Quantiles", "tag": "h6"},
-                    }
-                ),
-                "table": table_rows,
-                "styling": {
-                    "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
-                    "body": {"classes": ["table", "table-sm", "table-unbordered"],},
-                },
-            }
-        )
+        quantile_table_renderer = get_renderer_impl(
+            object_name="expect_column_quantile_values_to_be_between",
+            renderer_type="renderer.descriptive.quantile_table",
+        )[1]
+        return quantile_table_renderer(result=quantile_evr)
 
     @classmethod
     def _render_stats_table(cls, evrs):
+        expectation_renderers = {
+            "expect_column_mean_to_be_between": "renderer.descriptive.stats_table.mean_row",
+            "expect_column_min_to_be_between": "renderer.descriptive.stats_table.min_row",
+            "expect_column_max_to_be_between": "renderer.descriptive.stats_table.max_row",
+        }
+
         table_rows = []
 
-        mean_evr = cls._find_evr_by_type(evrs, "expect_column_mean_to_be_between")
-
-        if not mean_evr or mean_evr.exception_info["raised_exception"]:
-            return
-
-        mean_value = (
-            "{:.2f}".format(mean_evr.result["observed_value"]) if mean_evr else None
-        )
-        if mean_value:
-            table_rows.append(
-                [
-                    {
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Mean",
-                            "tooltip": {"content": "expect_column_mean_to_be_between"},
-                        },
-                    },
-                    mean_value,
-                ]
-            )
-
-        min_evr = cls._find_evr_by_type(evrs, "expect_column_min_to_be_between")
-        min_value = (
-            "{:.2f}".format(min_evr.result["observed_value"]) if min_evr else None
-        )
-        if min_value:
-            table_rows.append(
-                [
-                    {
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Minimum",
-                            "tooltip": {"content": "expect_column_min_to_be_between"},
-                        },
-                    },
-                    min_value,
-                ]
-            )
-
-        max_evr = cls._find_evr_by_type(evrs, "expect_column_max_to_be_between")
-        max_value = (
-            "{:.2f}".format(max_evr.result["observed_value"]) if max_evr else None
-        )
-        if max_value:
-            table_rows.append(
-                [
-                    {
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Maximum",
-                            "tooltip": {"content": "expect_column_max_to_be_between"},
-                        },
-                    },
-                    max_value,
-                ]
-            )
+        for expectation_type, renderer_type in expectation_renderers.items():
+            evr = cls._find_evr_by_type(evrs, expectation_type)
+            if evr and not evr.exception_info["raised_exception"]:
+                renderer_impl = get_renderer_impl(
+                    object_name=expectation_type, renderer_type=renderer_type
+                )[1]
+                table_rows.append(renderer_impl(result=evr))
 
         if len(table_rows) > 0:
             return RenderedTableContent(
@@ -438,60 +342,17 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         if not set_evr or set_evr.exception_info["raised_exception"]:
             return
-
-        if set_evr and "partial_unexpected_counts" in set_evr.result:
-            partial_unexpected_counts = set_evr.result["partial_unexpected_counts"]
-            values = [str(v["value"]) for v in partial_unexpected_counts]
-        elif set_evr and "partial_unexpected_list" in set_evr.result:
-            values = [str(item) for item in set_evr.result["partial_unexpected_list"]]
-        else:
+        if (
+            set_evr
+            and "partial_unexpected_counts" not in set_evr.result
+            and "partial_unexpected_list" not in set_evr.result
+        ):
             return
 
-        classes = ["col-3", "mt-1", "pl-1", "pr-1"]
-
-        if any(len(value) > 80 for value in values):
-            content_block_type = "bullet_list"
-            content_block_class = RenderedBulletListContent
-        else:
-            content_block_type = "value_list"
-            content_block_class = ValueListContent
-
-        new_block = content_block_class(
-            **{
-                "content_block_type": content_block_type,
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Example Values",
-                            "tooltip": {"content": "expect_column_values_to_be_in_set"},
-                            "tag": "h6",
-                        },
-                    }
-                ),
-                content_block_type: [
-                    {
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "$value",
-                            "params": {"value": value},
-                            "styling": {
-                                "default": {
-                                    "classes": ["badge", "badge-info"]
-                                    if content_block_type == "value_list"
-                                    else [],
-                                    "styles": {"word-break": "break-all"},
-                                },
-                            },
-                        },
-                    }
-                    for value in values
-                ],
-                "styling": {"classes": classes,},
-            }
-        )
-
-        return new_block
+        return get_renderer_impl(
+            object_name="expect_column_values_to_be_in_set",
+            renderer_type="renderer.descriptive.example_values_block",
+        )[1](result=set_evr)
 
     def _render_histogram(self, evrs):
         # NOTE: This code is very brittle
@@ -506,32 +367,13 @@ diagnose and repair the underlying issue.  Detailed information follows:
         ):
             return
 
-        observed_partition_object = kl_divergence_evr.result["details"][
-            "observed_partition"
-        ]
-        weights = observed_partition_object["weights"]
-        if len(weights) > 60:
-            return None
-
-        header = RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "Histogram",
-                    "tooltip": {
-                        "content": "expect_column_kl_divergence_to_be_less_than"
-                    },
-                    "tag": "h6",
-                },
-            }
-        )
-
-        return self._expectation_string_renderer._get_kl_divergence_chart(
-            observed_partition_object, header
-        )
+        return get_renderer_impl(
+            object_name="expect_column_kl_divergence_to_be_less_than",
+            renderer_type="renderer.descriptive.histogram",
+        )[1](result=kl_divergence_evr)
 
     @classmethod
-    def _render_bar_chart_table(cls, evrs):
+    def _render_value_counts_bar_chart(cls, evrs):
         distinct_values_set_evr = cls._find_evr_by_type(
             evrs, "expect_column_distinct_values_to_be_in_set"
         )
@@ -541,70 +383,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
         ):
             return
 
-        value_count_dicts = distinct_values_set_evr.result["details"]["value_counts"]
-        if isinstance(value_count_dicts, pd.Series):
-            values = value_count_dicts.index.tolist()
-            counts = value_count_dicts.tolist()
-        else:
-            values = [
-                value_count_dict["value"] for value_count_dict in value_count_dicts
-            ]
-            counts = [
-                value_count_dict["count"] for value_count_dict in value_count_dicts
-            ]
-
-        df = pd.DataFrame({"value": values, "count": counts,})
-
-        if len(values) > 60:
-            return None
-        else:
-            chart_pixel_width = (len(values) / 60.0) * 500
-            if chart_pixel_width < 250:
-                chart_pixel_width = 250
-            chart_container_col_width = round((len(values) / 60.0) * 6)
-            if chart_container_col_width < 4:
-                chart_container_col_width = 4
-            elif chart_container_col_width >= 5:
-                chart_container_col_width = 6
-            elif chart_container_col_width >= 4:
-                chart_container_col_width = 5
-
-        mark_bar_args = {}
-        if len(values) == 1:
-            mark_bar_args["size"] = 20
-
-        bars = (
-            alt.Chart(df)
-            .mark_bar(**mark_bar_args)
-            .encode(y="count:Q", x="value:O", tooltip=["value", "count"])
-            .properties(height=400, width=chart_pixel_width, autosize="fit")
-        )
-
-        chart = bars.to_json()
-
-        new_block = RenderedGraphContent(
-            **{
-                "content_block_type": "graph",
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Value Counts",
-                            "tooltip": {
-                                "content": "expect_column_distinct_values_to_be_in_set"
-                            },
-                            "tag": "h6",
-                        },
-                    }
-                ),
-                "graph": chart,
-                "styling": {
-                    "classes": ["col-" + str(chart_container_col_width), "mt-1"],
-                },
-            }
-        )
-
-        return new_block
+        return get_renderer_impl(
+            object_name="expect_column_distinct_values_to_be_in_set",
+            renderer_type="renderer.descriptive.value_counts_bar_chart",
+        )[1](result=distinct_values_set_evr)
 
     @classmethod
     def _render_failed(cls, evrs):

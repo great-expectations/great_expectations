@@ -33,7 +33,7 @@ try:
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
+    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup, quoted_name
     from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.operators import custom_op
     from sqlalchemy.sql.selectable import CTE, Select
@@ -113,6 +113,11 @@ try:
 except ImportError:
     pass
 
+try:
+    import pyathena.sqlalchemy_athena
+except ImportError:
+    pyathena = None
+
 
 class SqlAlchemyBatchReference:
     def __init__(self, engine, table_name=None, schema=None, query=None):
@@ -162,6 +167,8 @@ class MetaSqlAlchemyDataset(Dataset):
         def inner_wrapper(
             self, column, mostly=None, result_format=None, *args, **kwargs
         ):
+            if self.batch_kwargs.get("use_quoted_name"):
+                column = quoted_name(column, quote=True)
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -456,9 +463,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
                 table_name = f"#{table_name}"
-            generated_table_name = table_name
+            self.generated_table_name = table_name
         else:
-            generated_table_name = None
+            self.generated_table_name = None
 
         if table_name is None:
             raise ValueError("No table_name provided.")
@@ -495,13 +502,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
 
-            if engine and engine.dialect.name.lower() in ["sqlite", "mssql"]:
-                # sqlite/mssql temp tables only persist within a connection so override the engine
-                self.engine = engine.connect()
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
+
         elif self.engine.dialect.name.lower() == "redshift":
             self.dialect = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
@@ -510,8 +515,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="pybigquery.sqlalchemy_bigquery"
             )
+        elif self.engine.dialect.name.lower() == "awsathena":
+            self.dialect = import_library_module(
+                module_name="pyathena.sqlalchemy_athena"
+            )
         else:
             self.dialect = None
+
+        if engine and engine.dialect.name.lower() in ["sqlite", "mssql", "snowflake"]:
+            # sqlite/mssql/snowflake temp tables only persist within a connection so override the engine
+            self.engine = engine.connect()
 
         if schema is not None and custom_sql is not None:
             # temporary table will be written to temp schema, so don't allow
@@ -524,7 +537,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql is not None and self.engine.dialect.name.lower() == "bigquery":
             if (
-                generated_table_name is not None
+                self.generated_table_name is not None
                 and self.engine.dialect.dataset_id is None
             ):
                 raise ValueError(
@@ -532,26 +545,22 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     "default dataset in engine url"
                 )
 
-        if (
-            custom_sql is not None
-            and self.engine.dialect.name.lower() == "snowflake"
-            and generated_table_name is not None
-        ):
-            raise ValueError(
-                "No snowflake_transient_table specified. Snowflake with a query batch_kwarg will create "
-                "a transient table, so you must provide a user-selected name."
-            )
-
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql, schema_name=schema)
 
-            if (
-                generated_table_name is not None
-                and self.engine.dialect.name.lower() == "bigquery"
-            ):
-                logger.warning(
-                    "Created permanent table {table_name}".format(table_name=table_name)
-                )
+            if self.generated_table_name is not None:
+                if self.engine.dialect.name.lower() == "bigquery":
+                    logger.warning(
+                        "Created permanent table {table_name}".format(
+                            table_name=table_name
+                        )
+                    )
+                if self.engine.dialect.name.lower() == "awsathena":
+                    logger.warning(
+                        "Created permanent table default.{table_name}".format(
+                            table_name=table_name
+                        )
+                    )
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
@@ -744,6 +753,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ).scalar()
 
     def get_column_median(self, column):
+        # AWS Athena does not support offset
+        if self.sql_engine_dialect.name.lower() == "awsathena":
+            raise NotImplementedError("AWS Athena does not support OFFSET.")
         nonnull_count = self.get_column_nonnull_count(column)
         element_values = self.engine.execute(
             sa.select([sa.column(column)])
@@ -1177,11 +1189,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
-            logger.info("Creating transient table %s" % table_name)
+            table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
+
+            logger.info("Creating temporary table %s" % table_name)
             if schema_name is not None:
                 table_name = schema_name + "." + table_name
-            stmt = "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
+            stmt = "CREATE OR REPLACE {table_type} TABLE {table_name} AS {custom_sql}".format(
+                table_type=table_type, table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name == "mysql":
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the generic case.
@@ -1200,10 +1214,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = (
                 custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]
             ).format(table_name=table_name)
+        elif self.sql_engine_dialect.name.lower() == "awsathena":
+            stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
                 table_name=table_name, custom_sql=custom_sql
             )
+
         self.engine.execute(stmt)
 
     def column_reflection_fallback(self):

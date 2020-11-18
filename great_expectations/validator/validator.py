@@ -7,8 +7,7 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from functools import wraps
-from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Union
 
 import pandas as pd
 from dateutil.parser import parse
@@ -25,7 +24,6 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.id_dict import IDDict
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
@@ -34,19 +32,17 @@ from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
 )
-from great_expectations.exceptions.metric_exceptions import MetricError
 from great_expectations.expectations.registry import (
     get_expectation_impl,
-    get_metric_dependencies,
-    get_metric_kwargs,
+    get_metric_provider,
     list_registered_expectation_implementations,
 )
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.validation_graph import (
+    MetricConfiguration,
     MetricEdge,
-    MetricEdgeKey,
     ValidationGraph,
 )
 
@@ -57,13 +53,12 @@ logging.captureWarnings(True)
 class Validator:
     def __init__(
         self,
+        execution_engine,
         interactive_evaluation=True,
-        profiler=None,
         expectation_suite=None,
         expectation_suite_name=None,
         data_context=None,
-        execution_engine=None,
-        batch=None,
+        batches=None,
         **kwargs,
     ):
         """
@@ -80,20 +75,23 @@ class Validator:
 
         """
 
-        self._batch = batch
         self._data_context = data_context
         self._execution_engine = execution_engine
+        self._expose_dataframe_methods = False
 
-        if execution_engine:
-            self._execution_engine._validator = self
+        if batches is None:
+            batches = tuple()
 
-            if batch:
-                if not execution_engine.batches.get(batch.batch_spec.to_id()):
-                    execution_engine.batches[batch.batch_spec.to_id()] = batch
-                execution_engine._loaded_batch_id = batch.batch_spec.to_id()
+        self._batches = dict()
 
-        else:
-            self._data_context = None
+        for batch in batches:
+            assert isinstance(
+                batch, Batch
+            ), "batches provided to Validator must be Great Expectations Batch objects"
+            self._execution_engine.load_batch_data(batch.id, batch.data)
+            self._batches[batch.id] = batch
+
+        # TURN TO self.interactive_evaluation (single flag -> property)
         self._validator_config = {"interactive_evaluation": interactive_evaluation}
         self._initialize_expectations(
             expectation_suite=expectation_suite,
@@ -103,11 +101,10 @@ class Validator:
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
         self._active_validation = False
-        if profiler is not None:
-            profiler.profile(self)
         if self._data_context and hasattr(
             self._data_context, "_expectation_explorer_manager"
         ):
+            # TODO: verify flow of default expectation arguments
             self.set_default_expectation_argument("include_config", True)
 
     def __dir__(self):
@@ -117,38 +114,44 @@ class Validator:
         """
         validator_attrs = set(super().__dir__())
         class_expectation_impls = set(list_registered_expectation_implementations())
-        execution_engine_expectation_impls = (
-            set(
-                [
-                    attr_name
-                    for attr_name in self.execution_engine.__dir__()
-                    if attr_name.startswith("expect_")
-                ]
-            )
-            if self.execution_engine
-            else set()
-        )
+        # execution_engine_expectation_impls = (
+        #     {
+        #         attr_name
+        #         for attr_name in self.execution_engine.__dir__()
+        #         if attr_name.startswith("expect_")
+        #     }
+        #     if self.execution_engine
+        #     else set()
+        # )
 
         combined_dir = (
             validator_attrs
             | class_expectation_impls
-            | execution_engine_expectation_impls
+            # | execution_engine_expectation_impls
         )
 
-        if type(self.execution_engine).__name__ == "PandasExecutionEngine":
+        if self._expose_dataframe_methods:
             combined_dir | set(dir(pd.DataFrame))
 
         return list(combined_dir)
 
+    @property
+    def expose_dataframe_methods(self):
+        return self._expose_dataframe_methods
+
+    @expose_dataframe_methods.setter
+    def expose_dataframe_methods(self, value: bool):
+        self._expose_dataframe_methods = value
+
     def __getattr__(self, name):
         if name.startswith("expect_") and get_expectation_impl(name):
             return self.validate_expectation(name)
-        elif name.startswith("expect_") and hasattr(self.execution_engine, name):
-            return getattr(self.execution_engine, name)
-        elif type(
-            self.execution_engine
-        ).__name__ == "PandasExecutionEngine" and hasattr(pd.DataFrame, name):
-            return getattr(self.batch.data, name)
+        elif (
+            self._expose_dataframe_methods
+            and isinstance(self.active_batch.data, pd.DataFrame)
+            and hasattr(pd.DataFrame, name)
+        ):
+            return getattr(self.active_batch.data, name)
         else:
             raise AttributeError(
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
@@ -167,50 +170,52 @@ class Validator:
         """
 
         def inst_expectation(*args, **kwargs):
-            expectation_impl = get_expectation_impl(name)
-            allowed_config_keys = expectation_impl.get_allowed_config_keys()
-            expectation_kwargs = {
-                key: val for (key, val) in kwargs.items() if key in allowed_config_keys
-            }
-            meta = None
-            # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
-            # positional arguments to expectation methods
-            for idx, arg in enumerate(args):
-                try:
-                    arg_name = expectation_impl.legacy_method_parameters.get(
-                        name, tuple()
-                    )[idx]
-                    if arg_name in allowed_config_keys:
-                        expectation_kwargs[arg_name] = arg
-                    elif arg_name == "meta":
-                        meta = arg
-                except IndexError:
-                    raise InvalidExpectationConfigurationError(
-                        f"Invalid positional argument: {arg}"
-                    )
+            try:
+                expectation_impl = get_expectation_impl(name)
+                allowed_config_keys = expectation_impl.get_allowed_config_keys()
+                expectation_kwargs = kwargs
+                # expectation_kwargs = {
+                #     key: val for (key, val) in kwargs.items() if key in allowed_config_keys
+                # }
+                meta = None
+                # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
+                # positional arguments to expectation methods
+                for idx, arg in enumerate(args):
+                    try:
+                        arg_name = expectation_impl.legacy_method_parameters.get(
+                            name, tuple()
+                        )[idx]
+                        if arg_name in allowed_config_keys:
+                            expectation_kwargs[arg_name] = arg
+                        if arg_name == "meta":
+                            meta = arg
+                    except IndexError:
+                        raise InvalidExpectationConfigurationError(
+                            f"Invalid positional argument: {arg}"
+                        )
 
-            expectation = expectation_impl(
-                ExpectationConfiguration(
+                # this is used so that exceptions are caught appropriately when they occur in expectation config
+                basic_runtime_configuration = {
+                    k: v
+                    for k, v in kwargs.items()
+                    if k in ("result_format", "include_config", "catch_exceptions")
+                }
+
+                configuration = ExpectationConfiguration(
                     expectation_type=name, kwargs=expectation_kwargs, meta=meta
                 )
-            )
-            """Given an implementation and a configuration for any Expectation, returns its validation result"""
-            runtime_configuration = {
-                k: v
-                for k, v in kwargs.items()
-                if k in ("result_format", "include_config", "catch_exceptions")
-            }
-            try:
+                runtime_configuration = configuration.get_runtime_kwargs()
+                expectation = expectation_impl(configuration)
+                """Given an implementation and a configuration for any Expectation, returns its validation result"""
+
                 validation_result = expectation.validate(
-                    batches={self.batch.batch_spec.to_id(): self.batch},
-                    execution_engine=self.execution_engine,
-                    runtime_configuration=runtime_configuration,
+                    validator=self, runtime_configuration=runtime_configuration,
                 )
                 if isinstance(validation_result, dict):
                     validation_result = ExpectationValidationResult(**validation_result)
 
             except Exception as err:
-                if runtime_configuration.get("catch_exceptions"):
+                if basic_runtime_configuration.get("catch_exceptions"):
                     raised_exception = True
                     exception_traceback = traceback.format_exc()
                     exception_message = "{}: {}".format(type(err).__name__, str(err))
@@ -245,93 +250,44 @@ class Validator:
     def _populate_dependencies(
         self,
         graph: ValidationGraph,
-        metric_name: str,
+        child_node: MetricConfiguration,
         configuration: ExpectationConfiguration,
-        parent_node: Union[MetricEdgeKey, None] = None,
+        execution_engine: "ExecutionEngine",
+        parent_node: Optional[MetricConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> None:
         """Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
         until all metrics have been added."""
 
-        metric_kwargs = get_metric_kwargs(metric_name)
-
-        expectation_impl = get_expectation_impl(configuration.expectation_type)
-        configuration_kwargs = expectation_impl(
-            configuration=configuration
-        ).get_runtime_kwargs(runtime_configuration=runtime_configuration)
-        try:
-            if len(metric_kwargs["metric_domain_keys"]) > 0:
-                metric_domain_kwargs = IDDict(
-                    {
-                        k: configuration_kwargs.get(k)
-                        for k in metric_kwargs["metric_domain_keys"]
-                    }
-                )
-            else:
-                metric_domain_kwargs = IDDict()
-            if len(metric_kwargs["metric_value_keys"]) > 0:
-                metric_value_kwargs = IDDict(
-                    {
-                        k: configuration_kwargs.get(k)
-                        for k in metric_kwargs["metric_value_keys"]
-                    }
-                )
-            else:
-                metric_value_kwargs = IDDict()
-        except KeyError:
-            raise MetricError(
-                f"missing kwarg value while trying to identify dependency graph for metric {metric_name}"
-            )
-        # domain_id = metric_domain_kwargs.to_id()
-        # if domain_id not in graph_family:
-        #     graph_family[domain_id] = ValidationGraph(metric_domain_kwargs)
-
-        # graph = graph_family[domain_id]
-        metric_dependencies = get_metric_dependencies(metric_name)
+        # metric_kwargs = get_metric_kwargs(metric_name)
+        metric_impl = get_metric_provider(
+            child_node.metric_name, execution_engine=execution_engine
+        )[0]
+        metric_dependencies = metric_impl.get_evaluation_dependencies(
+            child_node, configuration
+        )
+        child_node.metric_dependencies = metric_dependencies
 
         if parent_node:
-            graph.add(
-                MetricEdge(
-                    parent_node,
-                    MetricEdgeKey(
-                        metric_name,
-                        metric_domain_kwargs,
-                        metric_value_kwargs,
-                        filter_column_isnull=metric_kwargs["filter_column_isnull"],
-                    ),
-                )
-            )
+            graph.add(MetricEdge(parent_node, child_node,))
 
         if len(metric_dependencies) == 0:
-            graph.add(
-                MetricEdge(
-                    MetricEdgeKey(
-                        metric_name,
-                        metric_domain_kwargs,
-                        metric_value_kwargs,
-                        filter_column_isnull=metric_kwargs["filter_column_isnull"],
-                    ),
-                    None,
-                )
-            )
+            graph.add(MetricEdge(child_node, None,))
 
         else:
-            for dependent_metric in metric_dependencies:
+            for metric_dependency in metric_dependencies.values():
                 self._populate_dependencies(
                     graph,
-                    dependent_metric,
+                    metric_dependency,
                     configuration,
-                    MetricEdgeKey(
-                        metric_name, metric_domain_kwargs, metric_value_kwargs
-                    ),
+                    execution_engine,
+                    child_node,
                     runtime_configuration=runtime_configuration,
                 )
 
     def graph_validate(
         self,
-        batches: Dict[str, Batch],
         configurations: List[ExpectationConfiguration],
-        execution_engine: "ExecutionEngine" = None,
         metrics: dict = None,
         runtime_configuration: dict = None,
     ) -> List[ExpectationValidationResult]:
@@ -353,25 +309,28 @@ class Validator:
                 Returns:
                     A list of Validations, validating that all necessary metrics are available.
         """
-        if execution_engine is None:
-            if self._execution_engine:
-                execution_engine = self._execution_engine
-            else:
-                raise ValueError("Execution Engine is required for validation")
         graph = ValidationGraph()
         for configuration in configurations:
-            expectation_impl = get_expectation_impl(configuration.expectation_type)
-            validation_dependencies = expectation_impl(
-                configuration
-            ).get_validation_dependencies(
-                configuration, execution_engine, runtime_configuration
-            )
+            # Validating
+            try:
+                # Todo: try to find a way to access table columns so as to verify column is in table
+                assert (
+                    configuration.expectation_type is not None
+                ), "Given configuration should include expectation type"
+            except AssertionError as e:
+                raise InvalidExpectationConfigurationError(str(e))
 
-            for metric_name in validation_dependencies.get("metrics"):
+            expectation_impl = get_expectation_impl(configuration.expectation_type)
+            validation_dependencies = expectation_impl().get_validation_dependencies(
+                configuration, self._execution_engine, runtime_configuration
+            )["metrics"]
+
+            for metric in validation_dependencies.values():
                 self._populate_dependencies(
                     graph,
-                    metric_name,
+                    metric,
                     configuration,
+                    self._execution_engine,
                     runtime_configuration=runtime_configuration,
                 )
 
@@ -383,8 +342,7 @@ class Validator:
             ready_metrics, needed_metrics = self._parse_validation_graph(graph, metrics)
             metrics.update(
                 self._resolve_metrics(
-                    batches=batches,
-                    execution_engine=execution_engine,
+                    execution_engine=self._execution_engine,
                     metrics_to_resolve=ready_metrics,
                     metrics=metrics,
                     runtime_configuration=runtime_configuration,
@@ -398,8 +356,8 @@ class Validator:
             evrs.append(
                 configuration.metrics_validate(
                     metrics,
+                    execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration,
-                    execution_engine=execution_engine,
                 )
             )
         return evrs
@@ -427,244 +385,16 @@ class Validator:
 
     def _resolve_metrics(
         self,
-        batches: Dict[str, Batch],
         execution_engine: "ExecutionEngine",
-        metrics_to_resolve: Iterable[MetricEdgeKey],
-        metrics: dict,
+        metrics_to_resolve: Iterable[MetricConfiguration],
+        metrics: Dict,
         runtime_configuration: dict = None,
     ):
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
         resolved"""
         return execution_engine.resolve_metrics(
-            batches, metrics_to_resolve, metrics, runtime_configuration
+            metrics_to_resolve, metrics, runtime_configuration
         )
-
-    def autoinspect(self, profiler):
-        """Deprecated: use profile instead.
-
-        Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
-
-        Args:
-            profiler: The profiler to use
-
-        Returns:
-            tuple(expectation_suite, validation_results)
-        """
-        warnings.warn(
-            "The term autoinspect is deprecated and will be removed in a future release. Please use 'profile'\
-        instead."
-        )
-        expectation_suite, validation_results = profiler.profile(self)
-        return expectation_suite, validation_results
-
-    def profile(self, profiler, profiler_configuration=None):
-        """Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
-
-        Args:
-            profiler: The profiler to use
-            profiler_configuration: Optional profiler configuration dict
-
-        Returns:
-            tuple(expectation_suite, validation_results)
-
-        """
-        expectation_suite, validation_results = profiler.profile(
-            self, profiler_configuration
-        )
-        return expectation_suite, validation_results
-
-    # TODO: add warning if no expectation_explorer_manager and how to turn on
-    def edit_expectation_suite(self):
-        return self._data_context._expectation_explorer_manager.edit_expectation_suite(
-            self
-        )
-
-    @classmethod
-    def expectation(cls, method_arg_names):
-        """Manages configuration and running of expectation objects.
-
-        Expectation builds and saves a new expectation configuration to the DataAsset object. It is the core decorator \
-        used by great expectations to manage expectation configurations.
-
-        Args:
-            method_arg_names (List) : An ordered list of the arguments used by the method implementing the expectation \
-                (typically the result of inspection). Positional arguments are explicitly mapped to \
-                keyword arguments when the expectation is run.
-
-        Notes:
-            Intermediate decorators that call the core @expectation decorator will most likely need to pass their \
-            decorated methods' signature up to the expectation decorator. For example, the MetaPandasDataset \
-            column_map_expectation decorator relies on the DataAsset expectation decorator, but will pass through the \
-            signature from the implementing method.
-
-            @expectation intercepts and takes action based on the following parameters:
-                * include_config (boolean or None) : \
-                    If True, then include the generated expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
-                * catch_exceptions (boolean or None) : \
-                    If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
-                * result_format (str or None) : \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                    For more detail, see :ref:`result_format <result_format>`.
-                * meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                    modification. For more detail, see :ref:`meta`.
-        """
-
-        def outer_wrapper(func):
-            @wraps(func)
-            def wrapper(self, *args, **kwargs):
-
-                # Get the name of the method
-                method_name = func.__name__
-
-                # Combine all arguments into a single new "all_args" dictionary to name positional parameters
-                all_args = dict(zip(method_arg_names, args))
-                all_args.update(kwargs)
-
-                # Unpack display parameters; remove them from all_args if appropriate
-                if "include_config" in kwargs:
-                    include_config = kwargs["include_config"]
-                    del all_args["include_config"]
-                else:
-                    include_config = self.default_expectation_args["include_config"]
-
-                if "catch_exceptions" in kwargs:
-                    catch_exceptions = kwargs["catch_exceptions"]
-                    del all_args["catch_exceptions"]
-                else:
-                    catch_exceptions = self.default_expectation_args["catch_exceptions"]
-
-                if "result_format" in kwargs:
-                    result_format = kwargs["result_format"]
-                else:
-                    result_format = self.default_expectation_args["result_format"]
-
-                # Extract the meta object for use as a top-level expectation_config holder
-                if "meta" in kwargs:
-                    meta = kwargs["meta"]
-                    del all_args["meta"]
-                else:
-                    meta = None
-
-                # Get the signature of the inner wrapper:
-                argspec = inspect.getfullargspec(func)[0][1:]
-
-                if "result_format" in argspec:
-                    all_args["result_format"] = result_format
-                else:
-                    if "result_format" in all_args:
-                        del all_args["result_format"]
-
-                all_args = recursively_convert_to_json_serializable(all_args)
-
-                # Patch in PARAMETER args, and remove locally-supplied arguments
-                # This will become the stored config
-                expectation_args = copy.deepcopy(all_args)
-
-                if self._expectation_suite.evaluation_parameters:
-                    (
-                        evaluation_args,
-                        substituted_parameters,
-                    ) = build_evaluation_parameters(
-                        expectation_args,
-                        self._expectation_suite.evaluation_parameters,
-                        self._validator_config.get("interactive_evaluation", True),
-                        self._data_context,
-                    )
-                else:
-                    (
-                        evaluation_args,
-                        substituted_parameters,
-                    ) = build_evaluation_parameters(
-                        expectation_args,
-                        None,
-                        self._validator_config.get("interactive_evaluation", True),
-                        self._data_context,
-                    )
-
-                # Construct the expectation_config object
-                expectation_config = ExpectationConfiguration(
-                    expectation_type=method_name, kwargs=expectation_args, meta=meta
-                )
-
-                raised_exception = False
-                exception_traceback = None
-                exception_message = None
-
-                # Finally, execute the expectation method itself
-                if (
-                    self._validator_config.get("interactive_evaluation", True)
-                    or self._active_validation
-                ):
-                    try:
-                        return_obj = func(self, **evaluation_args)
-                        if isinstance(return_obj, dict):
-                            return_obj = ExpectationValidationResult(**return_obj)
-
-                    except Exception as err:
-                        if catch_exceptions:
-                            raised_exception = True
-                            exception_traceback = traceback.format_exc()
-                            exception_message = "{}: {}".format(
-                                type(err).__name__, str(err)
-                            )
-
-                            return_obj = ExpectationValidationResult(success=False)
-
-                        else:
-                            raise err
-
-                else:
-                    return_obj = ExpectationValidationResult(
-                        expectation_config=copy.deepcopy(expectation_config)
-                    )
-
-                # If validate has set active_validation to true, then we do not save the config to avoid
-                # saving updating expectation configs to the same suite during validation runs
-                if self._active_validation is True:
-                    stored_config = expectation_config
-                else:
-                    # Append the expectation to the config.
-                    stored_config = self._expectation_suite.add_expectation(
-                        expectation_config
-                    )
-
-                if include_config:
-                    return_obj.expectation_config = copy.deepcopy(stored_config)
-
-                # If there was no interactive evaluation, success will not have been computed.
-                if return_obj.success is not None:
-                    # Add a "success" object to the config
-                    stored_config.success_on_last_run = return_obj.success
-
-                if catch_exceptions:
-                    return_obj.exception_info = {
-                        "raised_exception": raised_exception,
-                        "exception_message": exception_message,
-                        "exception_traceback": exception_traceback,
-                    }
-
-                if len(substituted_parameters) > 0:
-                    if meta is None:
-                        meta = dict()
-                    meta["substituted_parameters"] = substituted_parameters
-
-                # Add meta to return object
-                if meta is not None:
-                    return_obj.meta = meta
-
-                return_obj = recursively_convert_to_json_serializable(return_obj)
-
-                if self._data_context is not None:
-                    return_obj = self._data_context.update_return_obj(self, return_obj)
-
-                return return_obj
-
-            return wrapper
-
-        return outer_wrapper
 
     def _initialize_expectations(
         self, expectation_suite=None, expectation_suite_name=None
@@ -788,38 +518,45 @@ class Validator:
         return self._validator_config[key]
 
     @property
-    def batch(self):
-        """Getter for batch"""
-        if self._batch:
-            return self._batch
-        else:
-            return self.execution_engine.loaded_batch
+    def batches(self):
+        """Getter for batches"""
+        return self._batches
 
     @property
-    def batch_spec(self):
-        """Getter for batch_spec"""
-        if not self.batch:
+    def active_batch(self):
+        """Getter for active batch"""
+        active_batch_id = self.execution_engine.active_batch_data_id
+        active_batch = self.batches.get(active_batch_id) if active_batch_id else None
+        return active_batch
+
+    @property
+    def active_batch_spec(self):
+        """Getter for active batch's batch_spec"""
+        if not self.active_batch:
             return None
         else:
-            return self.batch.batch_spec
+            return self.active_batch.batch_spec
 
     @property
-    def batch_id(self):
-        """Getter for batch id"""
-        return self.batch_spec.to_id()
+    def active_batch_id(self):
+        """Getter for active batch id"""
+        return self.execution_engine.active_batch_data_id
 
     @property
     def batch_markers(self):
-        """Getter for batch markers"""
-        if not self.batch:
+        """Getter for active batch's batch markers"""
+        if not self.active_batch:
             return None
         else:
-            return self.batch.batch_markers
+            return self.active_batch.batch_markers
 
     @property
-    def batch_request(self):
-        """Getter for the batch request"""
-        return self.batch.batch_request
+    def batch_definition(self):
+        """Getter for the active batch's batch definition"""
+        if not self.active_batch:
+            return None
+        else:
+            return self.active_batch.batch_definition
 
     def discard_failing_expectations(self):
         """Removes any expectations from the validator where the validation has failed"""
@@ -1363,7 +1100,7 @@ class Validator:
                     "run_id": run_id,
                     "batch_spec": self.batch_spec,
                     "batch_markers": self.batch_markers,
-                    "batch_request": self.batch_request,
+                    "batch_definition": self.batch_definition,
                     "validation_time": validation_time,
                 },
             )
@@ -1424,7 +1161,7 @@ class Validator:
         comment,
         batch_spec=None,
         batch_markers=None,
-        batch_request=None,
+        batch_definition=None,
         citation_date=None,
     ):
         """Adds a citation to an existing Expectation Suite within the validator"""
@@ -1432,13 +1169,13 @@ class Validator:
             batch_spec = self.batch_spec
         if batch_markers is None:
             batch_markers = self.batch_markers
-        if batch_request is None:
-            batch_request = self.batch_request
+        if batch_definition is None:
+            batch_definition = self.batch_definition
         self._expectation_suite.add_citation(
             comment,
             batch_spec=batch_spec,
             batch_markers=batch_markers,
-            batch_request=batch_request,
+            batch_definition=batch_definition,
             citation_date=citation_date,
         )
 

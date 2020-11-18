@@ -393,7 +393,6 @@ class TupleS3StoreBackend(TupleStoreBackend):
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
             base_public_path=base_public_path,
-       
         )
         self.bucket = bucket
         if prefix:
@@ -405,7 +404,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             prefix = prefix.strip("/")
         self.prefix = prefix
         self.endpoint_url = endpoint_url
-        
+
     def _build_s3_object_key(self, key):
         if self.platform_specific_separator:
             if self.prefix:
@@ -537,18 +536,18 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def get_url_for_key(self, key, protocol=None):
         import boto3
 
-        location = boto3.client("s3", endpoint_url=self.endpoint_url).get_bucket_location(Bucket=self.bucket)[
-            "LocationConstraint"
-        ]
+        location = boto3.client(
+            "s3", endpoint_url=self.endpoint_url
+        ).get_bucket_location(Bucket=self.bucket)["LocationConstraint"]
         if location is None:
             location = "s3"
         else:
             location = "s3-" + location
         s3_key = self._convert_key_to_filepath(key)
 
-        location = boto3.client("s3", endpoint_url=self.endpoint_url).get_bucket_location(Bucket=self.bucket)[
-            "LocationConstraint"
-        ]
+        location = boto3.client(
+            "s3", endpoint_url=self.endpoint_url
+        ).get_bucket_location(Bucket=self.bucket)["LocationConstraint"]
         if location is None:
             location = "s3"
         else:

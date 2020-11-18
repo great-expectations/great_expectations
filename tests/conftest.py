@@ -5,6 +5,8 @@ import os
 import shutil
 from types import ModuleType
 from typing import Union
+import random
+import yaml
 
 import numpy as np
 import pandas as pd
@@ -21,17 +23,21 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import file_relative_path
+from great_expectations.data_context.util import (
+    file_relative_path,
+    instantiate_class_from_config,
+)
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.util import import_library_module
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_environment import ExecutionEnvironment
 
 from .test_utils import (
     expectationSuiteValidationResultSchema,
     get_dataset,
-    execution_environment_files_data_connector_regex_partitioner_config,
-    create_files_for_regex_partitioner
 )
+
 
 ###
 #
@@ -91,6 +97,7 @@ def build_test_backends_list(metafunc):
     no_spark = metafunc.config.getoption("--no-spark")
     if not no_spark:
         try:
+            import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
             raise ValueError("spark tests are requested, but pyspark is not installed")
@@ -156,6 +163,7 @@ def build_test_backends_list_cfe(metafunc):
     no_spark = metafunc.config.getoption("--no-spark")
     if not no_spark:
         try:
+            import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
             raise ValueError("spark tests are requested, but pyspark is not installed")
@@ -252,18 +260,23 @@ def sa(test_backends):
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
-        import sqlalchemy as sa
-
-        return sa
+        try:
+            import sqlalchemy as sa
+            return sa
+        except ImportError:
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
 
 @pytest.fixture
 def spark_session(test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
-    from pyspark.sql import SparkSession
-
-    return SparkSession.builder.getOrCreate()
+    try:
+        import pyspark
+        from pyspark.sql import SparkSession
+        return SparkSession.builder.getOrCreate()
+    except ImportError:
+        raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
@@ -274,6 +287,7 @@ def empty_expectation_suite():
         "expectations": [],
     }
     return expectation_suite
+
 
 @pytest.fixture
 def basic_expectation_suite():
@@ -1915,22 +1929,131 @@ def non_numeric_high_card_dataset(test_backend):
     }
     return get_dataset(test_backend, data, schemas=schemas)
 
+
 @pytest.fixture
 def periodic_table_of_elements():
-    data = ['Hydrogen', 'Helium', 'Lithium', 'Beryllium', 'Boron', 'Carbon', 'Nitrogen', 'Oxygen', 'Fluorine', 'Neon',
-     'Sodium', 'Magnesium', 'Aluminum', 'Silicon', 'Phosphorus', 'Sulfur', 'Chlorine', 'Argon', 'Potassium', 'Calcium',
-     'Scandium', 'Titanium', 'Vanadium', 'Chromium', 'Manganese', 'Iron', 'Cobalt', 'Nickel', 'Copper', 'Zinc',
-     'Gallium', 'Germanium', 'Arsenic', 'Selenium', 'Bromine', 'Krypton', 'Rubidium', 'Strontium', 'Yttrium',
-     'Zirconium', 'Niobium', 'Molybdenum', 'Technetium', 'Ruthenium', 'Rhodium', 'Palladium', 'Silver', 'Cadmium',
-     'Indium', 'Tin', 'Antimony', 'Tellurium', 'Iodine', 'Xenon', 'Cesium', 'Barium', 'Lanthanum', 'Cerium',
-     'Praseodymium', 'Neodymium', 'Promethium', 'Samarium', 'Europium', 'Gadolinium', 'Terbium', 'Dysprosium',
-     'Holmium', 'Erbium', 'Thulium', 'Ytterbium', 'Lutetium', 'Hafnium', 'Tantalum', 'Tungsten', 'Rhenium', 'Osmium',
-     'Iridium', 'Platinum', 'Gold', 'Mercury', 'Thallium', 'Lead', 'Bismuth', 'Polonium', 'Astatine', 'Radon',
-     'Francium', 'Radium', 'Actinium', 'Thorium', 'Protactinium', 'Uranium', 'Neptunium', 'Plutonium', 'Americium',
-     'Curium', 'Berkelium', 'Californium', 'Einsteinium', 'Fermium', 'Mendelevium', 'Nobelium', 'Lawrencium',
-     'Rutherfordium', 'Dubnium', 'Seaborgium', 'Bohrium', 'Hassium', 'Meitnerium', 'Darmstadtium', 'Roentgenium',
-     'Copernicium', 'Nihomium', 'Flerovium', 'Moscovium', 'Livermorium', 'Tennessine', 'Oganesson']
+    data = [
+        "Hydrogen",
+        "Helium",
+        "Lithium",
+        "Beryllium",
+        "Boron",
+        "Carbon",
+        "Nitrogen",
+        "Oxygen",
+        "Fluorine",
+        "Neon",
+        "Sodium",
+        "Magnesium",
+        "Aluminum",
+        "Silicon",
+        "Phosphorus",
+        "Sulfur",
+        "Chlorine",
+        "Argon",
+        "Potassium",
+        "Calcium",
+        "Scandium",
+        "Titanium",
+        "Vanadium",
+        "Chromium",
+        "Manganese",
+        "Iron",
+        "Cobalt",
+        "Nickel",
+        "Copper",
+        "Zinc",
+        "Gallium",
+        "Germanium",
+        "Arsenic",
+        "Selenium",
+        "Bromine",
+        "Krypton",
+        "Rubidium",
+        "Strontium",
+        "Yttrium",
+        "Zirconium",
+        "Niobium",
+        "Molybdenum",
+        "Technetium",
+        "Ruthenium",
+        "Rhodium",
+        "Palladium",
+        "Silver",
+        "Cadmium",
+        "Indium",
+        "Tin",
+        "Antimony",
+        "Tellurium",
+        "Iodine",
+        "Xenon",
+        "Cesium",
+        "Barium",
+        "Lanthanum",
+        "Cerium",
+        "Praseodymium",
+        "Neodymium",
+        "Promethium",
+        "Samarium",
+        "Europium",
+        "Gadolinium",
+        "Terbium",
+        "Dysprosium",
+        "Holmium",
+        "Erbium",
+        "Thulium",
+        "Ytterbium",
+        "Lutetium",
+        "Hafnium",
+        "Tantalum",
+        "Tungsten",
+        "Rhenium",
+        "Osmium",
+        "Iridium",
+        "Platinum",
+        "Gold",
+        "Mercury",
+        "Thallium",
+        "Lead",
+        "Bismuth",
+        "Polonium",
+        "Astatine",
+        "Radon",
+        "Francium",
+        "Radium",
+        "Actinium",
+        "Thorium",
+        "Protactinium",
+        "Uranium",
+        "Neptunium",
+        "Plutonium",
+        "Americium",
+        "Curium",
+        "Berkelium",
+        "Californium",
+        "Einsteinium",
+        "Fermium",
+        "Mendelevium",
+        "Nobelium",
+        "Lawrencium",
+        "Rutherfordium",
+        "Dubnium",
+        "Seaborgium",
+        "Bohrium",
+        "Hassium",
+        "Meitnerium",
+        "Darmstadtium",
+        "Roentgenium",
+        "Copernicium",
+        "Nihomium",
+        "Flerovium",
+        "Moscovium",
+        "Livermorium",
+        "Tennessine",
+        "Oganesson",
+    ]
     return data
+
 
 def dataset_sample_data(test_backend):
     # No infinities for mysql
@@ -2011,8 +2134,11 @@ def sqlalchemy_dataset(test_backends):
 def sqlitedb_engine(test_backend):
     if test_backend == "sqlite":
         import sqlalchemy as sa
-
-        return sa.create_engine("sqlite://")
+        try:
+            import sqlalchemy as sa
+            return sa.create_engine("sqlite://")
+        except ImportError:
+            raise ValueError("sqlite tests require sqlalchemy to be installed")
     else:
         pytest.skip("Skipping test designed for sqlite on non-sqlite backend.")
 
@@ -2020,11 +2146,13 @@ def sqlitedb_engine(test_backend):
 @pytest.fixture
 def postgresql_engine(test_backend):
     if test_backend == "postgresql":
-        import sqlalchemy as sa
-
-        engine = sa.create_engine("postgresql://postgres@localhost/test_ci").connect()
-        yield engine
-        engine.close()
+        try:
+            import sqlalchemy as sa
+            engine = sa.create_engine("postgresql://postgres@localhost/test_ci").connect()
+            yield engine
+            engine.close()
+        except ImportError:
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
         pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
 
@@ -2038,10 +2166,20 @@ def empty_data_context(tmp_path_factory):
     os.makedirs(asset_config_path, exist_ok=True)
     return context
 
+@pytest.fixture
+def empty_data_context_v3(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp("empty_data_context_v3"))
+    context = ge.data_context.DataContextV3.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    return context
+
 
 @pytest.fixture
 def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
     monkeypatch.setenv("FOO", "BAR")
+    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
     root_dir = empty_data_context.root_directory
     ge_config_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_basic_with_variables.yml",
@@ -2139,12 +2277,15 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 @pytest.fixture
 def titanic_sqlite_db(sa):
-    from sqlalchemy import create_engine
-
-    titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
-    engine = create_engine("sqlite:///{}".format(titanic_db_path))
-    assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
-    return engine
+    try:
+        import sqlalchemy as sa
+        from sqlalchemy import create_engine
+        titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
+        engine = create_engine("sqlite:///{}".format(titanic_db_path))
+        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        return engine
+    except ImportError:
+        raise ValueError("sqlite tests require sqlalchemy to be installed")
 
 
 @pytest.fixture
@@ -2169,8 +2310,8 @@ def titanic_expectation_suite():
 def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
-
         engine = create_engine("sqlite://")
         assert engine.execute("select 1").fetchall()[0] == (1,)
         return engine
@@ -2455,55 +2596,6 @@ def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
     return empty_data_context
 
 
-@pytest.fixture()
-def execution_environment_files_data_connector_regex_partitioner_no_groups_no_sorters_data_context(
-    empty_data_context: DataContext,
-    default_base_directory: str = "data",
-    data_asset_base_directory: str = None
-):
-    data_context: DataContext = empty_data_context
-    execution_environment_name: str = "test_execution_environment"
-    data_context.add_execution_environment(
-        name=execution_environment_name,
-        initialize=True,
-        **execution_environment_files_data_connector_regex_partitioner_config(
-            use_group_names=False,
-            use_sorters=False,
-            default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory
-        )["test_execution_environment"]
-    )
-    base_directory_names: list = [default_base_directory, data_asset_base_directory]
-    root_directory_path: str = data_context.root_directory
-    create_files_for_regex_partitioner(root_directory_path=root_directory_path, directory_paths=base_directory_names)
-    return data_context
-
-
-@pytest.fixture()
-def execution_environment_files_data_connector_regex_partitioner_with_groups_with_sorters_data_context(
-    empty_data_context: DataContext,
-    default_base_directory: str = "data",
-    data_asset_base_directory: str = None
-):
-    data_context: DataContext = empty_data_context
-    execution_environment_name: str = "test_execution_environment"
-    data_context.add_execution_environment(
-        name=execution_environment_name,
-        use_group_names=True,
-        initialize=True,
-        **execution_environment_files_data_connector_regex_partitioner_config(
-            use_group_names=True,
-            use_sorters=True,
-            default_base_directory=default_base_directory,
-            data_asset_base_directory=data_asset_base_directory
-        )["test_execution_environment"]
-    )
-    base_directory_names: list = [default_base_directory, data_asset_base_directory]
-    root_directory_path: str = data_context.root_directory
-    create_files_for_regex_partitioner(root_directory_path=root_directory_path, directory_paths=base_directory_names)
-    return data_context
-
-
 @pytest.fixture
 def filesystem_csv(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("filesystem_csv")
@@ -2659,14 +2751,14 @@ def evr_failed():
             "exception_message": None,
             "exception_traceback": None,
         },
-        expectation_config={
-            "expectation_type": "expect_column_values_to_not_match_regex",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_match_regex",
+            kwargs={
                 "column": "Name",
                 "regex": "^\\s+|\\s+$",
                 "result_format": "SUMMARY",
             },
-        },
+        ),
     )
 
 
@@ -2713,18 +2805,20 @@ def evr_success():
 def sqlite_view_engine(test_backends):
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
-        import sqlalchemy as sa
-
-        sqlite_engine = sa.create_engine("sqlite://")
-        df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-        df.to_sql("test_table", con=sqlite_engine)
-        sqlite_engine.execute(
-            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-        )
-        sqlite_engine.execute(
-            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-        )
-        return sqlite_engine
+        try:
+            import sqlalchemy as sa
+            sqlite_engine = sa.create_engine("sqlite://")
+            df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
+            df.to_sql("test_table", con=sqlite_engine)
+            sqlite_engine.execute(
+                "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+            )
+            sqlite_engine.execute(
+                "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
+            )
+            return sqlite_engine
+        except ImportError:
+            sa = None
     else:
         pytest.skip("SqlAlchemy tests disabled; not testing views")
 
@@ -2737,3 +2831,224 @@ def expectation_suite_identifier():
 @pytest.fixture
 def basic_sqlalchemy_datasource(sqlitedb_engine):
     return SqlAlchemyDatasource("basic_sqlalchemy_datasource", engine=sqlitedb_engine)
+
+
+@pytest.fixture
+def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
+    if sa is None:
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+
+    db_file = file_relative_path(
+        __file__, os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+    engine = sa.create_engine(f"sqlite:////{db_file}")
+    conn = engine.connect()
+
+    # Build a SqlAlchemyDataset using that database
+    return SqlAlchemyExecutionEngine(name="test_sql_execution_engine", engine=conn,)
+
+
+@pytest.fixture
+def test_folder_connection_path_csv(tmp_path_factory):
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    path = str(tmp_path_factory.mktemp("test_folder_connection_path_csv"))
+    df1.to_csv(path_or_buf=os.path.join(path, "test.csv"), index=False)
+    return str(path)
+
+
+@pytest.fixture
+def test_folder_connection_path_tsv(tmp_path_factory):
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    path = str(tmp_path_factory.mktemp("test_folder_connection_path_tsv"))
+    df1.to_csv(path_or_buf=os.path.join(path, "test.tsv"), sep="\t", index=False)
+    return str(path)
+
+
+@pytest.fixture
+def test_folder_connection_path_parquet(tmp_path_factory):
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    path = str(tmp_path_factory.mktemp("test_folder_connection_path_parquet"))
+    df1.to_parquet(path=os.path.join(path, "test.parquet"))
+    return str(path)
+
+
+@pytest.fixture
+def test_db_connection_string(tmp_path_factory, test_backends):
+    if "sqlite" not in test_backends:
+        pytest.skip("skipping fixture because sqlite not selected")
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    df2 = pd.DataFrame({"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]})
+
+    try:
+        import sqlalchemy as sa
+        basepath = str(tmp_path_factory.mktemp("db_context"))
+        path = os.path.join(basepath, "test.db")
+        engine = sa.create_engine("sqlite:///" + str(path))
+        df1.to_sql("table_1", con=engine, index=True)
+        df2.to_sql("table_2", con=engine, index=True, schema="main")
+
+        # Return a connection string to this newly-created db
+        return "sqlite:///" + str(path)
+    except ImportError:
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+
+@pytest.fixture
+def test_df(tmp_path_factory):
+    def generate_ascending_list_of_datetimes(
+            k,
+            start_date=datetime.date(2020, 1, 1),
+            end_date=datetime.date(2020, 12, 31)
+    ):
+        start_time = datetime.datetime(start_date.year, start_date.month, start_date.day)
+        days_between_dates = (end_date - start_date).total_seconds()
+
+        datetime_list = [start_time + datetime.timedelta(seconds=random.randrange(days_between_dates)) for i in
+                         range(k)]
+        datetime_list.sort()
+        return datetime_list
+
+    k = 120
+    random.seed(1)
+
+    timestamp_list = generate_ascending_list_of_datetimes(k, end_date=datetime.date(2020, 1, 31))
+    date_list = [datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list]
+
+    batch_ids = [random.randint(0, 10) for i in range(k)]
+    batch_ids.sort()
+
+    session_ids = [random.randint(2, 60) for i in range(k)]
+    session_ids.sort()
+    session_ids = [i - random.randint(0, 2) for i in session_ids]
+
+    events_df = pd.DataFrame({
+        "id": range(k),
+        "batch_id": batch_ids,
+        "date": date_list,
+        "y": [d.year for d in date_list],
+        "m": [d.month for d in date_list],
+        "d": [d.day for d in date_list],
+        "timestamp": timestamp_list,
+        "session_ids": session_ids,
+        "event_type": [random.choice(["start", "stop", "continue"]) for i in range(k)],
+        "favorite_color": ["#" + "".join([random.choice(list("0123456789ABCDEF")) for j in range(6)]) for i in range(k)]
+    })
+    return events_df
+
+@pytest.fixture	
+def test_connectable_postgresql_db(sa, test_backends, test_df):
+    """Populates a postgres DB with a `test_df` table in the `connection_test` schema to test DataConnectors against"""
+
+    if "postgresql" not in test_backends:	
+        pytest.skip("skipping fixture because postgresql not selected")	
+
+    import sqlalchemy as sa	
+    url = sa.engine.url.URL(
+        drivername="postgresql",
+        username="postgres",
+        password="",
+        host="localhost",
+        port="5432",
+        database="test_ci",
+    )
+    engine = sa.create_engine(url)
+
+    schema_check_results = engine.execute("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';").fetchall()
+    if len(schema_check_results) == 0:
+        engine.execute("CREATE SCHEMA connection_test;")
+
+    table_check_results = engine.execute("""
+SELECT EXISTS (
+   SELECT FROM information_schema.tables 
+   WHERE  table_schema = 'connection_test'
+   AND    table_name   = 'test_df'
+);
+""").fetchall()
+    if table_check_results != [(True,)]:
+        test_df.to_sql("test_df", con=engine, index=True, schema="connection_test")
+
+    # Return a connection string to this newly-created db	
+    return engine
+
+@pytest.fixture
+def data_context_with_sql_execution_environment_for_testing_get_batch(empty_data_context_v3):
+    context = empty_data_context_v3
+
+    db_file = file_relative_path(
+        __file__,
+        "test_sets/test_cases_for_sql_data_connector.db",
+    )
+
+    config = yaml.load(
+        f"""
+class_name: StreamlinedSqlExecutionEnvironment
+connection_string: sqlite:///{db_file}
+"""+"""
+introspection:
+    whole_table: {}
+
+    daily:
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: date
+            date_format_string: "%Y-%m-%d"
+
+    weekly:
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: date
+            date_format_string: "%Y-%W"
+
+    by_id_dozens:
+        splitter_method: _split_on_divided_integer
+        splitter_kwargs:
+            column_name: id
+            divisor: 12
+""",
+        yaml.FullLoader,
+    )
+
+    try:
+        context.add_execution_environment(
+            "my_sqlite_db",
+            config
+        )
+    except AttributeError:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
+
+    return context
+
+@pytest.fixture
+def basic_execution_environment(tmp_path_factory):
+    base_directory: str = str(tmp_path_factory.mktemp("basic_execution_environment_runtime_data_connector"))
+
+    basic_execution_environment: ExecutionEnvironment = instantiate_class_from_config(
+        config=yaml.load(
+            f"""
+class_name: ExecutionEnvironment
+
+data_connectors:
+    test_runtime_data_connector:
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: RuntimeDataConnector
+        runtime_keys:
+        - pipeline_stage_name
+        - run_id
+        - custom_key_0
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+    """,
+            Loader=yaml.FullLoader
+        ),
+        runtime_environment={
+            "name": "my_execution_environment",
+        },
+        config_defaults={
+          "module_name": "great_expectations.execution_environment",
+        }
+    )
+
+    return basic_execution_environment
+

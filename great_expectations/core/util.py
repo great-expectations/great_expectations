@@ -5,13 +5,15 @@ from collections.abc import Mapping
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from IPython import get_ipython
 
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
 
 
 def nested_update(d, u):
+    """update d with items from u, recursively and joining elements"""
     for k, v in u.items():
         if isinstance(v, Mapping):
             d[k] = nested_update(d.get(k, {}), v)
@@ -57,6 +59,11 @@ def convert_to_json_serializable(data):
 
     import numpy as np
     import pandas as pd
+
+    # If it's one of our types, we use our own conversion; this can move to full schema
+    # once nesting goes all the way down
+    if isinstance(data, SerializableDictDot):
+        return data.to_json_dict()
 
     try:
         if not isinstance(data, list) and np.isnan(data):
@@ -163,7 +170,6 @@ def ensure_json_serializable(data):
 
     import numpy as np
     import pandas as pd
-    from six import integer_types, string_types
 
     try:
         if not isinstance(data, list) and np.isnan(data):
@@ -175,7 +181,7 @@ def ensure_json_serializable(data):
     except ValueError:
         pass
 
-    if isinstance(data, (string_types, integer_types, float, bool)):
+    if isinstance(data, ((str,), (int,), float, bool)):
         # No problem to encode json
         return
 

@@ -8,16 +8,16 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics, get_domain_metrics_dict_by_name
 
 
-class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
+class ExpectColumnValueRatioToBeBetween(TableExpectation):
     """
        Expect the Ratio of a value in a Column to be between a Minimum and Maximum Threshold
 
@@ -83,25 +83,18 @@ class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Value ratio"""
+    """ A Column Map MetricProvider Decorator for the Value ratio"""
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.value_ratio",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("value",),
-        metric_dependencies=("column_values.nonnull.count",),
-        filter_column_isnull=False,
-    )
     def _pandas_value_ratio(
         self,
         batches: Dict[str, Batch],
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
     ):
-        """Value Ratio Metric Function, extracts nonnull count to use for obtaining the value ratio"""
+        """Value Ratio MetricProvider Function, extracts nonnull count to use for obtaining the value ratio"""
         # Column Extraction
         series = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
@@ -110,7 +103,7 @@ class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
         domain_metrics_lookup = get_domain_metrics_dict_by_name(
             metrics=metrics, metric_domain_kwargs=metric_domain_kwargs
         )
-        nonnull_count = domain_metrics_lookup["column_values.nonnull.count"]
+        nonnull_count = domain_metrics_lookup["column_values.nonnull.unexpected_count"]
 
         wanted_value = metric_value_kwargs["value"]
 
@@ -183,11 +176,11 @@ class ExpectColumnValueRatioToBeBetween(DatasetExpectation):
 
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):

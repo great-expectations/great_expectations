@@ -7,17 +7,25 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
+from ...render.renderer.renderer import renderer
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    handle_strict_min_max,
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
-    ColumnMapDatasetExpectation,
-    DatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
+    TableExpectation,
     _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectColumnUniqueValueCountToBeBetween(DatasetExpectation):
+class ExpectColumnUniqueValueCountToBeBetween(TableExpectation):
     """Expect the number of unique values to be between a minimum value and a maximum value.
 
             expect_column_unique_value_count_to_be_between is a \
@@ -91,29 +99,6 @@ class ExpectColumnUniqueValueCountToBeBetween(DatasetExpectation):
 
     """ A Column Aggregate Metric Decorator for the Unique Value Count"""
 
-    @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.unique_value_count",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        filter_column_isnull=False,
-    )
-    def _pandas_unique_value_count(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-    ):
-        """Value counts Metric Function"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        return series.value_counts().shape[0]
-
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -170,11 +155,119 @@ class ExpectColumnUniqueValueCountToBeBetween(DatasetExpectation):
 
         return True
 
-    @Expectation.validates(metric_dependencies=metric_dependencies)
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+
+        at_least_str, at_most_str = handle_strict_min_max(params)
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "may have any number of unique values."
+        else:
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                if params["min_value"] is None:
+                    template_str = f"must have {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
+                elif params["max_value"] is None:
+                    template_str = f"must have {at_least_str} $min_value unique values, at least $mostly_pct % of the time."
+                else:
+                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
+            else:
+                if params["min_value"] is None:
+                    template_str = f"must have {at_most_str} $max_value unique values."
+                elif params["max_value"] is None:
+                    template_str = f"must have {at_least_str} $min_value unique values."
+                else:
+                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    @classmethod
+    @renderer(
+        renderer_type="renderer.descriptive.column_properties_table.distinct_count_row"
+    )
+    def _descriptive_column_properties_table_distinct_count_row_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        assert result, "Must pass in result."
+        observed_value = result.result["observed_value"]
+        template_string_object = RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Distinct (%)",
+                    "tooltip": {
+                        "content": "expect_column_proportion_of_unique_values_to_be_between"
+                    },
+                },
+            }
+        )
+        if not observed_value:
+            return [template_string_object, "--"]
+        else:
+            return [template_string_object, "%.1f%%" % (100 * observed_value)]
+
+    # @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
         configuration: ExpectationConfiguration,
-        metrics: dict,
+        metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):

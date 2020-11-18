@@ -13,8 +13,15 @@ from great_expectations.execution_engine import (
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from ...render.renderer.renderer import renderer
+from ...render.types import RenderedStringTemplateContent
+from ...render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 from ..expectation import (
-    ColumnMapDatasetExpectation,
+    ColumnMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
@@ -27,7 +34,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
+class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     """Expect column entries to not be in the set.
 
     For example:
@@ -92,11 +99,11 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
     """
 
     map_metric = "column_values.not_in_set"
-    metric_dependencies = (
-        "column_values.not_in_set.count",
-        "column_values.nonnull.count",
+    success_keys = (
+        "value_set",
+        "mostly",
+        "parse_strings_as_datetimes",
     )
-    success_keys = ("value_set", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
         "row_condition": None,
@@ -121,19 +128,95 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.not_in_set",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("value_set",),
-        metric_dependencies=tuple(),
-        filter_column_isnull=True,
-    )
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "value_set",
+                "mostly",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+
+        if params["value_set"] is None or len(params["value_set"]) == 0:
+            values_string = "[ ]"
+        else:
+            for i, v in enumerate(params["value_set"]):
+                params["v__" + str(i)] = v
+
+            values_string = " ".join(
+                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+            )
+
+        template_str = "values must not belong to this set: " + values_string
+
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    # @PandasExecutionEngine.column_map_metric(
+    #     metric_name="column_values.not_in_set",
+    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
+    #     metric_value_keys=("value_set",),
+    #     metric_dependencies=tuple(),
+    #     filter_column_isnull=True,
+    # )
     def _pandas_column_values_not_in_set(
         self,
         series: pd.Series,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
+        metrics: Dict,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         runtime_configuration: dict = None,
         filter_column_isnull: bool = True,
     ):
@@ -152,52 +235,3 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
         return pd.DataFrame(
             {"column_values.not_in_set": ~series.isin(parsed_value_set)}
         )
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        else:
-            result_format = self.default_kwarg_values.get("result_format")
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
-            success=(
-                metric_vals.get("column_values.not_in_set.count")
-                / metric_vals.get("column_values.nonnull.count")
-            )
-            >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.not_in_set.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.not_in_set.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.not_in_set.unexpected_index_list"
-            ),
-        )
-
-    #
-    # @renders(StringTemplate, modes=())
-    # def lkjdsf(self, mode={prescriptive}, {descriptive}, {valiation}):
-    #     return "I'm a thing"

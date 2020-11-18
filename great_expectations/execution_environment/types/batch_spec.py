@@ -77,7 +77,7 @@ class S3BatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "s3" not in self:
-            raise InvalidBatchSpecError("S3BatchSpec requires a path element")
+            raise InvalidBatchSpecError("S3BatchSpec requires an S3 path element")
 
     @property
     def s3(self):
@@ -88,43 +88,18 @@ class S3BatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
         return self.get("reader_method")
 
 
-class InMemoryBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
+class RuntimeDataBatchSpec(BatchSpec):
+    _id_ignore_keys = set("batch_data")
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if "dataset" not in self:
-            raise InvalidBatchSpecError(
-                "InMemoryBatchSpec requires a 'dataset' element"
-            )
+
+        if self.batch_data is None:
+            raise InvalidBatchSpecError("RuntimeDataBatchSpec batch_data cannot be None")
 
     @property
-    def dataset(self):
-        return self.get("dataset")
-
-
-class PandasDatasourceInMemoryBatchSpec(InMemoryBatchSpec):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        import pandas as pd
-
-        if not isinstance(self["dataset"], pd.DataFrame):
-            raise InvalidBatchSpecError(
-                "PandasDatasourceInMemoryBatchSpec 'dataset' must be a pandas DataFrame"
-            )
-
-
-class SparkDFDatasourceInMemoryBatchSpec(InMemoryBatchSpec):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        try:
-            import pyspark
-        except ImportError:
-            raise InvalidBatchSpecError(
-                "SparkDFDatasourceInMemoryBatchSpec requires a valid pyspark installation, but pyspark import failed."
-            )
-        if not isinstance(self["dataset"], pyspark.sql.DataFrame):
-            raise InvalidBatchSpecError(
-                "SparkDFDatasourceInMemoryBatchSpec 'dataset' must be a spark DataFrame"
-            )
+    def batch_data(self):
+        return self.get("batch_data")
 
 
 class SqlAlchemyDatasourceTableBatchSpec(SqlAlchemyDatasourceBatchSpec):
@@ -132,7 +107,7 @@ class SqlAlchemyDatasourceTableBatchSpec(SqlAlchemyDatasourceBatchSpec):
         super().__init__(*args, **kwargs)
         if "table" not in self:
             raise InvalidBatchSpecError(
-                "SqlAlchemyDatasourceTableBatchSpec requires a 'table' element"
+                'SqlAlchemyDatasourceTableBatchSpec requires a "table" element'
             )
 
     @property
@@ -145,7 +120,7 @@ class SqlAlchemyDatasourceQueryBatchSpec(SqlAlchemyDatasourceBatchSpec):
         super().__init__(*args, **kwargs)
         if "query" not in self:
             raise InvalidBatchSpecError(
-                "SqlAlchemyDatasourceQueryBatchSpec requires a 'query' element"
+                'SqlAlchemyDatasourceQueryBatchSpec requires a "query" element'
             )
 
     @property
@@ -162,7 +137,7 @@ class SparkDFDatasourceQueryBatchSpec(SparkDFDatasourceBatchSpec):
         super().__init__(*args, **kwargs)
         if "query" not in self:
             raise InvalidBatchSpecError(
-                "SparkDFDatasourceQueryBatchSpec requires a 'query' element"
+                'SparkDFDatasourceQueryBatchSpec requires a "query" element'
             )
 
     @property

@@ -45,7 +45,7 @@ GE core team members use this checklist to ship releases.
 3. Make a new branch from ``develop`` called something like ``release-prep-2020-06-01``.
 4. In this branch, update the version number in the ``great_expectations/deployment_version`` file.
 
-5. Update the ``changelog.rst``: move all things under ``develop`` under a new heading with the new release number.
+5. Update the ``changelog.rst``: move all things under the ``Develop`` heading under a new heading with the new release number. NOTE: You should remove the ``Develop`` heading for the released version, it will be replaced in step #12.
 
   * Verify that any changes to requirements are specifically identified in the changelog
   * Double check the grouping / order of changes matches [BREAKING], [FEATURE], [ENHANCEMENT], [BUGFIX], [DOCS], [MAINTENANCE] and that all changes since the last release are mentioned or summarized in a bullet.
@@ -62,7 +62,7 @@ GE core team members use this checklist to ship releases.
   * Run ``git tag -a <<VERSION>> -m "<<VERSION>>"`` with the correct new version.
   * Push the tag up by running ``git push origin <<VERSION>>`` with the correct new version.
   * Merge ``main`` into ``develop`` so that the tagged commit becomes part of the history for ``develop``: ``git checkout develop; git pull; git merge main``
-  * On develop, add a new "develop" section header to changelog.rst, and push the updated file with message "Update changelog for develop"
+  * On develop, add a new "Develop" section header to changelog.rst, and push the updated file with message "Update changelog for develop"
 
 13. `Create the release on GitHub <https://github.com/great-expectations/great_expectations/releases>`__ with the version number. Copy the changelog notes into the release notes, and update any rst-specific links to use github issue numbers.
 

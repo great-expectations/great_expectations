@@ -32,33 +32,24 @@ DEFAULT_USAGE_STATISTICS_URL = (
 class AssetConfig(DictDot):
     def __init__(
         self,
-        partitioner=None,
-        config_params=None,
+        # partitioner_name=None,
         **kwargs,
     ):
-        if partitioner is not None:
-            self._partitioner = partitioner
-        if config_params is not None:
-            self._config_params = config_params
+        # if partitioner_name is not None:
+        #     self._partitioner_name = partitioner_name
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-    @property
-    def partitioner(self):
-        return self._partitioner
-
-    @property
-    def config_params(self):
-        return self._config_params
+    # @property
+    # def partitioner_name(self):
+    #     return self._partitioner_name
 
 
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    partitioner = fields.String(required=False, allow_none=True)
-
-    config_params = fields.Dict(allow_none=True)
+    # partitioner_name = fields.String(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -72,20 +63,12 @@ class AssetConfigSchema(Schema):
 
 class SorterConfig(DictDot):
     def __init__(
-        self,
-        name,
-        class_name=None,
-        module_name=None,
-        orderby="asc",
-        config_params=None,
-        **kwargs,
+        self, name, class_name=None, module_name=None, orderby="asc", **kwargs,
     ):
         self._name = name
         self._class_name = class_name
         self._module_name = module_name
         self._orderby = orderby
-        if config_params is not None:
-            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -105,10 +88,6 @@ class SorterConfig(DictDot):
     def orderby(self):
         return self._orderby
 
-    @property
-    def config_params(self):
-        return self._config_params
-
 
 class SorterConfigSchema(Schema):
     class Meta:
@@ -116,14 +95,10 @@ class SorterConfigSchema(Schema):
 
     name = fields.String(required=True)
     class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.execution_environment.data_connector.partitioner.sorter")
-    orderby = fields.String(
-        required=False,
-        missing="asc",
-        allow_none=False
+    module_name = fields.String(
+        missing="great_expectations.execution_environment.data_connector.partitioner.sorter"
     )
-
-    config_params = fields.Dict(allow_none=True)
+    orderby = fields.String(required=False, missing="asc", allow_none=False)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -143,7 +118,6 @@ class PartitionerConfig(DictDot):
         sorters=None,
         allow_multipart_partitions=False,
         runtime_keys=None,
-        config_params=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -153,8 +127,6 @@ class PartitionerConfig(DictDot):
         self._allow_multipart_partitions = allow_multipart_partitions
         if runtime_keys is not None:
             self._runtime_keys = runtime_keys
-        if config_params is not None:
-            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -178,17 +150,15 @@ class PartitionerConfig(DictDot):
     def runtime_keys(self):
         return self._runtime_keys
 
-    @property
-    def config_params(self):
-        return self._config_params
-
 
 class PartitionerConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.execution_environment.data_connector.partitioner")
+    module_name = fields.String(
+        missing="great_expectations.execution_environment.data_connector.partitioner"
+    )
 
     sorters = fields.List(
         cls_or_instance=fields.Nested(SorterConfigSchema),
@@ -197,18 +167,12 @@ class PartitionerConfigSchema(Schema):
     )
 
     allow_multipart_partitions = fields.Boolean(
-        required=False,
-        missing=False,
-        allow_none=False
+        required=False, missing=False, allow_none=False
     )
 
     runtime_keys = fields.List(
-        cls_or_instance=fields.String(),
-        required=False,
-        allow_none=True
+        cls_or_instance=fields.String(), required=False, allow_none=True
     )
-
-    config_params = fields.Dict(allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -220,37 +184,35 @@ class PartitionerConfigSchema(Schema):
         return PartitionerConfig(**data)
 
 
+# TODO: <Alex></Alex>
 class DataConnectorConfig(DictDot):
     def __init__(
         self,
         class_name,
         module_name=None,
-        partitioners=None,
-        default_partitioner=None,
+        # partitioners=None,
+        # default_partitioner_name=None,
         assets=None,
-        config_params=None,
-        **kwargs
+        **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
-        if partitioners is not None:
-            self._partitioners = partitioners
-        if default_partitioner is not None:
-            self._default_partitioner = default_partitioner
+        # if partitioners is not None:
+        #     self._partitioners = partitioners
+        # if default_partitioner_name is not None:
+        #     self._default_partitioner_name = default_partitioner_name
         if assets is not None:
             self._assets = assets
-        if config_params is not None:
-            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-    @property
-    def partitioners(self):
-        return self._partitioners
+    # @property
+    # def partitioners(self):
+    #     return self._partitioners
 
-    @property
-    def default_partitioner(self):
-        return self._default_partitioner
+    # @property
+    # def default_partitioner_name(self):
+    #     return self._default_partitioner_name
 
     @property
     def assets(self):
@@ -264,28 +226,14 @@ class DataConnectorConfig(DictDot):
     def module_name(self):
         return self._module_name
 
-    @property
-    def config_params(self):
-        return self._config_params
-
 
 class DataConnectorConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.execution_environment.data_connector")
-
-    default_partitioner = fields.String(
-        required=False,
-        allow_none=True,
-    )
-
-    partitioners = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(PartitionerConfigSchema),
-        required=False,
-        allow_none=True,
+    module_name = fields.String(
+        missing="great_expectations.execution_environment.data_connector"
     )
 
     assets = fields.Dict(
@@ -295,7 +243,18 @@ class DataConnectorConfigSchema(Schema):
         allow_none=True,
     )
 
-    config_params = fields.Dict(allow_none=True)
+    # TODO: <Alex></Alex>
+    # partitioners = fields.Dict(
+    #     keys=fields.Str(),
+    #     values=fields.Nested(PartitionerConfigSchema),
+    #     required=False,
+    #     allow_none=True,
+    # )
+
+    # default_partitioner_name = fields.String(
+    #     required=False,
+    #     allow_none=True,
+    # )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -314,7 +273,7 @@ class ExecutionEngineConfig(DictDot):
         module_name=None,
         caching=None,
         batch_spec_defaults=None,
-        **kwargs
+        **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
@@ -367,7 +326,7 @@ class ExecutionEnvironmentConfig(DictDot):
         credentials=None,
         reader_method=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
@@ -422,7 +381,6 @@ class ExecutionEnvironmentConfigSchema(Schema):
         return ExecutionEnvironmentConfig(**data)
 
 
-# TODO: deprecate? keep for backwards compatibility?
 class DatasourceConfig(DictDot):
     def __init__(
         self,
@@ -431,9 +389,10 @@ class DatasourceConfig(DictDot):
         data_asset_type=None,
         batch_kwargs_generators=None,
         credentials=None,
+        boto3_options=None,
         reader_method=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
@@ -449,6 +408,8 @@ class DatasourceConfig(DictDot):
             self.limit = limit
         for k, v in kwargs.items():
             setattr(self, k, v)
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
 
     @property
     def class_name(self):
@@ -545,6 +506,7 @@ class DatasourceConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.datasource")
     data_asset_type = fields.Nested(ClassConfigSchema)
+    boto3_options = fields.Dict(keys=fields.Str(), values=fields.Str(), allow_none=True)
     # TODO: Update to generator-specific
     # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
     batch_kwargs_generators = fields.Dict(
@@ -769,9 +731,7 @@ class DataContextConfigSchema(Schema):
         error_messages={"invalid": "config version must " "be a number."},
     )
     datasources = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(DatasourceConfigSchema),
-        allow_none=True
+        keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema), allow_none=True
     )
     execution_environments = fields.Dict(
         keys=fields.Str(),
@@ -816,8 +776,8 @@ class DataContextConfigSchema(Schema):
 
         # When migrating from 0.7.x to 0.8.0
         if data["config_version"] == 0 and (
-                "validations_store" in list(data.keys())
-                or "validations_stores" in list(data.keys())
+            "validations_store" in list(data.keys())
+            or "validations_stores" in list(data.keys())
         ):
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
@@ -842,6 +802,7 @@ dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 executionEnvironmentConfigSchema = ExecutionEnvironmentConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
+assetConfigSchema = AssetConfigSchema()
 partitionerConfigSchema = PartitionerConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()

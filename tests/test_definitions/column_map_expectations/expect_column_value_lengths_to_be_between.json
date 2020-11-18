@@ -16,7 +16,7 @@
       }
     },
     "tests": [{
-      "title": "Positive test, exact min and max",
+      "title": "positive_test__exact_min_and_max",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -29,7 +29,7 @@
         "unexpected_list": []
       }
     },{
-      "title": "Negative test, matching min - max too small",
+      "title": "negative_test__matching_min___max_too_small",
       "exact_match_out" : false,
       "in":{
         "column": "s2",
@@ -42,7 +42,7 @@
         "unexpected_list": ["collected"]
       }
     },{
-      "title": "Negative test, matching max - min too large",
+      "title": "negative_test__matching_max___min_too_large",
       "exact_match_out" : false,
       "in":{
         "column": "s2",
@@ -55,7 +55,7 @@
         "unexpected_list": ["cool", "calm"]
       }
     },{
-      "title": "Positive test with null min_value",
+      "title": "positive_test_with_null_min_value",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -68,7 +68,7 @@
         "unexpected_list": []
       }
     },{
-      "title": "Positive test with null max_value",
+      "title": "positive_test_with_null_max_value",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -81,7 +81,7 @@
         "unexpected_list": []
       }
     },{
-      "title": "Negative test with max < min",
+      "title": "negative_test_with_max_lt_min",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -94,7 +94,7 @@
         "unexpected_list": ["smart","silly","sassy","slimy","sexy"]
       }
     },{
-      "title": "Positive test with missing value in column",
+      "title": "positive_test_with_missing_value_in_column",
       "exact_match_out" : false,
       "in":{
         "column": "s3",
@@ -107,7 +107,7 @@
         "unexpected_list": []
       }
     },{
-      "title": "Test error handling for non-int min_value",
+      "title": "test_error_handling_for_non_int_min_value",
       "exact_match_out" : false,
       "in":{
         "min_value": "quack",
@@ -119,7 +119,7 @@
         "traceback_substring": "must be integers"
       }
     },{
-      "title": "Test error handling for non-int max_value",
+      "title": "test_error_handling_for_non_int_max_value",
       "exact_match_out" : false,
       "in":{
         "min_value": 0,
@@ -131,7 +131,7 @@
         "traceback_substring": "must be integers"
       }
     },{
-      "title": "Test error handling for both null max and min values",
+      "title": "test_error_handling_for_both_null_max_and_min_values",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -144,7 +144,7 @@
         "traceback_substring": "min_value and max_value cannot both be None"
       }
     },{
-      "title": "Test error handling, values are integers",
+      "title": "test_error_handling__values_are_integers",
       "exact_match_out" : false,
       "in":{
         "column": "s4",

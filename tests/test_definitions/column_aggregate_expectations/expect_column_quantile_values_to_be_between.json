@@ -18,7 +18,7 @@
     },
     "tests": [
         {
-          "title": "Basic positive test: extremes",
+          "title": "basic_positive_test_extremes",
           "exact_match_out": false,
           "in": {
             "column": "norm_0_1",
@@ -39,7 +39,7 @@
           "suppress_test_for": ["sqlite"]
         },
         {
-          "title": "Basic positive test: normal quartiles",
+          "title": "basic_positive_test_normal_quartiles",
           "exact_match_out": false,
           "in": {
             "column": "norm_0_1",
@@ -60,7 +60,7 @@
           "suppress_test_for": ["sqlite"]
         },
         {
-          "title": "Basic positive test: uneven spacing",
+          "title": "basic_positive_test_uneven_spacing",
           "exact_match_out": false,
           "in": {
             "column": "norm_0_1",
@@ -81,7 +81,7 @@
           "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation"
       },
         {
-          "title": "Basic negative test: normal quartiles, wrong distribution",
+          "title": "basic_negative_test_normal_quartiles__wrong_distribution",
           "exact_match_out": false,
           "in": {
             "column": "norm_1_1",

@@ -47,7 +47,7 @@ Expectations are assertions for data. They help accelerate data engineering and 
 
 .. _reference__core_concepts__expectations__expectations:
 
-**Expectations** are declarative statements that a computer can evaluate, and that are semantically meaningful to humans, like ``expect_column_values_to_be_unique`` or ``expect_column_mean_to_be_between``.  Expectations are implemented as classes that provide a rich interface to the rest of the library to support validation, profiling, and translation.
+An **Expectation** is a declarative statements that a computer can evaluate, and that are semantically meaningful to humans, like ``expect_column_values_to_be_unique`` or ``expect_column_mean_to_be_between``.  Expectations are implemented as classes that provide a rich interface to the rest of the library to support validation, profiling, and translation.
 
 **Expectation Implementations** provide the critical translation layer between what we expect and how to verify the expectation in data or express it in :ref:`data_docs`. Expectation Implementations provide different methods for specific execution engines where the actual expectation is executed.
 
@@ -65,6 +65,7 @@ Expectations are assertions for data. They help accelerate data engineering and 
    /reference/core_concepts/expectations/standard_arguments.rst
    /reference/core_concepts/expectations/result_format.rst
    /reference/core_concepts/expectations/implemented_expectations.rst
+   /reference/core_concepts/conditional_expectations.rst
 
 .. _reference__core_concepts__data_access:
 
@@ -110,7 +111,7 @@ An **Expectation Validation Result** captures the output of checking an expectat
 
 An **Expectation Suite Validation Result** combines multiple Expectation Validation Results and metadata about the validation into a single report.
 
-A **Metric** is a value produced by Great Expectations when evaluating one or more batches of data, such as an observed mean or distribution of data. Metrics can be addressed in Great Expectations using standardized names that refer to the specific Batch and Expectation that produced them. Metrics use :ref:`domain and value keys <reference__core_concepts__expectations__domain_and_success_keys>`  just as Expectations do.
+A **Metric** is a value produced by Great Expectations when evaluating one or more batches of data, such as an observed mean or distribution of data. Metrics can be addressed in Great Expectations using standardized names that refer to the specific Batch and Expectation that produced them. Metrics use :ref:`domain and value keys <reference__core_concepts__expectations__domain_and_success_keys>` similarly to the domain and success keys of Expectations.
 
 .. _reference__core_concepts__validation__validation_operator:
 

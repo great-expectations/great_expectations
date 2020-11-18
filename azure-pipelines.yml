@@ -4,7 +4,7 @@ trigger:
   - 0.*-develop
   - feature_dev_wip/partitioners
   - feature/batch_spec
- 
+
 resources:
   containers:
   - container: postgres
@@ -251,14 +251,14 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install -r requirements.txt
+              pip install --requirement requirements.txt
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install -r requirements.txt
-              pip install  pytest pytest-cov pytest-azurepipelines
+              pip install --requirement requirements.txt
+              pip install pytest pytest-cov pytest-azurepipelines
               pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
@@ -282,7 +282,7 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install -r requirements.txt
+              pip install --requirement requirements.txt
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
@@ -333,7 +333,7 @@ stages:
             inputs:
               pythonUploadServiceConnection: pypi
 
-          # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
+          # Use command line script to 'twine upload', use --requirement (or -r) to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
           - script: |
-              python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
+              python -m twine upload --requirement great-expectations --config-file $(PYPIRC_PATH) dist/*
             displayName: 'Upload'

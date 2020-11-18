@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import Dict
 
 import pytest
 from freezegun import freeze_time
@@ -21,7 +22,7 @@ from great_expectations.render.renderer.site_builder import SiteBuilder
 def assert_how_to_buttons(
     context,
     index_page_locator_info: str,
-    index_links_dict: dict,
+    index_links_dict: Dict,
     show_how_to_buttons=True,
 ):
     """Helper function to assert presence or non-presence of how-to buttons and related content in various

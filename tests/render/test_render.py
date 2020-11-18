@@ -20,8 +20,8 @@ from great_expectations.render.renderer.content_block import (
 )
 from great_expectations.render.view import DefaultJinjaPageView
 from tests.test_utils import (
-    expectationSuiteValidationResultSchema,
     expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
 )
 
 
@@ -215,7 +215,7 @@ def test_content_block_list_available_expectations():
         "expect_column_median_to_be_between",
         "expect_column_min_to_be_between",
         "expect_column_most_common_value_to_be_in_set",
-        "expect_column_pair_values_A_to_be_greater_than_B",
+        "expect_column_pair_values_a_to_be_greater_than_b",
         "expect_column_pair_values_to_be_equal",
         "expect_column_proportion_of_unique_values_to_be_between",
         "expect_column_stdev_to_be_between",

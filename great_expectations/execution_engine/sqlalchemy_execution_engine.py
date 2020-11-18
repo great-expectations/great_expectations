@@ -1,39 +1,49 @@
+import copy
 import datetime
+import json
 import logging
 import uuid
-from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Tuple
 from urllib.parse import urlparse
 
-from sqlalchemy.engine import reflection
-from sqlalchemy.engine.default import DefaultDialect
-from sqlalchemy.sql import Select
-from sqlalchemy.sql.elements import TextClause
-
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core import IDDict
+from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.execution_environment.types import (
     SqlAlchemyDatasourceQueryBatchSpec,
     SqlAlchemyDatasourceTableBatchSpec,
 )
-from great_expectations.expectations.registry import register_metric
+from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
+from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.util import import_library_module
-from great_expectations.validator.validation_graph import MetricEdgeKey
-
-try:
-    import sqlalchemy as sa
-except ImportError:
-    sa = None
-
-from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.exceptions import (
     BatchSpecError,
     DatasourceKeyPairAuthBadPassphraseError,
+    GreatExpectationsError,
     InvalidConfigError,
     ValidationError,
 )
-from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy as sa
+    from sqlalchemy.engine import reflection
+    from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.sql import Select
+    from sqlalchemy.sql.elements import (
+        TextClause,
+        quoted_name
+    )
+except ImportError:
+    sa = None
+    reflection = None
+    DefaultDialect = None
+    Select = None
+    TextClause = None
+    quoted_name = None
+
 
 try:
     import psycopg2
@@ -114,7 +124,9 @@ class SqlAlchemyBatchData:
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
 
-    def __init__(self, engine, table_name=None, schema=None, query=None):
+    def __init__(
+        self, engine, table_name=None, schema=None, query=None, use_quoted_name=False
+    ):
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
 
@@ -133,6 +145,7 @@ class SqlAlchemyBatchData:
         self._table_name = table_name
         self._schema = schema
         self._query = query
+        self._use_quoted_name = use_quoted_name
 
         if table_name is None and query is None:
             raise ValueError("Table_name or query must be specified")
@@ -152,9 +165,13 @@ class SqlAlchemyBatchData:
         if table_name is None:
             raise ValueError("No table_name provided.")
 
+        if use_quoted_name:
+            table_name = quoted_name(table_name)
+
         if engine.dialect.name.lower() == "bigquery":
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
+
         else:
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
@@ -173,16 +190,6 @@ class SqlAlchemyBatchData:
                     "No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
                     "default dataset in engine url"
                 )
-
-        if (
-            query is not None
-            and engine.dialect.name.lower() == "snowflake"
-            and generated_table_name is not None
-        ):
-            raise ValueError(
-                "No snowflake_transient_table specified. Snowflake with a query batch_kwarg will create "
-                "a transient table, so you must provide a user-selected name."
-            )
 
         if query:
             self.create_temporary_table(table_name, query, schema_name=schema)
@@ -216,6 +223,22 @@ class SqlAlchemyBatchData:
     def table(self):
         """Returns a table of the data inside the sqlalchemy_execution_engine"""
         return self._table
+
+    @property
+    def use_quoted_name(self):
+        """Returns a table of the data inside the sqlalchemy_execution_engine"""
+        return self._use_quoted_name
+
+    @property
+    def schema(self):
+        return self._schema
+
+    @property
+    def selectable(self):
+        if self._table is not None:
+            return self._table
+        else:
+            return sa.text(self._query)
 
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
         """
@@ -255,10 +278,9 @@ class SqlAlchemyBatchData:
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
-            logger.info("Creating transient table %s" % table_name)
             if schema_name is not None:
                 table_name = schema_name + "." + table_name
-            stmt = "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
+            stmt = "CREATE OR REPLACE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name == "mysql":
@@ -328,6 +350,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         engine=None,
         connection_string=None,
         url=None,
+        batch_data_dict=None,
         **kwargs,
     ):
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
@@ -342,9 +365,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 data_context (DataContext): \
                     An object representing a Great Expectations project that can be used to access Expectation
                     Suites and the Project Data itself
-                engine (SqlAlchemyExecutionEngine): \
-                    An Execution Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
-                    Execution Engine has already been configured and should be reused. Will override Credentials
+                engine (Engine): \
+                    A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
+                    Engine has already been configured and should be reused. Will override Credentials
                     if provided.
                 connection_string (string): \
                     If neither the engines nor the credentials have been provided, a connection string can be used
@@ -355,8 +378,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     a url can be used to access the data. This will be overridden by all other configuration
                     options if any are provided.
         """
-        super().__init__(name=None, data_context=data_context)
+        super().__init__(name=name, batch_data_dict=batch_data_dict, **kwargs)
         self._name = name
+
+        self._credentials = credentials
+        self._connection_string = connection_string
+        self._url = url
+
         if engine is not None:
             if credentials is not None:
                 logger.warning(
@@ -391,9 +419,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
 
-            if engine and engine.dialect.name.lower() in ["sqlite", "mssql"]:
-                # sqlite/mssql temp tables only persist within a connection so override the engine
-                self.engine = engine.connect()
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
@@ -408,6 +433,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
         else:
             self.dialect = None
+
+        # NOTE: Abe 20201111: I don't understand what this is supposed to do. It's untested, and it's breaking sqlite.
+        # if self.engine and self.engine.dialect.name.lower() in [
+        #     "sqlite",
+        #     "mssql",
+        #     "snowflake",
+        # ]:
+        #     # sqlite/mssql temp tables only persist within a connection so override the engine
+        #     self.engine = engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -425,7 +459,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 success=True,
             )
 
-    def _build_engine(self, credentials, **kwargs) -> sa.engine.Engine:
+    @property
+    def credentials(self):
+        return self._credentials
+
+    @property
+    def connection_string(self):
+        return self._connection_string
+
+    @property
+    def url(self):
+        return self._url
+
+    def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
@@ -505,90 +551,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             create_engine_kwargs,
         )
 
-    def load_batch(
-        self, batch_request=None, batch_spec=None, in_memory_dataset=None
-    ) -> Batch:
-        """
-        With the help of the execution environment and data connector specified within the batch request,
-        builds a batch spec and utilizes it to load a batch using the appropriate file reader and the given file path.
-
-        Args:
-           batch_spec (dict): A dictionary specifying the parameters used to build the batch
-           in_memory_dataset (A Pandas DataFrame or None): Optional specification of an in memory Dataset used
-                                                            to load a batch. A Data Asset name and partition ID
-                                                            must still be passed via batch request.
-
-        """
-        # We need to build a batch_markers to be used in the dataframe
-        if not batch_spec and not batch_request:
-            raise ValueError("must provide a batch spec or batch request")
-
-        if batch_spec and batch_request:
-            raise ValueError("only provide either batch spec or batch request")
-
-        if batch_spec and not batch_request:
-            logger.info("loading a batch without a batch_request")
-            batch_request = {}
-        else:
-            execution_environment_name = batch_request.get("execution_environment")
-            if not self._data_context:
-                raise ValueError("Cannot use a batch request without a data context")
-            execution_environment = self._data_context.get_execution_environment(
-                execution_environment_name
-            )
-
-            data_connector_name = batch_request.get("data_connector")
-            assert data_connector_name, "Batch definition must specify a data_connector"
-
-            data_connector = execution_environment.get_data_connector(
-                data_connector_name
-            )
-            # noinspection PyProtectedMember
-            batch_spec = data_connector._build_batch_spec(
-                batch_request=batch_request
-            )
-
-        batch_markers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
-        )
-
-        if isinstance(batch_spec, SqlAlchemyDatasourceTableBatchSpec):
-            batch_reference = SqlAlchemyBatchData(
-                engine=self.engine,
-                table_name=batch_spec.get("table"),
-                schema=batch_spec.get("schema"),
-            )
-        elif isinstance(batch_spec, SqlAlchemyDatasourceQueryBatchSpec):
-            batch_reference = SqlAlchemyBatchData(
-                engine=self.engine,
-                query=batch_spec.get("query"),
-                schema=batch_spec.get("schema"),
-            )
-        else:
-            raise BatchSpecError("Unrecognized BatchSpec")
-
-        batch_id = batch_spec.to_id()
-        if not self.batches.get(batch_id):
-            batch = Batch(
-                execution_engine=self,
-                batch_spec=batch_spec,
-                data=batch_reference,
-                batch_request=batch_request,
-                batch_markers=batch_markers,
-                data_context=self._data_context,
-            )
-            self.batches[batch_id] = batch
-
-        self._loaded_batch_id = batch_id
-        return batch
-
-    def _get_selectable(
-        self, domain_kwargs: dict = None, batches: Dict[str, Batch] = None
-    ) -> sa.sql.Selectable:
+    def get_compute_domain(
+        self, domain_kwargs: dict = None
+    ) -> Tuple["sa.sql.Selectable", dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
@@ -601,84 +566,116 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if batches and len(batches) == 1:
-                batch = [batch for batch in batches.values()][0]
-            elif self.loaded_batch:
-                batch = self.loaded_batch
+            if self.active_batch_data:
+                data_object = self.active_batch_data
             else:
-                raise ValidationError(
-                    "No batch is specified, but multiple batches are available."
+                raise GreatExpectationsError(
+                    "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batches and batch_id in batches:
-                batch = batches[batch_id]
-            elif batch_id == self.loaded_batch_id:
-                batch = self.loaded_batch
+            if batch_id in self.loaded_batch_data_dict:
+                data_object = self.loaded_batch_data_dict[batch_id]
             else:
-                raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
+                raise GreatExpectationsError(
+                    f"Unable to find batch with batch_id {batch_id}"
+                )
 
-        table_name = domain_kwargs.get("table", None)
-        if table_name and table_name != batch.data.table_name:
-            raise ValueError("Unrecognized table name.")
-        else:
-            table = batch.data.table
-
-        row_condition = domain_kwargs.get("row_condition", None)
-        if row_condition:
+        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs = dict()
+        if "table" in domain_kwargs and domain_kwargs["table"] is not None:
+            if domain_kwargs["table"] != data_object.table:
+                raise ValueError("Unrecognized table name.")
+            else:
+                selectable = data_object.table
+        elif "query" in domain_kwargs:
             raise ValueError(
-                "SqlAlchemyExecutionEngine does not support row_condition."
+                "query is not currently supported by SqlAlchemyExecutionEngine"
             )
+        else:
+            selectable = data_object.table
 
-        return table
+        if (
+            "row_condition" in domain_kwargs
+            and domain_kwargs["row_condition"] is not None
+        ):
+            condition_parser = domain_kwargs["condition_parser"]
+            if condition_parser == "great_expectations__experimental__":
+                parsed_condition = parse_condition_to_sqlalchemy(
+                    domain_kwargs["row_condition"]
+                )
+                selectable = sa.select(
+                    "*", from_obj=selectable, whereclause=parsed_condition
+                )
 
-    def batch_resolve(
-        self,
-        resolve_batch: Iterable[Tuple[MetricEdgeKey, Callable, dict]],
-        metrics: Dict[Tuple, Any] = None,
+            else:
+                raise GreatExpectationsError(
+                    "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
+                )
+
+        if "column" in compute_domain_kwargs:
+            if self.active_batch_data.use_quoted_name:
+                accessor_domain_kwargs["column"] = quoted_name(
+                    compute_domain_kwargs.pop("column")
+                )
+            else:
+                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+
+        return selectable, compute_domain_kwargs, accessor_domain_kwargs
+
+    def resolve_metric_bundle(
+        self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
     ) -> dict:
         """For every metrics in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds a
         bundles the metrics into one large query dictionary so that they are all executed simultaneously. Will fail if
         bundling the metrics together is not possible.
 
             Args:
-                resolve_batch (Iterable[Tuple[MetricEdgeKey, Callable, dict]): \
-                    A Dictionary containing a Metric's MetricEdgeKeys (its unique identifier), its metric provider function
-                    (the function that actually executes the metric), and its domain and value keyword argument dictionary.
+                metric_fn_bundle (Iterable[Tuple[MetricConfiguration, Callable, dict]): \
+                    A Dictionary containing a MetricProvider's MetricConfiguration (its unique identifier), its metric provider function
+                    (the function that actually executes the metric), and the arguments to pass to the metric provider function.
                 metrics (Dict[Tuple, Any]): \
                     A dictionary of metrics defined in the registry and corresponding arguments
 
             Returns:
                 A dictionary of metric names and their corresponding now-queried values.
         """
-        if metrics is None:
-            metrics = dict()
+        resolved_metrics = dict()
 
         # We need a different query for each domain (where clause).
         queries: Dict[Tuple, dict] = dict()
-        for metric_to_resolve, metric_provider, metric_provider_kwargs in resolve_batch:
+        for (
+            metric_to_resolve,
+            metric_provider,
+            metric_provider_kwargs,
+        ) in metric_fn_bundle:
             # We have different semantics for bundled metric providers, so ensure we actually are working only with those.
             assert (
-                metric_provider._can_be_bundled
-            ), "batch_resolve only supports metrics that support bundled computation"
-            # batch_id and table are the only determining factors for bundled metrics
-            batch_id = metric_to_resolve.metric_domain_kwargs.get("batch_id")
-            table = metric_to_resolve.metric_domain_kwargs.get("table")
-            select, selectable = metric_provider(
-                self, **metric_provider_kwargs, metrics=metrics
-            )
-            if (batch_id, table) not in queries:
-                queries[(batch_id, table)] = {
+                metric_provider.metric_fn_type == "aggregate_fn"
+            ), "resolve_metric_bundle only supports aggregate metrics"
+            statement, domain_kwargs = metric_provider(**metric_provider_kwargs)
+            if not isinstance(domain_kwargs, IDDict):
+                domain_kwargs = IDDict(domain_kwargs)
+            domain_id = domain_kwargs.to_id()
+            if domain_id not in queries:
+                queries[domain_id] = {
                     "select": [],
                     "ids": [],
-                    "select_from": selectable,
+                    "domain_kwargs": domain_kwargs,
                 }
-            queries[(batch_id, table)]["select"].append(
-                select.label(metric_to_resolve.metric_name)
+            queries[domain_id]["select"].append(
+                statement.label(metric_to_resolve.metric_name)
             )
-            queries[(batch_id, table)]["ids"].append(metric_to_resolve.id)
+            queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
+            selectable, compute_domain_kwargs, _ = self.get_compute_domain(
+                query["domain_kwargs"]
+            )
+            assert (
+                compute_domain_kwargs == query["domain_kwargs"]
+            ), "Invalid compute domain returned from a bundled metric. Verify that its target compute domain is a valid compute domain."
+            assert len(query["select"]) == len(query["ids"])
             res = self.engine.execute(
-                sa.select(query["select"]).select_from(query["select_from"])
+                sa.select(query["select"]).select_from(selectable)
             ).fetchall()
             assert (
                 len(res) == 1
@@ -687,256 +684,195 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 res[0]
             ), "unexpected number of metrics returned"
             for idx, id in enumerate(query["ids"]):
-                metrics[id] = res[0][idx]
+                resolved_metrics[id] = res[0][idx]
 
-        return metrics
+        return resolved_metrics
 
-    def _column_map_count(
+    ### Splitter methods for partitioning tables ###
+
+    def _split_on_whole_table(
         self,
-        metric_name: str,
-        batches: Dict[str, Batch],
-        execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: Dict[Tuple, Any],
-        filter_column_isnull,
-        **kwargs,
+        table_name: str,
+        # column_name: str,
+        partition_definition: dict,
     ):
-        """Returns column nonnull count for ColumnMapExpectations"""
-        assert metric_name.endswith(".count")
-        metric_key = MetricEdgeKey(
-            metric_name[: -len(".count")],
-            metric_domain_kwargs,
-            metric_value_kwargs,
-            filter_column_isnull=filter_column_isnull,
-        ).id
-        expected_condition = metrics.get(metric_key)
-        table = execution_engine._get_selectable(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-        return sa.func.sum(sa.case([(expected_condition, 1,)], else_=0,)), table
+        """'Split' by returning the whole table"""
 
-    def _column_map_values(
+        # return sa.column(column_name) == partition_definition[column_name]
+        return 1 == 1
+
+    def _split_on_column_value(
+        self, table_name: str, column_name: str, partition_definition: dict,
+    ):
+        """Split using the values in the named column"""
+
+        return sa.column(column_name) == partition_definition[column_name]
+
+    def _split_on_converted_datetime(
         self,
-        metric_name: str,
-        batches: Dict[str, Batch],
-        execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: Dict[Tuple, Any],
-        filter_column_isnull,
-        **kwargs,
+        table_name: str,
+        column_name: str,
+        partition_definition: dict,
+        date_format_string: str = "%Y-%m-%d",
     ):
-        """
-        Particularly for the purpose of finding unexpected values, returns all the metric values which do not meet an
-        expected Expectation condition for ColumnMapExpectation Expectations.
-        """
+        """Convert the values in the named column to the given date_format, and split on that"""
 
-        assert metric_name.endswith(".unexpected_values")
-        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
-        result_format = metric_value_kwargs["result_format"]
-        base_metric_value_kwargs = {
-            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
-        }
-        metric_key = MetricEdgeKey(
-            metric_name[: -len(".unexpected_values")],
-            metric_domain_kwargs,
-            base_metric_value_kwargs,
-            filter_column_isnull=filter_column_isnull,
-        ).id
-        unexpected_condition = sa.not_(metrics.get(metric_key))
-        table = execution_engine._get_selectable(
-            domain_kwargs=metric_domain_kwargs, batches=batches
+        return (
+            sa.func.strftime(date_format_string, sa.column(column_name),)
+            == partition_definition[column_name]
         )
-        query = (
-            sa.select([sa.column(metric_domain_kwargs.get("column"))])
-            .select_from(table)
-            .where(unexpected_condition)
-        )
-        if result_format["result_format"] != "COMPLETE":
-            query = query.limit(result_format["partial_unexpected_count"])
-        return execution_engine.engine.execute(query).fetchall()
 
-    def _column_map_value_counts(
+    def _split_on_divided_integer(
         self,
-        metric_name: str,
-        batches: Dict[str, Batch],
-        execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: Dict[Tuple, Any],
-        filter_column_isnull,
-        **kwargs,
+        table_name: str,
+        column_name: str,
+        divisor: int,
+        partition_definition: dict,
     ):
-        """
-        Returns value counts for all the metric values which do not meet an expected Expectation condition for instances
-        of ColumnMapExpectation.
-        """
+        """Divide the values in the named column by `divisor`, and split on that"""
 
-        assert metric_name.endswith(".unexpected_value_counts")
-        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
-        result_format = metric_value_kwargs["result_format"]
-        base_metric_value_kwargs = {
-            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
-        }
-        metric_key = MetricEdgeKey(
-            metric_name[: -len(".unexpected_value_counts")],
-            metric_domain_kwargs,
-            base_metric_value_kwargs,
-            filter_column_isnull=filter_column_isnull,
-        ).id
-        unexpected_condition = sa.not_(metrics.get(metric_key))
-        table = execution_engine._get_selectable(
-            domain_kwargs=metric_domain_kwargs, batches=batches
+        return (
+            sa.cast(sa.column(column_name) / divisor, sa.Integer)
+            == partition_definition[column_name]
         )
-        column = sa.column(metric_domain_kwargs["column"])
-        return execution_engine.engine.execute(
-            sa.select([column, sa.func.count(column)])
-            .select_from(table)
-            .where(unexpected_condition)
-            .groupby(column)
-        ).fetchall()
 
-    def _column_map_rows(
+    def _split_on_mod_integer(
+        self, table_name: str, column_name: str, mod: int, partition_definition: dict,
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+
+        return sa.column(column_name) % mod == partition_definition[column_name]
+
+    def _split_on_multi_column_values(
+        self, table_name: str, column_names: List[str], partition_definition: dict,
+    ):
+        """Split on the joint values in the named columns"""
+
+        return sa.and_(
+            *[
+                sa.column(column_name) == column_value
+                for column_name, column_value in partition_definition.items()
+            ]
+        )
+
+    def _split_on_hashed_column(
         self,
-        metric_name: str,
-        batches: Dict[str, Batch],
-        execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: Dict[Tuple, Any],
-        filter_column_isnull,
-        **kwargs,
+        table_name: str,
+        column_name: str,
+        hash_digits: int,
+        partition_definition: dict,
     ):
-        """
-        Returns all rows of the metric values which do not meet an expected Expectation condition for instances
-        of ColumnMapExpectation.
-        """
+        """Split on the hashed value of the named column"""
 
-        assert metric_name.endswith(".unexpected_rows")
-        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
-        result_format = metric_value_kwargs["result_format"]
-        base_metric_value_kwargs = {
-            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
-        }
-        metric_key = MetricEdgeKey(
-            metric_name[: -len(".unexpected_rows")],
-            metric_domain_kwargs,
-            base_metric_value_kwargs,
-            filter_column_isnull=filter_column_isnull,
-        ).id
-        unexpected_condition = sa.not_(metrics.get(metric_key))
-        table = execution_engine._get_selectable(
-            domain_kwargs=metric_domain_kwargs, batches=batches
+        return (
+            sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
+            == partition_definition[column_name]
         )
-        query = sa.select([sa.text("*")]).select_from(table).where(unexpected_condition)
-        if result_format["result_format"] != "COMPLETE":
-            query = query.limit(result_format["partial_unexpected_count"])
-        return execution_engine.engine.execute(query).fetchall()
 
-    @classmethod
-    def column_map_metric(
-        cls,
-        metric_name: str,
-        metric_domain_keys: Tuple[str, ...],
-        metric_value_keys: Tuple[str, ...],
-        metric_dependencies: Tuple[str, ...],
-        filter_column_isnull: bool = True,
+    ### Sampling methods ###
+
+    # _sample_using_limit
+    # _sample_using_random
+    # _sample_using_mod
+    # _sample_using_a_list
+    # _sample_using_md5
+
+    def _sample_using_random(
+        self, p: float = 0.1,
     ):
+        """Take a random sample of rows, retaining proportion p
+
+        Note: the Random function behaves differently on different dialects of SQL
         """
-        A decorator for declaring a metric provider for instances of map Expectations, registering the metric itself
-        and several specialized column map sub methods used to provide further information about the Expectation itself.
+        return sa.func.random() < p
 
-        Returns:
-            A generic metric provider function, which includes an expected metric condition.
-        """
+    def _sample_using_mod(
+        self, column_name, mod: int, value: int,
+    ):
+        """Take the mod of named column, and only keep rows that match the given value"""
+        return sa.column(column_name) % mod == value
 
-        def outer(metric_fn: Callable):
-            _declared_name = metric_name
+    def _sample_using_a_list(
+        self, column_name: str, value_list: list,
+    ):
+        """Match the values in the named column against value_list, and only keep the matches"""
+        return sa.column(column_name).in_(value_list)
 
-            @wraps(metric_fn)
-            def inner_func(
-                self,
-                metric_name: str,
-                batches: Dict[str, Batch],
-                execution_engine: SqlAlchemyExecutionEngine,
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
-                metrics: Dict[Tuple, Any],
-                **kwargs,
-            ):
-                if _declared_name != metric_name:
-                    logger.warning("using metric provider with an unrecognized metric")
-                column = sa.column(metric_domain_kwargs.get("column"))
-                metric_condition = metric_fn(
-                    self,
-                    column=column,
-                    metrics=metrics,
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    metric_value_kwargs=metric_value_kwargs,
-                    **kwargs,
-                )
-                if filter_column_isnull:
-                    expected_condition = sa.and_(
-                        metric_condition, sa.not_(column.is_(None))
+    def _sample_using_md5(
+        self, column_name: str, hash_digits: int = 1, hash_value: str = "f",
+    ):
+        """Hash the values in the named column, and split on that"""
+        return (
+            sa.func.right(
+                sa.func.md5(sa.cast(sa.column(column_name), sa.Text)), hash_digits
+            )
+            == hash_value
+        )
+
+    def _build_selector_from_batch_spec(self, batch_spec):
+        table_name = batch_spec["table_name"]
+
+        if "splitter_method" in batch_spec:
+            splitter_fn = getattr(self, batch_spec["splitter_method"])
+            split_clause = splitter_fn(
+                table_name=table_name,
+                partition_definition=batch_spec["partition_definition"],
+                **batch_spec["splitter_kwargs"]
+            )
+
+        else:
+            split_clause = True
+
+        if "sampling_method" in batch_spec:
+            if batch_spec["sampling_method"] == "_sample_using_limit":
+                # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
+                # so the business logic for building the query needs to be different.
+
+                return sa.select('*').select_from(
+                    sa.text(table_name)
+                ).where(
+                    split_clause
+                ).limit(batch_spec["sampling_kwargs"]["n"])
+
+            else:
+
+                sampler_fn = getattr(self, batch_spec["sampling_method"])
+                return sa.select('*').select_from(
+                    sa.text(table_name)
+                ).where(
+                    sa.and_(
+                        split_clause,
+                        sampler_fn(**batch_spec["sampling_kwargs"]),
                     )
-                else:
-                    expected_condition = metric_condition
-                return expected_condition
+                )
 
-            register_metric(
-                metric_name=metric_name,
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=metric_value_keys,
-                execution_engine=cls,
-                metric_dependencies=tuple(),
-                metric_provider=inner_func,
-                bundle_computation=False,
-                filter_column_isnull=filter_column_isnull,
-            )
-            register_metric(
-                metric_name=metric_name + ".count",
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=metric_value_keys,
-                execution_engine=cls,
-                metric_dependencies=(metric_name,),
-                metric_provider=cls._column_map_count,
-                bundle_computation=True,
-                filter_column_isnull=filter_column_isnull,
-            )
-            # noinspection PyTypeChecker
-            register_metric(
-                metric_name=metric_name + ".unexpected_values",
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=(*metric_value_keys, "result_format"),
-                execution_engine=cls,
-                metric_dependencies=(metric_name,),
-                metric_provider=cls._column_map_values,
-                bundle_computation=False,
-                filter_column_isnull=filter_column_isnull,
-            )
-            # noinspection PyTypeChecker
-            register_metric(
-                metric_name=metric_name + ".unexpected_value_counts",
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=(*metric_value_keys, "result_format"),
-                execution_engine=cls,
-                metric_dependencies=(metric_name,),
-                metric_provider=cls._column_map_value_counts,
-                bundle_computation=False,
-                filter_column_isnull=filter_column_isnull,
-            )
-            # noinspection PyTypeChecker
-            register_metric(
-                metric_name=metric_name + ".unexpected_rows",
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=(*metric_value_keys, "result_format"),
-                execution_engine=cls,
-                metric_dependencies=(metric_name,),
-                metric_provider=cls._column_map_rows,
-                bundle_computation=False,
-                filter_column_isnull=filter_column_isnull,
-            )
-            return inner_func
+        else:
 
-        return outer
+            return sa.select('*').select_from(
+                sa.text(table_name)
+            ).where(
+                split_clause
+            )
+
+    def get_batch_data_and_markers(
+        self, batch_spec
+    ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
+
+        selector = self._build_selector_from_batch_spec(batch_spec)
+        batch_data = self.engine.execute(selector)
+        # TODO: Abe 20201030: This method should return a SqlAlchemyBatchData as its first object, but that probably requires deeper changes.
+        # SqlAlchemyBatchData(
+        #     engine=self.engine,
+        #     table_name=batch_spec.get("table"),
+        #     schema=batch_spec.get("schema"),
+        # )
+
+        batch_markers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        return batch_data, batch_markers

@@ -1,12 +1,10 @@
 import logging
 import re
-import string
 from abc import ABC, ABCMeta
 from collections import Counter
 from copy import deepcopy
-from functools import wraps
 from inspect import isabstract
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union
 
 import pandas as pd
 from dateutil.parser import parse
@@ -21,22 +19,28 @@ from great_expectations.exceptions import (
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
 )
-from great_expectations.expectations.registry import register_expectation
+from great_expectations.expectations.registry import (
+    get_metric_kwargs,
+    register_expectation,
+    register_renderer,
+)
 from great_expectations.expectations.util import legacy_method_parameters
 
 from ..core.batch import Batch
+from ..core.util import nested_update
 from ..data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
 )
-from ..exceptions.metric_exceptions import MetricError
-from ..execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
+from ..execution_engine import ExecutionEngine, PandasExecutionEngine
+from ..render.renderer.renderer import renderer
+from ..render.types import (
+    CollapseContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
 )
-from ..execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
-from ..validator.validator import Validator
+from ..render.util import num_to_str
+from ..validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +62,15 @@ class MetaExpectation(ABCMeta):
         if not isabstract(newclass):
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
+        newclass._register_renderer_functions()
+        default_kwarg_values = dict()
+        for base in reversed(bases):
+            default_kwargs = getattr(base, "default_kwarg_values", dict())
+            default_kwarg_values = nested_update(default_kwarg_values, default_kwargs)
+
+        newclass.default_kwarg_values = nested_update(
+            default_kwarg_values, attrs.get("default_kwarg_values", dict())
+        )
         return newclass
 
 
@@ -72,10 +85,13 @@ class Expectation(ABC, metaclass=MetaExpectation):
         "catch_exceptions",
         "result_format",
     )
+    default_kwarg_values = {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": "BASIC",
+    }
     legacy_method_parameters = legacy_method_parameters
-
-    _validators = dict()
-    _post_validation_hooks = list()
+    default_kwarg_values = {}
 
     def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
         if configuration is not None:
@@ -83,105 +99,385 @@ class Expectation(ABC, metaclass=MetaExpectation):
         self._configuration = configuration
 
     @classmethod
+    def _register_renderer_functions(cls):
+        expectation_type = camel_to_snake(cls.__name__)
+
+        for candidate_renderer_fn_name in dir(cls):
+            attr_obj = getattr(cls, candidate_renderer_fn_name)
+            if not hasattr(attr_obj, "_renderer_type"):
+                continue
+            register_renderer(
+                object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj
+            )
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "styling": {"parent": {"classes": ["alert", "alert-warning"]}},
+                    "string_template": {
+                        "template": "$expectation_type(**$kwargs)",
+                        "params": {
+                            "expectation_type": configuration.expectation_type,
+                            "kwargs": configuration.kwargs,
+                        },
+                        "styling": {
+                            "params": {
+                                "expectation_type": {
+                                    "classes": ["badge", "badge-warning"],
+                                }
+                            }
+                        },
+                    },
+                }
+            )
+        ]
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.status_icon")
+    def _diagnostic_status_icon_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        assert result, "Must provide a result object."
+        if result.exception_info["raised_exception"]:
+            return RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "❗"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-exclamation-triangle",
+                                        "text-warning",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                }
+            )
+
+        if result.success:
+            return RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": ["hide-succeeded-validation-target-child"]
+                        }
+                    },
+                }
+            )
+        else:
+            return RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "❌"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "tag": "i",
+                                    "classes": ["fas", "fa-times", "text-danger"],
+                                }
+                            }
+                        },
+                    },
+                }
+            )
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.unexpected_statement")
+    def _diagnostic_unexpected_statement_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        assert result, "Must provide a result object."
+        success = result.success
+        result_dict = result.result
+
+        if result.exception_info["raised_exception"]:
+            exception_message_template_str = (
+                "\n\n$expectation_type raised an exception:\n$exception_message"
+            )
+
+            exception_message = RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": exception_message_template_str,
+                        "params": {
+                            "expectation_type": result.expectation_config.expectation_type,
+                            "exception_message": result.exception_info[
+                                "exception_message"
+                            ],
+                        },
+                        "tag": "strong",
+                        "styling": {
+                            "classes": ["text-danger"],
+                            "params": {
+                                "exception_message": {"tag": "code"},
+                                "expectation_type": {
+                                    "classes": ["badge", "badge-danger", "mb-2"]
+                                },
+                            },
+                        },
+                    },
+                }
+            )
+
+            exception_traceback_collapse = CollapseContent(
+                **{
+                    "collapse_toggle_link": "Show exception traceback...",
+                    "collapse": [
+                        RenderedStringTemplateContent(
+                            **{
+                                "content_block_type": "string_template",
+                                "string_template": {
+                                    "template": result.exception_info[
+                                        "exception_traceback"
+                                    ],
+                                    "tag": "code",
+                                },
+                            }
+                        )
+                    ],
+                }
+            )
+
+            return [exception_message, exception_traceback_collapse]
+
+        if success or not result_dict.get("unexpected_count"):
+            return []
+        else:
+            unexpected_count = num_to_str(
+                result_dict["unexpected_count"], use_locale=True, precision=20
+            )
+            unexpected_percent = (
+                num_to_str(result_dict["unexpected_percent"], precision=4) + "%"
+            )
+            element_count = num_to_str(
+                result_dict["element_count"], use_locale=True, precision=20
+            )
+
+            template_str = (
+                "\n\n$unexpected_count unexpected values found. "
+                "$unexpected_percent of $element_count total rows."
+            )
+
+            return [
+                RenderedStringTemplateContent(
+                    **{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": template_str,
+                            "params": {
+                                "unexpected_count": unexpected_count,
+                                "unexpected_percent": unexpected_percent,
+                                "element_count": element_count,
+                            },
+                            "tag": "strong",
+                            "styling": {"classes": ["text-danger"]},
+                        },
+                    }
+                )
+            ]
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.unexpected_table")
+    def _diagnostic_unexpected_table_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        try:
+            result_dict = result.result
+        except KeyError:
+            return None
+
+        if result_dict is None:
+            return None
+
+        if not result_dict.get("partial_unexpected_list") and not result_dict.get(
+            "partial_unexpected_counts"
+        ):
+            return None
+
+        table_rows = []
+
+        if result_dict.get("partial_unexpected_counts"):
+            # We will check to see whether we have *all* of the unexpected values
+            # accounted for in our count, and include counts if we do. If we do not,
+            # we will use this as simply a better (non-repeating) source of
+            # "sampled" unexpected values
+            total_count = 0
+            for unexpected_count_dict in result_dict.get("partial_unexpected_counts"):
+                if not isinstance(unexpected_count_dict, dict):
+                    # handles case: "partial_exception_counts requires a hashable type"
+                    # this case is also now deprecated (because the error is moved to an errors key
+                    # the error also *should have* been updated to "partial_unexpected_counts ..." long ago.
+                    # NOTE: JPC 20200724 - Consequently, this codepath should be removed by approximately Q1 2021
+                    continue
+                value = unexpected_count_dict.get("value")
+                count = unexpected_count_dict.get("count")
+                total_count += count
+                if value is not None and value != "":
+                    table_rows.append([value, count])
+                elif value == "":
+                    table_rows.append(["EMPTY", count])
+                else:
+                    table_rows.append(["null", count])
+
+            # Check to see if we have *all* of the unexpected values accounted for. If so,
+            # we show counts. If not, we only show "sampled" unexpected values.
+            if total_count == result_dict.get("unexpected_count"):
+                header_row = ["Unexpected Value", "Count"]
+            else:
+                header_row = ["Sampled Unexpected Values"]
+                table_rows = [[row[0]] for row in table_rows]
+        else:
+            header_row = ["Sampled Unexpected Values"]
+            sampled_values_set = set()
+            for unexpected_value in result_dict.get("partial_unexpected_list"):
+                if unexpected_value:
+                    string_unexpected_value = str(unexpected_value)
+                elif unexpected_value == "":
+                    string_unexpected_value = "EMPTY"
+                else:
+                    string_unexpected_value = "null"
+                if string_unexpected_value not in sampled_values_set:
+                    table_rows.append([unexpected_value])
+                    sampled_values_set.add(string_unexpected_value)
+
+        unexpected_table_content_block = RenderedTableContent(
+            **{
+                "content_block_type": "table",
+                "table": table_rows,
+                "header_row": header_row,
+                "styling": {
+                    "body": {"classes": ["table-bordered", "table-sm", "mt-3"]}
+                },
+            }
+        )
+
+        return unexpected_table_content_block
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    def _diagnostic_observed_value_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        result_dict = result.result
+        if result_dict is None:
+            return "--"
+
+        if result_dict.get("observed_value"):
+            observed_value = result_dict.get("observed_value")
+            if isinstance(observed_value, (int, float)) and not isinstance(
+                observed_value, bool
+            ):
+                return num_to_str(observed_value, precision=10, use_locale=True)
+            return str(observed_value)
+        elif result_dict.get("unexpected_percent") is not None:
+            return (
+                num_to_str(result_dict.get("unexpected_percent"), precision=5)
+                + "% unexpected"
+            )
+        else:
+            return "--"
+
+    @classmethod
     def get_allowed_config_keys(cls):
         return cls.domain_keys + cls.success_keys + cls.runtime_keys
 
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict[str, Any],
+        runtime_configuration: Dict,
+        execution_engine: ExecutionEngine,
+    ):
+        raise NotImplementedError
+
     def metrics_validate(
         self,
-        metrics: dict,
+        metrics: Dict,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> "ExpectationValidationResult":
         if configuration is None:
             configuration = self.configuration
+        provided_metrics = dict()
+        requested_metrics = self.get_validation_dependencies(
+            configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )["metrics"]
+        for name, metric_edge_key in requested_metrics.items():
+            provided_metrics[name] = metrics[metric_edge_key.id]
 
-        available_metrics = {metric[0] for metric in metrics.keys()}
-        available_validators = sorted(
-            [
-                (
-                    validators_key[0],  # expectation class name
-                    validators_key[1],  # validator name
-                    set(validators_key[2]),  # metric dependencies
-                    validator_fn,
-                )
-                for (validators_key, validator_fn) in self._validators.items()
-            ],
-            key=lambda x: len(x[0][2]),
+        return self._build_evr(
+            self._validate(
+                configuration=configuration,
+                metrics=provided_metrics,
+                runtime_configuration=runtime_configuration,
+                execution_engine=execution_engine,
+            )
         )
-        validator_name = self.get_validator_name()
-        for (
-            expectation_class_name,
-            declared_validator_name,
-            metric_deps,
-            validator_fn,
-        ) in available_validators:
-            # if metric_deps <= available_metrics:
-            if (
-                expectation_class_name == self.__class__.__name__
-                and metric_deps
-                <= available_metrics  # set comparison: metric_deps is a subset of available_metrics
-                and validator_name == declared_validator_name
-            ):
-                return validator_fn(
-                    self,
-                    configuration,
-                    metrics,
-                    runtime_configuration=runtime_configuration,
-                    execution_engine=execution_engine,
-                )
-        raise MetricError("No validator found for available metrics")
-
-    @classmethod
-    def validates(cls, metric_dependencies: tuple, validator_name: str = "default"):
-        def outer(validator: Callable):
-            validators_key = (cls.__name__, validator_name, metric_dependencies)
-            if validators_key in cls._validators:
-                if validator == cls._validators[validators_key]:
-                    logger.info(
-                        f"Multiple declarations of validator with metric dag: {str(validators_key)} found."
-                    )
-                    return
-                else:
-                    logger.warning(
-                        f"Overwriting declaration of validator with metric dag: {str(validators_key)}."
-                    )
-            logger.debug(f"Registering validator: {str(validators_key)}")
-
-            @wraps(validator)
-            def inner_func(self, *args, **kwargs):
-                raw_response = validator(self, *args, **kwargs)
-                return self._build_evr(raw_response)
-
-            cls._validators[
-                (
-                    validator.__qualname__.split(".")[0],  # expectation class name
-                    validator_name,
-                    metric_dependencies,
-                )
-            ] = inner_func
-
-            return inner_func
-
-        return outer
-
-    # @classmethod
-    # def post_validation(cls, func: Callable):
-    #
-    #     @wraps(func)
-    #     def hook(raw_response: Any):
-    #         return func(raw_response)
-    #
-    #     cls._post_validation_hooks.append(hook)
-    #
-    #     return hook
-    #
-    # def _process_post_validation_hooks(self, raw_response):
-    #     for hook in self._post_validation_hooks:
-    #         res = hook(raw_response)
-    #     return raw_response
 
     def _build_evr(self, raw_response):
+        """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
+        fails to return an EVR but returns the necessary components in a dictionary."""
         if not isinstance(raw_response, ExpectationValidationResult):
             if isinstance(raw_response, dict):
                 return ExpectationValidationResult(**raw_response)
@@ -196,27 +492,16 @@ class Expectation(ABC, metaclass=MetaExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        """Construct the validation graph for this expectation."""
+        """Returns the result format and metrics required to validate this Expectation using the provided result format."""
         return {
-            "domain": self.get_domain_kwargs(),
-            "success_kwargs": self.get_success_kwargs(),
             "result_format": parse_result_format(
                 self.get_runtime_kwargs(
-                    runtime_configuration=runtime_configuration
+                    configuration=configuration,
+                    runtime_configuration=runtime_configuration,
                 ).get("result_format")
             ),
-            "metrics": tuple(),
+            "metrics": dict(),
         }
-
-    def __check_validation_kwargs_definition(self):
-        """As a convenience to implementers, we verify that validation kwargs are indeed always supersets of their
-        parent validation_kwargs"""
-        validation_kwargs_set = set(self.validation_kwargs)
-        for parent in self.mro():
-            assert validation_kwargs_set <= set(
-                getattr(parent, "validation_kwargs", set())
-            ), ("Invalid Expectation " "definition for : " + self.__class__.__name__)
-        return True
 
     def get_domain_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -228,6 +513,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
             for key in self.domain_keys
         }
+        # Process evaluation parameter dependencies
+
         missing_kwargs = set(self.domain_keys) - set(domain_kwargs.keys())
         if missing_kwargs:
             raise InvalidExpectationKwargsError(
@@ -288,18 +575,14 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
     def validate(
         self,
-        batches: Dict[str, Batch],
-        execution_engine: ExecutionEngine,
+        validator: "Validator",
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration=None,
     ):
         if configuration is None:
             configuration = self.configuration
-        return Validator().graph_validate(
-            batches=batches,
-            execution_engine=execution_engine,
-            configurations=[configuration],
-            runtime_configuration=runtime_configuration,
+        return validator.graph_validate(
+            configurations=[configuration], runtime_configuration=runtime_configuration,
         )[0]
 
     @property
@@ -364,23 +647,15 @@ class Expectation(ABC, metaclass=MetaExpectation):
             meta=meta,
         )
 
-    def get_validator_name(self):
-        """
-        This is just a placeholder for more complex logic to determine the validator_name
-        Returns:
 
-        """
-        return "default"
-
-
-class DatasetExpectation(Expectation, ABC):
+class TableExpectation(Expectation, ABC):
     domain_keys = (
         "batch_id",
         "table",
-        "column",
         "row_condition",
         "condition_parser",
     )
+    metric_dependencies = tuple()
 
     def get_validation_dependencies(
         self,
@@ -391,64 +666,41 @@ class DatasetExpectation(Expectation, ABC):
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
-        metric_dependencies = set(self.metric_dependencies)
-
-        dependencies["metrics"] = metric_dependencies
+        for metric_name in self.metric_dependencies:
+            metric_kwargs = get_metric_kwargs(
+                metric_name=metric_name,
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            dependencies["metrics"][metric_name] = MetricConfiguration(
+                metric_name=metric_name,
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
 
         return dependencies
 
-    @staticmethod
-    def get_value_set_parser(execution_engine: ExecutionEngine):
-        if isinstance(execution_engine, PandasExecutionEngine):
-            return DatasetExpectation._pandas_value_set_parser
 
-        raise GreatExpectationsError(
-            f"No parser found for backend: {str(execution_engine.__name__)}"
-        )
-
-    @PandasExecutionEngine.metric(
-        metric_name="snippet",
-        metric_domain_keys=domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-        bundle_computation=True,
-    )
-    def _snippet(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
-    ):
-        df = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-        return df
-
-    @staticmethod
-    def _pandas_value_set_parser(value_set):
-        parsed_value_set = [
-            parse(value) if isinstance(value, str) else value for value in value_set
-        ]
-        return parsed_value_set
-
-    def parse_value_set(
-        self, execution_engine: Type[ExecutionEngine], value_set: Union[list, set]
-    ):
-        value_set_parser = self.get_value_set_parser(execution_engine)
-        return value_set_parser(value_set)
+class ColumnExpectation(TableExpectation, ABC):
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
 
 
-class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
+class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
-    metric_dependencies = "column_values.nonnull.count"
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     success_keys = ("mostly",)
+    default_kwarg_values = {
+        "row_condition": None,
+        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "mostly": 1,
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": True,
+    }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        super().validate_configuration(configuration)
+        if not super().validate_configuration(configuration):
+            return False
         try:
             assert (
                 "column" in configuration.kwargs
@@ -472,134 +724,142 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
-        metric_dependencies = set(self.metric_dependencies)
+        assert isinstance(
+            self.map_metric, str
+        ), "ColumnMapExpectation must override get_validation_dependencies or declare exactly one map_metric"
+        assert (
+            self.metric_dependencies == tuple()
+        ), "ColumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
+        # convenient name for updates
+        metric_dependencies = dependencies["metrics"]
+        metric_kwargs = get_metric_kwargs(
+            metric_name="column_values.nonnull.unexpected_count",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[
+            "column_values.nonnull.unexpected_count"
+        ] = MetricConfiguration(
+            "column_values.nonnull.unexpected_count",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+        metric_kwargs = get_metric_kwargs(
+            metric_name=self.map_metric + ".unexpected_count",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[
+            self.map_metric + ".unexpected_count"
+        ] = MetricConfiguration(
+            self.map_metric + ".unexpected_count",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
 
-        dependencies["metrics"] = metric_dependencies
         result_format_str = dependencies["result_format"].get("result_format")
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
 
-        metric_dependencies.add("column_values.count")
-        assert isinstance(
-            self.map_metric, str
-        ), "ColumnMapDatasetExpectation must override get_validation_dependencies or delcare exactly one map_metric"
-        metric_dependencies.add(self.map_metric + ".unexpected_values")
-        # TODO:
-        #
-        # if ".unexpected_index_list" is a registered metric **for this engine**
+        metric_kwargs = get_metric_kwargs(
+            metric_name="table.row_count",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
+        metric_kwargs = get_metric_kwargs(
+            self.map_metric + ".unexpected_values",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[
+            self.map_metric + ".unexpected_values"
+        ] = MetricConfiguration(
+            metric_name=self.map_metric + ".unexpected_values",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
 
-        metric_dependencies.add(self.map_metric + ".unexpected_rows")
+        metric_kwargs = get_metric_kwargs(
+            self.map_metric + ".unexpected_rows",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
+            metric_name=self.map_metric + ".unexpected_rows",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
         if isinstance(execution_engine, PandasExecutionEngine):
-            metric_dependencies.add(self.map_metric + ".unexpected_index_list")
+            metric_kwargs = get_metric_kwargs(
+                self.map_metric + ".unexpected_index_list",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            metric_dependencies[
+                self.map_metric + ".unexpected_index_list"
+            ] = MetricConfiguration(
+                metric_name=self.map_metric + ".unexpected_index_list",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
 
         return dependencies
 
-    @PandasExecutionEngine.metric(
-        metric_name="column_values.count",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-        bundle_computation=False,
-        filter_column_isnull=False,
-    )
-    def _count(
+    def _validate(
         self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = False,
+        execution_engine: ExecutionEngine = None,
     ):
-        df = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs,
-            batches=batches,
-            filter_column_isnull=filter_column_isnull,
-        )
-        return df.shape[0]
 
-    @SqlAlchemyExecutionEngine.metric(
-        metric_name="column_values.count",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-        bundle_computation=True,
-        filter_column_isnull=False,
-    )
-    def _count(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = False,
-    ):
-        import sqlalchemy as sa
-
-        table = execution_engine._get_selectable(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-        return sa.func.count(sa.column(metric_domain_kwargs["column"])), table
-
-    @SparkDFExecutionEngine.metric(
-        metric_name="column_values.count",
-        metric_domain_keys=DatasetExpectation.domain_keys,
-        metric_value_keys=tuple(),
-        metric_dependencies=tuple(),
-        bundle_computation=False,
-        filter_column_isnull=False,
-    )
-    def _count(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        filter_column_isnull: bool = False,
-    ):
-        data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
-        return data.count()
-
-
-def _calc_map_expectation_success(success_count, nonnull_count, mostly):
-    """Calculate success and percent_success for column_map_expectations
-
-    Args:
-        success_count (int): \
-            The number of successful values in the column
-        nonnull_count (int): \
-            The number of nonnull values in the column
-        mostly (float or None): \
-            A value between 0 and 1 (or None), indicating the fraction of successes required to pass the \
-            expectation as a whole. If mostly=None, then all values must succeed in order for the expectation as \
-            a whole to succeed.
-
-    Returns:
-        success (boolean), percent_success (float)
-    """
-
-    if nonnull_count > 0:
-        # percent_success = float(success_count)/nonnull_count
-        percent_success = success_count / nonnull_count
-
-        if mostly is not None:
-            success = bool(percent_success >= mostly)
-
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration.kwargs.get(
+                    "result_format", self.default_kwarg_values.get("result_format")
+                ),
+            )
         else:
-            success = bool(nonnull_count - success_count == 0)
+            result_format = configuration.kwargs.get(
+                "result_format", self.default_kwarg_values.get("result_format")
+            )
+        mostly = self.get_success_kwargs().get(
+            "mostly", self.default_kwarg_values.get("mostly")
+        )
+        total_count = metrics.get("table.row_count")
+        null_count = metrics.get("column_values.nonnull.unexpected_count")
+        unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
 
-    else:
-        success = True
-        percent_success = None
+        success = None
+        if (total_count - null_count) != 0:
+            success_ratio = (total_count - unexpected_count - null_count) / (
+                total_count - null_count
+            )
+            success = success_ratio >= mostly
 
-    return success, percent_success
+        return _format_map_output(
+            result_format=parse_result_format(result_format),
+            success=success,
+            element_count=metrics.get("table.row_count"),
+            nonnull_count=metrics.get("table.row_count")
+            - metrics.get("column_values.nonnull.unexpected_count"),
+            unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
+            unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
+            unexpected_index_list=metrics.get(
+                self.map_metric + ".unexpected_index_list"
+            ),
+        )
 
 
 def _format_map_output(
