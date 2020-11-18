@@ -200,10 +200,7 @@ class RuntimeDataConnector(DataConnector):
         return data_reference
 
     def _self_check_fetch_batch(
-        self,
-        pretty_print,
-        example_data_reference,
-        data_asset_name,
+        self, pretty_print, example_data_reference, data_asset_name,
     ):
         return {}
 

@@ -1,24 +1,24 @@
-import pytest
-import yaml
 import json
-
 from typing import List
 
 import boto3
+import pandas as pd
+import pytest
+import yaml
 from moto import mock_s3
 
-import pandas as pd
-
-from great_expectations.execution_environment.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.execution_engine import PandasExecutionEngine
+import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
-    BatchRequest,
     BatchDefinition,
-    PartitionRequest,
+    BatchRequest,
     PartitionDefinition,
+    PartitionRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-import great_expectations.exceptions.exceptions as ge_exceptions
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_environment.data_connector import (
+    ConfiguredAssetS3DataConnector,
+)
 
 
 @mock_s3
@@ -38,35 +38,30 @@ def test_basic_instantiation():
     ]
     for key in keys:
         client.put_object(
-            Bucket=bucket,
-            Body=test_df.to_csv(index=False).encode("utf-8"),
-            Key=key
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
     my_data_connector = ConfiguredAssetS3DataConnector(
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
-        default_regex={
-            "pattern": "alpha-(.*)\\.csv",
-            "group_names": ["index"],
-        },
+        default_regex={"pattern": "alpha-(.*)\\.csv", "group_names": ["index"],},
         bucket=bucket,
         prefix="",
-        assets={
-            "alpha": {}
-        }
+        assets={"alpha": {}},
     )
 
     assert my_data_connector.self_check() == {
         "class_name": "ConfiguredAssetS3DataConnector",
         "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
+        "example_data_asset_names": ["alpha",],
         "data_assets": {
             "alpha": {
-                "example_data_references": ["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-                "batch_definition_count": 3
+                "example_data_references": [
+                    "alpha-1.csv",
+                    "alpha-2.csv",
+                    "alpha-3.csv",
+                ],
+                "batch_definition_count": 3,
             },
         },
         "example_unmatched_data_references": [],
@@ -81,11 +76,15 @@ def test_basic_instantiation():
 
     # Illegal execution environment name
     with pytest.raises(ValueError):
-        print(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name="something",
-            data_connector_name="my_data_connector",
-            data_asset_name="something",
-        )))
+        print(
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                BatchRequest(
+                    execution_environment_name="something",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="something",
+                )
+            )
+        )
 
 
 @mock_s3
@@ -107,11 +106,10 @@ def test_instantiation_from_a_config(empty_data_context_v3):
     ]
     for key in keys:
         client.put_object(
-            Bucket=bucket,
-            Body=test_df.to_csv(index=False).encode("utf-8"),
-            Key=key
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
-    report_object = context.test_yaml_config(f"""
+    report_object = context.test_yaml_config(
+        f"""
         module_name: great_expectations.execution_environment.data_connector
         class_name: ConfiguredAssetS3DataConnector
         execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -124,18 +122,22 @@ def test_instantiation_from_a_config(empty_data_context_v3):
         prefix: ""
         assets:
             alpha:
-    """, return_mode="report_object")
+    """,
+        return_mode="report_object",
+    )
 
     assert report_object == {
         "class_name": "ConfiguredAssetS3DataConnector",
         "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
+        "example_data_asset_names": ["alpha",],
         "data_assets": {
             "alpha": {
-                "example_data_references": ["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-                "batch_definition_count": 3
+                "example_data_references": [
+                    "alpha-1.csv",
+                    "alpha-2.csv",
+                    "alpha-3.csv",
+                ],
+                "batch_definition_count": 3,
             },
         },
         "example_unmatched_data_references": [],
@@ -163,12 +165,11 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_conte
     ]
     for key in keys:
         client.put_object(
-            Bucket=bucket,
-            Body=test_df.to_csv(index=False).encode("utf-8"),
-            Key=key
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    report_object = context.test_yaml_config(f"""
+    report_object = context.test_yaml_config(
+        f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: ConfiguredAssetS3DataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
@@ -185,21 +186,22 @@ default_regex:
 assets:
     alpha:
 
-    """, return_mode="report_object")
+    """,
+        return_mode="report_object",
+    )
 
     assert report_object == {
         "class_name": "ConfiguredAssetS3DataConnector",
         "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
+        "example_data_asset_names": ["alpha",],
         "data_assets": {
-            "alpha": {
-                "example_data_references": [],
-                "batch_definition_count": 0
-            },
+            "alpha": {"example_data_references": [], "batch_definition_count": 0},
         },
-        "example_unmatched_data_references": ["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
+        "example_unmatched_data_references": [
+            "alpha-1.csv",
+            "alpha-2.csv",
+            "alpha-3.csv",
+        ],
         "unmatched_data_reference_count": 3,
         "example_data_reference": {},
     }
@@ -229,12 +231,11 @@ def test_return_all_batch_definitions_unsorted():
     ]
     for key in keys:
         client.put_object(
-            Bucket=bucket,
-            Body=test_df.to_csv(index=False).encode("utf-8"),
-            Key=key
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(f"""
+    my_data_connector_yaml = yaml.load(
+        f"""
             class_name: ConfiguredAssetS3DataConnector
             execution_environment_name: test_environment
             #execution_engine:
@@ -250,7 +251,9 @@ def test_return_all_batch_definitions_unsorted():
                     - name
                     - timestamp
                     - price
-        """, Loader=yaml.FullLoader)
+        """,
+        Loader=yaml.FullLoader,
+    )
 
     my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
@@ -267,81 +270,105 @@ def test_return_all_batch_definitions_unsorted():
         my_data_connector.get_batch_definition_list_from_batch_request()
 
     # with unnamed data_asset_name
-    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_s3_data_connector",
-        data_asset_name=None,
-    ))
+    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name=None,
+        )
+    )
     expected = [
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "abe", "timestamp": "20200809", "price": "1040"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "alex", "timestamp": "20200809", "price": "1000"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "alex", "timestamp": "20200819", "price": "1300"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "james", "timestamp": "20200713", "price": "1567"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "james", "timestamp": "20200810", "price": "1003"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "james", "timestamp": "20200811", "price": "1009"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "will", "timestamp": "20200809", "price": "1002"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "will", "timestamp": "20200810", "price": "1001"}
-                        )),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "alex", "timestamp": "20200809", "price": "1000"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "alex", "timestamp": "20200819", "price": "1300"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200713", "price": "1567"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "will", "timestamp": "20200809", "price": "1002"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "will", "timestamp": "20200810", "price": "1001"}
+            ),
+        ),
     ]
     assert expected == unsorted_batch_definition_list
 
     # with named data_asset_name
-    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_s3_data_connector",
-        data_asset_name="TestFiles",
-    ))
+    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+        )
+    )
     assert expected == unsorted_batch_definition_list
 
 
@@ -369,12 +396,11 @@ def test_return_all_batch_definitions_sorted():
     ]
     for key in keys:
         client.put_object(
-            Bucket=bucket,
-            Body=test_df.to_csv(index=False).encode("utf-8"),
-            Key=key
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(f"""
+    my_data_connector_yaml = yaml.load(
+        f"""
         class_name: ConfiguredAssetS3DataConnector
         execution_environment_name: test_environment
         #execution_engine:
@@ -402,7 +428,9 @@ def test_return_all_batch_definitions_sorted():
               class_name: NumericSorter
               name: price
 
-    """, Loader=yaml.FullLoader)
+    """,
+        Loader=yaml.FullLoader,
+    )
 
     my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
@@ -422,73 +450,95 @@ def test_return_all_batch_definitions_sorted():
     assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
     assert self_check_report["unmatched_data_reference_count"] == 0
 
-    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_s3_data_connector",
-        data_asset_name="TestFiles",
-    ))
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+        )
+    )
 
     expected = [
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "abe", "timestamp": "20200809", "price": "1040"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "alex", "timestamp": "20200819", "price": "1300"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "alex", "timestamp": "20200809", "price": "1000"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "james", "timestamp": "20200811", "price": "1009"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "james", "timestamp": "20200810", "price": "1003"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "james", "timestamp": "20200713", "price": "1567"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "will", "timestamp": "20200810", "price": "1001"}
-                        )),
-        BatchDefinition(execution_environment_name="test_environment",
-                        data_connector_name="general_s3_data_connector",
-                        data_asset_name="TestFiles",
-                        partition_definition=PartitionDefinition(
-                            {"name": "will", "timestamp": "20200809", "price": "1002"}
-                        )),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "alex", "timestamp": "20200819", "price": "1300"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "alex", "timestamp": "20200809", "price": "1000"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200713", "price": "1567"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "will", "timestamp": "20200810", "price": "1001"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "will", "timestamp": "20200809", "price": "1002"}
+            ),
+        ),
     ]
 
     # TEST 1: Sorting works
@@ -506,7 +556,7 @@ def test_return_all_batch_definitions_sorted():
                     "price": "1567",
                 }
             }
-        )
+        ),
     )
 
     my_batch_definition_list: List[BatchDefinition]
@@ -523,11 +573,8 @@ def test_return_all_batch_definitions_sorted():
         execution_environment_name="test_environment",
         data_connector_name="general_s3_data_connector",
         data_asset_name="TestFiles",
-        partition_definition=PartitionDefinition(**{
-                "name": "james",
-                "timestamp": "20200713",
-                "price": "1567",
-            }
+        partition_definition=PartitionDefinition(
+            **{"name": "james", "timestamp": "20200713", "price": "1567",}
         ),
     )
     assert my_batch_definition == expected_batch_definition
@@ -537,7 +584,7 @@ def test_return_all_batch_definitions_sorted():
         execution_environment_name="test_environment",
         data_connector_name="general_s3_data_connector",
         data_asset_name="TestFiles",
-        partition_request=None
+        partition_request=None,
     )
     # should return 10
     my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
@@ -564,12 +611,11 @@ def test_alpha():
     ]
     for key in keys:
         client.put_object(
-            Bucket=bucket,
-            Body=test_df.to_csv(index=False).encode("utf-8"),
-            Key=key
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(f"""
+    my_data_connector_yaml = yaml.load(
+        f"""
                 module_name: great_expectations.execution_environment.data_connector
                 class_name: ConfiguredAssetS3DataConnector
                 bucket: {bucket}
@@ -580,7 +626,9 @@ def test_alpha():
                     pattern: .*(.+)\\.csv
                     group_names:
                     - part_1
-            """, Loader=yaml.FullLoader)
+            """,
+        Loader=yaml.FullLoader,
+    )
 
     my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
@@ -608,7 +656,7 @@ def test_alpha():
         execution_environment_name="BASE",
         data_connector_name="general_s3_data_connector",
         data_asset_name="B",
-        partition_request=None
+        partition_request=None,
     )
 
     my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
@@ -621,12 +669,8 @@ def test_alpha():
         data_connector_name="general_s3_data_connector",
         data_asset_name="A",
         partition_request=PartitionRequest(
-            **{
-                "partition_identifiers": {
-                     "part_1": "B"
-                 }
-            }
-        )
+            **{"partition_identifiers": {"part_1": "B"}}
+        ),
     )
     my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=my_batch_request
@@ -662,12 +706,11 @@ def test_foxtrot():
     ]
     for key in keys:
         client.put_object(
-            Bucket=bucket,
-            Body=test_df.to_csv(index=False).encode("utf-8"),
-            Key=key
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(f"""
+    my_data_connector_yaml = yaml.load(
+        f"""
             module_name: great_expectations.execution_environment.data_connector
             class_name: ConfiguredAssetS3DataConnector
             bucket: {bucket}
@@ -690,7 +733,9 @@ def test_foxtrot():
                 group_names:
                 - part_1
                 - part_2
-        """, Loader=yaml.FullLoader)
+        """,
+        Loader=yaml.FullLoader,
+    )
 
     my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
@@ -706,11 +751,7 @@ def test_foxtrot():
     assert self_check_report == {
         "class_name": "ConfiguredAssetS3DataConnector",
         "data_asset_count": 4,
-        "example_data_asset_names": [
-            "A",
-            "B",
-            "C"
-        ],
+        "example_data_asset_names": ["A", "B", "C"],
         "data_assets": {
             "A": {
                 "batch_definition_count": 3,
@@ -718,7 +759,7 @@ def test_foxtrot():
                     "test_dir_foxtrot/A/A-1.csv",
                     "test_dir_foxtrot/A/A-2.csv",
                     "test_dir_foxtrot/A/A-3.csv",
-                ]
+                ],
             },
             "B": {
                 "batch_definition_count": 3,
@@ -726,7 +767,7 @@ def test_foxtrot():
                     "test_dir_foxtrot/B/B-1.txt",
                     "test_dir_foxtrot/B/B-2.txt",
                     "test_dir_foxtrot/B/B-3.txt",
-                ]
+                ],
             },
             "C": {
                 "batch_definition_count": 3,
@@ -734,8 +775,8 @@ def test_foxtrot():
                     "test_dir_foxtrot/C/C-2017.csv",
                     "test_dir_foxtrot/C/C-2018.csv",
                     "test_dir_foxtrot/C/C-2019.csv",
-                ]
-            }
+                ],
+            },
         },
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
@@ -747,7 +788,7 @@ def test_foxtrot():
         execution_environment_name="BASE",
         data_connector_name="general_s3_data_connector",
         data_asset_name="A",
-        partition_request=None
+        partition_request=None,
     )
     my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=my_batch_request
@@ -779,12 +820,11 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     ]
     for key in keys:
         client.put_object(
-            Bucket=bucket,
-            Body=test_df.to_csv(index=False).encode("utf-8"),
-            Key=key
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(f"""
+    my_data_connector_yaml = yaml.load(
+        f"""
         class_name: ConfiguredAssetS3DataConnector
         execution_environment_name: test_environment
         #execution_engine:
@@ -813,7 +853,9 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             - orderby: desc
               class_name: NumericSorter
               name: for_me_Me_Me
-    """, Loader=yaml.FullLoader)
+    """,
+        Loader=yaml.FullLoader,
+    )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
@@ -852,12 +894,11 @@ def test_return_all_batch_definitions_too_many_sorters():
     ]
     for key in keys:
         client.put_object(
-            Bucket=bucket,
-            Body=test_df.to_csv(index=False).encode("utf-8"),
-            Key=key
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(f"""
+    my_data_connector_yaml = yaml.load(
+        f"""
         class_name: ConfiguredAssetS3DataConnector
         execution_environment_name: test_environment
         #execution_engine:
@@ -883,7 +924,9 @@ def test_return_all_batch_definitions_too_many_sorters():
               class_name: NumericSorter
               name: price
 
-    """, Loader=yaml.FullLoader)
+    """,
+        Loader=yaml.FullLoader,
+    )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
@@ -924,9 +967,7 @@ def test_example_with_explicit_data_asset_names():
     ]
     for key in keys:
         client.put_object(
-            Bucket=bucket,
-            Body=test_df.to_csv(index=False).encode("utf-8"),
-            Key=key
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
     yaml_string = f"""
@@ -954,7 +995,9 @@ assets:
     config = yaml.load(yaml_string, Loader=yaml.FullLoader)
     my_data_connector = instantiate_class_from_config(
         config,
-        config_defaults={"module_name": "great_expectations.execution_environment.data_connector"},
+        config_defaults={
+            "module_name": "great_expectations.execution_environment.data_connector"
+        },
         runtime_environment={"name": "my_data_connector"},
     )
     # noinspection PyProtectedMember
@@ -962,29 +1005,35 @@ assets:
 
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
-    assert len(
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                data_connector_name="my_data_connector",
-                data_asset_name="alpha",
+    assert (
+        len(
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    data_connector_name="my_data_connector", data_asset_name="alpha",
+                )
             )
         )
-    ) == 3
+        == 3
+    )
 
-    assert len(
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                data_connector_name="my_data_connector",
-                data_asset_name="beta",
+    assert (
+        len(
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    data_connector_name="my_data_connector", data_asset_name="beta",
+                )
             )
         )
-    ) == 4
+        == 4
+    )
 
-    assert len(
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                data_connector_name="my_data_connector",
-                data_asset_name="gamma",
+    assert (
+        len(
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    data_connector_name="my_data_connector", data_asset_name="gamma",
+                )
             )
         )
-    ) == 5
+        == 5
+    )

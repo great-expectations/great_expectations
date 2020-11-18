@@ -201,12 +201,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return self.active_batch_data
 
     def get_batch_data_and_markers(
-        self,
-        batch_spec: BatchSpec
-    ) -> Tuple[
-        Any,  # batch_data
-        BatchMarkers
-    ]:
+        self, batch_spec: BatchSpec
+    ) -> Tuple[Any, BatchMarkers]:  # batch_data
         batch_data: DataFrame
 
         # We need to build a batch_markers to be used in the dataframe
@@ -227,7 +223,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             reader_fn: Callable = self._get_reader_fn(
                 reader=self.spark.read.options(**reader_options),
                 reader_method=reader_method,
-                path=path
+                path=path,
             )
             batch_data = reader_fn(path)
         else:

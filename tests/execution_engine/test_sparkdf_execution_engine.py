@@ -128,8 +128,9 @@ def test_get_compute_domain_with_no_domain_kwargs(spark_session):
     )
     engine = SparkDFExecutionEngine()
     engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={},
-                                                                      domain_type=MetricDomainTypes.TABLE)
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        domain_kwargs={}, domain_type=MetricDomainTypes.TABLE
+    )
     assert compute_kwargs is not None, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}
     assert data.schema == df.schema
@@ -151,8 +152,7 @@ def test_get_compute_domain_with_column_domain(spark_session):
     engine = SparkDFExecutionEngine()
     engine.load_batch_data(batch_data=df, batch_id="1234")
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"column": "a"},
-        domain_type=MetricDomainTypes.COLUMN
+        domain_kwargs={"column": "a"}, domain_type=MetricDomainTypes.COLUMN
     )
     assert compute_kwargs is not None, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {"column": "a"}
@@ -179,7 +179,7 @@ def test_get_compute_domain_with_row_condition(spark_session):
 
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
         domain_kwargs={"row_condition": "b > 2", "condition_parser": "spark"},
-        domain_type=MetricDomainTypes.TABLE
+        domain_type=MetricDomainTypes.TABLE,
     )
     # Ensuring data has been properly queried
     assert data.schema == expected_df.schema
@@ -212,7 +212,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(spark_session):
 
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
         domain_kwargs={"row_condition": "b > 24", "condition_parser": "spark"},
-        domain_type=MetricDomainTypes.TABLE
+        domain_type=MetricDomainTypes.TABLE,
     )
     # Ensuring data has been properly queried
     assert data.schema == expected_df.schema
@@ -256,7 +256,7 @@ def test_get_batch_empty_splitter(test_folder_connection_path_csv):
         PathBatchSpec(
             path=os.path.join(test_folder_connection_path_csv, "test.csv"),
             reader_options={"header": True},
-            splitter_method=None
+            splitter_method=None,
         )
     )
     assert test_sparkdf.count() == 5
@@ -271,7 +271,7 @@ def test_get_batch_empty_splitter_tsv(test_folder_connection_path_tsv):
         PathBatchSpec(
             path=os.path.join(test_folder_connection_path_tsv, "test.tsv"),
             reader_options={"header": True, "sep": "\t"},
-            splitter_method=None
+            splitter_method=None,
         )
     )
     assert test_sparkdf.count() == 5
@@ -284,19 +284,21 @@ def test_get_batch_empty_splitter_parquet(test_folder_connection_path_parquet):
     test_sparkdf = SparkDFExecutionEngine().get_batch_data(
         PathBatchSpec(
             path=os.path.join(test_folder_connection_path_parquet, "test.parquet"),
-            splitter_method=None
+            splitter_method=None,
         )
     )
     assert test_sparkdf.count() == 5
     assert len(test_sparkdf.columns) == 2
 
 
-def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path_csv):
+def test_get_batch_with_split_on_whole_table_filesystem(
+    test_folder_connection_path_csv,
+):
     # reader_method not configured because spark will configure own reader by default
     test_sparkdf = SparkDFExecutionEngine().get_batch_data(
         PathBatchSpec(
             path=os.path.join(test_folder_connection_path_csv, "test.csv"),
-            splitter_method="_split_on_whole_table"
+            splitter_method="_split_on_whole_table",
         )
     )
     assert test_sparkdf.count() == 6
@@ -337,10 +339,11 @@ def test_get_batch_with_split_on_whole_table_s3(spark_session):
 
 
 def test_get_batch_with_split_on_whole_table(test_sparkdf):
-    test_sparkdf = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
-        batch_data=test_sparkdf,
-        splitter_method="_split_on_whole_table"
-    ))
+    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_sparkdf, splitter_method="_split_on_whole_table"
+        )
+    )
     assert test_sparkdf.count() == 120
     assert len(test_sparkdf.columns) == 10
 
