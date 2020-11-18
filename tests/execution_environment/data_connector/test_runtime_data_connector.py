@@ -34,7 +34,8 @@ def test_self_check(basic_execution_environment):
             }
         },
         "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": []
+        "example_unmatched_data_references": [],
+        "example_data_reference": {}
     }
 
 

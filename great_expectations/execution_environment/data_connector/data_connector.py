@@ -1,12 +1,14 @@
 import logging
 from typing import Any, List, Tuple, Optional
+import random
 
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.batch import (
     BatchMarkers,
     BatchDefinition,
+    BatchRequest,
+    PartitionDefinition,
 )
 
 logger = logging.getLogger(__name__)
@@ -163,7 +165,7 @@ class DataConnector:
         asset_names.sort()
         len_asset_names = len(asset_names)
 
-        data_connector_obj = {
+        report_obj = {
             "class_name": self.__class__.__name__,
             "data_asset_count": len_asset_names,
             "example_data_asset_names": asset_names[:max_examples],
@@ -187,7 +189,7 @@ class DataConnector:
                     example_data_references,
                 )
 
-            data_connector_obj["data_assets"][asset_name] = {
+            report_obj["data_assets"][asset_name] = {
                 "batch_definition_count": len_batch_definition_list,
                 "example_data_references": example_data_references,
             }
@@ -197,10 +199,81 @@ class DataConnector:
         if pretty_print:
             print(f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):", unmatched_data_references[:max_examples])
 
-        data_connector_obj["unmatched_data_reference_count"] = len_unmatched_data_references
-        data_connector_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
+        report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
+        report_obj["example_unmatched_data_references"] = unmatched_data_references[:max_examples]
 
-        return data_connector_obj
+        # Choose an example data_reference
+        if pretty_print:
+            print("\n\tChoosing an example data reference...")
+
+        example_data_reference =  None
+
+        available_references = report_obj["data_assets"].items()
+        if len(available_references) == 0:
+            if pretty_print:
+                print(f"\t\tNo references available.")
+            return report_obj
+
+        for data_asset_name, data_asset_return_obj in available_references:
+            if data_asset_return_obj["batch_definition_count"] > 0:
+                example_data_reference = random.choice(
+                    data_asset_return_obj["example_data_references"]
+                )
+                break
+
+        if example_data_reference is not None:
+            if pretty_print:
+                print(f"\t\tReference chosen: {example_data_reference}")
+
+            # ...and fetch it.
+            report_obj["example_data_reference"] = self._self_check_fetch_batch(
+                pretty_print=pretty_print,
+                example_data_reference=example_data_reference,
+                data_asset_name=data_asset_name,
+            )
+        else:
+            report_obj["example_data_reference"] = {}
+    
+        return report_obj
+
+    def _self_check_fetch_batch(
+        self,
+        pretty_print: bool,
+        example_data_reference,
+        data_asset_name: str,
+    ):
+        if pretty_print:
+            print(f"\n\t\tFetching batch data...")
+
+        batch_definition_list = self._map_data_reference_to_batch_definition_list(
+            data_reference=example_data_reference,
+            data_asset_name=data_asset_name,
+        )
+        assert len(batch_definition_list) == 1
+        batch_definition = batch_definition_list[0]
+
+        # _execution_engine might be None for some tests
+        if self._execution_engine is None:
+            return {}
+
+        batch_data, batch_spec, _ = self.get_batch_data_and_metadata(
+            batch_definition
+        )
+
+        df = self._fetch_batch_data_as_pandas_df(batch_data)
+
+        if pretty_print:
+            print(f"\n\t\tShowing 5 rows")
+            print(df[:5])
+
+        return {
+            "batch_spec" : batch_spec,
+            "n_rows" : df.shape[0],
+        }
+    
+    def _fetch_batch_data_as_pandas_df(self, batch_data):
+        # raise NotImplementedError
+        return batch_data
 
     def _validate_batch_request(self, batch_request: BatchRequest):
         if not (
