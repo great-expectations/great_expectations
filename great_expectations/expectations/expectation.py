@@ -840,9 +840,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
         )
 
         result_format_str = dependencies["result_format"].get("result_format")
-        if result_format_str == "BOOLEAN_ONLY":
-            return dependencies
-
         metric_kwargs = get_metric_kwargs(
             metric_name="table.row_count",
             configuration=configuration,
@@ -853,6 +850,8 @@ class ColumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
+        if result_format_str == "BOOLEAN_ONLY":
+            return dependencies
 
         metric_kwargs = get_metric_kwargs(
             self.map_metric + ".unexpected_values",

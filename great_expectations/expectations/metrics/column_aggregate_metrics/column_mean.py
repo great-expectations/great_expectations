@@ -29,6 +29,9 @@ class ColumnMean(ColumnMetricProvider):
         return sa.func.avg(column)
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, **kwargs):
+    def _spark(cls, column, _table, _column_name, **kwargs):
         """Spark Mean Implementation"""
+        types = dict(_table.dtypes)
+        if types[_column_name] not in ("int", "float", "double", "bigint"):
+            raise TypeError("Expected numeric column type for function mean()")
         return F.mean(column)

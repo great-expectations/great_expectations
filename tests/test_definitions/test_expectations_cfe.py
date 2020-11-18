@@ -24,10 +24,9 @@ from tests.test_definitions.test_expectations import (
 )
 from tests.test_definitions.test_expectations import sqliteDialect as sqliteDialect
 from tests.test_definitions.test_expectations import tmp_dir
-from tests.test_utils import (
+from tests.test_utils import evaluate_json_test_cfe, get_test_validator_with_data
+from tests.test_utils_modular import (
     candidate_test_is_on_temporary_notimplemented_list_cfe,
-    evaluate_json_test_cfe,
-    get_test_validator_with_data,
 )
 
 

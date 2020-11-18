@@ -58,6 +58,8 @@ class ColumnMedian(ColumnMetricProvider):
         if dialect.name.lower() == "awsathena":
             raise NotImplementedError("AWS Athena does not support OFFSET.")
         nonnull_count = metrics.get("column_values.nonnull.count")
+        if not nonnull_count:
+            return None
         element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)
