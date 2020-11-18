@@ -1,6 +1,9 @@
 import os
 import uuid
 
+# TODO: maybe bring params in via f-strings from base.ConfigDefaults or whatever
+#  I end up using for the base level configs. Specifically PROJECT_OPTIONAL_CONFIG_COMMENT
+#  and PROJECT_HELP_COMMENT
 PROJECT_HELP_COMMENT = """
 # Welcome to Great Expectations! Always know what to expect from your data.
 #
