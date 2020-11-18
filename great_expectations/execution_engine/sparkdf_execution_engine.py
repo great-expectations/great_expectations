@@ -3,7 +3,7 @@ import datetime
 import hashlib
 import logging
 import uuid
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.id_dict import IDDict
