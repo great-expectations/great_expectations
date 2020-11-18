@@ -4,18 +4,11 @@ import tempfile
 
 import pytest
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import PluginClassNotFoundError
 from tests.test_utils import create_files_in_directory
-from great_expectations.exceptions import (
-    PluginClassNotFoundError,
-)
-from great_expectations.data_context.util import (
-    file_relative_path
-)
-from great_expectations.core import (
-    ExpectationSuite
-)
+
 
 def test_empty_store(empty_data_context_v3):
     my_expectation_store = empty_data_context_v3.test_yaml_config(

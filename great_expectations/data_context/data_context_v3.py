@@ -7,6 +7,7 @@ from typing import Callable, Union
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.compat import StringIO
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -19,12 +20,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
 )
-from great_expectations.core import (
-    ExpectationSuite,
-)
-from great_expectations.validator.validator import (
-    Validator
-)
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -205,7 +201,6 @@ class DataContextV3(DataContext):
             else:
                 raise (e)
 
-
     def get_batch(
         self,
         execution_environment_name: str = None,
@@ -331,32 +326,35 @@ class DataContextV3(DataContext):
 
     def get_validator(
         self,
-        execution_environment_name: str=None,
-        data_connector_name: str=None,
-        data_asset_name: str=None,
-        batch_definition: BatchDefinition=None,
-        batch_request: BatchRequest=None,
-        partition_request: Union[PartitionRequest, dict]=None,
-        partition_identifiers: dict=None,
-        limit: int=None,
+        execution_environment_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        batch_definition: BatchDefinition = None,
+        batch_request: BatchRequest = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
         index=None,
-        custom_filter_function: Callable=None,
-        sampling_method: str=None,
-        sampling_kwargs: dict=None,
-
-        expectation_suite_name: str=None,
-        expectation_suite: ExpectationSuite=None,
+        custom_filter_function: Callable = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        expectation_suite_name: str = None,
+        expectation_suite: ExpectationSuite = None,
         **kwargs,
     ) -> Validator:
         if expectation_suite is None:
             if not expectation_suite_name is None:
                 expectation_suite = self.get_expectation_suite(expectation_suite_name)
             else:
-                raise ValueError("expectation_suite and expectation_suite_name cannot both be None")
+                raise ValueError(
+                    "expectation_suite and expectation_suite_name cannot both be None"
+                )
 
         else:
             if not expectation_suite_name is None:
-                raise Warning("get_validator received values for both expectation_suite and expectation_suite_name. Defaulting to expectation_suite.")
+                raise Warning(
+                    "get_validator received values for both expectation_suite and expectation_suite_name. Defaulting to expectation_suite."
+                )
 
         batch = self.get_batch(
             execution_environment_name=execution_environment_name,
@@ -375,7 +373,9 @@ class DataContextV3(DataContext):
         )
 
         validator = Validator(
-            execution_engine=self.datasources[execution_environment_name].execution_engine,
+            execution_engine=self.datasources[
+                execution_environment_name
+            ].execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
             data_context=self,

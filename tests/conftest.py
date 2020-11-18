@@ -31,9 +31,8 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.util import import_library_module
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.util import import_library_module
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
@@ -3018,7 +3017,8 @@ SELECT EXISTS (
    WHERE  table_schema = 'connection_test'
    AND    table_name   = 'test_df'
 );
-""").fetchall()
+"""
+    ).fetchall()
     if table_check_results != [(True,)]:
         test_df.to_sql("test_df", con=engine, index=True, schema="connection_test")
 
@@ -3073,9 +3073,12 @@ introspection:
 
     return context
 
+
 @pytest.fixture
 def basic_execution_environment(tmp_path_factory):
-    base_directory: str = str(tmp_path_factory.mktemp("basic_execution_environment_runtime_data_connector"))
+    base_directory: str = str(
+        tmp_path_factory.mktemp("basic_execution_environment_runtime_data_connector")
+    )
 
     basic_execution_environment: ExecutionEnvironment = instantiate_class_from_config(
         config=yaml.load(
@@ -3095,15 +3098,10 @@ execution_engine:
     class_name: PandasExecutionEngine
 
     """,
-            Loader=yaml.FullLoader
+            Loader=yaml.FullLoader,
         ),
-        runtime_environment={
-            "name": "my_execution_environment",
-        },
-        config_defaults={
-          "module_name": "great_expectations.execution_environment",
-        }
+        runtime_environment={"name": "my_execution_environment",},
+        config_defaults={"module_name": "great_expectations.execution_environment",},
     )
 
     return basic_execution_environment
-

@@ -5,10 +5,7 @@ from typing import Any, Dict, Iterable, Tuple, Union
 
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import (
-    Batch,
-    BatchSpec,
-)
+from great_expectations.core.batch import Batch, BatchSpec
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.validation_graph import MetricConfiguration

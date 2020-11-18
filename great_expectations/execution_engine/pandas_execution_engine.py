@@ -195,7 +195,9 @@ Notes:
 
     def _get_typed_batch_data(self, batch_data):
         if not isinstance(batch_data, pd.DataFrame):
-            raise TypeError(f"batch_data must be an instance of type DataFrame, not {batch_data.__class__.__name__}")
+            raise TypeError(
+                f"batch_data must be an instance of type DataFrame, not {batch_data.__class__.__name__}"
+            )
 
         # NOTE: Once the class works properly, we should wrap batch_data as a PandasBatchData object.
 
