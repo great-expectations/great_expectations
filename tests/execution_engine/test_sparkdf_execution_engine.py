@@ -233,7 +233,7 @@ def test_get_batch_empty_splitter(test_folder_connection_path):
         )
     )
     assert test_sparkdf.count() == 5
-    assert len(test_sparkdf.columns) == 3
+    assert len(test_sparkdf.columns) == 2
 
 
 def test_get_batch_empty_splitter_tsv(test_folder_connection_path_tsv):
@@ -243,12 +243,12 @@ def test_get_batch_empty_splitter_tsv(test_folder_connection_path_tsv):
     test_sparkdf = SparkDFExecutionEngine().get_batch_data(
         PathBatchSpec(
             path=os.path.join(test_folder_connection_path_tsv, "test.tsv"),
-            reader_options={"header": True, "sep": r"\t"},
+            reader_options={"header": True, "sep": "\t"},
             splitter_method=None
         )
     )
     assert test_sparkdf.count() == 5
-    assert len(test_sparkdf.columns) == 3
+    assert len(test_sparkdf.columns) == 2
 
 
 def test_get_batch_empty_splitter_parquet(test_folder_connection_path_parquet):
@@ -261,7 +261,7 @@ def test_get_batch_empty_splitter_parquet(test_folder_connection_path_parquet):
         )
     )
     assert test_sparkdf.count() == 5
-    assert len(test_sparkdf.columns) == 3
+    assert len(test_sparkdf.columns) == 2
 
 
 def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path):
@@ -273,7 +273,7 @@ def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_p
         )
     )
     assert test_sparkdf.count() == 6
-    assert len(test_sparkdf.columns) == 3
+    assert len(test_sparkdf.columns) == 2
 
 
 def test_get_batch_with_split_on_whole_table_s3(spark_session):

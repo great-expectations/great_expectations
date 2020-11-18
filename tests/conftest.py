@@ -2849,7 +2849,7 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
 def test_folder_connection_path(tmp_path_factory):
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     path = str(tmp_path_factory.mktemp("test_folder_connection_path"))
-    df1.to_csv(path_or_buf=os.path.join(path, "test.csv"))
+    df1.to_csv(path_or_buf=os.path.join(path, "test.csv"), index=False)
     return str(path)
 
 
@@ -2857,7 +2857,7 @@ def test_folder_connection_path(tmp_path_factory):
 def test_folder_connection_path_tsv(tmp_path_factory):
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     path = str(tmp_path_factory.mktemp("test_folder_connection_path_tsv"))
-    df1.to_csv(path_or_buf=os.path.join(path, "test.tsv"), sep="\t")
+    df1.to_csv(path_or_buf=os.path.join(path, "test.tsv"), sep="\t", index=False)
     return str(path)
 
 
@@ -2865,7 +2865,6 @@ def test_folder_connection_path_tsv(tmp_path_factory):
 def test_folder_connection_path_parquet(tmp_path_factory):
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     path = str(tmp_path_factory.mktemp("test_folder_connection_path_parquet"))
-    # df1.to_parquet(path=os.path.join(path, "test.parquet"), compression=None, flavor="spark")
     df1.to_parquet(path=os.path.join(path, "test.parquet"))
     return str(path)
 
