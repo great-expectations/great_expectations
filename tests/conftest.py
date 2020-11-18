@@ -202,16 +202,15 @@ def build_test_backends_list_cfe(metafunc):
             # Be sure to ensure that tests (and users!) understand that subtlety,
             # which can be important for distributional expectations, for example.
             ###
-            try:
-                engine = sa.create_engine("postgresql://postgres@localhost/test_ci")
-                conn = engine.connect()
-                conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "postgresql tests are requested, but unable to connect to the postgresql database at "
-                    "'postgresql://postgres@localhost/test_ci'"
+            connection_string = "postgresql://postgres@localhost/test_ci"
+            checker = LockingConnectionCheck(sa, connection_string)
+            if checker.is_valid() is True:
+                test_backends += ["postgresql"]
+            else:
+                raise ValueError(
+                    f"backend-specific tests are requested, but unable to connect to the database at "
+                    f"{connection_string}"
                 )
-            test_backends += ["postgresql"]
         mysql = metafunc.config.getoption("--mysql")
         if sa and mysql:
             try:
