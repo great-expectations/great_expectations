@@ -11,8 +11,8 @@ from typing import Union
 import numpy as np
 import pandas as pd
 import pytest
-import yaml
 from freezegun import freeze_time
+from ruamel.yaml import YAML
 
 import great_expectations as ge
 from great_expectations import DataContext
@@ -36,6 +36,7 @@ from great_expectations.util import import_library_module
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
+yaml = YAML()
 ###
 #
 # NOTE: THESE TESTS ARE WRITTEN WITH THE en_US.UTF-8 LOCALE AS DEFAULT FOR STRING FORMATTING

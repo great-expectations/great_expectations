@@ -3,7 +3,7 @@ import os
 import random
 
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.util import (
@@ -15,6 +15,8 @@ try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
+
+yaml = YAML()
 
 
 def test_basic_instantiation(sa):

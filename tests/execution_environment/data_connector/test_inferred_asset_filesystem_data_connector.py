@@ -1,7 +1,7 @@
 from typing import List
 
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -14,6 +14,8 @@ from great_expectations.execution_environment.data_connector import (
     InferredAssetFilesystemDataConnector,
 )
 from tests.test_utils import create_files_in_directory
+
+yaml = YAML()
 
 
 def test_basic_instantiation(tmp_path_factory):

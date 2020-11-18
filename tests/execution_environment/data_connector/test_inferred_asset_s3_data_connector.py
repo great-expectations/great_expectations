@@ -3,8 +3,8 @@ from typing import List
 import boto3
 import pandas as pd
 import pytest
-import yaml
 from moto import mock_s3
+from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -16,6 +16,8 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment.data_connector import (
     InferredAssetS3DataConnector,
 )
+
+yaml = YAML()
 
 
 @mock_s3

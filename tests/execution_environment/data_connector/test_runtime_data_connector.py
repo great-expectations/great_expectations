@@ -2,7 +2,7 @@ from typing import List
 
 import pandas as pd
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest, BatchSpec
@@ -13,6 +13,8 @@ from great_expectations.execution_environment.execution_environment import (
     ExecutionEnvironment,
 )
 from great_expectations.execution_environment.types import RuntimeDataBatchSpec
+
+yaml = YAML()
 
 
 def test_self_check(basic_execution_environment):
@@ -373,5 +375,5 @@ def test__build_batch_spec(basic_execution_environment):
         batch_data=pd.DataFrame({"x": range(10)}),
     )
     assert type(batch_spec) == RuntimeDataBatchSpec
-    assert set(batch_spec.keys()) == set(["batch_data"])
+    assert set(batch_spec.keys()) == {"batch_data"}
     assert batch_spec["batch_data"].shape == (10, 1)

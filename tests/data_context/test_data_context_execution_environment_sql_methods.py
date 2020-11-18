@@ -1,7 +1,7 @@
 import json
 
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 from great_expectations.core.batch import (
     Batch,
@@ -11,6 +11,8 @@ from great_expectations.core.batch import (
     PartitionRequest,
 )
 from great_expectations.data_context.util import file_relative_path
+
+yaml = YAML()
 
 
 def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_batch):

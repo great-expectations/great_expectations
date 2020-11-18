@@ -2,7 +2,7 @@ import json
 from typing import List
 
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -17,6 +17,8 @@ from great_expectations.execution_environment.data_connector import (
     DataConnector,
 )
 from tests.test_utils import create_files_in_directory
+
+yaml = YAML()
 
 
 def test_basic_instantiation(tmp_path_factory):
@@ -749,7 +751,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
         base_directory: {base_directory}
         glob_directive: "*.csv"
         assets:
-            TestFiles: 
+            TestFiles:
                 pattern: (.+)_(.+)_(.+)\\.csv
                 group_names:
                     - name
@@ -816,7 +818,7 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
         base_directory: {base_directory}
         glob_directive: "*.csv"
         assets:
-            TestFiles: 
+            TestFiles:
         default_regex:
             pattern: (.+)_.+_.+\\.csv
             group_names:

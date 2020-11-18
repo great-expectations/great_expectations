@@ -2,12 +2,14 @@ import os
 import shutil
 
 import pandas as pd
-import yaml
+from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch
 from great_expectations.data_context.util import file_relative_path
 
 from ..test_utils import create_files_in_directory
+
+yaml = YAML()
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_execution_environment_inferred_assets(

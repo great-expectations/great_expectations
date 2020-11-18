@@ -2,12 +2,14 @@ import json
 import random
 
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchRequest, BatchSpec
 from great_expectations.execution_environment.data_connector import (
     ConfiguredAssetSqlDataConnector,
 )
+
+yaml = YAML()
 
 
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
