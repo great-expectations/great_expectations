@@ -313,8 +313,6 @@ def test_golden_path_pandas_execution_environment_configuration(empty_data_conte
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
-            "C-100.csv",
-            "B-10.csv",
             "A-1.csv",
         ],
         file_content_fn=lambda: "x,y,z\n11,12,13\n87,88,89"
@@ -345,6 +343,7 @@ data_connectors:
 """
 
     # A method, such as the one in the line below, needs to be called in order to populate the cache(s).
+    # noinspection PyUnusedLocal
     report_object = context.test_yaml_config(
         name="my_directory_datasource",
         yaml_config=yaml_config,
@@ -361,6 +360,7 @@ data_connectors:
     assert my_batch.batch_markers["pandas_data_fingerprint"] == "46e3908e5fbf959c959a5e8af4c73435"
 
     with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
         my_batch = context.get_batch(
             "my_directory_datasource",
             "my_filesystem_data_connector",
