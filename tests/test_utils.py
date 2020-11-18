@@ -3,6 +3,7 @@ import locale
 import os
 import random
 import string
+import threading
 from functools import wraps
 from typing import List, Union
 
@@ -30,11 +31,6 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_environment.types import (
-    BatchSpec,
-    SqlAlchemyDatasourceBatchSpec,
-    SqlAlchemyDatasourceTableBatchSpec,
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.validator.validator import Validator
@@ -149,6 +145,27 @@ try:
 except ImportError:
     mssqltypes = None
     MSSQL_TYPES = {}
+
+
+class SqlAlchemyConnectionManager:
+    def __init__(self):
+        self.lock = threading.Lock()
+        self._connections = dict()
+
+    def get_engine(self, connection_string):
+        with self.lock:
+            if connection_string not in self._connections:
+                try:
+                    engine = create_engine(connection_string)
+                    conn = engine.connect()
+                    self._connections[connection_string] = conn
+                except (ImportError, self.sa.exc.SQLAlchemyError):
+                    print(f"Unable to establish connection with {connection_string}")
+                    raise
+            return self._connections[connection_string]
+
+
+connection_manager = SqlAlchemyConnectionManager()
 
 
 def modify_locale(func):
@@ -315,9 +332,9 @@ def get_dataset(
             return None
 
         # Create a new database
-        engine = create_engine("postgresql://postgres@localhost/test_ci")
-        conn = engine.connect()
-
+        engine = connection_manager.get_engine(
+            "postgresql://postgres@localhost/test_ci"
+        )
         sql_dtypes = {}
         if (
             schemas
@@ -361,7 +378,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -369,7 +386,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mysql":
@@ -377,7 +394,6 @@ def get_dataset(
             return None
 
         engine = create_engine("mysql+pymysql://root@localhost/test_ci")
-        conn = engine.connect()
 
         sql_dtypes = {}
         if (
@@ -420,7 +436,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -428,7 +444,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mssql":
@@ -443,8 +459,6 @@ def get_dataset(
         # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
         # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
         # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
-
-        conn = engine.connect()
 
         sql_dtypes = {}
         if (
@@ -487,7 +501,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -495,7 +509,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "SparkDFDataset":
@@ -858,7 +872,9 @@ def _build_sa_validator_with_data(
         else:
             engine = create_engine("sqlite://")
     elif sa_engine_name == "postgresql":
-        engine = create_engine("postgresql://postgres@localhost/test_ci")
+        engine = connection_manager.get_engine(
+            "postgresql://postgres@localhost/test_ci"
+        )
     elif sa_engine_name == "mysql":
         engine = create_engine("mysql+pymysql://root@localhost/test_ci")
     elif sa_engine_name == "mssql":
@@ -873,7 +889,6 @@ def _build_sa_validator_with_data(
     # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
     # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
 
-    conn = engine.connect()
     # Add the data to the database as a new table
 
     sql_dtypes = {}
@@ -919,13 +934,12 @@ def _build_sa_validator_with_data(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
     df.to_sql(
-        name=table_name, con=conn, index=False, dtype=sql_dtypes, if_exists="replace",
+        name=table_name, con=engine, index=False, dtype=sql_dtypes, if_exists="replace",
     )
 
     batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
-    conn.close()
 
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
