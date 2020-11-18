@@ -56,11 +56,11 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         expect_table_column_count_to_be_between
     """
 
+    metric_dependencies = ("table.column_count", )
+
     success_keys = ("value",)
 
     default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "value": None,
         "result_format": "BASIC",
         "include_config": True,
@@ -69,29 +69,6 @@ class ExpectTableColumnCountToEqual(TableExpectation):
     }
 
     """ A Metric Decorator for the Column Count"""
-
-    # @PandasExecutionEngine.metric(
-    #        metric_name="columns.count",
-    #        metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #        metric_value_keys=(),
-    #        metric_dependencies=tuple(),
-    #        filter_column_isnull=False,
-    #    )
-    def _pandas_column_count(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-    ):
-        """Column count metric function"""
-        df = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        return df.shape[1]
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -107,8 +84,6 @@ class ExpectTableColumnCountToEqual(TableExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
 
         # Ensuring that a proper value has been provided
         try:
@@ -192,3 +167,20 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         # Checking if the column count is equivalent to value
         success = column_count == value
         return {"success": success, "result": {"observed_value": column_count}}
+
+    def _validate(
+            self,
+            configuration: ExpectationConfiguration,
+            metrics: Dict,
+            runtime_configuration: dict = None,
+            execution_engine: ExecutionEngine = None,
+    ):
+        expected_column_count = configuration.kwargs.get("value")
+        actual_column_count = metrics.get("table.column_count")
+
+        return {
+            "success": actual_column_count == expected_column_count,
+            "result": {
+                "observed_value": actual_column_count
+            }
+        }
