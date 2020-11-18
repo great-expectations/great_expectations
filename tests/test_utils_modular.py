@@ -3,8 +3,8 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",
             # "expect_table_columns_to_match_set",
-            "expect_table_column_count_to_be_between",
-            "expect_table_column_count_to_equal",
+            # "expect_table_column_count_to_be_between",
+            # "expect_table_column_count_to_equal",
             # "expect_column_to_exist",
             # "expect_table_columns_to_match_ordered_list",
             # "expect_table_row_count_to_be_between",
@@ -63,8 +63,8 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",
             # "expect_table_columns_to_match_set",
-            "expect_table_column_count_to_be_between",
-            "expect_table_column_count_to_equal",
+            # "expect_table_column_count_to_be_between",
+            # "expect_table_column_count_to_equal",
             # "expect_column_to_exist",
             # "expect_table_columns_to_match_ordered_list",
             # "expect_table_row_count_to_be_between",
@@ -123,8 +123,8 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         return expectation_type in [
             # "expect_table_columns_to_match_set",
             "expect_select_column_values_to_be_unique_within_record",
-            "expect_table_column_count_to_be_between",
-            "expect_table_column_count_to_equal",
+            # "expect_table_column_count_to_be_between",
+            # "expect_table_column_count_to_equal",
             # "expect_column_to_exist",
             # "expect_table_columns_to_match_ordered_list",
             # "expect_table_row_count_to_be_between",
