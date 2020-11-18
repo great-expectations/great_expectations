@@ -261,11 +261,13 @@ introspection:
         sampling_kwargs:
             n: 10
 """
-    # report_object = context.test_yaml_config(
-    #     name="my_datasource",
-    #     yaml_config=yaml_config,
-    #     return_mode="report_object",
-    # )
+    # A method, such as the one in the line below, needs to be called in order to populate the cache(s).
+    # noinspection PyUnusedLocal
+    report_object = context.test_yaml_config(
+        name="my_datasource",
+        yaml_config=yaml_config,
+        return_mode="report_object",
+    )
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
 
