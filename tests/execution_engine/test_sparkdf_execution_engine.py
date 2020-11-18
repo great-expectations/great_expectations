@@ -224,13 +224,43 @@ def test_get_batch_data(test_sparkdf):
 
 def test_get_batch_empty_splitter(test_folder_connection_path):
     # reader_method not configured because spark will configure own reader by default
+    # reader_options are needed to specify the fact that the first line of test file is the header
     test_sparkdf = SparkDFExecutionEngine().get_batch_data(
         PathBatchSpec(
             path=os.path.join(test_folder_connection_path, "test.csv"),
+            reader_options={"header": True},
             splitter_method=None
         )
     )
-    assert test_sparkdf.count() == 6
+    assert test_sparkdf.count() == 5
+    assert len(test_sparkdf.columns) == 3
+
+
+def test_get_batch_empty_splitter_tsv(test_folder_connection_path_tsv):
+    # reader_method not configured because spark will configure own reader by default
+    # reader_options are needed to specify the fact that the first line of test file is the header
+    # reader_options are also needed to specify the separator (otherwise, comma will be used as the default separator)
+    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
+        PathBatchSpec(
+            path=os.path.join(test_folder_connection_path_tsv, "test.tsv"),
+            reader_options={"header": True, "sep": r"\t"},
+            splitter_method=None
+        )
+    )
+    assert test_sparkdf.count() == 5
+    assert len(test_sparkdf.columns) == 3
+
+
+def test_get_batch_empty_splitter_parquet(test_folder_connection_path_parquet):
+    # Note: reader method and reader_options are not needed, because
+    # SparkDFExecutionEngine automatically determines the file type as well as the schema of the Parquet file.
+    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
+        PathBatchSpec(
+            path=os.path.join(test_folder_connection_path_parquet, "test.parquet"),
+            splitter_method=None
+        )
+    )
+    assert test_sparkdf.count() == 5
     assert len(test_sparkdf.columns) == 3
 
 
@@ -280,10 +310,6 @@ def test_get_batch_with_split_on_whole_table_s3(spark_session):
 
 
 def test_get_batch_with_split_on_whole_table(test_sparkdf):
-    db_file = file_relative_path(
-        __file__, os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
-    )
-
     test_sparkdf = SparkDFExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
         batch_data=test_sparkdf,
         splitter_method="_split_on_whole_table"

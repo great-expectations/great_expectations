@@ -228,7 +228,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 reader_method=reader_method,
                 path=path
             )
-            batch_data = reader_fn(path=path)
+            batch_data = reader_fn(path)
         else:
             raise BatchSpecError(
                 """
