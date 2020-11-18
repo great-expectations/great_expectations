@@ -86,7 +86,9 @@ class ColumnTypes(TableMetricProvider):
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
     insp = reflection.Inspector.from_engine(engine)
     try:
-        columns = insp.get_columns(batch_data.table.name, schema=batch_data.schema)
+        columns = insp.get_columns(
+            batch_data.selectable.name, schema=batch_data.selectable.schema
+        )
 
     except (KeyError, AttributeError):
         # we will get a KeyError for temporary tables, since
