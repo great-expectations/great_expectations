@@ -87,10 +87,21 @@ class SqlAlchemyQueryStore(Store):
     def get_query_result(self, key, query_parameters=None):
         if query_parameters is None:
             query_parameters = {}
-        query = self._store_backend.get(self._convert_key(key).to_tuple())
+        result = self._store_backend.get(self._convert_key(key).to_tuple())
+        if isinstance(result, dict):
+            query = result.get("query")
+            return_type = result.get("return_type")
+        else:
+            query = result
+            return_type = None
+
+        assert query, "Query must be specified to use SqlAlchemyQueryStore"
+
         query = Template(query).safe_substitute(query_parameters)
         res = self.engine.execute(query).fetchall()
         # NOTE: 20200617 - JPC: this approach is probably overly opinionated, but we can
         # adjust based on specific user requests
         res = [val for row in res for val in row]
+        if return_type == "scalar":
+            [res] = res
         return res
