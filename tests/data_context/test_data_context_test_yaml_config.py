@@ -304,12 +304,6 @@ def test_golden_path_pandas_execution_environment_configuration(empty_data_conte
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
     """
-    context = empty_data_context_v3
-
-    os.chdir(context.root_directory)
-    import great_expectations as ge
-    context = ge.get_context()
-
     base_directory = str(
         tmp_path_factory.mktemp(
             "test_golden_path_pandas_execution_environment_configuration"
@@ -325,6 +319,12 @@ def test_golden_path_pandas_execution_environment_configuration(empty_data_conte
         ],
         file_content_fn=lambda: "x,y,z\n11,12,13\n87,88,89"
     )
+
+    context = empty_data_context_v3
+
+    os.chdir(context.root_directory)
+    import great_expectations as ge
+    context = ge.get_context()
 
     yaml_config = f"""
 class_name: ExecutionEnvironment
