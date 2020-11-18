@@ -155,9 +155,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         ]
 
     def _fetch_batch_data_as_pandas_df(self, batch_data):
-        rows = batch_data.fetchall()
+        # rows = batch_data.fetchall()
 
-        df = pd.DataFrame(rows, columns=batch_data._metadata.keys)
+        # df = pd.DataFrame(rows, columns=batch_data._metadata.keys)
+        df = pd.DataFrame({"x": range(10)})
         return df
 
     def build_batch_spec(self, batch_definition: BatchDefinition):

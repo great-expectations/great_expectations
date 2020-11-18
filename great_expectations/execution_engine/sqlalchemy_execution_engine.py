@@ -178,11 +178,11 @@ class SqlAlchemyBatchData:
         self._schema_name = schema_name
         self._use_quoted_name = use_quoted_name
 
-        if sum(bool(x) for x in [table_name, query, selectable]) != 1:
+        if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
             raise ValueError(
                 "Exactly one of table_name, query, or selectable must be specified"
             )
-        elif (query and schema_name) or (selectable and schema_name):
+        elif (query and schema_name) or (selectable is not None and schema_name):
             raise ValueError(
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
             )
@@ -217,7 +217,7 @@ class SqlAlchemyBatchData:
                         "No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
                         "default dataset in engine url"
                     )
-            if selectable:
+            if selectable is not None:
                 # compile selectable to sql statement
                 query = selectable.compile(
                     dialect=self.sql_engine_dialect,
@@ -248,8 +248,8 @@ class SqlAlchemyBatchData:
         return self._selectable
 
     @property
-    def schema_name(self):
-        return self._schema_name
+    def use_quoted_name(self):
+        return self._use_quoted_name
 
     def _create_temporary_table(
         self, temp_table_name, query, temp_table_schema_name=None
@@ -547,16 +547,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
-            if domain_kwargs["table"] != data_object.table:
+            if domain_kwargs["table"] != data_object.record_set_name:
                 raise ValueError("Unrecognized table name.")
             else:
-                selectable = data_object.table
+                selectable = data_object.selectable
         elif "query" in domain_kwargs:
             raise ValueError(
                 "query is not currently supported by SqlAlchemyExecutionEngine"
             )
         else:
-            selectable = data_object.table
+            selectable = data_object.selectable
 
         if (
             "row_condition" in domain_kwargs
@@ -583,7 +583,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             and len(accessor_keys) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table"
+                "Accessor keys ignored since Metric Domain Type is not 'table'"
             )
 
         if domain_type == MetricDomainTypes.TABLE:
