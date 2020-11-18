@@ -568,8 +568,15 @@ def test_split_on_multi_column_values_and_sample_using_random(test_sparkdf):
         }
     ))
 
-    assert returned_df.count() == 3
+    # The test dataframe contains 10 columns and 120 rows.
     assert len(returned_df.columns) == 10
-    collected = returned_df.collect()
-    for val in collected:
+    # The number of returned rows corresponding to the value of "partition_definition" above is 4.
+    assert 0 <= returned_df.count() <= 4
+    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a
+    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get 50% of the rows, which is
+    # 2; however, for such a small sample (of 4 rows), the number of rows returned by an individual run can deviate from
+    # this average.  Still, in the majority of trials, the number of rows should not be fewer than 2 or greater than 3.
+    assert 2 <= returned_df.count() <= 3
+
+    for val in returned_df.collect():
         assert val.date == datetime.date(2020, 1, 5)
