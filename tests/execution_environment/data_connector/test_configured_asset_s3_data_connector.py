@@ -71,6 +71,7 @@ def test_basic_instantiation():
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
+        "example_data_reference": {},
     }
 
     # noinspection PyProtectedMember
@@ -139,6 +140,7 @@ def test_instantiation_from_a_config(empty_data_context_v3):
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
+        "example_data_reference": {},
     }
 
 
@@ -199,6 +201,7 @@ assets:
         },
         "example_unmatched_data_references": ["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
         "unmatched_data_reference_count": 3,
+        "example_data_reference": {},
     }
 
 
@@ -234,9 +237,8 @@ def test_return_all_batch_definitions_unsorted():
     my_data_connector_yaml = yaml.load(f"""
             class_name: ConfiguredAssetS3DataConnector
             execution_environment_name: test_environment
-            execution_engine:
-                BASE_ENGINE:
-                class_name: PandasExecutionEngine
+            #execution_engine:
+            #    class_name: PandasExecutionEngine
             class_name: ConfiguredAssetS3DataConnector
             bucket: {bucket}
             prefix: ""
@@ -255,7 +257,6 @@ def test_return_all_batch_definitions_unsorted():
         runtime_environment={
             "name": "general_s3_data_connector",
             "execution_environment_name": "test_environment",
-            "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector"
@@ -376,9 +377,8 @@ def test_return_all_batch_definitions_sorted():
     my_data_connector_yaml = yaml.load(f"""
         class_name: ConfiguredAssetS3DataConnector
         execution_environment_name: test_environment
-        execution_engine:
-            BASE_ENGINE:
-            class_name: PandasExecutionEngine
+        #execution_engine:
+        #    class_name: PandasExecutionEngine
         class_name: ConfiguredAssetS3DataConnector
         bucket: {bucket}
         prefix: ""
@@ -409,7 +409,6 @@ def test_return_all_batch_definitions_sorted():
         runtime_environment={
             "name": "general_s3_data_connector",
             "execution_environment_name": "test_environment",
-            "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector"
@@ -588,7 +587,6 @@ def test_alpha():
         runtime_environment={
             "name": "general_s3_data_connector",
             "execution_environment_name": "BASE",
-            "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector"
@@ -699,7 +697,6 @@ def test_foxtrot():
         runtime_environment={
             "name": "general_s3_data_connector",
             "execution_environment_name": "BASE",
-            "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector"
@@ -741,7 +738,8 @@ def test_foxtrot():
             }
         },
         "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": []
+        "example_unmatched_data_references": [],
+        "example_data_reference": {},
     }
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
@@ -789,9 +787,8 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     my_data_connector_yaml = yaml.load(f"""
         class_name: ConfiguredAssetS3DataConnector
         execution_environment_name: test_environment
-        execution_engine:
-            BASE_ENGINE:
-            class_name: PandasExecutionEngine
+        #execution_engine:
+        #    class_name: PandasExecutionEngine
         class_name: ConfiguredAssetS3DataConnector
         bucket: bucket
         assets:
@@ -824,7 +821,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             runtime_environment={
                 "name": "general_s3_data_connector",
                 "execution_environment_name": "test_environment",
-                "execution_engine": "BASE_ENGINE",
             },
             config_defaults={
                 "module_name": "great_expectations.execution_environment.data_connector"
@@ -864,9 +860,8 @@ def test_return_all_batch_definitions_too_many_sorters():
     my_data_connector_yaml = yaml.load(f"""
         class_name: ConfiguredAssetS3DataConnector
         execution_environment_name: test_environment
-        execution_engine:
-            BASE_ENGINE:
-            class_name: PandasExecutionEngine
+        #execution_engine:
+        #    class_name: PandasExecutionEngine
         class_name: ConfiguredAssetS3DataConnector
         bucket: {bucket}
         prefix: ""
@@ -896,7 +891,6 @@ def test_return_all_batch_definitions_too_many_sorters():
             runtime_environment={
                 "name": "general_s3_data_connector",
                 "execution_environment_name": "test_environment",
-                "execution_engine": "BASE_ENGINE",
             },
             config_defaults={
                 "module_name": "great_expectations.execution_environment.data_connector"
