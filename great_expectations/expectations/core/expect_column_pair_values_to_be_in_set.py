@@ -24,7 +24,7 @@ from ..expectation import (
     Expectation,
     InvalidExpectationConfigurationError,
     TableExpectation,
-    _format_map_output,
+    _format_map_output, ColumnPairMapExpectation,
 )
 from ..registry import extract_metrics, get_metric_kwargs
 
@@ -34,7 +34,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnPairValuesToBeInSet(TableExpectation):
+class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     """
     Expect paired values from columns A and B to belong to a set of valid pairs.
 
@@ -68,7 +68,7 @@ class ExpectColumnPairValuesToBeInSet(TableExpectation):
 
     """
 
-    metric_dependencies = ("column_pair_values.in_set.unexpected_count",)
+    map_metric = ("column_pair_values.in_set",)
     domain_keys = (
         "batch_id",
         "table",
@@ -77,9 +77,10 @@ class ExpectColumnPairValuesToBeInSet(TableExpectation):
         "column_A",
         "column_B",
     )
-    success_keys = ("value_pairs_set" "ignore_row_if",)
+    success_keys = ("value_pairs_set", "ignore_row_if", "mostly")
 
     default_kwarg_values = {
+        "mostly": 1,
         "ignore_row_if": "both_values_are_missing",
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -135,12 +136,12 @@ class ExpectColumnPairValuesToBeInSet(TableExpectation):
             ],
         )
 
-    def _validate(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        equal_columns = metrics.get("column_pair_values.in_set")
-        return {"success": equal_columns.all()}
+    # def _validate(
+    #     self,
+    #     configuration: ExpectationConfiguration,
+    #     metrics: Dict,
+    #     runtime_configuration: dict = None,
+    #     execution_engine: ExecutionEngine = None,
+    # ):
+    #     equal_columns = metrics.get("column_pair_values.in_set")
+    #     return {"success": equal_columns.all()}
