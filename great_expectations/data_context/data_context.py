@@ -256,6 +256,15 @@ class BaseDataContext:
         self._in_memory_instance_id = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
+
+        # Init stores
+        self._stores = dict()
+        self._init_stores(self._project_config_with_variables_substituted.stores)
+
+        # Override the project_config data_context_id if an expectations_store was already set up
+        project_config.anonymous_usage_statistics.data_context_id = (
+            self._construct_data_context_id()
+        )
         self._initialize_usage_statistics(project_config.anonymous_usage_statistics)
 
         # Store cached datasources but don't init them
@@ -283,13 +292,16 @@ class BaseDataContext:
     def _build_store(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
         try:
-            # Set expectations_store.store_backend_id to given data_context_id if it doesnt exist
+            # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+            # the expectations_store doesnt yet exist by:
+            # adding the data_context_id from the project_config
+            # to the store_config under the key manually_initialize_store_backend_id
             if (store_name == self.expectations_store_name) and store_config.get(
                 "store_backend"
             ):
                 store_config["store_backend"].update(
                     {
-                        "manually_initialize_store_backend_id": self.anonymous_usage_statistics.data_context_id
+                        "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
                     }
                 )
             new_store = instantiate_class_from_config(
@@ -444,19 +456,14 @@ class BaseDataContext:
         """
 
         # Choose the id of the currently-configured expectations store, if it is a persistent store
-        try:
-            expectations_store = self._stores[
-                self._project_config.expectations_store_name
-            ]
-            if isinstance(expectations_store.store_backend, TupleStoreBackend):
-                return expectations_store.store_backend_id
-            else:
-                # Otherwise choose the id stored in DataContextConfig
-                return (
-                    self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-                )
-        except Exception:
-            # If there is no expectations_store setup choose the id stored in DataContextConfig
+        expectations_store = self._stores[
+            self._project_config_with_variables_substituted.expectations_store_name
+        ]
+        if isinstance(expectations_store.store_backend, TupleStoreBackend):
+            return expectations_store.store_backend_id
+
+        # Otherwise choose the id stored in the project_config
+        else:
             return (
                 self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
             )
@@ -702,7 +709,9 @@ class BaseDataContext:
 
     @property
     def data_context_id(self):
-        return self._construct_data_context_id()
+        return (
+            self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+        )
 
     @property
     def instance_id(self):

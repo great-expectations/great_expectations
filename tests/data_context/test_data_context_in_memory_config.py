@@ -249,8 +249,9 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
     2. great_expectations.yml
     3. new generated id from DataContextConfig
     This test verifies that DataContext._construct_data_context_id
-    uses the store_backend_id from DataContextConfig when there is no configured expectations store
-    when instantiating the DataContext
+    uses the data_context_id from DataContextConfig when there is no configured expectations store
+    when instantiating the DataContext,
+    and also that this data_context_id is used to configure the expectations_store.store_backend_id
     """
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
