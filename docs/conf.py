@@ -47,7 +47,7 @@ extensions = [
     "sphinx_gitstamp",
     # "sphinx.ext.autosectionlabel",
     "sphinxcontrib.discourse",
-    "autoapi.extension",
+    # "autoapi.extension",
 ]
 
 autoapi_type = "python"
