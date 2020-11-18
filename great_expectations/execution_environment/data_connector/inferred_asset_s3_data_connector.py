@@ -1,6 +1,7 @@
-import logging
 import os
 from typing import List, Optional
+
+import logging
 
 try:
     import boto3
@@ -8,11 +9,11 @@ except ImportError:
     boto3 = None
 
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector import (
-    InferredAssetFilePathDataConnector,
-)
+from great_expectations.execution_environment.data_connector import InferredAssetFilePathDataConnector
 from great_expectations.execution_environment.data_connector.util import list_s3_keys
-
+from great_expectations.core.batch import (
+    BatchDefinition
+)
 logger = logging.getLogger(__name__)
 
 
@@ -28,7 +29,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
-        boto3_options: dict = None,
+        boto3_options: dict = None
     ):
         logger.debug(f'Constructing InferredAssetS3DataConnector "{name}".')
 
@@ -51,13 +52,10 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         try:
             self._s3 = boto3.client("s3", **boto3_options)
         except TypeError:
-            raise ImportError(
-                "Unable to load boto3 (it is required for InferredAssetS3DataConnector)."
-            )
+            raise ImportError("Unable to load boto3 (it is required for InferredAssetS3DataConnector).")
 
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
@@ -70,15 +68,15 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         }
 
         path_list: List[str] = [
-            key
-            for key in list_s3_keys(
-                s3=self._s3,
-                query_options=query_options,
-                iterator_dict={},
-                recursive=True,
-            )
+            key for key in list_s3_keys(s3=self._s3, query_options=query_options, iterator_dict={}, recursive=True)
         ]
         return path_list
 
-    def _get_full_file_path(self, path: str) -> str:
+    def _get_full_file_path(
+        self,
+        path: str,
+        data_asset_name: Optional[str] = None,
+    ) -> str:
+        # data_assert_name isn't used in this method.
+        # It's only kept for compatibility with parent methods.
         return f"s3a://{os.path.join(self._bucket, path)}"

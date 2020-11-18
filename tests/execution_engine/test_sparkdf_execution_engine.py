@@ -249,12 +249,12 @@ def test_get_batch_data(test_sparkdf):
     assert len(test_sparkdf.columns) == 10
 
 
-def test_get_batch_empty_splitter(test_folder_connection_path):
+def test_get_batch_empty_splitter(test_folder_connection_path_csv):
     # reader_method not configured because spark will configure own reader by default
     # reader_options are needed to specify the fact that the first line of test file is the header
     test_sparkdf = SparkDFExecutionEngine().get_batch_data(
         PathBatchSpec(
-            path=os.path.join(test_folder_connection_path, "test.csv"),
+            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
             reader_options={"header": True},
             splitter_method=None
         )
@@ -291,12 +291,12 @@ def test_get_batch_empty_splitter_parquet(test_folder_connection_path_parquet):
     assert len(test_sparkdf.columns) == 2
 
 
-def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path):
+def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path_csv):
     # reader_method not configured because spark will configure own reader by default
     test_sparkdf = SparkDFExecutionEngine().get_batch_data(
         PathBatchSpec(
-            path=os.path.join(test_folder_connection_path, "test.csv"),
-            splitter_method="_split_on_whole_table",
+            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
+            splitter_method="_split_on_whole_table"
         )
     )
     assert test_sparkdf.count() == 6

@@ -281,10 +281,10 @@ def test_get_batch_with_split_on_whole_table(test_df):
     assert split_df.shape == (120, 10)
 
 
-def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path):
+def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path_csv):
     test_df = PandasExecutionEngine().get_batch_data(
         PathBatchSpec(
-            path=os.path.join(test_folder_connection_path, "test.csv"),
+            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
             reader_method="read_csv",
             splitter_method="_split_on_whole_table",
         )
