@@ -19,41 +19,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as ge_exceptions
 
 
-@pytest.fixture
-def basic_execution_environment(tmp_path_factory):
-    base_directory: str = str(tmp_path_factory.mktemp("basic_execution_environment_runtime_data_connector"))
-
-    basic_execution_environment: ExecutionEnvironment = instantiate_class_from_config(
-        config=yaml.load(
-            f"""
-class_name: ExecutionEnvironment
-
-data_connectors:
-    test_runtime_data_connector:
-        module_name: great_expectations.execution_environment.data_connector
-        class_name: RuntimeDataConnector
-        runtime_keys:
-        - pipeline_stage_name
-        - run_id
-        - custom_key_0
-
-execution_engine:
-    class_name: PandasExecutionEngine
-
-    """,
-            Loader=yaml.FullLoader
-        ),
-        runtime_environment={
-            "name": "my_execution_environment",
-        },
-        config_defaults={
-          "module_name": "great_expectations.execution_environment",
-        }
-    )
-
-    return basic_execution_environment
-
-
 def test_self_check(basic_execution_environment):
     test_runtime_data_connector: RuntimeDataConnector = \
         basic_execution_environment.data_connectors["test_runtime_data_connector"]

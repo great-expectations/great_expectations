@@ -2,7 +2,11 @@ import pandas as pd
 
 import great_expectations.expectations.metrics
 from great_expectations.core import IDDict
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    PartitionRequest,
+)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -135,13 +139,28 @@ def test_populate_dependencies_with_incorrect_metric_name():
     assert isinstance(graph, MetricProviderError)
 
 
-def test_graph_validate():
+def test_graph_validate(basic_execution_environment):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={"column": "b", "mostly": 0.9, "threshold": 4, "double_sided": True,},
     )
-    batch = Batch(data=df)
+    
+    batch = basic_execution_environment.get_single_batch_from_batch_request(
+        BatchRequest(**{
+            "execution_environment_name": "my_execution_environment",
+            "data_connector_name": "test_runtime_data_connector",
+            "batch_data": df,
+            "partition_request": PartitionRequest(**{
+                "partition_identifiers" : {
+                    "pipeline_stage_name": 0,
+                    "run_id": 0,
+                    "custom_key_0": 0,
+                }
+            }),
+        })
+    )
+
     result = Validator(
         execution_engine=PandasExecutionEngine(), batches=[batch]
     ).graph_validate(configurations=[expectationConfiguration])
@@ -165,14 +184,29 @@ def test_graph_validate():
 
 
 # this might indicate that we need to validate configuration a little more strictly prior to actually validating
-def test_graph_validate_with_bad_config():
+def test_graph_validate_with_bad_config(basic_execution_environment):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_max_to_be_between",
         kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
     )
     expectation = ExpectColumnMaxToBeBetween(expectationConfiguration)
-    batch = Batch(data=df)
+
+    batch = basic_execution_environment.get_single_batch_from_batch_request(
+        BatchRequest(**{
+            "execution_environment_name": "my_execution_environment",
+            "data_connector_name": "test_runtime_data_connector",
+            "batch_data": df,
+            "partition_request": PartitionRequest(**{
+                "partition_identifiers" : {
+                    "pipeline_stage_name": 0,
+                    "run_id": 0,
+                    "custom_key_0": 0,
+                }
+            }),
+        })
+    )
+
     try:
         result = Validator(
             execution_engine=PandasExecutionEngine(), batches=[batch]
@@ -183,7 +217,7 @@ def test_graph_validate_with_bad_config():
 
 
 # Tests that runtime configuration actually works during graph validation
-def test_graph_validate_with_runtime_config():
+def test_graph_validate_with_runtime_config(basic_execution_environment):
     df = pd.DataFrame(
         {"a": [1, 5, 22, 3, 5, 10, 2, 3], "b": [97, 332, 3, 4, 5, 6, 7, None]}
     )
@@ -192,7 +226,22 @@ def test_graph_validate_with_runtime_config():
         kwargs={"column": "b", "mostly": 1, "threshold": 2, "double_sided": True},
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
-    batch = Batch(data=df)
+    
+    batch = basic_execution_environment.get_single_batch_from_batch_request(
+        BatchRequest(**{
+            "execution_environment_name": "my_execution_environment",
+            "data_connector_name": "test_runtime_data_connector",
+            "batch_data": df,
+            "partition_request": PartitionRequest(**{
+                "partition_identifiers" : {
+                    "pipeline_stage_name": 0,
+                    "run_id": 0,
+                    "custom_key_0": 0,
+                }
+            }),
+        })
+    )
+
     try:
         result = Validator(
             execution_engine=PandasExecutionEngine(), batches=(batch,)
