@@ -138,6 +138,20 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     ) -> List[str]:
         return self._data_references_cache[data_asset_name]
 
+    def _map_data_reference_to_batch_definition_list(
+        self,
+        data_reference,#: Any,
+        data_asset_name: Optional[str] = None
+    ) -> Optional[List[BatchDefinition]]:
+
+        return [BatchDefinition(
+            execution_environment_name=self.execution_environment_name,
+            data_connector_name=self.name,
+            data_asset_name=data_asset_name,
+            partition_definition=PartitionDefinition(data_reference),
+        )]
+
+
     def build_batch_spec(
         self,
         batch_definition: BatchDefinition
@@ -150,64 +164,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         })
 
         return batch_spec
-
-    def self_check(
-        self,
-        pretty_print=True,
-        max_examples=3
-    ):
-        report_object = super().self_check(
-            pretty_print=pretty_print,
-            max_examples=max_examples
-        )
-
-        # Choose an example data_reference
-        if pretty_print:
-            print("\n\tChoosing an example data reference...")
-
-        example_data_reference =  None
-
-        available_references = report_object["data_assets"].items()
-        if len(available_references) == 0:
-            if pretty_print:
-                print(f"\t\tNo references available.")
-            return report_object
-
-        for data_asset_name, data_asset_return_obj in available_references:
-            if data_asset_return_obj["batch_definition_count"] > 0:
-                example_data_reference = random.choice(
-                    data_asset_return_obj["example_data_references"]
-                )
-                break
-
-        if pretty_print:
-            print(f"\t\tReference chosen: {example_data_reference}")
-
-        # ...and fetch it.
-        if pretty_print:
-            print(f"\n\t\tFetching batch data..")
-        batch_data, batch_spec, batch_markers = self.get_batch_data_and_metadata(
-            BatchDefinition(
-                execution_environment_name=self.execution_environment_name,
-                data_connector_name=self.name,
-                data_asset_name=data_asset_name,
-                partition_definition=PartitionDefinition(example_data_reference),
-            )
-        )
-        rows = batch_data.fetchall()
-        report_object["example_data_reference"] = {
-            "batch_spec" : batch_spec,
-            "n_rows" : len(rows),
-        }
-
-        if pretty_print:
-            print(f"\n\t\tShowing 5 rows")
-            print(pd.DataFrame(
-                rows,
-                columns=batch_data._metadata.keys
-            )[:5])
-    
-        return report_object
 
     ### Splitter methods for listing partitions ###
 

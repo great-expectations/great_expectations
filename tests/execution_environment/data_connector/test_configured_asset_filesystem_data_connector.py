@@ -58,6 +58,7 @@ def test_basic_instantiation(tmp_path_factory):
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
+        "example_data_reference": {},
     }
 
     # noinspection PyProtectedMember
@@ -119,6 +120,7 @@ assets:
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
+        "example_data_reference": {},
     }
 
 
@@ -168,6 +170,7 @@ assets:
         },
         "example_unmatched_data_references": ["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
         "unmatched_data_reference_count": 3,
+        "example_data_reference": {},
     }
 
 
@@ -192,9 +195,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     my_data_connector_yaml = yaml.load(f"""
             class_name: ConfiguredAssetFilesystemDataConnector
             execution_environment_name: test_environment
-            execution_engine:
-                BASE_ENGINE:
-                class_name: PandasExecutionEngine
+            #execution_engine:
+            #    class_name: PandasExecutionEngine
             class_name: ConfiguredAssetFilesystemDataConnector
             base_directory: {base_directory}
             glob_directive: "*.csv"
@@ -213,7 +215,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         runtime_environment={
             "name": "general_filesystem_data_connector",
             "execution_environment_name": "test_environment",
-            "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector"
@@ -323,9 +324,8 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
     my_data_connector_yaml = yaml.load(f"""
         class_name: ConfiguredAssetFilesystemDataConnector
         execution_environment_name: test_environment
-        execution_engine:
-            BASE_ENGINE:
-            class_name: PandasExecutionEngine
+        #execution_engine:
+        #    class_name: PandasExecutionEngine
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
         glob_directive: "*.csv"
@@ -356,7 +356,6 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
         runtime_environment={
             "name": "general_filesystem_data_connector",
             "execution_environment_name": "test_environment",
-            "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector"
@@ -524,7 +523,6 @@ def test_alpha(tmp_path_factory):
         runtime_environment={
             "name": "general_filesystem_data_connector",
             "execution_environment_name": "BASE",
-            "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector"
@@ -625,7 +623,6 @@ def test_foxtrot(tmp_path_factory):
         runtime_environment={
             "name": "general_filesystem_data_connector",
             "execution_environment_name": "BASE",
-            "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector"
@@ -667,7 +664,8 @@ def test_foxtrot(tmp_path_factory):
             }
         },
         "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": []
+        "example_unmatched_data_references": [],
+        "example_data_reference": {},
     }
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
@@ -707,9 +705,8 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     my_data_connector_yaml = yaml.load(f"""
         class_name: ConfiguredAssetFilesystemDataConnector
         execution_environment_name: test_environment
-        execution_engine:
-            BASE_ENGINE:
-            class_name: PandasExecutionEngine
+        #execution_engine:
+        #    class_name: PandasExecutionEngine
         base_directory: {base_directory}
         glob_directive: "*.csv"
         assets:
@@ -742,7 +739,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             runtime_environment={
                 "name": "general_filesystem_data_connector",
                 "execution_environment_name": "test_environment",
-                "execution_engine": "BASE_ENGINE",
             },
             config_defaults={
                 "module_name": "great_expectations.execution_environment.data_connector"
@@ -770,9 +766,8 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
     my_data_connector_yaml = yaml.load(f"""
         class_name: ConfiguredAssetFilesystemDataConnector
         execution_environment_name: test_environment
-        execution_engine:
-            BASE_ENGINE:
-            class_name: PandasExecutionEngine
+        #execution_engine:
+        #    class_name: PandasExecutionEngine
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
         glob_directive: "*.csv"
@@ -802,7 +797,6 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
             runtime_environment={
                 "name": "general_filesystem_data_connector",
                 "execution_environment_name": "test_environment",
-                "execution_engine": "BASE_ENGINE",
             },
             config_defaults={
                 "module_name": "great_expectations.execution_environment.data_connector"

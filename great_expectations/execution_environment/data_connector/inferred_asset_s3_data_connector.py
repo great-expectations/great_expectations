@@ -11,6 +11,9 @@ except ImportError:
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector import InferredAssetFilePathDataConnector
 from great_expectations.execution_environment.data_connector.util import list_s3_keys
+from great_expectations.core.batch import (
+    BatchDefinition
+)
 logger = logging.getLogger(__name__)
 
 
@@ -69,5 +72,11 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         ]
         return path_list
 
-    def _get_full_file_path(self, path: str) -> str:
+    def _get_full_file_path(
+        self,
+        path: str,
+        data_asset_name: str = None,
+    ) -> str:
+        # data_assert_name isn't used in this method.
+        # It's only kept for compatibility with parent methods.
         return f"s3a://{os.path.join(self._bucket, path)}"
