@@ -385,14 +385,19 @@ class Batch(DictDot):
     @property
     def id(self):
         batch_definition = self._batch_definition
-        return batch_definition.id if isinstance(batch_definition, BatchDefinition) else batch_definition.to_id()
+        return (
+            batch_definition.id
+            if isinstance(batch_definition, BatchDefinition)
+            else batch_definition.to_id()
+        )
 
     def __str__(self):
         json_dict = {
             "data": str(self.data),
             "batch_request": self.batch_request.get_json_dict(),
-            "batch_definition": self.batch_definition.get_json_dict() if isinstance(self.batch_definition,
-                                                                                    BatchDefinition) else {},
+            "batch_definition": self.batch_definition.get_json_dict()
+            if isinstance(self.batch_definition, BatchDefinition)
+            else {},
             "batch_spec": str(self.batch_spec),
             "batch_markers": str(self.batch_markers),
         }

@@ -2,12 +2,14 @@ import json
 import random
 
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchRequest, BatchSpec
 from great_expectations.execution_environment.data_connector import (
     ConfiguredAssetSqlDataConnector,
 )
+
+yaml = YAML()
 
 
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
@@ -26,7 +28,6 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
             splitter_kwargs:
                 column_name: date
     """,
-        yaml.FullLoader,
     )
     config["execution_engine"] = execution_engine
 
@@ -81,7 +82,6 @@ def test_get_batch_definition_list_from_batch_request(
                 column_name: date
 
     """,
-        yaml.FullLoader,
     )
     config["execution_engine"] = db
 
@@ -171,7 +171,6 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
                 column_name: date
 
     """,
-        yaml.FullLoader,
     )
     config["execution_engine"] = db
 
@@ -222,8 +221,7 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
             splitter_method: _split_on_converted_datetime
             splitter_kwargs:
                 column_name: timestamp
-    """,
-        yaml.FullLoader,
+    """
     )
     config["execution_engine"] = db
 
@@ -276,7 +274,6 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
                 column_name: id
                 divisor: 10
     """,
-        yaml.FullLoader,
     )
     config["execution_engine"] = db
 
@@ -326,7 +323,6 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
             splitter_kwargs:
                 column_name: batch_id
     """,
-        yaml.FullLoader,
     )
     config["execution_engine"] = db
 
@@ -378,7 +374,6 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
             splitter_kwargs:
                 column_name: session_id
     """,
-        yaml.FullLoader,
     )
     config["execution_engine"] = db
 
@@ -434,7 +429,6 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
                     - m
                     - d
     """,
-        yaml.FullLoader,
     )
     config["execution_engine"] = db
 
@@ -490,7 +484,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
     #         splitter_kwargs:
     #             column_name: id
     #             hash_digits: 1
-    # """, yaml.FullLoader)
+    # """)
     # config["execution_engine"] = db
 
     # my_data_connector = ConfiguredAssetSqlDataConnector(**config)
@@ -692,7 +686,6 @@ def test_default_behavior_with_no_splitter(
     data_assets:
         table_partitioned_by_date_column__A: {}
     """,
-        yaml.FullLoader,
     )
     config["execution_engine"] = db
 
@@ -748,7 +741,6 @@ def test_behavior_with_whole_table_splitter(
             splitter_method : "_split_on_whole_table"
             splitter_kwargs : {}
     """,
-        yaml.FullLoader,
     )
     config["execution_engine"] = db
 

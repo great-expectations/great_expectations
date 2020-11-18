@@ -2,7 +2,7 @@ import datetime
 from typing import List
 
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -13,6 +13,8 @@ from great_expectations.core.batch import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment.data_connector import DataConnector
 from tests.test_utils import create_files_in_directory
+
+yaml = YAML()
 
 
 @pytest.fixture()
@@ -44,7 +46,6 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
             execution_engine:
                 BASE_ENGINE:
                 class_name: PandasExecutionEngine
-            class_name: ConfiguredAssetFilesystemDataConnector
             base_directory: {base_directory}
             glob_directive: '*.csv'
             assets:
@@ -68,7 +69,6 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
                   name: price
 
         """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: DataConnector = instantiate_class_from_config(

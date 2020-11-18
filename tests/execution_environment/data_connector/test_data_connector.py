@@ -1,6 +1,6 @@
 # TODO: <Alex>This module should be broken up -- please see suggestions below.</Alex>
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -15,6 +15,8 @@ from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
 )
 from tests.test_utils import create_files_in_directory
+
+yaml = YAML()
 
 
 @pytest.fixture
@@ -38,7 +40,6 @@ default_regex:
 assets:
     my_asset_name: {{}}
 """,
-            Loader=yaml.FullLoader,
         ),
         runtime_environment={"name": "my_data_connector"},
         config_defaults={

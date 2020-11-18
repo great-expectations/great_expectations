@@ -1,9 +1,7 @@
 import logging
 import os
 
-import numpy as np
 import pandas as pd
-import pyspark.sql.functions as F
 import pytest
 
 from great_expectations.core.batch import Batch, BatchSpec
@@ -11,13 +9,8 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics import (

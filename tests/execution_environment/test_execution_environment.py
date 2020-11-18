@@ -5,7 +5,7 @@ from typing import List, Optional, Union
 
 import pandas as pd
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -23,6 +23,8 @@ from great_expectations.execution_environment.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
 from tests.test_utils import create_files_in_directory
+
+yaml = YAML()
 
 
 @pytest.fixture
@@ -65,7 +67,6 @@ data_connectors:
             - letter
             - number
     """,
-            Loader=yaml.FullLoader,
         ),
         runtime_environment={"name": "my_execution_environment"},
         config_defaults={"module_name": "great_expectations.execution_environment"},
@@ -114,7 +115,6 @@ data_connectors:
             - letter
             - number
     """,
-            Loader=yaml.FullLoader,
         ),
         runtime_environment={"name": "my_execution_environment"},
         config_defaults={"module_name": "great_expectations.execution_environment"},
