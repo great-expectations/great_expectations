@@ -10,6 +10,7 @@ import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SparkDFExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_environment.types.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
@@ -127,7 +128,8 @@ def test_get_compute_domain_with_no_domain_kwargs(spark_session):
     )
     engine = SparkDFExecutionEngine()
     engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={})
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={},
+                                                                      domain_type=MetricDomainTypes.TABLE)
     assert compute_kwargs is not None, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}
     assert data.schema == df.schema
@@ -149,7 +151,8 @@ def test_get_compute_domain_with_column_domain(spark_session):
     engine = SparkDFExecutionEngine()
     engine.load_batch_data(batch_data=df, batch_id="1234")
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"column": "a"}
+        domain_kwargs={"column": "a"},
+        domain_type=MetricDomainTypes.COLUMN
     )
     assert compute_kwargs is not None, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {"column": "a"}
@@ -175,7 +178,8 @@ def test_get_compute_domain_with_row_condition(spark_session):
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"row_condition": "b > 2", "condition_parser": "spark"}
+        domain_kwargs={"row_condition": "b > 2", "condition_parser": "spark"},
+        domain_type=MetricDomainTypes.TABLE
     )
     # Ensuring data has been properly queried
     assert data.schema == expected_df.schema
@@ -207,7 +211,8 @@ def test_get_compute_domain_with_unmeetable_row_condition(spark_session):
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"row_condition": "b > 24", "condition_parser": "spark"}
+        domain_kwargs={"row_condition": "b > 24", "condition_parser": "spark"},
+        domain_type=MetricDomainTypes.TABLE
     )
     # Ensuring data has been properly queried
     assert data.schema == expected_df.schema
