@@ -681,7 +681,6 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
                 name: full_date
 
           """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
@@ -804,7 +803,6 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
                 name: not_matching_anything
 
           """,
-        Loader=yaml.FullLoader,
     )
 
     with pytest.raises(ge_exceptions.DataConnectorError):
@@ -864,7 +862,6 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
               class_name: NumericSorter
               name: price
           """,
-        Loader=yaml.FullLoader,
     )
 
     with pytest.raises(ge_exceptions.DataConnectorError):

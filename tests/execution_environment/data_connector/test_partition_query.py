@@ -46,7 +46,6 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
             execution_engine:
                 BASE_ENGINE:
                 class_name: PandasExecutionEngine
-            class_name: ConfiguredAssetFilesystemDataConnector
             base_directory: {base_directory}
             glob_directive: '*.csv'
             assets:
@@ -70,7 +69,6 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
                   name: price
 
         """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: DataConnector = instantiate_class_from_config(

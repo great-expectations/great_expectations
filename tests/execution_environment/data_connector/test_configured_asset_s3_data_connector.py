@@ -254,7 +254,6 @@ def test_return_all_batch_definitions_unsorted():
                     - timestamp
                     - price
         """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
@@ -431,7 +430,6 @@ def test_return_all_batch_definitions_sorted():
               name: price
 
     """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
@@ -629,7 +627,6 @@ def test_alpha():
                     group_names:
                     - part_1
             """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
@@ -736,7 +733,6 @@ def test_foxtrot():
                 - part_1
                 - part_2
         """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
@@ -856,7 +852,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
               class_name: NumericSorter
               name: for_me_Me_Me
     """,
-        Loader=yaml.FullLoader,
     )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
@@ -927,7 +922,6 @@ def test_return_all_batch_definitions_too_many_sorters():
               name: price
 
     """,
-        Loader=yaml.FullLoader,
     )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
@@ -994,7 +988,7 @@ assets:
         pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
 
     """
-    config = yaml.load(yaml_string, Loader=yaml.FullLoader)
+    config = yaml.load(yaml_string)
     my_data_connector = instantiate_class_from_config(
         config,
         config_defaults={

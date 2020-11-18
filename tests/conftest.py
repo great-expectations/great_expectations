@@ -3079,7 +3079,6 @@ introspection:
             column_name: id
             divisor: 12
 """,
-        yaml.FullLoader,
     )
 
     try:
@@ -3114,7 +3113,6 @@ execution_engine:
     class_name: PandasExecutionEngine
 
     """,
-            Loader=yaml.FullLoader,
         ),
         runtime_environment={"name": "my_execution_environment",},
         config_defaults={"module_name": "great_expectations.execution_environment",},

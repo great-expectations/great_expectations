@@ -67,7 +67,6 @@ data_connectors:
             - letter
             - number
     """,
-            Loader=yaml.FullLoader,
         ),
         runtime_environment={"name": "my_execution_environment"},
         config_defaults={"module_name": "great_expectations.execution_environment"},
@@ -116,7 +115,6 @@ data_connectors:
             - letter
             - number
     """,
-            Loader=yaml.FullLoader,
         ),
         runtime_environment={"name": "my_execution_environment"},
         config_defaults={"module_name": "great_expectations.execution_environment"},

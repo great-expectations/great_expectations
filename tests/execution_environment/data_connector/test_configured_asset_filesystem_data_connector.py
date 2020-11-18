@@ -14,7 +14,6 @@ from great_expectations.core.batch import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
-    DataConnector,
 )
 from tests.test_utils import create_files_in_directory
 
@@ -199,7 +198,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             execution_environment_name: test_environment
             #execution_engine:
             #    class_name: PandasExecutionEngine
-            class_name: ConfiguredAssetFilesystemDataConnector
             base_directory: {base_directory}
             glob_directive: "*.csv"
             assets:
@@ -211,7 +209,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     - timestamp
                     - price
         """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
@@ -357,7 +354,6 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
         execution_environment_name: test_environment
         #execution_engine:
         #    class_name: PandasExecutionEngine
-        class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
         glob_directive: "*.csv"
         assets:
@@ -381,7 +377,6 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
               name: price
 
     """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
@@ -570,7 +565,6 @@ def test_alpha(tmp_path_factory):
                     group_names:
                     - part_1
             """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
@@ -669,7 +663,6 @@ def test_foxtrot(tmp_path_factory):
                 - part_1
                 - part_2
         """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
@@ -773,7 +766,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
               class_name: NumericSorter
               name: for_me_Me_Me
     """,
-        Loader=yaml.FullLoader,
     )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
@@ -814,7 +806,6 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
         execution_environment_name: test_environment
         #execution_engine:
         #    class_name: PandasExecutionEngine
-        class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: {base_directory}
         glob_directive: "*.csv"
         assets:
@@ -836,7 +827,6 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
               name: price
 
     """,
-        Loader=yaml.FullLoader,
     )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
@@ -894,7 +884,7 @@ assets:
         glob_directive: "*.csv"
 
     """
-    config = yaml.load(yaml_string, Loader=yaml.FullLoader)
+    config = yaml.load(yaml_string)
     my_data_connector = instantiate_class_from_config(
         config,
         config_defaults={
