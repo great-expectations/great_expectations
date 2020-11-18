@@ -151,6 +151,14 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             partition_definition=PartitionDefinition(data_reference),
         )]
 
+    def _fetch_batch_data_as_pandas_df(self, batch_data):
+        rows = batch_data.fetchall()
+
+        df = pd.DataFrame(
+            rows,
+            columns=batch_data._metadata.keys
+        )
+        return df
 
     def build_batch_spec(
         self,

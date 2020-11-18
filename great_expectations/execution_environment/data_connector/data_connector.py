@@ -2,8 +2,6 @@ import logging
 from typing import Any, List, Tuple, Optional
 import random
 
-import pandas as pd
-
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.batch import (
@@ -262,19 +260,20 @@ class DataConnector:
             batch_definition
         )
 
-        rows = batch_data.fetchall()
+        df = self._fetch_batch_data_as_pandas_df(batch_data)
 
         if pretty_print:
             print(f"\n\t\tShowing 5 rows")
-            print(pd.DataFrame(
-                rows,
-                columns=batch_data._metadata.keys
-            )[:5])
+            print(df[:5])
 
         return {
             "batch_spec" : batch_spec,
-            "n_rows" : len(rows),
+            "n_rows" : df.shape[0],
         }
+    
+    def _fetch_batch_data_as_pandas_df(self, batch_data):
+        # raise NotImplementedError
+        return batch_data
 
     def _validate_batch_request(self, batch_request: BatchRequest):
         if not (
