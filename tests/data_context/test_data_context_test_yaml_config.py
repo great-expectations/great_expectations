@@ -371,8 +371,7 @@ data_connectors:
         "my_directory_datasource",
         "my_filesystem_data_connector",
         "A-1",
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
-        # attach_new_expectation_suite=True, # The implementation of this argument is currently work-in-progress.
+        attach_new_expectation_suite=True,
     )
     my_evr = my_validator.expect_column_values_to_be_between(
         column="z",
