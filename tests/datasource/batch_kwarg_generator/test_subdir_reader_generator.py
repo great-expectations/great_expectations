@@ -9,7 +9,7 @@ from great_expectations.exceptions import BatchKwargsError
 
 
 def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("test_folder_connection_path"))
+    base_directory = str(tmp_path_factory.mktemp("test_subdir_reader_path_partitioning"))
     mock_files = [
         "asset_1/20190101__asset_1.csv",
         "asset_1/20190102__asset_1.csv",
@@ -91,7 +91,7 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
 
 
 def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("test_folder_connection_path"))
+    base_directory = str(tmp_path_factory.mktemp("test_subdir_reader_file_partitioning"))
     mock_files = [
         "20190101__asset_1.csv",
         "20190102__asset_1.csv",
@@ -141,7 +141,7 @@ def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_facto
 def test_subdir_reader_configurable_reader_method(
     basic_pandas_datasource, tmp_path_factory
 ):
-    base_directory = str(tmp_path_factory.mktemp("test_folder_connection_path"))
+    base_directory = str(tmp_path_factory.mktemp("test_subdir_reader_configurable_reader_method"))
     mock_files = [
         "20190101__asset_1.dat",
         "20190102__asset_1.dat",
