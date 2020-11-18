@@ -415,10 +415,6 @@ def test_return_all_batch_definitions_sorted():
         },
     )
 
-    print(type(my_data_connector._execution_engine))
-    print(my_data_connector._execution_engine)
-    print("^"*80)
-
     self_check_report = my_data_connector.self_check()
 
     assert self_check_report["class_name"] == "ConfiguredAssetS3DataConnector"
