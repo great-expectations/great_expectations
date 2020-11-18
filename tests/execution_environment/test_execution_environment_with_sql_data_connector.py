@@ -49,7 +49,6 @@ data_connectors:
                     column_name: date
                     date_format_string: "%Y-%W"
     """,
-        yaml.FullLoader,
     )
 
     my_data_connector = instantiate_class_from_config(

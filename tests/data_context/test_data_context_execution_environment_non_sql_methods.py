@@ -53,7 +53,6 @@ data_connectors:
                 - letter
                 - number
     """,
-        yaml.FullLoader,
     )
 
     context.add_execution_environment(
@@ -137,7 +136,6 @@ data_connectors:
                     - timestamp
                     - size
     """,
-        yaml.FullLoader,
     )
 
     context.add_execution_environment(
