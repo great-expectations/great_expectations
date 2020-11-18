@@ -398,8 +398,8 @@ class Batch(DictDot):
             batch_definition = self.batch_definition.get_json_dict()
         json_dict = {
             "data": str(self.data),
-            "batch_request": str(batch_request),
-            "batch_definition": str(batch_definition),
+            "batch_request": batch_request,
+            "batch_definition": batch_definition,
             "batch_spec": str(self.batch_spec),
             "batch_markers": str(self.batch_markers),
         }
