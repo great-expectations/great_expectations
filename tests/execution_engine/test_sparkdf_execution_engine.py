@@ -39,8 +39,7 @@ def _build_spark_engine(spark_session, df):
         ],
         df.columns.tolist(),
     )
-    batch = Batch(data=df)
-    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = SparkDFExecutionEngine(batch_data_dict={"temp_id": df})
     return engine
 
 

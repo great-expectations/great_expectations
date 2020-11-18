@@ -170,6 +170,14 @@ Notes:
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
         return batch_data
 
+    def _get_typed_batch_data(self, batch_data):
+        if not isinstance(batch_data, pd.DataFrame):
+            raise TypeError(f"batch_data must be an instance of type DataFrame, not {batch_data.__class__.__name__}")
+
+        # NOTE: Once the class works properly, we should wrap batch_data as a PandasBatchData object.
+
+        return batch_data
+
     @property
     def dataframe(self):
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
@@ -278,8 +286,8 @@ Notes:
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.loaded_batch_data:
-                data = self.loaded_batch_data[batch_id]
+            if batch_id in self.loaded_batch_data_dict:
+                data = self.loaded_batch_data_dict[batch_id]
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 

@@ -89,10 +89,9 @@ def test_get_compute_domain_with_unmeetable_row_condition():
 # Just checking that the Pandas Execution Engine can perform these in sequence
 def test_resolve_metric_bundle():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
-    batch = Batch(data=df)
 
     # Building engine and configurations in attempt to resolve metrics
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = PandasExecutionEngine(batch_data_dict={"made-up-id": df})
     mean = MetricConfiguration(
         metric_name="column.aggregate.mean",
         metric_domain_kwargs={"column": "a"},
@@ -114,10 +113,9 @@ def test_resolve_metric_bundle():
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
 def test_resolve_metric_bundle_with_nonexistent_metric():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
-    batch = Batch(data=df)
 
     # Building engine and configurations in attempt to resolve metrics
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = PandasExecutionEngine(batch_data_dict={"made_up_id": df})
     mean = MetricConfiguration(
         metric_name="column.aggregate.i_don't_exist",
         metric_domain_kwargs={"column": "a"},
