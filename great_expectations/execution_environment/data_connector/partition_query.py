@@ -74,7 +74,7 @@ def build_partition_query(
     )
     if custom_filter_function and not isinstance(custom_filter_function, Callable):
         raise ge_exceptions.PartitionerError(
-            f"""The type of a custom_filter be a function (Python "Callable").  The type given is
+            f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
 "{str(type(custom_filter_function))}", which is illegal.
             """
         )

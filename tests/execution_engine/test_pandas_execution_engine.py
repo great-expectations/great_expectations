@@ -1,17 +1,30 @@
-import numpy as np
+import datetime
+import os
+import random
+from typing import List
+
+import boto3
 import pandas as pd
 import pytest
+from moto import mock_s3
 
+import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
-from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.metrics import (
-    ColumnMean,
-    ColumnStandardDeviation,
-    ColumnValuesZScore,
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.pandas_execution_engine import (
+    PandasExecutionEngine,
+)
+from great_expectations.execution_environment.data_connector import (
+    ConfiguredAssetS3DataConnector,
+    InferredAssetS3DataConnector,
+)
+from great_expectations.execution_environment.types.batch_spec import (
+    PathBatchSpec,
+    RuntimeDataBatchSpec,
+    S3BatchSpec,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 
 
 def test_reader_fn():
@@ -32,13 +45,17 @@ def test_get_compute_domain_with_no_domain_kwargs():
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={}, domain_type="identity")
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        domain_kwargs={}, domain_type="identity"
+    )
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
     # Trying same test with enum form of table domain - should work the same way
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={}, domain_type= MetricDomainTypes.TABLE)
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        domain_kwargs={}, domain_type=MetricDomainTypes.TABLE
+    )
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
@@ -46,65 +63,89 @@ def test_get_compute_domain_with_no_domain_kwargs():
 
 def test_get_compute_domain_with_column_pair_domain():
     engine = PandasExecutionEngine()
-    df = pd.DataFrame({"a": [1, 2, 3, 4], "b":[2, 3, 4, 5], "c": [1, 2, 3, 4]})
-    expected_identity = df.drop(columns = ['c'])
+    df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]})
+    expected_identity = df.drop(columns=["c"])
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column_A": "a", "column_B" : "b"},
-                                                                      domain_type="column_pair")
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        domain_kwargs={"column_A": "a", "column_B": "b"}, domain_type="column_pair"
+    )
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {"column_A": "a", "column_B" : "b"}, "Accessor kwargs have been modified"
+    assert accessor_kwargs == {
+        "column_A": "a",
+        "column_B": "b",
+    }, "Accessor kwargs have been modified"
 
     # Trying same test with enum form of table domain - should work the same way
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column_A": "a", "column_B" : "b"},
-                                                                      domain_type= "identity")
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        domain_kwargs={"column_A": "a", "column_B": "b"}, domain_type="identity"
+    )
 
-    assert data.equals(expected_identity), "Data does not match after getting compute domain"
-    assert compute_kwargs == {"column_A": "a", "column_B" : "b"}, "Compute domain kwargs should be existent"
+    assert data.equals(
+        expected_identity
+    ), "Data does not match after getting compute domain"
+    assert compute_kwargs == {
+        "column_A": "a",
+        "column_B": "b",
+    }, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
 def test_get_compute_domain_with_multicolumn_domain():
     engine = PandasExecutionEngine()
-    df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 2, 3], "d":  [2, 7, 9, 2]})
-    expected_identity = df.drop(columns = ['d'])
+    df = pd.DataFrame(
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 2, 3], "d": [2, 7, 9, 2]}
+    )
+    expected_identity = df.drop(columns=["d"])
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"columns": ['a', 'b', 'c']},
-                                                                      domain_type="multicolumn")
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="multicolumn"
+    )
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {"columns": ['a', 'b', 'c']}, "Accessor kwargs have been modified"
+    assert accessor_kwargs == {
+        "columns": ["a", "b", "c"]
+    }, "Accessor kwargs have been modified"
 
     # Trying same test with enum form of table domain - should work the same way
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"columns": ['a', 'b', 'c']},
-                                                                      domain_type= "identity")
-    assert data.equals(expected_identity), "Data does not match after getting compute domain"
-    assert compute_kwargs == {"columns": ['a', 'b', 'c']}, "Compute domain kwargs should be existent"
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="identity"
+    )
+    assert data.equals(
+        expected_identity
+    ), "Data does not match after getting compute domain"
+    assert compute_kwargs == {
+        "columns": ["a", "b", "c"]
+    }, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
 def test_get_compute_domain_with_column_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    expected_identity = df.drop(columns= ['b'])
+    expected_identity = df.drop(columns=["b"])
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column": "a"}, domain_type =
-                                                                      MetricDomainTypes.COLUMN)
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        domain_kwargs={"column": "a"}, domain_type=MetricDomainTypes.COLUMN
+    )
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
 
     # Doing this using identity domain should yield different results
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"column": "a"}, domain_type=
-    MetricDomainTypes.IDENTITY)
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        domain_kwargs={"column": "a"}, domain_type=MetricDomainTypes.IDENTITY
+    )
 
-    assert data.equals(expected_identity), "Data does not match after getting compute domain"
+    assert data.equals(
+        expected_identity
+    ), "Data does not match after getting compute domain"
     assert compute_kwargs == {"column": "a"}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
@@ -117,9 +158,10 @@ def test_get_compute_domain_with_row_condition():
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 2",
-                                                                                     "condition_parser": "pandas"},
-                                                                                        domain_type= "table")
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        domain_kwargs={"row_condition": "b > 2", "condition_parser": "pandas"},
+        domain_type="table",
+    )
     # Ensuring data has been properly queried
     assert data["b"].equals(
         expected_df["b"]
@@ -141,9 +183,10 @@ def test_get_compute_domain_with_unmeetable_row_condition():
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={"row_condition": "b > 24",
-                                                                                     "condition_parser": "pandas",},
-                                                                                        domain_type= "identity")
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        domain_kwargs={"row_condition": "b > 24", "condition_parser": "pandas",},
+        domain_type="identity",
+    )
     # Ensuring data has been properly queried
     assert data["b"].equals(
         expected_df["b"]
@@ -218,3 +261,310 @@ def test_dataframe_property_given_loaded_batch():
 
     # Ensuring Data not distorted
     assert engine.dataframe.equals(df)
+
+
+def test_get_batch_data(test_df):
+    split_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(batch_data=test_df,)
+    )
+    assert split_df.shape == (120, 10)
+
+    # No dataset passed to RuntimeDataBatchSpec
+    with pytest.raises(ge_exceptions.InvalidBatchSpecError):
+        PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec())
+
+
+def test_get_batch_with_split_on_whole_table(test_df):
+    split_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_df, splitter_method="_split_on_whole_table"
+        )
+    )
+    assert split_df.shape == (120, 10)
+
+
+def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_path):
+    test_df = PandasExecutionEngine().get_batch_data(
+        PathBatchSpec(
+            path=os.path.join(test_folder_connection_path, "test.csv"),
+            reader_method="read_csv",
+            splitter_method="_split_on_whole_table",
+        )
+    )
+    assert test_df.shape == (5, 3)
+
+
+@mock_s3
+def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector():
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client = boto3.client("s3", region_name=region_name)
+
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+    ]
+    for key in keys:
+        client.put_object(
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
+        )
+    path = "path/A-100.csv"
+    full_path = f"s3a://{os.path.join(bucket, path)}"
+
+    my_data_connector = ConfiguredAssetS3DataConnector(
+        name="my_data_connector",
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        default_regex={"pattern": "alpha-(.*)\\.csv", "group_names": ["index"],},
+        bucket=bucket,
+        prefix="",
+        assets={"alpha": {}},
+    )
+
+    test_df = PandasExecutionEngine().get_batch_data(
+        batch_spec=S3BatchSpec(
+            s3=full_path,
+            reader_method="read_csv",
+            splitter_method="_split_on_whole_table",
+        )
+    )
+    assert test_df.shape == (2, 2)
+
+
+@mock_s3
+def test_get_batch_with_split_on_whole_table_s3():
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client = boto3.client("s3", region_name=region_name)
+
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+    ]
+    for key in keys:
+        client.put_object(
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
+        )
+
+    path = "path/A-100.csv"
+    full_path = f"s3a://{os.path.join(bucket, path)}"
+    test_df = PandasExecutionEngine().get_batch_data(
+        batch_spec=S3BatchSpec(
+            s3=full_path,
+            reader_method="read_csv",
+            splitter_method="_split_on_whole_table",
+        )
+    )
+    assert test_df.shape == (2, 2)
+
+    # if S3 was not configured
+    execution_engine_no_s3 = PandasExecutionEngine()
+    execution_engine_no_s3._s3 = None
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        execution_engine_no_s3.get_batch_data(
+            batch_spec=S3BatchSpec(
+                s3=full_path,
+                reader_method="read_csv",
+                splitter_method="_split_on_whole_table",
+            )
+        )
+
+
+def test_get_batch_with_split_on_column_value(test_df):
+    split_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_df,
+            splitter_method="_split_on_column_value",
+            splitter_kwargs={
+                "column_name": "batch_id",
+                "partition_definition": {"batch_id": 2},
+            },
+        )
+    )
+    assert split_df.shape == (12, 10)
+    assert (split_df.batch_id == 2).all()
+
+    split_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_df,
+            splitter_method="_split_on_column_value",
+            splitter_kwargs={
+                "column_name": "date",
+                "partition_definition": {"date": datetime.date(2020, 1, 30)},
+            },
+        )
+    )
+    assert (split_df).shape == (3, 10)
+
+
+def test_get_batch_with_split_on_converted_datetime(test_df):
+    split_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_df,
+            splitter_method="_split_on_converted_datetime",
+            splitter_kwargs={
+                "column_name": "timestamp",
+                "partition_definition": {"timestamp": "2020-01-30"},
+            },
+        )
+    )
+    assert (split_df).shape == (3, 10)
+
+
+def test_get_batch_with_split_on_divided_integer(test_df):
+    split_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_df,
+            splitter_method="_split_on_divided_integer",
+            splitter_kwargs={
+                "column_name": "id",
+                "divisor": 10,
+                "partition_definition": {"id": 5},
+            },
+        )
+    )
+    assert split_df.shape == (10, 10)
+    assert split_df.id.min() == 50
+    assert split_df.id.max() == 59
+
+
+def test_get_batch_with_split_on_mod_integer(test_df):
+    split_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_df,
+            splitter_method="_split_on_mod_integer",
+            splitter_kwargs={
+                "column_name": "id",
+                "mod": 10,
+                "partition_definition": {"id": 5},
+            },
+        )
+    )
+    assert split_df.shape == (12, 10)
+    assert split_df.id.min() == 5
+    assert split_df.id.max() == 115
+
+
+def test_get_batch_with_split_on_multi_column_values(test_df):
+    split_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_df,
+            splitter_method="_split_on_multi_column_values",
+            splitter_kwargs={
+                "column_names": ["y", "m", "d"],
+                "partition_definition": {"y": 2020, "m": 1, "d": 5,},
+            },
+        )
+    )
+    assert split_df.shape == (4, 10)
+    assert (split_df.date == datetime.date(2020, 1, 5)).all()
+
+    with pytest.raises(ValueError):
+        split_df = PandasExecutionEngine().get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                splitter_method="_split_on_multi_column_values",
+                splitter_kwargs={
+                    "column_names": ["I", "dont", "exist"],
+                    "partition_definition": {"y": 2020, "m": 1, "d": 5,},
+                },
+            )
+        )
+
+
+def test_get_batch_with_split_on_hashed_column(test_df):
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        split_df = PandasExecutionEngine().get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                splitter_method="_split_on_hashed_column",
+                splitter_kwargs={
+                    "column_name": "favorite_color",
+                    "hash_digits": 1,
+                    "partition_definition": {"hash_value": "a",},
+                    "hash_function_name": "I_am_not_valid",
+                },
+            )
+        )
+
+    split_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_df,
+            splitter_method="_split_on_hashed_column",
+            splitter_kwargs={
+                "column_name": "favorite_color",
+                "hash_digits": 1,
+                "partition_definition": {"hash_value": "a",},
+                "hash_function_name": "sha256",
+            },
+        )
+    )
+    assert split_df.shape == (8, 10)
+
+
+# ### Sampling methods ###
+
+
+def test_sample_using_random(test_df):
+    random.seed(1)
+    sampled_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(batch_data=test_df, sampling_method="_sample_using_random")
+    )
+    assert sampled_df.shape == (13, 10)
+
+
+def test_sample_using_mod(test_df):
+    sampled_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_df,
+            sampling_method="_sample_using_mod",
+            sampling_kwargs={"column_name": "id", "mod": 5, "value": 4,},
+        )
+    )
+    assert sampled_df.shape == (24, 10)
+
+
+def test_sample_using_a_list(test_df):
+    sampled_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_df,
+            sampling_method="_sample_using_a_list",
+            sampling_kwargs={"column_name": "id", "value_list": [3, 5, 7, 11],},
+        )
+    )
+    assert sampled_df.shape == (4, 10)
+
+
+def test_sample_using_md5(test_df):
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        sampled_df = PandasExecutionEngine().get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                sampling_method="_sample_using_hash",
+                sampling_kwargs={
+                    "column_name": "date",
+                    "hash_function_name": "I_am_not_valid",
+                },
+            )
+        )
+
+    sampled_df = PandasExecutionEngine().get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_df,
+            sampling_method="_sample_using_hash",
+            sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
+        )
+    )
+    assert sampled_df.shape == (10, 10)
+    assert sampled_df.date.isin(
+        [datetime.date(2020, 1, 15), datetime.date(2020, 1, 29),]
+    ).all()

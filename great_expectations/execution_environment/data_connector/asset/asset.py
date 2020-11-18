@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-from typing import List
 import logging
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +13,14 @@ class Asset:
     def __init__(
         self,
         name: str,
-        partitioner_name: str = None,
         base_directory: str = None,
         glob_directive: str = None,
         pattern: str = None,
         group_names: List[str] = None,
+        bucket: str = None,
+        prefix: str = None,
+        delimiter: str = None,
+        max_keys: int = None,
     ):
         self._name = name
         self._base_directory = base_directory
@@ -29,13 +30,14 @@ class Asset:
         # Note: this may need to become a nested object to accomodate sorters
         self._group_names = group_names
 
+        self._bucket = bucket
+        self._prefix = prefix
+        self._delimiter = delimiter
+        self._max_keys = max_keys
+
     @property
     def name(self) -> str:
         return self._name
-
-    @property
-    def partitioner_name(self) -> str:
-        return self._partitioner_name
 
     @property
     def base_directory(self) -> str:
@@ -50,5 +52,21 @@ class Asset:
         return self._pattern
 
     @property
-    def group_names(self) -> str:
+    def group_names(self) -> List[str]:
         return self._group_names
+
+    @property
+    def bucket(self) -> str:
+        return self._bucket
+
+    @property
+    def prefix(self) -> str:
+        return self._prefix
+
+    @property
+    def delimiter(self) -> str:
+        return self._delimiter
+
+    @property
+    def max_keys(self) -> int:
+        return self._max_keys

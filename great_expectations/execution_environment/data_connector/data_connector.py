@@ -1,16 +1,9 @@
-import copy
-import itertools
-import json
 import logging
-from typing import Any, Callable, Dict, List, Tuple, Union, Optional
+from typing import Any, List, Optional, Tuple
 
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.core.batch import (
-    BatchMarkers,
-    BatchDefinition,
-)
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +34,7 @@ class DataConnector:
         self,
         name: str,
         execution_environment_name: str,
-        execution_engine: ExecutionEngine = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         self._name = name
         self._execution_environment_name = execution_environment_name
@@ -49,6 +42,8 @@ class DataConnector:
 
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache = None
+
+        self._data_context_root_directory = None
 
     @property
     def name(self) -> str:
@@ -58,14 +53,20 @@ class DataConnector:
     def execution_environment_name(self) -> str:
         return self._execution_environment_name
 
-    def get_batch_data_and_metadata_from_batch_definition(
+    @property
+    def data_context_root_directory(self) -> str:
+        return self._data_context_root_directory
+
+    @data_context_root_directory.setter
+    def data_context_root_directory(self, data_context_root_directory: str):
+        self._data_context_root_directory = data_context_root_directory
+
+    def get_batch_data_and_metadata(
         self, batch_definition: BatchDefinition,
     ) -> Tuple[
         Any, BatchSpec, BatchMarkers,  # batch_data
     ]:
-        batch_spec: BatchSpec = self._build_batch_spec_from_batch_definition(
-            batch_definition=batch_definition
-        )
+        batch_spec: BatchSpec = self.build_batch_spec(batch_definition=batch_definition)
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
@@ -75,24 +76,21 @@ class DataConnector:
             batch_markers,
         )
 
-    def _build_batch_spec_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> BatchSpec:
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
         batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
             batch_definition=batch_definition
         )
         # TODO Abe 20201018: Decide if we want to allow batch_spec_passthrough parameters anywhere.
         batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
-
         return batch_spec
 
-    def refresh_data_references_cache(self,):
+    def _refresh_data_references_cache(self,):
         raise NotImplementedError
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
-        """List objects in the underlying data store to create a list of data_references.	
+        """List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache.
         """
         raise NotImplementedError
@@ -141,7 +139,7 @@ class DataConnector:
 
     def self_check(self, pretty_print=True, max_examples=3):
         if self._data_references_cache is None:
-            self.refresh_data_references_cache()
+            self._refresh_data_references_cache()
 
         if pretty_print:
             print("\t" + self.name, ":", self.__class__.__name__)
@@ -167,7 +165,7 @@ class DataConnector:
 
         for asset_name in asset_names[:max_examples]:
             data_reference_list = self._get_data_reference_list_from_cache_by_data_asset_name(
-                asset_name
+                data_asset_name=asset_name
             )
             len_batch_definition_list = len(data_reference_list)
             example_data_references = data_reference_list[:max_examples]
@@ -207,7 +205,7 @@ class DataConnector:
             == self.execution_environment_name
         ):
             raise ValueError(
-                f"""execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not 
+                f"""execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not
 match DataConnector execution_environment_name: "{self.execution_environment_name}".
                 """
             )
@@ -216,7 +214,7 @@ match DataConnector execution_environment_name: "{self.execution_environment_nam
             or batch_request.data_connector_name == self.name
         ):
             raise ValueError(
-                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match 
+                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match
 DataConnector name: "{self.name}".
                 """
             )

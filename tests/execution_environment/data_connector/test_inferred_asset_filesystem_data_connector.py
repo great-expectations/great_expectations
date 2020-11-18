@@ -12,30 +12,36 @@ from great_expectations.core.batch import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment.data_connector import (
     InferredAssetFilesystemDataConnector,
-    SinglePartitionerDictDataConnector,
 )
-from tests.test_utils import create_fake_data_frame, create_files_in_directory
+from tests.test_utils import create_files_in_directory
 
 
-def test_basic_instantiation():
-    data_reference_dict = {
-        "path/A-100.csv": create_fake_data_frame(),
-        "path/A-101.csv": create_fake_data_frame(),
-        "directory/B-1.csv": create_fake_data_frame(),
-        "directory/B-2.csv": create_fake_data_frame(),
-    }
+def test_basic_instantiation(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "path/A-100.csv",
+            "path/A-101.csv",
+            "directory/B-1.csv",
+            "directory/B-2.csv",
+        ],
+    )
 
-    my_data_connector: SinglePartitionerDictDataConnector = SinglePartitionerDictDataConnector(
+    my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
         name="my_data_connector",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={
-            "pattern": "(.*)/(.+)-(\\d+)\\.csv",
+            "pattern": r"(.+)/(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "letter", "number"],
         },
-        data_reference_dict=data_reference_dict,
+        glob_directive="*/*.csv",
+        base_directory=base_directory,
     )
 
-    my_data_connector.refresh_data_references_cache()
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
     assert my_data_connector.get_data_reference_list_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -52,11 +58,63 @@ def test_basic_instantiation():
         )
 
 
-# TODO: <Alex>Can we come up with an explicit way of figuring out the data_asset_name instead of using the implicit mechanism (via "group_names")?</Alex>
-def test_example_with_implicit_data_asset_names():
-    data_reference_dict = {
-        data_reference: create_fake_data_frame
-        for data_reference in [
+def test_simple_regex_example_with_implicit_data_asset_names_self_check(
+    tmp_path_factory,
+):
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_simple_regex_example_with_implicit_data_asset_names"
+        )
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=["A-100.csv", "A-101.csv", "B-1.csv", "B-2.csv", "CCC.csv",],
+    )
+
+    my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        default_regex={
+            "pattern": r"(.+)-(\d+)\.csv",
+            "group_names": ["data_asset_name", "number",],
+        },
+        glob_directive="*",
+        base_directory=base_directory,
+    )
+
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    self_check_report_object = my_data_connector.self_check()
+
+    assert self_check_report_object == {
+        "class_name": "InferredAssetFilesystemDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": ["A", "B"],
+        "data_assets": {
+            "A": {
+                "example_data_references": ["A-100.csv", "A-101.csv"],
+                "batch_definition_count": 2,
+            },
+            "B": {
+                "example_data_references": ["B-1.csv", "B-2.csv"],
+                "batch_definition_count": 2,
+            },
+        },
+        "example_unmatched_data_references": ["CCC.csv"],
+        "unmatched_data_reference_count": 1,
+    }
+
+
+def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_complex_regex_example_with_implicit_data_asset_names"
+        )
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
             "2020/01/alpha-1001.csv",
             "2020/01/beta-1002.csv",
             "2020/02/alpha-1003.csv",
@@ -64,32 +122,22 @@ def test_example_with_implicit_data_asset_names():
             "2020/03/alpha-1005.csv",
             "2020/03/beta-1006.csv",
             "2020/04/beta-1007.csv",
-        ]
-    }
-
-    yaml_string = """
-class_name: SinglePartitionerDictDataConnector
-base_directory: my_base_directory/
-execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
-
-default_regex:
-    pattern: (\\d{4})/(\\d{2})/(.+)-\\d+\\.csv
-    group_names:
-        - year_dir
-        - month_dir
-        - data_asset_name
-    """
-    config = yaml.load(yaml_string, Loader=yaml.FullLoader)
-    config["data_reference_dict"] = data_reference_dict
-    my_data_connector = instantiate_class_from_config(
-        config,
-        config_defaults={
-            "module_name": "great_expectations.execution_environment.data_connector"
-        },
-        runtime_environment={"name": "my_data_connector"},
+        ],
     )
 
-    my_data_connector.refresh_data_references_cache()
+    my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        default_regex={
+            "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
+            "group_names": ["year_dir", "month_dir", "data_asset_name"],
+        },
+        glob_directive="*/*/*.csv",
+        base_directory=base_directory,
+    )
+
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
 
     # Test for an unknown execution environment
     with pytest.raises(ValueError):
@@ -171,75 +219,51 @@ default_regex:
     ]
 
 
-# TODO: Abe 20201028 : This test should actually be implemented with a ConfiguredAssetFilesystemDataConnector, not a InferredAssetFilesystemDataConnector
-# def test_example_with_explicit_data_asset_names(tmp_path_factory):
-#     data_reference_dict = dict([
-#         (data_reference, create_fake_data_frame)
-#         for data_reference in [
-#             "my_base_directory/alpha/files/go/here/alpha-202001.csv",
-#             "my_base_directory/alpha/files/go/here/alpha-202002.csv",
-#             "my_base_directory/alpha/files/go/here/alpha-202003.csv",
-#             "my_base_directory/beta_here/beta-202001.txt",
-#             "my_base_directory/beta_here/beta-202002.txt",
-#             "my_base_directory/beta_here/beta-202003.txt",
-#             "my_base_directory/beta_here/beta-202004.txt",
-#             "my_base_directory/gamma-202001.csv",
-#             "my_base_directory/gamma-202002.csv",
-#             "my_base_directory/gamma-202003.csv",
-#             "my_base_directory/gamma-202004.csv",
-#             "my_base_directory/gamma-202005.csv",
-#         ]
-#     ])
+def test_self_check(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_self_check"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=["A-100.csv", "A-101.csv", "B-1.csv", "B-2.csv",],
+    )
 
-#     yaml_string = """
-# class_name: InferredAssetFilesystemDataConnector
-# execution_environment_name: FAKE_EXECUTION_ENVIRONMENT_NAME
-# base_directory: my_base_directory/
-# # glob_directive: "*.csv"
-# default_regex:
-#     pattern: ^.*\\/(.+)-(\\d{4})(\\d{2})\\.(csv|txt)$
-#     group_names:
-#         - data_asset_name
-#         - year_dir
-#         - month_dir
-# assets:
-#     alpha:
-#         base_directory: alpha/files/go/here/
-#     beta:
-#         base_directory: beta_here/
-#         # glob_directive: "*.txt"
-#     gamma:
-#         base_directory: ""
+    my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        default_regex={
+            "pattern": r"(.+)-(\d+)\.csv",
+            "group_names": ["data_asset_name", "number"],
+        },
+        glob_directive="*",
+        base_directory=base_directory,
+    )
 
-#     """
-#     config = yaml.load(yaml_string, Loader=yaml.FullLoader)
-#     config["data_reference_dict"] = data_reference_dict
-#     my_data_connector = instantiate_class_from_config(
-#         config,
-#         config_defaults={"module_name": "great_expectations.execution_environment.data_connector"},
-#         runtime_environment={"name": "my_data_connector"},
-#     )
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
 
-#     my_data_connector.refresh_data_references_cache()
+    self_check_report_object = my_data_connector.self_check()
 
-#     # I'm starting to think we might want to separate out this behavior into a different class.
-#     assert len(my_data_connector.get_unmatched_data_references()) == 0
-#     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-#         data_connector_name="my_data_connector",
-#         data_asset_name="alpha",
-#     ))) == 3
-
-#     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-#         data_connector_name="my_data_connector",
-#         data_asset_name="beta",
-#     ))) == 4
-#     assert len(my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-#         data_connector_name="my_data_connector",
-#         data_asset_name="gamma",
-#     ))) == 5
+    assert self_check_report_object == {
+        "class_name": "InferredAssetFilesystemDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": ["A", "B"],
+        "data_assets": {
+            "A": {
+                "example_data_references": ["A-100.csv", "A-101.csv"],
+                "batch_definition_count": 2,
+            },
+            "B": {
+                "example_data_references": ["B-1.csv", "B-2.csv"],
+                "batch_definition_count": 2,
+            },
+        },
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
+    }
 
 
-def test_test_yaml_config_(empty_data_context, tmp_path_factory):
+def test_test_yaml_config(empty_data_context_v3, tmp_path_factory):
+    context = empty_data_context_v3
+
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
         directory=base_directory,
@@ -254,16 +278,14 @@ def test_test_yaml_config_(empty_data_context, tmp_path_factory):
         ],
     )
 
-    return_object = empty_data_context.test_yaml_config(
+    report_object = context.test_yaml_config(
         f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: InferredAssetFilesystemDataConnector
 execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
 name: TEST_DATA_CONNECTOR
-
 base_directory: {base_directory}/
 glob_directive: "*/*/*.csv"
-
 default_regex:
     pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
     group_names:
@@ -271,10 +293,10 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
-        return_mode="return_object",
+        return_mode="report_object",
     )
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": ["alpha", "beta"],
@@ -301,10 +323,14 @@ default_regex:
     }
 
 
-def test_test_yaml_config_excluding_non_regex_matching_files(
-    empty_data_context, tmp_path_factory
+def test_yaml_config_excluding_non_regex_matching_files(
+    empty_data_context_v3, tmp_path_factory
 ):
-    base_directory = str(tmp_path_factory.mktemp("test_something_needs_a_better_name"))
+    context = empty_data_context_v3
+
+    base_directory = str(
+        tmp_path_factory.mktemp("test_yaml_config_excluding_non_regex_matching_files")
+    )
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -320,9 +346,10 @@ def test_test_yaml_config_excluding_non_regex_matching_files(
         ],
     )
 
-    # gamma-202001.csv and gamma-202002.csv do not match regex (which includes 2020/month directory).
+    # gamma-202001.csv and gamma-202002.csv do not match regex (which includes 2020/month directory).  They are not
+    # considered as unmatched data references, because glob_directive causes these data references to not be listed.
 
-    return_object = empty_data_context.test_yaml_config(
+    report_object = context.test_yaml_config(
         f"""
 module_name: great_expectations.execution_environment.data_connector
 class_name: InferredAssetFilesystemDataConnector
@@ -339,10 +366,10 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
-        return_mode="return_object",
+        return_mode="report_object",
     )
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 2,
         "example_data_asset_names": ["alpha", "beta"],
@@ -369,90 +396,14 @@ default_regex:
     }
 
 
-def test_self_check():
-    data_reference_dict = {
-        "A-100.csv": create_fake_data_frame(),
-        "A-101.csv": create_fake_data_frame(),
-        "B-1.csv": create_fake_data_frame(),
-        "B-2.csv": create_fake_data_frame(),
-    }
-
-    my_data_connector = SinglePartitionerDictDataConnector(
-        name="my_data_connector",
-        data_reference_dict=data_reference_dict,
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
-        default_regex={
-            "pattern": "(.+)-(\\d+)\\.csv",
-            # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; idea: resurrect the Partition class.</Alex>
-            "group_names": ["data_asset_name", "number"],
-        },
-    )
-
-    self_check_return_object = my_data_connector.self_check()
-
-    assert self_check_return_object == {
-        "class_name": "SinglePartitionerDictDataConnector",
-        "data_asset_count": 2,
-        "example_data_asset_names": ["A", "B"],
-        "data_assets": {
-            "A": {
-                "example_data_references": ["A-100.csv", "A-101.csv"],
-                "batch_definition_count": 2,
-            },
-            "B": {
-                "example_data_references": ["B-1.csv", "B-2.csv"],
-                "batch_definition_count": 2,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
-
-
-def test_that_needs_a_better_name():
-    data_reference_dict = {
-        "A-100.csv": create_fake_data_frame(),
-        "A-101.csv": create_fake_data_frame(),
-        "B-1.csv": create_fake_data_frame(),
-        "B-2.csv": create_fake_data_frame(),
-        "CCC.csv": create_fake_data_frame(),
-    }
-
-    my_data_connector = SinglePartitionerDictDataConnector(
-        name="my_data_connector",
-        data_reference_dict=data_reference_dict,
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
-        default_regex={
-            "pattern": "(.+)-(\\d+)\\.csv",
-            "group_names": ["data_asset_name", "number"],
-        },
-    )
-
-    self_check_return_object = my_data_connector.self_check()
-
-    assert self_check_return_object == {
-        "class_name": "SinglePartitionerDictDataConnector",
-        "data_asset_count": 2,
-        "example_data_asset_names": ["A", "B"],
-        "data_assets": {
-            "A": {
-                "example_data_references": ["A-100.csv", "A-101.csv"],
-                "batch_definition_count": 2,
-            },
-            "B": {
-                "example_data_references": ["B-1.csv", "B-2.csv"],
-                "batch_definition_count": 2,
-            },
-        },
-        "example_unmatched_data_references": ["CCC.csv"],
-        "unmatched_data_reference_count": 1,
-    }
-
-
 def test_nested_directory_data_asset_name_in_folder(
-    empty_data_context, tmp_path_factory
+    empty_data_context_v3, tmp_path_factory
 ):
-    base_directory = str(tmp_path_factory.mktemp("test_dir_charlie"))
+    context = empty_data_context_v3
+
+    base_directory = str(
+        tmp_path_factory.mktemp("test_nested_directory_data_asset_name_in_folder")
+    )
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -471,7 +422,7 @@ def test_nested_directory_data_asset_name_in_folder(
         ],
     )
 
-    return_object = empty_data_context.test_yaml_config(
+    report_object = context.test_yaml_config(
         f"""
     module_name: great_expectations.execution_environment.data_connector
     class_name: InferredAssetFilesystemDataConnector
@@ -486,10 +437,10 @@ def test_nested_directory_data_asset_name_in_folder(
             - number
         pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
         """,
-        return_mode="return_object",
+        return_mode="report_object",
     )
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 4,
         "example_data_asset_names": ["A", "B", "C"],
@@ -513,8 +464,10 @@ def test_nested_directory_data_asset_name_in_folder(
 
 
 def test_redundant_information_in_naming_convention_random_hash(
-    empty_data_context, tmp_path_factory
+    empty_data_context_v3, tmp_path_factory
 ):
+    context = empty_data_context_v3
+
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
         directory=base_directory,
@@ -529,7 +482,7 @@ def test_redundant_information_in_naming_convention_random_hash(
         ],
     )
 
-    return_object = empty_data_context.test_yaml_config(
+    report_object = context.test_yaml_config(
         f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetFilesystemDataConnector
@@ -546,10 +499,10 @@ def test_redundant_information_in_naming_convention_random_hash(
               pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
 
               """,
-        return_mode="return_object",
+        return_mode="report_object",
     )
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": ["log_file"],
@@ -568,71 +521,11 @@ def test_redundant_information_in_naming_convention_random_hash(
     }
 
 
-# def test_redundant_information_in_naming_convention_random_hash_asset_name_is_date(empty_data_context, tmp_path_factory):
-#     base_directory = str(tmp_path_factory.mktemp("logs"))
-#     create_files_in_directory(
-#         directory=base_directory,
-#         file_name_list=[
-#             "2021/01/01/log_file-2f1e94b40f310274b485e72050daf591.txt.gz",
-#             "2021/01/01/log_file-8277e0910d750195b448797616e091ad.txt.gz",
-#             "2021/01/02/log_file-7f5d35d4f90bce5bf1fad680daac48a2.txt.gz",
-#             "2021/01/02/log_file-912ec803b2ce49e4a541068d495ab570.txt.gz",
-#             "2021/01/03/log_file-99d5ed1123f877c714bbe9a2cfdffc4b.txt.gz",
-#             "2021/01/03/log_file-45901b519281e201d4535cb90678d870.txt.gz",
-#             "2021/01/04/log_file-885d40a5661bbbea053b2405face042f.txt.gz",
-#             "2021/01/04/log_file-103935fb414d693ba3a5f01a9d9399d3.txt.gz",
-#             "2021/01/05/log_file-6e232cfb9357a98911d9794d0b0eb804.txt.gz",
-#             "2021/01/05/log_file-d8e478f817b608729cfc8fb750ebfc84.txt.gz",
-#             "2021/01/06/log_file-4786f3282f04de5b5c7317c490c6d922.txt.gz",
-#             "2021/01/06/log_file-b1ca8d1079c00fd4e210f7ef31549162.txt.gz",
-#             "2021/01/07/log_file-d34b4818c52e74b7827504920af19a5c.txt.gz",
-#             "2021/01/07/log_file-a21075a36eeddd084e17611a238c7101.txt.gz",
-#         ]
-#     )
-#     return_object = empty_data_context.test_yaml_config(f
-#           module_name: great_expectations.execution_environment.data_connector
-#           class_name: InferredAssetFilesystemDataConnector
-#           execution_environment_name: FAKE_EXECUTION_ENVIRONMENT
-#           name: TEST_DATA_CONNECTOR
-#           base_directory: {base_directory}/
-#           glob_directive: "*/*/*/*.txt.gz"
-#           partitioner:
-#               class_name: RegexPartitioner
-#               group_names:
-#                 - data_asset_name
-#               pattern: (\\d{{4}}\\/\\d{{2}}\\/\\d{{2}})/log_file-.*\\.txt\\.gz
-#               , return_mode="return_object")
-#
-#     return_object == {
-#         "class_name": "InferredAssetFilesystemDataConnector",
-#         "data_asset_count": 7,
-#         "example_data_asset_names": [
-#             "2021/01/01",
-#             "2021/01/02",
-#             "2021/01/03"
-#         ],
-#         "data_assets": {
-#             "2021/01/01": {
-#                 "batch_definition_count": 2,
-#                 "example_data_references": ["2021/01/01/log_file-*.txt.gz", "2021/01/01/log_file-*.txt.gz"]
-#             },
-#             "2021/01/02": {
-#                 "batch_definition_count": 2,
-#                 "example_data_references": ["2021/01/02/log_file-*.txt.gz", "2021/01/02/log_file-*.txt.gz"]
-#             },
-#             "2021/01/03": {
-#                 "batch_definition_count": 2,
-#                 "example_data_references": ["2021/01/03/log_file-*.txt.gz", "2021/01/03/log_file-*.txt.gz"]
-#             }
-#         },
-#         "unmatched_data_reference_count": 0,
-#         "example_unmatched_data_references": []
-#     }
-
-
 def test_redundant_information_in_naming_convention_timestamp(
-    empty_data_context, tmp_path_factory
+    empty_data_context_v3, tmp_path_factory
 ):
+    context = empty_data_context_v3
+
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
         directory=base_directory,
@@ -647,7 +540,7 @@ def test_redundant_information_in_naming_convention_timestamp(
         ],
     )
 
-    return_object = empty_data_context.test_yaml_config(
+    report_object = context.test_yaml_config(
         f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetFilesystemDataConnector
@@ -663,9 +556,9 @@ def test_redundant_information_in_naming_convention_timestamp(
                 - day
               pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
       """,
-        return_mode="return_object",
+        return_mode="report_object",
     )
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": ["log_file"],
@@ -685,8 +578,10 @@ def test_redundant_information_in_naming_convention_timestamp(
 
 
 def test_redundant_information_in_naming_convention_bucket(
-    empty_data_context, tmp_path_factory
+    empty_data_context_v3, tmp_path_factory
 ):
+    context = empty_data_context_v3
+
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
         directory=base_directory,
@@ -701,7 +596,7 @@ def test_redundant_information_in_naming_convention_bucket(
         ],
     )
 
-    return_object = empty_data_context.test_yaml_config(
+    report_object = context.test_yaml_config(
         f"""
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetFilesystemDataConnector
@@ -717,10 +612,10 @@ def test_redundant_information_in_naming_convention_bucket(
                   - day
               pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
               """,
-        return_mode="return_object",
+        return_mode="report_object",
     )
 
-    assert return_object == {
+    assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": ["some_bucket"],
@@ -739,9 +634,7 @@ def test_redundant_information_in_naming_convention_bucket(
     }
 
 
-def test_redundant_information_in_naming_convention_bucket_sorted(
-    empty_data_context, tmp_path_factory
-):
+def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
         directory=base_directory,
@@ -761,7 +654,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: test_environment
-          name: single_partitioner_data_connector
+          name: my_inferred_asset_filesystem_data_connector
           base_directory: {base_directory}/
           glob_directive: "*/*/*/*/*.txt.gz"
           default_regex:
@@ -784,9 +677,8 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
     my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
-            "name": "single_partitioner_data_connector",
+            "name": "my_inferred_asset_filesystem_data_connector",
             "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
             "execution_engine": "BASE_ENGINE",
         },
         config_defaults={
@@ -797,7 +689,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
     sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         BatchRequest(
             execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
         )
     )
@@ -805,7 +697,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
     expected = [
         BatchDefinition(
             execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
             partition_definition=PartitionDefinition(
                 {"year": "2021", "month": "01", "day": "07", "full_date": "20210107"}
@@ -813,7 +705,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
             partition_definition=PartitionDefinition(
                 {"year": "2021", "month": "01", "day": "06", "full_date": "20210106"}
@@ -821,7 +713,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
             partition_definition=PartitionDefinition(
                 {"year": "2021", "month": "01", "day": "05", "full_date": "20210105"}
@@ -829,7 +721,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
             partition_definition=PartitionDefinition(
                 {"year": "2021", "month": "01", "day": "04", "full_date": "20210104"}
@@ -837,7 +729,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
             partition_definition=PartitionDefinition(
                 {"year": "2021", "month": "01", "day": "03", "full_date": "20210103"}
@@ -845,7 +737,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
             partition_definition=PartitionDefinition(
                 {"year": "2021", "month": "01", "day": "02", "full_date": "20210102"}
@@ -853,7 +745,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
-            data_connector_name="single_partitioner_data_connector",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
             partition_definition=PartitionDefinition(
                 {"year": "2021", "month": "01", "day": "01", "full_date": "20210101"}
@@ -864,7 +756,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
 
 
 def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match_group(
-    empty_data_context, tmp_path_factory
+    tmp_path_factory,
 ):
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
@@ -885,7 +777,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
           module_name: great_expectations.execution_environment.data_connector
           class_name: InferredAssetFilesystemDataConnector
           execution_environment_name: test_environment
-          name: single_partitioner_data_connector
+          name: my_inferred_asset_filesystem_data_connector
           base_directory: {base_directory}/
           glob_directive: "*/*/*/*/*.txt.gz"
           default_regex:
@@ -905,32 +797,23 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
         Loader=yaml.FullLoader,
     )
 
-    my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "single_partitioner_data_connector",
-            "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
-            "execution_engine": "BASE_ENGINE",
-        },
-        config_defaults={
-            "module_name": "great_expectations.execution_environment.data_connector"
-        },
-    )
-
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                execution_environment_name="test_environment",
-                data_connector_name="single_partitioner_data_connector",
-                data_asset_name="some_bucket",
-            )
+        my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "my_inferred_asset_filesystem_data_connector",
+                "execution_environment_name": "test_environment",
+                "execution_engine": "BASE_ENGINE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector"
+            },
         )
 
 
 def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
-    empty_data_context, tmp_path_factory
+    tmp_path_factory,
 ):
     base_directory = str(tmp_path_factory.mktemp("logs"))
     create_files_in_directory(
@@ -951,7 +834,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
         module_name: great_expectations.execution_environment.data_connector
         class_name: InferredAssetFilesystemDataConnector
         execution_environment_name: test_environment
-        name: single_partitioner_data_connector
+        name: my_inferred_asset_filesystem_data_connector
         base_directory: {base_directory}/
         glob_directive: "*/*/*/*/*.txt.gz"
         default_regex:
@@ -963,7 +846,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
                 - full_date
             pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-(.*)\\.txt\\.gz
         sorters:
-            - datetime_format: '%Y%m%d'
+            - datetime_format: "%Y%m%d"
               orderby: desc
               class_name: DateTimeSorter
               name: timestamp
@@ -974,25 +857,15 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
         Loader=yaml.FullLoader,
     )
 
-    my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "single_partitioner_data_connector",
-            "execution_environment_name": "test_environment",
-            "data_context_root_directory": base_directory,
-            "execution_engine": "BASE_ENGINE",
-        },
-        config_defaults={
-            "module_name": "great_expectations.execution_environment.data_connector"
-        },
-    )
-
     with pytest.raises(ge_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                execution_environment_name="test_environment",
-                data_connector_name="single_partitioner_data_connector",
-                data_asset_name="some_bucket",
-            )
+        my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "my_inferred_asset_filesystem_data_connector",
+                "execution_environment_name": "test_environment",
+                "execution_engine": "BASE_ENGINE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.execution_environment.data_connector"
+            },
         )

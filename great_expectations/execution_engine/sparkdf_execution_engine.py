@@ -1,17 +1,25 @@
 import copy
 import datetime
+import hashlib
 import logging
 import uuid
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple
 
-try:
-    import pyspark.sql.functions as F
-except ImportError:
-    F = None
-
+from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.id_dict import IDDict
+from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.execution_environment.types.batch_spec import (
+    PathBatchSpec,
+    RuntimeDataBatchSpec,
+    S3BatchSpec,
+)
 
-from ..exceptions import BatchKwargsError, GreatExpectationsError, ValidationError
+from ..exceptions import (
+    BatchKwargsError,
+    BatchSpecError,
+    GreatExpectationsError,
+    ValidationError,
+)
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
 from .execution_engine import ExecutionEngine, MetricDomainTypes
@@ -19,10 +27,30 @@ from .execution_engine import ExecutionEngine, MetricDomainTypes
 logger = logging.getLogger(__name__)
 
 try:
+    import pyspark
+    import pyspark.sql.functions as F
     from pyspark.sql import DataFrame, SparkSession
+    from pyspark.sql.types import (
+        BooleanType,
+        DateType,
+        FloatType,
+        IntegerType,
+        StringType,
+        StructField,
+        StructType,
+    )
 except ImportError:
-    DataFrame = None
+    pyspark = None
     SparkSession = None
+    DataFrame = None
+    F = None
+    StructType = (None,)
+    StructField = (None,)
+    IntegerType = (None,)
+    FloatType = (None,)
+    StringType = (None,)
+    DateType = (None,)
+    BooleanType = (None,)
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
@@ -145,11 +173,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     def __init__(self, *args, **kwargs):
         # Creation of the Spark DataFrame is done outside this class
         self._persist = kwargs.pop("persist", True)
-
-        self._spark_config = kwargs.pop("spark_config ", {})
+        self._spark_config = kwargs.pop("spark_config", {})
         try:
             builder = SparkSession.builder
-            app_name: Union[str, None] = self._spark_config.pop("spark.app.name", None)
+            app_name: Optional[str] = self._spark_config.pop("spark.app.name", None)
             if app_name:
                 builder.appName(app_name)
             for k, v in self._spark_config.items():
@@ -172,6 +199,60 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
 
         return self.active_batch_data
+
+    def get_batch_data_and_markers(
+        self, batch_spec: BatchSpec
+    ) -> Tuple[Any, BatchMarkers]:  # batch_data
+        batch_data: Any = None
+
+        # We need to build a batch_markers to be used in the dataframe
+        batch_markers: BatchMarkers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+        if isinstance(batch_spec, RuntimeDataBatchSpec):
+            batch_data = batch_spec.batch_data
+        elif isinstance(batch_spec, PathBatchSpec):
+            reader_method: str = batch_spec.get("reader_method")
+            reader_options: dict = batch_spec.get("reader_options") or {}
+
+            path: str = batch_spec["path"]
+            reader = self.spark.read
+            reader_fn: Callable = self._get_reader_fn(reader, reader_method, path)
+            batch_data = reader_fn(path, **reader_options)
+        elif isinstance(batch_spec, S3BatchSpec):
+
+            reader_method = batch_spec.get("reader_method")
+            reader_options: dict = batch_spec.get("reader_options") or {}
+            url = batch_spec.get("s3")
+            reader_fn = self._get_reader_fn(
+                reader=self.spark.read, reader_method=reader_method, path=url
+            )
+            batch_data = reader_fn(path=url, **reader_options)
+
+        else:
+            raise BatchSpecError(
+                """
+                Invalid batch_spec: batch_data is required for a SparkDFExecutionEngine to operate.
+            """
+            )
+        batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
+        return batch_data, batch_markers
+
+    def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
+        if batch_spec.get("splitter_method"):
+            splitter_fn = getattr(self, batch_spec.get("splitter_method"))
+            splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
+            batch_data = splitter_fn(batch_data, **splitter_kwargs)
+
+        if batch_spec.get("sampling_method"):
+            sampling_fn = getattr(self, batch_spec.get("sampling_method"))
+            sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
+            batch_data = sampling_fn(batch_data, **sampling_kwargs)
+        return batch_data
 
     @staticmethod
     def guess_reader_method_from_path(path):
@@ -220,7 +301,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         try:
             if reader_method.lower() == "delta":
                 return reader.format("delta").load
-
             return getattr(reader, reader_method)
         except AttributeError:
             raise BatchKwargsError(
@@ -496,3 +576,171 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     def head(self, n=5):
         """Returns dataframe head. Default is 5"""
         return self.dataframe.limit(n).toPandas()
+
+    @staticmethod
+    def _split_on_whole_table(df,):
+        return df
+
+    @staticmethod
+    def _split_on_column_value(
+        df, column_name: str, partition_definition: dict,
+    ):
+        return df.filter(F.col(column_name) == partition_definition[column_name])
+
+    @staticmethod
+    def _split_on_converted_datetime(
+        df,
+        column_name: str,
+        partition_definition: dict,
+        date_format_string: str = "yyyy-MM-dd",
+    ):
+        matching_string = partition_definition[column_name]
+        res = (
+            df.withColumn(
+                "date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)
+            )
+            .filter(F.col("date_time_tmp") == matching_string)
+            .drop("date_time_tmp")
+        )
+        return res
+
+    @staticmethod
+    def _split_on_divided_integer(
+        df, column_name: str, divisor: int, partition_definition: dict,
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+        matching_divisor = partition_definition[column_name]
+        res = (
+            df.withColumn(
+                "div_temp", (F.col(column_name) / divisor).cast(IntegerType())
+            )
+            .filter(F.col("div_temp") == matching_divisor)
+            .drop("div_temp")
+        )
+        return res
+
+    @staticmethod
+    def _split_on_mod_integer(
+        df, column_name: str, mod: int, partition_definition: dict,
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+        matching_mod_value = partition_definition[column_name]
+        res = (
+            df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
+            .filter(F.col("mod_temp") == matching_mod_value)
+            .drop("mod_temp")
+        )
+        return res
+
+    @staticmethod
+    def _split_on_multi_column_values(
+        df, column_names: list, partition_definition: dict,
+    ):
+        """Split on the joint values in the named columns"""
+        for column_name in column_names:
+            value = partition_definition.get(column_name)
+            if not value:
+                raise ValueError(
+                    f"In order for SparkExecutionEngine to `_split_on_multi_column_values`, "
+                    f"all values in  column_names must also exist in partition_definition. "
+                    f"{column_name} was not found in partition_definition."
+                )
+            df = df.filter(F.col(column_name) == value)
+        return df
+
+    @staticmethod
+    def _split_on_hashed_column(
+        df,
+        column_name: str,
+        hash_digits: int,
+        partition_definition: dict,
+        hash_function_name: str = "sha256",
+    ):
+        """Split on the hashed value of the named column"""
+        try:
+            getattr(hashlib, hash_function_name)
+        except (TypeError, AttributeError) as e:
+            raise (
+                ge_exceptions.ExecutionEngineError(
+                    f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found."""
+                )
+            )
+
+        def _encrypt_value(to_encode):
+            hash_func = getattr(hashlib, hash_function_name)
+            hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits :]
+            return hashed_value
+
+        encrypt_udf = F.udf(_encrypt_value, StringType())
+        res = (
+            df.withColumn("encrypted_value", encrypt_udf(column_name))
+            .filter(F.col("encrypted_value") == partition_definition["hash_value"])
+            .drop("encrypted_value")
+        )
+        return res
+
+    ### Sampling methods ###
+    @staticmethod
+    def _sample_using_random(df, p: float = 0.1, seed: int = 1):
+        """Take a random sample of rows, retaining proportion p
+        """
+        res = (
+            df.withColumn("rand", F.rand(seed=seed))
+            .filter(F.col("rand") < p)
+            .drop("rand")
+        )
+        return res
+
+    @staticmethod
+    def _sample_using_mod(
+        df, column_name: str, mod: int, value: int,
+    ):
+        """Take the mod of named column, and only keep rows that match the given value"""
+        res = (
+            df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
+            .filter(F.col("mod_temp") == value)
+            .drop("mod_temp")
+        )
+        return res
+
+    @staticmethod
+    def _sample_using_a_list(
+        df, column_name: str, value_list: list,
+    ):
+        """Match the values in the named column against value_list, and only keep the matches"""
+        return df.where(F.col(column_name).isin(value_list))
+
+    @staticmethod
+    def _sample_using_hash(
+        df,
+        column_name: str,
+        hash_digits: int = 1,
+        hash_value: str = "f",
+        hash_function_name: str = "md5",
+    ):
+        try:
+            getattr(hashlib, str(hash_function_name))
+        except (TypeError, AttributeError) as e:
+            raise (
+                ge_exceptions.ExecutionEngineError(
+                    f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found."""
+                )
+            )
+
+        def _encrypt_value(to_encode):
+            to_encode_str = str(to_encode)
+            hash_func = getattr(hashlib, hash_function_name)
+            hashed_value = hash_func(to_encode_str.encode()).hexdigest()[
+                -1 * hash_digits :
+            ]
+            return hashed_value
+
+        encrypt_udf = F.udf(_encrypt_value, StringType())
+        res = (
+            df.withColumn("encrypted_value", encrypt_udf(column_name))
+            .filter(F.col("encrypted_value") == hash_value)
+            .drop("encrypted_value")
+        )
+        return res

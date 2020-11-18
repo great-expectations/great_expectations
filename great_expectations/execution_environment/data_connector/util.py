@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Utility methods for dealing with DataConnector objects
 
 import copy
@@ -45,12 +43,12 @@ def batch_definition_matches_batch_request(
             return False
 
     if batch_request.partition_request:
-        assert isinstance(batch_request.partition_request, dict)
         partition_identifiers: Any = batch_request.partition_request.get(
             "partition_identifiers"
         )
         if partition_identifiers:
-            assert isinstance(partition_identifiers, dict)
+            if not isinstance(partition_identifiers, dict):
+                return False
             for key in partition_identifiers.keys():
                 if not (
                     key in batch_definition.partition_definition
@@ -107,17 +105,21 @@ def convert_data_reference_string_to_batch_request_using_regex(
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
     if "data_asset_name" in partition_definition:
         data_asset_name = partition_definition.pop("data_asset_name")
-
     batch_request: BatchRequest = BatchRequest(
         data_asset_name=data_asset_name, partition_request=partition_definition,
     )
-
     return batch_request
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
     batch_definition: BatchDefinition, regex_pattern: str, group_names: List[str],
 ) -> str:
+
+    if not isinstance(batch_definition, BatchDefinition):
+        raise TypeError(
+            "batch_definition is not of an instance of type BatchDefinition"
+        )
+
     data_asset_name: str = batch_definition.data_asset_name
     partition_definition: PartitionDefinition = batch_definition.partition_definition
     partition_request: dict = partition_definition
@@ -162,6 +164,8 @@ def _invert_regex_to_data_reference_template(
     data_reference_template: str = ""
     group_name_index: int = 0
 
+    num_groups = len(group_names)
+
     # print("-"*80)
     parsed_sre = sre_parse.parse(regex_pattern)
     for token, value in parsed_sre:
@@ -170,6 +174,8 @@ def _invert_regex_to_data_reference_template(
             data_reference_template += chr(value)
 
         elif token == sre_constants.SUBPATTERN:
+            if not (group_name_index < num_groups):
+                break
             # Replace the captured group with "{next_group_name}" in the template
             data_reference_template += "{" + group_names[group_name_index] + "}"
             group_name_index += 1
@@ -199,6 +205,16 @@ def _invert_regex_to_data_reference_template(
     return data_reference_template
 
 
+def normalize_directory_path(
+    dir_path: str, root_directory_path: Optional[str] = None
+) -> str:
+    # If directory is a relative path, interpret it as relative to the root directory.
+    if Path(dir_path).is_absolute() or root_directory_path is None:
+        return dir_path
+    else:
+        return Path(root_directory_path).joinpath(dir_path)
+
+
 def get_filesystem_one_level_directory_glob_path_list(
     base_directory_path: str, glob_directive: str
 ) -> List[str]:
@@ -216,6 +232,71 @@ def get_filesystem_one_level_directory_glob_path_list(
     return path_list
 
 
+def list_s3_keys(
+    s3, query_options: dict, iterator_dict: dict, recursive: bool = False
+) -> str:
+    """
+    For InferredAssetS3DataConnector, we take bucket and prefix and search for files using RegEx at and below the level
+    specified by that bucket and prefix.  However, for ConfiguredAssetS3DataConnector, we take bucket and prefix and
+    search for files using RegEx only at the level specified by that bucket and prefix.  This restriction for the
+    ConfiguredAssetS3DataConnector is needed, because paths on S3 are comprised not only the leaf file name but the
+    full path that includes both the prefix and the file name.  Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible, due to the path ambiguity.
+    :param s3: s3 client connection
+    :param query_options: s3 query attributes ("Bucket", "Prefix", "Delimiter", "MaxKeys")
+    :param iterator_dict: dictionary to manage "NextContinuationToken" (if "IsTruncated" is returned from S3)
+    :param recursive: True for InferredAssetS3DataConnector and False for ConfiguredAssetS3DataConnector (see above)
+    :return: string valued key representing file path on S3 (full prefix and leaf file name)
+    """
+    if iterator_dict is None:
+        iterator_dict = {}
+
+    if "continuation_token" in iterator_dict:
+        query_options.update({"ContinuationToken": iterator_dict["continuation_token"]})
+
+    logger.debug(f"Fetching objects from S3 with query options: {query_options}")
+
+    s3_objects_info: dict = s3.list_objects_v2(**query_options)
+
+    if not any(key in s3_objects_info for key in ["Contents", "CommonPrefixes"]):
+        raise ValueError("S3 query may not have been configured correctly.")
+
+    if "Contents" in s3_objects_info:
+        keys: List[str] = [
+            item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0
+        ]
+        yield from keys
+    if recursive and "CommonPrefixes" in s3_objects_info:
+        common_prefixes: List[Dict[str, Any]] = s3_objects_info["CommonPrefixes"]
+        for prefix_info in common_prefixes:
+            query_options_tmp: dict = copy.deepcopy(query_options)
+            query_options_tmp.update({"Prefix": prefix_info["Prefix"]})
+            # Recursively fetch from updated prefix
+            yield from list_s3_keys(
+                s3=s3,
+                query_options=query_options_tmp,
+                iterator_dict={},
+                recursive=recursive,
+            )
+    if s3_objects_info["IsTruncated"]:
+        iterator_dict["continuation_token"] = s3_objects_info["NextContinuationToken"]
+        # Recursively fetch more
+        yield from list_s3_keys(
+            s3=s3,
+            query_options=query_options,
+            iterator_dict=iterator_dict,
+            recursive=recursive,
+        )
+
+    if "continuation_token" in iterator_dict:
+        # Make sure we clear the token once we've gotten fully through
+        del iterator_dict["continuation_token"]
+
+
+# TODO: <Alex>We need to move sorters and _validate_sorters_configuration() to DataConnector</Alex>
+# As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is
+# called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this
+# method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).
 def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
     sorter_dict: Dict[str, Sorter] = {}
     if config_list is not None:
@@ -225,13 +306,13 @@ def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dic
                 return None
             if "name" not in sorter_config:
                 raise ValueError("Sorter config should have a name")
-            sorter_name = sorter_config["name"]
+            sorter_name: str = sorter_config["name"]
             new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)
             sorter_dict[sorter_name] = new_sorter
     return sorter_dict
 
 
-def _build_sorter_from_config(sorter_config) -> Sorter:
+def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
     """Build a Sorter using the provided configuration and return the newly-built Sorter."""
     runtime_environment: dict = {"name": sorter_config["name"]}
     sorter: Sorter = instantiate_class_from_config(

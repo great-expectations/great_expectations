@@ -29,7 +29,6 @@ from great_expectations.execution_environment.data_connector.partitioner.partiti
 from tests.test_utils import (
     create_files_for_regex_partitioner,
     create_files_in_directory,
-    execution_environment_configured_asset_filesystem_data_connector_regex_partitioner_config,
 )
 
 

@@ -1,21 +1,30 @@
 import copy
 import datetime
+import hashlib
 import logging
+import random
 from functools import partial
-from io import StringIO
-from typing import Any, Callable, Dict, Iterable, Tuple, Union, Optional
+from typing import Any, Callable, Dict, Iterable, List, Tuple
 
 import pandas as pd
+from ruamel.yaml.compat import StringIO
 
+import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.execution_environment.types import (
-    InMemoryBatchSpec,
     PathBatchSpec,
+    RuntimeDataBatchSpec,
     S3BatchSpec,
 )
+from great_expectations.execution_environment.util import S3Url
 
-from ..core.batch import Batch, BatchMarkers, BatchRequest
+try:
+    import boto3
+except ImportError:
+    boto3 = None
+
+from ..core.batch import BatchMarkers
 from ..core.id_dict import BatchSpec
-from ..exceptions import BatchSpecError, ValidationError, GreatExpectationsError
+from ..exceptions import BatchSpecError, GreatExpectationsError, ValidationError
 from ..execution_environment.util import hash_pandas_dataframe
 from .execution_engine import ExecutionEngine, MetricDomainTypes
 
@@ -93,10 +102,19 @@ Notes:
     }
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
+        boto3_options: dict = None
+        if boto3_options is None:
+            boto3_options = {}
+
+        # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
+        try:
+            self._s3 = boto3.client("s3", **boto3_options)
+        except TypeError:
+            self._s3 = None
+        super().__init__(*args, **kwargs)
 
     def configure_validator(self, validator):
         super().configure_validator(validator)
@@ -105,8 +123,6 @@ Notes:
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
-        batch_data: Any = None
-
         # We need to build a batch_markers to be used in the dataframe
         batch_markers: BatchMarkers = BatchMarkers(
             {
@@ -116,76 +132,66 @@ Notes:
             }
         )
 
-        if isinstance(batch_spec, InMemoryBatchSpec):
-            raise BatchSpecError(
-                """The batch_spec argument must not have the type InMemoryBatchSpec when calling
-"get_batch_data_and_markers()"."
-                """
-            )
+        if isinstance(batch_spec, RuntimeDataBatchSpec):
+            # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
+            batch_data = batch_spec.batch_data
 
-        reader_method: str = batch_spec.get("reader_method")
-        reader_options: dict = batch_spec.get("reader_options") or {}
-        if isinstance(batch_spec, PathBatchSpec):
+        elif isinstance(batch_spec, PathBatchSpec):
+            reader_method: str = batch_spec.get("reader_method")
+            reader_options: dict = batch_spec.get("reader_options") or {}
+
             path: str = batch_spec["path"]
             reader_fn: Callable = self._get_reader_fn(reader_method, path)
+
             batch_data = reader_fn(path, **reader_options)
+
         elif isinstance(batch_spec, S3BatchSpec):
-            # TODO: <Alex>The job of S3DataConnector is to supply the URL and the S3_OBJECT (like FilesystemDataConnector supplies the PATH).</Alex>
-            # TODO: <Alex>Move the code below to S3DataConnector (which will update batch_spec with URL and S3_OBJECT values.</Alex>
-            # url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
-            # reader_method = batch_spec.get("reader_method")
-            # reader_fn = self._get_reader_fn(reader_method, url.key)
-            # batch_data = reader_fn(
-            #     StringIO(
-            #         s3_object["Body"]
-            #         .read()
-            #         .decode(s3_object.get("ContentEncoding", "utf-8"))
-            #     ),
-            #     **reader_options,
-            # )
-            pass
+            if self._s3 is None:
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine has been passed a S3BatchSpec,
+                        but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
+                )
+            s3_engine = self._s3
+            s3_url = S3Url(batch_spec.get("s3"))
+            reader_method: str = batch_spec.get("reader_method")
+            reader_options: dict = batch_spec.get("reader_options") or {}
+
+            s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
+
+            logger.debug(
+                "Fetching s3 object. Bucket: {} Key: {}".format(
+                    s3_url.bucket, s3_url.key
+                )
+            )
+            reader_fn = self._get_reader_fn(reader_method, s3_url.key)
+            batch_data = reader_fn(
+                StringIO(
+                    s3_object["Body"]
+                    .read()
+                    .decode(s3_object.get("ContentEncoding", "utf-8"))
+                ),
+                **reader_options,
+            )
         else:
             raise BatchSpecError(
-                """Invalid batch_spec: file path, s3 path, or batch_data is required for a PandasExecutionEngine to
-operate.
-                """
+                f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
             )
-
-        if batch_data is not None:
-            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
-                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(
-                    batch_data
-                )
-
+        batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
+        if batch_data.memory_usage().sum() < HASH_THRESHOLD:
+            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
         return batch_data, batch_markers
 
-    @staticmethod
-    def get_batch_markers_and_update_batch_spec_for_batch_data(
-        batch_data: pd.DataFrame, batch_spec: BatchSpec
-    ) -> BatchMarkers:
-        """
-        Computes batch_markers in the case of user-provided batch_data (e.g., in the case of a data pipeline).
+    def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
+        if batch_spec.get("splitter_method"):
+            splitter_fn = getattr(self, batch_spec.get("splitter_method"))
+            splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
+            batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
-        :param batch_data -- user-provided dataframe
-        :param batch_spec -- BatchSpec (must be previously instantiated/initialized by PipelineDataConnector)
-        :returns computed batch_markers specific to this execution engine
-        """
-        batch_markers: BatchMarkers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
-        )
-        if batch_data is not None:
-            if batch_data.memory_usage().sum() < HASH_THRESHOLD:
-                batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(
-                    batch_data
-                )
-            # we do not want to store the actual dataframe in batch_spec
-            # hence, marking that this is a PandasInMemoryDF instead
-            batch_spec["PandasInMemoryDF"] = True
-        return batch_markers
+        if batch_spec.get("sampling_method"):
+            sampling_fn = getattr(self, batch_spec.get("sampling_method"))
+            sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
+            batch_data = sampling_fn(batch_data, **sampling_kwargs)
+        return batch_data
 
     @property
     def dataframe(self):
@@ -235,6 +241,7 @@ operate.
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
+    # NOTE Abe 20201105: Any reason this shouldn't be a private method?
     @staticmethod
     def guess_reader_method_from_path(path):
         """Helper method for deciding which reader to use to read in a certain path.
@@ -266,37 +273,11 @@ operate.
 
         raise BatchSpecError(f'Unable to determine reader method from path: "{path}".')
 
-    # TODO: <Alex>Is this method still needed?  The DataConnector subclasses seem to accoplish the needed functionality.</Alex>
-    def process_batch_request(self, batch_request: BatchRequest, batch_spec: BatchSpec):
-        """Takes in a batch request and batch spec. If the batch request has a limit, uses it to initialize the
-        number of rows to process for the batch spec in obtaining a batch
-        Args:
-            batch_definition (dict) - The batch definition as defined by the user
-            batch_spec (dict) - The batch spec used to query the backend
-        Returns:
-             batch_spec (dict) - The batch spec used to query the backend, with the added row limit
-        """
-        limit = batch_request.get("limit")
-        if limit is not None:
-            if not batch_spec.get("reader_options"):
-                batch_spec["reader_options"] = {}
-            batch_spec["reader_options"]["nrows"] = limit
-
-        # TODO: <Alex>Is this still relevant?</Alex>
-        # TODO: Make sure dataset_options are accounted for in __init__ of ExecutionEngine
-        # if dataset_options is not None:
-        #     # Then update with any locally-specified reader options
-        #     if not batch_parameters.get("dataset_options"):
-        #         batch_parameters["dataset_options"] = dict()
-        #     batch_parameters["dataset_options"].update(dataset_options)
-
-        return batch_spec
-
     def get_compute_domain(
         self,
         domain_kwargs: dict,
         domain_type: Union[str, "MetricDomainTypes"],
-        accessor_keys: Optional[Iterable[str]] = []
+        accessor_keys: Optional[Iterable[str]] = [],
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas DataFrame. If the domain is a single column,
@@ -362,8 +343,14 @@ operate.
                 )
 
         # Warning user if accessor keys are in any domain that is not of type table, will be ignored
-        if domain_type != MetricDomainTypes.TABLE and accessor_keys is not None and len(accessor_keys) > 0:
-            logger.warning("Accessor keys ignored since Metric Domain Type is not 'table")
+        if (
+            domain_type != MetricDomainTypes.TABLE
+            and accessor_keys is not None
+            and len(accessor_keys) > 0
+        ):
+            logger.warning(
+                "Accessor keys ignored since Metric Domain Type is not 'table"
+            )
 
         # If given table (this is default), get all unexpected accessor_keys (an optional parameters allowing us to
         # modify domain access)
@@ -374,8 +361,15 @@ operate.
             if len(compute_domain_kwargs.keys()) > 0:
                 for key in compute_domain_kwargs.keys():
                     # Warning user if kwarg not "normal"
-                    if key not in ["batch_id", "table", "row_condition", "condition_parser"]:
-                        logger.warning(f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}")
+                    if key not in [
+                        "batch_id",
+                        "table",
+                        "row_condition",
+                        "condition_parser",
+                    ]:
+                        logger.warning(
+                            f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}"
+                        )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
         # If user has stated they want a column, checking if one is provided, and
@@ -384,21 +378,32 @@ operate.
                 accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
             else:
                 # If column not given
-                raise GreatExpectationsError("Column not provided in compute_domain_kwargs")
+                raise GreatExpectationsError(
+                    "Column not provided in compute_domain_kwargs"
+                )
 
         # Else, if column pair values requested
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
             # Ensuring column_A and column_B parameters provided
-            if "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs:
-                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
-                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
+            if (
+                "column_A" in compute_domain_kwargs
+                and "column_B" in compute_domain_kwargs
+            ):
+                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
+                    "column_A"
+                )
+                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
+                    "column_B"
+                )
             else:
-                raise GreatExpectationsError("column_A or column_B not found within compute_domain_kwargs")
+                raise GreatExpectationsError(
+                    "column_A or column_B not found within compute_domain_kwargs"
+                )
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-                if "columns" in compute_domain_kwargs:
-                    accessor_domain_kwargs['columns'] = compute_domain_kwargs.pop("columns")
+            if "columns" in compute_domain_kwargs:
+                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
@@ -408,11 +413,18 @@ operate.
                 data = pd.DataFrame(data[compute_domain_kwargs["column"]])
 
             # If we would like our data to now become a column pair
-            elif ("column_A" in compute_domain_kwargs) and ("column_B" in compute_domain_kwargs):
+            elif ("column_A" in compute_domain_kwargs) and (
+                "column_B" in compute_domain_kwargs
+            ):
 
                 # Dropping all not needed columns
-                column_a, column_b = compute_domain_kwargs["column_A"], compute_domain_kwargs["column_B"]
-                data = pd.DataFrame({column_a: data[column_a], column_b: data[column_b]})
+                column_a, column_b = (
+                    compute_domain_kwargs["column_A"],
+                    compute_domain_kwargs["column_B"],
+                )
+                data = pd.DataFrame(
+                    {column_a: data[column_a], column_b: data[column_b]}
+                )
 
             else:
                 # If we would like our data to become a multicolumn
@@ -420,3 +432,146 @@ operate.
                     data = data[compute_domain_kwargs["columns"]]
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
+
+    ### Splitter methods for partitioning dataframes ###
+    @staticmethod
+    def _split_on_whole_table(df,) -> pd.DataFrame:
+        return df
+
+    @staticmethod
+    def _split_on_column_value(
+        df, column_name: str, partition_definition: dict,
+    ) -> pd.DataFrame:
+
+        return df[df[column_name] == partition_definition[column_name]]
+
+    @staticmethod
+    def _split_on_converted_datetime(
+        df,
+        column_name: str,
+        partition_definition: dict,
+        date_format_string: str = "%Y-%m-%d",
+    ):
+        """Convert the values in the named column to the given date_format, and split on that"""
+        stringified_datetime_series = df[column_name].map(
+            lambda x: x.strftime(date_format_string)
+        )
+        matching_string = partition_definition[column_name]
+        return df[stringified_datetime_series == matching_string]
+
+    @staticmethod
+    def _split_on_divided_integer(
+        df, column_name: str, divisor: int, partition_definition: dict,
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+
+        matching_divisor = partition_definition[column_name]
+        matching_rows = df[column_name].map(
+            lambda x: int(x / divisor) == matching_divisor
+        )
+
+        return df[matching_rows]
+
+    @staticmethod
+    def _split_on_mod_integer(
+        df, column_name: str, mod: int, partition_definition: dict,
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+
+        matching_mod_value = partition_definition[column_name]
+        matching_rows = df[column_name].map(lambda x: x % mod == matching_mod_value)
+
+        return df[matching_rows]
+
+    @staticmethod
+    def _split_on_multi_column_values(
+        df, column_names: List[str], partition_definition: dict,
+    ):
+        """Split on the joint values in the named columns"""
+
+        subset_df = df.copy()
+        for column_name in column_names:
+            value = partition_definition.get(column_name)
+            if not value:
+                raise ValueError(
+                    f"In order for PandasExecution to `_split_on_multi_column_values`, "
+                    f"all values in column_names must also exist in partition_definition. "
+                    f"{column_name} was not found in partition_definition."
+                )
+            subset_df = subset_df[subset_df[column_name] == value]
+        return subset_df
+
+    @staticmethod
+    def _split_on_hashed_column(
+        df,
+        column_name: str,
+        hash_digits: int,
+        partition_definition: dict,
+        hash_function_name: str = "md5",
+    ):
+        """Split on the hashed value of the named column"""
+        try:
+            hash_method = getattr(hashlib, hash_function_name)
+        except (TypeError, AttributeError) as e:
+            raise (
+                ge_exceptions.ExecutionEngineError(
+                    f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found."""
+                )
+            )
+        matching_rows = df[column_name].map(
+            lambda x: hash_method(str(x).encode()).hexdigest()[-1 * hash_digits :]
+            == partition_definition["hash_value"]
+        )
+        return df[matching_rows]
+
+    ### Sampling methods ###
+
+    @staticmethod
+    def _sample_using_random(
+        df, p: float = 0.1,
+    ):
+        """Take a random sample of rows, retaining proportion p
+
+        Note: the Random function behaves differently on different dialects of SQL
+        """
+        return df[df.index.map(lambda x: random.random() < p)]
+
+    @staticmethod
+    def _sample_using_mod(
+        df, column_name: str, mod: int, value: int,
+    ):
+        """Take the mod of named column, and only keep rows that match the given value"""
+        return df[df[column_name].map(lambda x: x % mod == value)]
+
+    @staticmethod
+    def _sample_using_a_list(
+        df, column_name: str, value_list: list,
+    ):
+        """Match the values in the named column against value_list, and only keep the matches"""
+        return df[df[column_name].isin(value_list)]
+
+    @staticmethod
+    def _sample_using_hash(
+        df,
+        column_name: str,
+        hash_digits: int = 1,
+        hash_value: str = "f",
+        hash_function_name: str = "md5",
+    ):
+        """Hash the values in the named column, and split on that"""
+        try:
+            hash_func = getattr(hashlib, hash_function_name)
+        except (TypeError, AttributeError) as e:
+            raise (
+                ge_exceptions.ExecutionEngineError(
+                    f"""The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found."""
+                )
+            )
+
+        matches = df[column_name].map(
+            lambda x: hash_func(str(x).encode()).hexdigest()[-1 * hash_digits :]
+            == hash_value
+        )
+        return df[matches]

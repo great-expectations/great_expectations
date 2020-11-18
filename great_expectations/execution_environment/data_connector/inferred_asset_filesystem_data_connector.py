@@ -1,47 +1,29 @@
-from typing import List, Optional, Iterator
-import copy
-
 import logging
+from pathlib import Path
+from typing import List, Optional
 
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.data_connector import (
-    DataConnector,
-)
 from great_expectations.execution_environment.data_connector import (
-    SinglePartitionerDataConnector,
+    InferredAssetFilePathDataConnector,
 )
-from great_expectations.execution_environment.data_connector.sorter import Sorter
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequest,
-)
-from great_expectations.execution_environment.data_connector.partition_query import (
-    PartitionQuery,
-    build_partition_query,
-)
-from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.execution_environment.data_connector.util import (
-    batch_definition_matches_batch_request,
-    map_data_reference_string_to_batch_definition_list_using_regex,
-    map_batch_definition_to_data_reference_string_using_regex,
     get_filesystem_one_level_directory_glob_path_list,
-    build_sorters_from_config,
+    normalize_directory_path,
 )
-import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
 
-class InferredAssetFilesystemDataConnector(SinglePartitionerDataConnector):
+class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
     def __init__(
         self,
         name: str,
         execution_environment_name: str,
-        base_directory: str = None,
-        default_regex: dict = None,
+        base_directory: str,
+        execution_engine: Optional[ExecutionEngine] = None,
+        default_regex: Optional[dict] = None,
         glob_directive: str = "*",
-        execution_engine: ExecutionEngine = None,
-        sorters: List[dict] = None,
+        sorters: Optional[list] = None,
     ):
         logger.debug(f'Constructing InferredAssetFilesystemDataConnector "{name}".')
 
@@ -49,11 +31,12 @@ class InferredAssetFilesystemDataConnector(SinglePartitionerDataConnector):
             name=name,
             execution_environment_name=execution_environment_name,
             execution_engine=execution_engine,
-            base_directory=base_directory,
-            glob_directive=glob_directive,
             default_regex=default_regex,
             sorters=sorters,
         )
+
+        self._base_directory = base_directory
+        self._glob_directive = glob_directive
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
@@ -63,28 +46,18 @@ class InferredAssetFilesystemDataConnector(SinglePartitionerDataConnector):
         This method is used to refresh the cache.
         """
         path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
-            base_directory_path=self.base_directory, glob_directive=self.glob_directive
+            base_directory_path=self.base_directory, glob_directive=self._glob_directive
         )
-        return path_list
+        return sorted(path_list)
 
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> dict:
-        path: str = self._map_batch_definition_to_data_reference(
-            batch_definition=batch_definition
-        )
-        if not path:
-            raise ValueError(
-                f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
-partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
-                """
-            )
-        return {"path": path}
+    def _get_full_file_path(
+        self, path: str, data_asset_name: Optional[str] = None
+    ) -> str:
+        return str(Path(self.base_directory).joinpath(path))
 
-    def _build_batch_spec_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> PathBatchSpec:
-        batch_spec = super()._build_batch_spec_from_batch_definition(
-            batch_definition=batch_definition
+    @property
+    def base_directory(self):
+        return normalize_directory_path(
+            dir_path=self._base_directory,
+            root_directory_path=self.data_context_root_directory,
         )
-        return PathBatchSpec(batch_spec)

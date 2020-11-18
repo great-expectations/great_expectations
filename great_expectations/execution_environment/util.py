@@ -4,6 +4,12 @@ from urllib.parse import urlparse
 
 import pandas as pd
 
+try:
+    import pyspark.sql.functions as F
+    from pyspark.sql.types import col
+except ImportError:
+    F = None
+
 
 # S3Url class courtesy: https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path
 class S3Url:
@@ -56,5 +62,4 @@ def hash_pandas_dataframe(df):
     except TypeError:
         # In case of facing unhashable objects (like dict), use pickle
         obj = pickle.dumps(df, pickle.HIGHEST_PROTOCOL)
-
     return hashlib.md5(obj).hexdigest()

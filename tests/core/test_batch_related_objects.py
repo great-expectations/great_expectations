@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 
 from great_expectations.core.batch import (
@@ -9,6 +10,8 @@ from great_expectations.core.batch import (
     PartitionDefinition,
     PartitionRequest,
 )
+from great_expectations.exceptions import InvalidBatchSpecError
+from great_expectations.execution_environment.types import RuntimeDataBatchSpec
 
 
 def test_batch_definition_id():
@@ -113,4 +116,17 @@ def test_batch_request_instantiation():
 
     BatchRequest(
         execution_environment_name="A", data_connector_name="a", data_asset_name="aaa",
+    )
+
+
+def test_RuntimeDataBatchSpec():
+    with pytest.raises(InvalidBatchSpecError):
+        RuntimeDataBatchSpec()
+
+    RuntimeDataBatchSpec({"batch_data": pd.DataFrame({"x": range(10)})})
+
+    RuntimeDataBatchSpec(batch_data="we don't check types yet",)
+
+    RuntimeDataBatchSpec(
+        {"batch_data": "we don't check types yet",}
     )

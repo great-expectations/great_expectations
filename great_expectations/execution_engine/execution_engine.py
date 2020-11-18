@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterable, Tuple, Union
 
 from ruamel.yaml import YAML
 
+from great_expectations.core.batch import BatchSpec
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -98,24 +99,25 @@ class ExecutionEngine:
         """The current dictionary of batches."""
         return self._batch_data
 
+    def get_batch_data(self, batch_spec: BatchSpec,) -> Any:
+        """Interprets batch_data and returns the appropriate data.
+
+        This method is primarily useful for utility cases (e.g. testing) where
+        data is being fetched without a DataConnector and metadata like
+        batch_markers is unwanted
+
+        Note: this method is currently a thin wrapper for get_batch_data_and_markers.
+        It simply suppresses the batch_markers.
+        """
+        batch_data, _ = self.get_batch_data_and_markers(batch_spec)
+        return batch_data
+
     def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
         """
         Loads the specified batch_data into the execution engine
         """
         self._batch_data[batch_id] = batch_data
         self._active_batch_data_id = batch_id
-
-    def process_batch_request(self, batch_request, batch_spec):
-        """Use ExecutionEngine-specific configuration to translate any batch_request keys into batch_spec keys
-
-        Args:
-            batch_request (dict): batch_request to process
-            batch_spec (dict): batch_spec to map processed batch_request keys to
-
-        Returns:
-            batch_spec (dict)
-        """
-        raise NotImplementedError
 
     def resolve_metrics(
         self,

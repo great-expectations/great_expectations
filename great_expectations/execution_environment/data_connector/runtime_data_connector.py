@@ -1,21 +1,24 @@
-from typing import List, Any, Optional, Union
 import logging
+from typing import Any, List, Optional, Tuple, Union
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.id_dict import (
+    PartitionDefinition,
+    PartitionDefinitionSubset,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import (
     DataConnector,
 )
-from great_expectations.core.batch import BatchRequest
-from great_expectations.core.id_dict import (
-    PartitionDefinitionSubset,
-    PartitionDefinition,
-)
-from great_expectations.execution_environment.types import InMemoryBatchSpec
-from great_expectations.core.batch import BatchDefinition
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
 )
-import great_expectations.exceptions as ge_exceptions
+from great_expectations.execution_environment.types import (
+    BatchMarkers,
+    BatchSpec,
+    RuntimeDataBatchSpec,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,16 +27,16 @@ DEFAULT_DATA_ASSET_NAME: str = "IN_MEMORY_DATA_ASSET"
 DEFAULT_DELIMITER: str = "-"
 
 
-# TODO: <Alex>We need a mechanism for specifying the data_asset_name for PipelineDataConnector (otherwise, it will always be the default).</Alex>
-class PipelineDataConnector(DataConnector):
+# TODO: <Alex>We need a mechanism for specifying the data_asset_name for RuntimeDataConnector (otherwise, it will always be the default).</Alex>
+class RuntimeDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
         execution_environment_name: str,
-        execution_engine: ExecutionEngine = None,
-        runtime_keys: list = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_keys: Optional[list] = None,
     ):
-        logger.debug(f'Constructing PipelineDataConnector "{name}".')
+        logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
         super().__init__(
             name=name,
@@ -43,7 +46,7 @@ class PipelineDataConnector(DataConnector):
 
         self._runtime_keys = runtime_keys
 
-    def refresh_data_references_cache(self):
+    def _refresh_data_references_cache(self):
         """
         """
         # Map data_references to batch_definitions
@@ -69,7 +72,6 @@ class PipelineDataConnector(DataConnector):
     ) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache.
         """
-        # TODO: <Alex>There is no reason for the BatchRequest semantics here; this should be replaced with a method that accepts just the required arguments.</Alex>
         batch_definition_list: List[
             BatchDefinition
         ] = self.get_batch_definition_list_from_batch_request(
@@ -95,7 +97,7 @@ class PipelineDataConnector(DataConnector):
     def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
             raise ValueError(
-                '_data_references_cache is None.  Have you called "refresh_data_references_cache()" yet?'
+                '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
             )
 
         return [k for k, v in self._data_references_cache.items() if v is None]
@@ -116,6 +118,23 @@ class PipelineDataConnector(DataConnector):
             data_asset_names.add(batch_definition.data_asset_name)
 
         return list(data_asset_names)
+
+    def get_batch_data_and_metadata(
+        self, batch_definition: BatchDefinition, batch_data: Any,
+    ) -> Tuple[
+        Any, BatchSpec, BatchMarkers,  # batch_data
+    ]:
+        batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
+            batch_definition=batch_definition, batch_data=batch_data,
+        )
+        batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
+            batch_spec=batch_spec
+        )
+        return (
+            batch_data,
+            batch_spec,
+            batch_markers,
+        )
 
     def get_batch_definition_list_from_batch_request(
         self, batch_request: BatchRequest,
@@ -187,13 +206,12 @@ class PipelineDataConnector(DataConnector):
         return {}
 
     # This method is currently called called only in tests.
-    def _build_batch_spec_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> InMemoryBatchSpec:
-        batch_spec = super()._build_batch_spec_from_batch_definition(
-            batch_definition=batch_definition
-        )
-        return InMemoryBatchSpec(batch_spec)
+    def build_batch_spec(
+        self, batch_definition: BatchDefinition, batch_data: Any,
+    ) -> RuntimeDataBatchSpec:
+        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
+        batch_spec["batch_data"] = batch_data
+        return RuntimeDataBatchSpec(batch_spec)
 
     @staticmethod
     def _get_data_reference_name(
@@ -225,7 +243,7 @@ class PipelineDataConnector(DataConnector):
             )
         ):
             raise ge_exceptions.DataConnectorError(
-                f"""PipelineDataConnector "{self.name}" requires batch_data and partition_request to be both present or
+                f"""RuntimeDataConnector "{self.name}" requires batch_data and partition_request to be both present or
                 both absent in the batch_request parameter.
                 """
             )
@@ -245,7 +263,7 @@ class PipelineDataConnector(DataConnector):
                 self._runtime_keys and set(runtime_keys) <= set(self._runtime_keys)
             ):
                 raise ge_exceptions.DataConnectorError(
-                    f"""PipelineDataConnector "{self.name}" was invoked with one or more runtime keys that do not 
+                    f"""RuntimeDataConnector "{self.name}" was invoked with one or more runtime keys that do not
 appear among the configured runtime keys.
                     """
                 )
