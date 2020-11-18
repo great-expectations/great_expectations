@@ -4,7 +4,10 @@ from typing import Any, Dict, Iterable, Tuple
 
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import BatchSpec
+from great_expectations.core.batch import (
+    Batch,
+    BatchSpec,
+)
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -60,9 +63,10 @@ class ExecutionEngine:
             if key in self.recognized_batch_spec_defaults
         }
 
+        self._batch_data_dict = {}
         if batch_data_dict is None:
-            batch_data_dict = dict()
-        self._batch_data = batch_data_dict
+            batch_data_dict = {}
+        self._load_batch_data_from_dict(batch_data_dict)
         self._active_batch_data_id = None
 
     def configure_validator(self, validator):
@@ -79,8 +83,8 @@ class ExecutionEngine:
         """
         if self._active_batch_data_id is not None:
             return self._active_batch_data_id
-        elif len(self.loaded_batch_data) == 1:
-            return list(self.loaded_batch_data.keys())[0]
+        elif len(self.loaded_batch_data_dict) == 1:
+            return list(self.loaded_batch_data_dict.keys())[0]
         else:
             return None
 
@@ -91,12 +95,12 @@ class ExecutionEngine:
         if self.active_batch_data_id is None:
             return None
         else:
-            return self.loaded_batch_data.get(self.active_batch_data_id)
+            return self.loaded_batch_data_dict.get(self.active_batch_data_id)
 
     @property
-    def loaded_batch_data(self):
+    def loaded_batch_data_dict(self):
         """The current dictionary of batches."""
-        return self._batch_data
+        return self._batch_data_dict
 
     def get_batch_data(
         self,
@@ -118,8 +122,20 @@ class ExecutionEngine:
         """
         Loads the specified batch_data into the execution engine
         """
-        self._batch_data[batch_id] = batch_data
+        self._batch_data_dict[batch_id] = self._get_typed_batch_data(batch_data)
         self._active_batch_data_id = batch_id
+
+    def _load_batch_data_from_dict(self, batch_data_dict):
+        """
+        Loads all data in batch_data_dict into load_batch_data
+        """
+        for batch_id, batch_data in batch_data_dict.items():
+            self.load_batch_data(batch_id, batch_data)
+
+    # Note: Abe 20201117 : This method should raise NotImplementedError, and the
+    # _get_typed_batch_data methods in child classes should actually do type checking and type conversion.
+    def _get_typed_batch_data(self, batch_data):
+        return batch_data
 
     def resolve_metrics(
         self,

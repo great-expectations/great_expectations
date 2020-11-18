@@ -19,6 +19,12 @@ from great_expectations.core.batch import (
     BatchDefinition,
     PartitionRequest,
 )
+from great_expectations.core import (
+    ExpectationSuite,
+)
+from great_expectations.validator.validator import (
+    Validator
+)
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -198,6 +204,7 @@ class DataContextV3(DataContext):
             else:
                 raise(e)
 
+
     def get_batch(
         self,
         execution_environment_name: str=None,
@@ -302,3 +309,58 @@ class DataContextV3(DataContext):
             if len(batch_definitions) != 1:
                 raise ValueError(f"Instead of 1 batch_definition, these parameters match {len(batch_definitions)}.")
             return execution_environment.get_batch_from_batch_definition(batch_definitions[0])
+
+    def get_validator(
+        self,
+        execution_environment_name: str=None,
+        data_connector_name: str=None,
+        data_asset_name: str=None,
+        batch_definition: BatchDefinition=None,
+        batch_request: BatchRequest=None,
+        partition_request: Union[PartitionRequest, dict]=None,
+        partition_identifiers: dict=None,
+        limit: int=None,
+        index=None,
+        custom_filter_function: Callable=None,
+        sampling_method: str=None,
+        sampling_kwargs: dict=None,
+
+        expectation_suite_name: str=None,
+        expectation_suite: ExpectationSuite=None,
+        **kwargs,
+    ) -> Validator:
+        if expectation_suite is None:
+            if not expectation_suite_name is None:
+                expectation_suite = self.get_expectation_suite(expectation_suite_name)
+            else:
+                raise ValueError("expectation_suite and expectation_suite_name cannot both be None")
+
+        else:
+            if not expectation_suite_name is None:
+                raise Warning("get_validator received values for both expectation_suite and expectation_suite_name. Defaulting to expectation_suite.")
+
+        batch = self.get_batch(
+            execution_environment_name=execution_environment_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_definition=batch_definition,
+            batch_request=batch_request,
+            partition_request=partition_request,
+            partition_identifiers=partition_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            **kwargs,
+        )
+
+        validator = Validator(
+            execution_engine=self.datasources[execution_environment_name].execution_engine,
+            interactive_evaluation=True,
+            expectation_suite=expectation_suite,
+            data_context=self,
+            batches=[batch],
+        )
+
+        return validator

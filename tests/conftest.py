@@ -23,11 +23,15 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import file_relative_path
+from great_expectations.data_context.util import (
+    file_relative_path,
+    instantiate_class_from_config,
+)
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.util import import_library_module
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_environment import ExecutionEnvironment
 
 from .test_utils import (
     expectationSuiteValidationResultSchema,
@@ -2943,7 +2947,6 @@ SELECT EXISTS (
    AND    table_name   = 'test_df'
 );
 """).fetchall()
-    print(table_check_results)
     if table_check_results != [(True,)]:
         test_df.to_sql("test_df", con=engine, index=True, schema="connection_test")
 
@@ -2997,3 +3000,38 @@ introspection:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
     return context
+
+@pytest.fixture
+def basic_execution_environment(tmp_path_factory):
+    base_directory: str = str(tmp_path_factory.mktemp("basic_execution_environment_runtime_data_connector"))
+
+    basic_execution_environment: ExecutionEnvironment = instantiate_class_from_config(
+        config=yaml.load(
+            f"""
+class_name: ExecutionEnvironment
+
+data_connectors:
+    test_runtime_data_connector:
+        module_name: great_expectations.execution_environment.data_connector
+        class_name: RuntimeDataConnector
+        runtime_keys:
+        - pipeline_stage_name
+        - run_id
+        - custom_key_0
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+    """,
+            Loader=yaml.FullLoader
+        ),
+        runtime_environment={
+            "name": "my_execution_environment",
+        },
+        config_defaults={
+          "module_name": "great_expectations.execution_environment",
+        }
+    )
+
+    return basic_execution_environment
+
