@@ -217,7 +217,6 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             "alpha": {}
         }
     )
-
     test_df = PandasExecutionEngine().get_batch_data(batch_spec=
             S3BatchSpec(
                 s3=full_path,
@@ -409,7 +408,7 @@ def test_get_batch_with_split_on_hashed_column(test_df):
     assert split_df.shape == (8, 10)
 
 
-# ### Sampling methods ###
+### Sampling methods ###
 
 def test_sample_using_random(test_df):
     random.seed(1)
@@ -469,3 +468,27 @@ def test_sample_using_md5(test_df):
         datetime.date(2020, 1, 15),
         datetime.date(2020, 1, 29),
     ]).all()
+
+
+### Splitting + Sampling methods ###
+def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
+    split_df = PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec(
+        batch_data=test_df,
+        splitter_method="_split_on_divided_integer",
+        splitter_kwargs={
+            "column_name": "id",
+            "divisor": 10,
+            "partition_definition": {
+                "id": 5
+            }
+        },
+        sampling_method="_sample_using_mod",
+        sampling_kwargs={
+            "column_name": "id",
+            "mod": 5,
+            "value": 4,
+        }
+    ))
+    assert split_df.shape == (2, 10)
+    assert split_df.id.min() == 54
+    assert split_df.id.max() == 59
