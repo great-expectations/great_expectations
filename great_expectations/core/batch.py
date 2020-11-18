@@ -384,7 +384,7 @@ class Batch(DictDot):
 
     @property
     def id(self):
-        return self._batch_definition.to_id()
+        return self._batch_definition.id
 
     def __str__(self):
         json_dict = {

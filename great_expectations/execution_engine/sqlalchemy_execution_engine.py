@@ -581,8 +581,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.loaded_batch_data:
-                data_object = self.loaded_batch_data[batch_id]
+            if batch_id in self.loaded_batch_data_dict:
+                data_object = self.loaded_batch_data_dict[batch_id]
             else:
                 raise GreatExpectationsError(
                     f"Unable to find batch with batch_id {batch_id}"

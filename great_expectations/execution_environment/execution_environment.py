@@ -85,6 +85,14 @@ class BaseExecutionEnvironment:
         )
         return new_batch
 
+    def get_single_batch_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> Batch:
+        batch_list = self.get_batch_list_from_batch_request(batch_request)
+        if len(batch_list) != 1:
+            raise ValueError(f"Got {len(batch_list)} batches instead of a single batch.")
+        return batch_list[0]
+
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:

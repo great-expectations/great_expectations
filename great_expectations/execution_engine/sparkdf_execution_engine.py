@@ -362,8 +362,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.loaded_batch_data:
-                data = self.loaded_batch_data[batch_id]
+            if batch_id in self.loaded_batch_data_dict:
+                data = self.loaded_batch_data_dict[batch_id]
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 

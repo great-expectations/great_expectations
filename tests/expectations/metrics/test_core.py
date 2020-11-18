@@ -27,8 +27,7 @@ def _build_spark_engine(df, spark_session):
         ],
         df.columns.tolist(),
     )
-    batch = Batch(data=df)
-    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = SparkDFExecutionEngine(batch_data_dict={"my_id": df})
     return engine
 
 
@@ -36,16 +35,14 @@ def _build_sa_engine(df, sa):
     eng = sa.create_engine("sqlite://", echo=False)
     df.to_sql("test", eng, index=False)
     batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    batch = Batch(data=batch_data)
     engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={batch.id: batch_data}
+        engine=eng, batch_data_dict={"my_id": batch_data}
     )
     return engine
 
 
 def _build_pandas_engine(df):
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     return engine
 
 
@@ -185,9 +182,8 @@ def test_map_of_type_sa(sa):
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     df.to_sql("test", eng, index=False)
     batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    batch = Batch(data=batch_data)
     engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={batch.id: batch_data}
+        engine=eng, batch_data_dict={"my_id": batch_data}
     )
     desired_metric = MetricConfiguration(
         metric_name="table.column_types",
@@ -236,8 +232,7 @@ def test_map_value_set_spark(spark_session):
     # to demonstrate this behavior
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     df = spark_session.createDataFrame(df)
-    batch = Batch(data=df)
-    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = SparkDFExecutionEngine(batch_data_dict={"my_id": df})
 
     condition_metric = MetricConfiguration(
         metric_name="column_values.in_set.condition",
@@ -443,8 +438,7 @@ def test_map_unique_sa(sa):
 
 def test_z_score_under_threshold_pd():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     mean = MetricConfiguration(
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
@@ -570,8 +564,7 @@ def test_z_score_under_threshold_spark(spark_session):
 
 def test_table_metric_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None], "b": [1, 2, 3, 3, None]})
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     desired_metric = MetricConfiguration(
         metric_name="table.row_count",
         metric_domain_kwargs={"column": "a"},
@@ -583,8 +576,7 @@ def test_table_metric_pd():
 
 def test_column_pairs_equal_metric_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3], "b": [1, 2, 3, 3]})
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     desired_metric = MetricConfiguration(
         metric_name="column_pair_values.equal.condition",
         metric_domain_kwargs={"column_A": "a", "column_B": "b"},
@@ -596,8 +588,7 @@ def test_column_pairs_equal_metric_pd():
 
 def test_column_pairs_greater_metric_pd():
     df = pd.DataFrame({"a": [2, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     desired_metric = MetricConfiguration(
         metric_name="column_pair_values.a_greater_than_b.condition",
         metric_domain_kwargs={"column_A": "a", "column_B": "b"},
@@ -616,8 +607,7 @@ def test_column_pairs_greater_metric_pd():
 
 def test_column_pairs_in_set_metric_pd():
     df = pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     desired_metric = MetricConfiguration(
         metric_name="column_pair_values.in_set.condition",
         metric_domain_kwargs={"column_A": "a", "column_B": "b"},

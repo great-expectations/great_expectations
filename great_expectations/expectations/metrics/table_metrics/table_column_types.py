@@ -59,7 +59,7 @@ class ColumnTypes(TableMetricProvider):
                     "batch_id could not be determined from domain kwargs and no active_batch_data is loaded into the "
                     "execution engine"
                 )
-        batch_data = execution_engine.loaded_batch_data.get(batch_id)
+        batch_data = execution_engine.loaded_batch_data_dict.get(batch_id)
         if batch_data is None:
             raise GreatExpectationsError(
                 "the requested batch is not available; please load the batch into the execution engine."
