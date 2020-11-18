@@ -178,7 +178,7 @@ def test_get_batch_with_split_on_whole_table_filesystem(test_folder_connection_p
             splitter_method="_split_on_whole_table"
         )
     )
-    assert test_df.shape == (5, 3)
+    assert test_df.shape == (5, 2)
 
 @mock_s3
 def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector():

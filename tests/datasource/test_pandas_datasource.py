@@ -45,8 +45,11 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
     assert manual_batch_kwargs["path"] == auto_batch_kwargs["path"]
 
     # Include some extra kwargs...
+    # auto_batch_kwargs.update(
+    #     {"reader_options": {"sep": ",", "header": 0, "index_col": 0}}
+    # )
     auto_batch_kwargs.update(
-        {"reader_options": {"sep": ",", "header": 0, "index_col": 0}}
+        {"reader_options": {"sep": ","}}
     )
     batch = datasource.get_batch(batch_kwargs=auto_batch_kwargs)
     assert isinstance(batch, Batch)
@@ -368,7 +371,8 @@ def test_read_limit(test_folder_connection_path):
     batch_kwargs = PathBatchKwargs(
         {
             "path": os.path.join(str(test_folder_connection_path), "test.csv"),
-            "reader_options": {"sep": ",", "header": 0, "index_col": 0},
+            # "reader_options": {"sep": ",", "header": 0, "index_col": 0},
+            "reader_options": {"sep": ","},
         }
     )
     nested_update(batch_kwargs, datasource.process_batch_parameters(limit=1))
