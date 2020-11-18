@@ -298,7 +298,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         try:
             if reader_method_op == "delta":
                 return reader.format(reader_method_op).load
-            return getattr(reader, reader_method)
+            return getattr(reader, reader_method_op)
         except AttributeError:
             raise BatchKwargsError(
                 "Unable to find reader_method %s in spark." % reader_method,
