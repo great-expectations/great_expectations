@@ -433,7 +433,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
-def test_get_compute_domain_with_nonexistent_condition_parser():
+def test_get_compute_domain_with_nonexistent_condition_parser(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}))
 
     # Expect GreatExpectationsError because parser doesn't exist
@@ -448,7 +448,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser():
 
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
-def test_resolve_metric_bundle_with_nonexistent_metric():
+def test_resolve_metric_bundle_with_nonexistent_metric(sa):
     engine = _build_sa_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
     )
