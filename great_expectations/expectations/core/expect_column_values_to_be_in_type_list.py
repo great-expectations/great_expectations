@@ -300,10 +300,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
+        # this calls TableExpectation.get_validation_dependencies to set baseline dependencies
+        # for the aggregate version of the expectation
         dependencies = super(ColumnMapExpectation, self).get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
 
+        # only PandasExecutionEngine supports the column map version of the expectation
         if isinstance(execution_engine, PandasExecutionEngine):
             column_name = configuration.kwargs.get("column")
             expected_types_list = configuration.kwargs.get("type_list")
@@ -327,14 +330,18 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 for type_dict in actual_column_types_list
                 if type_dict["name"] == column_name
             ][0]
+
+            # only use column map version if column dtype is object
             if (
                 actual_column_type.type.__name__ == "object_"
                 and expected_types_list is not None
             ):
+                # this resets dependencies using  ColumnMapExpectation.get_validation_dependencies
                 dependencies = super().get_validation_dependencies(
                     configuration, execution_engine, runtime_configuration
                 )
 
+        # this adds table.column_types dependency for both aggregate and map versions of expectation
         column_types_metric_kwargs = get_metric_kwargs(
             metric_name="table.column_types",
             configuration=configuration,
@@ -365,10 +372,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         ][0]
 
         if isinstance(execution_engine, PandasExecutionEngine):
+            # only PandasExecutionEngine supports map version of expectation and
+            # only when column type is object
             if (
                 actual_column_type.type.__name__ == "object_"
                 and expected_types_list is not None
             ):
+                # this calls ColumnMapMetric._validate
                 return super()._validate(
                     configuration, metrics, runtime_configuration, execution_engine
                 )
