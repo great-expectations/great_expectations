@@ -303,7 +303,6 @@ introspection:
     # assert my_evr.success
 
 
-import pandas as pd
 def test_golden_path_inferred_asset_pandas_execution_environment_configuration(
     empty_data_context_v3,
     test_df,
@@ -393,9 +392,9 @@ data_connectors:
     assert my_batch.data.shape == (10, 10)
     df_data = my_batch.data
     df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
-    pd.testing.assert_frame_equal(test_df[
+    test_df[
         (test_df["date"] == datetime.date(2020, 1, 15)) | (test_df["date"] == datetime.date(2020, 1, 29))
-    ].drop("timestamp", axis=1), df_data.drop("timestamp", axis=1))
+    ].drop("timestamp", axis=1).equals(df_data.drop("timestamp", axis=1))
 
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -551,9 +550,9 @@ data_connectors:
     assert my_batch.data.shape == (10, 10)
     df_data = my_batch.data
     df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
-    pd.testing.assert_frame_equal(test_df[
+    test_df[
         (test_df["date"] == datetime.date(2020, 1, 15)) | (test_df["date"] == datetime.date(2020, 1, 29))
-    ].drop("timestamp", axis=1), df_data.drop("timestamp", axis=1))
+    ].drop("timestamp", axis=1).equals(df_data.drop("timestamp", axis=1))
 
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal

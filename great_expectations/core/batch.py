@@ -214,7 +214,7 @@ class BatchRequest(DictDot):
         return self._limit
 
     @property
-    def batch_speck_passthrough(self) -> dict:
+    def batch_spec_passthrough(self) -> dict:
         return self._batch_spec_passthrough
 
     @staticmethod
