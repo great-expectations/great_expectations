@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 import numpy as np
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.metric_exceptions import (
     MetricError,
     MetricProviderError,
@@ -775,7 +776,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         sa.select([unexpected_count_query.c.unexpected_count,])
     ).scalar()
 
-    return unexpected_count
+    return convert_to_json_serializable(unexpected_count)
 
 
 def _sqlalchemy_column_map_condition_values(
