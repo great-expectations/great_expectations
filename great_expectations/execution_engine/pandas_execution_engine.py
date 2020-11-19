@@ -112,7 +112,7 @@ Notes:
         # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
         try:
             self._s3 = boto3.client("s3", **boto3_options)
-        except TypeError:
+        except (TypeError, AttributeError):
             self._s3 = None
         super().__init__(*args, **kwargs)
 
