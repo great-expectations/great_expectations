@@ -15,6 +15,9 @@ from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_value,
 )
+from great_expectations.expectations.metrics.util import (
+    get_sql_dialect_floating_point_infinity_value,
+)
 
 
 class ColumnValuesBetweenCount(MetricProvider):
@@ -100,6 +103,67 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
+        dialect = execution_engine.dialect
+
+        if (
+            min_value
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=True
+            )
+        ) or (
+            min_value
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=True
+            )
+        ):
+            min_value = get_sql_dialect_floating_point_infinity_value(
+                schema=dialect.name.lower(), negative=True
+            )
+
+        if (
+            min_value
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=False
+            )
+        ) or (
+            min_value
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=False
+            )
+        ):
+            min_value = get_sql_dialect_floating_point_infinity_value(
+                schema=dialect.name.lower().name.lower(), negative=False
+            )
+
+        if (
+            max_value
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=True
+            )
+        ) or (
+            max_value
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=True
+            )
+        ):
+            max_value = get_sql_dialect_floating_point_infinity_value(
+                schema=dialect.name.lower(), negative=True
+            )
+
+        if (
+            max_value
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=False
+            )
+        ) or (
+            max_value
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=False
+            )
+        ):
+            max_value = get_sql_dialect_floating_point_infinity_value(
+                schema=dialect.name.lower(), negative=False
+            )
 
         (
             selectable,
