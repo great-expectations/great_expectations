@@ -5,11 +5,13 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine, SqlAlchemyExecutionEngine, \
     SparkDFExecutionEngine
+from great_expectations.expectations.core.expect_column_values_to_be_of_type import _get_dialect_type_module, \
+    _native_type_type_map
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    TableExpectation,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.render.renderer.renderer import renderer
@@ -30,46 +32,6 @@ except ImportError as e:
     logger.debug(
         "Unable to load spark context; install optional spark dependency for support."
     )
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.dialects import registry
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    registry = None
-
-try:
-    import sqlalchemy_redshift.dialect
-except ImportError:
-    sqlalchemy_redshift = None
-
-try:
-    import pybigquery.sqlalchemy_bigquery
-
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect")
-    try:
-        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
-        bigquery_types_tuple = None
-    except AttributeError:
-        # In older versions of the pybigquery driver, types were not exported, so we use a hack
-        logger.warning(
-            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-        )
-        from collections import namedtuple
-
-        BigQueryTypes = namedtuple(
-            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
-        )
-        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
-    bigquery_types_tuple = None
-    pybigquery = None
 
 
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
@@ -137,6 +99,18 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        super().validate_configuration(configuration)
+        try:
+            assert "type_list" in configuration.kwargs, "type_list is required"
+            assert (
+                isinstance(configuration.kwargs["type_list"], list)
+                or configuration.kwargs["type_list"] is None
+            ), "type_list must be a list or None"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+        return True
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -404,60 +378,3 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 actual_column_type=actual_column_type,
                 expected_types_list=expected_types_list
             )
-
-
-def _get_dialect_type_module(
-        execution_engine,
-):
-    if execution_engine.dialect is None:
-        logger.warning(
-            "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
-        )
-        return sa
-    try:
-        # Redshift does not (yet) export types to top level; only recognize base SA types
-        if isinstance(
-                execution_engine.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
-        ):
-            return execution_engine.dialect.sa
-    except (TypeError, AttributeError):
-        pass
-
-    # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
-    try:
-        if (
-                isinstance(
-                    execution_engine.sql_engine_dialect,
-                    pybigquery.sqlalchemy_bigquery.BigQueryDialect,
-                )
-                and bigquery_types_tuple is not None
-        ):
-            return bigquery_types_tuple
-    except (TypeError, AttributeError):
-        pass
-
-    return execution_engine.dialect
-
-
-def _native_type_type_map(type_):
-    # We allow native python types in cases where the underlying type is "object":
-    if type_.lower() == "none":
-        return (type(None),)
-    elif type_.lower() == "bool":
-        return (bool,)
-    elif type_.lower() in ["int", "long"]:
-        return (int,)
-    elif type_.lower() == "float":
-        return (float,)
-    elif type_.lower() == "bytes":
-        return (bytes,)
-    elif type_.lower() == "complex":
-        return (complex,)
-    elif type_.lower() in ["str", "string_types"]:
-        return (str,)
-    elif type_.lower() == "list":
-        return (list,)
-    elif type_.lower() == "dict":
-        return (dict,)
-    elif type_.lower() == "unicode":
-        return None
