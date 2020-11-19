@@ -103,7 +103,7 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
-        dialect = execution_engine.dialect
+        dialect_name = execution_engine.engine.dialect.name.lower()
 
         if (
             min_value
@@ -117,7 +117,7 @@ class ColumnValuesBetweenCount(MetricProvider):
             )
         ):
             min_value = get_sql_dialect_floating_point_infinity_value(
-                schema=dialect.name.lower(), negative=True
+                schema=dialect_name, negative=True
             )
 
         if (
@@ -132,7 +132,7 @@ class ColumnValuesBetweenCount(MetricProvider):
             )
         ):
             min_value = get_sql_dialect_floating_point_infinity_value(
-                schema=dialect.name.lower().name.lower(), negative=False
+                schema=dialect_name, negative=False
             )
 
         if (
@@ -147,7 +147,7 @@ class ColumnValuesBetweenCount(MetricProvider):
             )
         ):
             max_value = get_sql_dialect_floating_point_infinity_value(
-                schema=dialect.name.lower(), negative=True
+                schema=dialect_name, negative=True
             )
 
         if (
@@ -162,7 +162,7 @@ class ColumnValuesBetweenCount(MetricProvider):
             )
         ):
             max_value = get_sql_dialect_floating_point_infinity_value(
-                schema=dialect.name.lower(), negative=False
+                schema=dialect_name, negative=False
             )
 
         (
