@@ -306,6 +306,7 @@ class SqlAlchemyBatchData:
         self._engine.execute(stmt)
 
     def head(self, n=5, fetch_all=False):
+        """Fetches the head of the table"""
 
         if fetch_all:
             result_object = self._engine.execute(
@@ -331,6 +332,16 @@ class SqlAlchemyBatchData:
 
         return(head_df)
 
+    def row_count(self):
+        """Gets the number of rows"""
+
+        result_object = self._engine.execute(
+            sa.select([sa.func.count()]).select_from(self._selectable)
+        )
+        rows = result_object.fetchall()
+        print(rows)
+
+        return(rows[0][0])
 
 class SqlAlchemyExecutionEngine(ExecutionEngine):
     def __init__(

@@ -67,3 +67,20 @@ def test_head(sqlite_view_engine):
     assert batch_data.head(fetch_all=True).shape == (100, 2)
     assert batch_data.head(n=20).shape == (20, 2)
     assert batch_data.head(n=20, fetch_all=True).shape == (100, 2)
+
+def test_row_count(sqlite_view_engine):
+    #Create a larger table so that we can downsample meaningfully
+    df = pd.DataFrame({"a": range(100)})
+    df.to_sql("test_table_2", con=sqlite_view_engine)
+
+    batch_data = SqlAlchemyBatchData(
+        engine=sqlite_view_engine,
+        table_name="test_table",
+    )
+    assert batch_data.row_count() == 5
+
+    batch_data = SqlAlchemyBatchData(
+        engine=sqlite_view_engine,
+        table_name="test_table_2",
+    )
+    assert batch_data.row_count() == 100
