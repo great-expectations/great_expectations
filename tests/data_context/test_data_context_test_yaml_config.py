@@ -543,7 +543,7 @@ data_connectors:
     df_data = my_batch.data
     df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
     assert df_data[
-       (df_data["date"] >= datetime.date(2020, 1, 1)) & (df_data["date"] <= datetime.date(2020, 12, 31))
+        (df_data["date"] >= datetime.date(2020, 1, 1)) & (df_data["date"] <= datetime.date(2020, 12, 31))
     ].shape[0] == 120
 
     with pytest.raises(ValueError):
