@@ -362,7 +362,9 @@ def initialized_sqlite_project(
     """This is an initialized project through the CLI."""
     project_dir = str(tmp_path_factory.mktemp("my_rad_project"))
 
-    engine = sa.create_engine("sqlite:///{}".format(titanic_sqlite_db_file), pool_recycle=3600)
+    engine = sa.create_engine(
+        "sqlite:///{}".format(titanic_sqlite_db_file), pool_recycle=3600
+    )
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(

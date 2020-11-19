@@ -24,20 +24,13 @@ from tests.test_definitions.test_expectations import (
 )
 from tests.test_definitions.test_expectations import sqliteDialect as sqliteDialect
 from tests.test_definitions.test_expectations import tmp_dir
-from tests.test_utils import (
+from tests.test_utils import evaluate_json_test_cfe, get_test_validator_with_data
+from tests.test_utils_modular import (
     candidate_test_is_on_temporary_notimplemented_list_cfe,
-    evaluate_json_test_cfe,
-    get_test_validator_with_data,
 )
 
 
 def pytest_generate_tests(metafunc):
-
-    # BLOCK ON 0.13-develop; remove when working on these tests
-    metafunc.parametrize("test_case", [])
-    return
-    # END BLOCK
-
     # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
     expectation_dirs = [
@@ -48,13 +41,14 @@ def pytest_generate_tests(metafunc):
 
     parametrized_tests = []
     ids = []
+    backends = build_test_backends_list_cfe(metafunc)
 
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        for c in build_test_backends_list_cfe(metafunc):
+        for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)
                 test_configuration = json.load(file)
@@ -223,7 +217,7 @@ def pytest_generate_tests(metafunc):
                                 )
                                 and isinstance(
                                     validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                    mssqlDialect,
+                                    mysqlDialect,
                                 )
                             )
                             or (

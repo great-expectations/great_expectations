@@ -1,7 +1,9 @@
 from typing import Dict, List, Optional
 
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.execution_environment.data_connector import (
+    ConfiguredAssetSqlDataConnector,
+)
 from great_expectations.execution_environment.data_connector.asset import Asset
 
 try:
@@ -32,22 +34,23 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             If False, the class will throw an error during initialization if any such tables are encountered.
         introspection_directives (Dict): Arguments passed to the introspection method to guide introspection
     """
+
     def __init__(
         self,
         name: str,
         execution_environment_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        data_asset_name_prefix: str="",
-        data_asset_name_suffix: str="",
-        include_schema_name: bool=False,
-        splitter_method: str=None,
-        splitter_kwargs: dict=None,
-        sampling_method: str=None,
-        sampling_kwargs: dict=None,
-        excluded_tables: List=None,
-        included_tables: List=None,
-        skip_inapplicable_tables: bool=True,
-        introspection_directives: Dict=None,
+        data_asset_name_prefix: str = "",
+        data_asset_name_suffix: str = "",
+        include_schema_name: bool = False,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        excluded_tables: List = None,
+        included_tables: List = None,
+        skip_inapplicable_tables: bool = True,
+        introspection_directives: Dict = None,
     ):
         self._data_asset_name_prefix = data_asset_name_prefix
         self._data_asset_name_suffix = data_asset_name_suffix
@@ -108,34 +111,50 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
     def _refresh_introspected_data_assets_cache(
         self,
-        data_asset_name_prefix: str=None,
-        data_asset_name_suffix: str=None,
-        include_schema_name: bool=False,
-        splitter_method: str=None,
-        splitter_kwargs: dict=None,
-        sampling_method: str=None,
-        sampling_kwargs: dict=None,
-        excluded_tables: List=None,
-        included_tables: List=None,
-        skip_inapplicable_tables: bool=True,
+        data_asset_name_prefix: str = None,
+        data_asset_name_suffix: str = None,
+        include_schema_name: bool = False,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        excluded_tables: List = None,
+        included_tables: List = None,
+        skip_inapplicable_tables: bool = True,
     ):
         introspected_table_metadata = self._introspect_db(
             **self._introspection_directives
         )
         for metadata in introspected_table_metadata:
-            if (excluded_tables is not None) and (metadata["schema_name"]+"."+metadata["table_name"] in excluded_tables):
+            if (excluded_tables is not None) and (
+                metadata["schema_name"] + "." + metadata["table_name"]
+                in excluded_tables
+            ):
                 continue
 
-            if (included_tables is not None) and (metadata["schema_name"]+"."+metadata["table_name"] not in included_tables):
+            if (included_tables is not None) and (
+                metadata["schema_name"] + "." + metadata["table_name"]
+                not in included_tables
+            ):
                 continue
 
             if include_schema_name:
-                data_asset_name = data_asset_name_prefix+metadata["schema_name"]+"."+metadata["table_name"]+data_asset_name_suffix
+                data_asset_name = (
+                    data_asset_name_prefix
+                    + metadata["schema_name"]
+                    + "."
+                    + metadata["table_name"]
+                    + data_asset_name_suffix
+                )
             else:
-                data_asset_name = data_asset_name_prefix+metadata["table_name"]+data_asset_name_suffix
-            
+                data_asset_name = (
+                    data_asset_name_prefix
+                    + metadata["table_name"]
+                    + data_asset_name_suffix
+                )
+
             data_asset_config = {
-                "table_name" : metadata["schema_name"]+"."+metadata["table_name"],
+                "table_name": metadata["schema_name"] + "." + metadata["table_name"],
             }
             if not splitter_method is None:
                 data_asset_config["splitter_method"] = splitter_method
@@ -149,8 +168,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             # Attempt to fetch a list of partition_definitions from the table
             try:
                 self._get_partition_definition_list_from_data_asset_config(
-                    data_asset_name,
-                    data_asset_config,
+                    data_asset_name, data_asset_config,
                 )
             except OperationalError as e:
                 # If it doesn't work, then...
@@ -159,17 +177,19 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     continue
 
                 else:
-                    #We're being strict. Crash now.
-                    raise ValueError(f"Couldn't execute a query against table {metadata['table_name']} in schema {metadata['schema_name']}") from e
+                    # We're being strict. Crash now.
+                    raise ValueError(
+                        f"Couldn't execute a query against table {metadata['table_name']} in schema {metadata['schema_name']}"
+                    ) from e
 
             # Store an asset config for each introspected data asset.
             self._introspected_data_assets_cache[data_asset_name] = data_asset_config
 
     def _introspect_db(
         self,
-        schema_name: str=None,
-        ignore_information_schemas_and_system_tables: bool=True,
-        information_schemas: List[str]= [
+        schema_name: str = None,
+        ignore_information_schemas_and_system_tables: bool = True,
+        information_schemas: List[str] = [
             "INFORMATION_SCHEMA",  # snowflake, mssql, mysql, oracle
             "information_schema",  # postgres, redshift, mysql
             "performance_schema",  # mysql
@@ -177,7 +197,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             "mysql",  # mysql
         ],
         system_tables: List[str] = ["sqlite_master"],  # sqlite
-        include_views = True,
+        include_views=True,
     ):
         engine = self._execution_engine.engine
         inspector = sa.inspect(engine)
@@ -186,7 +206,10 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
         tables = []
         for schema_name in inspector.get_schema_names():
-            if ignore_information_schemas_and_system_tables and schema_name in information_schemas:
+            if (
+                ignore_information_schemas_and_system_tables
+                and schema_name in information_schemas
+            ):
                 continue
 
             if selected_schema_name is not None and schema_name != selected_schema_name:
@@ -194,14 +217,18 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
             for table_name in inspector.get_table_names(schema=schema_name):
 
-                if (ignore_information_schemas_and_system_tables) and (table_name in system_tables):
+                if (ignore_information_schemas_and_system_tables) and (
+                    table_name in system_tables
+                ):
                     continue
-                
-                tables.append({
-                    "schema_name": schema_name,
-                    "table_name": table_name,
-                    "type": "table",
-                })
+
+                tables.append(
+                    {
+                        "schema_name": schema_name,
+                        "table_name": table_name,
+                        "type": "table",
+                    }
+                )
 
             # Note Abe 20201112: This logic is currently untested.
             if include_views:
@@ -209,13 +236,17 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
                 for view_name in inspector.get_view_names(schema=schema_name):
 
-                    if (ignore_information_schemas_and_system_tables) and (table_name in system_tables):
+                    if (ignore_information_schemas_and_system_tables) and (
+                        table_name in system_tables
+                    ):
                         continue
-                    
-                    tables.append({
-                        "schema_name": schema_name,
-                        "table_name": view_name,
-                        "type": "view",
-                    })
-        
+
+                    tables.append(
+                        {
+                            "schema_name": schema_name,
+                            "table_name": view_name,
+                            "type": "view",
+                        }
+                    )
+
         return tables

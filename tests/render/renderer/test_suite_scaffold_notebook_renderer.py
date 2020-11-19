@@ -113,7 +113,7 @@ contains a list of possible expectations.""",
     assert obs == expected
 
 
-def test_notebook_execution_with_pandas_backend(titanic_data_context):
+def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_docs):
     """
     This tests that the notebook is written to disk and executes without error.
 
@@ -127,7 +127,10 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    context = titanic_data_context
+    # Since we'll run the notebook, we use a context with no data docs to avoid
+    # the renderer's default behavior of building and opening docs, which is not
+    # part of this test.
+    context = titanic_data_context_no_data_docs
     root_dir = context.root_directory
     uncommitted_dir = os.path.join(root_dir, "uncommitted")
     suite_name = "my_suite"
@@ -160,7 +163,9 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     assert not os.path.isfile(notebook_path)
 
     # Create notebook
-    renderer = SuiteScaffoldNotebookRenderer(titanic_data_context, suite, batch_kwargs)
+    renderer = SuiteScaffoldNotebookRenderer(
+        titanic_data_context_no_data_docs, suite, batch_kwargs
+    )
     renderer.render_to_disk(notebook_path)
     assert os.path.isfile(notebook_path)
 

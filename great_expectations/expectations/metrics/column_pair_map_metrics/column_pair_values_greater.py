@@ -2,19 +2,13 @@ from typing import Any, Dict, Tuple
 
 from dateutil.parser import parse
 
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    MetricPartialFunctionTypes,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.metrics.column_map_metric import (
-    MapMetricProvider,
-    column_map_condition,
-    map_condition,
-)
-from great_expectations.expectations.metrics.metric_provider import metric
+from great_expectations.expectations.metrics.map_metric import MapMetricProvider
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 
 
@@ -26,9 +20,13 @@ class ColumnPairValuesAGreaterThanB(MapMetricProvider):
         "parse_strings_as_datetimes",
         "allow_cross_type_comparisons",
     )
-    domain_keys = ("batch_id", "table", "column_a", "column_b")
+    domain_keys = ("batch_id", "table", "column_A", "column_B")
 
-    @map_condition(engine=PandasExecutionEngine)
+    @metric_partial(
+        engine=PandasExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
+        domain_type=MetricDomainTypes.COLUMN_PAIR,
+    )
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
@@ -49,13 +47,13 @@ class ColumnPairValuesAGreaterThanB(MapMetricProvider):
             "allow_cross_type_comparisons"
         )
 
-        df, compute_domain, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs
+        df, compute_domain, accessor_domain = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN_PAIR
         )
 
         column_A, column_B = filter_pair_metric_nulls(
-            df[metric_domain_kwargs["column_a"]],
-            df[metric_domain_kwargs["column_b"]],
+            df[metric_domain_kwargs["column_A"]],
+            df[metric_domain_kwargs["column_B"]],
             ignore_row_if=ignore_row_if,
         )
 
@@ -71,6 +69,6 @@ class ColumnPairValuesAGreaterThanB(MapMetricProvider):
             temp_column_B = column_B
 
         if or_equal:
-            return temp_column_A >= temp_column_B
+            return temp_column_A >= temp_column_B, compute_domain, accessor_domain
         else:
-            return temp_column_A > temp_column_B
+            return temp_column_A > temp_column_B, compute_domain, accessor_domain

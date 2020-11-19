@@ -1,9 +1,9 @@
 import copy
-import datetime
 import locale
 import os
 import random
 import string
+import threading
 from functools import wraps
 from typing import List, Union
 
@@ -19,6 +19,7 @@ from great_expectations.core import (
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
+from great_expectations.core.batch import Batch
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
@@ -30,11 +31,6 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_environment.types import (
-    BatchSpec,
-    SqlAlchemyDatasourceBatchSpec,
-    SqlAlchemyDatasourceTableBatchSpec,
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.validator.validator import Validator
@@ -149,6 +145,27 @@ try:
 except ImportError:
     mssqltypes = None
     MSSQL_TYPES = {}
+
+
+class SqlAlchemyConnectionManager:
+    def __init__(self):
+        self.lock = threading.Lock()
+        self._connections = dict()
+
+    def get_engine(self, connection_string):
+        with self.lock:
+            if connection_string not in self._connections:
+                try:
+                    engine = create_engine(connection_string)
+                    conn = engine.connect()
+                    self._connections[connection_string] = conn
+                except (ImportError, self.sa.exc.SQLAlchemyError):
+                    print(f"Unable to establish connection with {connection_string}")
+                    raise
+            return self._connections[connection_string]
+
+
+connection_manager = SqlAlchemyConnectionManager()
 
 
 def modify_locale(func):
@@ -315,9 +332,9 @@ def get_dataset(
             return None
 
         # Create a new database
-        engine = create_engine("postgresql://postgres@localhost/test_ci")
-        conn = engine.connect()
-
+        engine = connection_manager.get_engine(
+            "postgresql://postgres@localhost/test_ci"
+        )
         sql_dtypes = {}
         if (
             schemas
@@ -361,7 +378,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -369,7 +386,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mysql":
@@ -377,7 +394,6 @@ def get_dataset(
             return None
 
         engine = create_engine("mysql+pymysql://root@localhost/test_ci")
-        conn = engine.connect()
 
         sql_dtypes = {}
         if (
@@ -420,7 +436,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -428,7 +444,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mssql":
@@ -443,8 +459,6 @@ def get_dataset(
         # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
         # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
         # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
-
-        conn = engine.connect()
 
         sql_dtypes = {}
         if (
@@ -487,7 +501,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -495,7 +509,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "SparkDFDataset":
@@ -858,7 +872,9 @@ def _build_sa_validator_with_data(
         else:
             engine = create_engine("sqlite://")
     elif sa_engine_name == "postgresql":
-        engine = create_engine("postgresql://postgres@localhost/test_ci")
+        engine = connection_manager.get_engine(
+            "postgresql://postgres@localhost/test_ci"
+        )
     elif sa_engine_name == "mysql":
         engine = create_engine("mysql+pymysql://root@localhost/test_ci")
     elif sa_engine_name == "mssql":
@@ -866,12 +882,13 @@ def _build_sa_validator_with_data(
             "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
         )
+    else:
+        engine = None
 
     # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
     # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
     # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
 
-    conn = engine.connect()
     # Add the data to the database as a new table
 
     sql_dtypes = {}
@@ -917,7 +934,7 @@ def _build_sa_validator_with_data(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
     df.to_sql(
-        name=table_name, con=conn, index=False, dtype=sql_dtypes, if_exists="replace",
+        name=table_name, con=engine, index=False, dtype=sql_dtypes, if_exists="replace",
     )
 
     batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
@@ -1056,188 +1073,6 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
     return False
 
 
-def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
-        return expectation_type in [
-            "expect_select_column_values_to_be_unique_within_record",
-            "expect_table_columns_to_match_set",
-            "expect_table_column_count_to_be_between",
-            "expect_table_column_count_to_equal",
-            "expect_column_to_exist",
-            "expect_table_columns_to_match_ordered_list",
-            "expect_table_row_count_to_be_between",
-            "expect_table_row_count_to_equal",
-            "expect_table_row_count_to_equal_other_table",
-            "expect_column_values_to_be_unique",
-            "expect_column_values_to_not_be_null",
-            "expect_column_values_to_be_null",
-            "expect_column_values_to_be_of_type",
-            "expect_column_values_to_be_in_type_list",
-            "expect_column_values_to_be_in_set",
-            "expect_column_values_to_not_be_in_set",
-            # "expect_column_values_to_be_between",
-            "expect_column_values_to_be_increasing",
-            "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            "expect_column_values_to_match_regex",
-            "expect_column_values_to_not_match_regex",
-            "expect_column_values_to_match_regex_list",
-            "expect_column_values_to_not_match_regex_list",
-            "expect_column_values_to_match_like_pattern",
-            "expect_column_values_to_not_match_like_pattern",
-            "expect_column_values_to_match_like_pattern_list",
-            "expect_column_values_to_not_match_like_pattern_list",
-            "expect_column_values_to_match_strftime_format",
-            "expect_column_values_to_be_dateutil_parseable",
-            "expect_column_values_to_be_json_parseable",
-            "expect_column_values_to_match_json_schema",
-            "expect_column_distinct_values_to_be_in_set",
-            "expect_column_distinct_values_to_contain_set",
-            "expect_column_distinct_values_to_equal_set",
-            "expect_column_mean_to_be_between",
-            "expect_column_median_to_be_between",
-            "expect_column_quantile_values_to_be_between",
-            "expect_column_stdev_to_be_between",
-            "expect_column_unique_value_count_to_be_between",
-            "expect_column_proportion_of_unique_values_to_be_between",
-            "expect_column_most_common_value_to_be_in_set",
-            "expect_column_max_to_be_between",
-            "expect_column_min_to_be_between",
-            "expect_column_sum_to_be_between",
-            "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_to_be_in_set",
-            "expect_multicolumn_values_to_be_unique",
-            "expect_multicolumn_sum_to_equal",
-            "expect_column_pair_cramers_phi_value_to_be_less_than",
-            "expect_column_kl_divergence_to_be_less_than",
-            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
-            "expect_column_chisquare_test_p_value_to_be_greater_than",
-            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-        ]
-    if context == "spark":
-        return expectation_type in [
-            "expect_select_column_values_to_be_unique_within_record",
-            "expect_table_columns_to_match_set",
-            "expect_table_column_count_to_be_between",
-            "expect_table_column_count_to_equal",
-            "expect_column_to_exist",
-            "expect_table_columns_to_match_ordered_list",
-            "expect_table_row_count_to_be_between",
-            "expect_table_row_count_to_equal",
-            "expect_table_row_count_to_equal_other_table",
-            "expect_column_values_to_be_unique",
-            "expect_column_values_to_not_be_null",
-            "expect_column_values_to_be_null",
-            "expect_column_values_to_be_of_type",
-            "expect_column_values_to_be_in_type_list",
-            # "expect_column_values_to_be_in_set",
-            "expect_column_values_to_not_be_in_set",
-            # "expect_column_values_to_be_between",
-            "expect_column_values_to_be_increasing",
-            "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            "expect_column_values_to_match_regex",
-            "expect_column_values_to_not_match_regex",
-            "expect_column_values_to_match_regex_list",
-            "expect_column_values_to_not_match_regex_list",
-            "expect_column_values_to_match_like_pattern",
-            "expect_column_values_to_not_match_like_pattern",
-            "expect_column_values_to_match_like_pattern_list",
-            "expect_column_values_to_not_match_like_pattern_list",
-            "expect_column_values_to_match_strftime_format",
-            "expect_column_values_to_be_dateutil_parseable",
-            "expect_column_values_to_be_json_parseable",
-            "expect_column_values_to_match_json_schema",
-            "expect_column_distinct_values_to_be_in_set",
-            "expect_column_distinct_values_to_contain_set",
-            "expect_column_distinct_values_to_equal_set",
-            "expect_column_mean_to_be_between",
-            "expect_column_median_to_be_between",
-            "expect_column_quantile_values_to_be_between",
-            "expect_column_stdev_to_be_between",
-            "expect_column_unique_value_count_to_be_between",
-            "expect_column_proportion_of_unique_values_to_be_between",
-            "expect_column_most_common_value_to_be_in_set",
-            "expect_column_max_to_be_between",
-            "expect_column_min_to_be_between",
-            "expect_column_sum_to_be_between",
-            "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_to_be_in_set",
-            "expect_multicolumn_values_to_be_unique",
-            "expect_multicolumn_sum_to_equal",
-            "expect_column_pair_cramers_phi_value_to_be_less_than",
-            "expect_column_kl_divergence_to_be_less_than",
-            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
-            "expect_column_chisquare_test_p_value_to_be_greater_than",
-            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-        ]
-    if context == "pandas":
-        return expectation_type in [
-            "expect_table_columns_to_match_set",
-            "expect_select_column_values_to_be_unique_within_record",
-            "expect_table_column_count_to_be_between",
-            "expect_table_column_count_to_equal",
-            # "expect_column_to_exist",
-            "expect_table_columns_to_match_ordered_list",
-            # "expect_table_row_count_to_be_between",
-            # "expect_table_row_count_to_equal",
-            "expect_table_row_count_to_equal_other_table",
-            # "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            # "expect_column_values_to_be_null",
-            # "expect_column_values_to_be_of_type",
-            # "expect_column_values_to_be_in_type_list",
-            # "expect_column_values_to_be_in_set",
-            # "expect_column_values_to_not_be_in_set",
-            # "expect_column_values_to_be_between",
-            # "expect_column_values_to_be_increasing",
-            # "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
-            # "expect_column_values_to_not_match_regex",
-            # "expect_column_values_to_match_regex_list",
-            # "expect_column_values_to_not_match_regex_list",
-            "expect_column_values_to_match_like_pattern",
-            "expect_column_values_to_not_match_like_pattern",
-            "expect_column_values_to_match_like_pattern_list",
-            "expect_column_values_to_not_match_like_pattern_list",
-            # "expect_column_values_to_match_strftime_format",
-            # "expect_column_values_to_be_dateutil_parseable",
-            # "expect_column_values_to_be_json_parseable",
-            # "expect_column_values_to_match_json_schema",
-            # "expect_column_distinct_values_to_be_in_set",
-            "expect_column_distinct_values_to_contain_set",
-            "expect_column_distinct_values_to_equal_set",
-            # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",
-            # "expect_column_quantile_values_to_be_between",
-            # "expect_column_stdev_to_be_between",
-            "expect_column_unique_value_count_to_be_between",
-            "expect_column_proportion_of_unique_values_to_be_between",
-            "expect_column_most_common_value_to_be_in_set",
-            # "expect_column_max_to_be_between",
-            # "expect_column_min_to_be_between",
-            "expect_column_sum_to_be_between",
-            "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_to_be_in_set",
-            "expect_multicolumn_values_to_be_unique",
-            "expect_multicolumn_sum_to_equal",
-            "expect_column_pair_cramers_phi_value_to_be_less_than",
-            "expect_column_kl_divergence_to_be_less_than",
-            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
-            "expect_column_chisquare_test_p_value_to_be_greater_than",
-            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            "expect_compound_columns_to_be_unique",
-        ]
-    return False
-
-
 def evaluate_json_test(data_asset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
@@ -1337,9 +1172,9 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
         result = getattr(validator, expectation_type)(*kwargs)
     # As well as keyword arguments
     else:
-        kwargs["result_format"] = "COMPLETE"
-        kwargs["include_config"] = False
-        result = getattr(validator, expectation_type)(**kwargs)
+        runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
+        runtime_kwargs.update(kwargs)
+        result = getattr(validator, expectation_type)(**runtime_kwargs)
 
     check_json_test_result(
         test=test,
@@ -1351,7 +1186,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 def check_json_test_result(test, result, data_asset=None):
     # Check results
     if test["exact_match_out"] is True:
-        assert expectationValidationResultSchema.load(test["out"]) == result
+        assert result == expectationValidationResultSchema.load(test["out"])
     else:
         # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
@@ -1366,8 +1201,8 @@ def check_json_test_result(test, result, data_asset=None):
             elif key == "observed_value":
                 if "tolerance" in test:
                     if isinstance(value, dict):
-                        assert set(value.keys()) == set(
-                            result["result"]["observed_value"].keys()
+                        assert set(result["result"]["observed_value"].keys()) == set(
+                            value.keys()
                         )
                         for k, v in value.items():
                             assert np.allclose(
@@ -1382,7 +1217,7 @@ def check_json_test_result(test, result, data_asset=None):
                             rtol=test["tolerance"],
                         )
                 else:
-                    assert value == result["result"]["observed_value"]
+                    assert result["result"]["observed_value"] == value
 
             # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
             # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
@@ -1559,4 +1394,3 @@ def create_files_in_directory(
 
 def create_fake_data_frame():
     return pd.DataFrame({"x": range(10), "y": list("ABCDEFGHIJ"),})
-

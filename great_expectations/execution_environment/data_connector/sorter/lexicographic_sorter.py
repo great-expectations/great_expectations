@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import logging
 from typing import Any
 
-import logging
-
 from great_expectations.core.batch import BatchDefinition
-
-from great_expectations.execution_environment.data_connector.sorter.sorter import (
-Sorter,
-)
+from great_expectations.execution_environment.data_connector.sorter.sorter import Sorter
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +19,6 @@ class LexicographicSorter(Sorter):
         doc_fields_dict: dict = {
             "name": self.name,
             "reverse": self.reverse,
-            "type": "LexicographicSorter"
+            "type": "LexicographicSorter",
         }
         return str(doc_fields_dict)

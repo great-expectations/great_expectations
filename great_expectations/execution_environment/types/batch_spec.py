@@ -95,7 +95,9 @@ class RuntimeDataBatchSpec(BatchSpec):
         super().__init__(*args, **kwargs)
 
         if self.batch_data is None:
-            raise InvalidBatchSpecError("RuntimeDataBatchSpec batch_data cannot be None")
+            raise InvalidBatchSpecError(
+                "RuntimeDataBatchSpec batch_data cannot be None"
+            )
 
     @property
     def batch_data(self):

@@ -1,35 +1,32 @@
-import os
-import logging
-import traceback
 import copy
-from ruamel.yaml import YAML, YAMLError
-from ruamel.yaml.compat import StringIO
+import logging
+import os
+import traceback
 from typing import Callable, Union
 
-from great_expectations.data_context.util import (
-    substitute_all_config_variables,
-    instantiate_class_from_config,
-)
+from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.compat import StringIO
 
-from great_expectations.data_context.data_context import DataContext
-from great_expectations.data_context.types.base import dataContextConfigSchema
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
-    BatchRequest,
     BatchDefinition,
+    BatchRequest,
     PartitionRequest,
 )
-from great_expectations.core import (
-    ExpectationSuite,
+from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.types.base import dataContextConfigSchema
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
+    substitute_all_config_variables,
 )
-from great_expectations.validator.validator import (
-    Validator
-)
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
+
 
 class DataContextV3(DataContext):
     """Class implementing the v3 spec for DataContext configs, plus API changes for the 0.13+ series."""
@@ -37,16 +34,16 @@ class DataContextV3(DataContext):
     def get_config(self, mode="typed"):
         config = super().get_config()
 
-        if mode=="typed":
+        if mode == "typed":
             return config
 
-        elif mode=="commented_map":
+        elif mode == "commented_map":
             return config.commented_map
 
-        elif mode=="dict":
+        elif mode == "dict":
             return dict(config.commented_map)
 
-        elif mode=="yaml":
+        elif mode == "yaml":
             commented_map = copy.deepcopy(config.commented_map)
             commented_map.update(dataContextConfigSchema.dump(config))
 
@@ -66,9 +63,7 @@ class DataContextV3(DataContext):
     @property
     def config_variables(self):
         # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
-        return dict(
-            self._load_config_variables_file()
-        )
+        return dict(self._load_config_variables_file())
 
     @property
     def datasources(self):
@@ -89,7 +84,7 @@ class DataContextV3(DataContext):
         parts of a Great Expectations deployment. It allows you to quickly
         test out configs for system components, especially Datasources,
         Checkpoints, and Stores.
-                
+
         For many deployments of Great Expectations, these components (plus
         Expectations) are the only ones you'll need.
 
@@ -128,11 +123,10 @@ class DataContextV3(DataContext):
             print("Attempting to instantiate class from config...")
 
         if not return_mode in ["instantiated_class", "report_object"]:
-                raise ValueError(f"Unknown return_mode: {return_mode}.")
-        
+            raise ValueError(f"Unknown return_mode: {return_mode}.")
+
         substituted_config_variables = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
+            self.config_variables, dict(os.environ),
         )
 
         substitutions = {
@@ -142,8 +136,7 @@ class DataContextV3(DataContext):
         }
 
         config_str_with_substituted_variables = substitute_all_config_variables(
-            yaml_config,
-            substitutions,
+            yaml_config, substitutions,
         )
 
         config = yaml.load(config_str_with_substituted_variables)
@@ -163,16 +156,20 @@ class DataContextV3(DataContext):
                 "SqlAlchemyQueryStore",
             ]:
                 print(f"\tInstantiating as a Store, since class_name is {class_name}")
-                instantiated_class = self._build_store_from_config("my_temp_store", config)
+                instantiated_class = self._build_store_from_config(
+                    "my_temp_store", config
+                )
 
-            elif class_name in ["ExecutionEnvironment", "StreamlinedSqlExecutionEnvironment"]:
+            elif class_name in [
+                "ExecutionEnvironment",
+                "StreamlinedSqlExecutionEnvironment",
+            ]:
                 print(
                     f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}"
                 )
                 execution_environment_name = name or "my_temp_execution_environment"
                 instantiated_class = self._build_execution_environment_from_config(
-                    execution_environment_name,
-                    config,
+                    execution_environment_name, config,
                 )
 
             else:
@@ -202,23 +199,22 @@ class DataContextV3(DataContext):
                 traceback.print_exc(limit=1)
 
             else:
-                raise(e)
-
+                raise (e)
 
     def get_batch(
         self,
-        execution_environment_name: str=None,
-        data_connector_name: str=None,
-        data_asset_name: str=None,
-        batch_definition: BatchDefinition=None,
-        batch_request: BatchRequest=None,
-        partition_request: Union[PartitionRequest, dict]=None,
-        partition_identifiers: dict=None,
-        limit: int=None,
+        execution_environment_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        batch_definition: BatchDefinition = None,
+        batch_request: BatchRequest = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
         index=None,
-        custom_filter_function: Callable=None,
-        sampling_method: str=None,
-        sampling_kwargs: dict=None,
+        custom_filter_function: Callable = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
         **kwargs,
     ) -> Batch:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -254,7 +250,9 @@ class DataContextV3(DataContext):
         """
         if batch_definition:
             if not isinstance(batch_definition, BatchDefinition):
-                raise TypeError(f"batch_definition must be an instance of BatchDefinition object, not {type(batch_definition)}")
+                raise TypeError(
+                    f"batch_definition must be an instance of BatchDefinition object, not {type(batch_definition)}"
+                )
 
             execution_environment_name = batch_definition.execution_environment_name
         elif batch_request:
@@ -265,24 +263,32 @@ class DataContextV3(DataContext):
         execution_environment = self.datasources[execution_environment_name]
 
         if batch_definition:
-            #TODO: Raise a warning if any parameters besides batch_definition are specified
+            # TODO: Raise a warning if any parameters besides batch_definition are specified
 
-            return execution_environment.get_batch_from_batch_definition(batch_definition)
+            return execution_environment.get_batch_from_batch_definition(
+                batch_definition
+            )
 
         elif batch_request:
-            #TODO: Raise a warning if any parameters besides batch_requests are specified
+            # TODO: Raise a warning if any parameters besides batch_requests are specified
 
-            batch_definitions = execution_environment.get_available_batch_definitions(batch_request)
+            batch_definitions = execution_environment.get_available_batch_definitions(
+                batch_request
+            )
             if len(batch_definitions) != 1:
-                raise ValueError(f"Instead of 1 batch_definition, this batch_request matches {len(batch_definitions)}.")
-            return execution_environment.get_batch_from_batch_definition(batch_definitions[0])
+                raise ValueError(
+                    f"Instead of 1 batch_definition, this batch_request matches {len(batch_definitions)}."
+                )
+            return execution_environment.get_batch_from_batch_definition(
+                batch_definitions[0]
+            )
 
         else:
             if partition_request is None:
                 if partition_identifiers is None:
                     partition_identifiers = kwargs
                 else:
-                    #Raise a warning if kwargs exist
+                    # Raise a warning if kwargs exist
                     pass
 
                 partition_request = PartitionRequest({
@@ -296,7 +302,7 @@ class DataContextV3(DataContext):
                 })
 
             else:
-                #Raise a warning if partition_identifiers or kwargs exist
+                # Raise a warning if partition_identifiers or kwargs exist
                 partition_request = PartitionRequest(partition_request)
 
             batch_request = BatchRequest(
@@ -306,21 +312,27 @@ class DataContextV3(DataContext):
                 partition_request=partition_request,
             )
 
-            batch_definitions = execution_environment.get_available_batch_definitions(batch_request)
+            batch_definitions = execution_environment.get_available_batch_definitions(
+                batch_request
+            )
             if len(batch_definitions) != 1:
-                raise ValueError(f"Instead of 1 batch_definition, these parameters match {len(batch_definitions)}.")
-            return execution_environment.get_batch_from_batch_definition(batch_definitions[0])
+                raise ValueError(
+                    f"Instead of 1 batch_definition, these parameters match {len(batch_definitions)}."
+                )
+            return execution_environment.get_batch_from_batch_definition(
+                batch_definitions[0]
+            )
 
     def get_validator(
         self,
-        execution_environment_name: str=None,
-        data_connector_name: str=None,
-        data_asset_name: str=None,
-        batch_definition: BatchDefinition=None,
-        batch_request: BatchRequest=None,
-        partition_request: Union[PartitionRequest, dict]=None,
-        partition_identifiers: dict=None,
-        limit: int=None,
+        execution_environment_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        batch_definition: BatchDefinition = None,
+        batch_request: BatchRequest = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
         index=None,
         custom_filter_function: Callable=None,
         sampling_method: str=None,
@@ -358,7 +370,9 @@ class DataContextV3(DataContext):
         )
 
         validator = Validator(
-            execution_engine=self.datasources[execution_environment_name].execution_engine,
+            execution_engine=self.datasources[
+                execution_environment_name
+            ].execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
             data_context=self,

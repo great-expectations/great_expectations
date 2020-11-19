@@ -1,10 +1,9 @@
 import json
 import os
 import shutil
-
-import pandas as pd
 from typing import List
 
+import pandas as pd
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
@@ -1363,6 +1362,7 @@ def test_get_batch_when_passed_a_suite(titanic_data_context):
     batch = context.get_batch(batch_kwargs, suite)
     assert isinstance(batch, Dataset)
     assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
+
 
 def test_list_validation_operators_data_context_with_none_returns_empty_list(
     titanic_data_context,

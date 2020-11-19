@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+
 try:
     from sqlalchemy.engine import RowProxy
     from sqlalchemy.exc import ProgrammingError
@@ -30,28 +32,27 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
-    column_aggregate_metric,
+    column_aggregate_partial,
+    column_aggregate_value,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
-from great_expectations.expectations.metrics.metric_provider import metric
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
 logger = logging.getLogger(__name__)
 
 
 class ColumnQuantileValues(ColumnMetricProvider):
-    metric_name = "column.aggregate.quantile_values"
+    metric_name = "column.quantile_values"
     value_keys = ("quantiles", "allow_relative_error")
 
-    @column_aggregate_metric(engine=PandasExecutionEngine)
-    def _pandas(cls, column, quantile_ranges, **kwargs):
+    @column_aggregate_value(engine=PandasExecutionEngine)
+    def _pandas(cls, column, quantiles, **kwargs):
         """Quantile Function"""
 
-        return column.quantile(
-            tuple(quantile_ranges["quantiles"],), interpolation="nearest"
-        ).tolist()
+        return column.quantile(quantiles, interpolation="nearest").tolist()
 
-    @metric(engine=SqlAlchemyExecutionEngine, metric_fn_type="data")
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
@@ -64,7 +65,9 @@ class ColumnQuantileValues(ColumnMetricProvider):
             selectable,
             compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(metric_domain_kwargs)
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
+        )
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
@@ -102,7 +105,7 @@ class ColumnQuantileValues(ColumnMetricProvider):
                 sqlalchemy_engine=sqlalchemy_engine,
             )
 
-    @metric(engine=SparkDFExecutionEngine, metric_fn_type="data")
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
@@ -115,7 +118,9 @@ class ColumnQuantileValues(ColumnMetricProvider):
             df,
             compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(metric_domain_kwargs)
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
+        )
         allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
         quantiles = metric_value_kwargs["quantiles"]
         column = accessor_domain_kwargs["column"]

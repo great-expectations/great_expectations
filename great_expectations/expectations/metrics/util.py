@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 from dateutil.parser import parse
@@ -62,33 +62,48 @@ except ImportError:
     pybigquery = None
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 
+SCHEMAS = {
+    "api_np": {"NegativeInfinity": -np.inf, "PositiveInfinity": np.inf,},
+    "api_cast": {"NegativeInfinity": -float("inf"), "PositiveInfinity": float("inf"),},
+    "mysql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
+    "mssql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
+}
+
+
+def get_sql_dialect_floating_point_infinity_value(
+    schema: str, negative: bool = False
+) -> float:
+    res: Optional[Dict] = SCHEMAS.get(schema)
+    if res is None:
+        if negative:
+            return -np.inf
+        else:
+            return np.inf
+    else:
+        if negative:
+            return res["NegativeInfinity"]
+        else:
+            return res["PositiveInfinity"]
+
 
 def get_dialect_regex_expression(column, regex, dialect, positive=True):
     try:
         # postgres
-        if isinstance(dialect, sa.dialects.postgresql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
             if positive:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("~")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("~"))
             else:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("!~")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("!~"))
     except AttributeError:
         pass
 
     try:
         # redshift
-        if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+        if issubclass(dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             if positive:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("~")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("~"))
             else:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("!~")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("!~"))
     except (
         AttributeError,
         TypeError,
@@ -97,29 +112,23 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # MySQL
-        if isinstance(dialect, sa.dialects.mysql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.mysql.dialect):
             if positive:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("REGEXP")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("REGEXP"))
             else:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("NOT REGEXP")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("NOT REGEXP"))
     except AttributeError:
         pass
 
     try:
         # Snowflake
-        if isinstance(dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect,):
+        if issubclass(
+            dialect.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
+        ):
             if positive:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("RLIKE")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
             else:
-                return BinaryExpression(
-                    sa.column(column), literal(regex), custom_op("NOT RLIKE")
-                )
+                return BinaryExpression(column, literal(regex), custom_op("NOT RLIKE"))
     except (
         AttributeError,
         TypeError,
@@ -128,13 +137,11 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # Bigquery
-        if isinstance(dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+        if issubclass(dialect.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
             if positive:
-                return sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
+                return sa.func.REGEXP_CONTAINS(column, literal(regex))
             else:
-                return sa.not_(
-                    sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
-                )
+                return sa.not_(sa.func.REGEXP_CONTAINS(column, literal(regex)))
     except (
         AttributeError,
         TypeError,
@@ -260,8 +267,8 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
-    if isinstance(
-        dialect,
+    if issubclass(
+        dialect.dialect,
         (
             sa.dialects.sqlite.dialect,
             sa.dialects.postgresql.dialect,
@@ -280,9 +287,9 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     if dialect_supported:
         try:
             if positive:
-                return sa.column(column).like(literal(like_pattern))
+                return column.like(literal(like_pattern))
             else:
-                return sa.not_(sa.column(column).like(literal(like_pattern)))
+                return sa.not_(column.like(literal(like_pattern)))
         except AttributeError:
             pass
 

@@ -1,20 +1,21 @@
 import copy
 import datetime
-import logging
-from functools import partial
 import hashlib
+import logging
 import random
-import pandas as pd
-from typing import Any, Callable, Dict, Iterable, Tuple, List
+from functools import partial
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
+import pandas as pd
 from ruamel.yaml.compat import StringIO
+
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.execution_environment.util import S3Url
 from great_expectations.execution_environment.types import (
     PathBatchSpec,
-    S3BatchSpec,
     RuntimeDataBatchSpec,
+    S3BatchSpec,
 )
+from great_expectations.execution_environment.util import S3Url
 
 try:
     import boto3
@@ -23,10 +24,9 @@ except ImportError:
 
 from ..core.batch import BatchMarkers
 from ..core.id_dict import BatchSpec
-from ..exceptions import BatchSpecError, ValidationError
+from ..exceptions import BatchSpecError, GreatExpectationsError, ValidationError
 from ..execution_environment.util import hash_pandas_dataframe
-from ..validator.validation_graph import MetricConfiguration
-from .execution_engine import ExecutionEngine
+from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 logger = logging.getLogger(__name__)
 
@@ -121,12 +121,8 @@ Notes:
         validator.expose_dataframe_methods = True
 
     def get_batch_data_and_markers(
-        self,
-        batch_spec: BatchSpec
-    ) -> Tuple[
-        Any,  # batch_data
-        BatchMarkers
-    ]:
+        self, batch_spec: BatchSpec
+    ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
         batch_markers: BatchMarkers = BatchMarkers(
             {
@@ -152,8 +148,9 @@ Notes:
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
                 raise ge_exceptions.ExecutionEngineError(
-                    f'''PandasExecutionEngine has been passed a S3BatchSpec, 
-                        but the ExecutionEngine does not have a boto3 client configured. Please check your config.''')
+                    f"""PandasExecutionEngine has been passed a S3BatchSpec,
+                        but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
+                )
             s3_engine = self._s3
             s3_url = S3Url(batch_spec.get("s3"))
             reader_method: str = batch_spec.get("reader_method")
@@ -162,7 +159,9 @@ Notes:
             s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
 
             logger.debug(
-                "Fetching s3 object. Bucket: {} Key: {}".format(s3_url.bucket, s3_url.key)
+                "Fetching s3 object. Bucket: {} Key: {}".format(
+                    s3_url.bucket, s3_url.key
+                )
             )
             reader_fn = self._get_reader_fn(reader_method, s3_url.key)
             batch_data = reader_fn(
@@ -196,7 +195,9 @@ Notes:
 
     def _get_typed_batch_data(self, batch_data):
         if not isinstance(batch_data, pd.DataFrame):
-            raise TypeError(f"batch_data must be an instance of type DataFrame, not {batch_data.__class__.__name__}")
+            raise TypeError(
+                f"batch_data must be an instance of type DataFrame, not {batch_data.__class__.__name__}"
+            )
 
         # NOTE: Once the class works properly, we should wrap batch_data as a PandasBatchData object.
 
@@ -283,7 +284,10 @@ Notes:
         raise BatchSpecError(f'Unable to determine reader method from path: "{path}".')
 
     def get_compute_domain(
-        self, domain_kwargs: Dict,
+        self,
+        domain_kwargs: dict,
+        domain_type: Union[str, "MetricDomainTypes"],
+        accessor_keys: Optional[Iterable[str]] = [],
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas DataFrame. If the domain is a single column,
@@ -291,7 +295,12 @@ Notes:
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            batches (dict) - A dictionary specifying batch id and which batches to obtain
+            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity", "column",
+            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
+            MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
+             the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
@@ -300,6 +309,9 @@ Notes:
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
+
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -323,54 +335,125 @@ Notes:
                 "PandasExecutionEngine does not currently support multiple named tables."
             )
 
+        # Filtering by row condition
         row_condition = domain_kwargs.get("row_condition", None)
         if row_condition:
             condition_parser = domain_kwargs.get("condition_parser", None)
+
+            # Ensuring proper condition parser has been provided
             if condition_parser not in ["python", "pandas"]:
                 raise ValueError(
                     "condition_parser is required when setting a row_condition,"
                     " and must be 'python' or 'pandas'"
                 )
             else:
+                # Querying row condition
                 data = data.query(row_condition, parser=condition_parser).reset_index(
                     drop=True
                 )
 
-        if "column" in compute_domain_kwargs:
-            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
+        if (
+            domain_type != MetricDomainTypes.TABLE
+            and accessor_keys is not None
+            and len(accessor_keys) > 0
+        ):
+            logger.warning(
+                "Accessor keys ignored since Metric Domain Type is not 'table"
+            )
+
+        # If given table (this is default), get all unexpected accessor_keys (an optional parameters allowing us to
+        # modify domain access)
+        if domain_type == MetricDomainTypes.TABLE:
+            if accessor_keys is not None and len(accessor_keys) > 0:
+                for key in accessor_keys:
+                    accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
+            if len(compute_domain_kwargs.keys()) > 0:
+                for key in compute_domain_kwargs.keys():
+                    # Warning user if kwarg not "normal"
+                    if key not in [
+                        "batch_id",
+                        "table",
+                        "row_condition",
+                        "condition_parser",
+                    ]:
+                        logger.warning(
+                            f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}"
+                        )
+            return data, compute_domain_kwargs, accessor_domain_kwargs
+
+        # If user has stated they want a column, checking if one is provided, and
+        elif domain_type == MetricDomainTypes.COLUMN:
+            if "column" in compute_domain_kwargs:
+                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+            else:
+                # If column not given
+                raise GreatExpectationsError(
+                    "Column not provided in compute_domain_kwargs"
+                )
+
+        # Else, if column pair values requested
+        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+            # Ensuring column_A and column_B parameters provided
+            if (
+                "column_A" in compute_domain_kwargs
+                and "column_B" in compute_domain_kwargs
+            ):
+                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
+                    "column_A"
+                )
+                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
+                    "column_B"
+                )
+            else:
+                raise GreatExpectationsError(
+                    "column_A or column_B not found within compute_domain_kwargs"
+                )
+
+        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+        elif domain_type == MetricDomainTypes.MULTICOLUMN:
+            if "columns" in compute_domain_kwargs:
+                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
+
+        # Filtering if identity
+        elif domain_type == MetricDomainTypes.IDENTITY:
+
+            # If we would like our data to become a single column
+            if "column" in compute_domain_kwargs:
+                data = pd.DataFrame(data[compute_domain_kwargs["column"]])
+
+            # If we would like our data to now become a column pair
+            elif ("column_A" in compute_domain_kwargs) and (
+                "column_B" in compute_domain_kwargs
+            ):
+
+                # Dropping all not needed columns
+                column_a, column_b = (
+                    compute_domain_kwargs["column_A"],
+                    compute_domain_kwargs["column_B"],
+                )
+                data = pd.DataFrame(
+                    {column_a: data[column_a], column_b: data[column_b]}
+                )
+
+            else:
+                # If we would like our data to become a multicolumn
+                if "columns" in compute_domain_kwargs:
+                    data = data[compute_domain_kwargs["columns"]]
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
-    def resolve_metric_bundle(
-        self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
-    ) -> dict:
-        """This engine simply evaluates metrics one at a time."""
-        resolved_metrics = dict()
-        for (
-            metric_to_resolve,
-            metric_provider,
-            metric_provider_kwargs,
-        ) in metric_fn_bundle:
-            resolved_metrics[metric_to_resolve.id] = metric_provider(
-                **metric_provider_kwargs
-            )
-        return resolved_metrics
-
     ### Splitter methods for partitioning dataframes ###
     @staticmethod
-    def _split_on_whole_table(
-        df,
-    ) -> pd.DataFrame:
+    def _split_on_whole_table(df,) -> pd.DataFrame:
         return df
 
     @staticmethod
     def _split_on_column_value(
-        df,
-        column_name: str,
-        partition_definition: dict,
+        df, column_name: str, partition_definition: dict,
     ) -> pd.DataFrame:
 
-        return df[df[column_name]==partition_definition[column_name]]
+        return df[df[column_name] == partition_definition[column_name]]
 
     @staticmethod
     def _split_on_converted_datetime(
@@ -380,30 +463,28 @@ Notes:
         date_format_string: str = "%Y-%m-%d",
     ):
         """Convert the values in the named column to the given date_format, and split on that"""
-        stringified_datetime_series = df[column_name].map(lambda x: x.strftime(date_format_string))
+        stringified_datetime_series = df[column_name].map(
+            lambda x: x.strftime(date_format_string)
+        )
         matching_string = partition_definition[column_name]
         return df[stringified_datetime_series == matching_string]
 
     @staticmethod
     def _split_on_divided_integer(
-        df,
-        column_name: str,
-        divisor:int,
-        partition_definition: dict,
+        df, column_name: str, divisor: int, partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
         matching_divisor = partition_definition[column_name]
-        matching_rows = df[column_name].map(lambda x: int(x/divisor)==matching_divisor)
+        matching_rows = df[column_name].map(
+            lambda x: int(x / divisor) == matching_divisor
+        )
 
         return df[matching_rows]
 
     @staticmethod
     def _split_on_mod_integer(
-        df,
-        column_name: str,
-        mod:int,
-        partition_definition: dict,
+        df, column_name: str, mod: int, partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
@@ -414,9 +495,7 @@ Notes:
 
     @staticmethod
     def _split_on_multi_column_values(
-        df,
-        column_names: List[str],
-        partition_definition: dict,
+        df, column_names: List[str], partition_definition: dict,
     ):
         """Split on the joint values in the named columns"""
 
@@ -424,10 +503,12 @@ Notes:
         for column_name in column_names:
             value = partition_definition.get(column_name)
             if not value:
-                raise ValueError(f"In order for PandasExecution to `_split_on_multi_column_values`, "
-                                 f"all values in column_names must also exist in partition_definition. "
-                                 f"{column_name} was not found in partition_definition.")
-            subset_df = subset_df[subset_df[column_name]==value]
+                raise ValueError(
+                    f"In order for PandasExecution to `_split_on_multi_column_values`, "
+                    f"all values in column_names must also exist in partition_definition. "
+                    f"{column_name} was not found in partition_definition."
+                )
+            subset_df = subset_df[subset_df[column_name] == value]
         return subset_df
 
     @staticmethod
@@ -437,17 +518,20 @@ Notes:
         hash_digits: int,
         partition_definition: dict,
         hash_function_name: str = "md5",
-
     ):
         """Split on the hashed value of the named column"""
         try:
             hash_method = getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError) as e:
-            raise (ge_exceptions.ExecutionEngineError(
-                f'''The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found.'''))
+            raise (
+                ge_exceptions.ExecutionEngineError(
+                    f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found."""
+                )
+            )
         matching_rows = df[column_name].map(
-            lambda x: hash_method(str(x).encode()).hexdigest()[-1*hash_digits:] == partition_definition["hash_value"]
+            lambda x: hash_method(str(x).encode()).hexdigest()[-1 * hash_digits :]
+            == partition_definition["hash_value"]
         )
         return df[matching_rows]
 
@@ -455,30 +539,24 @@ Notes:
 
     @staticmethod
     def _sample_using_random(
-        df,
-        p: float = .1,
+        df, p: float = 0.1,
     ):
         """Take a random sample of rows, retaining proportion p
-        
+
         Note: the Random function behaves differently on different dialects of SQL
         """
-        return df[df.index.map( lambda x: random.random() < p )]
+        return df[df.index.map(lambda x: random.random() < p)]
 
     @staticmethod
     def _sample_using_mod(
-        df,
-        column_name: str,
-        mod: int,
-        value: int,
+        df, column_name: str, mod: int, value: int,
     ):
         """Take the mod of named column, and only keep rows that match the given value"""
-        return df[df[column_name].map( lambda x: x % mod == value)]
+        return df[df[column_name].map(lambda x: x % mod == value)]
 
     @staticmethod
     def _sample_using_a_list(
-        df,
-        column_name: str,
-        value_list: list,
+        df, column_name: str, value_list: list,
     ):
         """Match the values in the named column against value_list, and only keep the matches"""
         return df[df[column_name].isin(value_list)]
@@ -488,18 +566,22 @@ Notes:
         df,
         column_name: str,
         hash_digits: int = 1,
-        hash_value: str = 'f',
+        hash_value: str = "f",
         hash_function_name: str = "md5",
     ):
         """Hash the values in the named column, and split on that"""
         try:
             hash_func = getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError) as e:
-            raise (ge_exceptions.ExecutionEngineError(
-                f'''The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.  
-                    Reference to {hash_function_name} cannot be found.'''))
+            raise (
+                ge_exceptions.ExecutionEngineError(
+                    f"""The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found."""
+                )
+            )
 
         matches = df[column_name].map(
-            lambda x: hash_func(str(x).encode()).hexdigest()[-1*hash_digits:] == hash_value
+            lambda x: hash_func(str(x).encode()).hexdigest()[-1 * hash_digits :]
+            == hash_value
         )
         return df[matches]
