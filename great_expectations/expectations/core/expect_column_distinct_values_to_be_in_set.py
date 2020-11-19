@@ -5,6 +5,7 @@ import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from ..metrics.util import parse_value_set
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedGraphContent, RenderedStringTemplateContent
@@ -256,13 +257,12 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
             assert isinstance(
                 configuration.kwargs["value_set"], (list, set)
-            ), "value_set must be a list or a set"
+            ) or configuration.kwargs["value_set"] is None, "value_set must be a list, set, or None"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
@@ -274,43 +274,27 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        """Validates that the Distinct values are a superset of the value set"""
-        # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
         parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
             "parse_strings_as_datetimes"
         )
-        observed_value_counts = metric_vals.get("column.value_counts")
+        observed_value_counts = metrics.get("column.value_counts")
         observed_value_set = set(observed_value_counts.index)
-        value_set = self.get_success_kwargs(configuration).get("value_set")
+        value_set = self.get_success_kwargs(configuration).get("value_set") or []
 
         if parse_strings_as_datetimes:
-            parsed_value_set = PandasExecutionEngine._parse_value_set(value_set)
+            parsed_value_set = parse_value_set(value_set)
         else:
             parsed_value_set = value_set
 
         expected_value_set = set(parsed_value_set)
 
+        if not expected_value_set:
+            success = True
+        else:
+            success = observed_value_set.issubset(expected_value_set)
+
         return {
-            "success": observed_value_set.issubset(expected_value_set),
+            "success": success,
             "result": {
                 "observed_value": sorted(list(observed_value_set)),
                 "details": {"value_counts": observed_value_counts},
