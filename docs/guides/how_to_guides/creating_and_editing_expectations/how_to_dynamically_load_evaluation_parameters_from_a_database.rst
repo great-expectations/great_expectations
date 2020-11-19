@@ -38,7 +38,7 @@ Steps
         queries:
           current_ratings_max:
             query: "SELECT MAX(rating) FROM ratings;"
-            return_type: "scalar"  # return_type can be either "scalar" or "list"
+            return_type: "scalar"  # return_type can be either "scalar" or "list" or omitted
           current_genre_ids:
             query: "SELECT id FROM genres;"
             return_type: "list"  # return_type can be either "scalar" or "list"
