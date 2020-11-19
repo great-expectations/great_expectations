@@ -400,7 +400,6 @@ data_connectors:
         sampling_method="_sample_using_hash",
         sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
         expectation_suite=ExpectationSuite("my_expectation_suite"),
-        # attach_new_expectation_suite=True, # The implementation of this argument is currently work-in-progress.
     )
     my_evr = my_validator.expect_column_values_to_be_between(
         column="d", min_value=1, max_value=31
@@ -466,7 +465,7 @@ data_connectors:
         default_regex:
             pattern: (.+)\\.csv
             group_names:
-                - data_asset_name
+                - alphanumeric
 
         assets:
             A:
@@ -542,9 +541,11 @@ data_connectors:
         data_asset_name="C",
         partition_request={"partition_identifiers": {"year": "2019"}},
         sampling_method="_sample_using_hash",
-        sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
-        # attach_new_expectation_suite=True, # The implementation of this argument is currently work-in-progress.
+        sampling_kwargs={
+            "column_name": "date",
+            "hash_function_name": "md5"
+        },
+        attach_new_expectation_suite=True,
     )
     my_evr = my_validator.expect_column_values_to_be_between(
         column="d", min_value=1, max_value=31

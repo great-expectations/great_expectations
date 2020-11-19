@@ -336,26 +336,24 @@ class DataContextV3(DataContext):
         partition_identifiers: dict = None,
         limit: int = None,
         index=None,
-        custom_filter_function: Callable = None,
-        sampling_method: str = None,
-        sampling_kwargs: dict = None,
-        expectation_suite_name: str = None,
-        expectation_suite: ExpectationSuite = None,
+        custom_filter_function: Callable=None,
+        sampling_method: str=None,
+        sampling_kwargs: dict=None,
+        attach_new_expectation_suite: bool = False,
+        expectation_suite_name: str=None,
+        expectation_suite: ExpectationSuite=None,
         **kwargs,
     ) -> Validator:
+        if attach_new_expectation_suite:
+            expectation_suite = ExpectationSuite(f"{data_asset_name}_expectation_suite")
         if expectation_suite is None:
-            if not expectation_suite_name is None:
+            if expectation_suite_name:
                 expectation_suite = self.get_expectation_suite(expectation_suite_name)
             else:
-                raise ValueError(
-                    "expectation_suite and expectation_suite_name cannot both be None"
-                )
-
+                raise ValueError("expectation_suite and expectation_suite_name cannot both be None")
         else:
-            if not expectation_suite_name is None:
-                raise Warning(
-                    "get_validator received values for both expectation_suite and expectation_suite_name. Defaulting to expectation_suite."
-                )
+            if expectation_suite_name:
+                raise Warning("get_validator received values for both expectation_suite and expectation_suite_name. Defaulting to expectation_suite.")
 
         batch = self.get_batch(
             execution_environment_name=execution_environment_name,
