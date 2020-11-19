@@ -78,7 +78,7 @@ class DataContextV3(DataContext):
     def test_yaml_config(
         self,
         yaml_config: str,
-        name = None,
+        name=None,
         pretty_print=True,
         return_mode="instantiated_class",
         shorten_tracebacks=False,
