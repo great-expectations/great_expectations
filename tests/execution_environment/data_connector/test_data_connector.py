@@ -40,7 +40,6 @@ default_regex:
 assets:
     my_asset_name: {{}}
 """,
-            Loader=yaml.FullLoader,
         ),
         runtime_environment={"name": "my_data_connector"},
         config_defaults={

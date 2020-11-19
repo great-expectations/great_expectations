@@ -30,12 +30,15 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+except ImportError:
+    sa = None
+
+try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
-    sa = None
     reflection = None
     DefaultDialect = None
     Select = None

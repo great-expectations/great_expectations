@@ -242,7 +242,6 @@ def test_return_all_batch_definitions_unsorted():
             execution_environment_name: test_environment
             #execution_engine:
             #    class_name: PandasExecutionEngine
-            class_name: ConfiguredAssetS3DataConnector
             bucket: {bucket}
             prefix: ""
             assets:
@@ -406,7 +405,6 @@ def test_return_all_batch_definitions_sorted():
         execution_environment_name: test_environment
         #execution_engine:
         #    class_name: PandasExecutionEngine
-        class_name: ConfiguredAssetS3DataConnector
         bucket: {bucket}
         prefix: ""
         assets:
@@ -827,7 +825,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
         execution_environment_name: test_environment
         #execution_engine:
         #    class_name: PandasExecutionEngine
-        class_name: ConfiguredAssetS3DataConnector
         bucket: bucket
         assets:
             TestFiles:
@@ -900,7 +897,6 @@ def test_return_all_batch_definitions_too_many_sorters():
         execution_environment_name: test_environment
         #execution_engine:
         #    class_name: PandasExecutionEngine
-        class_name: ConfiguredAssetS3DataConnector
         bucket: {bucket}
         prefix: ""
         assets:
