@@ -50,7 +50,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
 
         try:
             self._s3 = boto3.client("s3", **boto3_options)
-        except TypeError:
+        except (TypeError, AttributeError):
             raise ImportError("Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector).")
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:

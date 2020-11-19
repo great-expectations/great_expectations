@@ -51,7 +51,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
 
         try:
             self._s3 = boto3.client("s3", **boto3_options)
-        except TypeError:
+        except (TypeError, AttributeError):
             raise ImportError("Unable to load boto3 (it is required for InferredAssetS3DataConnector).")
 
 
