@@ -290,8 +290,9 @@ class DataContextV3(DataContext):
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
-                    "sampling_method": sampling_method,
-                    "sampling_kwargs": sampling_kwargs,
+                    # TODO: <Alex>To be implemented as a follow-on task.</Alex>
+                    # "sampling_method": sampling_method,
+                    # "sampling_kwargs": sampling_kwargs,
                 })
 
             else:
