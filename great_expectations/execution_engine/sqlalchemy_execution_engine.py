@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
+import pandas as pd
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import Batch, BatchMarkers
@@ -173,8 +174,16 @@ class SqlAlchemyBatchData:
 
 
         """
-        self._engine = engine
-        self._record_set_name = record_set_name
+        if engine.dialect.name.lower() in ["sqlite", "mssql", "snowflake"]:
+            # sqlite/mssql/snowflake temp tables only persist within a connection, so override the engine
+            self._engine = engine.connect()
+        else:
+            self._engine = engine
+
+        self._record_set_name = record_set_name or "great_expectations_sub_selection"
+        if not isinstance(self._record_set_name, str):
+            raise TypeError(f"record_set_name should be of type str, not {type(record_set_name)}")
+
         self._schema_name = schema_name
         self._use_quoted_name = use_quoted_name
 
@@ -234,7 +243,7 @@ class SqlAlchemyBatchData:
                 self._selectable = sa.text(query)
             else:
                 self._selectable = selectable.alias(
-                    self._record_set_name or "great_expectations_sub_selection"
+                    self._record_set_name
                 )
 
     @property
@@ -296,6 +305,43 @@ class SqlAlchemyBatchData:
             )
         self._engine.execute(stmt)
 
+    def head(self, n=5, fetch_all=False):
+        """Fetches the head of the table"""
+
+        if fetch_all:
+            result_object = self._engine.execute(
+                sa
+                    .select("*")
+                    .select_from(self._selectable)
+            )
+        else:
+            result_object = self._engine.execute(
+                sa
+                    .select("*")
+                    .limit(n)
+                    .select_from(self._selectable)
+            )
+
+        rows = result_object.fetchall()
+
+        # Note: Abe 20201119: This should be a GE type 
+        head_df = pd.DataFrame(
+            rows,
+            columns=result_object._metadata.keys
+        )
+
+        return(head_df)
+
+    def row_count(self):
+        """Gets the number of rows"""
+
+        result_object = self._engine.execute(
+            sa.select([sa.func.count()]).select_from(self._selectable)
+        )
+        rows = result_object.fetchall()
+        print(rows)
+
+        return(rows[0][0])
 
 class SqlAlchemyExecutionEngine(ExecutionEngine):
     def __init__(
@@ -307,7 +353,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         connection_string=None,
         url=None,
         batch_data_dict=None,
-        **kwargs,
+        **kwargs, # These will be passed as optional parameters to the engine, **not** the ExecutionEngine
     ):
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
         desired database. Also initializes the dialect to be used and configures usage statistics.
@@ -334,7 +380,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     a url can be used to access the data. This will be overridden by all other configuration
                     options if any are provided.
         """
-        super().__init__(name=name, batch_data_dict=batch_data_dict, **kwargs)
+        super().__init__(name=name, batch_data_dict=batch_data_dict)#, **kwargs)
         self._name = name
 
         self._credentials = credentials
