@@ -417,7 +417,6 @@ data_connectors:
             "hash_function_name": "md5"
         },
         expectation_suite=ExpectationSuite("my_expectation_suite"),
-        # attach_new_expectation_suite=True, # The implementation of this argument is currently work-in-progress.
     )
     my_evr = my_validator.expect_column_values_to_be_between(
         column="d",
@@ -486,7 +485,7 @@ data_connectors:
         default_regex:
             pattern: (.+)\\.csv
             group_names:
-                - data_asset_name
+                - alphanumeric
 
         assets:
             A:
@@ -569,8 +568,7 @@ data_connectors:
             "column_name": "date",
             "hash_function_name": "md5"
         },
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
-        # attach_new_expectation_suite=True, # The implementation of this argument is currently work-in-progress.
+        attach_new_expectation_suite=True,
     )
     my_evr = my_validator.expect_column_values_to_be_between(
         column="d",
