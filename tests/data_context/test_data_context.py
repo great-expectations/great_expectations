@@ -1566,7 +1566,7 @@ def test_get_validator_with_instantiated_expectation_suite(empty_data_context_v3
 
     base_directory = str(
         tmp_path_factory.mktemp(
-            "test_get_validator_with_attach_expectation_suite"
+            "test_get_validator_with_instantiated_expectation_suite"
         )
     )
 
