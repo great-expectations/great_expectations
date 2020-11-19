@@ -11,14 +11,14 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.execution_engine.util import (
-    get_sql_dialect_floating_point_infinity_value,
-)
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
 )
 from great_expectations.expectations.metrics.import_manager import Bucketizer, F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.expectations.metrics.util import (
+    get_sql_dialect_floating_point_infinity_value,
+)
 
 logger = logging.getLogger(__name__)
 
