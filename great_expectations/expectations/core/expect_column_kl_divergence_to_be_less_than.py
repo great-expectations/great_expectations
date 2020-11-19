@@ -448,7 +448,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             above_partition = metrics["above_partition"]
 
             # Observed Weights is just the histogram values divided by the total number of observations
-            observed_weights = np.array(hist) / nonnull_count
+            observed_weights = hist / nonnull_count
 
             # Adjust expected_weights to account for tail_weight and internal_weight
             if "tail_weights" in partition_object:

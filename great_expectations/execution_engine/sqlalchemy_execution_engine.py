@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
     BatchSpecError,
     DatasourceKeyPairAuthBadPassphraseError,
@@ -814,7 +815,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             for idx, id in enumerate(query["ids"]):
                 resolved_metrics[id] = res[0][idx]
 
-        return resolved_metrics
+        # Convert metrics to be serializable
+        return convert_to_json_serializable(resolved_metrics)
 
     ### Splitter methods for partitioning tables ###
 
