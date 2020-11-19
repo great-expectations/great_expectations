@@ -386,20 +386,10 @@ class Batch(DictDot):
         return self._batch_definition.id
 
     def __str__(self):
-        batch_request: dict
-        if isinstance(self.batch_request, dict):
-            batch_request = self.batch_request
-        else:
-            batch_request = self.batch_request.get_json_dict()
-        batch_definition: dict
-        if isinstance(self.batch_request, dict):
-            batch_definition = self.batch_definition
-        else:
-            batch_definition = self.batch_definition.get_json_dict()
         json_dict = {
             "data": str(self.data),
-            "batch_request": str(batch_request),
-            "batch_definition": str(batch_definition),
+            "batch_request": self.batch_request.get_json_dict(),
+            "batch_definition": self.batch_definition.get_json_dict(),
             "batch_spec": str(self.batch_spec),
             "batch_markers": str(self.batch_markers),
         }

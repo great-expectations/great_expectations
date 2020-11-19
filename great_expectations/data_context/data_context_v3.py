@@ -78,7 +78,7 @@ class DataContextV3(DataContext):
     def test_yaml_config(
         self,
         yaml_config: str,
-        name = None,
+        name=None,
         pretty_print=True,
         return_mode="instantiated_class",
         shorten_tracebacks=False,
@@ -285,19 +285,13 @@ class DataContextV3(DataContext):
                     #Raise a warning if kwargs exist
                     pass
 
-                sampling_params = {
-                    e[0]: e[1] for e in zip(
-                        ["sampling_method", "sampling_kwargs"],
-                        [sampling_method, sampling_kwargs]
-                    )
-                    if e[1] is not None
-                }
                 partition_request = PartitionRequest({
                     "partition_identifiers": partition_identifiers,
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
-                    **sampling_params,
+                    "sampling_method": sampling_method,
+                    "sampling_kwargs": sampling_kwargs,
                 })
 
             else:
