@@ -72,7 +72,7 @@ except ImportError:
     pybigquery = None
 
 
-class ExpectColumnValuesToBeInTypeList(TableExpectation):
+class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     """
     Expect a column to contain values from a specified type list.
 
@@ -124,7 +124,8 @@ class ExpectColumnValuesToBeInTypeList(TableExpectation):
         <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_of_type>`
     """
 
-    metric_dependencies = ("table.column_types",)
+    map_metric = "column_values.in_type_list"
+
     success_keys = (
         "type_list",
         "mostly",
@@ -249,7 +250,7 @@ class ExpectColumnValuesToBeInTypeList(TableExpectation):
                     except AttributeError:
                         pass
 
-                native_type = self._native_type_type_map(type_)
+                native_type = _native_type_type_map(type_)
                 if native_type is not None:
                     comp_types.extend(native_type)
 
@@ -259,30 +260,6 @@ class ExpectColumnValuesToBeInTypeList(TableExpectation):
             "success": success,
             "result": {"observed_value": actual_column_type.type.__name__},
         }
-
-    @staticmethod
-    def _native_type_type_map(type_):
-        # We allow native python types in cases where the underlying type is "object":
-        if type_.lower() == "none":
-            return (type(None),)
-        elif type_.lower() == "bool":
-            return (bool,)
-        elif type_.lower() in ["int", "long"]:
-            return (int,)
-        elif type_.lower() == "float":
-            return (float,)
-        elif type_.lower() == "bytes":
-            return (bytes,)
-        elif type_.lower() == "complex":
-            return (complex,)
-        elif type_.lower() in ["str", "string_types"]:
-            return (str,)
-        elif type_.lower() == "list":
-            return (list,)
-        elif type_.lower() == "dict":
-            return (dict,)
-        elif type_.lower() == "unicode":
-            return None
 
     def _validate_sqlalchemy(
         self,
@@ -303,7 +280,7 @@ class ExpectColumnValuesToBeInTypeList(TableExpectation):
             success = True
         else:
             types = []
-            type_module = self._get_dialect_type_module(execution_engine=execution_engine)
+            type_module = _get_dialect_type_module(execution_engine=execution_engine)
             for type_ in expected_types_list:
                 try:
                     type_class = getattr(type_module, type_)
@@ -318,39 +295,6 @@ class ExpectColumnValuesToBeInTypeList(TableExpectation):
             success = isinstance(actual_column_type, types)
 
         return {"success": success, "result": {"observed_value": type(actual_column_type).__name__}}
-
-    def _get_dialect_type_module(
-            self,
-            execution_engine,
-    ):
-        if execution_engine.dialect is None:
-            logger.warning(
-                "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
-            )
-            return sa
-        try:
-            # Redshift does not (yet) export types to top level; only recognize base SA types
-            if isinstance(
-                execution_engine.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
-            ):
-                return execution_engine.dialect.sa
-        except (TypeError, AttributeError):
-            pass
-
-        # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
-        try:
-            if (
-                isinstance(
-                    execution_engine.sql_engine_dialect,
-                    pybigquery.sqlalchemy_bigquery.BigQueryDialect,
-                )
-                and bigquery_types_tuple is not None
-            ):
-                return bigquery_types_tuple
-        except (TypeError, AttributeError):
-            pass
-
-        return execution_engine.dialect
 
     def _validate_spark(
         self,
@@ -379,29 +323,45 @@ class ExpectColumnValuesToBeInTypeList(TableExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        dependencies = super().get_validation_dependencies(
+        dependencies = super(ColumnMapExpectation, self).get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
 
-        # if isinstance(execution_engine, PandasExecutionEngine):
-        #     column_name = configuration.kwargs.get("column")
-        #     metric_kwargs = get_metric_kwargs(configuration=configuration, metric_name="table.column_types",
-        #                                       runtime_configuration=runtime_configuration)
-        #     metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")
-        #     metric_value_kwargs = metric_kwargs.get("metric_value_kwargs")
-        #     table_column_types_configuration = MetricConfiguration(
-        #         "table.column_types",
-        #         metric_domain_kwargs=metric_domain_kwargs,
-        #         metric_value_kwargs=metric_value_kwargs,
-        #     )
-        #     actual_column_types_list = execution_engine.resolve_metrics(
-        #         [table_column_types_configuration]
-        #     )[table_column_types_configuration.id]
-        #     actual_column_type = [
-        #         type_dict["type"]
-        #         for type_dict in actual_column_types_list
-        #         if type_dict["name"] == column_name
-        #     ][0]
+        if isinstance(execution_engine, PandasExecutionEngine):
+            column_name = configuration.kwargs.get("column")
+            expected_types_list = configuration.kwargs.get("type_list")
+            metric_kwargs = get_metric_kwargs(configuration=configuration, metric_name="table.column_types",
+                                              runtime_configuration=runtime_configuration)
+            metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")
+            metric_value_kwargs = metric_kwargs.get("metric_value_kwargs")
+            table_column_types_configuration = MetricConfiguration(
+                "table.column_types",
+                metric_domain_kwargs=metric_domain_kwargs,
+                metric_value_kwargs=metric_value_kwargs,
+            )
+            actual_column_types_list = execution_engine.resolve_metrics(
+                [table_column_types_configuration]
+            )[table_column_types_configuration.id]
+            actual_column_type = [
+                type_dict["type"]
+                for type_dict in actual_column_types_list
+                if type_dict["name"] == column_name
+            ][0]
+            if actual_column_type.type.__name__ == "object_" and expected_types_list is not None:
+                dependencies = super().get_validation_dependencies(
+                    configuration, execution_engine, runtime_configuration
+            )
+
+        column_types_metric_kwargs = get_metric_kwargs(
+            metric_name="table.column_types",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        dependencies["metrics"]["table.column_types"] = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs=column_types_metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=column_types_metric_kwargs["metric_value_kwargs"],
+        )
 
         return dependencies
 
@@ -422,6 +382,13 @@ class ExpectColumnValuesToBeInTypeList(TableExpectation):
         ][0]
 
         if isinstance(execution_engine, PandasExecutionEngine):
+            if actual_column_type.type.__name__ == "object_" and expected_types_list is not None:
+                return super()._validate(
+                    configuration,
+                    metrics,
+                    runtime_configuration,
+                    execution_engine
+                )
             return self._validate_pandas(
                 actual_column_type=actual_column_type,
                 expected_types_list=expected_types_list
@@ -437,3 +404,60 @@ class ExpectColumnValuesToBeInTypeList(TableExpectation):
                 actual_column_type=actual_column_type,
                 expected_types_list=expected_types_list
             )
+
+
+def _get_dialect_type_module(
+        execution_engine,
+):
+    if execution_engine.dialect is None:
+        logger.warning(
+            "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
+        )
+        return sa
+    try:
+        # Redshift does not (yet) export types to top level; only recognize base SA types
+        if isinstance(
+                execution_engine.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+        ):
+            return execution_engine.dialect.sa
+    except (TypeError, AttributeError):
+        pass
+
+    # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
+    try:
+        if (
+                isinstance(
+                    execution_engine.sql_engine_dialect,
+                    pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+                )
+                and bigquery_types_tuple is not None
+        ):
+            return bigquery_types_tuple
+    except (TypeError, AttributeError):
+        pass
+
+    return execution_engine.dialect
+
+
+def _native_type_type_map(type_):
+    # We allow native python types in cases where the underlying type is "object":
+    if type_.lower() == "none":
+        return (type(None),)
+    elif type_.lower() == "bool":
+        return (bool,)
+    elif type_.lower() in ["int", "long"]:
+        return (int,)
+    elif type_.lower() == "float":
+        return (float,)
+    elif type_.lower() == "bytes":
+        return (bytes,)
+    elif type_.lower() == "complex":
+        return (complex,)
+    elif type_.lower() in ["str", "string_types"]:
+        return (str,)
+    elif type_.lower() == "list":
+        return (list,)
+    elif type_.lower() == "dict":
+        return (dict,)
+    elif type_.lower() == "unicode":
+        return None
