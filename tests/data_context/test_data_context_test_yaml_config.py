@@ -371,7 +371,7 @@ data_connectors:
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
 
-    # TODO: <Alex>Implement sampling for Pandas and Spark DataFrame Execution Engine classes as a follow-on task.</Alex>
+    # TODO: <Alex>Implement splitting for Pandas and Spark DataFrame Execution Engine classes as a follow-on task.</Alex>
     my_batch = context.get_batch(
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
@@ -379,19 +379,22 @@ data_connectors:
         partition_identifiers={
             "number": "2",
         },
-        sampling_method="_sample_using_hash",
-        sampling_kwargs={
-            "column_name": "date",
-            "hash_function_name": "md5"
+        batch_spec_passthrough={
+            "sampling_method": "_sample_using_hash",
+            "sampling_kwargs": {
+                "column_name": "date",
+                "hash_function_name": "md5",
+                "hash_value": "f",
+            },
         },
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
-    assert my_batch.data.shape == (120, 10)
+    assert my_batch.data.shape == (10, 10)
     df_data = my_batch.data
     df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
     assert df_data[
-        (df_data["date"] >= datetime.date(2020, 1, 1)) & (df_data["date"] <= datetime.date(2020, 12, 31))
-    ].shape[0] == 120
+        (df_data["date"] >= datetime.date(2020, 1, 15)) & (df_data["date"] <= datetime.date(2020, 1, 29))
+    ].equals(df_data)
 
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -401,7 +404,7 @@ data_connectors:
             data_asset_name="DOES_NOT_EXIST",
         )
 
-    # TODO: <Alex>Implement sampling for Pandas and Spark DataFrame Execution Engine classes as a follow-on task.</Alex>
+    # TODO: <Alex>Implement splitting for Pandas and Spark DataFrame Execution Engine classes as a follow-on task.</Alex>
     my_validator = context.get_validator(
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
@@ -411,10 +414,13 @@ data_connectors:
                 "number": "3"
             }
         },
-        sampling_method="_sample_using_hash",
-        sampling_kwargs={
-            "column_name": "date",
-            "hash_function_name": "md5"
+        batch_spec_passthrough={
+            "sampling_method": "_sample_using_hash",
+            "sampling_kwargs": {
+                "column_name": "date",
+                "hash_function_name": "md5",
+                "hash_value": "f",
+            },
         },
         expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
@@ -531,19 +537,22 @@ data_connectors:
         partition_identifiers={
             "number": "2",
         },
-        sampling_method="_sample_using_hash",
-        sampling_kwargs={
-            "column_name": "date",
-            "hash_function_name": "md5"
+        batch_spec_passthrough={
+            "sampling_method": "_sample_using_hash",
+            "sampling_kwargs": {
+                "column_name": "date",
+                "hash_function_name": "md5",
+                "hash_value": "f",
+            },
         },
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
-    assert my_batch.data.shape == (120, 10)
+    assert my_batch.data.shape == (10, 10)
     df_data = my_batch.data
     df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
     assert df_data[
-        (df_data["date"] >= datetime.date(2020, 1, 1)) & (df_data["date"] <= datetime.date(2020, 12, 31))
-    ].shape[0] == 120
+        (df_data["date"] >= datetime.date(2020, 1, 15)) & (df_data["date"] <= datetime.date(2020, 1, 29))
+    ].equals(df_data)
 
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -563,10 +572,13 @@ data_connectors:
                 "year": "2019"
             }
         },
-        sampling_method="_sample_using_hash",
-        sampling_kwargs={
-            "column_name": "date",
-            "hash_function_name": "md5"
+        batch_spec_passthrough={
+            "sampling_method": "_sample_using_hash",
+            "sampling_kwargs": {
+                "column_name": "date",
+                "hash_function_name": "md5",
+                "hash_value": "f",
+            },
         },
         attach_new_expectation_suite=True,
     )

@@ -22,6 +22,7 @@ class BatchDefinition(DictDot):
         data_connector_name: str,
         data_asset_name: str,
         partition_definition: PartitionDefinition,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         self._validate_batch_definition(
             execution_environment_name=execution_environment_name,
@@ -37,6 +38,7 @@ class BatchDefinition(DictDot):
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_definition = partition_definition
+        self._batch_spec_passthrough = batch_spec_passthrough
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
@@ -113,6 +115,14 @@ class BatchDefinition(DictDot):
     def partition_definition(self) -> PartitionDefinition:
         return self._partition_definition
 
+    @property
+    def batch_spec_passthrough(self) -> dict:
+        return self._batch_spec_passthrough
+
+    @batch_spec_passthrough.setter
+    def batch_spec_passthrough(self, batch_spec_passthrough: Optional[dict]):
+        self._batch_spec_passthrough = batch_spec_passthrough
+
     def get_json_dict(self) -> dict:
         return {
             "execution_environment_name": self.execution_environment_name,
@@ -158,10 +168,10 @@ class BatchRequest(DictDot):
         execution_environment_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        partition_request: Optional[dict] = None,
+        partition_request: Optional[Union[PartitionRequest, dict]] = None,
         batch_data: Any = None,
         limit: Union[int, None] = None,
-        sampling: Union[dict, None] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         self._validate_batch_request(
             execution_environment_name=execution_environment_name,
@@ -177,7 +187,7 @@ class BatchRequest(DictDot):
         self._partition_request = partition_request
         self._batch_data = batch_data
         self._limit = limit
-        self._sampling = sampling
+        self._batch_spec_passthrough = batch_spec_passthrough
 
     @property
     def execution_environment_name(self) -> str:
@@ -192,7 +202,7 @@ class BatchRequest(DictDot):
         return self._data_asset_name
 
     @property
-    def partition_request(self) -> dict:  # PartitionRequest:
+    def partition_request(self) -> Union[PartitionRequest, dict]:  # PartitionRequest:
         return self._partition_request
 
     @property
@@ -202,6 +212,10 @@ class BatchRequest(DictDot):
     @property
     def limit(self) -> int:
         return self._limit
+
+    @property
+    def batch_speck_passthrough(self) -> dict:
+        return self._batch_spec_passthrough
 
     @staticmethod
     def _validate_batch_request(

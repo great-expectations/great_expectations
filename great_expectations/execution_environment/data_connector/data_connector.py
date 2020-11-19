@@ -89,7 +89,12 @@ class DataConnector:
         batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
             batch_definition=batch_definition
         )
-        # TODO Abe 20201018: Decide if we want to allow batch_spec_passthrough parameters anywhere.
+        batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
+        if batch_spec_passthrough and isinstance(batch_spec_passthrough, dict):
+            if "sampling_method" in batch_spec_passthrough:
+                batch_spec_params["sampling_method"] = batch_spec_passthrough["sampling_method"]
+            if "sampling_kwargs" in batch_spec_passthrough:
+                batch_spec_params["sampling_kwargs"] = batch_spec_passthrough["sampling_kwargs"]
         batch_spec: BatchSpec = BatchSpec(
             **batch_spec_params
         )

@@ -4,7 +4,7 @@ import traceback
 import copy
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.compat import StringIO
-from typing import Callable, Union
+from typing import Callable, Union, Optional
 
 from great_expectations.data_context.util import (
     substitute_all_config_variables,
@@ -217,8 +217,7 @@ class DataContextV3(DataContext):
         limit: int=None,
         index=None,
         custom_filter_function: Callable=None,
-        sampling_method: str=None,
-        sampling_kwargs: dict=None,
+        batch_spec_passthrough: Optional[dict] = None,
         **kwargs,
     ) -> Batch:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -239,6 +238,8 @@ class DataContextV3(DataContext):
             custom_filter_function
             sampling_method
             sampling_kwargs
+
+            batch_spec_passthrough
 
             **kwargs
 
@@ -272,12 +273,13 @@ class DataContextV3(DataContext):
         elif batch_request:
             #TODO: Raise a warning if any parameters besides batch_requests are specified
 
-            batch_definitions = execution_environment.get_available_batch_definitions(batch_request)
+            batch_definitions = execution_environment.get_available_batch_definitions(batch_request=batch_request)
             if len(batch_definitions) != 1:
                 raise ValueError(f"Instead of 1 batch_definition, this batch_request matches {len(batch_definitions)}.")
             return execution_environment.get_batch_from_batch_definition(batch_definitions[0])
 
         else:
+            partition_request: PartitionRequest
             if partition_request is None:
                 if partition_identifiers is None:
                     partition_identifiers = kwargs
@@ -290,26 +292,22 @@ class DataContextV3(DataContext):
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
-                    # TODO: <Alex>To be implemented as a follow-on task.</Alex>
-                    # "sampling_method": sampling_method,
-                    # "sampling_kwargs": sampling_kwargs,
                 })
-
             else:
                 #Raise a warning if partition_identifiers or kwargs exist
                 partition_request = PartitionRequest(partition_request)
 
-            batch_request = BatchRequest(
+            batch_request: BatchRequest = BatchRequest(
                 execution_environment_name=execution_environment_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
                 partition_request=partition_request,
+                batch_spec_passthrough=batch_spec_passthrough,
             )
 
-            batch_definitions = execution_environment.get_available_batch_definitions(batch_request)
-            if len(batch_definitions) != 1:
-                raise ValueError(f"Instead of 1 batch_definition, these parameters match {len(batch_definitions)}.")
-            return execution_environment.get_batch_from_batch_definition(batch_definitions[0])
+            return execution_environment.get_single_batch_from_batch_request(
+                batch_request=batch_request
+            )
 
     def get_validator(
         self,
@@ -328,6 +326,7 @@ class DataContextV3(DataContext):
         attach_new_expectation_suite: bool = False,
         expectation_suite_name: str=None,
         expectation_suite: ExpectationSuite=None,
+        batch_spec_passthrough: Optional[dict] = None,
         **kwargs,
     ) -> Validator:
         if attach_new_expectation_suite:
@@ -354,6 +353,7 @@ class DataContextV3(DataContext):
             custom_filter_function=custom_filter_function,
             sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
+            batch_spec_passthrough=batch_spec_passthrough,
             **kwargs,
         )
 
