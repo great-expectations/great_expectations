@@ -215,7 +215,7 @@ Steps
 
             .. code-block:: bash
 
-                Attempting to instantiate class from config...
+                Attempting to instantiate class from config ...
                     Instantiating as a ExecutionEnvironment, since class_name is ExecutionEnvironment
                     Successfully instantiated ExecutionEnvironment
 
