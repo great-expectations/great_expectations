@@ -1,10 +1,13 @@
 import os
 import uuid
 
+from great_expectations.data_context.types.base import DataContextConfigDefaults
+
 # TODO: maybe bring params in via f-strings from base.ConfigDefaults or whatever
 #  I end up using for the base level configs. Specifically PROJECT_OPTIONAL_CONFIG_COMMENT
 #  and PROJECT_HELP_COMMENT
-PROJECT_HELP_COMMENT = """
+
+PROJECT_HELP_COMMENT = f"""
 # Welcome to Great Expectations! Always know what to expect from your data.
 #
 # Here you can define datasources, batch kwargs generators, integrations and
@@ -15,12 +18,12 @@ PROJECT_HELP_COMMENT = """
 
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
 # It is auto-generated and usually does not need to be changed.
-config_version: 2
+config_version: {DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value}
 
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource_reference.html
-datasources: {}
+datasources: {{}}
 """
 
 CONFIG_VARIABLES_INTRO = """
@@ -49,7 +52,7 @@ CONFIG_VARIABLES_TEMPLATE = (
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = (
     CONFIG_VARIABLES_INTRO
-    + """
+    + f"""
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules
@@ -79,7 +82,7 @@ validation_operators:
       #   action:
       #     class_name: SlackNotificationAction
       #     # put the actual webhook URL in the uncommitted/config_variables.yml file
-      #     slack_webhook: ${validation_notification_slack_webhook}
+      #     slack_webhook: ${{validation_notification_slack_webhook}}
       #     notify_on: all # possible values: "all", "failure", "success"
       #     notify_with: # optional list containing the DataDocs sites to include in the notification.
       #     renderer:

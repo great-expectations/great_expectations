@@ -458,7 +458,11 @@ class DataContextConfigSchema(Schema):
             )
 
 
-class InMemoryConfigDefaults(enum.Enum):
+class DataContextConfigDefaults(enum.Enum):
+    # TODO: should default plugins_directory be "plugins/" or None?
+    #  I think it may depend on in-memory or not. Is there checking
+    #  for this directory when it is used and graceful handling if not found?
+
     DEFAULT_CONFIG_VERSION = CURRENT_CONFIG_VERSION
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
@@ -520,14 +524,17 @@ class BaseBackendEcosystem(DictDot):
     Define base defaults
     """
 
-    config_version = InMemoryConfigDefaults.DEFAULT_CONFIG_VERSION.value
-    expectations_store_name: str = InMemoryConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value
-    validations_store_name = InMemoryConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value
-    evaluation_parameter_store_name = (
-        InMemoryConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value
-    )
-    stores = InMemoryConfigDefaults.DEFAULT_STORES.value
-    data_docs_sites = InMemoryConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
+    def __init__(self):
+        self.config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
+        self.expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value
+        self.validations_store_name = (
+            DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value
+        )
+        self.evaluation_parameter_store_name = (
+            DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value
+        )
+        self.stores = DataContextConfigDefaults.DEFAULT_STORES.value
+        self.data_docs_sites = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
 
 
 class S3BackendEcosystem(BaseBackendEcosystem):
@@ -544,6 +551,10 @@ class S3BackendEcosystem(BaseBackendEcosystem):
         validations_store_name: str = "validations_S3_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
     ):
+        # Initialize base defaults
+        super().__init__()
+
+        # Use default_bucket_name if separate store buckets are not provided
         expectations_store_bucket_name = (
             expectations_store_bucket_name
             if expectations_store_bucket_name is not None
@@ -559,10 +570,11 @@ class S3BackendEcosystem(BaseBackendEcosystem):
             if data_docs_bucket_name is not None
             else default_bucket_name
         )
-
+        # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        # TODO: Instead of creating from scratch, modify existing default to keep a bit more DRY?
         self.stores = {
             expectations_store_name: {
                 "class_name": "ExpectationsStore",
@@ -585,6 +597,7 @@ class S3BackendEcosystem(BaseBackendEcosystem):
         self.data_docs_sites = {
             "s3_site": {
                 "class_name": "SiteBuilder",
+                "show_how_to_buttons": True,
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
                     "bucket": data_docs_bucket_name,
@@ -598,39 +611,236 @@ class S3BackendEcosystem(BaseBackendEcosystem):
         }
 
 
-class FilesystemBackendEcosystem(DictDot):
+class FilesystemBackendEcosystem(BaseBackendEcosystem):
+    """
+    The default backend BaseBackendEcosystem is currently filesystem based. This class is just a convenience to make that explicit, and a placeholder for future modifications. This should be used in place of BaseBackendEcosystem.
+    """
+
     pass
 
 
-class GCSBackendEcosystem(DictDot):
+class GCSBackendEcosystem(BaseBackendEcosystem):
+    def __init__(
+        self,
+        default_bucket_name: str,
+        default_project_name: str,
+        expectations_store_bucket_name: str = None,
+        validations_store_bucket_name: str = None,
+        data_docs_bucket_name: str = None,
+        expectations_store_project_name: str = None,
+        validations_store_project_name: str = None,
+        data_docs_project_name: str = None,
+        expectations_store_prefix: str = "expectations",
+        validations_store_prefix: str = "validations",
+        data_docs_prefix: str = "data_docs",
+        expectations_store_name: str = "expectations_GCS_store",
+        validations_store_name: str = "validations_GCS_store",
+        evaluation_parameter_store_name: str = "evaluation_parameter_store",
+    ):
+        # Initialize base defaults
+        super().__init__()
+
+        # Use default_bucket_name if separate store buckets are not provided
+        expectations_store_bucket_name = (
+            expectations_store_bucket_name
+            if expectations_store_bucket_name is not None
+            else default_bucket_name
+        )
+        validations_store_bucket_name = (
+            validations_store_bucket_name
+            if validations_store_bucket_name is not None
+            else default_bucket_name
+        )
+        data_docs_bucket_name = (
+            data_docs_bucket_name
+            if data_docs_bucket_name is not None
+            else default_bucket_name
+        )
+
+        # Use default_project_name if separate store projects are not provided
+        expectations_store_project_name = (
+            expectations_store_project_name
+            if expectations_store_project_name is not None
+            else default_project_name
+        )
+        validations_store_project_name = (
+            validations_store_project_name
+            if validations_store_project_name is not None
+            else default_project_name
+        )
+        data_docs_project_name = (
+            data_docs_project_name
+            if data_docs_project_name is not None
+            else default_project_name
+        )
+        # Overwrite defaults
+        self.expectations_store_name = expectations_store_name
+        self.validations_store_name = validations_store_name
+        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.stores = {
+            expectations_store_name: {
+                "class_name": "ExpectationsStore",
+                "store_backend": {
+                    "class_name": "TupleGCSStoreBackend",
+                    "project": expectations_store_project_name,
+                    "bucket": expectations_store_bucket_name,
+                    "prefix": expectations_store_prefix,
+                },
+            },
+            validations_store_name: {
+                "class_name": "ValidationsStore",
+                "store_backend": {
+                    "class_name": "TupleGCSStoreBackend",
+                    "project": validations_store_project_name,
+                    "bucket": validations_store_bucket_name,
+                    "prefix": validations_store_prefix,
+                },
+            },
+            evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+        }
+        self.data_docs_sites = {
+            "gcs_site": {
+                "class_name": "SiteBuilder",
+                "show_how_to_buttons": True,
+                "store_backend": {
+                    "class_name": "TupleGCSStoreBackend",
+                    "project": data_docs_project_name,
+                    "bucket": data_docs_bucket_name,
+                    "prefix": data_docs_prefix,
+                },
+                "site_index_builder": {
+                    "class_name": "DefaultSiteIndexBuilder",
+                    "show_cta_footer": True,
+                },
+            }
+        }
+
+
+class DatabaseBackendEcosystem(BaseBackendEcosystem):
+    def __init__(
+        self,
+        default_credentials: Dict = None,
+        expectations_store_credentials: Dict = None,
+        validations_store_credentials: Dict = None,
+        expectations_store_name: str = "expectations_database_store",
+        validations_store_name: str = "validations_database_store",
+        evaluation_parameter_store_name: str = "evaluation_parameter_store",
+    ):
+        # Initialize base defaults
+        super().__init__()
+
+        # Use default credentials if seprate credentials not supplied for expectations_store and validations_store
+        expectations_store_credentials = (
+            expectations_store_credentials
+            if expectations_store_credentials is not None
+            else default_credentials
+        )
+        validations_store_credentials = (
+            validations_store_credentials
+            if validations_store_credentials is not None
+            else default_credentials
+        )
+
+        # Overwrite defaults
+        self.expectations_store_name = expectations_store_name
+        self.validations_store_name = validations_store_name
+        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+
+        self.stores = {
+            expectations_store_name: {
+                "class_name": "ExpectationsStore",
+                "store_backend": {
+                    "class_name": "DatabaseStoreBackend",
+                    "credentials": expectations_store_credentials,
+                },
+            },
+            validations_store_name: {
+                "class_name": "ValidationsStore",
+                "store_backend": {
+                    "class_name": "DatabaseStoreBackend",
+                    "credentials": validations_store_credentials,
+                },
+            },
+            evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+        }
+
+
+class InMemoryBackendEcosystem(BaseBackendEcosystem):
     pass
-
-
-class DatabaseBackendEcosystem(DictDot):
-    pass
-
-
-class InMemoryBackendEcosystem(DictDot):
-    pass
+    # TODO: Are in-memory metadata stores supported? If so create this class.
 
 
 class DataContextConfig(DictDot):
     def __init__(
         self,
-        config_version,
-        datasources,
-        expectations_store_name,
-        validations_store_name,
-        evaluation_parameter_store_name,
-        plugins_directory,
-        validation_operators,
-        stores,
-        data_docs_sites,
+        config_version: Optional[float] = None,
+        datasources: Optional[
+            Union[
+                Dict[str, DatasourceConfig],
+                # Dict[
+                #     Union[
+                #         DatasourceConfig, Dict[
+                #             str, DatasourceConfig
+                #         ]
+                #     ]
+                # ],
+                Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
+            ]
+        ] = None,
+        expectations_store_name: Optional[str] = None,
+        validations_store_name: Optional[str] = None,
+        evaluation_parameter_store_name: Optional[str] = None,
+        plugins_directory: Optional[str] = None,
+        validation_operators=DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value,
+        stores: Optional[Dict] = None,
+        data_docs_sites: Optional[Dict] = None,
         notebooks=None,
-        config_variables_file_path=None,
+        config_variables_file_path: Optional[str] = None,
         anonymous_usage_statistics=None,
         commented_map=None,
+        backend_ecosystem: BaseBackendEcosystem = BaseBackendEcosystem(),
     ):
+
+        # TODO: should default plugins_directory be "plugins/" or None?
+        #  I think it may depend on in-memory or not. Is there checking
+        #  for this directory when it is used and graceful handling if not found?
+
+        # Set defaults via backend_ecosystem
+        # What happens / should happen if a user specifies a backend_ecosystem
+        #  and also items that would be specified inside of it e.g. expectations_store_name?
+        # Override attributes from backend_ecosystem with any items passed into the constructor:
+        config_version = (
+            config_version
+            if config_version is not None
+            else backend_ecosystem.config_version
+        )
+        stores = stores if stores is not None else backend_ecosystem.stores
+        expectations_store_name = (
+            expectations_store_name
+            if expectations_store_name is not None
+            else backend_ecosystem.expectations_store_name
+        )
+        validations_store_name = (
+            validations_store_name
+            if validations_store_name is not None
+            else backend_ecosystem.validations_store_name
+        )
+        evaluation_parameter_store_name = (
+            evaluation_parameter_store_name
+            if evaluation_parameter_store_name is not None
+            else backend_ecosystem.evaluation_parameter_store_name
+        )
+        validation_operators = (
+            validation_operators
+            if validation_operators is not None
+            else backend_ecosystem.validation_operators
+        )
+        data_docs_sites = (
+            data_docs_sites
+            if data_docs_sites is not None
+            else backend_ecosystem.data_docs_sites
+        )
+
         if commented_map is None:
             commented_map = CommentedMap()
         self._commented_map = commented_map
@@ -682,161 +892,6 @@ class DataContextConfig(DictDot):
         commented_map = deepcopy(self.commented_map)
         commented_map.update(dataContextConfigSchema.dump(self))
         yaml.dump(commented_map, outfile)
-
-
-class DefaultInMemoryDataContextConfig(DataContextConfig):
-    def __init__(
-        self,
-        # config_version: float = InMemoryConfigDefaults.DEFAULT_CONFIG_VERSION.value,
-        config_version: Optional[float] = None,
-        datasources: Optional[
-            Union[DatasourceConfig, Dict[str, DatasourceConfig]]
-        ] = None,
-        # expectations_store_name: str = InMemoryConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
-        # validations_store_name=InMemoryConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
-        # evaluation_parameter_store_name=InMemoryConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
-        expectations_store_name=None,
-        validations_store_name=None,
-        evaluation_parameter_store_name=None,
-        plugins_directory=None,
-        validation_operators=InMemoryConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value,
-        # stores=InMemoryConfigDefaults.DEFAULT_STORES.value,
-        stores=None,
-        # data_docs_sites=InMemoryConfigDefaults.DEFAULT_DATA_DOCS_SITES.value,
-        data_docs_sites=None,
-        notebooks=None,
-        config_variables_file_path=None,
-        anonymous_usage_statistics=None,
-        commented_map=None,
-        backend_ecosystem=BaseBackendEcosystem,
-    ):
-
-        config_version = (
-            config_version if config_version else backend_ecosystem.config_version
-        )
-        # TODO: What happens / should happen if a user specifies a backend_ecosystem
-        #  and also items that would be specified inside of it e.g. expectations_store_name?
-        stores = stores if stores else backend_ecosystem.stores
-
-        expectations_store_name = (
-            expectations_store_name
-            if expectations_store_name is not None
-            else backend_ecosystem.expectations_store_name
-        )
-        validations_store_name = (
-            validations_store_name
-            if validations_store_name is not None
-            else backend_ecosystem.validations_store_name
-        )
-        evaluation_parameter_store_name = (
-            evaluation_parameter_store_name
-            if evaluation_parameter_store_name is not None
-            else backend_ecosystem.evaluation_parameter_store_name
-        )
-
-        data_docs_sites = (
-            data_docs_sites
-            if data_docs_sites is not None
-            else backend_ecosystem.data_docs_sites
-        )
-
-        # Set defaults here
-        # config_version = config_version if config_version else CURRENT_CONFIG_VERSION
-        # # datasources is a required argument
-        # # expectations_store_name = (
-        # #     expectations_store_name if expectations_store_name else "expectations_store"
-        # # )
-        # # validations_store_name = (
-        # #     validations_store_name if validations_store_name else "validations_store"
-        # # )
-        # # evaluation_parameter_store_name = (
-        # #     evaluation_parameter_store_name
-        # #     if evaluation_parameter_store_name
-        # #     else "evaluation_parameter_store"
-        # # )
-        # plugins_directory = (
-        #     plugins_directory if plugins_directory else None
-        # )  # TODO: not "plugins/"?
-
-        # default_validation_operators = {
-        #     "action_list_operator": {
-        #         "class_name": "ActionListValidationOperator",
-        #         "action_list": [
-        #             {
-        #                 "name": "store_validation_result",
-        #                 "action": {"class_name": "StoreValidationResultAction"},
-        #             },
-        #             {
-        #                 "name": "store_evaluation_params",
-        #                 "action": {"class_name": "StoreEvaluationParametersAction"},
-        #             },
-        #             {
-        #                 "name": "update_data_docs",
-        #                 "action": {"class_name": "UpdateDataDocsAction"},
-        #             },
-        #         ],
-        #     }
-        # }
-        # validation_operators = (
-        #     validation_operators
-        #     if validation_operators
-        #     else default_validation_operators
-        # )
-
-        # default_stores = {
-        #     "expectations_S3_store": {
-        #         "class_name": "ExpectationsStore",
-        #         "store_backend": {
-        #             "class_name": "TupleS3StoreBackend",
-        #             "bucket": "REPLACE ME",  # TODO: replace with your value
-        #             "prefix": "REPLACE ME",  # TODO: replace with your value
-        #         },
-        #     },
-        #     "validations_S3_store": {
-        #         "class_name": "ValidationsStore",
-        #         "store_backend": {
-        #             "class_name": "TupleS3StoreBackend",
-        #             "bucket": "REPLACE ME",  # TODO: replace with your value
-        #             "prefix": "REPLACE ME",  # TODO: replace with your value
-        #         },
-        #     },
-        #     "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-        # }
-        # stores = stores if stores else default_stores
-
-        # default_data_docs_sites = {
-        #     "s3_site": {
-        #         "class_name": "SiteBuilder",
-        #         "store_backend": {
-        #             "class_name": "TupleS3StoreBackend",
-        #             "bucket": "REPLACE ME",  # TODO: replace with your value
-        #         },
-        #         "site_index_builder": {
-        #             "class_name": "DefaultSiteIndexBuilder",
-        #             "show_cta_footer": True,
-        #         },
-        #     }
-        # }
-        # data_docs_sites = (
-        #     data_docs_sites if data_docs_sites else default_data_docs_sites
-        # )
-
-        # Init parent class with defaults
-        super().__init__(
-            config_version=config_version,
-            datasources=datasources,
-            expectations_store_name=expectations_store_name,
-            validations_store_name=validations_store_name,
-            evaluation_parameter_store_name=evaluation_parameter_store_name,
-            plugins_directory=plugins_directory,
-            validation_operators=validation_operators,
-            stores=stores,
-            data_docs_sites=data_docs_sites,
-            notebooks=notebooks,
-            config_variables_file_path=config_variables_file_path,
-            anonymous_usage_statistics=anonymous_usage_statistics,
-            commented_map=commented_map,
-        )
 
 
 dataContextConfigSchema = DataContextConfigSchema()
