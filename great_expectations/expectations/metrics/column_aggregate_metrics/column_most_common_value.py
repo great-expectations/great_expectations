@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -16,6 +16,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.expectations.metrics.import_manager import F
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -27,9 +28,16 @@ class ColumnMostCommonValue(ColumnMetricProvider):
         mode_list = list(column.mode().values)
         return mode_list
 
-    @column_aggregate_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, _metrics, **kwargs):
-        column_value_counts = _metrics.get("column.value_counts")
+    @metric_value(engine=SparkDFExecutionEngine)
+    def _spark(
+        cls,
+        execution_engine: "SqlAlchemyExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        column_value_counts = metrics.get("column.value_counts")
         return list(
             column_value_counts[column_value_counts == column_value_counts.max()].index
         )
