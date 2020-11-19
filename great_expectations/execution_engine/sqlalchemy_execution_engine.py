@@ -9,6 +9,7 @@ import pandas as pd
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
     GreatExpectationsError,
@@ -24,12 +25,15 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+except ImportError:
+    sa = None
+
+try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
-    sa = None
     reflection = None
     DefaultDialect = None
     Select = None
@@ -813,8 +817,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 res[0]
             ), "unexpected number of metrics returned"
             for idx, id in enumerate(query["ids"]):
-                resolved_metrics[id] = res[0][idx]
+                resolved_metrics[id] = convert_to_json_serializable(res[0][idx])
 
+        # Convert metrics to be serializable
         return resolved_metrics
 
     ### Splitter methods for partitioning tables ###
