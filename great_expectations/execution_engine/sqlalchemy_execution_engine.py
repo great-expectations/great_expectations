@@ -223,16 +223,19 @@ class SqlAlchemyBatchData:
                     dialect=self.sql_engine_dialect,
                     compile_kwargs={"literal_binds": True},
                 )
-            self._selectable = self._create_temporary_table(
+            self._create_temporary_table(
                 generated_table_name,
                 query,
                 temp_table_schema_name=temp_table_schema_name,
             )
+            self._selectable = sa.Table(generated_table_name, sa.MetaData(), schema_name=temp_table_schema_name)
         else:
             if query:
                 self._selectable = sa.text(query)
             else:
-                self._selectable = selectable
+                self._selectable = selectable.alias(
+                    self._record_set_name or "great_expectations_sub_selection"
+                )
 
     @property
     def sql_engine_dialect(self) -> DefaultDialect:
@@ -937,13 +940,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
 
         selectable = self._build_selectable_from_batch_spec(batch_spec)
-        # batch_data = self.engine.execute(selector)
-        # TODO: Abe 20201030: This method should return a SqlAlchemyBatchData as its first object, but that probably requires deeper changes.
         batch_data = SqlAlchemyBatchData(
             engine=self.engine,
             selectable=selectable,
-            # table_name=batch_spec.get("table"),
-            # schema=batch_spec.get("schema"),
         )
 
         batch_markers = BatchMarkers(
