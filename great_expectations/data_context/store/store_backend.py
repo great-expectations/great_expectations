@@ -1,6 +1,7 @@
 import logging
 import uuid
 from abc import ABCMeta, abstractmethod
+from typing import Optional
 
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 
@@ -22,9 +23,17 @@ class StoreBackend(metaclass=ABCMeta):
     STORE_BACKEND_ID_KEY = (".ge_store_backend_id",)
     STORE_BACKEND_ID_PREFIX = "store_backend_id = "
 
-    def __init__(self, fixed_length_key=False, suppress_store_backend_id=False):
+    def __init__(
+        self,
+        fixed_length_key=False,
+        suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
+    ):
         self._fixed_length_key = fixed_length_key
         self._suppress_store_backend_id = suppress_store_backend_id
+        self._manually_initialize_store_backend_id = (
+            manually_initialize_store_backend_id
+        )
 
     @property
     def fixed_length_key(self):
@@ -34,6 +43,9 @@ class StoreBackend(metaclass=ABCMeta):
     def store_backend_id(self) -> str:
         """
         Create a store_backend_id if one does not exist, and return it if it exists
+        If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id
+        and there is not already an existing store_backend_id then the store_backend_id
+        from param manually_initialize_store_backend_id is used to create it.
         Returns:
             store_backend_id which is a UUID(version=4)
         """
@@ -43,7 +55,11 @@ class StoreBackend(metaclass=ABCMeta):
                     self.STORE_BACKEND_ID_PREFIX, ""
                 )
             except InvalidKeyError:
-                store_id = str(uuid.uuid4())
+                store_id = (
+                    self._manually_initialize_store_backend_id
+                    if self._manually_initialize_store_backend_id
+                    else str(uuid.uuid4())
+                )
                 self.set(
                     key=self.STORE_BACKEND_ID_KEY,
                     value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}",
@@ -141,11 +157,22 @@ class InMemoryStoreBackend(StoreBackend):
     """
 
     # noinspection PyUnusedLocal
-    def __init__(self, runtime_environment=None, fixed_length_key=False):
-        super().__init__(fixed_length_key=fixed_length_key)
+    def __init__(
+        self,
+        runtime_environment=None,
+        fixed_length_key=False,
+        suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
+    ):
+        super().__init__(
+            fixed_length_key=fixed_length_key,
+            suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
+        )
         self._store = {}
-        # Initialize with store_backend_id
-        _ = self.store_backend_id
+        # Initialize with store_backend_id if not part of an HTMLSiteStore
+        if not self._suppress_store_backend_id:
+            _ = self.store_backend_id
 
     def _get(self, key):
         try:

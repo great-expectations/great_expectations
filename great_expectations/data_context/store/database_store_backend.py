@@ -29,8 +29,18 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseStoreBackend(StoreBackend):
-    def __init__(self, credentials, table_name, key_columns, fixed_length_key=True):
-        super().__init__(fixed_length_key=fixed_length_key)
+    def __init__(
+        self,
+        credentials,
+        table_name,
+        key_columns,
+        fixed_length_key=True,
+        manually_initialize_store_backend_id: str = "",
+    ):
+        super().__init__(
+            fixed_length_key=fixed_length_key,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
+        )
         if not sqlalchemy:
             raise ge_exceptions.DataContextError(
                 "ModuleNotFoundError: No module named 'sqlalchemy'"
@@ -86,10 +96,14 @@ class DatabaseStoreBackend(StoreBackend):
         Returns:
             store_backend_id which is a UUID(version=4)
         """
+
         if not self._store_backend_id:
-            self._store_backend_id = (
-                f"{self.STORE_BACKEND_ID_PREFIX}{str(uuid.uuid4())}"
+            store_id = (
+                self._manually_initialize_store_backend_id
+                if self._manually_initialize_store_backend_id
+                else str(uuid.uuid4())
             )
+            self._store_backend_id = f"{self.STORE_BACKEND_ID_PREFIX}{store_id}"
         return self._store_backend_id.replace(self.STORE_BACKEND_ID_PREFIX, "")
 
     def _get(self, key):

@@ -30,11 +30,13 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         platform_specific_separator=True,
         fixed_length_key=False,
         suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
         base_public_path=None,
     ):
         super().__init__(
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
         )
         if forbidden_substrings is None:
             forbidden_substrings = ["/", "\\"]
@@ -219,6 +221,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         root_directory=None,
         fixed_length_key=False,
         suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
         base_public_path=None,
     ):
         super().__init__(
@@ -229,6 +232,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             base_public_path=base_public_path,
         )
         if os.path.isabs(base_directory):
@@ -402,6 +406,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         platform_specific_separator=False,
         fixed_length_key=False,
         suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
         base_public_path=None,
         endpoint_url=None,
     ):
@@ -413,6 +418,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             base_public_path=base_public_path,
         )
         self.bucket = bucket
@@ -657,6 +663,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         platform_specific_separator=False,
         fixed_length_key=False,
         suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
         public_urls=True,
         base_public_path=None,
     ):
@@ -668,6 +675,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             base_public_path=base_public_path,
         )
         self.bucket = bucket
