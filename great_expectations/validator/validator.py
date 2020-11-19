@@ -180,11 +180,12 @@ class Validator:
                 meta = None
                 # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
                 # positional arguments to expectation methods
+                legacy_arg_names = expectation_impl.legacy_method_parameters.get(
+                    name, tuple()
+                )
                 for idx, arg in enumerate(args):
                     try:
-                        arg_name = expectation_impl.legacy_method_parameters.get(
-                            name, tuple()
-                        )[idx]
+                        arg_name = legacy_arg_names[idx]
                         if arg_name in allowed_config_keys:
                             expectation_kwargs[arg_name] = arg
                         if arg_name == "meta":
@@ -204,12 +205,12 @@ class Validator:
                 configuration = ExpectationConfiguration(
                     expectation_type=name, kwargs=expectation_kwargs, meta=meta
                 )
-                runtime_configuration = configuration.get_runtime_kwargs()
+                # runtime_configuration = configuration.get_runtime_kwargs()
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 validation_result = expectation.validate(
-                    validator=self, runtime_configuration=runtime_configuration,
+                    validator=self, runtime_configuration=basic_runtime_configuration
                 )
                 if isinstance(validation_result, dict):
                     validation_result = ExpectationValidationResult(**validation_result)
@@ -247,7 +248,7 @@ class Validator:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
-    def _populate_dependencies(
+    def build_metric_dependency_graph(
         self,
         graph: ValidationGraph,
         child_node: MetricConfiguration,
@@ -264,7 +265,10 @@ class Validator:
             child_node.metric_name, execution_engine=execution_engine
         )[0]
         metric_dependencies = metric_impl.get_evaluation_dependencies(
-            child_node, configuration
+            metric=child_node,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
         )
         child_node.metric_dependencies = metric_dependencies
 
@@ -276,7 +280,12 @@ class Validator:
 
         else:
             for metric_dependency in metric_dependencies.values():
-                self._populate_dependencies(
+                if metric_dependency.id == child_node.id:
+                    logger.warning(
+                        f"Metric {str(child_node.id)} has created a circular dependency"
+                    )
+                    continue
+                self.build_metric_dependency_graph(
                     graph,
                     metric_dependency,
                     configuration,
@@ -313,7 +322,6 @@ class Validator:
         for configuration in configurations:
             # Validating
             try:
-                # Todo: try to find a way to access table columns so as to verify column is in table
                 assert (
                     configuration.expectation_type is not None
                 ), "Given configuration should include expectation type"
@@ -326,7 +334,7 @@ class Validator:
             )["metrics"]
 
             for metric in validation_dependencies.values():
-                self._populate_dependencies(
+                self.build_metric_dependency_graph(
                     graph,
                     metric,
                     configuration,
@@ -336,7 +344,20 @@ class Validator:
 
         if metrics is None:
             metrics = dict()
+        metrics = self.resolve_validation_graph(graph, metrics, runtime_configuration)
 
+        evrs = list()
+        for configuration in configurations:
+            evrs.append(
+                configuration.metrics_validate(
+                    metrics,
+                    execution_engine=self._execution_engine,
+                    runtime_configuration=runtime_configuration,
+                )
+            )
+        return evrs
+
+    def resolve_validation_graph(self, graph, metrics, runtime_configuration=None):
         done: bool = False
         while not done:
             ready_metrics, needed_metrics = self._parse_validation_graph(graph, metrics)
@@ -351,37 +372,28 @@ class Validator:
             if len(ready_metrics) + len(needed_metrics) == 0:
                 done = True
 
-        evrs = list()
-        for configuration in configurations:
-            evrs.append(
-                configuration.metrics_validate(
-                    metrics,
-                    execution_engine=self._execution_engine,
-                    runtime_configuration=runtime_configuration,
-                )
-            )
-        return evrs
+        return metrics
 
     def _parse_validation_graph(self, validation_graph, metrics):
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
-        needed_metric_ids = set()
-        needed_metrics = set()
-        ready_metric_ids = set()
-        ready_metrics = set()
+        unmet_dependency_ids = set()
+        unmet_dependency = set()
+        maybe_ready_ids = set()
+        maybe_ready = set()
 
         for edge in validation_graph.edges:
             if edge.left.id not in metrics:
                 if edge.right is None or edge.right.id in metrics:
-                    if edge.left.id not in ready_metric_ids:
-                        ready_metric_ids.add(edge.left.id)
-                        ready_metrics.add(edge.left)
+                    if edge.left.id not in maybe_ready_ids:
+                        maybe_ready_ids.add(edge.left.id)
+                        maybe_ready.add(edge.left)
                 else:
-                    if edge.left.id not in needed_metric_ids:
-                        needed_metric_ids.add(edge.left.id)
-                        needed_metrics.add(edge.left)
+                    if edge.left.id not in unmet_dependency_ids:
+                        unmet_dependency_ids.add(edge.left.id)
+                        unmet_dependency.add(edge.left)
 
-        return ready_metrics, needed_metrics
+        return maybe_ready - unmet_dependency, unmet_dependency
 
     def _resolve_metrics(
         self,

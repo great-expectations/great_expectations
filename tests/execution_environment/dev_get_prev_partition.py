@@ -4,7 +4,7 @@ from typing import List, Union
 
 import pandas as pd
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 from great_expectations.core.batch import (
     Batch,
@@ -30,6 +30,8 @@ from tests.test_utils import (
     create_files_for_regex_partitioner,
     create_files_in_directory,
 )
+
+yaml = YAML()
 
 
 @pytest.fixture

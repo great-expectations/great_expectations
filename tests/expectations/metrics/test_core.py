@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import pandas as pd
 
+from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -46,16 +47,30 @@ def _build_pandas_engine(df):
 
 
 def test_metric_loads():
-    assert (
-        get_metric_provider("column.aggregate.max", PandasExecutionEngine()) is not None
-    )
+    assert get_metric_provider("column.max", PandasExecutionEngine()) is not None
 
 
 def test_basic_metric():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+
     desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert results == {desired_metric.id: 3}
+
+
+def test_column_max():
+    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    desired_metric = MetricConfiguration(
+        metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -66,7 +81,7 @@ def test_basic_metric():
 def test_mean_metric_pd():
     engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
     desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.mean",
+        metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -77,7 +92,7 @@ def test_mean_metric_pd():
 def test_stdev_metric_pd():
     engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
     desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.standard_deviation",
+        metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -86,45 +101,76 @@ def test_stdev_metric_pd():
 
 
 def test_max_metric_sa(sa):
-    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 1]}), sa)
-    desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.max",
+    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
+
+    partial_metric = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
 
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    metrics = engine.resolve_metrics(metrics_to_resolve=(partial_metric,))
+    desired_metric = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": partial_metric},
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
     assert results == {desired_metric.id: 2}
 
 
 def test_max_metric_spark(spark_session):
     engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}), spark_session)
-    desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.max",
+    partial_metric = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+
+    metrics = engine.resolve_metrics(metrics_to_resolve=(partial_metric,))
+    desired_metric = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": partial_metric},
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
     assert results == {desired_metric.id: 2}
 
 
 def test_map_value_set_sa(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), sa)
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set",
+        metric_name="column_values.in_set.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
-
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+
     # Note: metric_dependencies is optional here in the config when called from a validator.
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set.unexpected_count",
+    aggregate_partial = MetricConfiguration(
+        metric_name="column_values.in_set.unexpected_count.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
         metric_dependencies={"unexpected_condition": desired_metric},
     )
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
+
+    metrics = engine.resolve_metrics(
+        metrics_to_resolve=(aggregate_partial,), metrics=metrics
+    )
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.in_set.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"value_set": [1, 2, 3]},
+        metric_dependencies={"metric_partial_fn": aggregate_partial},
+    )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -154,17 +200,27 @@ def test_map_value_set_spark(spark_session):
     engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), spark_session)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.in_set",
+        metric_name="column_values.in_set.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
-
     metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
+
+    # Note: metric_dependencies is optional here in the config when called from a validator.
+    aggregate_partial = MetricConfiguration(
+        metric_name="column_values.in_set.unexpected_count.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"value_set": [1, 2, 3]},
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    metrics = engine.resolve_metrics(
+        metrics_to_resolve=(aggregate_partial,), metrics=metrics
+    )
     desired_metric = MetricConfiguration(
         metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"unexpected_condition": condition_metric},
+        metric_dependencies={"metric_partial_fn": aggregate_partial},
     )
 
     results = engine.resolve_metrics(
@@ -179,17 +235,27 @@ def test_map_value_set_spark(spark_session):
     engine = SparkDFExecutionEngine(batch_data_dict={"my_id": df})
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.in_set",
+        metric_name="column_values.in_set.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
-
     metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
+
+    # Note: metric_dependencies is optional here in the config when called from a validator.
+    aggregate_partial = MetricConfiguration(
+        metric_name="column_values.in_set.unexpected_count.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"value_set": [1, 2, 3]},
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    metrics = engine.resolve_metrics(
+        metrics_to_resolve=(aggregate_partial,), metrics=metrics
+    )
     desired_metric = MetricConfiguration(
         metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"unexpected_condition": condition_metric},
+        metric_dependencies={"metric_partial_fn": aggregate_partial},
     )
 
     results = engine.resolve_metrics(
@@ -199,33 +265,30 @@ def test_map_value_set_spark(spark_session):
 
 
 def test_map_column_value_lengths_between_pd():
-    # NOTE: 20201106 - JPC - this test is unusual because it's checking against the map_fn value.
-    # We plan to implement map_values in the future.
     engine = _build_pandas_engine(
         pd.DataFrame({"a": ["a", "aaa", "bcbc", "defgh", None]})
     )
     desired_metric = MetricConfiguration(
-        metric_name="column_values.value_length.map_fn",
+        metric_name="column_values.value_length.map",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"value_set": [1]},
+        metric_value_kwargs=dict(),
     )
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    # assert results == {desired_metric.id: 1}
     ser_expected_lengths = pd.Series([1, 3, 4, 5])
-    assert ser_expected_lengths.equals(results[desired_metric.id])
+    result_series, _, _ = results[desired_metric.id]
+    assert ser_expected_lengths.equals(result_series)
 
 
 def test_map_unique_pd():
     engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique",
+        metric_name="column_values.unique.condition",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"value_set": [1]},
+        metric_value_kwargs=dict(),
     )
 
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert list(results[desired_metric.id]) == [False, False, True, True]
+    assert list(results[desired_metric.id][0]) == [False, False, True, True]
 
 
 def test_map_unique_spark(spark_session):
@@ -240,12 +303,13 @@ def test_map_unique_spark(spark_session):
     )
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique",
+        metric_name="column_values.unique.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
 
+    # unique is a *window* function so does not use the aggregate_fn version of unexpected count
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.unexpected_count",
         metric_domain_kwargs={"column": "a"},
@@ -305,20 +369,34 @@ def test_map_unique_sa(sa):
         sa,
     )
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique",
+        metric_name="column_values.unique.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
 
+    # This is no longer a MAP_CONDITION because mssql does not support it. Instead, it is a WINDOW_CONDITION
+    #
+    # aggregate_fn = MetricConfiguration(
+    #     metric_name="column_values.unique.unexpected_count.aggregate_fn",
+    #     metric_domain_kwargs={"column": "a"},
+    #     metric_value_kwargs=dict(),
+    #     metric_dependencies={"unexpected_condition": condition_metric},
+    # )
+    # aggregate_fn_metrics = engine.resolve_metrics(
+    #     metrics_to_resolve=(aggregate_fn,), metrics=metrics
+    # )
+
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
+        # metric_dependencies={"metric_partial_fn": aggregate_fn},
         metric_dependencies={"unexpected_condition": condition_metric},
     )
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
+        metrics_to_resolve=(desired_metric,),
+        metrics=metrics,  # metrics=aggregate_fn_metrics
     )
     assert results[desired_metric.id] == 2
 
@@ -366,12 +444,12 @@ def test_z_score_under_threshold_pd():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     mean = MetricConfiguration(
-        metric_name="column.aggregate.mean",
+        metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     stdev = MetricConfiguration(
-        metric_name="column.aggregate.standard_deviation",
+        metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
@@ -379,28 +457,25 @@ def test_z_score_under_threshold_pd():
     metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map_fn",
+        metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={
-            "column.aggregate.standard_deviation": stdev,
-            "column.aggregate.mean": mean,
-        },
+        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean,},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold",
+        metric_name="column_values.z_score.under_threshold.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"column_values.z_score.map_fn": desired_metric},
+        metric_dependencies={"column_values.z_score.map": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
-    assert list(results[desired_metric.id]) == [False, False, False]
+    assert list(results[desired_metric.id][0]) == [False, False, False]
     metrics.update(results)
     desired_metric = MetricConfiguration(
         metric_name="column_values.z_score.under_threshold.unexpected_count",
@@ -416,47 +491,74 @@ def test_z_score_under_threshold_pd():
 
 def test_z_score_under_threshold_spark(spark_session):
     engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), spark_session)
+
     mean = MetricConfiguration(
-        metric_name="column.aggregate.mean",
+        metric_name="column.mean.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     stdev = MetricConfiguration(
-        metric_name="column.aggregate.standard_deviation",
+        metric_name="column.standard_deviation.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     desired_metrics = (mean, stdev)
-    metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metrics))
+    metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map_fn",
+    mean = MetricConfiguration(
+        metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={
-            "column.aggregate.standard_deviation": stdev,
-            "column.aggregate.mean": mean,
-        },
+        metric_dependencies={"metric_partial_fn": mean},
+    )
+    stdev = MetricConfiguration(
+        metric_name="column.standard_deviation",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": stdev},
+    )
+    desired_metrics = (mean, stdev)
+    metrics = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metrics), metrics=metrics
+    )
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.z_score.map",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold",
+        metric_name="column_values.z_score.under_threshold.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"column_values.z_score.map_fn": desired_metric},
+        metric_dependencies={"column_values.z_score.map": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.z_score.under_threshold.unexpected_count.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"double_sided": True, "threshold": 2},
+        metric_dependencies={"unexpected_condition": desired_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
     desired_metric = MetricConfiguration(
         metric_name="column_values.z_score.under_threshold.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"unexpected_condition": desired_metric},
+        metric_dependencies={"metric_partial_fn": desired_metric},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -480,20 +582,20 @@ def test_column_pairs_equal_metric_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3], "b": [1, 2, 3, 3]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     desired_metric = MetricConfiguration(
-        metric_name="column_pair_values.equal",
-        metric_domain_kwargs={"column_a": "a", "column_b": "b"},
+        metric_name="column_pair_values.equal.condition",
+        metric_domain_kwargs={"column_A": "a", "column_B": "b"},
         metric_value_kwargs=dict(),
     )
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert list(results.values())[0].equals(pd.Series([True, True, True, True]))
+    assert results[desired_metric.id][0].equals(pd.Series([True, True, True, True]))
 
 
 def test_column_pairs_greater_metric_pd():
     df = pd.DataFrame({"a": [2, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     desired_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b",
-        metric_domain_kwargs={"column_a": "a", "column_b": "b"},
+        metric_name="column_pair_values.a_greater_than_b.condition",
+        metric_domain_kwargs={"column_A": "a", "column_B": "b"},
         metric_value_kwargs={
             "or_equal": True,
             "ignore_row_if": "either_value_is_missing",
@@ -501,7 +603,7 @@ def test_column_pairs_greater_metric_pd():
     )
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert (
-        list(results.values())[0]
+        results[desired_metric.id][0]
         .reset_index(drop=True)
         .equals(pd.Series([True, True, True, True]))
     )
@@ -511,8 +613,8 @@ def test_column_pairs_in_set_metric_pd():
     df = pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     desired_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set",
-        metric_domain_kwargs={"column_a": "a", "column_b": "b"},
+        metric_name="column_pair_values.in_set.condition",
+        metric_domain_kwargs={"column_A": "a", "column_B": "b"},
         metric_value_kwargs={
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
             "ignore_row_if": "either_value_is_missing",
@@ -520,7 +622,7 @@ def test_column_pairs_in_set_metric_pd():
     )
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert (
-        list(results.values())[0]
+        results[desired_metric.id][0]
         .reset_index(drop=True)
         .equals(pd.Series([False, True, True, True]))
     )
@@ -530,30 +632,45 @@ def test_table_metric_spark(spark_session):
     engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}), spark_session)
 
     desired_metric = MetricConfiguration(
-        metric_name="table.row_count",
+        metric_name="table.row_count.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
-
-    # results = engine.resolve_metrics(batches={"batch_id": batch}, metrics_to_resolve=(desired_metric,))
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+
+    desired_metric = MetricConfiguration(
+        metric_name="table.row_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=results
+    )
+
     assert results == {desired_metric.id: 3}
 
 
 def test_median_metric_spark(spark_session):
     engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3]}), spark_session)
 
+    desired_metric = MetricConfiguration(
+        metric_name="table.row_count.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+
     row_count = MetricConfiguration(
         metric_name="table.row_count",
         metric_domain_kwargs={},
         metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric},
     )
-
-    desired_metrics = (row_count,)
-    metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
+    metrics = engine.resolve_metrics(metrics_to_resolve=(row_count,), metrics=metrics)
 
     desired_metric = MetricConfiguration(
-        metric_name="column.aggregate.median",
+        metric_name="column.median",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
         metric_dependencies={"table.row_count": row_count},
@@ -655,7 +772,7 @@ def test_distinct_metric_pd():
     assert results == {desired_metric.id: {1, 2, 3}}
 
 
-def test_sa_batch_aggregate_metrics(sa):
+def test_sa_batch_aggregate_metrics(caplog, sa):
     import datetime
 
     engine = _build_sa_engine(
@@ -663,25 +780,59 @@ def test_sa_batch_aggregate_metrics(sa):
     )
 
     desired_metric_1 = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     desired_metric_2 = MetricConfiguration(
-        metric_name="column.aggregate.min",
+        metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     desired_metric_3 = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
     )
     desired_metric_4 = MetricConfiguration(
-        metric_name="column.aggregate.min",
+        metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
     )
+    metrics = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        )
+    )
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_1},
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_2},
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_3},
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_4},
+    )
+    caplog.clear()
+    caplog.set_level(logging.DEBUG, logger="great_expectations")
     start = datetime.datetime.now()
     res = engine.resolve_metrics(
         metrics_to_resolve=(
@@ -689,7 +840,8 @@ def test_sa_batch_aggregate_metrics(sa):
             desired_metric_2,
             desired_metric_3,
             desired_metric_4,
-        )
+        ),
+        metrics=metrics,
     )
     end = datetime.datetime.now()
     print("t1")
@@ -698,6 +850,16 @@ def test_sa_batch_aggregate_metrics(sa):
     assert res[desired_metric_2.id] == 1
     assert res[desired_metric_3.id] == 4
     assert res[desired_metric_4.id] == 4
+
+    # Check that all four of these metrics were computed on a single domain
+    found_message = False
+    for record in caplog.records:
+        if (
+            record.message
+            == "SqlAlchemyExecutionEngine computed 4 metrics on domain_id ()"
+        ):
+            found_message = True
+    assert found_message
 
 
 def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
@@ -708,24 +870,56 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     )
 
     desired_metric_1 = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     desired_metric_2 = MetricConfiguration(
-        metric_name="column.aggregate.min",
+        metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
     )
     desired_metric_3 = MetricConfiguration(
-        metric_name="column.aggregate.max",
+        metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
     )
     desired_metric_4 = MetricConfiguration(
-        metric_name="column.aggregate.min",
+        metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
+    )
+    metrics = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        )
+    )
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_1},
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_2},
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_3},
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": desired_metric_4},
     )
     start = datetime.datetime.now()
     caplog.clear()
@@ -736,7 +930,8 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
             desired_metric_2,
             desired_metric_3,
             desired_metric_4,
-        )
+        ),
+        metrics=metrics,
     )
     end = datetime.datetime.now()
     print(end - start)

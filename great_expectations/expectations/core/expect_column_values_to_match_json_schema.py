@@ -1,20 +1,8 @@
 import json
-from typing import Dict, List, Optional, Union
-
-import jsonschema
-import numpy as np
-import pandas as pd
+from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
 
-from ...core.batch import Batch
-from ...data_asset.util import parse_result_format
-from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
@@ -22,13 +10,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-)
-from ..registry import extract_metrics, get_metric_kwargs
+from ..expectation import ColumnMapExpectation
 
 try:
     import sqlalchemy as sa
@@ -162,52 +144,3 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
                 }
             )
         ]
-
-    # @SqlAlchemyExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_json_schema",
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=("json",),
-    #     metric_dependencies=tuple(),
-    # )
-    # def _sqlalchemy_match_json_schema(
-    #     self,
-    #     column: sa.column,
-    #     json: str,
-    #     runtime_configuration: dict = None,
-    #     filter_column_isnull: bool = True,
-    # ):
-    #     json_expression = execution_engine._get_dialect_json_expression(column, json)
-    #     if json_expression is None:
-    #         logger.warning(
-    #             "json is not supported for dialect %s" % str(self.sql_engine_dialect)
-    #         )
-    #         raise NotImplementedError
-    #
-    #     return json_expression
-    #     if json is None:
-    #         # vacuously true
-    #         return True
-    #
-    #     return column.in_(tuple(json))
-    #
-    # @SparkDFExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_json_schema",
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=("json",),
-    #     metric_dependencies=tuple(),
-    # )
-    # def _spark_match_json_schema(
-    #     self,
-    #     data: "pyspark.sql.DataFrame",
-    #     column: str,
-    #     json: str,
-    #     runtime_configuration: dict = None,
-    #     filter_column_isnull: bool = True,
-    # ):
-    #     import pyspark.sql.functions as F
-    #
-    #     if json is None:
-    #         # vacuously true
-    #         return data.withColumn(column + "__success", F.lit(True))
-    #
-    #     return data.withColumn(column + "__success", F.col(column).isin(json))

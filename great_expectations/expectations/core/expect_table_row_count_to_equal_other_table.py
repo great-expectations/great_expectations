@@ -1,3 +1,7 @@
+from typing import Dict, Optional
+
+from great_expectations.core import ExpectationConfiguration
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
@@ -5,8 +9,8 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 
 
 class ExpectTableRowCountToEqualOtherTable(TableExpectation):
-    metric_dependencies = tuple()
-    success_keys = "other_table_name"
+    metric_dependencies = ("table.row_count",)
+    success_keys = ("other_table_name",)
     default_kwarg_values = {
         "other_table_name": None,
         "result_format": "BASIC",
@@ -75,3 +79,30 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
                 },
             }
         )
+
+    def get_validation_dependencies(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        dependencies = super().get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )
+        test = 1
+        return dependencies
+
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        expected_table_row_count = self.get_success_kwargs().get("value")
+        actual_table_row_count = metrics.get("table.row_count")
+
+        return {
+            "success": actual_table_row_count == expected_table_row_count,
+            "result": {"observed_value": actual_table_row_count},
+        }

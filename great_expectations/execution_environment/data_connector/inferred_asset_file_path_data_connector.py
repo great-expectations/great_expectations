@@ -1,13 +1,11 @@
-from typing import List, Optional
 import copy
-
 import logging
+from typing import List, Optional
 
+from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector import FilePathDataConnector
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequest,
+from great_expectations.execution_environment.data_connector import (
+    FilePathDataConnector,
 )
 
 logger = logging.getLogger(__name__)
@@ -50,9 +48,10 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
-            mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(
-                data_reference=data_reference,
-                data_asset_name=None
+            mapped_batch_definition_list: List[
+                BatchDefinition
+            ] = self._map_data_reference_to_batch_definition_list(
+                data_reference=data_reference, data_asset_name=None
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
@@ -66,7 +65,9 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
     def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
-            raise ValueError('_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?')
+            raise ValueError(
+                '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
+            )
 
         return [k for k, v in self._data_references_cache.items() if v is None]
 
@@ -75,14 +76,19 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             self._refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
-        batch_definition_list: List[BatchDefinition] = self.get_batch_definition_list_from_batch_request(
+        batch_definition_list: List[
+            BatchDefinition
+        ] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,
             )
         )
 
-        data_asset_names: List[str] = [batch_definition.data_asset_name for batch_definition in batch_definition_list]
+        data_asset_names: List[str] = [
+            batch_definition.data_asset_name
+            for batch_definition in batch_definition_list
+        ]
 
         return list(set(data_asset_names))
 

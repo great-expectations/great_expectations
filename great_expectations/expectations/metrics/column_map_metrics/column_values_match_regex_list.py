@@ -9,11 +9,11 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetricProvider,
-    column_map_condition,
-)
 from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.metrics.map_metric import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
 from great_expectations.expectations.metrics.util import get_dialect_regex_expression
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
     )
     default_kwarg_values = {"match_on": "any"}
 
-    @column_map_condition(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, regex_list, match_on, **kwargs):
         regex_matches = []
         for regex in regex_list:
@@ -43,7 +43,7 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
 
         return result
 
-    @column_map_condition(engine=SqlAlchemyExecutionEngine)
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, regex_list, match_on, _dialect, **kwargs):
         if match_on not in ["any", "all"]:
             raise ValueError("match_on must be any or all")
@@ -72,7 +72,7 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
             )
         return condition
 
-    @column_map_condition(engine=SparkDFExecutionEngine)
+    @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, regex_list, match_on, **kwargs):
         if match_on == "any":
             return column.rlike("|".join(regex_list))

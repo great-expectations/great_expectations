@@ -8,35 +8,33 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
+    column_aggregate_value,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import F as F
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    column_aggregate_metric,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
-    metric,
+    metric_value,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnMedian(MetricProvider):
+class ColumnMedian(ColumnMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
-    metric_name = "column.aggregate.median"
+    metric_name = "column.median"
 
-    @column_aggregate_metric(engine=PandasExecutionEngine)
+    @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Median Implementation"""
         return column.median()
 
-    @metric(engine=SqlAlchemyExecutionEngine, metric_fn_type="data")
+    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     def _sqlalchemy(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
@@ -49,7 +47,9 @@ class ColumnMedian(MetricProvider):
             selectable,
             compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(metric_domain_kwargs)
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
@@ -58,6 +58,8 @@ class ColumnMedian(MetricProvider):
         if dialect.name.lower() == "awsathena":
             raise NotImplementedError("AWS Athena does not support OFFSET.")
         nonnull_count = metrics.get("column_values.nonnull.count")
+        if not nonnull_count:
+            return None
         element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)
@@ -85,7 +87,7 @@ class ColumnMedian(MetricProvider):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    @metric(engine=SparkDFExecutionEngine, metric_fn_type="data")
+    @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
     def _spark(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
@@ -98,7 +100,9 @@ class ColumnMedian(MetricProvider):
             df,
             compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(metric_domain_kwargs)
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
         column = accessor_domain_kwargs["column"]
         # We will get the two middle values by choosing an epsilon to add
         # to the 50th percentile such that we always get exactly the middle two values
@@ -117,7 +121,7 @@ class ColumnMedian(MetricProvider):
         return np.mean(result)
 
     @classmethod
-    def get_evaluation_dependencies(
+    def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -131,15 +135,29 @@ class ColumnMedian(MetricProvider):
           ...
         }
         """
+
+        dependencies = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
         table_domain_kwargs = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
 
-        return {
-            "column_values.nonnull.count": MetricConfiguration(
+        dependencies.update(
+            {
+                "table.row_count": MetricConfiguration(
+                    "table.row_count", table_domain_kwargs
+                )
+            }
+        )
+
+        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+            dependencies["column_values.nonnull.count"] = MetricConfiguration(
                 "column_values.nonnull.count", metric.metric_domain_kwargs
-            ),
-            "table.row_count": MetricConfiguration(
-                "table.row_count", table_domain_kwargs
-            ),
-        }
+            )
+
+        return dependencies
