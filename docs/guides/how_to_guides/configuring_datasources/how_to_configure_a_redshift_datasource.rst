@@ -187,11 +187,13 @@ Steps
                     password: my_password
                     host: my-datawarehouse-name.abcde1qrstuw.us-east-1.redshift.amazonaws.com
                     port: 5439
-                    sslmode: prefer
                     database: dev
+                    query:
+                        sslmode: prefer
 
                 introspection:
-                    whole_table: {}
+                    whole_table:
+                        data_asset_name_suffix: __whole_table
                 """
 
         #. **Run context.test_yaml_config.**
@@ -215,42 +217,41 @@ Steps
 
             .. code-block:: bash
 
-                Attempting to instantiate class from config ...
-                    Instantiating as a ExecutionEnvironment, since class_name is ExecutionEnvironment
-                    Successfully instantiated ExecutionEnvironment
+                Attempting to instantiate class from config...
+                Instantiating as a ExecutionEnvironment, since class_name is StreamlinedSqlExecutionEnvironment
+                Successfully instantiated StreamlinedSqlExecutionEnvironment
 
-                Execution engine: PandasExecutionEngine
+                Execution engine: SqlAlchemyExecutionEngine
                 Data connectors:
-                    my_filesystem_data_connector : InferredAssetFilesystemDataConnector
+                    whole_table : InferredAssetSqlDataConnector
 
-                    Available data_asset_names (1 of 1):
-                        DEFAULT_ASSET_NAME (3 of 10): ['abe_20200809_1040.csv', 'alex_20200809_1000.csv', 'alex_20200819_1300.csv']
+                Available data_asset_names (1 of 1):
+                    imdb_100k_main__whole_table (1 of 1): [{}]
 
-                    Unmatched data_references (0 of 0): []
+                Unmatched data_references (0 of 0): []
 
-                    Choosing an example data reference...
-                        Reference chosen: alex_20200819_1300.csv
+                Choosing an example data reference...
+                    Reference chosen: {}
 
-                        Fetching batch data...
-                        Successfuly fetched 100 rows of data.
+                    Fetching batch data...
+
+                    Showing 5 rows
+                   movieid                               title                                       genres
+                    0        1                    Toy Story (1995)  Adventure|Animation|Children|Comedy|Fantasy
+                    1        3             Grumpier Old Men (1995)                               Comedy|Romance
+                    2        5  Father of the Bride Part II (1995)                                       Comedy
+                    3        7                      Sabrina (1995)                               Comedy|Romance
+                    4        9                 Sudden Death (1995)                                       Action
 
             If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.  Whenever possible, test_yaml_config provides helpful warnings and error messages. It can't solve every problem, but it can solve many.
 
             .. code-block:: bash
 
-                Attempting to instantiate class from config...
-                    Instantiating as a ExecutionEnvironment, since class_name is StreamlinedSqlExecutionEnvironment
-                ---------------------------------------------------------------------------
-                DatabaseError                             Traceback (most recent call last)
-                ~/anaconda2/envs/py3/lib/python3.7/site-packages/sqlalchemy/engine/base.py in _wrap_pool_connect(self, fn, connection)
-                2338         try:
-                -> 2339             return fn()
-                2340         except dialect.dbapi.Error as e:
-
                 ...
 
-                DatabaseError: (snowflake.connector.errors.DatabaseError) 250001 (08001): Failed to connect to DB: oca29081.us-east-1.snowflakecomputing.com:443. Incorrect username or password was specified.
-                (Background on this error at: http://sqlalche.me/e/13/4xp6)
+                psycopg2.OperationalError: FATAL:  password authentication failed for user "my_username"
+                FATAL:  password authentication failed for user "my_username"
+
 
 
 ----------------
