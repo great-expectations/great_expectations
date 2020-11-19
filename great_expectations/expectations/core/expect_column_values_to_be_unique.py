@@ -76,7 +76,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
 
-    map_metric = "column_values.are_unique"
+    map_metric = "column_values.unique"
     success_keys = ("mostly",)
 
     default_kwarg_values = {

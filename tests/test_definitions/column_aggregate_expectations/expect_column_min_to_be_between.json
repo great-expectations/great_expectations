@@ -5,8 +5,6 @@
       "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
       "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
       "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
-      "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
-      "zz" : ["2/1/2016", "2/2/2016", "2/2/2016", "10/1/2016", "1/2/2017", "10/1/2017", null, null, null, null],
       "a" : [null, 0, null, null, 1, null, null, 2, null, null],
       "b" : [null, 0, null, null, 2, null, null, 1, null, null]
     },
@@ -15,8 +13,6 @@
         "w": "INTEGER",
         "x": "INTEGER",
         "y": "INTEGER",
-        "z": "VARCHAR",
-        "zz": "DATETIME",
         "a": "INTEGER",
         "b": "INTEGER"
       },
@@ -24,8 +20,6 @@
         "w": "INTEGER",
         "x": "INTEGER",
         "y": "INTEGER",
-        "z": "TEXT",
-        "zz": "TIMESTAMP",
         "a": "INTEGER",
         "b": "INTEGER"
       }
@@ -104,35 +98,6 @@
         "observed_value": 0
       }
     },{
-      "title": "test_on_a_series_containing_dates",
-      "exact_match_out" : false,
-      "suppress_test_for": ["sqlalchemy"],
-      "in": {
-        "column": "zz",
-        "min_value": "2/1/2016",
-        "max_value": "3/1/2016",
-        "parse_strings_as_datetimes": true
-      },
-      "out": {
-        "success": true,
-        "observed_value": "2016-02-01 00:00:00"
-      }
-    },{
-      "title": "test_on_a_series_containing_dates__with_an_output_strftime_format_value",
-      "exact_match_out" : false,
-      "suppress_test_for": ["sqlalchemy"],
-      "in": {
-        "column": "zz",
-        "min_value": "2/1/2016",
-        "max_value": "3/1/2016",
-        "parse_strings_as_datetimes": true,
-        "output_strftime_format" : "%m/%d/%Y"
-      },
-      "out": {
-        "success": true,
-        "observed_value": "02/01/2016"
-      }
-    },{
       "title": "negative_test_case_with_only_a_max",
       "exact_match_out" : false,
       "in": {
@@ -153,19 +118,6 @@
       "out": {},
       "error": {
         "traceback_substring": "cannot both be None"
-      }
-    },
-    {
-      "title": "positive_test_on_strings",
-      "exact_match_out": false,
-      "in": {
-        "column": "z",
-        "min_value": "a",
-        "max_value": "b"
-      },
-      "out": {
-        "success": true,
-        "observed_value": "a"
       }
     }
     ]

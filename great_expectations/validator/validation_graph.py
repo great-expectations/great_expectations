@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.id_dict import IDDict
 
@@ -53,9 +53,6 @@ class MetricConfiguration:
             self.metric_value_kwargs_id,
         )
 
-    # def __hash__(self):
-    #     return self.id.__hash__()
-
 
 class MetricEdge:
     def __init__(
@@ -96,20 +93,3 @@ class ValidationGraph:
     @property
     def edges(self):
         return copy.deepcopy(self._edges)
-
-
-# class ValidationGraph(object):
-#     def __init__(self, domain: Dict, edges: Optional[Set[MetricEdge]] = None):
-#         self._domain = IDDict(domain)
-#         if edges:
-#             self.edges = edges
-#         else:
-#             self.edges = set()
-#
-#     @property
-#     def domain(self):
-#         return self._domain
-#
-#     @property
-#     def domain_id(self):
-#         return self._domain.to_id()

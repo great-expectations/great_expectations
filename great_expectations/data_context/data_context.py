@@ -8,10 +8,10 @@ import logging
 import os
 import shutil
 import sys
+import traceback
 import uuid
 import warnings
 import webbrowser
-import traceback
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -21,10 +21,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequest,
-)
+from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -69,18 +66,16 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
+from great_expectations.exceptions import DataContextError
 from great_expectations.execution_environment import (
-    ExecutionEnvironment,
     BaseExecutionEnvironment,
+    ExecutionEnvironment,
 )
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
-from great_expectations.exceptions import (
-    DataContextError
-)
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -999,19 +994,28 @@ class BaseDataContext:
                 message="Batch request must specify an execution_environment."
             )
 
+<<<<<<< HEAD
         execution_environment: ExecutionEnvironment = self.datasources[execution_environment_name]
+=======
+        # execution_environment: ExecutionEnvironment = self.get_execution_environment(
+        #     execution_environment_name=execution_environment_name
+        # )
+        execution_environment: ExecutionEnvironment = self.datasources[
+            execution_environment_name
+        ]
+>>>>>>> 0.13-develop
         batch_request: BatchRequest = BatchRequest(**batch_request)
         return execution_environment.get_batch_list_from_batch_request(
             batch_request=batch_request
         )
 
-    def get_batch(	
-        self,	
-        batch_kwargs: Union[dict, BatchKwargs],	
-        expectation_suite_name: Union[str, ExpectationSuite],	
-        data_asset_type=None,	
-        batch_parameters=None,	
-    ) -> DataAsset:	
+    def get_batch(
+        self,
+        batch_kwargs: Union[dict, BatchKwargs],
+        expectation_suite_name: Union[str, ExpectationSuite],
+        data_asset_type=None,
+        batch_parameters=None,
+    ) -> DataAsset:
         """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If	
         batch_parameters are included, they will be available as attributes of the batch.	
         Args:	
@@ -1023,43 +1027,43 @@ class BaseDataContext:
                 reflect parameters that would provide the passed BatchKwargs.	
         Returns:	
             DataAsset	
-        """	
-        if isinstance(batch_kwargs, dict):	
-            batch_kwargs = BatchKwargs(batch_kwargs)	
+        """
+        if isinstance(batch_kwargs, dict):
+            batch_kwargs = BatchKwargs(batch_kwargs)
 
-        if not isinstance(batch_kwargs, BatchKwargs):	
-            raise ge_exceptions.BatchKwargsError(	
-                "BatchKwargs must be a BatchKwargs object or dictionary."	
-            )	
+        if not isinstance(batch_kwargs, BatchKwargs):
+            raise ge_exceptions.BatchKwargsError(
+                "BatchKwargs must be a BatchKwargs object or dictionary."
+            )
 
-        if not isinstance(	
-            expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, str)	
-        ):	
-            raise ge_exceptions.DataContextError(	
-                "expectation_suite_name must be an ExpectationSuite, "	
-                "ExpectationSuiteIdentifier or string."	
-            )	
+        if not isinstance(
+            expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, str)
+        ):
+            raise ge_exceptions.DataContextError(
+                "expectation_suite_name must be an ExpectationSuite, "
+                "ExpectationSuiteIdentifier or string."
+            )
 
-        if isinstance(expectation_suite_name, ExpectationSuite):	
-            expectation_suite = expectation_suite_name	
-        elif isinstance(expectation_suite_name, ExpectationSuiteIdentifier):	
-            expectation_suite = self.get_expectation_suite(	
-                expectation_suite_name.expectation_suite_name	
-            )	
-        else:	
-            expectation_suite = self.get_expectation_suite(expectation_suite_name)	
+        if isinstance(expectation_suite_name, ExpectationSuite):
+            expectation_suite = expectation_suite_name
+        elif isinstance(expectation_suite_name, ExpectationSuiteIdentifier):
+            expectation_suite = self.get_expectation_suite(
+                expectation_suite_name.expectation_suite_name
+            )
+        else:
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
-        datasource = self.get_datasource(batch_kwargs.get("datasource"))	
-        batch = datasource.get_batch(	
-            batch_kwargs=batch_kwargs, batch_parameters=batch_parameters	
-        )	
-        if data_asset_type is None:	
-            data_asset_type = datasource.config.get("data_asset_type")	
-        validator = BridgeValidator(	
-            batch=batch,	
-            expectation_suite=expectation_suite,	
-            expectation_engine=data_asset_type,	
-        )	
+        datasource = self.get_datasource(batch_kwargs.get("datasource"))
+        batch = datasource.get_batch(
+            batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
+        )
+        if data_asset_type is None:
+            data_asset_type = datasource.config.get("data_asset_type")
+        validator = BridgeValidator(
+            batch=batch,
+            expectation_suite=expectation_suite,
+            expectation_engine=data_asset_type,
+        )
         return validator.get_dataset()
 
     @usage_statistics_enabled_method(
@@ -1184,7 +1188,9 @@ class BaseDataContext:
 
         return datasource
 
-    def add_execution_environment(self, execution_environment_name, execution_environment_config):
+    def add_execution_environment(
+        self, execution_environment_name, execution_environment_config
+    ):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
@@ -1196,10 +1202,11 @@ class BaseDataContext:
         """
 
         new_execution_environment = self._build_execution_environment_from_config(
-            execution_environment_name,
-            execution_environment_config,
+            execution_environment_name, execution_environment_config,
         )
-        self._project_config["datasources"][execution_environment_name] = execution_environment_config
+        self._project_config["datasources"][
+            execution_environment_name
+        ] = execution_environment_config
         return new_execution_environment
 
     # TODO: deprecate
@@ -1281,9 +1288,7 @@ class BaseDataContext:
         return datasource
 
     def _build_execution_environment_from_config(
-        self,
-        name: str,
-        config: dict,
+        self, name: str, config: dict,
     ) -> ExecutionEnvironment:
         module_name: str = "great_expectations.execution_environment"
         runtime_environment: dict = {
@@ -1295,16 +1300,18 @@ class BaseDataContext:
             runtime_environment=runtime_environment,
             config_defaults={"module_name": module_name},
         )
-        
+
         if not new_execution_environment:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
                 class_name=config["class_name"],
             )
-        
+
         if not isinstance(new_execution_environment, BaseExecutionEnvironment):
-            raise TypeError(f"Newly instantiated component {name} is not an instance of BaseExecutionEnvironment. Please check class_name in the config.")
+            raise TypeError(
+                f"Newly instantiated component {name} is not an instance of BaseExecutionEnvironment. Please check class_name in the config."
+            )
 
         self._cached_datasources[name] = new_execution_environment
         return new_execution_environment
@@ -2541,12 +2548,16 @@ class DataContext(BaseDataContext):
 
         return delete_datasource
 
-    def add_execution_environment(self, execution_environment_name, execution_environment_config):
-        logger.debug("Starting DataContext.add_execution_environment for execution_environment %s" % execution_environment_name)
+    def add_execution_environment(
+        self, execution_environment_name, execution_environment_config
+    ):
+        logger.debug(
+            "Starting DataContext.add_execution_environment for execution_environment %s"
+            % execution_environment_name
+        )
 
         new_execution_environment = super().add_execution_environment(
-            execution_environment_name,
-            execution_environment_config
+            execution_environment_name, execution_environment_config
         )
         self._save_project_config()
 

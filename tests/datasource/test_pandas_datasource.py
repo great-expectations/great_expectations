@@ -48,9 +48,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path_csv):
     # auto_batch_kwargs.update(
     #     {"reader_options": {"sep": ",", "header": 0, "index_col": 0}}
     # )
-    auto_batch_kwargs.update(
-        {"reader_options": {"sep": ","}}
-    )
+    auto_batch_kwargs.update({"reader_options": {"sep": ","}})
     batch = datasource.get_batch(batch_kwargs=auto_batch_kwargs)
     assert isinstance(batch, Batch)
     dataset = batch.data

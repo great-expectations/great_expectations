@@ -76,7 +76,7 @@ class ExpectColumnMostCommonValueToBeInSet(TableExpectation):
             """
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.mode",)
+    metric_dependencies = ("column.mode",)
     success_keys = (
         "value_set",
         "ties_okay",
@@ -203,7 +203,7 @@ class ExpectColumnMostCommonValueToBeInSet(TableExpectation):
                 "result_format", self.default_kwarg_values.get("result_format")
             )
 
-        mode_list = metric_vals.get("column.aggregate.mode")
+        mode_list = metric_vals.get("column.mode")
         value_set = self.get_success_kwargs(configuration).get("value_set")
         ties_okay = self.get_success_kwargs(configuration).get("ties_okay")
 

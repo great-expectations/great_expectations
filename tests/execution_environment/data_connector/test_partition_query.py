@@ -2,7 +2,7 @@ import datetime
 from typing import List
 
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -13,6 +13,8 @@ from great_expectations.core.batch import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_environment.data_connector import DataConnector
 from tests.test_utils import create_files_in_directory
+
+yaml = YAML()
 
 
 @pytest.fixture()
@@ -44,7 +46,6 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
             execution_engine:
                 BASE_ENGINE:
                 class_name: PandasExecutionEngine
-            class_name: ConfiguredAssetFilesystemDataConnector
             base_directory: {base_directory}
             glob_directive: '*.csv'
             assets:
@@ -68,7 +69,6 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
                   name: price
 
         """,
-        Loader=yaml.FullLoader,
     )
 
     my_data_connector: DataConnector = instantiate_class_from_config(
@@ -85,237 +85,266 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
     return my_data_connector
 
 
-def test_partition_request_non_recognized_param(create_files_and_instantiate_data_connector):
+def test_partition_request_non_recognized_param(
+    create_files_and_instantiate_data_connector,
+):
     my_data_connector = create_files_and_instantiate_data_connector
     # Test 1: non valid_partition_identifiers_limit
     with pytest.raises(ge_exceptions.PartitionerError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={
-                "fake": "I_wont_work"
-            },
-        ))
+        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                execution_environment_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={"fake": "I_wont_work"},
+            )
+        )
 
     # Test 2: Unrecognized custom_filter is not a function
     with pytest.raises(ge_exceptions.PartitionerError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={
-                "custom_filter_function": "I_wont_work_either"
-            },
-        ))
+        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                execution_environment_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={"custom_filter_function": "I_wont_work_either"},
+            )
+        )
 
     # Test 3: partition_definitions is not dict
     with pytest.raises(ge_exceptions.PartitionerError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                execution_environment_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={"partition_identifiers": 1},
+            )
+        )
+
+    returned = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_request={
-                "partition_identifiers": 1
-            },
-        ))
-
-    returned = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "partition_identifiers": {
-                "name": "alex"
-            }
-        },
-    ))
+            partition_request={"partition_identifiers": {"name": "alex"}},
+        )
+    )
     assert len(returned) == 2
 
 
 def test_partition_request_limit(create_files_and_instantiate_data_connector):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "limit": None
-        },
-    ))
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_request={"limit": None},
+        )
+    )
     assert len(sorted_batch_definition_list) == 10
 
     # proper limit
-    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "limit": 3
-        },
-    ))
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_request={"limit": 3},
+        )
+    )
     assert len(sorted_batch_definition_list) == 3
 
     # illegal limit
     with pytest.raises(ge_exceptions.PartitionerError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-            execution_environment_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={
-                "limit": "apples"
-            },
-        ))
+        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                execution_environment_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={"limit": "apples"},
+            )
+        )
 
 
-def test_partition_request_illegal_index_and_limit_combination(create_files_and_instantiate_data_connector):
+def test_partition_request_illegal_index_and_limit_combination(
+    create_files_and_instantiate_data_connector,
+):
     my_data_connector = create_files_and_instantiate_data_connector
     with pytest.raises(ge_exceptions.PartitionerError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
+        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                execution_environment_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={"index": 0, "limit": 1},
+            )
+        )
+
+
+def test_partition_request_sorted_filtered_by_custom_filter(
+    create_files_and_instantiate_data_connector,
+):
+    my_data_connector = create_files_and_instantiate_data_connector
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+
+    def my_custom_partition_selector(partition_definition: dict) -> bool:
+        return (
+            partition_definition["name"] in ["abe", "james", "eugene"]
+            and datetime.datetime.strptime(
+                partition_definition["timestamp"], "%Y%m%d"
+            ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
+
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_request={"custom_filter_function": my_custom_partition_selector},
+        )
+    )
+
+    expected: List[BatchDefinition] = [
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
+        ),
+        BatchDefinition(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+    ]
+    assert returned_batch_definition_list == expected
+
+
+def test_partition_request_sorted_filtered_by_custom_filter_with_limit(
+    create_files_and_instantiate_data_connector,
+):
+    # <TODO> is this behavior correct?
+    my_data_connector = create_files_and_instantiate_data_connector
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+
+    def my_custom_partition_selector(partition_definition: dict) -> bool:
+        return (
+            partition_definition["name"] in ["abe", "james", "eugene"]
+            and datetime.datetime.strptime(
+                partition_definition["timestamp"], "%Y%m%d"
+            ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
+
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
             partition_request={
-                "index": 0,
-                "limit": 1
+                "custom_filter_function": my_custom_partition_selector,
+                "limit": 4,
             },
-        ))
-
-
-def test_partition_request_sorted_filtered_by_custom_filter(create_files_and_instantiate_data_connector):
-    my_data_connector = create_files_and_instantiate_data_connector
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
-
-    def my_custom_partition_selector(partition_definition: dict) -> bool:
-        return \
-            partition_definition["name"] in ["abe", "james", "eugene"] \
-            and datetime.datetime.strptime(
-                partition_definition["timestamp"], "%Y%m%d"
-            ).date() > datetime.datetime(
-                2020, 7, 15
-            ).date()
-
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "custom_filter_function": my_custom_partition_selector
-        },
-    ))
+        )
+    )
 
     expected: List[BatchDefinition] = [
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'abe', 'timestamp': '20200809', 'price': '1040'}),
+            partition_definition=PartitionDefinition(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20201129', 'price': '1900'}),
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20200809', 'price': '1500'}),
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200811', 'price': '1009'}),
-        ),
-        BatchDefinition(
-            execution_environment_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
         ),
     ]
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_sorted_filtered_by_custom_filter_with_limit(create_files_and_instantiate_data_connector):
+def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_int(
+    create_files_and_instantiate_data_connector,
+):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
     def my_custom_partition_selector(partition_definition: dict) -> bool:
-        return \
-            partition_definition["name"] in ["abe", "james", "eugene"] \
+        return (
+            partition_definition["name"] in ["abe", "james", "eugene"]
             and datetime.datetime.strptime(
                 partition_definition["timestamp"], "%Y%m%d"
-            ).date() > datetime.datetime(
-                2020, 7, 15
             ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "custom_filter_function": my_custom_partition_selector,
-            "limit": 4,
-        },
-    ))
-
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'abe', 'timestamp': '20200809', 'price': '1040'}),
-        ),
-        BatchDefinition(
-            execution_environment_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20201129', 'price': '1900'}),
-        ),
-        BatchDefinition(
-            execution_environment_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20200809', 'price': '1500'}),
-        ),
-        BatchDefinition(
-            execution_environment_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
-        ),
-    ]
-    assert returned_batch_definition_list == expected
-
-
-def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_int(create_files_and_instantiate_data_connector):
-    # <TODO> is this behavior correct?
-    my_data_connector = create_files_and_instantiate_data_connector
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
-
-    def my_custom_partition_selector(partition_definition: dict) -> bool:
-        return \
-            partition_definition["name"] in ["abe", "james", "eugene"] \
-            and datetime.datetime.strptime(
-                partition_definition["timestamp"], "%Y%m%d"
-            ).date() > datetime.datetime(
-                2020, 7, 15
-            ).date()
-
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "custom_filter_function": my_custom_partition_selector,
-            "index": 0,
-        },
-    ))
+            partition_request={
+                "custom_filter_function": my_custom_partition_selector,
+                "index": 0,
+            },
+        )
+    )
     assert len(returned_batch_definition_list) == 1
 
     expected: List[BatchDefinition] = [
@@ -323,70 +352,82 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_int(cr
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'abe', 'timestamp': '20200809', 'price': '1040'}),
+            partition_definition=PartitionDefinition(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
         ),
     ]
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_string(create_files_and_instantiate_data_connector):
+def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_string(
+    create_files_and_instantiate_data_connector,
+):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
     def my_custom_partition_selector(partition_definition: dict) -> bool:
-        return \
-            partition_definition["name"] in ["abe", "james", "eugene"] \
+        return (
+            partition_definition["name"] in ["abe", "james", "eugene"]
             and datetime.datetime.strptime(
                 partition_definition["timestamp"], "%Y%m%d"
-            ).date() > datetime.datetime(
-                2020, 7, 15
             ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "custom_filter_function": my_custom_partition_selector,
-            "index": "-1",
-        },
-    ))
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_request={
+                "custom_filter_function": my_custom_partition_selector,
+                "index": "-1",
+            },
+        )
+    )
     assert len(returned_batch_definition_list) == 1
     expected: List[BatchDefinition] = [
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200811', 'price': '1009'}),
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
         ),
     ]
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_list(create_files_and_instantiate_data_connector):
+def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_list(
+    create_files_and_instantiate_data_connector,
+):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
     def my_custom_partition_selector(partition_definition: dict) -> bool:
-        return \
-            partition_definition["name"] in ["abe", "james", "eugene"] \
+        return (
+            partition_definition["name"] in ["abe", "james", "eugene"]
             and datetime.datetime.strptime(
                 partition_definition["timestamp"], "%Y%m%d"
-            ).date() > datetime.datetime(
-                2020, 7, 15
             ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "custom_filter_function": my_custom_partition_selector,
-            "index": [1, 3],
-        },
-    ))
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_request={
+                "custom_filter_function": my_custom_partition_selector,
+                "index": [1, 3],
+            },
+        )
+    )
 
     assert len(returned_batch_definition_list) == 2
 
@@ -395,41 +436,49 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_list(c
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20201129', 'price': '1900'}),
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20200809', 'price': '1500'}),
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
         ),
     ]
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_tuple(create_files_and_instantiate_data_connector):
+def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_tuple(
+    create_files_and_instantiate_data_connector,
+):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
     def my_custom_partition_selector(partition_definition: dict) -> bool:
-        return \
-            partition_definition["name"] in ["abe", "james", "eugene"] \
+        return (
+            partition_definition["name"] in ["abe", "james", "eugene"]
             and datetime.datetime.strptime(
                 partition_definition["timestamp"], "%Y%m%d"
-            ).date() > datetime.datetime(
-                2020, 7, 15
             ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "custom_filter_function": my_custom_partition_selector,
-            "index": (0, 4, 3),
-        },
-    ))
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_request={
+                "custom_filter_function": my_custom_partition_selector,
+                "index": (0, 4, 3),
+            },
+        )
+    )
     assert len(returned_batch_definition_list) == 2
 
     expected: List[BatchDefinition] = [
@@ -437,41 +486,49 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_tuple(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'abe', 'timestamp': '20200809', 'price': '1040'}),
+            partition_definition=PartitionDefinition(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
         ),
     ]
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_str(create_files_and_instantiate_data_connector):
+def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_str(
+    create_files_and_instantiate_data_connector,
+):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
     def my_custom_partition_selector(partition_definition: dict) -> bool:
-        return \
-            partition_definition["name"] in ["abe", "james", "eugene"] \
+        return (
+            partition_definition["name"] in ["abe", "james", "eugene"]
             and datetime.datetime.strptime(
                 partition_definition["timestamp"], "%Y%m%d"
-            ).date() > datetime.datetime(
-                2020, 7, 15
             ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "custom_filter_function": my_custom_partition_selector,
-            "index": "3:5",
-        },
-    ))
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_request={
+                "custom_filter_function": my_custom_partition_selector,
+                "index": "3:5",
+            },
+        )
+    )
     assert len(returned_batch_definition_list) == 2
 
     expected: List[BatchDefinition] = [
@@ -479,41 +536,49 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_str(cr
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200811', 'price': '1009'}),
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
         ),
     ]
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(create_files_and_instantiate_data_connector):
+def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(
+    create_files_and_instantiate_data_connector,
+):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
     def my_custom_partition_selector(partition_definition: dict) -> bool:
-        return \
-            partition_definition["name"] in ["abe", "james", "eugene"] \
+        return (
+            partition_definition["name"] in ["abe", "james", "eugene"]
             and datetime.datetime.strptime(
                 partition_definition["timestamp"], "%Y%m%d"
-            ).date() > datetime.datetime(
-                2020, 7, 15
             ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "custom_filter_function": my_custom_partition_selector,
-            "index": slice(3, 5, None),
-        },
-    ))
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_request={
+                "custom_filter_function": my_custom_partition_selector,
+                "index": slice(3, 5, None),
+            },
+        )
+    )
     assert len(returned_batch_definition_list) == 2
 
     expected: List[BatchDefinition] = [
@@ -521,31 +586,35 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(creat
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200811', 'price': '1009'}),
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
         ),
     ]
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_identifiers_1_key(create_files_and_instantiate_data_connector):
+def test_partition_request_partition_request_partition_identifiers_1_key(
+    create_files_and_instantiate_data_connector,
+):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "partition_identifiers": {
-                "timestamp": "20200809"
-            },
-        },
-    ))
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_request={"partition_identifiers": {"timestamp": "20200809"},},
+        )
+    )
     assert len(returned_batch_definition_list) == 4
 
     expected: List[BatchDefinition] = [
@@ -553,44 +622,51 @@ def test_partition_request_partition_request_partition_identifiers_1_key(create_
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'abe', 'timestamp': '20200809', 'price': '1040'}),
+            partition_definition=PartitionDefinition(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'alex', 'timestamp': '20200809', 'price': '1000'}),
+            partition_definition=PartitionDefinition(
+                {"name": "alex", "timestamp": "20200809", "price": "1000"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20200809', 'price': '1500'}),
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'will', 'timestamp': '20200809', 'price': '1002'}),
+            partition_definition=PartitionDefinition(
+                {"name": "will", "timestamp": "20200809", "price": "1002"}
+            ),
         ),
     ]
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_identifiers_1_key_and_index(create_files_and_instantiate_data_connector):
+def test_partition_request_partition_request_partition_identifiers_1_key_and_index(
+    create_files_and_instantiate_data_connector,
+):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "partition_identifiers": {
-                "name": "james"
-            },
-            "index": 0,
-        },
-    ))
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_request={"partition_identifiers": {"name": "james"}, "index": 0,},
+        )
+    )
     assert len(returned_batch_definition_list) == 1
 
     expected: List[BatchDefinition] = [
@@ -598,26 +674,29 @@ def test_partition_request_partition_request_partition_identifiers_1_key_and_ind
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200713', 'price': '1567'}),
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200713", "price": "1567"}
+            ),
         ),
     ]
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_identifiers_2_key_name_timestamp(create_files_and_instantiate_data_connector):
+def test_partition_request_partition_request_partition_identifiers_2_key_name_timestamp(
+    create_files_and_instantiate_data_connector,
+):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-        partition_request={
-            "partition_identifiers": {
-                "timestamp": "20200809",
-                "name": "will"
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            partition_request={
+                "partition_identifiers": {"timestamp": "20200809", "name": "will"},
             },
-        },
-    ))
+        )
+    )
     assert len(returned_batch_definition_list) == 1
 
     expected: List[BatchDefinition] = [
@@ -625,20 +704,26 @@ def test_partition_request_partition_request_partition_identifiers_2_key_name_ti
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'will', 'timestamp': '20200809', 'price': '1002'}),
+            partition_definition=PartitionDefinition(
+                {"name": "will", "timestamp": "20200809", "price": "1002"}
+            ),
         ),
     ]
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_for_data_asset_name(create_files_and_instantiate_data_connector):
+def test_partition_request_for_data_asset_name(
+    create_files_and_instantiate_data_connector,
+):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(BatchRequest(
-        execution_environment_name="test_environment",
-        data_connector_name="general_filesystem_data_connector",
-        data_asset_name="TestFiles",
-    ))
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            execution_environment_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+        )
+    )
     assert len(returned_batch_definition_list) == 10
 
     expected: List[BatchDefinition] = [
@@ -646,61 +731,81 @@ def test_partition_request_for_data_asset_name(create_files_and_instantiate_data
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'abe', 'timestamp': '20200809', 'price': '1040'}),
+            partition_definition=PartitionDefinition(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'alex', 'timestamp': '20200819', 'price': '1300'}),
+            partition_definition=PartitionDefinition(
+                {"name": "alex", "timestamp": "20200819", "price": "1300"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'alex', 'timestamp': '20200809', 'price': '1000'}),
+            partition_definition=PartitionDefinition(
+                {"name": "alex", "timestamp": "20200809", "price": "1000"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20201129', 'price': '1900'}),
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'eugene', 'timestamp': '20200809', 'price': '1500'}),
+            partition_definition=PartitionDefinition(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200811', 'price': '1009'}),
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200810', 'price': '1003'}),
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'james', 'timestamp': '20200713', 'price': '1567'}),
+            partition_definition=PartitionDefinition(
+                {"name": "james", "timestamp": "20200713", "price": "1567"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'will', 'timestamp': '20200810', 'price': '1001'}),
+            partition_definition=PartitionDefinition(
+                {"name": "will", "timestamp": "20200810", "price": "1001"}
+            ),
         ),
         BatchDefinition(
             execution_environment_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition({'name': 'will', 'timestamp': '20200809', 'price': '1002'}),
+            partition_definition=PartitionDefinition(
+                {"name": "will", "timestamp": "20200809", "price": "1002"}
+            ),
         ),
     ]
     assert returned_batch_definition_list == expected

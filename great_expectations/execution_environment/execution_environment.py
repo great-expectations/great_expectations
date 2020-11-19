@@ -1,8 +1,7 @@
 import copy
 import logging
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from great_expectations.execution_environment.types import PathBatchSpec
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -10,14 +9,15 @@ from great_expectations.core.batch import (
     BatchRequest,
     PartitionRequest,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector import DataConnector
-from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_environment.types import PathBatchSpec
 
 logger = logging.getLogger(__name__)
 
 
-class BaseExecutionEnvironment(object):
+class BaseExecutionEnvironment:
     """
     An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
     """
@@ -66,8 +66,14 @@ class BaseExecutionEnvironment(object):
             # Seems like we should verify that batch_data is compatible with the execution_engine...?
             batch_spec, batch_markers = None, None
         else:
-            data_connector: DataConnector = self.data_connectors[batch_definition.data_connector_name]
-            batch_data, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata(
+            data_connector: DataConnector = self.data_connectors[
+                batch_definition.data_connector_name
+            ]
+            (
+                batch_data,
+                batch_spec,
+                batch_markers,
+            ) = data_connector.get_batch_data_and_metadata(
                 batch_definition=batch_definition
             )
         new_batch: Batch = Batch(
@@ -79,12 +85,12 @@ class BaseExecutionEnvironment(object):
         )
         return new_batch
 
-    def get_single_batch_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> Batch:
+    def get_single_batch_from_batch_request(self, batch_request: BatchRequest) -> Batch:
         batch_list = self.get_batch_list_from_batch_request(batch_request)
         if len(batch_list) != 1:
-            raise ValueError(f"Got {len(batch_list)} batches instead of a single batch.")
+            raise ValueError(
+                f"Got {len(batch_list)} batches instead of a single batch."
+            )
         return batch_list[0]
 
     def get_batch_list_from_batch_request(
@@ -99,7 +105,9 @@ class BaseExecutionEnvironment(object):
         """
         self._validate_batch_request(batch_request=batch_request)
 
-        data_connector: DataConnector = self.data_connectors[batch_request.data_connector_name]
+        data_connector: DataConnector = self.data_connectors[
+            batch_request.data_connector_name
+        ]
         batch_definition_list: List[
             BatchDefinition
         ] = data_connector.get_batch_definition_list_from_batch_request(
@@ -113,7 +121,11 @@ class BaseExecutionEnvironment(object):
                 batch_data: Any
                 batch_spec: PathBatchSpec
                 batch_markers: BatchMarkers
-                batch_data, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata(
+                (
+                    batch_data,
+                    batch_spec,
+                    batch_markers,
+                ) = data_connector.get_batch_data_and_metadata(
                     batch_definition=batch_definition
                 )
                 new_batch: Batch = Batch(
@@ -127,18 +139,23 @@ class BaseExecutionEnvironment(object):
             return batches
 
         else:
-            #This is a runtime batchrequest
+            # This is a runtime batchrequest
 
-            if len(batch_definition_list) is not 1:
-                raise ValueError("When batch_request includes batch_data, it must specify exactly one corresponding BatchDefinition")
+            if len(batch_definition_list) != 1:
+                raise ValueError(
+                    "When batch_request includes batch_data, it must specify exactly one corresponding BatchDefinition"
+                )
 
             batch_definition = batch_definition_list[0]
             batch_data = batch_request["batch_data"]
 
             # noinspection PyArgumentList
-            typed_batch_data, batch_spec, batch_markers = data_connector.get_batch_data_and_metadata(
-                batch_definition=batch_definition,
-                batch_data=batch_data,
+            (
+                typed_batch_data,
+                batch_spec,
+                batch_markers,
+            ) = data_connector.get_batch_data_and_metadata(
+                batch_definition=batch_definition, batch_data=batch_data,
             )
 
             new_batch: Batch = Batch(
@@ -152,9 +169,7 @@ class BaseExecutionEnvironment(object):
             return [new_batch]
 
     def _build_data_connector_from_config(
-        self,
-        name: str,
-        config: Dict[str, Any],
+        self, name: str, config: Dict[str, Any],
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         new_data_connector: DataConnector = instantiate_class_from_config(
@@ -168,7 +183,9 @@ class BaseExecutionEnvironment(object):
                 "module_name": "great_expectations.execution_environment.data_connector"
             },
         )
-        new_data_connector.data_context_root_directory = self._data_context_root_directory
+        new_data_connector.data_context_root_directory = (
+            self._data_context_root_directory
+        )
 
         self.data_connectors[name] = new_data_connector
         return new_data_connector
@@ -216,7 +233,9 @@ class BaseExecutionEnvironment(object):
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
-        data_connector: DataConnector = self.data_connectors[batch_request.data_connector_name]
+        data_connector: DataConnector = self.data_connectors[
+            batch_request.data_connector_name
+        ]
         batch_definition_list = data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
@@ -238,12 +257,12 @@ class BaseExecutionEnvironment(object):
 
         data_connector_list = list(self.data_connectors.keys())
         data_connector_list.sort()
-        report_object["data_connectors"] = {
-            "count": len(data_connector_list)
-        }
+        report_object["data_connectors"] = {"count": len(data_connector_list)}
 
         for data_connector_name in data_connector_list:
-            data_connector_obj: DataConnector = self.data_connectors[data_connector_name]
+            data_connector_obj: DataConnector = self.data_connectors[
+                data_connector_name
+            ]
             data_connector_return_obj = data_connector_obj.self_check(
                 pretty_print=pretty_print, max_examples=max_examples
             )
@@ -255,8 +274,8 @@ class BaseExecutionEnvironment(object):
 
     def _validate_batch_request(self, batch_request: BatchRequest):
         if not (
-                batch_request.execution_environment_name is None
-                or batch_request.execution_environment_name == self.name
+            batch_request.execution_environment_name is None
+            or batch_request.execution_environment_name == self.name
         ):
             raise ValueError(
                 f"""execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not
@@ -312,7 +331,7 @@ class ExecutionEnvironment(BaseExecutionEnvironment):
         super().__init__(
             name=name,
             execution_engine=execution_engine,
-            data_context_root_directory=data_context_root_directory
+            data_context_root_directory=data_context_root_directory,
         )
 
         if data_connectors is None:
@@ -320,16 +339,12 @@ class ExecutionEnvironment(BaseExecutionEnvironment):
         self._data_connectors = data_connectors
         self._init_data_connectors(data_connector_configs=data_connectors)
 
-        self._execution_environment_config.update({
-            "data_connectors": data_connectors
-        })
+        self._execution_environment_config.update({"data_connectors": data_connectors})
 
     def _init_data_connectors(
-        self,
-        data_connector_configs: Dict[str, Dict[str, Any]],
+        self, data_connector_configs: Dict[str, Dict[str, Any]],
     ):
         for name, config in data_connector_configs.items():
             self._build_data_connector_from_config(
-                name=name,
-                config=config,
+                name=name, config=config,
             )

@@ -1,13 +1,15 @@
+import logging
 from pathlib import Path
 from typing import List, Optional
-import logging
 
-from great_expectations.execution_environment.data_connector import ConfiguredAssetFilePathDataConnector
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector import (
+    ConfiguredAssetFilePathDataConnector,
+)
 from great_expectations.execution_environment.data_connector.asset import Asset
 from great_expectations.execution_environment.data_connector.util import (
-    normalize_directory_path,
     get_filesystem_one_level_directory_glob_path_list,
+    normalize_directory_path,
 )
 
 logger = logging.getLogger(__name__)
@@ -46,26 +48,26 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         if asset is not None:
             if asset.base_directory:
                 base_directory = normalize_directory_path(
-                    dir_path=asset.base_directory,
-                    root_directory_path=base_directory
+                    dir_path=asset.base_directory, root_directory_path=base_directory
                 )
             if asset.glob_directive:
                 glob_directive = asset.glob_directive
 
         path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
-            base_directory_path=base_directory,
-            glob_directive=glob_directive
+            base_directory_path=base_directory, glob_directive=glob_directive
         )
 
         return sorted(path_list)
 
-    def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset] = None) -> str:
+    def _get_full_file_path_for_asset(
+        self, path: str, asset: Optional[Asset] = None
+    ) -> str:
         base_directory: str = self.base_directory
         if asset is not None:
             if asset.base_directory:
                 base_directory = normalize_directory_path(
                     dir_path=asset.base_directory,
-                    root_directory_path=self.data_context_root_directory
+                    root_directory_path=self.data_context_root_directory,
                 )
         return str(Path(base_directory).joinpath(path))
 
@@ -73,5 +75,5 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
     def base_directory(self):
         return normalize_directory_path(
             dir_path=self._base_directory,
-            root_directory_path=self.data_context_root_directory
+            root_directory_path=self.data_context_root_directory,
         )

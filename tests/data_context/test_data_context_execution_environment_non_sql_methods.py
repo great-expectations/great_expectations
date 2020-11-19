@@ -1,16 +1,19 @@
 import os
-import yaml
-import pandas as pd
 import shutil
+
+import pandas as pd
+from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch
 from great_expectations.data_context.util import file_relative_path
+
 from ..test_utils import create_files_in_directory
+
+yaml = YAML()
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_execution_environment_inferred_assets(
-    empty_data_context,
-    tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
     context = empty_data_context
 
@@ -27,10 +30,11 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_execution_env
             "directory/B-1.csv",
             "directory/B-2.csv",
         ],
-        file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5"
+        file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
     )
 
-    config = yaml.load(f"""
+    config = yaml.load(
+        f"""
 class_name: ExecutionEnvironment
 
 execution_engine:
@@ -48,25 +52,27 @@ data_connectors:
                 - data_asset_name
                 - letter
                 - number
-    """, yaml.FullLoader)
-    
-    context.add_execution_environment(
-        "my_execution_environment",
-        config,
+    """,
     )
 
-    batch_list = context.get_batch_list_from_new_style_datasource({
-        "execution_environment_name": "my_execution_environment",
-        "data_connector_name": "my_data_connector",
-        "data_asset_name": "path",
-        "partition_request": {
-            "partition_identifiers": {
-                # "data_asset_name": "path",
-                "letter": "A",
-                "number": "101",
-            }
+    context.add_execution_environment(
+        "my_execution_environment", config,
+    )
+
+    batch_list = context.get_batch_list_from_new_style_datasource(
+        {
+            "execution_environment_name": "my_execution_environment",
+            "data_connector_name": "my_data_connector",
+            "data_asset_name": "path",
+            "partition_request": {
+                "partition_identifiers": {
+                    # "data_asset_name": "path",
+                    "letter": "A",
+                    "number": "101",
+                }
+            },
         }
-    })
+    )
 
     assert len(batch_list) == 1
 
@@ -83,8 +89,7 @@ data_connectors:
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_execution_environment_configured_assets(
-    empty_data_context,
-    tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
     context = empty_data_context
 
@@ -97,11 +102,16 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_execution_env
     titanic_asset_base_directory_path: str = os.path.join(base_directory, "data")
     os.makedirs(titanic_asset_base_directory_path)
 
-    titanic_csv_source_file_path: str = file_relative_path(__file__, "../test_sets/Titanic.csv")
-    titanic_csv_destination_file_path: str = str(os.path.join(base_directory, "data/Titanic_19120414_1313.csv"))
+    titanic_csv_source_file_path: str = file_relative_path(
+        __file__, "../test_sets/Titanic.csv"
+    )
+    titanic_csv_destination_file_path: str = str(
+        os.path.join(base_directory, "data/Titanic_19120414_1313.csv")
+    )
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
-    config = yaml.load(f"""
+    config = yaml.load(
+        f"""
 class_name: ExecutionEnvironment
 
 execution_engine:
@@ -125,25 +135,27 @@ data_connectors:
                     - name
                     - timestamp
                     - size
-    """, yaml.FullLoader)
-
-    context.add_execution_environment(
-        "my_execution_environment",
-        config,
+    """,
     )
 
-    batch_list = context.get_batch_list_from_new_style_datasource({
-        "execution_environment_name": "my_execution_environment",
-        "data_connector_name": "my_data_connector",
-        "data_asset_name": "Titanic",
-        "partition_request": {
-            "partition_identifiers": {
-                "name": "Titanic",
-                "timestamp": "19120414",
-                "size": "1313",
-            }
+    context.add_execution_environment(
+        "my_execution_environment", config,
+    )
+
+    batch_list = context.get_batch_list_from_new_style_datasource(
+        {
+            "execution_environment_name": "my_execution_environment",
+            "data_connector_name": "my_data_connector",
+            "data_asset_name": "Titanic",
+            "partition_request": {
+                "partition_identifiers": {
+                    "name": "Titanic",
+                    "timestamp": "19120414",
+                    "size": "1313",
+                }
+            },
         }
-    })
+    )
 
     assert len(batch_list) == 1
 
@@ -154,7 +166,7 @@ data_connectors:
     assert batch.batch_definition["partition_definition"] == {
         "name": "Titanic",
         "timestamp": "19120414",
-        "size": "1313"
+        "size": "1313",
     }
     assert isinstance(batch.data, pd.DataFrame)
     assert batch.data.shape == (1313, 7)
