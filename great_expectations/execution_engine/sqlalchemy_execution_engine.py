@@ -813,10 +813,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 res[0]
             ), "unexpected number of metrics returned"
             for idx, id in enumerate(query["ids"]):
-                resolved_metrics[id] = res[0][idx]
+                resolved_metrics[id] = convert_to_json_serializable(res[0][idx])
 
         # Convert metrics to be serializable
-        return convert_to_json_serializable(resolved_metrics)
+        return resolved_metrics
 
     ### Splitter methods for partitioning tables ###
 
