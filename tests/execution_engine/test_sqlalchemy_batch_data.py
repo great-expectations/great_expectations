@@ -2,6 +2,12 @@ import pytest
 
 import pandas as pd
 
+try:
+    import sqlalchemy
+except ImportError:
+    sqlalchemy = None
+
+
 from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlAlchemyBatchData
 
 def test_instantiation_with_table_name(sqlite_view_engine):
@@ -10,10 +16,15 @@ def test_instantiation_with_table_name(sqlite_view_engine):
         table_name="test_table",
     )
 
-    # Note Abe 20111119: Fill this in:
-    # assert batch_data.sql_engine_dialect == "something"
-    # assert batch_data.record_set_name == "something"
-    # assert batch_data.selectable == "something"
+    # This is a very hacky type check.
+    # A better way would be to figure out the proper parent class for dialects within SQLAlchemy
+    assert str(type(batch_data.sql_engine_dialect))[:28] == "<class 'sqlalchemy.dialects."
+
+    assert isinstance(batch_data.selectable, sqlalchemy.Table)
+    
+    assert type(batch_data.record_set_name) == str
+    assert batch_data.record_set_name == "great_expectations_sub_selection"
+    
     assert batch_data.use_quoted_name == False
 
 def test_instantiation_with_query():
