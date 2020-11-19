@@ -1,7 +1,7 @@
+import datetime
 import json
 import os
 import tempfile
-import datetime
 
 import pytest
 
@@ -294,9 +294,7 @@ introspection:
 
 
 def test_golden_path_inferred_asset_pandas_execution_environment_configuration(
-    empty_data_context_v3,
-    test_df,
-    tmp_path_factory
+    empty_data_context_v3, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -310,26 +308,27 @@ def test_golden_path_inferred_asset_pandas_execution_environment_configuration(
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
-            'test_dir_charlie/A/A-1.csv',
-            'test_dir_charlie/A/A-2.csv',
-            'test_dir_charlie/A/A-3.csv',
-            'test_dir_charlie/B/B-1.csv',
-            'test_dir_charlie/B/B-2.csv',
-            'test_dir_charlie/B/B-3.csv',
-            'test_dir_charlie/C/C-1.csv',
-            'test_dir_charlie/C/C-2.csv',
-            'test_dir_charlie/C/C-3.csv',
-            'test_dir_charlie/D/D-1.csv',
-            'test_dir_charlie/D/D-2.csv',
-            'test_dir_charlie/D/D-3.csv',
+            "test_dir_charlie/A/A-1.csv",
+            "test_dir_charlie/A/A-2.csv",
+            "test_dir_charlie/A/A-3.csv",
+            "test_dir_charlie/B/B-1.csv",
+            "test_dir_charlie/B/B-2.csv",
+            "test_dir_charlie/B/B-3.csv",
+            "test_dir_charlie/C/C-1.csv",
+            "test_dir_charlie/C/C-2.csv",
+            "test_dir_charlie/C/C-3.csv",
+            "test_dir_charlie/D/D-1.csv",
+            "test_dir_charlie/D/D-2.csv",
+            "test_dir_charlie/D/D-3.csv",
         ],
-        file_content_fn=lambda: test_df.to_csv(header=True, index=False)
+        file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
     context = empty_data_context_v3
 
     os.chdir(context.root_directory)
     import great_expectations as ge
+
     context = ge.get_context()
 
     yaml_config = f"""
@@ -366,22 +365,23 @@ data_connectors:
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
-            "number": "2",
-        },
+        partition_identifiers={"number": "2",},
         sampling_method="_sample_using_hash",
-        sampling_kwargs={
-            "column_name": "date",
-            "hash_function_name": "md5"
-        },
+        sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
     assert my_batch.data.shape == (120, 10)
     df_data = my_batch.data
-    df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
-    assert df_data[
-        (df_data["date"] >= datetime.date(2020, 1, 1)) & (df_data["date"] <= datetime.date(2020, 12, 31))
-    ].shape[0] == 120
+    df_data["date"] = df_data.apply(
+        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
+    )
+    assert (
+        df_data[
+            (df_data["date"] >= datetime.date(2020, 1, 1))
+            & (df_data["date"] <= datetime.date(2020, 12, 31))
+        ].shape[0]
+        == 120
+    )
 
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -396,23 +396,14 @@ data_connectors:
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
-        partition_request={
-            "partition_identifiers": {
-                "number": "3"
-            }
-        },
+        partition_request={"partition_identifiers": {"number": "3"}},
         sampling_method="_sample_using_hash",
-        sampling_kwargs={
-            "column_name": "date",
-            "hash_function_name": "md5"
-        },
+        sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
         expectation_suite=ExpectationSuite("my_expectation_suite"),
         # attach_new_expectation_suite=True, # The implementation of this argument is currently work-in-progress.
     )
     my_evr = my_validator.expect_column_values_to_be_between(
-        column="d",
-        min_value=1,
-        max_value=31
+        column="d", min_value=1, max_value=31
     )
     assert my_evr.success
 
@@ -421,9 +412,7 @@ data_connectors:
 
 
 def test_golden_path_configured_asset_pandas_execution_environment_configuration(
-    empty_data_context_v3,
-    test_df,
-    tmp_path_factory
+    empty_data_context_v3, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -437,28 +426,29 @@ def test_golden_path_configured_asset_pandas_execution_environment_configuration
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
-            'test_dir_foxtrot/A/A-1.csv',
-            'test_dir_foxtrot/A/A-2.csv',
-            'test_dir_foxtrot/A/A-3.csv',
-            'test_dir_foxtrot/B/B-1.txt',
-            'test_dir_foxtrot/B/B-2.txt',
-            'test_dir_foxtrot/B/B-3.txt',
-            'test_dir_foxtrot/C/C-2017.csv',
-            'test_dir_foxtrot/C/C-2018.csv',
-            'test_dir_foxtrot/C/C-2019.csv',
-            'test_dir_foxtrot/D/D-aaa.csv',
-            'test_dir_foxtrot/D/D-bbb.csv',
-            'test_dir_foxtrot/D/D-ccc.csv',
-            'test_dir_foxtrot/D/D-ddd.csv',
-            'test_dir_foxtrot/D/D-eee.csv',
+            "test_dir_foxtrot/A/A-1.csv",
+            "test_dir_foxtrot/A/A-2.csv",
+            "test_dir_foxtrot/A/A-3.csv",
+            "test_dir_foxtrot/B/B-1.txt",
+            "test_dir_foxtrot/B/B-2.txt",
+            "test_dir_foxtrot/B/B-3.txt",
+            "test_dir_foxtrot/C/C-2017.csv",
+            "test_dir_foxtrot/C/C-2018.csv",
+            "test_dir_foxtrot/C/C-2019.csv",
+            "test_dir_foxtrot/D/D-aaa.csv",
+            "test_dir_foxtrot/D/D-bbb.csv",
+            "test_dir_foxtrot/D/D-ccc.csv",
+            "test_dir_foxtrot/D/D-ddd.csv",
+            "test_dir_foxtrot/D/D-eee.csv",
         ],
-        file_content_fn=lambda: test_df.to_csv(header=True, index=False)
+        file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
     context = empty_data_context_v3
 
     os.chdir(context.root_directory)
     import great_expectations as ge
+
     context = ge.get_context()
 
     yaml_config = f"""
@@ -519,22 +509,23 @@ data_connectors:
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
-            "number": "2",
-        },
+        partition_identifiers={"number": "2",},
         sampling_method="_sample_using_hash",
-        sampling_kwargs={
-            "column_name": "date",
-            "hash_function_name": "md5"
-        },
+        sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
     assert my_batch.data.shape == (120, 10)
     df_data = my_batch.data
-    df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
-    assert df_data[
-        (df_data["date"] >= datetime.date(2020, 1, 1)) & (df_data["date"] <= datetime.date(2020, 12, 31))
-    ].shape[0] == 120
+    df_data["date"] = df_data.apply(
+        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
+    )
+    assert (
+        df_data[
+            (df_data["date"] >= datetime.date(2020, 1, 1))
+            & (df_data["date"] <= datetime.date(2020, 12, 31))
+        ].shape[0]
+        == 120
+    )
 
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -549,23 +540,14 @@ data_connectors:
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="C",
-        partition_request={
-            "partition_identifiers": {
-                "year": "2019"
-            }
-        },
+        partition_request={"partition_identifiers": {"year": "2019"}},
         sampling_method="_sample_using_hash",
-        sampling_kwargs={
-            "column_name": "date",
-            "hash_function_name": "md5"
-        },
+        sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
         expectation_suite=ExpectationSuite("my_expectation_suite"),
         # attach_new_expectation_suite=True, # The implementation of this argument is currently work-in-progress.
     )
     my_evr = my_validator.expect_column_values_to_be_between(
-        column="d",
-        min_value=1,
-        max_value=31
+        column="d", min_value=1, max_value=31
     )
     assert my_evr.success
 
