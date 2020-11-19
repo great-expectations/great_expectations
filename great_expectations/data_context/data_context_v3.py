@@ -330,7 +330,7 @@ class DataContextV3(DataContext):
         **kwargs,
     ) -> Validator:
         if attach_new_expectation_suite:
-            expectation_suite = ExpectationSuite(f"{data_asset_name}_ExpectationSuite")
+            expectation_suite = ExpectationSuite(f"{data_asset_name}_expectation_suite")
         if expectation_suite is None:
             if expectation_suite_name:
                 expectation_suite = self.get_expectation_suite(expectation_suite_name)
