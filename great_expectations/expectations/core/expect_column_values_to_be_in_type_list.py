@@ -6,13 +6,17 @@ import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine, SqlAlchemyExecutionEngine, \
-    SparkDFExecutionEngine
-from great_expectations.expectations.core.expect_column_values_to_be_of_type import _get_dialect_type_module, \
-    _native_type_type_map
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.core.expect_column_values_to_be_of_type import (
+    _get_dialect_type_module,
+    _native_type_type_map,
+)
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
@@ -198,9 +202,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         ]
 
     def _validate_pandas(
-        self,
-        actual_column_type,
-        expected_types_list,
+        self, actual_column_type, expected_types_list,
     ):
         if expected_types_list is None:
             success = True
@@ -236,10 +238,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         }
 
     def _validate_sqlalchemy(
-        self,
-        actual_column_type,
-        expected_types_list,
-        execution_engine
+        self, actual_column_type, expected_types_list, execution_engine
     ):
         # Our goal is to be as explicit as possible. We will match the dialect
         # if that is possible. If there is no dialect available, we *will*
@@ -268,12 +267,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             types = tuple(types)
             success = isinstance(actual_column_type, types)
 
-        return {"success": success, "result": {"observed_value": type(actual_column_type).__name__}}
+        return {
+            "success": success,
+            "result": {"observed_value": type(actual_column_type).__name__},
+        }
 
     def _validate_spark(
-        self,
-        actual_column_type,
-        expected_types_list,
+        self, actual_column_type, expected_types_list,
     ):
         if expected_types_list is None:
             success = True
@@ -289,7 +289,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 raise ValueError("No recognized spark types in expected_types_list")
             types = tuple(types)
             success = isinstance(actual_column_type, types)
-        return {"success": success, "result": {"observed_value": type(actual_column_type).__name__}}
+        return {
+            "success": success,
+            "result": {"observed_value": type(actual_column_type).__name__},
+        }
 
     def get_validation_dependencies(
         self,
@@ -304,8 +307,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         if isinstance(execution_engine, PandasExecutionEngine):
             column_name = configuration.kwargs.get("column")
             expected_types_list = configuration.kwargs.get("type_list")
-            metric_kwargs = get_metric_kwargs(configuration=configuration, metric_name="table.column_types",
-                                              runtime_configuration=runtime_configuration)
+            metric_kwargs = get_metric_kwargs(
+                configuration=configuration,
+                metric_name="table.column_types",
+                runtime_configuration=runtime_configuration,
+            )
             metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")
             metric_value_kwargs = metric_kwargs.get("metric_value_kwargs")
             table_column_types_configuration = MetricConfiguration(
@@ -321,10 +327,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 for type_dict in actual_column_types_list
                 if type_dict["name"] == column_name
             ][0]
-            if actual_column_type.type.__name__ == "object_" and expected_types_list is not None:
+            if (
+                actual_column_type.type.__name__ == "object_"
+                and expected_types_list is not None
+            ):
                 dependencies = super().get_validation_dependencies(
                     configuration, execution_engine, runtime_configuration
-            )
+                )
 
         column_types_metric_kwargs = get_metric_kwargs(
             metric_name="table.column_types",
@@ -356,25 +365,25 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         ][0]
 
         if isinstance(execution_engine, PandasExecutionEngine):
-            if actual_column_type.type.__name__ == "object_" and expected_types_list is not None:
+            if (
+                actual_column_type.type.__name__ == "object_"
+                and expected_types_list is not None
+            ):
                 return super()._validate(
-                    configuration,
-                    metrics,
-                    runtime_configuration,
-                    execution_engine
+                    configuration, metrics, runtime_configuration, execution_engine
                 )
             return self._validate_pandas(
                 actual_column_type=actual_column_type,
-                expected_types_list=expected_types_list
+                expected_types_list=expected_types_list,
             )
         elif isinstance(execution_engine, SqlAlchemyExecutionEngine):
             return self._validate_sqlalchemy(
                 actual_column_type=actual_column_type,
                 expected_types_list=expected_types_list,
-                execution_engine=execution_engine
+                execution_engine=execution_engine,
             )
         elif isinstance(execution_engine, SparkDFExecutionEngine):
             return self._validate_spark(
                 actual_column_type=actual_column_type,
-                expected_types_list=expected_types_list
+                expected_types_list=expected_types_list,
             )

@@ -5,7 +5,6 @@ import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from ..metrics.util import parse_value_set
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedGraphContent, RenderedStringTemplateContent
@@ -14,6 +13,7 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
+from ..metrics.util import parse_value_set
 from ..registry import extract_metrics
 
 
@@ -260,9 +260,10 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
 
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
-            assert isinstance(
-                configuration.kwargs["value_set"], (list, set)
-            ) or configuration.kwargs["value_set"] is None, "value_set must be a list, set, or None"
+            assert (
+                isinstance(configuration.kwargs["value_set"], (list, set))
+                or configuration.kwargs["value_set"] is None
+            ), "value_set must be a list, set, or None"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True

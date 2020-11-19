@@ -955,7 +955,14 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
 class ColumnPairMapExpectation(TableExpectation, ABC):
     map_metric = None
-    domain_keys = ("batch_id", "table", "column_A", "column_B", "row_condition", "condition_parser")
+    domain_keys = (
+        "batch_id",
+        "table",
+        "column_A",
+        "column_B",
+        "row_condition",
+        "condition_parser",
+    )
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -974,7 +981,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                 "column_A" in configuration.kwargs
             ), "'column_A' parameter is required for column pair map expectations"
             assert (
-                    "column_B" in configuration.kwargs
+                "column_B" in configuration.kwargs
             ), "'column_B' parameter is required for column pair map expectations"
             if "mostly" in configuration.kwargs:
                 mostly = configuration.kwargs["mostly"]

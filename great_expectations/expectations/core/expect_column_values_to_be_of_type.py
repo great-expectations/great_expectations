@@ -6,8 +6,12 @@ import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine, SqlAlchemyExecutionEngine, \
-    SparkDFExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     TableExpectation,
@@ -207,9 +211,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         ]
 
     def _validate_pandas(
-        self,
-        actual_column_type,
-        expected_type,
+        self, actual_column_type, expected_type,
     ):
         if expected_type is None:
             success = True
@@ -244,12 +246,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             "result": {"observed_value": actual_column_type.type.__name__},
         }
 
-    def _validate_sqlalchemy(
-        self,
-        actual_column_type,
-        expected_type,
-        execution_engine
-    ):
+    def _validate_sqlalchemy(self, actual_column_type, expected_type, execution_engine):
         # Our goal is to be as explicit as possible. We will match the dialect
         # if that is possible. If there is no dialect available, we *will*
         # match against a top-level SqlAlchemy type.
@@ -276,12 +273,13 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             types = tuple(types)
             success = isinstance(actual_column_type, types)
 
-        return {"success": success, "result": {"observed_value": type(actual_column_type).__name__}}
+        return {
+            "success": success,
+            "result": {"observed_value": type(actual_column_type).__name__},
+        }
 
     def _validate_spark(
-        self,
-        actual_column_type,
-        expected_type,
+        self, actual_column_type, expected_type,
     ):
         if expected_type is None:
             success = True
@@ -296,7 +294,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 raise ValueError("No recognized spark types in expected_types_list")
             types = tuple(types)
             success = isinstance(actual_column_type, types)
-        return {"success": success, "result": {"observed_value": type(actual_column_type).__name__}}
+        return {
+            "success": success,
+            "result": {"observed_value": type(actual_column_type).__name__},
+        }
 
     def get_validation_dependencies(
         self,
@@ -311,8 +312,11 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         if isinstance(execution_engine, PandasExecutionEngine):
             column_name = configuration.kwargs.get("column")
             expected_type = configuration.kwargs.get("type_")
-            metric_kwargs = get_metric_kwargs(configuration=configuration, metric_name="table.column_types",
-                                              runtime_configuration=runtime_configuration)
+            metric_kwargs = get_metric_kwargs(
+                configuration=configuration,
+                metric_name="table.column_types",
+                runtime_configuration=runtime_configuration,
+            )
             metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")
             metric_value_kwargs = metric_kwargs.get("metric_value_kwargs")
             table_column_types_configuration = MetricConfiguration(
@@ -328,10 +332,15 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 for type_dict in actual_column_types_list
                 if type_dict["name"] == column_name
             ][0]
-            if actual_column_type.type.__name__ == "object_" and expected_type not in ["object", "object_", "O", None]:
+            if actual_column_type.type.__name__ == "object_" and expected_type not in [
+                "object",
+                "object_",
+                "O",
+                None,
+            ]:
                 dependencies = super().get_validation_dependencies(
                     configuration, execution_engine, runtime_configuration
-            )
+                )
 
         column_types_metric_kwargs = get_metric_kwargs(
             metric_name="table.column_types",
@@ -363,33 +372,31 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         ][0]
 
         if isinstance(execution_engine, PandasExecutionEngine):
-            if actual_column_type.type.__name__ == "object_" and expected_type not in ["object", "object_", "O", None]:
+            if actual_column_type.type.__name__ == "object_" and expected_type not in [
+                "object",
+                "object_",
+                "O",
+                None,
+            ]:
                 return super()._validate(
-                    configuration,
-                    metrics,
-                    runtime_configuration,
-                    execution_engine
+                    configuration, metrics, runtime_configuration, execution_engine
                 )
             return self._validate_pandas(
-                actual_column_type=actual_column_type,
-                expected_type=expected_type
+                actual_column_type=actual_column_type, expected_type=expected_type
             )
         elif isinstance(execution_engine, SqlAlchemyExecutionEngine):
             return self._validate_sqlalchemy(
                 actual_column_type=actual_column_type,
                 expected_type=expected_type,
-                execution_engine=execution_engine
+                execution_engine=execution_engine,
             )
         elif isinstance(execution_engine, SparkDFExecutionEngine):
             return self._validate_spark(
-                actual_column_type=actual_column_type,
-                expected_type=expected_type
+                actual_column_type=actual_column_type, expected_type=expected_type
             )
 
 
-def _get_dialect_type_module(
-        execution_engine,
-):
+def _get_dialect_type_module(execution_engine,):
     if execution_engine.dialect is None:
         logger.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
@@ -398,7 +405,8 @@ def _get_dialect_type_module(
     try:
         # Redshift does not (yet) export types to top level; only recognize base SA types
         if isinstance(
-                execution_engine.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+            execution_engine.sql_engine_dialect,
+            sqlalchemy_redshift.dialect.RedshiftDialect,
         ):
             return execution_engine.dialect.sa
     except (TypeError, AttributeError):
@@ -407,11 +415,11 @@ def _get_dialect_type_module(
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
         if (
-                isinstance(
-                    execution_engine.sql_engine_dialect,
-                    pybigquery.sqlalchemy_bigquery.BigQueryDialect,
-                )
-                and bigquery_types_tuple is not None
+            isinstance(
+                execution_engine.sql_engine_dialect,
+                pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+            )
+            and bigquery_types_tuple is not None
         ):
             return bigquery_types_tuple
     except (TypeError, AttributeError):

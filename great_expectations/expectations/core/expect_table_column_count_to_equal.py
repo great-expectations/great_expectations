@@ -56,7 +56,7 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         expect_table_column_count_to_be_between
     """
 
-    metric_dependencies = ("table.column_count", )
+    metric_dependencies = ("table.column_count",)
 
     success_keys = ("value",)
 
@@ -169,18 +169,16 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         return {"success": success, "result": {"observed_value": column_count}}
 
     def _validate(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: Dict,
-            runtime_configuration: dict = None,
-            execution_engine: ExecutionEngine = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
         expected_column_count = configuration.kwargs.get("value")
         actual_column_count = metrics.get("table.column_count")
 
         return {
             "success": actual_column_count == expected_column_count,
-            "result": {
-                "observed_value": actual_column_count
-            }
+            "result": {"observed_value": actual_column_count},
         }

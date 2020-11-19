@@ -1,9 +1,10 @@
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
+    ExecutionEngine,
     PandasExecutionEngine,
-    SparkDFExecutionEngine, ExecutionEngine,
+    SparkDFExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
@@ -29,7 +30,9 @@ class ColumnMostCommonValue(ColumnMetricProvider):
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _metrics, **kwargs):
         column_value_counts = _metrics.get("column.value_counts")
-        return list(column_value_counts[column_value_counts == column_value_counts.max()].index)
+        return list(
+            column_value_counts[column_value_counts == column_value_counts.max()].index
+        )
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -48,9 +51,7 @@ class ColumnMostCommonValue(ColumnMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        if isinstance(
-            execution_engine, (SparkDFExecutionEngine)
-        ):
+        if isinstance(execution_engine, (SparkDFExecutionEngine)):
             dependencies.update(
                 {
                     "column.value_counts": MetricConfiguration(

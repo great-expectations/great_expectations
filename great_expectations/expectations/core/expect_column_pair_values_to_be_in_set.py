@@ -21,10 +21,11 @@ from ...render.util import (
 )
 from ..expectation import (
     ColumnMapExpectation,
+    ColumnPairMapExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     TableExpectation,
-    _format_map_output, ColumnPairMapExpectation,
+    _format_map_output,
 )
 from ..registry import extract_metrics, get_metric_kwargs
 
