@@ -4,13 +4,16 @@ import warnings
 from pathlib import Path
 from urllib.parse import urlparse, urlunparse
 
-import s3fs
+try:
+    import s3fs
+except ImportError:
+    s3fs = None
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )
 from great_expectations.datasource.types import PathBatchKwargs, S3BatchKwargs
-from great_expectations.exceptions import BatchKwargsError, InvalidConfigError
+from great_expectations.exceptions import BatchKwargsError, InvalidConfigError, ClassInstantiationError
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +60,10 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_method=None,
     ):
         super().__init__(name, datasource=datasource)
+
+        if not s3fs:
+            raise ClassInstantiationError("ModuleNotFoundError: No module named 's3fs'")
+
         if reader_options is None:
             reader_options = self._default_reader_options
 
