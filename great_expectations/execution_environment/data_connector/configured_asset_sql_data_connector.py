@@ -154,11 +154,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
         ]
 
-    # Note: Abe 20201119: Rename to head
-    def _fetch_batch_data_as_pandas_df(self, batch_data):
-        df = batch_data.head(n=10)
-        return df
-
     def build_batch_spec(self, batch_definition: BatchDefinition):
         data_asset_name = batch_definition.data_asset_name
         batch_spec = BatchSpec(

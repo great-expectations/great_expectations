@@ -252,7 +252,8 @@ class DataConnector:
 
         batch_data, batch_spec, _ = self.get_batch_data_and_metadata(batch_definition)
 
-        df = self._fetch_batch_data_as_pandas_df(batch_data)
+        df = batch_data.head()
+        n_rows = batch_data.row_count()
 
         if pretty_print:
             print(f"\n\t\tShowing 5 rows")
@@ -260,12 +261,8 @@ class DataConnector:
 
         return {
             "batch_spec": batch_spec,
-            "n_rows": df.shape[0],
+            "n_rows": n_rows,
         }
-
-    def _fetch_batch_data_as_pandas_df(self, batch_data):
-        # raise NotImplementedError
-        return batch_data
 
     def _validate_batch_request(self, batch_request: BatchRequest):
         if not (
