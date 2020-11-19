@@ -32,35 +32,32 @@ logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
 
-
 class PandasBatchData:
     def __init__(
         self,
-        dataframe: pd.DataFrame = None,
-        dataframe_dict: Dict[str, pd.DataFrame] = None,
-        default_table_name=None,
+        dataframe: pd.DataFrame,
+        record_set_name: str = None,
     ):
-        assert (
-            dataframe is not None or dataframe_dict is not None
-        ), "dataframe or dataframe_dict is required"
-        assert (
-            not dataframe and dataframe_dict
-        ), "dataframe and dataframe_dict may not both be specified"
+        if not isinstance(dataframe, pd.DataFrame):
+            raise TypeError(
+                f"batch_data must be an instance of type DataFrame, not {batch_data.__class__.__name__}"
+            )
 
-        if dataframe is not None:
-            dataframe_dict = {"": dataframe}
-            default_table_name = ""
-
-        self._dataframe_dict = dataframe_dict
-        self._default_table_name = default_table_name
+        self._dataframe = dataframe
+        self._record_set_name = record_set_name or "great_expectations_dataframe"
 
     @property
-    def default_dataframe(self):
-        if self._default_table_name in self._dataframe_dict:
-            return self._dataframe_dict[self._default_table_name]
+    def record_set_name(self):
+        return self._record_set_name
 
-        return None
+    def head(self, n=10, fetch_all=False):
+        if fetch_all:
+            return self._dataframe
+        else:
+            return self._dataframe.head(n=n)
 
+    def row_count(self):
+        return self._dataframe.shape[0]
 
 class PandasExecutionEngine(ExecutionEngine):
     """
@@ -176,10 +173,14 @@ Notes:
             raise BatchSpecError(
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
             )
+        
         batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
         if batch_data.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
-        return batch_data, batch_markers
+
+        typed_batch_data = self._get_typed_batch_data(batch_data)
+
+        return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
@@ -194,14 +195,10 @@ Notes:
         return batch_data
 
     def _get_typed_batch_data(self, batch_data):
-        if not isinstance(batch_data, pd.DataFrame):
-            raise TypeError(
-                f"batch_data must be an instance of type DataFrame, not {batch_data.__class__.__name__}"
-            )
-
-        # NOTE: Once the class works properly, we should wrap batch_data as a PandasBatchData object.
-
-        return batch_data
+        typed_batch_data = PandasBatchData(
+            dataframe = batch_data
+        )
+        return typed_batch_data
 
     @property
     def dataframe(self):
