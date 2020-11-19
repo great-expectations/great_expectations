@@ -87,7 +87,8 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
     insp = reflection.Inspector.from_engine(engine)
     try:
         columns = insp.get_columns(
-            batch_data.selectable.name, schema=batch_data.schema_name
+            batch_data.selectable.name,
+            schema=batch_data.selectable.schema,
         )
 
     except (KeyError, AttributeError):

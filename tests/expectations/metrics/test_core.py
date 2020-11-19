@@ -176,7 +176,6 @@ def test_map_value_set_sa(sa):
     )
     assert results == {desired_metric.id: 0}
 
-
 def test_map_of_type_sa(sa):
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
@@ -193,7 +192,6 @@ def test_map_of_type_sa(sa):
 
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results[desired_metric.id][0]["name"] == "a"
-    print(results)
     assert isinstance(results[desired_metric.id][0]["type"], sa.FLOAT)
 
 

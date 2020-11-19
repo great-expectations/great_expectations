@@ -201,7 +201,30 @@ object_id = OBJECT_ID('tempdb..{selectable}')
         ]
     else:
         query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
-        col_names: list = sqlalchemy_engine.execute(query).keys()
+        print(query)
+
+        # result_object = self._engine.execute(
+        #         sa
+        #             .select("*")
+        #             .limit(n)
+        #             .select_from(self._selectable)
+        #     )
+
+        # rows = result_object.fetchall()
+
+        # # Note: Abe 20201119: This should be a GE type 
+        # head_df = pd.DataFrame(
+        #     rows,
+        #     columns=result_object._metadata.keys
+
+        # col_names: list = sqlalchemy_engine.execute(query).keys()
+        result_object = sqlalchemy_engine.execute(query)
+        print(type(result_object))
+        col_names = result_object._metadata.keys
+        print(result_object._metadata)
+        print(result_object._metadata.__dict__)
+        col_types = result_object._metadata.types
+        print(col_names)
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
     return col_info_dict_list
 
