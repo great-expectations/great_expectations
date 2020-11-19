@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
+import pandas as pd
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import Batch, BatchMarkers
@@ -295,6 +296,30 @@ class SqlAlchemyBatchData:
                 temp_table_name=temp_table_name, query=query
             )
         self._engine.execute(stmt)
+
+    def head(self, n=5, fetch_all=False):
+
+        if fetch_all:
+            result_object = self._engine.execute(
+                sa
+                    .select("*")
+                    .select_from(self._selectable)
+            )
+        else:
+            result_object = self._engine.execute(
+                sa
+                    .select("*")
+                    .limit(n)
+                    .select_from(self._selectable)
+            )
+
+        rows = result_object.fetchall()
+        head_df = pd.DataFrame(
+            rows,
+            columns=result_object._metadata.keys
+        )
+
+        return(head_df)
 
 
 class SqlAlchemyExecutionEngine(ExecutionEngine):

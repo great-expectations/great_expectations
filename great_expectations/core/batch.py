@@ -402,3 +402,6 @@ class Batch(DictDot):
             "batch_markers": str(self.batch_markers),
         }
         return json.dumps(json_dict, indent=2)
+
+    def head(self):
+        return self._batch_data.head()
