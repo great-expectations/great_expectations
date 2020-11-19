@@ -91,6 +91,11 @@ class SqlAlchemyQueryStore(Store):
         if isinstance(result, dict):
             query = result.get("query")
             return_type = result.get("return_type")
+            if return_type not in ["list", "scalar"]:
+                raise ValueError(
+                    "The return_type of a SqlAlchemyQueryStore query must be one of either 'list' "
+                    "or 'scalar'"
+                )
         else:
             query = result
             return_type = None

@@ -28,6 +28,21 @@ Steps
         queries:
           current_genre_ids: "SELECT id FROM genres;"  # The query name and value can be replaced with your desired query
 
+    By default, query results will be returned as a list. If instead you need a scalar for your expectation, you can specify the return_type
+
+.. code-block:: yaml
+
+      my_query_store:
+        class_name: SqlAlchemyQueryStore
+        credentials: ${rds_movies_db}
+        queries:
+          current_ratings_max:
+            query: "SELECT MAX(rating) FROM ratings;"
+            return_type: "scalar"  # return_type can be either "scalar" or "list"
+          current_genre_ids:
+            query: "SELECT id FROM genres;"
+            return_type: "list"  # return_type can be either "scalar" or "list"
+
     Ensure you have added valid credentials to the ``config-variables.yml`` file:
 
     .. code-block:: yaml
