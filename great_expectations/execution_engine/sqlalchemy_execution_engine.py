@@ -145,11 +145,11 @@ class SqlAlchemyBatchData:
                 record_set_name: (string or None): \
                     The name of the record set available as a domain kwarg for Great Expectations validations. record_set_name
                     can usually be None, but is required when there are multiple record_sets in the same Batch.
+                schema_name (string or None): \
+                    The name of the schema_name in which the databases lie
                 table_name (string or None): \
                     The name of the table that will be accessed. Either this parameter or the query parameter must be
                     specified. Default is 'None'.
-                schema (string or None): \
-                    The name of the schema in which the databases lie
                 query (string or None): \
                     A query string representing a domain, which will be used to create a temporary table
                 selectable (Sqlalchemy Selectable or None): \
@@ -210,10 +210,16 @@ class SqlAlchemyBatchData:
                         "schema_name should not be used when passing a table_name for biquery. Instead, include the schema name in the table_name string."
                     )
                 # In BigQuery the table name is already qualified with its schema name
-                self._selectable = sa.Table(table_name, sa.MetaData(), schema_name=None)
+                self._selectable = sa.Table(
+                    table_name,
+                    sa.MetaData(),
+                    schema_name=None,
+                )
             else:
                 self._selectable = sa.Table(
-                    table_name, sa.MetaData(), schema_name=schema_name
+                    table_name,
+                    sa.MetaData(),
+                    schema_name=schema_name,
                 )
 
         elif create_temp_table:
@@ -241,7 +247,11 @@ class SqlAlchemyBatchData:
                 query,
                 temp_table_schema_name=temp_table_schema_name,
             )
-            self._selectable = sa.Table(generated_table_name, sa.MetaData(), schema_name=temp_table_schema_name)
+            self._selectable = sa.Table(
+                generated_table_name,
+                sa.MetaData(),
+                schema_name=temp_table_schema_name,
+            )
         else:
             if query:
                 self._selectable = sa.text(query)

@@ -32,32 +32,10 @@ logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
 
-class PandasBatchData:
-    def __init__(
-        self,
-        dataframe: pd.DataFrame,
-        record_set_name: str = None,
-    ):
-        if not isinstance(dataframe, pd.DataFrame):
-            raise TypeError(
-                f"batch_data must be an instance of type DataFrame, not {batch_data.__class__.__name__}"
-            )
-
-        self._dataframe = dataframe
-        self._record_set_name = record_set_name or "great_expectations_dataframe"
-
-    @property
-    def record_set_name(self):
-        return self._record_set_name
-
-    def head(self, n=10, fetch_all=False):
-        if fetch_all:
-            return self._dataframe
-        else:
-            return self._dataframe.head(n=n)
-
+class PandasBatchData(pd.DataFrame):
+    # @property
     def row_count(self):
-        return self._dataframe.shape[0]
+        return self.shape[0]
 
 class PandasExecutionEngine(ExecutionEngine):
     """
@@ -195,9 +173,7 @@ Notes:
         return batch_data
 
     def _get_typed_batch_data(self, batch_data):
-        typed_batch_data = PandasBatchData(
-            dataframe = batch_data
-        )
+        typed_batch_data = PandasBatchData(batch_data)
         return typed_batch_data
 
     @property

@@ -193,6 +193,7 @@ def test_map_of_type_sa(sa):
 
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results[desired_metric.id][0]["name"] == "a"
+    print(results)
     assert isinstance(results[desired_metric.id][0]["type"], sa.FLOAT)
 
 
