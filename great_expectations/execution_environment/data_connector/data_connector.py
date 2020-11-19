@@ -90,11 +90,8 @@ class DataConnector:
             batch_definition=batch_definition
         )
         batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
-        if batch_spec_passthrough and isinstance(batch_spec_passthrough, dict):
-            if "sampling_method" in batch_spec_passthrough:
-                batch_spec_params["sampling_method"] = batch_spec_passthrough["sampling_method"]
-            if "sampling_kwargs" in batch_spec_passthrough:
-                batch_spec_params["sampling_kwargs"] = batch_spec_passthrough["sampling_kwargs"]
+        if isinstance(batch_spec_passthrough, dict):
+            batch_spec_params.update(batch_spec_passthrough)
         batch_spec: BatchSpec = BatchSpec(
             **batch_spec_params
         )
