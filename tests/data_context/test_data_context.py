@@ -1561,7 +1561,9 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         context.get_checkpoint("foo")
 
 
-def test_get_validator_with_instantiated_expectation_suite(empty_data_context_v3, tmp_path_factory):
+def test_get_validator_with_instantiated_expectation_suite(
+    empty_data_context_v3, tmp_path_factory
+):
     context = empty_data_context_v3
 
     base_directory = str(
@@ -1571,10 +1573,7 @@ def test_get_validator_with_instantiated_expectation_suite(empty_data_context_v3
     )
 
     create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            'some_file.csv',
-        ],
+        directory=base_directory, file_name_list=["some_file.csv",],
     )
 
     yaml_config = f"""
@@ -1597,36 +1596,30 @@ data_connectors:
 
     config = yaml.load(yaml_config)
     context.add_execution_environment(
-        "my_directory_datasource",
-        config,
+        "my_directory_datasource", config,
     )
 
     my_validator = context.get_validator(
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
-            "alphanumeric": "some_file",
-        },
+        partition_identifiers={"alphanumeric": "some_file",},
         expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     assert my_validator.expectation_suite_name == "my_expectation_suite"
 
 
-def test_get_validator_with_attach_expectation_suite(empty_data_context_v3, tmp_path_factory):
+def test_get_validator_with_attach_expectation_suite(
+    empty_data_context_v3, tmp_path_factory
+):
     context = empty_data_context_v3
 
     base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_get_validator_with_attach_expectation_suite"
-        )
+        tmp_path_factory.mktemp("test_get_validator_with_attach_expectation_suite")
     )
 
     create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            'some_file.csv',
-        ],
+        directory=base_directory, file_name_list=["some_file.csv",],
     )
 
     yaml_config = f"""
@@ -1649,17 +1642,14 @@ data_connectors:
 
     config = yaml.load(yaml_config)
     context.add_execution_environment(
-        "my_directory_datasource",
-        config,
+        "my_directory_datasource", config,
     )
 
     my_validator = context.get_validator(
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
-            "alphanumeric": "some_file",
-        },
+        partition_identifiers={"alphanumeric": "some_file",},
         attach_new_expectation_suite=True,
     )
     assert my_validator.expectation_suite_name == "A_expectation_suite"
