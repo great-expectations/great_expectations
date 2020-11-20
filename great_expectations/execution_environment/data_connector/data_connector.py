@@ -86,7 +86,6 @@ class DataConnector:
         batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
             batch_definition=batch_definition
         )
-        # TODO: We should add validation to insure that batch_spec_passthrough contains only the sanctioned attributes.
         batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
         if isinstance(batch_spec_passthrough, dict):
             batch_spec_params.update(batch_spec_passthrough)
