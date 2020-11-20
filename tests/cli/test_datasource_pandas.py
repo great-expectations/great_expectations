@@ -285,6 +285,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert len(caplog.messages) == 1
     assert_no_tracebacks(result)
 
+
 def test_cli_datasource_profile_with_skip_prompt_flag(
     caplog, empty_data_context, filesystem_csv_2
 ):
@@ -307,7 +308,7 @@ def test_cli_datasource_profile_with_skip_prompt_flag(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["datasource", "profile", "-d", project_root_dir, "--no-view",'-y'],
+        ["datasource", "profile", "-d", project_root_dir, "--no-view", "-y"],
         input="Y\n",
         catch_exceptions=False,
     )
@@ -350,7 +351,6 @@ def test_cli_datasource_profile_with_skip_prompt_flag(
     assert "Preparing column 1 of 1" in caplog.messages[0]
     assert len(caplog.messages) == 1
     assert_no_tracebacks(result)
-
 
 
 def test_cli_datasource_profile_with_additional_batch_kwargs(
