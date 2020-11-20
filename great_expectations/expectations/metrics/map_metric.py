@@ -1,9 +1,11 @@
+import uuid
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.metric_exceptions import (
     MetricError,
     MetricProviderError,
@@ -305,7 +307,10 @@ def column_condition_partial(
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
-        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_FN]:
+        if partial_fn_type not in [
+            MetricPartialFunctionTypes.MAP_CONDITION_FN,
+            MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+        ]:
             raise ValueError(
                 "SqlAlchemyExecutionEngine only supports map_condition_fn for column_condition_partial partial_fn_type"
             )
@@ -723,6 +728,57 @@ def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
     )
 
 
+def _sqlalchemy_map_condition_unexpected_count_value(
+    cls,
+    execution_engine: "SqlAlchemyExecutionEngine",
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Returns unexpected count for MapExpectations. This is a *value* metric, which is useful for
+    when the unexpected_condition is a window function.
+    """
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+        "unexpected_condition"
+    )
+    (selectable, _, _,) = execution_engine.get_compute_domain(
+        compute_domain_kwargs, domain_type="identity"
+    )
+    temp_table_name: str = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+    if execution_engine.engine.dialect.name.lower() == "mssql":
+        # mssql expects all temporary table names to have a prefix '#'
+        temp_table_name = f"#{temp_table_name}"
+
+    with execution_engine.engine.begin():
+        metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
+        temp_table_obj: sa.Table = sa.Table(
+            temp_table_name,
+            metadata,
+            sa.Column("condition", sa.Integer, primary_key=False, nullable=False),
+        )
+        temp_table_obj.create(execution_engine.engine, checkfirst=True)
+
+        count_case_statement: List[sa.sql.elements.Label] = [
+            sa.case([(unexpected_condition, 1,)], else_=0,).label("condition")
+        ]
+        inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
+            count_case_statement,
+            sa.select(count_case_statement).select_from(selectable),
+        )
+        execution_engine.engine.execute(inner_case_query)
+
+    unexpected_count_query: sa.Select = sa.select(
+        [sa.func.sum(sa.column("condition")).label("unexpected_count"),]
+    ).select_from(temp_table_obj).alias("UnexpectedCountSubquery")
+
+    unexpected_count = execution_engine.engine.execute(
+        sa.select([unexpected_count_query.c.unexpected_count,])
+    ).scalar()
+
+    return convert_to_json_serializable(unexpected_count)
+
+
 def _sqlalchemy_column_map_condition_values(
     cls,
     execution_engine: "SqlAlchemyExecutionEngine",
@@ -1079,24 +1135,37 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=condition_provider,
                         metric_fn_type=metric_fn_type,
                     )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_count.aggregate_fn",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=metric_value_keys,
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_sqlalchemy_map_condition_unexpected_count_aggregate_fn,
-                        metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
-                    )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_count",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=metric_value_keys,
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=None,
-                        metric_fn_type=MetricFunctionTypes.VALUE,
-                    )
+                    if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_count.aggregate_fn",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=metric_value_keys,
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_map_condition_unexpected_count_aggregate_fn,
+                            metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=metric_value_keys,
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=None,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                    elif (
+                        metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN
+                    ):
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=metric_value_keys,
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_map_condition_unexpected_count_value,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
                     register_metric(
                         metric_name=metric_name + ".unexpected_rows",
                         metric_domain_keys=metric_domain_keys,

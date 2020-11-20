@@ -37,7 +37,7 @@ from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
-from tests.test_utils import safe_remove
+from tests.test_utils import safe_remove, create_files_in_directory
 
 try:
     from unittest import mock
@@ -1559,3 +1559,107 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
 
     with pytest.raises(CheckpointError) as e:
         context.get_checkpoint("foo")
+
+
+def test_get_validator_with_instantiated_expectation_suite(empty_data_context_v3, tmp_path_factory):
+    context = empty_data_context_v3
+
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_get_validator_with_instantiated_expectation_suite"
+        )
+    )
+
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            'some_file.csv',
+        ],
+    )
+
+    yaml_config = f"""
+class_name: ExecutionEnvironment
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        class_name: ConfiguredAssetFilesystemDataConnector
+        base_directory: {base_directory}
+        default_regex:
+            pattern: (.+)\\.csv
+            group_names:
+                - alphanumeric
+        assets:
+            A:
+"""
+
+    config = yaml.load(yaml_config)
+    context.add_execution_environment(
+        "my_directory_datasource",
+        config,
+    )
+
+    my_validator = context.get_validator(
+        execution_environment_name="my_directory_datasource",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="A",
+        partition_identifiers={
+            "alphanumeric": "some_file",
+        },
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
+    )
+    assert my_validator.expectation_suite_name == "my_expectation_suite"
+
+
+def test_get_validator_with_attach_expectation_suite(empty_data_context_v3, tmp_path_factory):
+    context = empty_data_context_v3
+
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_get_validator_with_attach_expectation_suite"
+        )
+    )
+
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            'some_file.csv',
+        ],
+    )
+
+    yaml_config = f"""
+class_name: ExecutionEnvironment
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        class_name: ConfiguredAssetFilesystemDataConnector
+        base_directory: {base_directory}
+        default_regex:
+            pattern: (.+)\\.csv
+            group_names:
+                - alphanumeric
+        assets:
+            A:
+"""
+
+    config = yaml.load(yaml_config)
+    context.add_execution_environment(
+        "my_directory_datasource",
+        config,
+    )
+
+    my_validator = context.get_validator(
+        execution_environment_name="my_directory_datasource",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="A",
+        partition_identifiers={
+            "alphanumeric": "some_file",
+        },
+        attach_new_expectation_suite=True,
+    )
+    assert my_validator.expectation_suite_name == "A_expectation_suite"

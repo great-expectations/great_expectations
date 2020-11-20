@@ -217,7 +217,7 @@ def pytest_generate_tests(metafunc):
                                 )
                                 and isinstance(
                                     validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                    mssqlDialect,
+                                    mysqlDialect,
                                 )
                             )
                             or (

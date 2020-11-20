@@ -883,6 +883,9 @@ class Dataset(MetaDataset):
         except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
+        if min_value is not None and max_value is not None and min_value > max_value:
+            raise ValueError("min_value cannot be greater than max_value")
+
         # check that min_value or max_value is set
         # if min_value is None and max_value is None:
         #     raise Exception('Must specify either or both of min_value and max_value')

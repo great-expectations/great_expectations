@@ -31,8 +31,25 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
     def _pandas(cls, column, **kwargs):
         return ~column.duplicated(keep=False)
 
-    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column, _table, **kwargs):
+    # NOTE: 20201119 - JPC - We cannot split per-dialect into window and non-window functions
+    # @column_condition_partial(
+    #     engine=SqlAlchemyExecutionEngine,
+    # )
+    # def _sqlalchemy(cls, column, _table, **kwargs):
+    #     dup_query = (
+    #         sa.select([column])
+    #         .select_from(_table)
+    #         .group_by(column)
+    #         .having(sa.func.count(column) > 1)
+    #     )
+    #
+    #     return column.notin_(dup_query)
+
+    @column_condition_partial(
+        engine=SqlAlchemyExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+    )
+    def _sqlalchemy_window(cls, column, _table, **kwargs):
         dup_query = (
             sa.select([column])
             .select_from(_table)

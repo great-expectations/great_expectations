@@ -374,24 +374,28 @@ def test_map_unique_sa(sa):
     )
     metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
 
-    aggregate_fn = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count.aggregate_fn",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"unexpected_condition": condition_metric},
-    )
-    aggregate_fn_metrics = engine.resolve_metrics(
-        metrics_to_resolve=(aggregate_fn,), metrics=metrics
-    )
+    # This is no longer a MAP_CONDITION because mssql does not support it. Instead, it is a WINDOW_CONDITION
+    #
+    # aggregate_fn = MetricConfiguration(
+    #     metric_name="column_values.unique.unexpected_count.aggregate_fn",
+    #     metric_domain_kwargs={"column": "a"},
+    #     metric_value_kwargs=dict(),
+    #     metric_dependencies={"unexpected_condition": condition_metric},
+    # )
+    # aggregate_fn_metrics = engine.resolve_metrics(
+    #     metrics_to_resolve=(aggregate_fn,), metrics=metrics
+    # )
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": aggregate_fn},
+        # metric_dependencies={"metric_partial_fn": aggregate_fn},
+        metric_dependencies={"unexpected_condition": condition_metric},
     )
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=aggregate_fn_metrics
+        metrics_to_resolve=(desired_metric,),
+        metrics=metrics,  # metrics=aggregate_fn_metrics
     )
     assert results[desired_metric.id] == 2
 
