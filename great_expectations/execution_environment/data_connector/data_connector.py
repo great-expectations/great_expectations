@@ -255,21 +255,29 @@ class DataConnector:
         batch_data, batch_spec, _ = self.get_batch_data_and_metadata(batch_definition)
         df = self._fetch_batch_data_as_pandas_df(batch_data)
 
-        if pretty_print:
+        if pretty_print and df is not None:
             print(f"\n\t\tShowing 5 rows")
             print(df[:5])
 
-        return {
-            "batch_spec": batch_spec,
-            "n_rows": df.shape[0],
-        }
+        if df is not None:
+            return_dict = {
+                "batch_spec": batch_spec,
+                "n_rows": df.shape[0]
+            }
+        else:
+            return_dict = {
+                "batch_spec": batch_spec,
+                "n_rows": 0
+            }
+        return return_dict
 
     def _fetch_batch_data_as_pandas_df(self, batch_data):
         if isinstance(batch_data, pd.core.frame.DataFrame):
             return batch_data
         else:
             try:
-                batch_data_pandas = batch_data.toPandas()
+                batch_data = batch_data.select("*").toPandas()
+                return batch_data
             except AttributeError:
                 raise DataConnectorError("Spark not working")
 
