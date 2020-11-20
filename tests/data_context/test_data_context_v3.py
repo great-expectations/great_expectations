@@ -52,9 +52,7 @@ def test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas
 
     create_files_in_directory(
         directory=base_directory,
-        file_name_list=[
-            "somme_file.csv",
-        ],
+        file_name_list=["somme_file.csv",],
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
@@ -105,10 +103,17 @@ data_connectors:
 
     df_data = my_batch.data
     assert df_data.shape == (10, 10)
-    df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
-    assert test_df[
-        (test_df["date"] == datetime.date(2020, 1, 15)) | (test_df["date"] == datetime.date(2020, 1, 29))
-        ].drop("timestamp", axis=1).equals(df_data.drop("timestamp", axis=1))
+    df_data["date"] = df_data.apply(
+        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
+    )
+    assert (
+        test_df[
+            (test_df["date"] == datetime.date(2020, 1, 15))
+            | (test_df["date"] == datetime.date(2020, 1, 29))
+        ]
+        .drop("timestamp", axis=1)
+        .equals(df_data.drop("timestamp", axis=1))
+    )
 
     my_batch = context.get_batch(
         execution_environment_name="my_directory_datasource",
@@ -124,7 +129,11 @@ data_connectors:
     )
     df_data = my_batch.data
     assert df_data.shape == (4, 10)
-    df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
-    df_data["belongs_in_split"] = df_data.apply(lambda row: row["date"] == datetime.date(2020, 1, 5), axis=1)
+    df_data["date"] = df_data.apply(
+        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
+    )
+    df_data["belongs_in_split"] = df_data.apply(
+        lambda row: row["date"] == datetime.date(2020, 1, 5), axis=1
+    )
     df_data = df_data[df_data["belongs_in_split"]]
     assert df_data.drop("belongs_in_split", axis=1).shape == (4, 10)

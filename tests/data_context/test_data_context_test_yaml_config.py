@@ -364,9 +364,7 @@ data_connectors:
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
-            "number": "2",
-        },
+        partition_identifiers={"number": "2",},
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -380,10 +378,17 @@ data_connectors:
 
     df_data = my_batch.data
     assert df_data.shape == (10, 10)
-    df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
-    assert test_df[
-        (test_df["date"] == datetime.date(2020, 1, 15)) | (test_df["date"] == datetime.date(2020, 1, 29))
-        ].drop("timestamp", axis=1).equals(df_data.drop("timestamp", axis=1))
+    df_data["date"] = df_data.apply(
+        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
+    )
+    assert (
+        test_df[
+            (test_df["date"] == datetime.date(2020, 1, 15))
+            | (test_df["date"] == datetime.date(2020, 1, 29))
+        ]
+        .drop("timestamp", axis=1)
+        .equals(df_data.drop("timestamp", axis=1))
+    )
 
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -397,11 +402,7 @@ data_connectors:
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
-        partition_request={
-            "partition_identifiers": {
-                "number": "3"
-            }
-        },
+        partition_request={"partition_identifiers": {"number": "3"}},
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -518,9 +519,7 @@ data_connectors:
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
-            "number": "2",
-        },
+        partition_identifiers={"number": "2",},
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -534,10 +533,17 @@ data_connectors:
 
     df_data = my_batch.data
     assert df_data.shape == (10, 10)
-    df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
-    assert test_df[
-        (test_df["date"] == datetime.date(2020, 1, 15)) | (test_df["date"] == datetime.date(2020, 1, 29))
-    ].drop("timestamp", axis=1).equals(df_data.drop("timestamp", axis=1))
+    df_data["date"] = df_data.apply(
+        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
+    )
+    assert (
+        test_df[
+            (test_df["date"] == datetime.date(2020, 1, 15))
+            | (test_df["date"] == datetime.date(2020, 1, 29))
+        ]
+        .drop("timestamp", axis=1)
+        .equals(df_data.drop("timestamp", axis=1))
+    )
 
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -551,11 +557,7 @@ data_connectors:
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="C",
-        partition_request={
-            "partition_identifiers": {
-                "year": "2019"
-            }
-        },
+        partition_request={"partition_identifiers": {"year": "2019"}},
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
