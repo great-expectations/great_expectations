@@ -89,9 +89,7 @@ class DataConnector:
         batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
         if isinstance(batch_spec_passthrough, dict):
             batch_spec_params.update(batch_spec_passthrough)
-        batch_spec: BatchSpec = BatchSpec(
-            **batch_spec_params
-        )
+        batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
         return batch_spec
 
     def _refresh_data_references_cache(self,):

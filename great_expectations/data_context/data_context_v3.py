@@ -212,12 +212,12 @@ class DataContextV3(DataContext):
         partition_identifiers: dict = None,
         limit: int = None,
         index=None,
-        custom_filter_function: Callable=None,
+        custom_filter_function: Callable = None,
         batch_spec_passthrough: Optional[dict] = None,
-        sampling_method: str=None,
-        sampling_kwargs: dict=None,
-        splitter_method: str=None,
-        splitter_kwargs: dict=None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
         **kwargs,
     ) -> Batch:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -281,7 +281,9 @@ class DataContextV3(DataContext):
         elif batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
 
-            batch_definitions = execution_environment.get_available_batch_definitions(batch_request=batch_request)
+            batch_definitions = execution_environment.get_available_batch_definitions(
+                batch_request=batch_request
+            )
             if len(batch_definitions) != 1:
                 raise ValueError(
                     f"Instead of 1 batch_definition, this batch_request matches {len(batch_definitions)}."
@@ -356,15 +358,15 @@ class DataContextV3(DataContext):
         partition_identifiers: dict = None,
         limit: int = None,
         index=None,
-        custom_filter_function: Callable=None,
+        custom_filter_function: Callable = None,
         attach_new_expectation_suite: bool = False,
-        expectation_suite_name: str=None,
-        expectation_suite: ExpectationSuite=None,
+        expectation_suite_name: str = None,
+        expectation_suite: ExpectationSuite = None,
         batch_spec_passthrough: Optional[dict] = None,
-        sampling_method: str=None,
-        sampling_kwargs: dict=None,
-        splitter_method: str=None,
-        splitter_kwargs: dict=None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
         **kwargs,
     ) -> Validator:
         if attach_new_expectation_suite:
