@@ -17,9 +17,9 @@ from great_expectations.execution_environment.types.batch_spec import (
 from ..exceptions import (
     BatchKwargsError,
     BatchSpecError,
+    ExecutionEngineError,
     GreatExpectationsError,
     ValidationError,
-    ExecutionEngineError,
 )
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
@@ -224,9 +224,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             try:
                 reader_options = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
-                    reader=reader_options,
-                    reader_method=reader_method,
-                    path=path,
+                    reader=reader_options, reader_method=reader_method, path=path,
                 )
                 batch_data = reader_fn(path)
             except AttributeError:
@@ -234,7 +232,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     """
                     Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
                     """
-                    )
+                )
         else:
             raise BatchSpecError(
                 """

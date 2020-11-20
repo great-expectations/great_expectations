@@ -4,14 +4,9 @@ from typing import Any, List, Optional, Tuple
 
 import pandas as pd
 
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchMarkers,
-    BatchRequest,
-)
-
-from great_expectations.exceptions.exceptions import DataConnectorError
+from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.exceptions.exceptions import DataConnectorError
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -260,15 +255,9 @@ class DataConnector:
             print(df[:5])
 
         if df is not None:
-            return_dict = {
-                "batch_spec": batch_spec,
-                "n_rows": df.shape[0]
-            }
+            return_dict = {"batch_spec": batch_spec, "n_rows": df.shape[0]}
         else:
-            return_dict = {
-                "batch_spec": batch_spec,
-                "n_rows": 0
-            }
+            return_dict = {"batch_spec": batch_spec, "n_rows": 0}
         return return_dict
 
     def _fetch_batch_data_as_pandas_df(self, batch_data):

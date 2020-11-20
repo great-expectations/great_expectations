@@ -10,11 +10,11 @@ from great_expectations.core.batch import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SparkDFExecutionEngine
+    SparkDFExecutionEngine,
 )
 from great_expectations.execution_environment.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
-    InferredAssetFilesystemDataConnector
+    InferredAssetFilesystemDataConnector,
 )
 from great_expectations.execution_environment.data_connector.util import (
     batch_definition_matches_batch_request,
@@ -231,7 +231,9 @@ def test__batch_definition_matches_batch_request():
     # TODO : Test cases to exercise ranges, etc.
 
 
-def test_for_self_check_using_InferredAssetFilesystemDataConnector_PandasExecutionEngine(tmp_path_factory):
+def test_for_self_check_using_InferredAssetFilesystemDataConnector_PandasExecutionEngine(
+    tmp_path_factory,
+):
     base_directory = str(
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
     )
@@ -249,16 +251,23 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_PandasExecuti
         glob_directive="*.csv",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         execution_engine=PandasExecutionEngine(),
-        default_regex={"pattern": "(.+)_(\\d+)_(\\d+)\\.csv", "group_names": ["data_asset_name", "timestamp", "size"]},
+        default_regex={
+            "pattern": "(.+)_(\\d+)_(\\d+)\\.csv",
+            "group_names": ["data_asset_name", "timestamp", "size"],
+        },
     )
     self_check_results = my_data_connector.self_check()
-    assert self_check_results['data_asset_count'] == 3
-    assert self_check_results['example_data_reference']["n_rows"] == 2
+    assert self_check_results["data_asset_count"] == 3
+    assert self_check_results["example_data_reference"]["n_rows"] == 2
 
 
-def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecutionEngine(spark_session, tmp_path_factory):
+def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecutionEngine(
+    spark_session, tmp_path_factory
+):
     base_directory = str(
-        tmp_path_factory.mktemp("basic_data_connector_inferred_asset_filesystem_data_connector")
+        tmp_path_factory.mktemp(
+            "basic_data_connector_inferred_asset_filesystem_data_connector"
+        )
     )
     create_files_in_directory(
         directory=base_directory,
@@ -274,8 +283,11 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecut
         glob_directive="*.csv",
         execution_environment_name="FAKE_EXECUTION_ENVIRONMENT",
         execution_engine=SparkDFExecutionEngine(),
-        default_regex={"pattern": "(.+)_(\\d+)_(\\d+)\\.csv", "group_names": ["data_asset_name", "timestamp", "size"]},
+        default_regex={
+            "pattern": "(.+)_(\\d+)_(\\d+)\\.csv",
+            "group_names": ["data_asset_name", "timestamp", "size"],
+        },
     )
     self_check_results = my_data_connector.self_check()
-    assert self_check_results['data_asset_count'] == 3
-    assert self_check_results['example_data_reference']["n_rows"] == 3
+    assert self_check_results["data_asset_count"] == 3
+    assert self_check_results["example_data_reference"]["n_rows"] == 3
