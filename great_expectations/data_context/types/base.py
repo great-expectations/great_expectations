@@ -533,6 +533,9 @@ class BaseBackendEcosystem(DictDot):
         self.evaluation_parameter_store_name = (
             DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value
         )
+        self.validation_operators = (
+            DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
+        )
         self.stores = DataContextConfigDefaults.DEFAULT_STORES.value
         self.data_docs_sites = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
 
@@ -791,55 +794,56 @@ class DataContextConfig(DictDot):
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
-        validation_operators=DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value,
+        validation_operators=None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
         notebooks=None,
         config_variables_file_path: Optional[str] = None,
         anonymous_usage_statistics=None,
         commented_map=None,
-        backend_ecosystem: BaseBackendEcosystem = BaseBackendEcosystem(),
+        backend_ecosystem: Optional[BaseBackendEcosystem] = None,
     ):
 
         # TODO: should default plugins_directory be "plugins/" or None?
         #  I think it may depend on in-memory or not. Is there checking
         #  for this directory when it is used and graceful handling if not found?
 
-        # Set defaults via backend_ecosystem
+        # Set defaults via backend_ecosystem if one is passed in
         # What happens / should happen if a user specifies a backend_ecosystem
         #  and also items that would be specified inside of it e.g. expectations_store_name?
         # Override attributes from backend_ecosystem with any items passed into the constructor:
-        config_version = (
-            config_version
-            if config_version is not None
-            else backend_ecosystem.config_version
-        )
-        stores = stores if stores is not None else backend_ecosystem.stores
-        expectations_store_name = (
-            expectations_store_name
-            if expectations_store_name is not None
-            else backend_ecosystem.expectations_store_name
-        )
-        validations_store_name = (
-            validations_store_name
-            if validations_store_name is not None
-            else backend_ecosystem.validations_store_name
-        )
-        evaluation_parameter_store_name = (
-            evaluation_parameter_store_name
-            if evaluation_parameter_store_name is not None
-            else backend_ecosystem.evaluation_parameter_store_name
-        )
-        validation_operators = (
-            validation_operators
-            if validation_operators is not None
-            else backend_ecosystem.validation_operators
-        )
-        data_docs_sites = (
-            data_docs_sites
-            if data_docs_sites is not None
-            else backend_ecosystem.data_docs_sites
-        )
+        if backend_ecosystem:
+            config_version = (
+                config_version
+                if config_version is not None
+                else backend_ecosystem.config_version
+            )
+            stores = stores if stores is not None else backend_ecosystem.stores
+            expectations_store_name = (
+                expectations_store_name
+                if expectations_store_name is not None
+                else backend_ecosystem.expectations_store_name
+            )
+            validations_store_name = (
+                validations_store_name
+                if validations_store_name is not None
+                else backend_ecosystem.validations_store_name
+            )
+            evaluation_parameter_store_name = (
+                evaluation_parameter_store_name
+                if evaluation_parameter_store_name is not None
+                else backend_ecosystem.evaluation_parameter_store_name
+            )
+            validation_operators = (
+                validation_operators
+                if validation_operators is not None
+                else backend_ecosystem.validation_operators
+            )
+            data_docs_sites = (
+                data_docs_sites
+                if data_docs_sites is not None
+                else backend_ecosystem.data_docs_sites
+            )
 
         if commented_map is None:
             commented_map = CommentedMap()

@@ -5,6 +5,7 @@ import pytest
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
+    BaseBackendEcosystem,
     DatabaseBackendEcosystem,
     DataContextConfig,
     DataContextConfigDefaults,
@@ -120,6 +121,7 @@ def test_DataContextConfig_with_BaseBackendEcosystem_and_simple_defaults(
                 },
             )
         },
+        backend_ecosystem=BaseBackendEcosystem(),
     )
 
     desired_config = construct_data_context_config(
