@@ -34,49 +34,72 @@ DEFAULT_USAGE_STATISTICS_URL = (
 
 class DatasourceDefaults(metaclass=abc.ABCMeta):
     """
-
+    Abstract class with defaults applicable to all datasource types. Defines the base interface.
     """
 
-    # TODO: Should MODULE_NAME be used in datasource.py as the default?
-    # TODO: Should we make this class abstract and raise a NotImplementedError
-    #  if a subclass doesn't have a CLASS_NAME or DATA_ASSET_TYPE?
-    MODULE_NAME = "great_expectations.datasource"
+    _default_module_name = "great_expectations.datasource"
+
+    @classmethod
+    def module_name(cls):
+        return cls._default_module_name
+
+    @classmethod
+    @abc.abstractmethod
+    def class_name(cls):
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def data_asset_type(cls):
+        raise NotImplementedError
 
 
 class PandasDatasourceDefaults(DatasourceDefaults):
-    """
-
-    """
-
-    CLASS_NAME = "PandasDatasource"
-    DATA_ASSET_TYPE = {
+    _class_name = "PandasDatasource"
+    _data_asset_type = {
         "module_name": "great_expectations.dataset",
         "class_name": "PandasDataset",
     }
 
+    @classmethod
+    def class_name(cls):
+        return cls._class_name
+
+    @classmethod
+    def data_asset_type(cls):
+        return cls._data_asset_type
+
 
 class SqlAlchemyDatasourceDefaults(DatasourceDefaults):
-    """
-
-    """
-
-    CLASS_NAME = "SqlAlchemyDatasource"
-    DATA_ASSET_TYPE = {
+    _class_name = "SqlAlchemyDatasource"
+    _data_asset_type = {
         "module_name": "great_expectations.dataset",
         "class_name": "SqlAlchemyDataset",
     }
 
+    @classmethod
+    def class_name(cls):
+        return cls._class_name
+
+    @classmethod
+    def data_asset_type(cls):
+        return cls._data_asset_type
+
 
 class SparkDFDatasourceDefaults(DatasourceDefaults):
-    """
-
-    """
-
-    CLASS_NAME = "SparkDFDatasource"
-    DATA_ASSET_TYPE = {
+    _class_name = "SparkDFDatasource"
+    _data_asset_type = {
         "module_name": "great_expectations.dataset",
         "class_name": "SparkDFDataset",
     }
+
+    @classmethod
+    def class_name(cls):
+        return cls._class_name
+
+    @classmethod
+    def data_asset_type(cls):
+        return cls._data_asset_type
 
 
 class DatasourceConfig(DictDot):
@@ -100,19 +123,21 @@ class DatasourceConfig(DictDot):
             module_name and data_asset_type as configured or defaults
         """
         defaults_class = None
-        if class_name == PandasDatasourceDefaults.CLASS_NAME:
+        if class_name == PandasDatasourceDefaults.class_name():
             defaults_class = PandasDatasourceDefaults
-        elif class_name == SqlAlchemyDatasourceDefaults.CLASS_NAME:
+        elif class_name == SqlAlchemyDatasourceDefaults.class_name():
             defaults_class = SqlAlchemyDatasourceDefaults
-        elif class_name == SparkDFDatasourceDefaults.CLASS_NAME:
+        elif class_name == SparkDFDatasourceDefaults.class_name():
             defaults_class = SparkDFDatasourceDefaults
 
         data_asset_type = (
-            defaults_class.DATA_ASSET_TYPE
+            defaults_class.data_asset_type()
             if data_asset_type is None
             else data_asset_type
         )
-        module_name = defaults_class.MODULE_NAME if module_name is None else module_name
+        module_name = (
+            defaults_class.module_name() if module_name is None else module_name
+        )
 
         return module_name, data_asset_type
 
