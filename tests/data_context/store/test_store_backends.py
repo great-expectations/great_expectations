@@ -56,6 +56,8 @@ def check_store_backend_store_backend_id_functionality(
     """
     # Check that store_backend_id exists can be read
     assert store_backend.store_backend_id is not None
+    store_error_uuid = "00000000-0000-0000-0000-00000000e003"
+    assert store_backend.store_backend_id != store_error_uuid
     if store_backend_id:
         assert store_backend.store_backend_id == store_backend_id
     # Check that store_backend_id is a valid UUID
@@ -150,6 +152,9 @@ test_StoreBackend_id_initialization__dir1/
         base_directory=project_path,
         # filepath_template="my_file_{0}",
     )
+    check_store_backend_store_backend_id_functionality(
+        store_backend=tuple_filesystem_store_backend_duplicate
+    )
     assert (
         tuple_filesystem_store_backend.store_backend_id
         == tuple_filesystem_store_backend_duplicate.store_backend_id
@@ -167,13 +172,15 @@ test_StoreBackend_id_initialization__dir1/
     s3_store_backend = TupleS3StoreBackend(
         filepath_template="my_file_{0}", bucket=bucket, prefix=prefix,
     )
-    print(s3_store_backend.list_keys())
 
     check_store_backend_store_backend_id_functionality(store_backend=s3_store_backend)
 
     # Create a new store with the same config and make sure it reports the same store_backend_id
     s3_store_backend_duplicate = TupleS3StoreBackend(
         filepath_template="my_file_{0}", bucket=bucket, prefix=prefix,
+    )
+    check_store_backend_store_backend_id_functionality(
+        store_backend=s3_store_backend_duplicate
     )
     assert (
         s3_store_backend.store_backend_id == s3_store_backend_duplicate.store_backend_id
@@ -213,6 +220,14 @@ test_StoreBackend_id_initialization__dir1/
             gcs_store_backend_with_base_public_path.store_backend_id
             == gcs_store_backend_with_base_public_path_duplicate.store_backend_id
         )
+        store_error_uuid = "00000000-0000-0000-0000-00000000e003"
+        assert (
+            gcs_store_backend_with_base_public_path.store_backend_id != store_error_uuid
+        )
+        assert (
+            gcs_store_backend_with_base_public_path_duplicate.store_backend_id
+            != store_error_uuid
+        )
 
 
 @mock_s3
@@ -236,6 +251,11 @@ def test_TupleS3StoreBackend_store_backend_id():
     s3_store_backend_duplicate = TupleS3StoreBackend(
         filepath_template="my_file_{0}", bucket=bucket, prefix=prefix,
     )
+
+    store_error_uuid = "00000000-0000-0000-0000-00000000e003"
+    assert s3_store_backend.store_backend_id != store_error_uuid
+    assert s3_store_backend_duplicate.store_backend_id != store_error_uuid
+
     assert (
         s3_store_backend.store_backend_id == s3_store_backend_duplicate.store_backend_id
     )
