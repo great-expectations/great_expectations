@@ -172,7 +172,7 @@ def test_some_very_basic_stuff(basic_execution_environment):
 
     # TODO Abe 20201104: Make sure this is what we truly want to do.
     assert batch.batch_request == {}
-    assert type(batch.data) == pd.DataFrame
+    assert isinstance(batch.data, pd.DataFrame)
     assert batch.batch_definition == BatchDefinition(
         execution_environment_name="my_execution_environment",
         data_connector_name="my_filesystem_data_connector",
@@ -207,7 +207,7 @@ def test_some_very_basic_stuff(basic_execution_environment):
         )
     )
     assert len(batch_list) == 1
-    assert type(batch_list[0].data) == pd.DataFrame
+    assert isinstance(batch_list[0].data, pd.DataFrame)
 
     my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
     batch: Batch = basic_execution_environment.get_batch_from_batch_definition(

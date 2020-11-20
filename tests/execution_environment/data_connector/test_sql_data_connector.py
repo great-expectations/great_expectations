@@ -536,7 +536,7 @@ def test_sampling_method__limit(
             }
         )
     )
-    assert len(batch_data.fetchall()) == 20
+    assert len(batch_data.head(fetch_all=True)) == 20
 
     # TODO: Implement this test once get_batch_data_and_markers is returning a proper SqlAlchemyBatchData
     # batch_data.expect_column_values_to_be_in_set("date", values=["2020-01-02"])
@@ -561,7 +561,7 @@ def test_sampling_method__random(
     )
 
     # random.seed() is no good here: the random number generator is in the database, not python
-    # assert len(batch_data.fetchall()) == 63
+    # assert len(batch_data.head(fetch_all=True)) == 63
     pass
 
 
@@ -583,7 +583,7 @@ def test_sampling_method__mod(
         )
     )
 
-    assert len(batch_data.fetchall()) == 12
+    assert len(batch_data.head(fetch_all=True)) == 12
 
 
 def test_sampling_method__a_list(
@@ -607,7 +607,7 @@ def test_sampling_method__a_list(
         )
     )
 
-    assert len(batch_data.fetchall()) == 4
+    assert len(batch_data.head(fetch_all=True)) == 4
 
 
 def test_sampling_method__md5(
@@ -646,7 +646,7 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
         )
     )
 
-    assert len(batch_data.fetchall()) == 12
+    assert len(batch_data.head(fetch_all=True)) == 12
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=BatchSpec(
@@ -657,7 +657,7 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
         )
     )
 
-    assert len(batch_data.fetchall()) == 120
+    assert len(batch_data.head(fetch_all=True)) == 120
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=BatchSpec(
@@ -670,7 +670,7 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
         )
     )
 
-    assert len(batch_data.fetchall()) == 120
+    assert len(batch_data.head(fetch_all=True)) == 120
 
 
 def test_default_behavior_with_no_splitter(
