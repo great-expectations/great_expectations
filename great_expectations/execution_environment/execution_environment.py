@@ -117,6 +117,9 @@ class BaseExecutionEnvironment:
         if batch_request["batch_data"] is None:
             batches: List[Batch] = []
             for batch_definition in batch_definition_list:
+                batch_definition.batch_spec_passthrough = (
+                    batch_request.batch_spec_passthrough
+                )
                 batch_data: Any
                 batch_spec: PathBatchSpec
                 batch_markers: BatchMarkers
