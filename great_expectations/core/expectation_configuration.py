@@ -7,6 +7,7 @@ import jsonpatch
 
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
+    build_evaluation_parameters,
     find_evaluation_parameter_dependencies,
 )
 from great_expectations.core.urn import ge_urn
@@ -786,12 +787,30 @@ class ExpectationConfiguration(SerializableDictDot):
                 "expectation configuration kwargs must be a dict."
             )
         self._kwargs = kwargs
+        self._raw_kwargs = None  # the kwargs before evaluation parameters are evaluated
         if meta is None:
             meta = {}
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
         self.success_on_last_run = success_on_last_run
+
+    def build_evaluation_parameters(
+        self, evaluation_parameters, interactive_evaluation=True, data_context=None
+    ):
+        if self._raw_kwargs is not None:
+            logger.warning(
+                "evaluation_parameters have already been built on this expectation"
+            )
+
+        (evaluation_args, substituted_parameters,) = build_evaluation_parameters(
+            self._kwargs, evaluation_parameters, interactive_evaluation, data_context,
+        )
+
+        self._raw_kwargs = self._kwargs
+        self._kwargs = evaluation_args
+        if len(substituted_parameters) > 0:
+            self.meta["substituted_parameters"] = substituted_parameters
 
     def patch(self, op: str, path: str, value: Any) -> "ExpectationConfiguration":
         """

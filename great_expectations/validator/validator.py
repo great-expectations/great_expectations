@@ -91,8 +91,7 @@ class Validator:
             self._execution_engine.load_batch_data(batch.id, batch.data)
             self._batches[batch.id] = batch
 
-        # TURN TO self.interactive_evaluation (single flag -> property)
-        self._validator_config = {"interactive_evaluation": interactive_evaluation}
+        self.interactive_evaluation = interactive_evaluation
         self._initialize_expectations(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
@@ -212,8 +211,26 @@ class Validator:
                 validation_result = expectation.validate(
                     validator=self, runtime_configuration=basic_runtime_configuration
                 )
-                if isinstance(validation_result, dict):
-                    validation_result = ExpectationValidationResult(**validation_result)
+
+                # If validate has set active_validation to true, then we do not save the config to avoid
+                # saving updating expectation configs to the same suite during validation runs
+                if self._active_validation is True:
+                    stored_config = configuration
+                else:
+                    # Append the expectation to the config.
+                    stored_config = self._expectation_suite.add_expectation(
+                        configuration
+                    )
+
+                # If there was no interactive evaluation, success will not have been computed.
+                if validation_result.success is not None:
+                    # Add a "success" object to the config
+                    stored_config.success_on_last_run = validation_result.success
+
+                if self._data_context is not None:
+                    validation_result = self._data_context.update_return_obj(
+                        self, validation_result
+                    )
 
             except Exception as err:
                 if basic_runtime_configuration.get("catch_exceptions"):
@@ -319,6 +336,8 @@ class Validator:
                     A list of Validations, validating that all necessary metrics are available.
         """
         graph = ValidationGraph()
+        if runtime_configuration is None:
+            runtime_configuration = dict()
 
         if runtime_configuration.get("catch_exceptions", True):
             catch_exceptions = True
@@ -378,14 +397,6 @@ class Validator:
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration,
                 )
-                result.expectation_config = configuration
-                # Add an empty exception_info object if no exception was caught
-                if catch_exceptions and result.exception_info is None:
-                    result.exception_info = {
-                        "raised_exception": False,
-                        "exception_traceback": None,
-                        "exception_message": None,
-                    }
                 evrs.append(result)
             except Exception as err:
                 if catch_exceptions:
@@ -940,7 +951,6 @@ class Validator:
             validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-
             assert not (run_id and run_name) and not (
                 run_id and run_time
             ), "Please provide either a run_id or run_name and/or run_time."
@@ -963,7 +973,8 @@ class Validator:
                 run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
             self._active_validation = True
-
+            if result_format is None:
+                result_format = {"result_format": "BASIC"}
             # If a different validation data context was provided, override
             validate__data_context = self._data_context
             if data_context is None and self._data_context is not None:
@@ -971,8 +982,6 @@ class Validator:
             elif data_context is not None:
                 # temporarily set self._data_context so it is used inside the expectation decorator
                 self._data_context = data_context
-
-            results = []
 
             if expectation_suite is None:
                 expectation_suite = self.get_expectation_suite(
@@ -1055,6 +1064,11 @@ class Validator:
             columns = {}
 
             for expectation in expectation_suite.expectations:
+                expectation.build_evaluation_parameters(
+                    evaluation_parameters=runtime_evaluation_parameters,
+                    interactive_evaluation=self.interactive_evaluation,
+                    data_context=self._data_context,
+                )
                 if "column" in expectation.kwargs and isinstance(
                     expectation.kwargs["column"], Hashable
                 ):
@@ -1069,7 +1083,13 @@ class Validator:
             for col in columns:
                 expectations_to_evaluate.extend(columns[col])
 
-            results = self.graph_validate(expectations_to_evaluate)
+            results = self.graph_validate(
+                expectations_to_evaluate,
+                runtime_configuration={
+                    "catch_exceptions": catch_exceptions,
+                    "result_format": result_format,
+                },
+            )
             statistics = _calc_validation_statistics(results)
 
             if only_return_failures:
@@ -1095,15 +1115,15 @@ class Validator:
                     "great_expectations_version": ge_version,
                     "expectation_suite_name": expectation_suite_name,
                     "run_id": run_id,
-                    "batch_spec": self.batch_spec,
-                    "batch_markers": self.batch_markers,
-                    "batch_definition": self.batch_definition,
+                    # "batch_spec": self.batch_spec,
+                    # "batch_markers": self.batch_markers,
+                    # "batch_definition": self.batch_definition,
                     "validation_time": validation_time,
                 },
             )
 
             self._data_context = validate__data_context
-        except Exception:
+        except Exception as e:
             if getattr(data_context, "_usage_statistics_handler", None):
                 handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
