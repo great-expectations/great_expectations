@@ -116,7 +116,7 @@ data_connectors:
 
     print(json.dumps(return_obj, indent=2))
 
-    assert set(return_obj.keys()) == set(["execution_engine", "data_connectors",])
+    assert set(return_obj.keys()) == {"execution_engine", "data_connectors"}
     sub_obj = return_obj["data_connectors"]["my_filesystem_data_connector"]
     sub_obj.pop("example_data_reference")
     assert sub_obj == {
@@ -541,10 +541,7 @@ data_connectors:
         data_asset_name="C",
         partition_request={"partition_identifiers": {"year": "2019"}},
         sampling_method="_sample_using_hash",
-        sampling_kwargs={
-            "column_name": "date",
-            "hash_function_name": "md5"
-        },
+        sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
         attach_new_expectation_suite=True,
     )
     my_evr = my_validator.expect_column_values_to_be_between(
