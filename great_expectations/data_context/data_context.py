@@ -994,16 +994,7 @@ class BaseDataContext:
                 message="Batch request must specify an execution_environment."
             )
 
-<<<<<<< HEAD
         execution_environment: ExecutionEnvironment = self.datasources[execution_environment_name]
-=======
-        # execution_environment: ExecutionEnvironment = self.get_execution_environment(
-        #     execution_environment_name=execution_environment_name
-        # )
-        execution_environment: ExecutionEnvironment = self.datasources[
-            execution_environment_name
-        ]
->>>>>>> 0.13-develop
         batch_request: BatchRequest = BatchRequest(**batch_request)
         return execution_environment.get_batch_list_from_batch_request(
             batch_request=batch_request
