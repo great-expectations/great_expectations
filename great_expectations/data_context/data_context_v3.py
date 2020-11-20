@@ -219,6 +219,8 @@ class DataContextV3(DataContext):
         batch_spec_passthrough: Optional[dict] = None,
         sampling_method: str=None,
         sampling_kwargs: dict=None,
+        splitter_method: str=None,
+        splitter_kwargs: dict=None,
         **kwargs,
     ) -> Batch:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -237,8 +239,12 @@ class DataContextV3(DataContext):
             limit
             index
             custom_filter_function
+
             sampling_method
             sampling_kwargs
+
+            splitter_method
+            splitter_kwargs
 
             batch_spec_passthrough
 
@@ -305,14 +311,27 @@ class DataContextV3(DataContext):
                 # of partitions is implemented using the PartitionQuery class, it will not recognized the keys
                 # representing the splitting and sampling directives and raise an exception.  Additional work is needed
                 # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
-                partition_request = PartitionRequest({
+                partition_request_params: dict = {
                     "partition_identifiers": partition_identifiers,
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
-                    "sampling_method": sampling_method,
-                    "sampling_kwargs": sampling_kwargs,
-                })
+                }
+                if sampling_method is not None:
+                    sampling_params: dict = {
+                        "sampling_method": sampling_method,
+                    }
+                    if sampling_kwargs is not None:
+                        sampling_params["sampling_kwargs"] = sampling_kwargs
+                    partition_request_params.update(sampling_params)
+                if splitter_method is not None:
+                    splitter_params: dict = {
+                        "splitter_method": splitter_method,
+                    }
+                    if splitter_kwargs is not None:
+                        splitter_params["splitter_kwargs"] = splitter_kwargs
+                    partition_request_params.update(splitter_params)
+                partition_request = PartitionRequest(partition_request_params)
             else:
                 # Raise a warning if partition_identifiers or kwargs exist
                 partition_request = PartitionRequest(partition_request)
@@ -341,12 +360,14 @@ class DataContextV3(DataContext):
         limit: int = None,
         index=None,
         custom_filter_function: Callable=None,
-        sampling_method: str=None,
-        sampling_kwargs: dict=None,
         attach_new_expectation_suite: bool = False,
         expectation_suite_name: str=None,
         expectation_suite: ExpectationSuite=None,
         batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str=None,
+        sampling_kwargs: dict=None,
+        splitter_method: str=None,
+        splitter_kwargs: dict=None,
         **kwargs,
     ) -> Validator:
         if attach_new_expectation_suite:
@@ -371,9 +392,11 @@ class DataContextV3(DataContext):
             limit=limit,
             index=index,
             custom_filter_function=custom_filter_function,
+            batch_spec_passthrough=batch_spec_passthrough,
             sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
-            batch_spec_passthrough=batch_spec_passthrough,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
             **kwargs,
         )
 
