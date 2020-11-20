@@ -281,14 +281,6 @@ class DataContextV3(DataContext):
             return execution_environment.get_single_batch_from_batch_request(
                 batch_request=batch_request
             )
-            # batch_definitions = execution_environment.get_available_batch_definitions(batch_request=batch_request)
-            # if len(batch_definitions) != 1:
-            #     raise ValueError(
-            #         f"Instead of 1 batch_definition, this batch_request matches {len(batch_definitions)}."
-            #     )
-            # return execution_environment.get_batch_from_batch_definition(
-            #     batch_definitions[0]
-            # )
         else:
             partition_request: PartitionRequest
             if partition_request is None:
