@@ -3,6 +3,7 @@ from typing import Dict
 import pytest
 
 from great_expectations import DataContext
+from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DatabaseBackendEcosystem,
     DataContextConfig,
@@ -98,9 +99,6 @@ def default_spark_datasource_config():
     }
 
 
-# TODO: Create other datasource config fixtures
-
-
 def test_DataContextConfig_with_BaseBackendEcosystem_and_simple_defaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -147,11 +145,6 @@ def test_DataContextConfig_with_S3BackendEcosystem(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
                 class_name="PandasDatasource",
-                module_name="great_expectations.datasource",
-                data_asset_type={
-                    "module_name": "great_expectations.dataset",
-                    "class_name": "PandasDataset",
-                },
                 batch_kwargs_generators={
                     "subdir_reader": {
                         "class_name": "SubdirReaderBatchKwargsGenerator",
@@ -789,32 +782,32 @@ def test_override_general_defaults(
                 "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
-                    "bucket": "REPLACE_ME",  # TODO: replace with your value
-                    "prefix": "REPLACE_ME",  # TODO: replace with your value
+                    "bucket": "REPLACE_ME",
+                    "prefix": "REPLACE_ME",
                 },
             },
             "expectations_S3_store2": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
-                    "bucket": "REPLACE_ME",  # TODO: replace with your value
-                    "prefix": "REPLACE_ME",  # TODO: replace with your value
+                    "bucket": "REPLACE_ME",
+                    "prefix": "REPLACE_ME",
                 },
             },
             "validations_S3_store": {
                 "class_name": "ValidationsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
-                    "bucket": "REPLACE_ME",  # TODO: replace with your value
-                    "prefix": "REPLACE_ME",  # TODO: replace with your value
+                    "bucket": "REPLACE_ME",
+                    "prefix": "REPLACE_ME",
                 },
             },
             "validations_S3_store2": {
                 "class_name": "ValidationsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
-                    "bucket": "REPLACE_ME",  # TODO: replace with your value
-                    "prefix": "REPLACE_ME",  # TODO: replace with your value
+                    "bucket": "REPLACE_ME",
+                    "prefix": "REPLACE_ME",
                 },
             },
             "custom_evaluation_parameter_store": {
@@ -829,7 +822,7 @@ def test_override_general_defaults(
                 "class_name": "SiteBuilder",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
-                    "bucket": "REPLACE_ME",  # TODO: replace with your value
+                    "bucket": "REPLACE_ME",
                 },
                 "site_index_builder": {
                     "class_name": "DefaultSiteIndexBuilder",
@@ -974,13 +967,90 @@ def test_override_general_defaults(
     assert DataContext.validate_config(project_config=data_context_config)
 
 
-# TODO: Other tests:
-#  1. Other backend ecosystems DONE
-#  2. Overrides of BackendEcosystem work correctly (e.g. specifying an expectations_store_name in the constructor overrides
-#  one specified in the BackendEcosystem, probably should either throw warning or error here) DONE
-#  3. Overrides of general defaults work correctly e.g. validation_operators DONE
-#  4. Also test if additional parameters are passed e.g. credentials for SqlAlchemyDatasource
-#  5. What about substituted variables? Will they just work?
-#  6. Test with other DataSources
-#  7. Make sure these are all valid configs DataContext.validate_config(cls, project_config) DONE
-#  8. Make sure multiple datasources and stores are handled DONE
+def test_DataContextConfig_with_S3BackendEcosystem_and_simple_defaults_with_variable_sub(
+    monkeypatch, construct_data_context_config, default_pandas_datasource_config
+):
+    """
+    What does this test and why?
+    Ensure that a very simple DataContextConfig setup with many defaults is created accurately
+    and produces a valid DataContextConfig
+    """
+
+    monkeypatch.setenv("SUBSTITUTED_BASE_DIRECTORY", "../data/")
+
+    data_context_config = DataContextConfig(
+        datasources={
+            "my_pandas_datasource": DatasourceConfig(
+                class_name="PandasDatasource",
+                batch_kwargs_generators={
+                    "subdir_reader": {
+                        "class_name": "SubdirReaderBatchKwargsGenerator",
+                        "base_directory": "${SUBSTITUTED_BASE_DIRECTORY}",
+                    }
+                },
+            )
+        },
+        backend_ecosystem=S3BackendEcosystem(default_bucket_name="my_default_bucket"),
+    )
+
+    # Create desired config
+    desired_stores_config = {
+        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "expectations_S3_store": {
+            "class_name": "ExpectationsStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "expectations",
+            },
+        },
+        "validations_S3_store": {
+            "class_name": "ValidationsStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "validations",
+            },
+        },
+    }
+    desired_data_docs_sites_config = {
+        "s3_site": {
+            "class_name": "SiteBuilder",
+            "show_how_to_buttons": True,
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+                "show_cta_footer": True,
+            },
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "data_docs",
+            },
+        }
+    }
+
+    desired_config = construct_data_context_config(
+        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        datasources=default_pandas_datasource_config,
+        expectations_store_name="expectations_S3_store",
+        validations_store_name="validations_S3_store",
+        evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        stores=desired_stores_config,
+        data_docs_sites=desired_data_docs_sites_config,
+    )
+
+    desired_config["datasources"]["my_pandas_datasource"]["batch_kwargs_generators"][
+        "subdir_reader"
+    ]["base_directory"] = "${SUBSTITUTED_BASE_DIRECTORY}"
+
+    data_context_config_schema = DataContextConfigSchema()
+    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert DataContext.validate_config(project_config=data_context_config)
+
+    data_context = BaseDataContext(project_config=data_context_config)
+    assert (
+        data_context.datasources["my_pandas_datasource"]
+        .get_batch_kwargs_generator("subdir_reader")
+        ._base_directory
+        == "../data/"
+    )
