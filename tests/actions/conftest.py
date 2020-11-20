@@ -74,6 +74,7 @@ def basic_in_memory_data_context_for_validation_operator(
 ):
     return BaseDataContext(basic_data_context_config_for_validation_operator)
 
+
 @pytest.fixture(scope="module")
 def validation_result_suite():
     return ExpectationSuiteValidationResult(
@@ -91,6 +92,7 @@ def validation_result_suite():
             "run_id": "test_100",
         },
     )
+
 
 @pytest.fixture(scope="module")
 def validation_result_suite_id():
