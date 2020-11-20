@@ -264,8 +264,8 @@ introspection:
     report_object = context.test_yaml_config(
         name="my_datasource", yaml_config=yaml_config, return_mode="report_object",
     )
-    # print(json.dumps(report_object, indent=2))
-    # print(context.datasources)
+    print(json.dumps(report_object, indent=2))
+    print(context.datasources)
 
     my_batch = context.get_batch("my_datasource", "whole_table_with_limits", "test_df",)
     assert len(my_batch.data.fetchall()) == 10
@@ -276,9 +276,9 @@ introspection:
         )
 
     my_validator = context.get_validator(
-        "my_datasource",
-        "whole_table_with_limits",
-        "test_df",
+        execution_environment_name="my_datasource",
+        data_connector_name="whole_table_with_limits",
+        data_asset_name="test_df",
         expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
 

@@ -217,6 +217,8 @@ class DataContextV3(DataContext):
         index=None,
         custom_filter_function: Callable=None,
         batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str=None,
+        sampling_kwargs: dict=None,
         **kwargs,
     ) -> Batch:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -294,11 +296,22 @@ class DataContextV3(DataContext):
                     # Raise a warning if kwargs exist
                     pass
 
+                # Currently, the implementation of splitting and sampling is inconsistent between the
+                # ExecutionEnvironment and StreamlinedSqlExecutionEnvironment classes.  The former communicates these
+                # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
+                # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
+                # StreamlinedSqlExecutionEnvironment uses "PartitionRequest" to relay the splitting and sampling
+                # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
+                # of partitions is implemented using the PartitionQuery class, it will not recognized the keys
+                # representing the splitting and sampling directives and raise an exception.  Additional work is needed
+                # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
                 partition_request = PartitionRequest({
                     "partition_identifiers": partition_identifiers,
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
+                    "sampling_method": sampling_method,
+                    "sampling_kwargs": sampling_kwargs,
                 })
             else:
                 # Raise a warning if partition_identifiers or kwargs exist
