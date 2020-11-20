@@ -222,8 +222,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             reader_options: dict = batch_spec.get("reader_options") or {}
             path: str = batch_spec.get("path") or batch_spec.get("s3")
             try:
+                reader_options = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
-                    reader=self.spark.read.options(**reader_options),
+                    reader=reader_options,
                     reader_method=reader_method,
                     path=path,
                 )
