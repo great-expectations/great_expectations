@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 import pytest
 
@@ -40,6 +40,7 @@ def construct_data_context_config():
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        plugins_directory: Optional[str] = None,
         stores: Dict = DataContextConfigDefaults.DEFAULT_STORES.value,
         validation_operators=DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value,
         data_docs_sites: Dict = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value,
@@ -50,7 +51,7 @@ def construct_data_context_config():
             "expectations_store_name": expectations_store_name,
             "validations_store_name": validations_store_name,
             "evaluation_parameter_store_name": evaluation_parameter_store_name,
-            "plugins_directory": None,
+            "plugins_directory": plugins_directory,
             "validation_operators": validation_operators,
             "stores": stores,
             "data_docs_sites": data_docs_sites,
@@ -960,9 +961,9 @@ def test_override_general_defaults(
         stores=desired_stores,
         validation_operators=desired_validation_operators,
         data_docs_sites=desired_data_docs_sites_config,
+        plugins_directory="custom_plugins_directory",
     )
     desired_config["config_variables_file_path"] = "custom_config_variables_file_path"
-    desired_config["plugins_directory"] = "custom_plugins_directory"
 
     data_context_config_schema = DataContextConfigSchema()
     assert data_context_config_schema.dump(data_context_config) == desired_config
