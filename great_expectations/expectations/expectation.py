@@ -6,11 +6,11 @@ from copy import deepcopy
 from inspect import isabstract
 from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union
 
-import pandas as pd
-from dateutil.parser import parse
-
 from great_expectations import __version__ as ge_version
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,
+    parse_result_format,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -26,12 +26,8 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.expectations.util import legacy_method_parameters
 
-from ..core.batch import Batch
-from ..core.util import nested_update
-from ..data_asset.util import (
-    parse_result_format,
-    recursively_convert_to_json_serializable,
-)
+from ..core.util import convert_to_json_serializable, nested_update
+from ..data_asset.util import recursively_convert_to_json_serializable
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..render.renderer.renderer import renderer
 from ..render.types import (
@@ -472,19 +468,23 @@ class Expectation(ABC, metaclass=MetaExpectation):
                 metrics=provided_metrics,
                 runtime_configuration=runtime_configuration,
                 execution_engine=execution_engine,
-            )
+            ),
+            configuration,
         )
 
-    def _build_evr(self, raw_response):
+    def _build_evr(self, raw_response, configuration):
         """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
         fails to return an EVR but returns the necessary components in a dictionary."""
         if not isinstance(raw_response, ExpectationValidationResult):
             if isinstance(raw_response, dict):
-                return ExpectationValidationResult(**raw_response)
+                evr = ExpectationValidationResult(**raw_response)
+                evr.expectation_config = configuration
             else:
                 raise GreatExpectationsError("Unable to build EVR")
         else:
-            return raw_response
+            evr = raw_response
+            evr.expectation_config = configuration
+        return evr
 
     def get_validation_dependencies(
         self,
@@ -577,13 +577,22 @@ class Expectation(ABC, metaclass=MetaExpectation):
         self,
         validator: "Validator",
         configuration: Optional[ExpectationConfiguration] = None,
+        evaluation_parameters=None,
+        interactive_evaluation=True,
+        data_context=None,
         runtime_configuration=None,
     ):
         if configuration is None:
             configuration = self.configuration
-        return validator.graph_validate(
+
+        configuration.build_evaluation_parameters(
+            evaluation_parameters, interactive_evaluation, data_context
+        )
+        evr = validator.graph_validate(
             configurations=[configuration], runtime_configuration=runtime_configuration,
         )[0]
+
+        return evr
 
     @property
     def configuration(self):
@@ -643,7 +652,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         # Construct the expectation_config object
         return ExpectationConfiguration(
             expectation_type=cls.expectation_type,
-            kwargs=recursively_convert_to_json_serializable(deepcopy(all_args)),
+            kwargs=convert_to_json_serializable(deepcopy(all_args)),
             meta=meta,
         )
 
