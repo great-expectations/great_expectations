@@ -2,10 +2,7 @@ import copy
 import logging
 import os
 import traceback
-import copy
-from ruamel.yaml import YAML, YAMLError
-from ruamel.yaml.compat import StringIO
-from typing import Callable, Union, Optional
+from typing import Callable, Optional, Union
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.compat import StringIO
