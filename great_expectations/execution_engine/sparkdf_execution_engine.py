@@ -1,55 +1,56 @@
 import copy
 import datetime
+import hashlib
 import logging
 import uuid
-import hashlib
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
-from typing import Any, Callable, Dict, Iterable, Tuple, Optional
-
-from .execution_engine import ExecutionEngine
+from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.id_dict import IDDict
-from great_expectations.core.batch import BatchSpec, BatchMarkers
-from great_expectations.execution_environment.types.batch_spec import(
+from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.execution_environment.types.batch_spec import (
     PathBatchSpec,
-    S3BatchSpec,
     RuntimeDataBatchSpec,
+    S3BatchSpec,
 )
-from ..exceptions import BatchKwargsError, GreatExpectationsError, ValidationError, BatchSpecError
+
+from ..exceptions import (
+    BatchKwargsError,
+    BatchSpecError,
+    GreatExpectationsError,
+    ValidationError,
+)
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
-from great_expectations.exceptions import exceptions as ge_exceptions
-
+from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 logger = logging.getLogger(__name__)
 
 try:
     import pyspark
-    from pyspark.sql import (
-        SparkSession,
-        DataFrame,
-    )
     import pyspark.sql.functions as F
+    from pyspark.sql import DataFrame, SparkSession
     from pyspark.sql.types import (
-        StructType,
-        StructField,
-        IntegerType,
-        FloatType,
-        StringType,
-        DateType,
         BooleanType,
+        DateType,
+        FloatType,
+        IntegerType,
+        StringType,
+        StructField,
+        StructType,
     )
 except ImportError:
     pyspark = None
     SparkSession = None
     DataFrame = None
     F = None
-    StructType = None,
-    StructField = None,
-    IntegerType = None,
-    FloatType = None,
-    StringType = None,
-    DateType = None,
-    BooleanType = None,
+    StructType = (None,)
+    StructField = (None,)
+    IntegerType = (None,)
+    FloatType = (None,)
+    StringType = (None,)
+    DateType = (None,)
+    BooleanType = (None,)
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
@@ -200,12 +201,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return self.active_batch_data
 
     def get_batch_data_and_markers(
-        self,
-        batch_spec: BatchSpec
-    ) -> Tuple[
-        Any,  # batch_data
-        BatchMarkers
-    ]:
+        self, batch_spec: BatchSpec
+    ) -> Tuple[Any, BatchMarkers]:  # batch_data
         batch_data: DataFrame
 
         # We need to build a batch_markers to be used in the dataframe
@@ -226,7 +223,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             reader_fn: Callable = self._get_reader_fn(
                 reader=self.spark.read.options(**reader_options),
                 reader_method=reader_method,
-                path=path
+                path=path,
             )
             batch_data = reader_fn(path)
         else:
@@ -306,7 +303,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
 
     def get_compute_domain(
-        self, domain_kwargs: dict
+        self,
+        domain_kwargs: dict,
+        domain_type: Union[str, "MetricDomainTypes"],
+        accessor_keys: Optional[Iterable[str]] = [],
     ) -> Tuple["pyspark.sql.DataFrame", dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
@@ -314,7 +314,12 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            batches (dict) - A dictionary specifying batch id and which batches to obtain
+            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity", "column",
+            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
+            MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
+            the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
@@ -323,6 +328,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
+
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -359,14 +367,128 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     f"unrecognized condition_parser {str(condition_parser)}for Spark execution engine"
                 )
 
-        if "column" in compute_domain_kwargs:
-            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
+        if (
+            domain_type != MetricDomainTypes.TABLE
+            and accessor_keys is not None
+            and len(accessor_keys) > 0
+        ):
+            logger.warning(
+                "Accessor keys ignored since Metric Domain Type is not 'table"
+            )
+
+        if domain_type == MetricDomainTypes.TABLE:
+            if accessor_keys is not None and len(accessor_keys) > 0:
+                for key in accessor_keys:
+                    accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
+            if len(compute_domain_kwargs.keys()) > 0:
+                for key in compute_domain_kwargs.keys():
+                    # Warning user if kwarg not "normal"
+                    if key not in [
+                        "batch_id",
+                        "table",
+                        "row_condition",
+                        "condition_parser",
+                    ]:
+                        logger.warning(
+                            f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}"
+                        )
+            return data, compute_domain_kwargs, accessor_domain_kwargs
+
+        # If user has stated they want a column, checking if one is provided, and
+        elif domain_type == MetricDomainTypes.COLUMN:
+            if "column" in compute_domain_kwargs:
+                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+            else:
+                # If column not given
+                raise GreatExpectationsError(
+                    "Column not provided in compute_domain_kwargs"
+                )
+
+        # Else, if column pair values requested
+        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+            # Ensuring column_A and column_B parameters provided
+            if (
+                "column_A" in compute_domain_kwargs
+                and "column_B" in compute_domain_kwargs
+            ):
+                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
+                    "column_A"
+                )
+                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
+                    "column_B"
+                )
+            else:
+                raise GreatExpectationsError(
+                    "column_A or column_B not found within compute_domain_kwargs"
+                )
+
+        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+        elif domain_type == MetricDomainTypes.MULTICOLUMN:
+            if "columns" in compute_domain_kwargs:
+                # If columns exist
+                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
+
+        # Filtering if identity
+        elif domain_type == MetricDomainTypes.IDENTITY:
+
+            # If we would like our data to become a single column
+            if "column" in compute_domain_kwargs:
+                data = data.select(compute_domain_kwargs["column"])
+
+            # If we would like our data to now become a column pair
+            elif ("column_A" in compute_domain_kwargs) and (
+                "column_B" in compute_domain_kwargs
+            ):
+                data = data.select(
+                    compute_domain_kwargs["column_A"], compute_domain_kwargs["column_B"]
+                )
+            else:
+
+                # If we would like our data to become a multicolumn
+                if "columns" in compute_domain_kwargs:
+                    data = data.select(compute_domain_kwargs["columns"])
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
-    def _get_eval_column_name(self, column):
-        """Given the name of a column (string), returns the name of the corresponding eval column"""
-        return "__eval_col_" + column.replace(".", "__").replace("`", "_")
+    def add_column_row_condition(
+        self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
+    ):
+        if filter_nan is False:
+            return super().add_column_row_condition(
+                domain_kwargs=domain_kwargs,
+                column_name=column_name,
+                filter_null=filter_null,
+                filter_nan=filter_nan,
+            )
+
+        # We explicitly handle filter_nan for spark using a spark-native condition
+        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
+            raise GreatExpectationsError(
+                "ExecutionEngine does not support updating existing row_conditions."
+            )
+
+        new_domain_kwargs = copy.deepcopy(domain_kwargs)
+        assert "column" in domain_kwargs or column_name is not None
+        if column_name is not None:
+            column = column_name
+        else:
+            column = domain_kwargs["column"]
+        if filter_null and filter_nan:
+            new_domain_kwargs[
+                "row_condition"
+            ] = f"NOT isnan({column}) AND {column} IS NOT NULL"
+        elif filter_null:
+            new_domain_kwargs["row_condition"] = f"{column} IS NOT NULL"
+        elif filter_nan:
+            new_domain_kwargs["row_condition"] = f"NOT isnan({column})"
+        else:
+            logger.warning(
+                "add_column_row_condition called without specifying a desired row condition"
+            )
+
+        new_domain_kwargs["condition_parser"] = "spark"
+        return new_domain_kwargs
 
     def resolve_metric_bundle(
         self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
@@ -386,32 +508,27 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         aggregates: Dict[Tuple, dict] = dict()
         for (
             metric_to_resolve,
-            metric_provider,
+            engine_fn,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
             metric_provider_kwargs,
         ) in metric_fn_bundle:
-            assert (
-                metric_provider.metric_fn_type == "aggregate_fn"
-            ), "resolve_metric_bundle only supports aggregate metrics"
-            # batch_id and table are the only determining factors for bundled metrics
-            column_aggregate, domain_kwargs = metric_provider(**metric_provider_kwargs)
-            if not isinstance(domain_kwargs, IDDict):
-                domain_kwargs = IDDict(domain_kwargs)
-            domain_id = domain_kwargs.to_id()
+            if not isinstance(compute_domain_kwargs, IDDict):
+                compute_domain_kwargs = IDDict(compute_domain_kwargs)
+            domain_id = compute_domain_kwargs.to_id()
             if domain_id not in aggregates:
                 aggregates[domain_id] = {
                     "column_aggregates": [],
                     "ids": [],
-                    "domain_kwargs": domain_kwargs,
+                    "domain_kwargs": compute_domain_kwargs,
                 }
-            aggregates[domain_id]["column_aggregates"].append(column_aggregate)
+            aggregates[domain_id]["column_aggregates"].append(engine_fn)
             aggregates[domain_id]["ids"].append(metric_to_resolve.id)
         for aggregate in aggregates.values():
-            df, compute_domain_kwargs, _ = self.get_compute_domain(
-                aggregate["domain_kwargs"]
+            compute_domain_kwargs = aggregate["domain_kwargs"]
+            df, _, _ = self.get_compute_domain(
+                compute_domain_kwargs, domain_type="identity"
             )
-            assert (
-                compute_domain_kwargs == aggregate["domain_kwargs"]
-            ), "Invalid compute domain returned from a bundled metric. Verify that its target compute domain is a valid compute domain."
             assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
             condition_ids = []
             aggregate_cols = []
@@ -427,8 +544,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             assert len(aggregate["ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
-            logger.warning(
-                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {domain_id}"
+            logger.debug(
+                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
             )
             for idx, id in enumerate(aggregate["ids"]):
                 resolved_metrics[id] = res[0][idx]
@@ -440,16 +557,12 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return self.dataframe.limit(n).toPandas()
 
     @staticmethod
-    def _split_on_whole_table(
-        df,
-    ):
+    def _split_on_whole_table(df,):
         return df
 
     @staticmethod
     def _split_on_column_value(
-        df,
-        column_name: str,
-        partition_definition: dict,
+        df, column_name: str, partition_definition: dict,
     ):
         return df.filter(F.col(column_name) == partition_definition[column_name])
 
@@ -458,117 +571,121 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         df,
         column_name: str,
         partition_definition: dict,
-        date_format_string: str='yyyy-MM-dd',
+        date_format_string: str = "yyyy-MM-dd",
     ):
         matching_string = partition_definition[column_name]
-        res = df.withColumn("date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)) \
-            .filter(F.col("date_time_tmp") == matching_string) \
+        res = (
+            df.withColumn(
+                "date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)
+            )
+            .filter(F.col("date_time_tmp") == matching_string)
             .drop("date_time_tmp")
+        )
         return res
 
     @staticmethod
     def _split_on_divided_integer(
-        df,
-        column_name: str,
-        divisor: int,
-        partition_definition: dict,
+        df, column_name: str, divisor: int, partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
         matching_divisor = partition_definition[column_name]
-        res = df.withColumn("div_temp", (F.col(column_name) / divisor).cast(IntegerType())) \
-            .filter(F.col("div_temp") == matching_divisor) \
+        res = (
+            df.withColumn(
+                "div_temp", (F.col(column_name) / divisor).cast(IntegerType())
+            )
+            .filter(F.col("div_temp") == matching_divisor)
             .drop("div_temp")
+        )
         return res
 
     @staticmethod
     def _split_on_mod_integer(
-        df,
-        column_name: str,
-        mod: int,
-        partition_definition: dict,
+        df, column_name: str, mod: int, partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
         matching_mod_value = partition_definition[column_name]
-        res = df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType())) \
-            .filter(F.col("mod_temp") == matching_mod_value) \
+        res = (
+            df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
+            .filter(F.col("mod_temp") == matching_mod_value)
             .drop("mod_temp")
+        )
         return res
 
     @staticmethod
     def _split_on_multi_column_values(
-            df,
-            column_names: list,
-            partition_definition: dict,
+        df, column_names: list, partition_definition: dict,
     ):
         """Split on the joint values in the named columns"""
         for column_name in column_names:
             value = partition_definition.get(column_name)
             if not value:
-                raise ValueError(f"In order for SparkExecutionEngine to `_split_on_multi_column_values`, "
-                                 f"all values in  column_names must also exist in partition_definition. "
-                                 f"{column_name} was not found in partition_definition.")
+                raise ValueError(
+                    f"In order for SparkExecutionEngine to `_split_on_multi_column_values`, "
+                    f"all values in  column_names must also exist in partition_definition. "
+                    f"{column_name} was not found in partition_definition."
+                )
             df = df.filter(F.col(column_name) == value)
         return df
 
     @staticmethod
     def _split_on_hashed_column(
-            df,
-            column_name: str,
-            hash_digits: int,
-            partition_definition: dict,
-            hash_function_name: str = "sha256",
+        df,
+        column_name: str,
+        hash_digits: int,
+        partition_definition: dict,
+        hash_function_name: str = "sha256",
     ):
         """Split on the hashed value of the named column"""
         try:
             getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError) as e:
-            raise (ge_exceptions.ExecutionEngineError(
-                f'''The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found.'''))
+            raise (
+                ge_exceptions.ExecutionEngineError(
+                    f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found."""
+                )
+            )
 
         def _encrypt_value(to_encode):
             hash_func = getattr(hashlib, hash_function_name)
-            hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits:]
+            hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits :]
             return hashed_value
 
         encrypt_udf = F.udf(_encrypt_value, StringType())
-        res = df.withColumn('encrypted_value', encrypt_udf(column_name)) \
-            .filter(F.col("encrypted_value") == partition_definition["hash_value"]) \
+        res = (
+            df.withColumn("encrypted_value", encrypt_udf(column_name))
+            .filter(F.col("encrypted_value") == partition_definition["hash_value"])
             .drop("encrypted_value")
+        )
         return res
 
     ### Sampling methods ###
     @staticmethod
-    def _sample_using_random(
-        df,
-        p: float = .1,
-        seed: int = 1
-    ):
+    def _sample_using_random(df, p: float = 0.1, seed: int = 1):
         """Take a random sample of rows, retaining proportion p
         """
-        res = df.withColumn('rand',  F.rand(seed=seed)) \
-            .filter(F.col("rand") < p) \
+        res = (
+            df.withColumn("rand", F.rand(seed=seed))
+            .filter(F.col("rand") < p)
             .drop("rand")
+        )
         return res
 
     @staticmethod
     def _sample_using_mod(
-        df,
-        column_name: str,
-        mod: int,
-        value: int,
+        df, column_name: str, mod: int, value: int,
     ):
         """Take the mod of named column, and only keep rows that match the given value"""
-        res = df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType())) \
-            .filter(F.col("mod_temp") == value) \
+        res = (
+            df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
+            .filter(F.col("mod_temp") == value)
             .drop("mod_temp")
+        )
         return res
 
     @staticmethod
     def _sample_using_a_list(
-        df,
-        column_name: str,
-        value_list: list,
+        df, column_name: str, value_list: list,
     ):
         """Match the values in the named column against value_list, and only keep the matches"""
         return df.where(F.col(column_name).isin(value_list))
@@ -578,24 +695,31 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         df,
         column_name: str,
         hash_digits: int = 1,
-        hash_value: str = 'f',
-        hash_function_name: str = "md5"
+        hash_value: str = "f",
+        hash_function_name: str = "md5",
     ):
         try:
             getattr(hashlib, str(hash_function_name))
         except (TypeError, AttributeError) as e:
-            raise (ge_exceptions.ExecutionEngineError(
-                f'''The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found.'''))
+            raise (
+                ge_exceptions.ExecutionEngineError(
+                    f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found."""
+                )
+            )
 
         def _encrypt_value(to_encode):
             to_encode_str = str(to_encode)
             hash_func = getattr(hashlib, hash_function_name)
-            hashed_value = hash_func(to_encode_str.encode()).hexdigest()[-1 * hash_digits:]
+            hashed_value = hash_func(to_encode_str.encode()).hexdigest()[
+                -1 * hash_digits :
+            ]
             return hashed_value
 
         encrypt_udf = F.udf(_encrypt_value, StringType())
-        res = df.withColumn('encrypted_value', encrypt_udf(column_name)) \
-            .filter(F.col("encrypted_value") == hash_value) \
+        res = (
+            df.withColumn("encrypted_value", encrypt_udf(column_name))
+            .filter(F.col("encrypted_value") == hash_value)
             .drop("encrypted_value")
+        )
         return res

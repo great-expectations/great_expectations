@@ -6,6 +6,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
 )
@@ -13,7 +14,7 @@ from great_expectations.expectations.metrics.import_manager import (
     reflection,
     sparktypes,
 )
-from great_expectations.expectations.metrics.metric_provider import metric
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric import TableMetricProvider
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 
@@ -23,8 +24,8 @@ class ColumnTypes(TableMetricProvider):
     value_keys = ("include_nested",)
     default_kwarg_values = {"include_nested": True}
 
-    @metric(engine=PandasExecutionEngine)
-    def _spark(
+    @metric_value(engine=PandasExecutionEngine)
+    def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
@@ -32,13 +33,15 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs)
+        df, _, _ = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+        )
         return [
             {"name": name, "type": dtype}
             for (name, dtype) in zip(df.columns, df.dtypes)
         ]
 
-    @metric(engine=SqlAlchemyExecutionEngine)
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -63,7 +66,7 @@ class ColumnTypes(TableMetricProvider):
             )
         return _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
 
-    @metric(engine=SparkDFExecutionEngine)
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
@@ -72,16 +75,20 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs)
+        df, _, _ = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+        )
         return _get_spark_column_metadata(
-            df.schema, metric_value_kwargs["include_nested"]
+            df.schema, include_nested=metric_value_kwargs["include_nested"]
         )
 
 
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
     insp = reflection.Inspector.from_engine(engine)
     try:
-        columns = insp.get_columns(batch_data.table.name, schema=batch_data.schema)
+        columns = insp.get_columns(
+            batch_data.selectable.name, schema=batch_data.selectable.schema
+        )
 
     except (KeyError, AttributeError):
         # we will get a KeyError for temporary tables, since

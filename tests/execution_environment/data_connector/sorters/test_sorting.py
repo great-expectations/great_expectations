@@ -1,19 +1,17 @@
-import pytest
 from typing import Iterator
-from great_expectations.core.batch import (
-    BatchDefinition,
-    PartitionDefinition,
-)
 
-from great_expectations.execution_environment.data_connector.sorter import(
-Sorter,
-LexicographicSorter,
-NumericSorter,
-DateTimeSorter,
-CustomListSorter
-)
+import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchDefinition, PartitionDefinition
+from great_expectations.execution_environment.data_connector.sorter import (
+    CustomListSorter,
+    DateTimeSorter,
+    LexicographicSorter,
+    NumericSorter,
+    Sorter,
+)
+
 
 @pytest.fixture()
 def example_batch_def_list():
@@ -21,61 +19,81 @@ def example_batch_def_list():
         execution_environment_name="A",
         data_connector_name="a",
         data_asset_name="james_20200810_1003",
-        partition_definition=PartitionDefinition({"name": "james", "timestamp": "20200810", "price": "1003"}),
+        partition_definition=PartitionDefinition(
+            {"name": "james", "timestamp": "20200810", "price": "1003"}
+        ),
     )
     b = BatchDefinition(
         execution_environment_name="A",
         data_connector_name="b",
         data_asset_name="abe_20200809_1040",
-        partition_definition=PartitionDefinition({"name": "abe", "timestamp": "20200809", "price": "1040"}),
+        partition_definition=PartitionDefinition(
+            {"name": "abe", "timestamp": "20200809", "price": "1040"}
+        ),
     )
     c = BatchDefinition(
         execution_environment_name="A",
         data_connector_name="c",
         data_asset_name="eugene_20200809_1500",
-        partition_definition=PartitionDefinition({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
+        partition_definition=PartitionDefinition(
+            {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+        ),
     )
     d = BatchDefinition(
         execution_environment_name="A",
         data_connector_name="d",
         data_asset_name="alex_20200819_1300",
-        partition_definition=PartitionDefinition({"name": "alex", "timestamp": "20200819", "price": "1300"}),
+        partition_definition=PartitionDefinition(
+            {"name": "alex", "timestamp": "20200819", "price": "1300"}
+        ),
     )
     e = BatchDefinition(
         execution_environment_name="A",
         data_connector_name="e",
         data_asset_name="alex_20200809_1000",
-        partition_definition=PartitionDefinition({"name": "alex", "timestamp": "20200809", "price": "1000"}),
+        partition_definition=PartitionDefinition(
+            {"name": "alex", "timestamp": "20200809", "price": "1000"}
+        ),
     )
     f = BatchDefinition(
         execution_environment_name="A",
         data_connector_name="f",
         data_asset_name="will_20200810_1001",
-        partition_definition=PartitionDefinition({"name": "will", "timestamp": "20200810", "price": "1001"}),
+        partition_definition=PartitionDefinition(
+            {"name": "will", "timestamp": "20200810", "price": "1001"}
+        ),
     )
     g = BatchDefinition(
         execution_environment_name="A",
         data_connector_name="g",
         data_asset_name="eugene_20201129_1900",
-        partition_definition=PartitionDefinition({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
+        partition_definition=PartitionDefinition(
+            {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+        ),
     )
     h = BatchDefinition(
         execution_environment_name="A",
         data_connector_name="h",
         data_asset_name="will_20200809_1002",
-        partition_definition=PartitionDefinition({"name": "will", "timestamp": "20200809", "price": "1002"}),
+        partition_definition=PartitionDefinition(
+            {"name": "will", "timestamp": "20200809", "price": "1002"}
+        ),
     )
     i = BatchDefinition(
         execution_environment_name="A",
         data_connector_name="i",
         data_asset_name="james_20200811_1009",
-        partition_definition=PartitionDefinition({"name": "james", "timestamp": "20200811", "price": "1009"}),
+        partition_definition=PartitionDefinition(
+            {"name": "james", "timestamp": "20200811", "price": "1009"}
+        ),
     )
     j = BatchDefinition(
         execution_environment_name="A",
         data_connector_name="j",
         data_asset_name="james_20200713_1567",
-        partition_definition=PartitionDefinition({"name": "james", "timestamp": "20200713", "price": "1567"}),
+        partition_definition=PartitionDefinition(
+            {"name": "james", "timestamp": "20200713", "price": "1567"}
+        ),
     )
     return [a, b, c, d, e, f, g, h, i, j]
 
@@ -109,7 +127,7 @@ def test_create_three_batch_definitions_sort_lexicographically():
 
     # sorting by "id" reverse alphabetically (ascending)
     my_sorter = LexicographicSorter(name="id", orderby="asc")
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list, )
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list,)
     assert sorted_batch_list == [a, b, c]
 
 
@@ -188,7 +206,6 @@ def test_date_time():
         # numeric date_time_format
         i_dont_work = DateTimeSorter(name="date", datetime_format=12345, orderby="desc")
 
-
     my_date_is_not_a_string = BatchDefinition(
         execution_environment_name="C",
         data_connector_name="c",
@@ -208,33 +225,31 @@ def test_custom_list(periodic_table_of_elements):
         execution_environment_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
-        partition_definition=PartitionDefinition({
-            "element": "Hydrogen"
-        })
+        partition_definition=PartitionDefinition({"element": "Hydrogen"}),
     )
     Helium = BatchDefinition(
         execution_environment_name="B",
         data_connector_name="b",
         data_asset_name="bbb",
-        partition_definition=PartitionDefinition({
-            "element": "Helium"
-        })
+        partition_definition=PartitionDefinition({"element": "Helium"}),
     )
     Lithium = BatchDefinition(
         execution_environment_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
-        partition_definition=PartitionDefinition({
-            "element": "Lithium"
-        })
+        partition_definition=PartitionDefinition({"element": "Lithium"}),
     )
 
     batch_list = [Hydrogen, Helium, Lithium]
-    my_sorter = CustomListSorter(name="element", orderby="desc", reference_list=periodic_table_of_elements)
+    my_sorter = CustomListSorter(
+        name="element", orderby="desc", reference_list=periodic_table_of_elements
+    )
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [Lithium, Helium, Hydrogen]
 
-    my_sorter = CustomListSorter(name="element", orderby="asc", reference_list=periodic_table_of_elements)
+    my_sorter = CustomListSorter(
+        name="element", orderby="asc", reference_list=periodic_table_of_elements
+    )
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [Hydrogen, Helium, Lithium]
 
@@ -244,26 +259,34 @@ def test_example_file_list_sorters(example_batch_def_list):
     batch_list = [a, b, c, d, e, f, g, h, i, j]
 
     name_sorter = LexicographicSorter(name="name", orderby="desc")
-    timestamp_sorter = DateTimeSorter(name="timestamp", datetime_format="%Y%m%d", orderby="desc")
+    timestamp_sorter = DateTimeSorter(
+        name="timestamp", datetime_format="%Y%m%d", orderby="desc"
+    )
     price_sorter = NumericSorter(name="price", orderby="desc")
 
     # 1. sorting just by name
     sorters_list = [name_sorter]
     sorters: Iterator[Sorter] = reversed(sorters_list)
     for sorter in sorters:
-        sorted_batch_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_list)
+        sorted_batch_list = sorter.get_sorted_batch_definitions(
+            batch_definitions=batch_list
+        )
     assert sorted_batch_list == [f, h, a, i, j, c, g, d, e, b]
 
     # 2. sorting by timestamp + name
     sorters_list = [timestamp_sorter, name_sorter]
     sorters: Iterator[Sorter] = reversed(sorters_list)
     for sorter in sorters:
-        sorted_batch_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_list)
+        sorted_batch_list = sorter.get_sorted_batch_definitions(
+            batch_definitions=batch_list
+        )
     assert sorted_batch_list == [g, d, i, a, f, b, c, e, h, j]
 
     # 3. sorting just by price + timestamp + name
     sorters_list = [price_sorter, timestamp_sorter, name_sorter]
     sorters: Iterator[Sorter] = reversed(sorters_list)
     for sorter in sorters:
-        sorted_batch_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_list)
+        sorted_batch_list = sorter.get_sorted_batch_definitions(
+            batch_definitions=batch_list
+        )
     assert sorted_batch_list == [g, j, c, d, b, i, a, h, f, e]

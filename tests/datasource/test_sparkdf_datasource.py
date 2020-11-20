@@ -36,7 +36,7 @@ def test_parquet_folder_connection_path(tmp_path_factory):
 
 def test_sparkdf_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite,
-        test_folder_connection_path_csv,
+    test_folder_connection_path_csv,
     spark_session,
 ):
     assert spark_session  # Ensure a spark session exists
@@ -202,7 +202,9 @@ def test_standalone_spark_parquet_datasource(
     assert batch.data.count() == 2
 
 
-def test_standalone_spark_csv_datasource(test_folder_connection_path_csv, test_backends):
+def test_standalone_spark_csv_datasource(
+    test_folder_connection_path_csv, test_backends
+):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     datasource = SparkDFDatasource(
@@ -359,7 +361,7 @@ def test_spark_config(test_backends):
 
 
 def test_spark_datasource_processes_dataset_options(
-        test_folder_connection_path_csv, test_backends
+    test_folder_connection_path_csv, test_backends
 ):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")

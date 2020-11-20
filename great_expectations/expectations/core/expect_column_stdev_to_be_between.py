@@ -7,6 +7,7 @@ from great_expectations.core.batch import Batch
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import (
+    ColumnExpectation,
     Expectation,
     TableExpectation,
     renderer,
@@ -21,7 +22,7 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectColumnStdevToBeBetween(TableExpectation):
+class ExpectColumnStdevToBeBetween(ColumnExpectation):
     """Expect the column standard deviation to be between a minimum value and a maximum value.
             Uses sample standard deviation (normalized by N-1).
 
@@ -82,7 +83,7 @@ class ExpectColumnStdevToBeBetween(TableExpectation):
 
             """
 
-    metric_dependencies = ("column.aggregate.standard_deviation",)
+    metric_dependencies = ("column.standard_deviation",)
     success_keys = (
         "min_value",
         "strict_min",
@@ -100,47 +101,18 @@ class ExpectColumnStdevToBeBetween(TableExpectation):
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        neccessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            True if the configuration has been validated successfully. Otherwise, raises an exception
+        """
         super().validate_configuration(configuration)
-        min_val = None
-        max_val = None
-
-        if "min_value" in configuration.kwargs:
-            min_val = configuration.kwargs["min_value"]
-
-        if "max_value" in configuration.kwargs:
-            max_val = configuration.kwargs["max_value"]
-
-        try:
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for metric"
-            assert (
-                min_val is not None or max_val is not None
-            ), "min_value and max_value cannot both be none"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-        return True
-
-    # @PandasExecutionEngine.metric(
-    #        metric_name="column.aggregate.standard_deviation",
-    #        metric_domain_keys=TableExpectation.domain_keys,
-    #        metric_value_keys=tuple(),
-    #        metric_dependencies=tuple(),
-    #        filter_column_isnull=False,
-    #    )
-    def _standard_deviation(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-    ):
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-        return series.std()
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -207,41 +179,17 @@ class ExpectColumnStdevToBeBetween(TableExpectation):
             )
         ]
 
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
+    def _validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        metric_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        metric_vals = extract_metrics(
-            metric_dependencies, metrics, configuration, runtime_configuration
+        return self._validate_metric_value_between(
+            metric_name="column.standard_deviation",
+            configuration=configuration,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+            execution_engine=execution_engine,
         )
-        column_stdev = metric_vals.get("column.aggregate.standard_deviation")
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
-        if min_value is not None:
-            if strict_min:
-                above_min = column_stdev > min_value
-            else:
-                above_min = column_stdev >= min_value
-        else:
-            above_min = True
-
-        if max_value is not None:
-            if strict_max:
-                below_max = column_stdev < max_value
-            else:
-                below_max = column_stdev <= max_value
-        else:
-            below_max = True
-
-        success = above_min and below_max
-
-        return {"success": success, "result": {"observed_value": column_stdev}}

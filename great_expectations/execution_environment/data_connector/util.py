@@ -1,27 +1,21 @@
-# -*- coding: utf-8 -*-
-
 # Utility methods for dealing with DataConnector objects
 
-import os
-from typing import List, Dict, Any, Optional
 import copy
-from pathlib import Path
-import re
-import sre_parse
-import sre_constants
-
 import logging
+import os
+import re
+import sre_constants
+import sre_parse
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from great_expectations.core.batch import (
-    BatchRequest,
-    BatchDefinition
-)
+from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.id_dict import (
-    PartitionDefinitionSubset,
     PartitionDefinition,
+    PartitionDefinitionSubset,
 )
-from great_expectations.execution_environment.data_connector.sorter import Sorter
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_environment.data_connector.sorter import Sorter
 
 logger = logging.getLogger(__name__)
 
@@ -30,14 +24,16 @@ DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
 
 
 def batch_definition_matches_batch_request(
-    batch_definition: BatchDefinition,
-    batch_request: BatchRequest,
+    batch_definition: BatchDefinition, batch_request: BatchRequest,
 ) -> bool:
     assert isinstance(batch_definition, BatchDefinition)
     assert isinstance(batch_request, BatchRequest)
 
     if batch_request.execution_environment_name:
-        if batch_request.execution_environment_name != batch_definition.execution_environment_name:
+        if (
+            batch_request.execution_environment_name
+            != batch_definition.execution_environment_name
+        ):
             return False
     if batch_request.data_connector_name:
         if batch_request.data_connector_name != batch_definition.data_connector_name:
@@ -47,14 +43,17 @@ def batch_definition_matches_batch_request(
             return False
 
     if batch_request.partition_request:
-        partition_identifiers: Any = batch_request.partition_request.get("partition_identifiers")
+        partition_identifiers: Any = batch_request.partition_request.get(
+            "partition_identifiers"
+        )
         if partition_identifiers:
             if not isinstance(partition_identifiers, dict):
                 return False
             for key in partition_identifiers.keys():
                 if not (
-                    key in batch_definition.partition_definition and batch_definition.partition_definition[key] ==
-                    partition_identifiers[key]
+                    key in batch_definition.partition_definition
+                    and batch_definition.partition_definition[key]
+                    == partition_identifiers[key]
                 ):
                     return False
     return True
@@ -90,9 +89,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
 
 
 def convert_data_reference_string_to_batch_request_using_regex(
-    data_reference: str,
-    regex_pattern: str,
-    group_names: List[str],
+    data_reference: str, regex_pattern: str, group_names: List[str],
 ) -> Optional[BatchRequest]:
     # noinspection PyUnresolvedReferences
     matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
@@ -109,41 +106,37 @@ def convert_data_reference_string_to_batch_request_using_regex(
     if "data_asset_name" in partition_definition:
         data_asset_name = partition_definition.pop("data_asset_name")
     batch_request: BatchRequest = BatchRequest(
-        data_asset_name=data_asset_name,
-        partition_request=partition_definition,
+        data_asset_name=data_asset_name, partition_request=partition_definition,
     )
     return batch_request
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
-    batch_definition: BatchDefinition,
-    regex_pattern: str,
-    group_names: List[str],
+    batch_definition: BatchDefinition, regex_pattern: str, group_names: List[str],
 ) -> str:
 
     if not isinstance(batch_definition, BatchDefinition):
-        raise TypeError("batch_definition is not of an instance of type BatchDefinition")
+        raise TypeError(
+            "batch_definition is not of an instance of type BatchDefinition"
+        )
 
     data_asset_name: str = batch_definition.data_asset_name
     partition_definition: PartitionDefinition = batch_definition.partition_definition
     partition_request: dict = partition_definition
     batch_request: BatchRequest = BatchRequest(
-        data_asset_name=data_asset_name,
-        partition_request=partition_request,
+        data_asset_name=data_asset_name, partition_request=partition_request,
     )
     data_reference: str = convert_batch_request_to_data_reference_string_using_regex(
         batch_request=batch_request,
         regex_pattern=regex_pattern,
-        group_names=group_names
+        group_names=group_names,
     )
     return data_reference
 
 
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
 def convert_batch_request_to_data_reference_string_using_regex(
-    batch_request: BatchRequest,
-    regex_pattern: str,
-    group_names: List[str],
+    batch_request: BatchRequest, regex_pattern: str, group_names: List[str],
 ) -> str:
     if not isinstance(batch_request, BatchRequest):
         raise TypeError("batch_request is not of an instance of type BatchRequest")
@@ -154,20 +147,16 @@ def convert_batch_request_to_data_reference_string_using_regex(
         template_arguments["data_asset_name"] = batch_request.data_asset_name
 
     filepath_template: str = _invert_regex_to_data_reference_template(
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+        regex_pattern=regex_pattern, group_names=group_names,
     )
-    converted_string = filepath_template.format(
-        **template_arguments
-    )
+    converted_string = filepath_template.format(**template_arguments)
 
     return converted_string
 
 
 # noinspection PyUnresolvedReferences
 def _invert_regex_to_data_reference_template(
-    regex_pattern: str,
-    group_names: List[str],
+    regex_pattern: str, group_names: List[str],
 ) -> str:
     """
     NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
@@ -188,7 +177,7 @@ def _invert_regex_to_data_reference_template(
             if not (group_name_index < num_groups):
                 break
             # Replace the captured group with "{next_group_name}" in the template
-            data_reference_template += "{"+group_names[group_name_index]+"}"
+            data_reference_template += "{" + group_names[group_name_index] + "}"
             group_name_index += 1
 
         elif token in [
@@ -207,14 +196,18 @@ def _invert_regex_to_data_reference_template(
         ]:
             pass
         else:
-            raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
+            raise ValueError(
+                f"Unrecognized regex token {token} in regex pattern {regex_pattern}."
+            )
 
     # Collapse adjacent wildcards into a single wildcard
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)
     return data_reference_template
 
 
-def normalize_directory_path(dir_path: str, root_directory_path: Optional[str] = None) -> str:
+def normalize_directory_path(
+    dir_path: str, root_directory_path: Optional[str] = None
+) -> str:
     # If directory is a relative path, interpret it as relative to the root directory.
     if Path(dir_path).is_absolute() or root_directory_path is None:
         return dir_path
@@ -223,8 +216,7 @@ def normalize_directory_path(dir_path: str, root_directory_path: Optional[str] =
 
 
 def get_filesystem_one_level_directory_glob_path_list(
-    base_directory_path: str,
-    glob_directive: str
+    base_directory_path: str, glob_directive: str
 ) -> List[str]:
     """
     List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
@@ -233,11 +225,16 @@ def get_filesystem_one_level_directory_glob_path_list(
     :returns -- list of relative file paths
     """
     globbed_paths = Path(base_directory_path).glob(glob_directive)
-    path_list: List[str] = [os.path.relpath(str(posix_path), base_directory_path) for posix_path in globbed_paths]
+    path_list: List[str] = [
+        os.path.relpath(str(posix_path), base_directory_path)
+        for posix_path in globbed_paths
+    ]
     return path_list
 
 
-def list_s3_keys(s3, query_options: dict, iterator_dict: dict, recursive: bool = False) -> str:
+def list_s3_keys(
+    s3, query_options: dict, iterator_dict: dict, recursive: bool = False
+) -> str:
     """
     For InferredAssetS3DataConnector, we take bucket and prefix and search for files using RegEx at and below the level
     specified by that bucket and prefix.  However, for ConfiguredAssetS3DataConnector, we take bucket and prefix and
@@ -255,9 +252,7 @@ def list_s3_keys(s3, query_options: dict, iterator_dict: dict, recursive: bool =
         iterator_dict = {}
 
     if "continuation_token" in iterator_dict:
-        query_options.update(
-            {"ContinuationToken": iterator_dict["continuation_token"]}
-        )
+        query_options.update({"ContinuationToken": iterator_dict["continuation_token"]})
 
     logger.debug(f"Fetching objects from S3 with query options: {query_options}")
 
@@ -277,11 +272,21 @@ def list_s3_keys(s3, query_options: dict, iterator_dict: dict, recursive: bool =
             query_options_tmp: dict = copy.deepcopy(query_options)
             query_options_tmp.update({"Prefix": prefix_info["Prefix"]})
             # Recursively fetch from updated prefix
-            yield from list_s3_keys(s3=s3, query_options=query_options_tmp, iterator_dict={}, recursive=recursive)
+            yield from list_s3_keys(
+                s3=s3,
+                query_options=query_options_tmp,
+                iterator_dict={},
+                recursive=recursive,
+            )
     if s3_objects_info["IsTruncated"]:
         iterator_dict["continuation_token"] = s3_objects_info["NextContinuationToken"]
         # Recursively fetch more
-        yield from list_s3_keys(s3=s3, query_options=query_options, iterator_dict=iterator_dict, recursive=recursive)
+        yield from list_s3_keys(
+            s3=s3,
+            query_options=query_options,
+            iterator_dict=iterator_dict,
+            recursive=recursive,
+        )
 
     if "continuation_token" in iterator_dict:
         # Make sure we clear the token once we've gotten fully through
@@ -301,7 +306,7 @@ def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dic
                 return None
             if "name" not in sorter_config:
                 raise ValueError("Sorter config should have a name")
-            sorter_name: str = sorter_config['name']
+            sorter_name: str = sorter_config["name"]
             new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)
             sorter_dict[sorter_name] = new_sorter
     return sorter_dict
@@ -309,14 +314,12 @@ def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dic
 
 def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
     """Build a Sorter using the provided configuration and return the newly-built Sorter."""
-    runtime_environment: dict = {
-        "name": sorter_config['name']
-    }
+    runtime_environment: dict = {"name": sorter_config["name"]}
     sorter: Sorter = instantiate_class_from_config(
         config=sorter_config,
         runtime_environment=runtime_environment,
         config_defaults={
             "module_name": "great_expectations.execution_environment.data_connector.sorter"
-        }
+        },
     )
     return sorter

@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-from typing import List
 import logging
+from typing import List
 
 logger = logging.getLogger(__name__)
 

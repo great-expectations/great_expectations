@@ -680,9 +680,91 @@ class TableExpectation(Expectation, ABC):
 
         return dependencies
 
+    def validate_metric_value_between_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ):
+        # Validating that Minimum and Maximum values are of the proper format and type
+        min_val = None
+        max_val = None
+
+        if "min_value" in configuration.kwargs:
+            min_val = configuration.kwargs["min_value"]
+
+        if "max_value" in configuration.kwargs:
+            max_val = configuration.kwargs["max_value"]
+
+        try:
+            # Ensuring Proper interval has been provided
+            assert min_val is None or isinstance(
+                min_val, (float, int)
+            ), "Provided min threshold must be a number"
+            assert max_val is None or isinstance(
+                max_val, (float, int)
+            ), "Provided max threshold must be a number"
+
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+
+        if min_val is not None and max_val is not None and min_val > max_val:
+            raise InvalidExpectationConfigurationError(
+                "Minimum Threshold cannot be larger than Maximum Threshold"
+            )
+
+        return True
+
+    def _validate_metric_value_between(
+        self,
+        metric_name,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        metric_value = metrics.get(metric_name)
+
+        # Obtaining components needed for validation
+        min_value = self.get_success_kwargs(configuration).get("min_value")
+        strict_min = self.get_success_kwargs(configuration).get("strict_min")
+        max_value = self.get_success_kwargs(configuration).get("max_value")
+        strict_max = self.get_success_kwargs(configuration).get("strict_max")
+
+        if metric_value is None:
+            return {"success": False, "result": {"observed_value": metric_value}}
+
+        # Checking if mean lies between thresholds
+        if min_value is not None:
+            if strict_min:
+                above_min = metric_value > min_value
+            else:
+                above_min = metric_value >= min_value
+        else:
+            above_min = True
+
+        if max_value is not None:
+            if strict_max:
+                below_max = metric_value < max_value
+            else:
+                below_max = metric_value <= max_value
+        else:
+            below_max = True
+
+        success = above_min and below_max
+
+        return {"success": success, "result": {"observed_value": metric_value}}
+
 
 class ColumnExpectation(TableExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        # Ensuring basic configuration parameters are properly set
+        try:
+            assert (
+                "column" in configuration.kwargs
+            ), "'column' parameter is required for column expectations"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+        return True
 
 
 class ColumnMapExpectation(TableExpectation, ABC):
@@ -730,6 +812,202 @@ class ColumnMapExpectation(TableExpectation, ABC):
         assert (
             self.metric_dependencies == tuple()
         ), "ColumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
+        # convenient name for updates
+        metric_dependencies = dependencies["metrics"]
+        metric_kwargs = get_metric_kwargs(
+            metric_name="column_values.nonnull.unexpected_count",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[
+            "column_values.nonnull.unexpected_count"
+        ] = MetricConfiguration(
+            "column_values.nonnull.unexpected_count",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+        metric_kwargs = get_metric_kwargs(
+            metric_name=self.map_metric + ".unexpected_count",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[
+            self.map_metric + ".unexpected_count"
+        ] = MetricConfiguration(
+            self.map_metric + ".unexpected_count",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
+        result_format_str = dependencies["result_format"].get("result_format")
+        metric_kwargs = get_metric_kwargs(
+            metric_name="table.row_count",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+        if result_format_str == "BOOLEAN_ONLY":
+            return dependencies
+
+        metric_kwargs = get_metric_kwargs(
+            self.map_metric + ".unexpected_values",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[
+            self.map_metric + ".unexpected_values"
+        ] = MetricConfiguration(
+            metric_name=self.map_metric + ".unexpected_values",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
+        if result_format_str in ["BASIC", "SUMMARY"]:
+            return dependencies
+
+        metric_kwargs = get_metric_kwargs(
+            self.map_metric + ".unexpected_rows",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
+            metric_name=self.map_metric + ".unexpected_rows",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
+        if isinstance(execution_engine, PandasExecutionEngine):
+            metric_kwargs = get_metric_kwargs(
+                self.map_metric + ".unexpected_index_list",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            metric_dependencies[
+                self.map_metric + ".unexpected_index_list"
+            ] = MetricConfiguration(
+                metric_name=self.map_metric + ".unexpected_index_list",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
+
+        return dependencies
+
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration.kwargs.get(
+                    "result_format", self.default_kwarg_values.get("result_format")
+                ),
+            )
+        else:
+            result_format = configuration.kwargs.get(
+                "result_format", self.default_kwarg_values.get("result_format")
+            )
+        mostly = self.get_success_kwargs().get(
+            "mostly", self.default_kwarg_values.get("mostly")
+        )
+        total_count = metrics.get("table.row_count")
+        null_count = metrics.get("column_values.nonnull.unexpected_count")
+        unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
+
+        success = None
+        if total_count is None or null_count is None:
+            # Vacuously true
+            success = True
+        elif (total_count - null_count) != 0:
+            success_ratio = (total_count - unexpected_count - null_count) / (
+                total_count - null_count
+            )
+            success = success_ratio >= mostly
+        elif total_count == 0 or (total_count - null_count) == 0:
+            success = True
+
+        try:
+            nonnull_count = metrics.get("table.row_count") - metrics.get(
+                "column_values.nonnull.unexpected_count"
+            )
+        except TypeError:
+            nonnull_count = None
+
+        return _format_map_output(
+            result_format=parse_result_format(result_format),
+            success=success,
+            element_count=metrics.get("table.row_count"),
+            nonnull_count=nonnull_count,
+            unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
+            unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
+            unexpected_index_list=metrics.get(
+                self.map_metric + ".unexpected_index_list"
+            ),
+        )
+
+
+class ColumnPairMapExpectation(TableExpectation, ABC):
+    map_metric = None
+    domain_keys = (
+        "batch_id",
+        "table",
+        "column_A",
+        "column_B",
+        "row_condition",
+        "condition_parser",
+    )
+    success_keys = ("mostly",)
+    default_kwarg_values = {
+        "row_condition": None,
+        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "mostly": 1,
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": True,
+    }
+
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        if not super().validate_configuration(configuration):
+            return False
+        try:
+            assert (
+                "column_A" in configuration.kwargs
+            ), "'column_A' parameter is required for column pair map expectations"
+            assert (
+                "column_B" in configuration.kwargs
+            ), "'column_B' parameter is required for column pair map expectations"
+            if "mostly" in configuration.kwargs:
+                mostly = configuration.kwargs["mostly"]
+                assert isinstance(
+                    mostly, (int, float)
+                ), "'mostly' parameter must be an integer or float"
+                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+        return True
+
+    def get_validation_dependencies(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        dependencies = super().get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )
+        assert isinstance(
+            self.map_metric, str
+        ), "ColumnPairMapExpectation must override get_validation_dependencies or declare exactly one map_metric"
+        assert (
+            self.metric_dependencies == tuple()
+        ), "ColumnPairMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
         # convenient name for updates
         metric_dependencies = dependencies["metrics"]
         metric_kwargs = get_metric_kwargs(
@@ -822,7 +1100,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-
         if runtime_configuration:
             result_format = runtime_configuration.get(
                 "result_format",
@@ -842,18 +1119,29 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
 
         success = None
-        if (total_count - null_count) != 0:
+        if total_count is None or null_count is None:
+            # Vacuously true
+            success = True
+        elif (total_count - null_count) != 0:
             success_ratio = (total_count - unexpected_count - null_count) / (
                 total_count - null_count
             )
             success = success_ratio >= mostly
+        elif total_count == 0 or (total_count - null_count) == 0:
+            success = True
+
+        try:
+            nonnull_count = metrics.get("table.row_count") - metrics.get(
+                "column_values.nonnull.unexpected_count"
+            )
+        except TypeError:
+            nonnull_count = None
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=success,
             element_count=metrics.get("table.row_count"),
-            nonnull_count=metrics.get("table.row_count")
-            - metrics.get("column_values.nonnull.unexpected_count"),
+            nonnull_count=nonnull_count,
             unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
             unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
             unexpected_index_list=metrics.get(

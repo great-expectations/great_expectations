@@ -9,9 +9,13 @@ from great_expectations.core.batch import (
     PartitionDefinition,
 )
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.asset.asset import Asset
-from great_expectations.execution_environment.data_connector.util import batch_definition_matches_batch_request
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
+from great_expectations.execution_environment.data_connector.util import (
+    batch_definition_matches_batch_request,
+)
 
 try:
     import sqlalchemy as sa
@@ -40,27 +44,22 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return self._data_assets
 
     def add_data_asset(
-        self,
-        name,
-        config,
+        self, name, config,
     ):
         self._data_assets[name] = config
 
     def _get_partition_definition_list_from_data_asset_config(
-        self,
-        data_asset_name,
-        data_asset_config,
+        self, data_asset_name, data_asset_config,
     ):
         if "table_name" in data_asset_config:
             table_name = data_asset_config["table_name"]
         else:
             table_name = data_asset_name
-        
+
         if "splitter_method" in data_asset_config:
             splitter_fn = getattr(self, data_asset_config["splitter_method"])
             split_query = splitter_fn(
-                table_name=table_name,
-                **data_asset_config["splitter_kwargs"]
+                table_name=table_name, **data_asset_config["splitter_kwargs"]
             )
 
             rows = self._execution_engine.engine.execute(split_query).fetchall()
@@ -82,8 +81,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         for data_asset_name in self.data_assets:
             data_asset = self.data_assets[data_asset_name]
             partition_definition_list = self._get_partition_definition_list_from_data_asset_config(
-                data_asset_name,
-                data_asset,
+                data_asset_name, data_asset,
             )
 
             # TODO Abe 20201029 : Apply sorters to partition_definition_list here
@@ -102,10 +100,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
     def get_available_data_asset_names(self):
         return list(self.data_assets.keys())
-    
+
     def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
-            raise ValueError("_data_references_cache is None. Have you called _refresh_data_references_cache yet?")
+            raise ValueError(
+                "_data_references_cache is None. Have you called _refresh_data_references_cache yet?"
+            )
         return []
 
     def get_batch_definition_list_from_batch_request(self, batch_request):
@@ -115,18 +115,20 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             self._refresh_data_references_cache()
 
         batch_definition_list = []
-        
+
         try:
             sub_cache = self._data_references_cache[batch_request.data_asset_name]
         except KeyError as e:
-            raise KeyError(f"data_asset_name {batch_request.data_asset_name} is not recognized.")
+            raise KeyError(
+                f"data_asset_name {batch_request.data_asset_name} is not recognized."
+            )
 
         for partition_definition in sub_cache:
             batch_definition = BatchDefinition(
                 execution_environment_name=self.execution_environment_name,
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,
-                partition_definition=PartitionDefinition(partition_definition)
+                partition_definition=PartitionDefinition(partition_definition),
             )
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
@@ -139,46 +141,41 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return self._data_references_cache[data_asset_name]
 
     def _map_data_reference_to_batch_definition_list(
-        self,
-        data_reference,#: Any,
-        data_asset_name: Optional[str] = None
+        self, data_reference, data_asset_name: Optional[str] = None  #: Any,
     ) -> Optional[List[BatchDefinition]]:
-# Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries, allowing us to invoke `PartitionDefinition(data_reference)`
+        # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries, allowing us to invoke `PartitionDefinition(data_reference)`
 
-        return [BatchDefinition(
-            execution_environment_name=self.execution_environment_name,
-            data_connector_name=self.name,
-            data_asset_name=data_asset_name,
-            partition_definition=PartitionDefinition(data_reference),
-        )]
+        return [
+            BatchDefinition(
+                execution_environment_name=self.execution_environment_name,
+                data_connector_name=self.name,
+                data_asset_name=data_asset_name,
+                partition_definition=PartitionDefinition(data_reference),
+            )
+        ]
 
     def _fetch_batch_data_as_pandas_df(self, batch_data):
         rows = batch_data.fetchall()
 
-        df = pd.DataFrame(
-            rows,
-            columns=batch_data._metadata.keys
-        )
+        df = pd.DataFrame(rows, columns=batch_data._metadata.keys)
         return df
 
-    def build_batch_spec(
-        self,
-        batch_definition: BatchDefinition
-    ):
+    def build_batch_spec(self, batch_definition: BatchDefinition):
         data_asset_name = batch_definition.data_asset_name
-        batch_spec = BatchSpec({
-            "table_name" : data_asset_name,
-            "partition_definition": batch_definition.partition_definition,
-            **self.data_assets[data_asset_name],
-        })
+        batch_spec = BatchSpec(
+            {
+                "table_name": data_asset_name,
+                "partition_definition": batch_definition.partition_definition,
+                **self.data_assets[data_asset_name],
+            }
+        )
 
         return batch_spec
 
     ### Splitter methods for listing partitions ###
 
     def _split_on_whole_table(
-        self,
-        table_name: str,
+        self, table_name: str,
     ):
         """'Split' by returning the whole table
         

@@ -1,13 +1,15 @@
-from typing import List, Union, Dict, Optional
 import copy
 import logging
+from typing import Dict, List, Optional, Union
 
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.asset.asset import Asset
-from great_expectations.execution_environment.data_connector import FilePathDataConnector
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.data_context.util import instantiate_class_from_config
-import great_expectations.exceptions as ge_exceptions
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.asset.asset import Asset
+from great_expectations.execution_environment.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -46,23 +48,19 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             if asset_config is None:
                 asset_config = {}
             new_asset: Asset = self._build_asset_from_config(
-                name=name,
-                config=asset_config,
+                name=name, config=asset_config,
             )
             self.assets[name] = new_asset
 
     def _build_asset_from_config(self, name: str, config: dict):
         """Build an Asset using the provided configuration and return the newly-built Asset."""
-        runtime_environment: dict = {
-            "name": name,
-            "data_connector": self
-        }
+        runtime_environment: dict = {"name": name, "data_connector": self}
         asset: Asset = instantiate_class_from_config(
             config=config,
             runtime_environment=runtime_environment,
             config_defaults={
                 "module_name": "great_expectations.execution_environment.data_connector.asset",
-                "class_name": "Asset"
+                "class_name": "Asset",
             },
         )
         if not asset:
@@ -81,9 +79,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         """
         return list(self.assets.keys())
 
-    def _refresh_data_references_cache(
-        self,
-    ):
+    def _refresh_data_references_cache(self,):
         """
         """
         # Map data_references to batch_definitions
@@ -95,13 +91,18 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             for data_reference in self._get_data_reference_list(
                 data_asset_name=data_asset_name
             ):
-                mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(
-                    data_reference=data_reference,
-                    data_asset_name=data_asset_name,
+                mapped_batch_definition_list: List[
+                    BatchDefinition
+                ] = self._map_data_reference_to_batch_definition_list(
+                    data_reference=data_reference, data_asset_name=data_asset_name,
                 )
-                self._data_references_cache[data_asset_name][data_reference] = mapped_batch_definition_list
+                self._data_references_cache[data_asset_name][
+                    data_reference
+                ] = mapped_batch_definition_list
 
-    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
+    def _get_data_reference_list(
+        self, data_asset_name: Optional[str] = None
+    ) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
@@ -119,8 +120,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         total_references: int = sum(
             [
                 len(self._data_references_cache[data_asset_name])
-                for data_asset_name
-                in self._data_references_cache
+                for data_asset_name in self._data_references_cache
             ]
         )
 
@@ -128,11 +128,18 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def get_unmatched_data_references(self) -> List[str]:
         if self._data_references_cache is None:
-            raise ValueError('_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?')
+            raise ValueError(
+                '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
+            )
 
         unmatched_data_references: List[str] = []
-        for data_asset_name, data_reference_sub_cache in self._data_references_cache.items():
-            unmatched_data_references += [k for k, v in data_reference_sub_cache.items() if v is None]
+        for (
+            data_asset_name,
+            data_reference_sub_cache,
+        ) in self._data_references_cache.items():
+            unmatched_data_references += [
+                k for k, v in data_reference_sub_cache.items() if v is None
+            ]
 
         return unmatched_data_references
 
@@ -145,7 +152,9 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         ]
         return batch_definition_list
 
-    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
+    def _get_full_file_path(
+        self, path: str, data_asset_name: Optional[str] = None
+    ) -> str:
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
@@ -166,7 +175,11 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def _get_asset(self, data_asset_name: str) -> Asset:
         asset: Optional[Asset] = None
-        if data_asset_name is not None and self.assets and data_asset_name in self.assets:
+        if (
+            data_asset_name is not None
+            and self.assets
+            and data_asset_name in self.assets
+        ):
             asset = self.assets[data_asset_name]
         return asset
 

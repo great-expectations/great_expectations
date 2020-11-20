@@ -1,5 +1,5 @@
-import logging
 import copy
+import logging
 
 from great_expectations.execution_environment import BaseExecutionEnvironment
 
@@ -33,15 +33,11 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
             "engine": engine,
         }
 
-        super().__init__(
-            name=name,
-            execution_engine=self._execution_engine_config
-        )
+        super().__init__(name=name, execution_engine=self._execution_engine_config)
 
         self._data_connectors = {}
         self._init_data_connectors(
-            introspection_configs=introspection,
-            table_configs=tables,
+            introspection_configs=introspection, table_configs=tables,
         )
 
         # NOTE: Abe 20201111 : This is incorrect. Will need to be fixed when we reconcile all the configs.
@@ -50,44 +46,50 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
     # noinspection PyMethodOverriding
     # Note: This method is meant to overwrite ExecutionEnvironment._init_data_connectors (dispite signature mismatch).
     def _init_data_connectors(
-        self,
-        introspection_configs: dict,
-        table_configs: dict,
+        self, introspection_configs: dict, table_configs: dict,
     ):
 
         # First, build DataConnectors for introspected assets
         for name, config in introspection_configs.items():
-            data_connector_config = dict(**{
-                "class_name": "InferredAssetSqlDataConnector",
-                "name": name,
-            }, **config)
+            data_connector_config = dict(
+                **{"class_name": "InferredAssetSqlDataConnector", "name": name,},
+                **config
+            )
             self._build_data_connector_from_config(
-                name,
-                data_connector_config,
+                name, data_connector_config,
             )
 
         # Second, build DataConnectors for tables. They will map to configured data_assets
         for table_name, table_config in table_configs.items():
-            for partitioner_name, partitioner_config in table_config["partitioners"].items():
+            for partitioner_name, partitioner_config in table_config[
+                "partitioners"
+            ].items():
 
                 data_connector_name = partitioner_name
                 if not data_connector_name in self.data_connectors:
                     data_connector_config = {
                         "class_name": "ConfiguredAssetSqlDataConnector",
-                        "data_assets": {}
+                        "data_assets": {},
                     }
-                    self._build_data_connector_from_config(data_connector_name, data_connector_config)
+                    self._build_data_connector_from_config(
+                        data_connector_name, data_connector_config
+                    )
 
                 data_connector = self.data_connectors[data_connector_name]
 
                 data_asset_config = copy.deepcopy(partitioner_config)
                 data_asset_config["table_name"] = table_name
 
-                data_asset_name_prefix = data_asset_config.pop("data_asset_name_prefix", "")
-                data_asset_name_suffix = data_asset_config.pop("data_asset_name_suffix", "")
-                data_asset_name = data_asset_name_prefix+table_name+data_asset_name_suffix
+                data_asset_name_prefix = data_asset_config.pop(
+                    "data_asset_name_prefix", ""
+                )
+                data_asset_name_suffix = data_asset_config.pop(
+                    "data_asset_name_suffix", ""
+                )
+                data_asset_name = (
+                    data_asset_name_prefix + table_name + data_asset_name_suffix
+                )
 
                 data_connector.add_data_asset(
-                    data_asset_name,
-                    data_asset_config,
+                    data_asset_name, data_asset_config,
                 )
