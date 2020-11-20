@@ -614,7 +614,7 @@ class Validator:
         return self.execution_engine.active_batch_data_id
 
     @property
-    def batch_markers(self):
+    def active_batch_markers(self):
         """Getter for active batch's batch markers"""
         if not self.active_batch:
             return None
@@ -622,7 +622,7 @@ class Validator:
             return self.active_batch.batch_markers
 
     @property
-    def batch_definition(self):
+    def active_batch_definition(self):
         """Getter for the active batch's batch definition"""
         if not self.active_batch:
             return None
@@ -1115,9 +1115,9 @@ class Validator:
                     "great_expectations_version": ge_version,
                     "expectation_suite_name": expectation_suite_name,
                     "run_id": run_id,
-                    # "batch_spec": self.batch_spec,
-                    # "batch_markers": self.batch_markers,
-                    # "batch_definition": self.batch_definition,
+                    "batch_spec": self.active_batch_spec,
+                    "batch_markers": self.active_batch_markers,
+                    "active_batch_definition": self.active_batch_definition,
                     "validation_time": validation_time,
                 },
             )
@@ -1185,9 +1185,9 @@ class Validator:
         if batch_spec is None:
             batch_spec = self.batch_spec
         if batch_markers is None:
-            batch_markers = self.batch_markers
+            batch_markers = self.active_batch_markers
         if batch_definition is None:
-            batch_definition = self.batch_definition
+            batch_definition = self.active_batch_definition
         self._expectation_suite.add_citation(
             comment,
             batch_spec=batch_spec,
