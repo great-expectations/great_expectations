@@ -942,7 +942,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     def _build_selector_from_batch_spec(self, batch_spec):
-        table_name = batch_spec["table_name"]
+        table_name: str = batch_spec["table_name"]
+        if "bigquery_temp_table" in batch_spec:
+            table_name = batch_spec.get("bigquery_temp_table")
 
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
@@ -979,16 +981,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         )
                     )
                 )
-
-        else:
-
-            return sa.select("*").select_from(sa.text(table_name)).where(split_clause)
+        return sa.select("*").select_from(sa.text(table_name)).where(split_clause)
 
     def get_batch_data_and_markers(
         self, batch_spec
     ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
 
-        selector = self._build_selector_from_batch_spec(batch_spec)
+        selector = self._build_selector_from_batch_spec(batch_spec=batch_spec)
         batch_data = self.engine.execute(selector)
         # TODO: Abe 20201030: This method should return a SqlAlchemyBatchData as its first object, but that probably requires deeper changes.
         # SqlAlchemyBatchData(
