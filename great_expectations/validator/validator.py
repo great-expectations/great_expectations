@@ -319,6 +319,14 @@ class Validator:
                     A list of Validations, validating that all necessary metrics are available.
         """
         graph = ValidationGraph()
+
+        if runtime_configuration.get("catch_exceptions", True):
+            catch_exceptions = True
+        else:
+            catch_exceptions = False
+
+        processed_configurations = []
+        evrs = []
         for configuration in configurations:
             # Validating
             try:
@@ -333,28 +341,68 @@ class Validator:
                 configuration, self._execution_engine, runtime_configuration
             )["metrics"]
 
-            for metric in validation_dependencies.values():
-                self.build_metric_dependency_graph(
-                    graph,
-                    metric,
-                    configuration,
-                    self._execution_engine,
-                    runtime_configuration=runtime_configuration,
-                )
+            try:
+                for metric in validation_dependencies.values():
+                    self.build_metric_dependency_graph(
+                        graph,
+                        metric,
+                        configuration,
+                        self._execution_engine,
+                        runtime_configuration=runtime_configuration,
+                    )
+                processed_configurations.append(configuration)
+            except Exception as err:
+                if catch_exceptions:
+                    raised_exception = True
+                    exception_traceback = traceback.format_exc()
+                    result = ExpectationValidationResult(
+                        success=False,
+                        exception_info={
+                            "raised_exception": raised_exception,
+                            "exception_traceback": exception_traceback,
+                            "exception_message": str(err),
+                        },
+                    )
+                    evrs.append(result)
+                else:
+                    raise err
 
         if metrics is None:
             metrics = dict()
-        metrics = self.resolve_validation_graph(graph, metrics, runtime_configuration)
 
-        evrs = list()
-        for configuration in configurations:
-            evrs.append(
-                configuration.metrics_validate(
+        metrics = self.resolve_validation_graph(graph, metrics, runtime_configuration)
+        for configuration in processed_configurations:
+            try:
+                result = configuration.metrics_validate(
                     metrics,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration,
                 )
-            )
+                result.expectation_config = configuration
+                # Add an empty exception_info object if no exception was caught
+                if catch_exceptions and result.exception_info is None:
+                    result.exception_info = {
+                        "raised_exception": False,
+                        "exception_traceback": None,
+                        "exception_message": None,
+                    }
+                evrs.append(result)
+            except Exception as err:
+                if catch_exceptions:
+                    raised_exception = True
+                    exception_traceback = traceback.format_exc()
+
+                    result = ExpectationValidationResult(
+                        success=False,
+                        exception_info={
+                            "raised_exception": raised_exception,
+                            "exception_traceback": exception_traceback,
+                            "exception_message": str(err),
+                        },
+                    )
+                    evrs.append(result)
+                else:
+                    raise err
         return evrs
 
     def resolve_validation_graph(self, graph, metrics, runtime_configuration=None):
@@ -1003,12 +1051,6 @@ class Validator:
                     "WARNING: No great_expectations version found in configuration object."
                 )
 
-            ###
-            # This is an early example of what will become part of the ValidationOperator
-            # This operator would be dataset-semantic aware
-            # Adding now to simply ensure we can be slightly better at ordering our expectation evaluation
-            ###
-
             # Group expectations by column
             columns = {}
 
@@ -1027,64 +1069,7 @@ class Validator:
             for col in columns:
                 expectations_to_evaluate.extend(columns[col])
 
-            for expectation in expectations_to_evaluate:
-
-                try:
-                    # copy the config so we can modify it below if needed
-                    expectation = copy.deepcopy(expectation)
-
-                    expectation_method = getattr(self, expectation.expectation_type)
-
-                    if result_format is not None:
-                        expectation.kwargs.update({"result_format": result_format})
-
-                    # A missing parameter will raise an EvaluationParameterError
-                    (
-                        evaluation_args,
-                        substituted_parameters,
-                    ) = build_evaluation_parameters(
-                        expectation.kwargs,
-                        runtime_evaluation_parameters,
-                        self._validator_config.get("interactive_evaluation", True),
-                        self._data_context,
-                    )
-
-                    result = expectation_method(
-                        catch_exceptions=catch_exceptions,
-                        include_config=True,
-                        **evaluation_args,
-                    )
-
-                except Exception as err:
-                    if catch_exceptions:
-                        raised_exception = True
-                        exception_traceback = traceback.format_exc()
-
-                        result = ExpectationValidationResult(
-                            success=False,
-                            exception_info={
-                                "raised_exception": raised_exception,
-                                "exception_traceback": exception_traceback,
-                                "exception_message": str(err),
-                            },
-                        )
-
-                    else:
-                        raise err
-
-                # if include_config:
-                result.expectation_config = expectation
-
-                # Add an empty exception_info object if no exception was caught
-                if catch_exceptions and result.exception_info is None:
-                    result.exception_info = {
-                        "raised_exception": False,
-                        "exception_traceback": None,
-                        "exception_message": None,
-                    }
-
-                results.append(result)
-
+            results = self.graph_validate(expectations_to_evaluate)
             statistics = _calc_validation_statistics(results)
 
             if only_return_failures:
