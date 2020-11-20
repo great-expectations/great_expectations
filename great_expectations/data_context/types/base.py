@@ -795,11 +795,6 @@ class DatabaseBackendEcosystem(BaseBackendEcosystem):
         }
 
 
-class InMemoryBackendEcosystem(BaseBackendEcosystem):
-    pass
-    # TODO: Are in-memory metadata stores supported? If so create this class.
-
-
 class DataContextConfig(DictDot):
     def __init__(
         self,
