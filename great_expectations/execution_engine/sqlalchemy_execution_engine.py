@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
+
 import pandas as pd
 
 from great_expectations.core import IDDict
@@ -178,15 +179,12 @@ class SqlAlchemyBatchData:
 
 
         """
-        if engine.dialect.name.lower() in ["sqlite", "mssql", "snowflake"]:
-            # sqlite/mssql/snowflake temp tables only persist within a connection, so override the engine
-            self._engine = engine.connect()
-        else:
-            self._engine = engine
-
+        self._engine = engine
         self._record_set_name = record_set_name or "great_expectations_sub_selection"
         if not isinstance(self._record_set_name, str):
-            raise TypeError(f"record_set_name should be of type str, not {type(record_set_name)}")
+            raise TypeError(
+                f"record_set_name should be of type str, not {type(record_set_name)}"
+            )
 
         self._schema_name = schema_name
         self._use_quoted_name = use_quoted_name
@@ -211,15 +209,11 @@ class SqlAlchemyBatchData:
                     )
                 # In BigQuery the table name is already qualified with its schema name
                 self._selectable = sa.Table(
-                    table_name,
-                    sa.MetaData(),
-                    schema_name=None,
+                    table_name, sa.MetaData(), schema_name=None,
                 )
             else:
                 self._selectable = sa.Table(
-                    table_name,
-                    sa.MetaData(),
-                    schema_name=schema_name,
+                    table_name, sa.MetaData(), schema_name=schema_name,
                 )
 
         elif create_temp_table:
@@ -248,17 +242,13 @@ class SqlAlchemyBatchData:
                 temp_table_schema_name=temp_table_schema_name,
             )
             self._selectable = sa.Table(
-                generated_table_name,
-                sa.MetaData(),
-                schema_name=temp_table_schema_name,
+                generated_table_name, sa.MetaData(), schema_name=temp_table_schema_name,
             )
         else:
             if query:
                 self._selectable = sa.text(query)
             else:
-                self._selectable = selectable.alias(
-                    self._record_set_name
-                )
+                self._selectable = selectable.alias(self._record_set_name)
 
     @property
     def sql_engine_dialect(self) -> DefaultDialect:
@@ -324,27 +314,19 @@ class SqlAlchemyBatchData:
 
         if fetch_all:
             result_object = self._engine.execute(
-                sa
-                    .select("*")
-                    .select_from(self._selectable)
+                sa.select("*").select_from(self._selectable)
             )
         else:
             result_object = self._engine.execute(
-                sa
-                    .select("*")
-                    .limit(n)
-                    .select_from(self._selectable)
+                sa.select("*").limit(n).select_from(self._selectable)
             )
 
         rows = result_object.fetchall()
 
-        # Note: Abe 20201119: This should be a GE type 
-        head_df = pd.DataFrame(
-            rows,
-            columns=result_object._metadata.keys
-        )
+        # Note: Abe 20201119: This should be a GE type
+        head_df = pd.DataFrame(rows, columns=result_object._metadata.keys)
 
-        return(head_df)
+        return head_df
 
     def row_count(self):
         """Gets the number of rows"""
@@ -355,7 +337,8 @@ class SqlAlchemyBatchData:
         rows = result_object.fetchall()
         print(rows)
 
-        return(rows[0][0])
+        return rows[0][0]
+
 
 class SqlAlchemyExecutionEngine(ExecutionEngine):
     def __init__(
@@ -367,7 +350,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         connection_string=None,
         url=None,
         batch_data_dict=None,
-        **kwargs, # These will be passed as optional parameters to the engine, **not** the ExecutionEngine
+        **kwargs,  # These will be passed as optional parameters to the engine, **not** the ExecutionEngine
     ):
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
         desired database. Also initializes the dialect to be used and configures usage statistics.
@@ -394,7 +377,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     a url can be used to access the data. This will be overridden by all other configuration
                     options if any are provided.
         """
-        super().__init__(name=name, batch_data_dict=batch_data_dict)#, **kwargs)
+        super().__init__(name=name, batch_data_dict=batch_data_dict)  # , **kwargs)
         self._name = name
 
         self._credentials = credentials
@@ -419,8 +402,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             raise InvalidConfigError(
                 "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
             )
-        connection = self.engine.connect()
-        connection.close()
 
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in [
@@ -451,14 +432,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.dialect = None
 
-        # NOTE: Abe 20201111: I don't understand what this is supposed to do. It's untested, and it's breaking sqlite.
-        # if self.engine and self.engine.dialect.name.lower() in [
-        #     "sqlite",
-        #     "mssql",
-        #     "snowflake",
-        # ]:
-        #     # sqlite/mssql temp tables only persist within a connection so override the engine
-        #     self.engine = engine.connect()
+        if self.engine and self.engine.dialect.name.lower() in [
+            "sqlite",
+            "mssql",
+            "snowflake",
+        ]:
+            # sqlite/mssql temp tables only persist within a connection so override the engine
+            self.engine = self.engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -1001,10 +981,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
 
         selectable = self._build_selectable_from_batch_spec(batch_spec)
-        batch_data = SqlAlchemyBatchData(
-            engine=self.engine,
-            selectable=selectable,
-        )
+        batch_data = SqlAlchemyBatchData(engine=self.engine, selectable=selectable,)
 
         batch_markers = BatchMarkers(
             {
