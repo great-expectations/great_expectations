@@ -350,7 +350,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         connection_string=None,
         url=None,
         batch_data_dict=None,
-        **kwargs,  # These will be passed as optional parameters to the engine, **not** the ExecutionEngine
+        **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
     ):
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
         desired database. Also initializes the dialect to be used and configures usage statistics.
