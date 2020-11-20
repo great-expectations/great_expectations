@@ -5,7 +5,7 @@
 Core Great Expectations Concepts
 #####################################
 
-This guide describes the core concepts used in Great Expectations. It aims for precision, even when that makes the text dense, but includes examples of typical use cases to help provide intuition. Understanding how Great Expectations uses these concepts helps deliver Great Expectations' key features: **expectations validate data quality**, **tests are docs, and docs are tests**, and **automatic profiling of data**.
+This guide describes the core concepts used in Great Expectations. We have tried to use precise language in the guide, even when that makes the text dense.Understanding how Great Expectations uses these concepts can help you take advantage of Great Expectations' key features: **expectations validate data quality**, **tests are docs, and docs are tests**, and **automatic profiling of data**. But rest assured you do not need to thoroughly understand all of these concepts that to get started with Great Expectations. 
 
 *****************************************
 Background: Logical Data Assets
