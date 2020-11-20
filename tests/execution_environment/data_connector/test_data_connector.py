@@ -231,7 +231,7 @@ def test__batch_definition_matches_batch_request():
     # TODO : Test cases to exercise ranges, etc.
 
 
-def test_for_self_check_using_FilesDataConnector_PandasExecutionEngine(tmp_path_factory):
+def test_for_self_check_using_InferredAssetFilesystemDataConnector_PandasExecutionEngine(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
     )
@@ -256,9 +256,9 @@ def test_for_self_check_using_FilesDataConnector_PandasExecutionEngine(tmp_path_
     assert self_check_results['example_data_reference']["n_rows"] == 2
 
 
-def test_for_self_check_using_FilesDataConnector_SparkDFExecutionEngine(tmp_path_factory):
+def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecutionEngine(spark_session, tmp_path_factory):
     base_directory = str(
-        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
+        tmp_path_factory.mktemp("basic_data_connector_inferred_asset_filesystem_data_connector")
     )
     create_files_in_directory(
         directory=base_directory,
