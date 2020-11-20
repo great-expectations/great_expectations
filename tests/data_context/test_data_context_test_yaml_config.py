@@ -241,8 +241,7 @@ def test_golden_path_sql_execution_environment_configuration(
 
     os.chdir(context.root_directory)
 
-
-    #Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
+    # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
     import great_expectations as ge
 
     context = ge.get_context()

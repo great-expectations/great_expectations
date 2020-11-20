@@ -32,10 +32,12 @@ logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
 
+
 class PandasBatchData(pd.DataFrame):
     # @property
     def row_count(self):
         return self.shape[0]
+
 
 class PandasExecutionEngine(ExecutionEngine):
     """
@@ -151,7 +153,7 @@ Notes:
             raise BatchSpecError(
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
             )
-        
+
         batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
         if batch_data.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
