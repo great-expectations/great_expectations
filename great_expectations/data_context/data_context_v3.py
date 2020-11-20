@@ -291,15 +291,17 @@ class DataContextV3(DataContext):
                     # Raise a warning if kwargs exist
                     pass
 
-                partition_request = PartitionRequest({
-                    "partition_identifiers": partition_identifiers,
-                    "limit": limit,
-                    "index": index,
-                    "custom_filter_function": custom_filter_function,
-                    # TODO: <Alex>To be implemented as a follow-on task.</Alex>
-                    # "sampling_method": sampling_method,
-                    # "sampling_kwargs": sampling_kwargs,
-                })
+                partition_request = PartitionRequest(
+                    {
+                        "partition_identifiers": partition_identifiers,
+                        "limit": limit,
+                        "index": index,
+                        "custom_filter_function": custom_filter_function,
+                        # TODO: <Alex>To be implemented as a follow-on task.</Alex>
+                        # "sampling_method": sampling_method,
+                        # "sampling_kwargs": sampling_kwargs,
+                    }
+                )
 
             else:
                 # Raise a warning if partition_identifiers or kwargs exist
