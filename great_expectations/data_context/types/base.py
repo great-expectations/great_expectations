@@ -802,13 +802,6 @@ class DataContextConfig(DictDot):
         datasources: Optional[
             Union[
                 Dict[str, DatasourceConfig],
-                # Dict[
-                #     Union[
-                #         DatasourceConfig, Dict[
-                #             str, DatasourceConfig
-                #         ]
-                #     ]
-                # ],
                 Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
             ]
         ] = None,
