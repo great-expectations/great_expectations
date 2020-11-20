@@ -385,28 +385,6 @@ data_connectors:
         (test_df["date"] == datetime.date(2020, 1, 15)) | (test_df["date"] == datetime.date(2020, 1, 29))
         ].drop("timestamp", axis=1).equals(df_data.drop("timestamp", axis=1))
 
-    my_batch = context.get_batch(
-        execution_environment_name="my_directory_datasource",
-        data_connector_name="my_filesystem_data_connector",
-        data_asset_name="A",
-        partition_identifiers={
-            "number": "2",
-        },
-        batch_spec_passthrough={
-            "splitter_method": "_split_on_multi_column_values",
-            "splitter_kwargs": {
-                "column_names": ["y", "m", "d"],
-                "partition_definition": {"y": 2020, "m": 1, "d": 5},
-            },
-        },
-    )
-    df_data = my_batch.data
-    assert df_data.shape == (4, 10)
-    df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
-    df_data["belongs_in_split"] = df_data.apply(lambda row: row["date"] == datetime.date(2020, 1, 5), axis=1)
-    df_data = df_data[df_data["belongs_in_split"]]
-    assert df_data.drop("belongs_in_split", axis=1).shape == (4, 10)
-
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         my_batch = context.get_batch(
@@ -560,28 +538,6 @@ data_connectors:
     assert test_df[
         (test_df["date"] == datetime.date(2020, 1, 15)) | (test_df["date"] == datetime.date(2020, 1, 29))
     ].drop("timestamp", axis=1).equals(df_data.drop("timestamp", axis=1))
-
-    my_batch = context.get_batch(
-        execution_environment_name="my_directory_datasource",
-        data_connector_name="my_filesystem_data_connector",
-        data_asset_name="C",
-        partition_identifiers={
-            "year": "2019",
-        },
-        batch_spec_passthrough={
-            "splitter_method": "_split_on_multi_column_values",
-            "splitter_kwargs": {
-                "column_names": ["y", "m", "d"],
-                "partition_definition": {"y": 2020, "m": 1, "d": 5},
-            },
-        },
-    )
-    df_data = my_batch.data
-    assert df_data.shape == (4, 10)
-    df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
-    df_data["belongs_in_split"] = df_data.apply(lambda row: row["date"] == datetime.date(2020, 1, 5), axis=1)
-    df_data = df_data[df_data["belongs_in_split"]]
-    assert df_data.drop("belongs_in_split", axis=1).shape == (4, 10)
 
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
