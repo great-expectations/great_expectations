@@ -256,7 +256,7 @@ class DataConnector:
             print(f"\n\t\tShowing 5 rows")
             print(df[:5])
 
-<       if df is not None:
+        if df is not None:
             return_dict = {"batch_spec": batch_spec, "n_rows": df.shape[0]}
         else:
             return_dict = {"batch_spec": batch_spec, "n_rows": 0}
