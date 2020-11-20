@@ -10,10 +10,10 @@ from great_expectations.core.batch import (
     PartitionDefinition,
     PartitionRequest,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
 )
-from great_expectations.data_context.util import file_relative_path
 
 yaml = YAML()
 
