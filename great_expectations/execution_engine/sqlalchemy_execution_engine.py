@@ -189,8 +189,10 @@ class SqlAlchemyBatchData:
         if query is not None and engine.dialect.name.lower() == "bigquery":
             if generated_table_name is not None and engine.dialect.dataset_id is None:
                 raise ValueError(
-                    "No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
-                    "default dataset in engine url"
+                    """
+                    No BigQuery dataset specified.  Include bigquery_temp_table in batch_spec_passthrough or a specify a
+                    default dataset in engine url
+                    """
                 )
 
         if query:
