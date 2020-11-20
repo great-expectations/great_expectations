@@ -116,7 +116,7 @@ data_connectors:
 
     print(json.dumps(return_obj, indent=2))
 
-    assert set(return_obj.keys()) == set(["execution_engine", "data_connectors",])
+    assert set(return_obj.keys()) == {"execution_engine", "data_connectors"}
     sub_obj = return_obj["data_connectors"]["my_filesystem_data_connector"]
     sub_obj.pop("example_data_reference")
     assert sub_obj == {
