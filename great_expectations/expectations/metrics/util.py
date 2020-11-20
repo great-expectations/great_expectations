@@ -224,7 +224,8 @@ object_id = OBJECT_ID('tempdb..{selectable}')
         ]
     else:
         query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
-        col_names: list = sqlalchemy_engine.execute(query).keys()
+        result_object = sqlalchemy_engine.execute(query)
+        col_names = result_object._metadata.keys
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
     return col_info_dict_list
 

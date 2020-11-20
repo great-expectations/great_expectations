@@ -273,25 +273,14 @@ class DataContextV3(DataContext):
 
         if batch_definition:
             # TODO: Raise a warning if any parameters besides batch_definition are specified
-
             return execution_environment.get_batch_from_batch_definition(
                 batch_definition
             )
-
         elif batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
-
-            batch_definitions = execution_environment.get_available_batch_definitions(
+            return execution_environment.get_single_batch_from_batch_request(
                 batch_request=batch_request
             )
-            if len(batch_definitions) != 1:
-                raise ValueError(
-                    f"Instead of 1 batch_definition, this batch_request matches {len(batch_definitions)}."
-                )
-            return execution_environment.get_batch_from_batch_definition(
-                batch_definitions[0]
-            )
-
         else:
             partition_request: PartitionRequest
             if partition_request is None:
@@ -342,7 +331,6 @@ class DataContextV3(DataContext):
                 partition_request=partition_request,
                 batch_spec_passthrough=batch_spec_passthrough,
             )
-
             return execution_environment.get_single_batch_from_batch_request(
                 batch_request=batch_request
             )

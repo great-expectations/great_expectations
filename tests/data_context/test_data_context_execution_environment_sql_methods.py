@@ -11,6 +11,9 @@ from great_expectations.core.batch import (
     PartitionRequest,
 )
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyBatchData,
+)
 
 yaml = YAML()
 
@@ -178,5 +181,5 @@ def test_get_batch_list_from_new_style_datasource_with_sql_execution_environment
         == "table_partitioned_by_date_column__A"
     )
     assert batch.batch_definition["partition_definition"] == {"date": "2020-01-15"}
-    assert isinstance(batch.data, sa.engine.result.ResultProxy)
-    assert len(batch.data.fetchall()) == 4
+    assert isinstance(batch.data, SqlAlchemyBatchData)
+    assert len(batch.data.head(fetch_all=True)) == 4
