@@ -11,15 +11,17 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
-from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlAlchemyBatchData
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionDefinitionSubset,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyBatchData,
+)
 from great_expectations.execution_environment.data_connector.sorter import Sorter
-import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 

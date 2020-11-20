@@ -5,7 +5,9 @@ from typing import Any, List, Optional, Tuple
 from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.util import fetch_batch_data_as_pandas_df
+from great_expectations.execution_environment.data_connector.util import (
+    fetch_batch_data_as_pandas_df,
+)
 
 logger = logging.getLogger(__name__)
 
