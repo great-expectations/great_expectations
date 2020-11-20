@@ -270,10 +270,6 @@ class BaseDataContext:
         # Store cached datasources but don't init them
         self._cached_datasources = {}
 
-        # Init stores
-        self._stores = dict()
-        self._init_stores(self._project_config_with_variables_substituted.stores)
-
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that datasources, validation operators, site builders and other plugins are built.
