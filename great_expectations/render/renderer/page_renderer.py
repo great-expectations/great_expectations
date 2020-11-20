@@ -235,9 +235,7 @@ class ValidationResultsPageRenderer(Renderer):
         expectation_suite_path = (
             os.path.join(*expectation_suite_path_components) + ".html"
         )
-        data_asset_name = (
-            validation_results.meta["batch_kwargs"].get("data_asset_name")
-        )
+        data_asset_name = validation_results.meta["batch_kwargs"].get("data_asset_name")
         if success:
             success = "Succeeded"
             html_success_icon = (
