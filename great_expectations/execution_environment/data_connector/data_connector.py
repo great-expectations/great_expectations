@@ -2,12 +2,15 @@ import logging
 import random
 from typing import Any, List, Optional, Tuple
 
+import pandas as pd
+
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
     BatchRequest,
-    PartitionDefinition,
 )
+
+from great_expectations.exceptions.exceptions import DataConnectorError
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -249,9 +252,7 @@ class DataConnector:
         # _execution_engine might be None for some tests
         if self._execution_engine is None:
             return {}
-
         batch_data, batch_spec, _ = self.get_batch_data_and_metadata(batch_definition)
-
         df = self._fetch_batch_data_as_pandas_df(batch_data)
 
         if pretty_print:
@@ -264,8 +265,13 @@ class DataConnector:
         }
 
     def _fetch_batch_data_as_pandas_df(self, batch_data):
-        # raise NotImplementedError
-        return batch_data
+        if isinstance(batch_data, pd.core.frame.DataFrame):
+            return batch_data
+        else:
+            try:
+                batch_data_pandas = batch_data.toPandas()
+            except AttributeError:
+                raise DataConnectorError("Spark not working")
 
     def _validate_batch_request(self, batch_request: BatchRequest):
         if not (

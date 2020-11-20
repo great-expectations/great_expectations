@@ -19,6 +19,7 @@ from ..exceptions import (
     BatchSpecError,
     GreatExpectationsError,
     ValidationError,
+    ExecutionEngineError,
 )
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
@@ -220,12 +221,19 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             reader_method: str = batch_spec.get("reader_method")
             reader_options: dict = batch_spec.get("reader_options") or {}
             path: str = batch_spec.get("path") or batch_spec.get("s3")
-            reader_fn: Callable = self._get_reader_fn(
-                reader=self.spark.read.options(**reader_options),
-                reader_method=reader_method,
-                path=path,
-            )
-            batch_data = reader_fn(path)
+            try:
+                reader_fn: Callable = self._get_reader_fn(
+                    reader=self.spark.read.options(**reader_options),
+                    reader_method=reader_method,
+                    path=path,
+                )
+                batch_data = reader_fn(path)
+            except AttributeError:
+                raise ExecutionEngineError(
+                    """
+                    Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
+                    """
+                    )
         else:
             raise BatchSpecError(
                 """
