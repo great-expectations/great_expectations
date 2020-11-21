@@ -60,15 +60,16 @@
         "observed_value": 4
       }
     },{
-      "title": "negative_test_with_max_lt_min",
+      "title": "test_error_handling_for_max_lt_min",
       "exact_match_out" : false,
       "in":{
         "min_value": 1,
-        "max_value": 0
+        "max_value": 0,
+        "catch_exceptions": true
       },
-      "out":{
-        "success":false,
-        "observed_value": 4
+      "out": {},
+      "error":{
+      "traceback_substring": "min_value cannot be greater than max_value"
       }
     },{
       "title": "positive_test_with_null_min",

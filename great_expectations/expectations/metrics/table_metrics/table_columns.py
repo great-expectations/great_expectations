@@ -9,7 +9,7 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.metric_provider import metric
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric import TableMetricProvider
 from great_expectations.validator.validation_graph import MetricConfiguration
 
@@ -22,7 +22,7 @@ except ImportError:
 class TableColumns(TableMetricProvider):
     metric_name = "table.columns"
 
-    @metric(engine=PandasExecutionEngine)
+    @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
@@ -34,7 +34,7 @@ class TableColumns(TableMetricProvider):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
 
-    @metric(engine=SqlAlchemyExecutionEngine)
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -46,7 +46,7 @@ class TableColumns(TableMetricProvider):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
 
-    @metric(engine=SparkDFExecutionEngine)
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
@@ -58,7 +58,8 @@ class TableColumns(TableMetricProvider):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
 
-    def get_evaluation_dependencies(
+    @classmethod
+    def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,

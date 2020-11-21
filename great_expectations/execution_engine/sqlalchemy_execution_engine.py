@@ -1,43 +1,40 @@
 import copy
 import datetime
-import json
 import logging
 import uuid
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
-from great_expectations.execution_engine import ExecutionEngine
+import pandas as pd
+
 from great_expectations.core import IDDict
 from great_expectations.core.batch import Batch, BatchMarkers
-from great_expectations.execution_environment.types import (
-    SqlAlchemyDatasourceQueryBatchSpec,
-    SqlAlchemyDatasourceTableBatchSpec,
-)
-from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
-from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.util import import_library_module
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
-    BatchSpecError,
     DatasourceKeyPairAuthBadPassphraseError,
     GreatExpectationsError,
     InvalidConfigError,
-    ValidationError,
 )
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
+from great_expectations.util import import_library_module
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+except ImportError:
+    sa = None
+
+try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.sql import Select
-    from sqlalchemy.sql.elements import (
-        TextClause,
-        quoted_name
-    )
+    from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
-    sa = None
     reflection = None
     DefaultDialect = None
     Select = None
@@ -125,94 +122,133 @@ class SqlAlchemyBatchData:
     and several getters used to access various properties."""
 
     def __init__(
-        self, engine, table_name=None, schema=None, query=None, use_quoted_name=False
+        self,
+        engine,
+        record_set_name: str = None,
+        # Option 1
+        schema_name: str = None,
+        table_name: str = None,
+        # Option 2
+        query: str = None,
+        # Option 3
+        selectable=None,
+        create_temp_table: bool = True,
+        temp_table_name: str = None,
+        temp_table_schema_name: str = None,
+        use_quoted_name: bool = False,
     ):
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
 
             Args:
-                engine (SqlAlchemyExecutionEngineExecutionEngine): \
-                    A SqlAlchemy Execution Engine that will act upon the data
+                engine (SqlAlchemy Engine): \
+                    A SqlAlchemy Engine or connection that will be used to access the data
+                record_set_name: (string or None): \
+                    The name of the record set available as a domain kwarg for Great Expectations validations. record_set_name
+                    can usually be None, but is required when there are multiple record_sets in the same Batch.
+                schema_name (string or None): \
+                    The name of the schema_name in which the databases lie
                 table_name (string or None): \
                     The name of the table that will be accessed. Either this parameter or the query parameter must be
                     specified. Default is 'None'.
-                schema (string or None): \
-                    The name of the schema in which the databases lie
                 query (string or None): \
                     A query string representing a domain, which will be used to create a temporary table
-            """
+                selectable (Sqlalchemy Selectable or None): \
+                    A SqlAlchemy selectable representing a domain, which will be used to create a temporary table
+                create_temp_table (bool): \
+                    When building the batch data object from a query, this flag determines whether a temporary table should
+                    be created against which to validate data from the query. If False, a subselect statement will be used
+                    in each validation.
+                temp_table_name (str or None): \
+                    The name to use for a temporary table if one should be created. If None, a default name will be generated.
+                temp_table_schema_name (str or None): \
+                    The name of the schema in which a temporary table should be created. If None, the default schema will be
+                    used if a temporary table is requested.
+                use_quoted_name (bool): \
+                    If true, names should be quoted to preserve case sensitivity on databases that usually normalize them
+
+        The query that will be executed against the DB can be determined in any of three ways:
+
+            1. Specify a `schema_name` and `table_name`. This will query the whole table as a record_set. If schema_name is None, then the default schema will be used.
+            2. Specify a `query`, which will be executed as-is to fetch the record_set. NOTE Abe 20201118 : This functionality is currently untested.
+            3. Specify a `selectable`, which will be to fetch the record_set. This is the primary path used by DataConnectors.
+
+        In the case of (2) and (3) you have the option to execute the query either as a temporary table, or as a subselect statement.
+
+        In general, temporary tables invite more optimization from the query engine itself. Subselect statements may sometimes be preffered, because they do not require write access on the database.
+
+
+        """
         self._engine = engine
-        self._table_name = table_name
-        self._schema = schema
-        self._query = query
+        self._record_set_name = record_set_name or "great_expectations_sub_selection"
+        if not isinstance(self._record_set_name, str):
+            raise TypeError(
+                f"record_set_name should be of type str, not {type(record_set_name)}"
+            )
+
+        self._schema_name = schema_name
         self._use_quoted_name = use_quoted_name
 
-        if table_name is None and query is None:
-            raise ValueError("Table_name or query must be specified")
+        if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
+            raise ValueError(
+                "Exactly one of table_name, query, or selectable must be specified"
+            )
+        elif (query and schema_name) or (selectable is not None and schema_name):
+            raise ValueError(
+                "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
+            )
 
-        if query and not table_name:
-            # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
-            # was used for a temp table and raising an error
-            schema = None
-            table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
-            # mssql expects all temporary table names to have a prefix '#'
-            if engine.dialect.name.lower() == "mssql":
-                table_name = f"#{table_name}"
-            generated_table_name = table_name
-        else:
-            generated_table_name = None
-
-        if table_name is None:
-            raise ValueError("No table_name provided.")
-
-        if use_quoted_name:
-            table_name = quoted_name(table_name)
-
-        if engine.dialect.name.lower() == "bigquery":
-            # In BigQuery the table name is already qualified with its schema name
-            self._table = sa.Table(table_name, sa.MetaData(), schema=None)
-
-        else:
-            self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
-
-        if schema is not None and query is not None:
-            # temporary table will be written to temp schema, so don't allow
-            # a user-defined schema
-            # NOTE: 20200306 - JPC - Previously, this would disallow both custom_sql (a query) and a schema, but
-            # that is overly restrictive -- snowflake could have had a schema specified, for example, in which to create
-            # a temporary table.
-            # raise ValueError("Cannot specify both schema and custom_sql.")
-            pass
-
-        if query is not None and engine.dialect.name.lower() == "bigquery":
-            if generated_table_name is not None and engine.dialect.dataset_id is None:
-                raise ValueError(
-                    "No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
-                    "default dataset in engine url"
+        if table_name:
+            # Suggestion: pull this block out as its own _function
+            if use_quoted_name:
+                table_name = quoted_name(table_name, quote=True)
+            if engine.dialect.name.lower() == "bigquery":
+                if schema_name is not None:
+                    logger.warning(
+                        "schema_name should not be used when passing a table_name for biquery. Instead, include the schema name in the table_name string."
+                    )
+                # In BigQuery the table name is already qualified with its schema name
+                self._selectable = sa.Table(
+                    table_name, sa.MetaData(), schema_name=None,
+                )
+            else:
+                self._selectable = sa.Table(
+                    table_name, sa.MetaData(), schema_name=schema_name,
                 )
 
-        if query:
-            self.create_temporary_table(table_name, query, schema_name=schema)
-
-            if (
-                generated_table_name is not None
-                and engine.dialect.name.lower() == "bigquery"
-            ):
-                logger.warning(
-                    "Created permanent table {table_name}".format(table_name=table_name)
+        elif create_temp_table:
+            if temp_table_name:
+                generated_table_name = temp_table_name
+            else:
+                # Suggestion: Pull this into a separate "_generate_temporary_table_name" method
+                generated_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+                # mssql expects all temporary table names to have a prefix '#'
+                if engine.dialect.name.lower() == "mssql":
+                    generated_table_name = f"#{generated_table_name}"
+                if engine.dialect.name.lower() == "bigquery":
+                    raise ValueError(
+                        "No BigQuery dataset specified.  Include bigquery_temp_table in "
+                        "batch_spec_passthrough or a specify a default dataset in engine url"
+                    )
+            if selectable is not None:
+                # compile selectable to sql statement
+                query = selectable.compile(
+                    dialect=self.sql_engine_dialect,
+                    compile_kwargs={"literal_binds": True},
                 )
-
-        try:
-            insp = reflection.Inspector.from_engine(engine)
-            self.columns = insp.get_columns(table_name, schema=schema)
-        except KeyError:
-            # we will get a KeyError for temporary tables, since
-            # reflection will not find the temporary schema
-            self.columns = self.column_reflection_fallback()
-
-        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
-        if len(self.columns) == 0:
-            self.columns = self.column_reflection_fallback()
+            self._create_temporary_table(
+                generated_table_name,
+                query,
+                temp_table_schema_name=temp_table_schema_name,
+            )
+            self._selectable = sa.Table(
+                generated_table_name, sa.MetaData(), schema_name=temp_table_schema_name,
+            )
+        else:
+            if query:
+                self._selectable = sa.text(query)
+            else:
+                self._selectable = selectable.alias(self._record_set_name)
 
     @property
     def sql_engine_dialect(self) -> DefaultDialect:
@@ -220,125 +256,88 @@ class SqlAlchemyBatchData:
         return self._engine.dialect
 
     @property
-    def table(self):
-        """Returns a table of the data inside the sqlalchemy_execution_engine"""
-        return self._table
-
-    @property
-    def use_quoted_name(self):
-        """Returns a table of the data inside the sqlalchemy_execution_engine"""
-        return self._use_quoted_name
-
-    @property
-    def schema(self):
-        return self._schema
+    def record_set_name(self):
+        return self._record_set_name
 
     @property
     def selectable(self):
-        if self._table is not None:
-            return self._table
-        else:
-            return sa.text(self._query)
+        return self._selectable
 
-    def create_temporary_table(self, table_name, custom_sql, schema_name=None):
+    @property
+    def use_quoted_name(self):
+        return self._use_quoted_name
+
+    def _create_temporary_table(
+        self, temp_table_name, query, temp_table_schema_name=None
+    ):
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
-        :param custom_sql:
+        :param query:
         """
-
-        ###
-        # NOTE: 20200310 - The update to support snowflake transient table creation revealed several
-        # import cases that are not fully handled.
-        # The snowflake-related change updated behavior to allow both custom_sql and schema to be specified. But
-        # the underlying incomplete handling of schema remains.
-        #
-        # Several cases we need to consider:
-        #
-        # 1. Distributed backends (e.g. Snowflake and BigQuery) often use a `<database>.<schema>.<table>`
-        # syntax, but currently we are biased towards only allowing schema.table
-        #
-        # 2. In the wild, we see people using several ways to declare the schema they want to use:
-        # a. In the connection string, the original RFC only specifies database, but schema is supported by some
-        # backends (Snowflake) as a query parameter.
-        # b. As a default for a user (the equivalent of USE SCHEMA being provided at the beginning of a session)
-        # c. As part of individual queries.
-        #
-        # 3. We currently don't make it possible to select from a table in one query, but create a temporary
-        # table in
-        # another schema, except for with BigQuery and (now) snowflake, where you can specify the table name (and
-        # potentially triple of database, schema, table) in the batch_kwargs.
-        #
-        # The SqlAlchemyDataset interface essentially predates the batch_kwargs concept and so part of what's going
-        # on, I think, is a mismatch between those. I think we should rename custom_sql -> "temp_table_query" or
-        # similar, for example.
-        ###
-
         if self.sql_engine_dialect.name.lower() == "bigquery":
-            stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
+            stmt = "CREATE OR REPLACE TABLE `{temp_table_name}` AS {query}".format(
+                temp_table_name=temp_table_name, query=query
             )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
-            if schema_name is not None:
-                table_name = schema_name + "." + table_name
-            stmt = "CREATE OR REPLACE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
+            if temp_table_schema_name is not None:
+                temp_table_name = temp_table_schema_name + "." + temp_table_name
+            stmt = "CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}".format(
+                temp_table_name=temp_table_name, query=query
             )
         elif self.sql_engine_dialect.name == "mysql":
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the
             # generic case.
-            stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
+            stmt = "CREATE TEMPORARY TABLE {temp_table_name} AS {query}".format(
+                temp_table_name=temp_table_name, query=query
             )
         elif self.sql_engine_dialect.name == "mssql":
-            # Insert "into #{table_name}" in the custom sql query right before the "from" clause
+            # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
-            # Note: transforming custom_sql to uppercase/lowercase has uninteded consequences (i.e.,
+            # Note: transforming query to uppercase/lowercase has uninteded consequences (i.e.,
             # changing column names), so this is not an option!
-            if "from" in custom_sql:
+            if "from" in query:
                 strsep = "from"
             else:
                 strsep = "FROM"
-            custom_sqlmod = custom_sql.split(strsep, maxsplit=1)
-            stmt = (
-                custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]
-            ).format(table_name=table_name)
+            querymod = query.split(strsep, maxsplit=1)
+            stmt = (querymod[0] + "into {temp_table_name} from" + querymod[1]).format(
+                temp_table_name=temp_table_name
+            )
         else:
-            stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
-                table_name=table_name, custom_sql=custom_sql
+            stmt = 'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'.format(
+                temp_table_name=temp_table_name, query=query
             )
         self._engine.execute(stmt)
 
-    def column_reflection_fallback(self):
-        """If we can't reflect the table, use a query to at least get column names."""
-        col_info_dict_list: List[Dict]
-        if self.sql_engine_dialect.name.lower() == "mssql":
-            type_module = _get_dialect_type_module(self.sql_engine_dialect)
-            # Get column names and types from the database
-            # StackOverflow to the rescue: https://stackoverflow.com/a/38634368
-            col_info_query: TextClause = sa.text(
-                f"""
-SELECT
-    cols.NAME, ty.NAME
-FROM
-    tempdb.sys.columns AS cols
-JOIN
-    sys.types AS ty
-ON
-    cols.user_type_id = ty.user_type_id
-WHERE
-    object_id = OBJECT_ID('tempdb..{self._table}')
-                """
+    def head(self, n=5, fetch_all=False):
+        """Fetches the head of the table"""
+
+        if fetch_all:
+            result_object = self._engine.execute(
+                sa.select("*").select_from(self._selectable)
             )
-            col_info_tuples_list = self._engine.execute(col_info_query).fetchall()
-            col_info_dict_list = [
-                {"name": col_name, "type": getattr(type_module, col_type.upper())()}
-                for col_name, col_type in col_info_tuples_list
-            ]
         else:
-            query: Select = sa.select([sa.text("*")]).select_from(self._table).limit(1)
-            col_names: list = self._engine.execute(query).keys()
-            col_info_dict_list = [{"name": col_name} for col_name in col_names]
-        return col_info_dict_list
+            result_object = self._engine.execute(
+                sa.select("*").limit(n).select_from(self._selectable)
+            )
+
+        rows = result_object.fetchall()
+
+        # Note: Abe 20201119: This should be a GE type
+        head_df = pd.DataFrame(rows, columns=result_object._metadata.keys)
+
+        return head_df
+
+    def row_count(self):
+        """Gets the number of rows"""
+
+        result_object = self._engine.execute(
+            sa.select([sa.func.count()]).select_from(self._selectable)
+        )
+        rows = result_object.fetchall()
+        print(rows)
+
+        return rows[0][0]
 
 
 class SqlAlchemyExecutionEngine(ExecutionEngine):
@@ -351,7 +350,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         connection_string=None,
         url=None,
         batch_data_dict=None,
-        **kwargs,
+        **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
     ):
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
         desired database. Also initializes the dialect to be used and configures usage statistics.
@@ -378,7 +377,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     a url can be used to access the data. This will be overridden by all other configuration
                     options if any are provided.
         """
-        super().__init__(name=name, batch_data_dict=batch_data_dict, **kwargs)
+        super().__init__(name=name, batch_data_dict=batch_data_dict)  # , **kwargs)
         self._name = name
 
         self._credentials = credentials
@@ -403,7 +402,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             raise InvalidConfigError(
                 "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
             )
-        self.engine.connect()
 
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in [
@@ -434,14 +432,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.dialect = None
 
-        # NOTE: Abe 20201111: I don't understand what this is supposed to do. It's untested, and it's breaking sqlite.
-        # if self.engine and self.engine.dialect.name.lower() in [
-        #     "sqlite",
-        #     "mssql",
-        #     "snowflake",
-        # ]:
-        #     # sqlite/mssql temp tables only persist within a connection so override the engine
-        #     self.engine = engine.connect()
+        if self.engine and self.engine.dialect.name.lower() in [
+            "sqlite",
+            "mssql",
+            "snowflake",
+        ]:
+            # sqlite/mssql temp tables only persist within a connection so override the engine
+            self.engine = self.engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -552,17 +549,27 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     def get_compute_domain(
-        self, domain_kwargs: dict = None
+        self,
+        domain_kwargs: Dict,
+        domain_type: Union[str, "MetricDomainTypes"],
+        accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple["sa.sql.Selectable", dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            batches (dict) - A dictionary specifying batch id and which batches to obtain
+            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity", "column",
+            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
+            MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
+            the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             SqlAlchemy column
         """
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -583,16 +590,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
-            if domain_kwargs["table"] != data_object.table:
+            if domain_kwargs["table"] != data_object.record_set_name:
                 raise ValueError("Unrecognized table name.")
             else:
-                selectable = data_object.table
+                selectable = data_object.selectable
         elif "query" in domain_kwargs:
             raise ValueError(
                 "query is not currently supported by SqlAlchemyExecutionEngine"
             )
         else:
-            selectable = data_object.table
+            selectable = data_object.selectable
 
         if (
             "row_condition" in domain_kwargs
@@ -612,18 +619,137 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
                 )
 
-        if "column" in compute_domain_kwargs:
-            if self.active_batch_data.use_quoted_name:
-                accessor_domain_kwargs["column"] = quoted_name(
-                    compute_domain_kwargs.pop("column")
-                )
-            else:
-                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
+        if (
+            domain_type != MetricDomainTypes.TABLE
+            and accessor_keys is not None
+            and len(accessor_keys) > 0
+        ):
+            logger.warning(
+                "Accessor keys ignored since Metric Domain Type is not 'table'"
+            )
 
+        if domain_type == MetricDomainTypes.TABLE:
+            if accessor_keys is not None and len(accessor_keys) > 0:
+                for key in accessor_keys:
+                    accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
+            if len(domain_kwargs.keys()) > 0:
+                for key in compute_domain_kwargs.keys():
+                    # Warning user if kwarg not "normal"
+                    if key not in [
+                        "batch_id",
+                        "table",
+                        "row_condition",
+                        "condition_parser",
+                    ]:
+                        logger.warning(
+                            f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}"
+                        )
+            return selectable, compute_domain_kwargs, accessor_domain_kwargs
+
+        # If user has stated they want a column, checking if one is provided, and
+        elif domain_type == MetricDomainTypes.COLUMN:
+            if "column" in compute_domain_kwargs:
+                # Checking if case- sensitive and using appropriate name
+                if self.active_batch_data.use_quoted_name:
+                    accessor_domain_kwargs["column"] = quoted_name(
+                        compute_domain_kwargs.pop("column")
+                    )
+                else:
+                    accessor_domain_kwargs["column"] = compute_domain_kwargs.pop(
+                        "column"
+                    )
+            else:
+                # If column not given
+                raise GreatExpectationsError(
+                    "Column not provided in compute_domain_kwargs"
+                )
+
+        # Else, if column pair values requested
+        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+            # Ensuring column_A and column_B parameters provided
+            if (
+                "column_A" in compute_domain_kwargs
+                and "column_B" in compute_domain_kwargs
+            ):
+                if self.active_batch_data.use_quoted_name:
+                    # If case matters...
+                    accessor_domain_kwargs["column_A"] = quoted_name(
+                        compute_domain_kwargs.pop("column_A")
+                    )
+                    accessor_domain_kwargs["column_B"] = quoted_name(
+                        compute_domain_kwargs.pop("column_B")
+                    )
+                else:
+                    accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
+                        "column_A"
+                    )
+                    accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
+                        "column_B"
+                    )
+            else:
+                raise GreatExpectationsError(
+                    "column_A or column_B not found within compute_domain_kwargs"
+                )
+
+        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+        elif domain_type == MetricDomainTypes.MULTICOLUMN:
+            if "columns" in compute_domain_kwargs:
+                # If columns exist
+                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
+
+        # Filtering if identity
+        elif domain_type == MetricDomainTypes.IDENTITY:
+            # If we would like our data to become a single column
+            if "column" in compute_domain_kwargs:
+                if self.active_batch_data.use_quoted_name:
+                    selectable = sa.select(
+                        [sa.column(quoted_name(compute_domain_kwargs["column"]))]
+                    ).select_from(selectable)
+                else:
+                    selectable = sa.select(
+                        [sa.column(compute_domain_kwargs["column"])]
+                    ).select_from(selectable)
+
+            # If we would like our data to now become a column pair
+            elif ("column_A" in compute_domain_kwargs) and (
+                "column_B" in compute_domain_kwargs
+            ):
+                if self.active_batch_data.use_quoted_name:
+                    selectable = sa.select(
+                        [
+                            sa.column(quoted_name(compute_domain_kwargs["column_A"])),
+                            sa.column(quoted_name(compute_domain_kwargs["column_B"])),
+                        ]
+                    ).select_from(selectable)
+                else:
+                    selectable = sa.select(
+                        [
+                            sa.column(compute_domain_kwargs["column_A"]),
+                            sa.column(compute_domain_kwargs["column_B"]),
+                        ]
+                    ).select_from(selectable)
+            else:
+                # If we would like our data to become a multicolumn
+                if "columns" in compute_domain_kwargs:
+                    if self.active_batch_data.use_quoted_name:
+                        # Building a list of column objects used for sql alchemy selection
+                        to_select = [
+                            sa.column(quoted_name(col))
+                            for col in compute_domain_kwargs["columns"]
+                        ]
+                        selectable = sa.select(to_select).select_from(selectable)
+                    else:
+                        to_select = [
+                            sa.column(col) for col in compute_domain_kwargs["columns"]
+                        ]
+                        selectable = sa.select(to_select).select_from(selectable)
+
+        # Letting selectable fall through
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
     def resolve_metric_bundle(
-        self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
+        self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
     ) -> dict:
         """For every metrics in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds a
         bundles the metrics into one large query dictionary so that they are all executed simultaneously. Will fail if
@@ -645,38 +771,35 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         queries: Dict[Tuple, dict] = dict()
         for (
             metric_to_resolve,
-            metric_provider,
+            engine_fn,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
             metric_provider_kwargs,
         ) in metric_fn_bundle:
-            # We have different semantics for bundled metric providers, so ensure we actually are working only with those.
-            assert (
-                metric_provider.metric_fn_type == "aggregate_fn"
-            ), "resolve_metric_bundle only supports aggregate metrics"
-            statement, domain_kwargs = metric_provider(**metric_provider_kwargs)
-            if not isinstance(domain_kwargs, IDDict):
-                domain_kwargs = IDDict(domain_kwargs)
-            domain_id = domain_kwargs.to_id()
+            if not isinstance(compute_domain_kwargs, IDDict):
+                compute_domain_kwargs = IDDict(compute_domain_kwargs)
+            domain_id = compute_domain_kwargs.to_id()
             if domain_id not in queries:
                 queries[domain_id] = {
                     "select": [],
                     "ids": [],
-                    "domain_kwargs": domain_kwargs,
+                    "domain_kwargs": compute_domain_kwargs,
                 }
             queries[domain_id]["select"].append(
-                statement.label(metric_to_resolve.metric_name)
+                engine_fn.label(metric_to_resolve.metric_name)
             )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"]
+                query["domain_kwargs"], domain_type="identity"
             )
-            assert (
-                compute_domain_kwargs == query["domain_kwargs"]
-            ), "Invalid compute domain returned from a bundled metric. Verify that its target compute domain is a valid compute domain."
             assert len(query["select"]) == len(query["ids"])
             res = self.engine.execute(
                 sa.select(query["select"]).select_from(selectable)
             ).fetchall()
+            logger.debug(
+                f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
+            )
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
@@ -684,8 +807,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 res[0]
             ), "unexpected number of metrics returned"
             for idx, id in enumerate(query["ids"]):
-                resolved_metrics[id] = res[0][idx]
+                resolved_metrics[id] = convert_to_json_serializable(res[0][idx])
 
+        # Convert metrics to be serializable
         return resolved_metrics
 
     ### Splitter methods for partitioning tables ###
@@ -809,15 +933,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def _build_selector_from_batch_spec(self, batch_spec):
-        table_name = batch_spec["table_name"]
+    def _build_selectable_from_batch_spec(self, batch_spec):
+        table_name: str = batch_spec["table_name"]
 
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
             split_clause = splitter_fn(
                 table_name=table_name,
                 partition_definition=batch_spec["partition_definition"],
-                **batch_spec["splitter_kwargs"]
+                **batch_spec["splitter_kwargs"],
             )
 
         else:
@@ -828,44 +952,39 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
                 # so the business logic for building the query needs to be different.
 
-                return sa.select('*').select_from(
-                    sa.text(table_name)
-                ).where(
-                    split_clause
-                ).limit(batch_spec["sampling_kwargs"]["n"])
+                return (
+                    sa.select("*")
+                    .select_from(sa.text(table_name))
+                    .where(split_clause)
+                    .limit(batch_spec["sampling_kwargs"]["n"])
+                )
 
             else:
 
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
-                return sa.select('*').select_from(
-                    sa.text(table_name)
-                ).where(
-                    sa.and_(
-                        split_clause,
-                        sampler_fn(**batch_spec["sampling_kwargs"]),
+                return (
+                    sa.select("*")
+                    .select_from(sa.text(table_name))
+                    .where(
+                        sa.and_(
+                            split_clause, sampler_fn(**batch_spec["sampling_kwargs"]),
+                        )
                     )
                 )
-
-        else:
-
-            return sa.select('*').select_from(
-                sa.text(table_name)
-            ).where(
-                split_clause
-            )
+        return sa.select("*").select_from(sa.text(table_name)).where(split_clause)
 
     def get_batch_data_and_markers(
         self, batch_spec
     ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
 
-        selector = self._build_selector_from_batch_spec(batch_spec)
-        batch_data = self.engine.execute(selector)
-        # TODO: Abe 20201030: This method should return a SqlAlchemyBatchData as its first object, but that probably requires deeper changes.
-        # SqlAlchemyBatchData(
-        #     engine=self.engine,
-        #     table_name=batch_spec.get("table"),
-        #     schema=batch_spec.get("schema"),
-        # )
+        selectable = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
+        if "bigquery_temp_table" in batch_spec:
+            temp_table_name = batch_spec.get("bigquery_temp_table")
+        else:
+            temp_table_name = None
+        batch_data = SqlAlchemyBatchData(
+            engine=self.engine, selectable=selectable, temp_table_name=temp_table_name
+        )
 
         batch_markers = BatchMarkers(
             {

@@ -1,5 +1,6 @@
 import json
 import os
+from unittest import mock
 
 import nbformat
 import pytest
@@ -1295,7 +1296,7 @@ def test_complex_suite(warning_suite, empty_data_context):
     assert obs == expected
 
 
-def test_notebook_execution_with_pandas_backend(titanic_data_context):
+def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_docs):
     """
     To set this test up we:
 
@@ -1311,7 +1312,10 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    context = titanic_data_context
+    # Since we'll run the notebook, we use a context with no data docs to avoid
+    # the renderer's default behavior of building and opening docs, which is not
+    # part of this test.
+    context = titanic_data_context_no_data_docs
     root_dir = context.root_directory
     uncommitted_dir = os.path.join(root_dir, "uncommitted")
     suite_name = "warning"
@@ -1368,10 +1372,6 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     # Run notebook
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
-
-    # Useful to inspect executed notebook
-    with open(os.path.join(uncommitted_dir, "output.ipynb"), "w") as f:
-        nbformat.write(nb, f)
 
     # Assertions about output
     context = DataContext(root_dir)

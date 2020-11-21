@@ -1,3 +1,7 @@
+import numpy as np
+
+from great_expectations.validator.validation_graph import MetricConfiguration
+
 legacy_method_parameters = {
     "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than": (
         "column",

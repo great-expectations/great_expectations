@@ -1,7 +1,6 @@
+import logging
 import os
 from typing import List, Optional
-
-import logging
 
 try:
     import boto3
@@ -9,9 +8,12 @@ except ImportError:
     boto3 = None
 
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector import (
+    ConfiguredAssetFilePathDataConnector,
+)
 from great_expectations.execution_environment.data_connector.asset import Asset
-from great_expectations.execution_environment.data_connector import ConfiguredAssetFilePathDataConnector
 from great_expectations.execution_environment.data_connector.util import list_s3_keys
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,7 +30,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
-        boto3_options: dict = None
+        boto3_options: dict = None,
     ):
         logger.debug(f'Constructing ConfiguredAssetS3DataConnector "{name}".')
 
@@ -51,7 +53,9 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         try:
             self._s3 = boto3.client("s3", **boto3_options)
         except TypeError:
-            raise ImportError("Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector).")
+            raise ImportError(
+                "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
+            )
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         query_options: dict = {
@@ -71,14 +75,18 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
                 query_options["MaxKeys"] = asset.max_keys
 
         path_list: List[str] = [
-            key for key in list_s3_keys(s3=self._s3, query_options=query_options, iterator_dict={}, recursive=False)
+            key
+            for key in list_s3_keys(
+                s3=self._s3,
+                query_options=query_options,
+                iterator_dict={},
+                recursive=False,
+            )
         ]
         return path_list
 
     def _get_full_file_path(
-        self,
-        path: str,
-        data_asset_name: Optional[str] = None,
+        self, path: str, data_asset_name: Optional[str] = None,
     ) -> str:
         # data_assert_name isn't used in this method.
         # It's only kept for compatibility with parent methods.

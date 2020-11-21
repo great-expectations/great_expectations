@@ -68,16 +68,14 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         expect_table_row_count_to_equal
     """
 
+    metric_dependencies = ("table.row_count",)
+
     success_keys = (
         "min_value",
         "max_value",
-        "mostly",
     )
 
     default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
         "min_value": None,
         "max_value": None,
         "result_format": "BASIC",
@@ -85,33 +83,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
-
-    """ A Map Metric Decorator for the Row Count"""
-    # TODO: Confirm - given that this uses the same metric as expect_table_row_count_to_equal, is it ok to have this
-    #    expectation without any metrics?
-    # @PandasExecutionEngine.metric(
-    #     metric_name="rows.count",
-    #     metric_domain_keys=TableExpectation.domain_keys,
-    #     metric_value_keys=(),
-    #     metric_dependencies=tuple(),
-    #     filter_column_isnull=False
-    # )
-    # def _pandas_row_count(
-    #     self,
-    #     batches: Dict[str, Batch],
-    #     execution_engine: PandasExecutionEngine,
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict,
-    #     runtime_configuration: dict = None,
-    #     filter_column_isnull: bool = False,
-    # ):
-    #     """Row Count Metric Function"""
-    #     df = execution_engine.get_domain_dataframe(
-    #         domain_kwargs=metric_domain_kwargs, batches=batches
-    #     )
-    #
-    #     return df.shape[0]
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -127,31 +98,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        min_val = None
-        max_val = None
-
-        # Setting these values if they are available
-        if "min_value" in configuration.kwargs:
-            min_val = configuration.kwargs["min_value"]
-
-        if "max_value" in configuration.kwargs:
-            max_val = configuration.kwargs["max_value"]
-
-        try:
-            if min_val is not None:
-                if not float(min_val).is_integer():
-                    raise ValueError("min_value must be integer")
-            if max_val is not None:
-                if not float(max_val).is_integer():
-                    raise ValueError("max_value must be integer")
-
-        except ValueError:
-            raise ValueError("min_value and max_value must be integers")
-
-        return True
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -218,3 +165,18 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 }
             )
         ]
+
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        return self._validate_metric_value_between(
+            metric_name="table.row_count",
+            configuration=configuration,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+            execution_engine=execution_engine,
+        )
