@@ -227,8 +227,8 @@ class SqlAlchemyBatchData:
                     generated_table_name = f"#{generated_table_name}"
                 if engine.dialect.name.lower() == "bigquery":
                     raise ValueError(
-                        "No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
-                        "default dataset in engine url"
+                        "No BigQuery dataset specified.  Include bigquery_temp_table in "
+                        "batch_spec_passthrough or a specify a default dataset in engine url"
                     )
             if selectable is not None:
                 # compile selectable to sql statement
@@ -350,7 +350,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         connection_string=None,
         url=None,
         batch_data_dict=None,
-        **kwargs,  # These will be passed as optional parameters to the engine, **not** the ExecutionEngine
+        **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
     ):
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
         desired database. Also initializes the dialect to be used and configures usage statistics.
@@ -935,6 +935,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _build_selectable_from_batch_spec(self, batch_spec):
         table_name = batch_spec["table_name"]
+        table_name: str = batch_spec["table_name"]
 
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
@@ -971,17 +972,20 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         )
                     )
                 )
-
-        else:
-
-            return sa.select("*").select_from(sa.text(table_name)).where(split_clause)
+        return sa.select("*").select_from(sa.text(table_name)).where(split_clause)
 
     def get_batch_data_and_markers(
         self, batch_spec
     ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
 
-        selectable = self._build_selectable_from_batch_spec(batch_spec)
-        batch_data = SqlAlchemyBatchData(engine=self.engine, selectable=selectable,)
+        selectable = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
+        if "bigquery_temp_table" in batch_spec:
+            temp_table_name = batch_spec.get("bigquery_temp_table")
+        else:
+            temp_table_name = None
+        batch_data = SqlAlchemyBatchData(
+            engine=self.engine, selectable=selectable, temp_table_name=temp_table_name
+        )
 
         batch_markers = BatchMarkers(
             {
