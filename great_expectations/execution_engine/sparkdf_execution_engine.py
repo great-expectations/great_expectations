@@ -40,6 +40,15 @@ try:
         StructField,
         StructType,
     )
+
+    class SparkDFBatchData(DataFrame):
+        
+        def __init__(self, df):
+            super(self.__class__, self).__init__(df._jdf, df.sql_ctx)
+
+        def row_count(self):
+            return self.count()
+
 except ImportError:
     pyspark = None
     SparkSession = None
@@ -52,17 +61,12 @@ except ImportError:
     StringType = (None,)
     DateType = (None,)
     BooleanType = (None,)
+
+    SparkDFBatchData = None
+
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
-
-class SparkDFBatchData(DataFrame):
-    
-    def __init__(self, df):
-        super(self.__class__, self).__init__(df._jdf, df.sql_ctx)
-
-    def row_count(self):
-        return self.count()
 
 class SparkDFExecutionEngine(ExecutionEngine):
     """
