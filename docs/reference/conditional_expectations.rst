@@ -128,7 +128,8 @@ The previous example for a SQLAlchemy backend.
 
     >>> my_df.expect_column_values_to_be_null(
             column='Provider Last Name (Legal Name)',
-            row_condition='`Provider Organization Name (Legal Business Name)` IS NOT NULL'
+            row_condition='`Provider Organization Name (Legal Business Name)` IS NOT NULL',
+            condition_parser='raw_sql'
         )
     {
         "success": true,

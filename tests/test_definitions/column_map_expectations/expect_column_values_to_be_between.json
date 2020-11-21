@@ -526,7 +526,8 @@
           "max_value": 10,
           "min_value": 10,
           "strict_max": false,
-          "row_condition": "y = 'abc'"
+          "row_condition": "y = 'abc'",
+          "condition_parser": "raw_sql"
         },
         "out": {
           "unexpected_list": [],
@@ -559,7 +560,8 @@
           "max_value": 10,
           "min_value": 10,
           "strict_max": false,
-          "row_condition": "y = '9'"
+          "row_condition": "y = '9'",
+          "condition_parser": "raw_sql"
         },
         "out": {
           "unexpected_list": [9],
@@ -581,6 +583,23 @@
         },
         "out": {
           "traceback_substring": "must be 'python' or 'pandas'"
+        }
+      },
+      {
+        "title": "test_conditional_expectation_parser_errors_sqlalchemy",
+        "only_for": ["sqlalchemy"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "catch_exceptions": true,
+          "strict_max": false,
+          "row_condition": "y = '9'",
+          "condition_parser": "bad_parser"
+        },
+        "out": {
+          "traceback_substring": "must be 'raw_sql'"
         }
       }
     ]

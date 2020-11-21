@@ -141,7 +141,8 @@
         "column": "z",
         "value_set": ["hello"],
         "catch_exceptions": true,
-        "row_condition": "x = '1'"
+        "row_condition": "x = '1'",
+        "condition_parser": "raw_sql"
       },
       "out": {
         "success": true,
@@ -174,7 +175,8 @@
         "column": "z",
         "value_set": ["jello"],
         "catch_exceptions": true,
-        "row_condition": "x = 1"
+        "row_condition": "x = 1",
+        "condition_parser": "raw_sql"
       },
       "out": {
         "success": false,

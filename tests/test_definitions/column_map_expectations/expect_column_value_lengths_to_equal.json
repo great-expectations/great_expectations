@@ -91,7 +91,8 @@
         "column": "s1",
         "value": 4,
         "catch_exceptions": true,
-        "row_condition": "equal_length_integer = 5 AND equal_length_string = 'e'"
+        "row_condition": "equal_length_integer = 5 AND equal_length_string = 'e'",
+        "condition_parser": "raw_sql"
       },
       "out" : {
         "success":true,
@@ -139,7 +140,8 @@
         "column": "s1",
         "value": 4,
         "catch_exceptions": true,
-        "row_condition": "(equal_length_integer = 4) AND (equal_length_string = 'd')"
+        "row_condition": "(equal_length_integer = 4) AND (equal_length_string = 'd')",
+        "condition_parser": "raw_sql"
       },
       "out" : {
         "success": false,

@@ -18,7 +18,7 @@ Optionally, the :code:`condition_parser` argument can be provided for pandas dat
 this argument will be set to *"pandas"* by default, thus, demanding the appropriate syntax. Other engines might be implemented in future.
 
 For SQLAlchemy the :code:`row_condition` argument should be a valid SQL string. It will be added to the where clause of
-the query when validation expectations. The :code:`condition_parser` argument is not allowed for SQLAlchemy backends.
+the query when validation expectations. The :code:`condition_parser` argument must be `raw_sql`.
 
 The feature can be used, e.g., to test if different encodings of identical pieces of information are consistent with each other:
 
@@ -50,7 +50,8 @@ For SQLAlchemy the expectation would be defined like this:
     >>> my_df.expect_column_values_to_be_in_set(
             column='Sex',
             value_set=['male'],
-            row_condition='SexCode=0'
+            row_condition='SexCode=0',
+            condition_parser='raw_sql'
         )
     {
         "success": true,

@@ -165,7 +165,13 @@ class MetaSqlAlchemyDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-                self, column, mostly=None, result_format=None, row_condition=None, *args, **kwargs
+                self, column,
+                mostly=None,
+                result_format=None,
+                row_condition=None,
+                condition_parser=None,
+                *args,
+                **kwargs
         ):
             if self.batch_kwargs.get("use_quoted_name"):
                 column = quoted_name(column, quote=True)
@@ -228,6 +234,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 count_query = self._get_count_query_mssql(
                     expected_condition=expected_condition,
                     ignore_values_condition=ignore_values_condition,
+                    row_condition=row_condition
                 )
             else:
                 count_query = self._get_count_query_generic_sqlalchemy(
@@ -259,6 +266,9 @@ class MetaSqlAlchemyDataset(Dataset):
             count_results["unexpected_count"] = int(count_results["unexpected_count"])
 
             if row_condition:
+                if condition_parser != 'raw_sql':
+                    raise ValueError("condition_parser is required when setting a row_condition, and must be 'raw_sql'")
+
                 where_clause = sa.and_(
                     sa.not_(expected_condition), sa.not_(ignore_values_condition), sa.text(row_condition)
                 )
@@ -335,6 +345,7 @@ class MetaSqlAlchemyDataset(Dataset):
         self,
         expected_condition: BinaryExpression,
         ignore_values_condition: BinaryExpression,
+        row_condition=None
     ) -> Select:
         # mssql expects all temporary table names to have a prefix '#'
         temp_table_name: str = f"#ge_tmp_{str(uuid.uuid4())[:8]}"
@@ -362,6 +373,9 @@ class MetaSqlAlchemyDataset(Dataset):
                     else_=0,
                 ).label("condition")
             ]
+            if row_condition:
+                count_case_statement = sa.where(sa.text(row_condition))
+
             inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
                 count_case_statement,
                 sa.select(count_case_statement).select_from(self._table),
@@ -376,6 +390,9 @@ class MetaSqlAlchemyDataset(Dataset):
                 ),
             ]
         ).select_from(self._table).alias("ElementAndNullCountsSubquery")
+
+        if row_condition:
+            element_count_query = sa.where(sa.text(row_condition))
 
         unexpected_count_query: Select = sa.select(
             [sa.func.sum(sa.column("condition")).label("unexpected_count"),]
