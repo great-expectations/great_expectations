@@ -2,12 +2,12 @@ import logging
 import random
 from typing import Any, List, Optional, Tuple
 
-import pandas as pd
-
 from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.exceptions.exceptions import DataConnectorError
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.util import (
+    fetch_batch_data_as_pandas_df,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -262,8 +262,6 @@ class DataConnector:
             "batch_spec": batch_spec,
             "n_rows": n_rows,
         }
-
-        return return_dict
 
     def _validate_batch_request(self, batch_request: BatchRequest):
         if not (
