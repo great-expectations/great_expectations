@@ -210,7 +210,7 @@ Steps
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
 
-            **Note** : In the current example, the yaml config will only create a connector to the ``DataSource`` for the current session. After you exit python, the ``DataSource`` and configuration will be gone.  To make the ``DataSource`` and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
+            **Note** : In the current example, the yaml config will only create a connector to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
             ``self_check`` will do the following:
 
