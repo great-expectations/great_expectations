@@ -20,7 +20,9 @@ from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer impor
 from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
     DataDocsSiteAnonymizer,
 )
-from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import DatasourceAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
+    DatasourceAnonymizer,
+)
 from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
     ExpectationSuiteAnonymizer,
 )

@@ -58,7 +58,9 @@ class SqlAlchemyExecutionEnvironmentBatchSpec(BatchSpec, metaclass=ABCMeta):
         return self.get("schema")
 
 
-class PathBatchSpec(PandasExecutionEnvironmentBatchSpec, SparkDFExecutionEnvironmentBatchSpec):
+class PathBatchSpec(
+    PandasExecutionEnvironmentBatchSpec, SparkDFExecutionEnvironmentBatchSpec
+):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "path" not in self:
@@ -73,7 +75,9 @@ class PathBatchSpec(PandasExecutionEnvironmentBatchSpec, SparkDFExecutionEnviron
         return self.get("reader_method")
 
 
-class S3BatchSpec(PandasExecutionEnvironmentBatchSpec, SparkDFExecutionEnvironmentBatchSpec):
+class S3BatchSpec(
+    PandasExecutionEnvironmentBatchSpec, SparkDFExecutionEnvironmentBatchSpec
+):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "s3" not in self:

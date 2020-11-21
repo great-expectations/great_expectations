@@ -1,4 +1,6 @@
-from great_expectations.core.usage_statistics.anonymizers.execution_environment_anonymizer import ExecutionEnvironmentAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.execution_environment_anonymizer import (
+    ExecutionEnvironmentAnonymizer,
+)
 from great_expectations.datasource import PandasDatasource
 
 
