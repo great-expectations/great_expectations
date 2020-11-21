@@ -1,8 +1,5 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine, SparkDFExecutionEngine, SqlAlchemyExecutionEngine
 
 
 class ExecutionEngineAnonymizer(Anonymizer):
@@ -12,8 +9,8 @@ class ExecutionEngineAnonymizer(Anonymizer):
         # ordered bottom up in terms of inheritance order
         self._ge_classes = [
             PandasExecutionEngine,
+            SparkDFExecutionEngine,
             SqlAlchemyExecutionEngine,
-            # SparkExecutionEngine,
             ExecutionEngine,
         ]
 
