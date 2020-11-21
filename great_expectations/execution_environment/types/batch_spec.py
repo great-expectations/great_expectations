@@ -28,7 +28,7 @@ class BatchMarkers(BatchSpec):
         return self.get("ge_load_time")
 
 
-class PandasDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
+class PandasExecutionEnvironmentBatchSpec(BatchSpec, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
@@ -36,7 +36,7 @@ class PandasDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
     pass
 
 
-class SparkDFDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
+class SparkDFExecutionEnvironmentBatchSpec(BatchSpec, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
@@ -44,7 +44,7 @@ class SparkDFDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
     pass
 
 
-class SqlAlchemyDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
+class SqlAlchemyExecutionEnvironmentBatchSpec(BatchSpec, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
@@ -58,7 +58,7 @@ class SqlAlchemyDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
         return self.get("schema")
 
 
-class PathBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
+class PathBatchSpec(PandasExecutionEnvironmentBatchSpec, SparkDFExecutionEnvironmentBatchSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "path" not in self:
@@ -73,7 +73,7 @@ class PathBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
         return self.get("reader_method")
 
 
-class S3BatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
+class S3BatchSpec(PandasExecutionEnvironmentBatchSpec, SparkDFExecutionEnvironmentBatchSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "s3" not in self:
@@ -102,46 +102,3 @@ class RuntimeDataBatchSpec(BatchSpec):
     @property
     def batch_data(self):
         return self.get("batch_data")
-
-
-class SqlAlchemyDatasourceTableBatchSpec(SqlAlchemyDatasourceBatchSpec):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if "table" not in self:
-            raise InvalidBatchSpecError(
-                'SqlAlchemyDatasourceTableBatchSpec requires a "table" element'
-            )
-
-    @property
-    def table(self):
-        return self.get("table")
-
-
-class SqlAlchemyDatasourceQueryBatchSpec(SqlAlchemyDatasourceBatchSpec):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if "query" not in self:
-            raise InvalidBatchSpecError(
-                'SqlAlchemyDatasourceQueryBatchSpec requires a "query" element'
-            )
-
-    @property
-    def query(self):
-        return self.get("query")
-
-    @property
-    def query_parameters(self):
-        return self.get("query_parameters")
-
-
-class SparkDFDatasourceQueryBatchSpec(SparkDFDatasourceBatchSpec):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if "query" not in self:
-            raise InvalidBatchSpecError(
-                'SparkDFDatasourceQueryBatchSpec requires a "query" element'
-            )
-
-    @property
-    def query(self):
-        return self.get("query")

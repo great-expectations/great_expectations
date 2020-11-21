@@ -1,4 +1,4 @@
-from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import DatasourceAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.execution_environment_anonymizer import ExecutionEnvironmentAnonymizer
 from great_expectations.datasource import PandasDatasource
 
 
@@ -6,8 +6,8 @@ class CustomDatasource(PandasDatasource):
     pass
 
 
-def test_datasource_anonymizer():
-    datasource_anonymizer = DatasourceAnonymizer()
+def test_execution_environment_anonymizer():
+    datasource_anonymizer = ExecutionEnvironmentAnonymizer()
     # n1 = datasource_anonymizer.anonymize_datasource_info("PandasDatasource")
     # assert n1 == {"parent_class": "PandasDatasource"}
     #
