@@ -250,17 +250,18 @@ class DataConnector:
         if self._execution_engine is None:
             return {}
         batch_data, batch_spec, _ = self.get_batch_data_and_metadata(batch_definition)
-        df = fetch_batch_data_as_pandas_df(batch_data=batch_data)
+
+        df = batch_data.head(n=5)
+        n_rows = batch_data.row_count()
 
         if pretty_print and df is not None:
             print(f"\n\t\tShowing 5 rows")
-            print(df[:5])
+            print(df)
 
-        if df is not None:
-            return_dict = {"batch_spec": batch_spec, "n_rows": df.shape[0]}
-        else:
-            return_dict = {"batch_spec": batch_spec, "n_rows": 0}
-        return return_dict
+        return {
+            "batch_spec": batch_spec,
+            "n_rows": n_rows,
+        }
 
     def _validate_batch_request(self, batch_request: BatchRequest):
         if not (
