@@ -6,7 +6,7 @@ from great_expectations.datasource import Datasource
 from great_expectations.datasource.batch_kwargs_generator import (
     QueryBatchKwargsGenerator,
 )
-from great_expectations.execution_environment.types import (
+from great_expectations.datasource.types import (
     SqlAlchemyDatasourceQueryBatchKwargs,
 )
 
