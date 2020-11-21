@@ -3,7 +3,7 @@ import warnings
 from string import Template
 
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
-from great_expectations.execution_environment.types import (
+from great_expectations.datasource.types import (
     SqlAlchemyDatasourceTableBatchKwargs,
 )
 from great_expectations.marshmallow__shade import (

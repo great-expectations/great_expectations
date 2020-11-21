@@ -3,7 +3,7 @@ import os
 import warnings
 
 from great_expectations.exceptions import BatchKwargsError, ClassInstantiationError
-from great_expectations.execution_environment.types import (
+from great_expectations.datasource.types import (
     SqlAlchemyDatasourceQueryBatchKwargs,
 )
 
