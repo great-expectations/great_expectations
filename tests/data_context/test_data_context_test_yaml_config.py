@@ -1,7 +1,7 @@
+import datetime
 import json
 import os
 import tempfile
-import datetime
 
 import pytest
 
@@ -116,7 +116,7 @@ data_connectors:
 
     print(json.dumps(return_obj, indent=2))
 
-    assert set(return_obj.keys()) == set(["execution_engine", "data_connectors",])
+    assert set(return_obj.keys()) == {"execution_engine", "data_connectors"}
     sub_obj = return_obj["data_connectors"]["my_filesystem_data_connector"]
     sub_obj.pop("example_data_reference")
     assert sub_obj == {
@@ -240,6 +240,8 @@ def test_golden_path_sql_execution_environment_configuration(
     context = empty_data_context_v3
 
     os.chdir(context.root_directory)
+
+    # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
     import great_expectations as ge
 
     context = ge.get_context()
@@ -264,11 +266,11 @@ introspection:
     report_object = context.test_yaml_config(
         name="my_datasource", yaml_config=yaml_config, return_mode="report_object",
     )
-    # print(json.dumps(report_object, indent=2))
-    # print(context.datasources)
+    print(json.dumps(report_object, indent=2))
+    print(context.datasources)
 
     my_batch = context.get_batch("my_datasource", "whole_table_with_limits", "test_df",)
-    assert len(my_batch.data.fetchall()) == 10
+    # assert len(my_batch.data.fetchall()) == 10
 
     with pytest.raises(KeyError):
         my_batch = context.get_batch(
@@ -276,16 +278,18 @@ introspection:
         )
 
     my_validator = context.get_validator(
-        "my_datasource",
-        "whole_table_with_limits",
-        "test_df",
+        execution_environment_name="my_datasource",
+        data_connector_name="whole_table_with_limits",
+        data_asset_name="test_df",
         expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
+    my_evr = my_validator.expect_table_columns_to_match_set(column_set=[])
+    print(my_evr)
 
     # my_evr = my_validator.expect_column_values_to_be_between(
-    #     column="a",
-    #     min_value=10,
-    #     max_value=100,
+    #     column="x",
+    #     min_value=0,
+    #     max_value=4,
     # )
     # assert my_evr.success
 
@@ -360,27 +364,34 @@ data_connectors:
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
 
-    # TODO: <Alex>Implement sampling for Pandas and Spark DataFrame Execution Engine classes as a follow-on task.</Alex>
     my_batch = context.get_batch(
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         partition_identifiers={"number": "2",},
-        sampling_method="_sample_using_hash",
-        sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
+        batch_spec_passthrough={
+            "sampling_method": "_sample_using_hash",
+            "sampling_kwargs": {
+                "column_name": "date",
+                "hash_function_name": "md5",
+                "hash_value": "f",
+            },
+        },
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
-    assert my_batch.data.shape == (120, 10)
+
     df_data = my_batch.data
+    assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
     )
     assert (
-        df_data[
-            (df_data["date"] >= datetime.date(2020, 1, 1))
-            & (df_data["date"] <= datetime.date(2020, 12, 31))
-        ].shape[0]
-        == 120
+        test_df[
+            (test_df["date"] == datetime.date(2020, 1, 15))
+            | (test_df["date"] == datetime.date(2020, 1, 29))
+        ]
+        .drop("timestamp", axis=1)
+        .equals(df_data.drop("timestamp", axis=1))
     )
 
     with pytest.raises(ValueError):
@@ -391,14 +402,19 @@ data_connectors:
             data_asset_name="DOES_NOT_EXIST",
         )
 
-    # TODO: <Alex>Implement sampling for Pandas and Spark DataFrame Execution Engine classes as a follow-on task.</Alex>
     my_validator = context.get_validator(
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
         partition_request={"partition_identifiers": {"number": "3"}},
-        sampling_method="_sample_using_hash",
-        sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
+        batch_spec_passthrough={
+            "sampling_method": "_sample_using_hash",
+            "sampling_kwargs": {
+                "column_name": "date",
+                "hash_function_name": "md5",
+                "hash_value": "f",
+            },
+        },
         expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     my_evr = my_validator.expect_column_values_to_be_between(
@@ -503,27 +519,34 @@ data_connectors:
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
 
-    # TODO: <Alex>Implement sampling for Pandas and Spark DataFrame Execution Engine classes as a follow-on task.</Alex>
     my_batch = context.get_batch(
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         partition_identifiers={"number": "2",},
-        sampling_method="_sample_using_hash",
-        sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
+        batch_spec_passthrough={
+            "sampling_method": "_sample_using_hash",
+            "sampling_kwargs": {
+                "column_name": "date",
+                "hash_function_name": "md5",
+                "hash_value": "f",
+            },
+        },
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
-    assert my_batch.data.shape == (120, 10)
+
     df_data = my_batch.data
+    assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
     )
     assert (
-        df_data[
-            (df_data["date"] >= datetime.date(2020, 1, 1))
-            & (df_data["date"] <= datetime.date(2020, 12, 31))
-        ].shape[0]
-        == 120
+        test_df[
+            (test_df["date"] == datetime.date(2020, 1, 15))
+            | (test_df["date"] == datetime.date(2020, 1, 29))
+        ]
+        .drop("timestamp", axis=1)
+        .equals(df_data.drop("timestamp", axis=1))
     )
 
     with pytest.raises(ValueError):
@@ -534,14 +557,19 @@ data_connectors:
             data_asset_name="DOES_NOT_EXIST",
         )
 
-    # TODO: <Alex>Implement sampling for Pandas and Spark DataFrame Execution Engine classes as a follow-on task.</Alex>
     my_validator = context.get_validator(
         execution_environment_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="C",
         partition_request={"partition_identifiers": {"year": "2019"}},
-        sampling_method="_sample_using_hash",
-        sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
+        batch_spec_passthrough={
+            "sampling_method": "_sample_using_hash",
+            "sampling_kwargs": {
+                "column_name": "date",
+                "hash_function_name": "md5",
+                "hash_value": "f",
+            },
+        },
         attach_new_expectation_suite=True,
     )
     my_evr = my_validator.expect_column_values_to_be_between(

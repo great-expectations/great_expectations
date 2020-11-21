@@ -2,14 +2,12 @@ import logging
 import random
 from typing import Any, List, Optional, Tuple
 
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchMarkers,
-    BatchRequest,
-    PartitionDefinition,
-)
+from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.util import (
+    fetch_batch_data_as_pandas_df,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +84,9 @@ class DataConnector:
         batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
             batch_definition=batch_definition
         )
-        # TODO Abe 20201018: Decide if we want to allow batch_spec_passthrough parameters anywhere.
+        batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
+        if isinstance(batch_spec_passthrough, dict):
+            batch_spec_params.update(batch_spec_passthrough)
         batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
         return batch_spec
 
@@ -249,23 +249,18 @@ class DataConnector:
         # _execution_engine might be None for some tests
         if self._execution_engine is None:
             return {}
-
         batch_data, batch_spec, _ = self.get_batch_data_and_metadata(batch_definition)
+        df = fetch_batch_data_as_pandas_df(batch_data=batch_data)
 
-        df = self._fetch_batch_data_as_pandas_df(batch_data)
-
-        if pretty_print:
+        if pretty_print and df is not None:
             print(f"\n\t\tShowing 5 rows")
             print(df[:5])
 
-        return {
-            "batch_spec": batch_spec,
-            "n_rows": df.shape[0],
-        }
-
-    def _fetch_batch_data_as_pandas_df(self, batch_data):
-        # raise NotImplementedError
-        return batch_data
+        if df is not None:
+            return_dict = {"batch_spec": batch_spec, "n_rows": df.shape[0]}
+        else:
+            return_dict = {"batch_spec": batch_spec, "n_rows": 0}
+        return return_dict
 
     def _validate_batch_request(self, batch_request: BatchRequest):
         if not (

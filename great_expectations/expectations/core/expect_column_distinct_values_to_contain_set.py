@@ -42,13 +42,10 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map MetricProvider Decorator for the Mode metric"""
-
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
             assert isinstance(

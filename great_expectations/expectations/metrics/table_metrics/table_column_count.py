@@ -18,7 +18,7 @@ class TableColumnCount(TableMetricProvider):
     metric_name = "table.column_count"
 
     @metric_value(engine=PandasExecutionEngine)
-    def _sqlalchemy(
+    def _pandas(
         cls,
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: Dict,
@@ -26,7 +26,7 @@ class TableColumnCount(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        columns = metrics.get("columns")
+        columns = metrics.get("table.columns")
         return len(columns)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -38,7 +38,7 @@ class TableColumnCount(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        columns = metrics.get("columns")
+        columns = metrics.get("table.columns")
         return len(columns)
 
     @metric_value(engine=SparkDFExecutionEngine)
@@ -50,7 +50,7 @@ class TableColumnCount(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        columns = metrics.get("columns")
+        columns = metrics.get("table.columns")
         return len(columns)
 
     @classmethod
