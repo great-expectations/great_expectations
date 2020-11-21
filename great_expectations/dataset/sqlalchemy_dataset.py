@@ -373,13 +373,16 @@ class MetaSqlAlchemyDataset(Dataset):
                     else_=0,
                 ).label("condition")
             ]
+
+            select_qry = sa.select(count_case_statement).select_from(self._table)
             if row_condition:
-                count_case_statement = sa.where(sa.text(row_condition))
+                select_qry = select_qry.where(sa.text(row_condition))
 
             inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
                 count_case_statement,
-                sa.select(count_case_statement).select_from(self._table),
+                select_qry,
             )
+
             self.engine.execute(inner_case_query)
 
         element_count_query: Select = sa.select(
@@ -389,10 +392,12 @@ class MetaSqlAlchemyDataset(Dataset):
                     "null_count"
                 ),
             ]
-        ).select_from(self._table).alias("ElementAndNullCountsSubquery")
+        ).select_from(self._table)
 
         if row_condition:
-            element_count_query = sa.where(sa.text(row_condition))
+            element_count_query = element_count_query.where(sa.text(row_condition))
+
+        element_count_query = element_count_query.alias("ElementAndNullCountsSubquery")
 
         unexpected_count_query: Select = sa.select(
             [sa.func.sum(sa.column("condition")).label("unexpected_count"),]
