@@ -25,6 +25,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
+from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.exceptions import (
     BatchKwargsError,
     CheckpointError,
@@ -32,7 +33,6 @@ from great_expectations.exceptions import (
     ConfigNotFoundError,
     DataContextError,
 )
-from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
