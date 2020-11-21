@@ -20,7 +20,7 @@ Steps
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
 
 
-        To add a Redshift datasource, do this:
+        To add a Redshift datasource, do the following:
 
         #. **Install the required modules**
 
@@ -150,23 +150,23 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - Set up a DataContext
-            - Understand the basics of ExecutionEnvironments
-            - Learned how to use ``test_yaml_config``
+            - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
 
         To add a Redshift datasource, do the following:
 
         #. **Install the required modules**
 
-        If you haven't already, install these modules for connecting to Redshift.
+            If you haven't already, install these modules for connecting to Redshift.
 
-        .. code-block:: bash
+            .. code-block:: bash
 
-            pip install sqlalchemy
+                pip install sqlalchemy
 
-            pip install psycopg2
+                pip install psycopg2
 
-            # or if on macOS:
-            pip install psycopg2-binary
+                # or if on macOS:
+                pip install psycopg2-binary
 
         #. **Instantiate a DataContext**
 
@@ -177,14 +177,17 @@ Steps
 
         #. **Create or copy a yaml config**
 
+            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``StreamlinedSqlDataSource`` with associated credentials.  Username and  password are set as environment variables, and host, port, and database are set as strings.
+            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+
             .. code-block:: python
 
-                my_config = """
-                class_name: StreamlinedSqlExecutionEnvironment
+                my_config = f"""
+                class_name: StreamlinedSqlDataSource
                 credentials:
                     drivername: postgresql+psycopg2
-                    username: my_username
-                    password: my_password
+                    username: ${my_username}
+                    password: ${my_password}
                     host: my-datawarehouse-name.abcde1qrstuw.us-east-1.redshift.amazonaws.com
                     port: 5439
                     database: dev
@@ -207,10 +210,12 @@ Steps
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
 
-            In the case of a Datasource, this means
+            **Note** : In the current example, the yaml config will only create a connector to the ``DataSource`` for the current session. After you exit python, the ``DataSource`` and configuration will be gone.  To make the ``DataSource`` and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
-                1. confirming that the connection works,
-                2. gathering a list of available DataAssets (e.g. tables in SQL; files or folders in a filesystem), and
+            ``self_check`` will do the following:
+
+                1. confirm that the connection works,
+                2. gather a list of available DataAssets (e.g. tables in SQL; files or folders in a filesystem), and
                 3. verify that it can successfully fetch at least one Batch from the source.
 
             The output will look something like this:
@@ -251,8 +256,6 @@ Steps
 
                 psycopg2.OperationalError: FATAL:  password authentication failed for user "my_username"
                 FATAL:  password authentication failed for user "my_username"
-
-
 
 ----------------
 Additional Notes
