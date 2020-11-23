@@ -67,7 +67,7 @@ class StoreBackend(metaclass=ABCMeta):
                 return store_id
         except Exception:
             logger.warning(
-                "Invalid store configuration: store_backend_id cannot be retrieved or set."
+                f"Invalid store configuration: store_backend_id cannot be retrieved or set. Please check the configuration of your {self.__class__.__name__}"
             )
             return "00000000-0000-0000-0000-00000000e003"
 
