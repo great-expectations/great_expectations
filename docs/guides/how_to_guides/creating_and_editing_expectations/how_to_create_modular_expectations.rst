@@ -23,26 +23,28 @@ If your metric does not yet exist within the framework, you will need to impleme
 
 Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark dialects:
 
-from great_expectations.execution_engine import (
-   PandasExecutionEngine,
-   SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-   SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-   ColumnMetricProvider,
-   column_aggregate_metric,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
-from great_expectations.expectations.metrics.import_manager import F
+.. code-block:: python
 
-class ColumnMean(ColumnMetricProvider):
-   """MetricProvider Class for Aggregate Mean MetricProvider"""
+   from great_expectations.execution_engine import (
+      PandasExecutionEngine,
+      SparkDFExecutionEngine,
+   )
+   from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+      SqlAlchemyExecutionEngine,
+   )
+   from great_expectations.expectations.metrics.column_aggregate_metric import (
+      ColumnMetricProvider,
+      column_aggregate_metric,
+   )
+   from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
+   from great_expectations.expectations.metrics.import_manager import F
 
-   metric_name = "column.aggregate.mean"
+   class ColumnMean(ColumnMetricProvider):
+      """MetricProvider Class for Aggregate Mean MetricProvider"""
 
-   @column_aggregate_metric(engine=PandasExecutionEngine)
+      metric_name = "column.aggregate.mean"
+
+      @column_aggregate_metric(engine=PandasExecutionEngine)
    def _pandas(cls, column, **kwargs):
        """Pandas Mean Implementation"""
        return column.mean()
@@ -75,75 +77,80 @@ Examples: Thresholds, Value Sets to validate data against, etc.
 Default Kwarg Values (Optional)  -  Default values for success keys and the defined domain, among other values.
 An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class and building our Expectation in a separate file from our Metric): 
 
-class ExpectColumnMaxToBeBetween(ColumnExpectation):
-   # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
-   metric_dependencies = ("column.aggregate.max",)
-   success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+.. code-block:: python
 
-   # Default values
-   default_kwarg_values = {
-       "row_condition": None,
-       "condition_parser": None,
-       "min_value": None,
-       "max_value": None,
-       "strict_min": None,
-       "strict_max": None,
-       "mostly": 1,
-       "result_format": "BASIC",
-       "include_config": True,
-       "catch_exceptions": False,
-   }
+   class ExpectColumnMaxToBeBetween(ColumnExpectation):
+      # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
+      metric_dependencies = ("column.aggregate.max",)
+      success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+
+      # Default values
+      default_kwarg_values = {
+          "row_condition": None,
+          "condition_parser": None,
+          "min_value": None,
+          "max_value": None,
+          "strict_min": None,
+          "strict_max": None,
+          "mostly": 1,
+          "result_format": "BASIC",
+          "include_config": True,
+          "catch_exceptions": False,
+      }
+      
 Notice that this class is of type ColumnExpectation, indicating that the Expectation Validation will be done on a column.
 
 **Step 4: Validate Configuration**
 
 We have almost reached the end of our journey in implementing an Expectation! Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a validate_configuration method:
 
-def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-   """
-   Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-   necessary configuration arguments have been provided for the validation of the expectation.
+.. code-block:: python
 
-   Args:
-       configuration (OPTIONAL[ExpectationConfiguration]): \
-           An optional Expectation Configuration entry that will be used to configure the expectation
-   Returns:
-       True if the configuration has been validated successfully. Otherwise, raises an exception
-   """
-   min_val = None
-   max_val = None
+   def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+      """
+      Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+      necessary configuration arguments have been provided for the validation of the expectation.
 
-   # Setting up a configuration
-   super().validate_configuration(configuration)
-   if configuration is None:
-       configuration = self.configuration
+      Args:
+          configuration (OPTIONAL[ExpectationConfiguration]): \
+              An optional Expectation Configuration entry that will be used to configure the expectation
+      Returns:
+          True if the configuration has been validated successfully. Otherwise, raises an exception
+      """
+      min_val = None
+      max_val = None
 
-   # Ensuring basic configuration parameters are properly set
-   try:
-       assert (
-           "column" in configuration.kwargs
-       ), "'column' parameter is required for column map expectations"
-   except AssertionError as e:
-       raise InvalidExpectationConfigurationError(str(e))
+      # Setting up a configuration
+      super().validate_configuration(configuration)
+      if configuration is None:
+          configuration = self.configuration
 
-   # Validating that Minimum and Maximum values are of the proper format and type
-   if "min_value" in configuration.kwargs:
-       min_val = configuration.kwargs["min_value"]
+      # Ensuring basic configuration parameters are properly set
+      try:
+          assert (
+              "column" in configuration.kwargs
+          ), "'column' parameter is required for column map expectations"
+      except AssertionError as e:
+          raise InvalidExpectationConfigurationError(str(e))
 
-   if "max_value" in configuration.kwargs:
-       max_val = configuration.kwargs["max_value"]
+    # Validating that Minimum and Maximum values are of the proper format and type
+    if "min_value" in configuration.kwargs:
+        min_val = configuration.kwargs["min_value"]
 
-   try:
-       # Ensuring Proper interval has been provided
-       assert (
-           min_val is not None or max_val is not None
-       ), "min_value and max_value cannot both be none"
-       assert min_val is None or isinstance(
-           min_val, (float, int)
-       ), "Provided min threshold must be a number"
-       assert max_val is None or isinstance(
-           max_val, (float, int)
-       ), "Provided max threshold must be a number"
+    if "max_value" in configuration.kwargs:
+        max_val = configuration.kwargs["max_value"]
+
+    try:
+        # Ensuring Proper interval has been provided
+        assert (
+            min_val is not None or max_val is not None
+        ), "min_value and max_value cannot both be none"
+        assert min_val is None or isinstance(
+            min_val, (float, int)
+        ), "Provided min threshold must be a number"
+        assert max_val is None or isinstance(
+            max_val, (float, int)
+        ), "Provided max threshold must be a number"
 
 In this method, given a configuration the user has provided, we check that certain conditions are satisfied by the configuration. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold.
 
@@ -153,42 +160,44 @@ In this final step, we simply need to validate that the results of our metrics m
 
 The validate method is implemented as _validate. This method takes a dictionary named Metrics, which contains all metrics requested by your metric dependencies, and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not. In order to obtain these success keys, the Expectation parent class has a get_success_kwargs method which returns a dictionary containing all necessary success keys:
 
-def _validate(
-   self,
-   configuration: ExpectationConfiguration,
-   metrics: Dict,
-   runtime_configuration: dict = None,
-   execution_engine: ExecutionEngine = None,
-):
-   """Validates the given data against the set minimum and maximum value thresholds for the column max"""
-   column_max = metrics.get("column.aggregate.max")
+.. code-block:: python
 
-   # Obtaining components needed for validation
-   min_value = self.get_success_kwargs(configuration).get("min_value")
-   strict_min = self.get_success_kwargs(configuration).get("strict_min")
-   max_value = self.get_success_kwargs(configuration).get("max_value")
-   strict_max = self.get_success_kwargs(configuration).get("strict_max")
+   def _validate(
+      self,
+      configuration: ExpectationConfiguration,
+      metrics: Dict,
+      runtime_configuration: dict = None,
+      execution_engine: ExecutionEngine = None,
+   ):
+      """Validates the given data against the set minimum and maximum value thresholds for the column max"""
+      column_max = metrics.get("column.aggregate.max")
 
-   # Checking if mean lies between thresholds
-   if min_value is not None:
-       if strict_min:
-           above_min = column_max > min_value
-       else:
-           above_min = column_max >= min_value
-   else:
-       above_min = True
+      # Obtaining components needed for validation
+      min_value = self.get_success_kwargs(configuration).get("min_value")
+      strict_min = self.get_success_kwargs(configuration).get("strict_min")
+      max_value = self.get_success_kwargs(configuration).get("max_value")
+      strict_max = self.get_success_kwargs(configuration).get("strict_max")
 
-   if max_value is not None:
-       if strict_max:
-           below_max = column_max < max_value
-       else:
-           below_max = column_max <= max_value
-   else:
-       below_max = True
+      # Checking if mean lies between thresholds
+      if min_value is not None:
+          if strict_min:
+              above_min = column_max > min_value
+          else:
+              above_min = column_max >= min_value
+      else:
+          above_min = True
 
-   success = above_min and below_max
+      if max_value is not None:
+          if strict_max:
+              below_max = column_max < max_value
+          else:
+              below_max = column_max <= max_value
+      else:
+          below_max = True
 
-   return {"success": success, "result": {"observed_value": column_max}}
+      success = above_min and below_max
+
+      return {"success": success, "result": {"observed_value": column_max}}
 
 We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference (Link to core concepts).
 
