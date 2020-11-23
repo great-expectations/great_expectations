@@ -6,9 +6,6 @@ How to configure a Pandas/filesystem Datasource
 
 This guide shows how to connect to a Pandas Datasource such that the data is accessible in the form of files on a local or NFS type of a filesystem.
 
-.. admonition:: Prerequisites: This how-to guide assumes you have already:
-
-  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
 
 -----
 Steps
@@ -19,7 +16,12 @@ Steps
     .. tab-container:: tab0
         :title: Show Docs for Stable API (up to 0.12.x)
 
-        To add a filesystem-backed Pandas datasource do this:
+        .. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+            - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+
+
+        To add a filesystem-backed Pandas datasource do the following:
 
         #. **Run datasource new**
 
@@ -109,9 +111,8 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - Set up a DataContext
-            - Understand the basics of ExecutionEnvironments
-            - Learned how to use ``test_yaml_config``
-
+            - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
 
         To add a Pandas filesystem datasource, do the following:
 
@@ -122,13 +123,29 @@ Steps
                 import great_expectations as ge
                 context = ge.get_context()
 
-        #. **Create or copy a yaml config to configure an Execution Environment**
-            The following configuration will add a `ConfiguredAssetFilesystemDataConnector` to the Execution Environment, but you can also use a `InferredAssetFilesystemDataConnector`. Please see associated documentation **ADD LINK** for more information.
+        #.  **Create or copy a yaml config**
+
+            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetFilesystemDataConnector`` and one asset named ``TestAsset``.
+
+            .. code-block:: bash
+
+                test_directory/abe_20201119_200.csv
+                test_directory/alex_20201212_300.csv
+                test_directory/will_20201008_100.csv
+
+            The example will take the 3 files shown above and create 1 asset named ``TestAsset``, with ``name``, ``timestamp`` and ``size`` as the group names.
+            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+
+            The example will also touch upon concepts like ``assets``, ``data_conenctors`` and ``PartitionDefinitions``. For additional information on these please look at the ``core_concepts`` document.
+
+            #<WILL> see if this section can be smoothed.
 
             .. code-block:: python
 
+                base_directory = "test_directory/"
+
                 config = f"""
-                        class_name: ExecutionEnvironment
+                        class_name: DataSource
 
                         execution_engine:
                             class_name: PandasExecutionEngine
@@ -139,12 +156,8 @@ Steps
                                 base_directory: {base_directory}
                                 glob_directive: "*.csv"
 
-                                default_regex:
-                                    pattern: (.+)\\.csv
-                                    group_names:
-                                        - name
                                 assets:
-                                    Titanic:
+                                    TestAsset:
                                         base_directory: {base_directory}
                                         pattern: (.+)_(\\d+)_(\\d+)\\.csv
                                         group_names:
@@ -164,10 +177,12 @@ Steps
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
 
-            In the case of a Datasource, this means
+            **Note** : In the current example, the yaml config will only create a connector to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
-                1. confirming that the connection works,
-                2. gathering a list of available DataAssets (e.g. tables in SQL; files or folders in a filesystem), and
+            ``self_check`` will do the following:
+
+                1. confirm that the connection works,
+                2. gather a list of available DataAssets (e.g. tables in SQL; files or folders in a filesystem), and
                 3. verify that it can successfully fetch at least one Batch from the source.
 
             The output will look something like this:
@@ -184,7 +199,7 @@ Steps
                     my_data_connector : ConfiguredAssetFilesystemDataConnector
 
                     Available data_asset_names (1 of 1):
-                        Titanic (3 of 3): ['abe_20201119_200.csv', 'alex_20201212_300.csv', 'will_20201008_100.csv']
+                        TestAsset (3 of 3): ['abe_20201119_200.csv', 'alex_20201212_300.csv', 'will_20201008_100.csv']
 
                     Unmatched data_references (0 of 0): []
 
