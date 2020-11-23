@@ -446,9 +446,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
         self, key, value, content_encoding="utf-8", content_type="application/json"
     ):
         import boto3
-
-        s3 = boto3.resource("s3", endpoint_url=self.endpoint_url)
-
+        import os
+        
+        session = boto3.session.Session(profile_name=os.getenv('AWS_PROFILE'))
+        s3 = session.resource("s3", endpoint_url=self.endpoint_url)
         s3_object_key = self._build_s3_object_key(key)
 
         try:
