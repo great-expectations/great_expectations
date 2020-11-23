@@ -11,6 +11,7 @@ This guide will help you deploy Great Expectations within an Airflow pipeline th
     - Set up an `Astronomer deploy <https://www.astronomer.io/docs/cloud/stable/develop/cli-quickstart/>`_
 
 Using the Great Expectations Airflow Operator in an Astronomer Deployment
+-------------------------------------------------------------------------
 =========================================================================
 
 There are only few additional requirements to deploy a DAG using the Great Expectations operator with Astronomer. Most importantly, you will need to set relevant environment variables.
@@ -51,4 +52,3 @@ Step 2: Set the environment variables for credentials
 You will need to configure environment variables for any credentials required for external data connections, see :ref:`how_to_guides__configuring_data_contexts__how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials` for an explanation of how to use environment variables in your ``great_expectations.yml``.
 
 Then add the environment variables to your local ``.env file`` in your Astronomer deploy and as secret environment variables in the Astronomer Cloud settings, following the instructions in the `Astronomer documentation <https://www.astronomer.io/docs/cloud/stable/deploy/environment-variables/>`_.
-
