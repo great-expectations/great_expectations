@@ -64,9 +64,7 @@ def send_opsgenie_alert(query, suite_name, settings):
             logger.warning(
                 "Request to Opsgenie API at {url} "
                 "returned error {status_code}: {text}".format(
-                    url=url,
-                    status_code=response.status_code,
-                    text=response.text,
+                    url=url, status_code=response.status_code, text=response.text,
                 )
             )
         else:

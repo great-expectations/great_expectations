@@ -1,4 +1,5 @@
 from unittest import mock
+
 from freezegun import freeze_time
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
@@ -8,9 +9,9 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.validation_operators import (
-    SlackNotificationAction,
-    PagerdutyAlertAction,
     OpsgenieAlertAction,
+    PagerdutyAlertAction,
+    SlackNotificationAction,
     StoreValidationResultAction,
 )
 
@@ -77,10 +78,10 @@ def test_StoreAction():
 
 
 def test_SlackNotificationAction(
-        data_context_parameterized_expectation_suite,
-        validation_result_suite,
-        validation_result_suite_id
-    ):
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
+):
     renderer = {
         "module_name": "great_expectations.render.renderer.slack_renderer",
         "class_name": "SlackRenderer",
@@ -105,13 +106,13 @@ def test_SlackNotificationAction(
 
 @mock.patch("pypd.EventV2")
 def test_PagerdutyAlertAction(
-        data_context_parameterized_expectation_suite,
-        validation_result_suite,
-        validation_result_suite_id
-    ):
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
+):
     api_key = "test"
     routing_key = "test"
-    
+
     pagerduty_action = PagerdutyAlertAction(
         data_context=data_context_parameterized_expectation_suite,
         api_key=api_key,
@@ -138,10 +139,10 @@ def test_PagerdutyAlertAction(
 
 
 def test_OpsgenieAlertAction(
-        data_context_parameterized_expectation_suite,
-        validation_result_suite,
-        validation_result_suite_id
-    ):
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
+):
 
     renderer = {
         "module_name": "great_expectations.render.renderer.opsgenie_renderer",
@@ -150,10 +151,10 @@ def test_OpsgenieAlertAction(
     opsgenie_action = OpsgenieAlertAction(
         data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
-        api_key='testapikey',
+        api_key="testapikey",
         region=None,
-        priority='P3',
-        notify_on='all'
+        priority="P3",
+        notify_on="all",
     )
 
     # Make sure the alert is sent by default when the validation has success = False
@@ -173,6 +174,7 @@ def test_OpsgenieAlertAction(
         validation_result_suite=validation_result_suite,
         data_asset=None,
     ) == {"opsgenie_alert_result": "error"}
+
 
 # def test_ExtractAndStoreEvaluationParamsAction():
 #     fake_in_memory_store = ValidationsStore(
