@@ -393,7 +393,7 @@ class DataContextV3(DataContext):
 
         validator = Validator(
             execution_engine=self.datasources[
-                execution_environment_name
+                batch.execution_environment_name
             ].execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
