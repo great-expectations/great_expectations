@@ -119,3 +119,32 @@ def test_resolve_metrics_with_extraneous_value_key():
     # Ensuring extraneous value key did not change computation
     assert metrics[('column.standard_deviation', 'column=a', 'value_set=[1, 2, 3, 4, 5]')] == 1.0
 
+
+# Testing that metric resolution also works with metric partial function
+def test_resolve_metrics_with_incomplete_metric_input():
+    engine = PandasExecutionEngine()
+
+    mean = MetricConfiguration(
+        metric_name="column.mean",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    stdev = MetricConfiguration(
+        metric_name="column.standard_deviation",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.z_score.map",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean, },
+    )
+
+    # Ensuring that incomplete metrics given raises a GreatExpectationsError
+    with pytest.raises(GreatExpectationsError) as error:
+        engine.resolve_metrics(
+            metrics_to_resolve=(desired_metric,), metrics={}
+        )
+
