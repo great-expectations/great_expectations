@@ -12,7 +12,7 @@ This guide will help you deploy Great Expectations within an Airflow pipeline. Y
     - Optional: Configured a :ref:`Checkpoint <tutorials__getting_started__validate_your_data>`.
     - Configured an Airflow pipeline (DAG).
 
-There are three supported methods for running :ref:`Validation<reference__core_concepts__validation>` in an Airflow DAG:
+There are three supported methods for running :ref:`validation<reference__core_concepts__validation>` in an Airflow DAG:
 
 #. Recommended: Using the ``GreatExpectationsOperator`` in the Great Expectations Airflow Provider package
 #. Using an Airflow ``PythonOperator`` to run validations using Python code
