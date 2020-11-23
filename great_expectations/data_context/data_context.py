@@ -300,6 +300,16 @@ class BaseDataContext:
                         "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
                     }
                 )
+
+            # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+            if (
+                store_name not in [store["name"] for store in self.list_active_stores()]
+                and store_config.get("store_backend") is not None
+            ):
+                store_config["store_backend"].update(
+                    {"suppress_store_backend_id": True}
+                )
+
             new_store = instantiate_class_from_config(
                 config=store_config,
                 runtime_environment={"root_directory": self.root_directory,},
@@ -1267,6 +1277,22 @@ class BaseDataContext:
             value["name"] = name
             stores.append(value)
         return stores
+
+    def list_active_stores(self):
+        """
+        List active Stores on this context. Active stores are identified by setting the following parameters:
+            expectations_store_name,
+            validations_store_name,
+            evaluation_parameter_store_name
+        """
+        active_store_names = [
+            self.expectations_store_name,
+            self.validations_store_name,
+            self.evaluation_parameter_store_name,
+        ]
+        return [
+            store for store in self.list_stores() if store["name"] in active_store_names
+        ]
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
