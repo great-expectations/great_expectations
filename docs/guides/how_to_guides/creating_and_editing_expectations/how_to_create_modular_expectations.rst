@@ -8,8 +8,10 @@ please read *An Introductory Reference Guide to Modular Expectation Logic*). Now
 modular expectations!
 
 
-1. Plan Metric Dependencies
-________________________________
+Steps:
+_____
+
+#. **Plan Metric Dependencies**
 
    In the new Modular Expectation design, Expectations rely on Metrics defined by separate MetricProvider Classes, which are then referenced within the Expectation and used for computation.
 
@@ -20,12 +22,12 @@ ________________________________
    Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is very possible you will find that the Metric you’d like to implement already exists within the GE framework and can be readily deployed within your Expectation. Even if it doesn’t, it is always worthwhile to check!
 
 
-2. Implement your Metric (Sometimes)
-________________________________________
+#. **Implement your Metric (Sometimes)**
 
    If your metric does not yet exist within the framework, you will need to implement it yourself within a new file - a task that is quick and simple within the new modular framework. 
 
    Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark dialects (other implementations can be found in the dictionary of metrics):
+
 
 .. code-block:: python
 
@@ -64,8 +66,7 @@ ________________________________________
        return F.mean(column)
 
 
-3. Define Parameters
-____________________
+3. **Define Parameters**
 
    We have already reached the point where we can start building our Expectation! 
 
@@ -77,6 +78,7 @@ ____________________
    Examples: Thresholds, Value Sets to validate data against, etc.
    - Default Kwarg Values (Optional)  -  Default values for success keys and the defined domain, among other values.
    An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class and building our Expectation in a separate file from our Metric):
+
 
 .. code-block:: python
 
@@ -100,14 +102,14 @@ ____________________
       }
       
 
-Step 4: Validate Configuration
-______________________________
+4. **Validate Configuration**
 
    We have almost reached the end of our journey in implementing an Expectation! Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a validate_configuration method. 
 
    In this method, given a configuration the user has provided, we check that certain conditions are satisfied by the configuration. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold.
 
    An example is shown below:
+
 
 .. code-block:: python
 
@@ -158,8 +160,7 @@ ______________________________
         ), "Provided max threshold must be a number"
 
 
-Step 5: Validate (Sometimes)
-____________________________
+5. **Validate (Sometimes)**
 
    In this final step, we simply need to validate that the results of our metrics meet our Expectations. For Expectations of type ColumnMapDatasetExpectation, which maps a column to a boolean series by asking questions that are fundamentally boolean in nature (Ex: are my column values nonnull?), this is implemented automatically by the GE machinery and does not require user implementation. If your data inquiry can be summed up by a true or false question, feel free to skip this step.
 
