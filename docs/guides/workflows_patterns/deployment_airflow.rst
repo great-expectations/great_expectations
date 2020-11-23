@@ -12,7 +12,7 @@ This guide will help you deploy Great Expectations within an Airflow pipeline. Y
     - Optional: Configured a :ref:`Checkpoint <tutorials__getting_started__validate_your_data>`.
     - Configured an Airflow pipeline (DAG).
 
-There are three supported methods for running validation in an Airflow DAG:
+There are three supported methods for running :ref:`Validation<reference__core_concepts__validation>` in an Airflow DAG:
 
 #. Recommended: Using the ``GreatExpectationsOperator`` in the Great Expectations Airflow Provider package
 #. Using an Airflow ``PythonOperator`` to run validations using Python code
@@ -35,9 +35,9 @@ We will now explain the supported methods for using Great Expectations within an
 Running validation using the ``GreatExpectationsOperator``
 -----------------------------------------------------------
 
-The ``GreatExpectationsOperator`` in the `Great Expectations Airflow Provider package<https://github.com/great-expectations/airflow-provider-great-expectations>`_ is a convenient way to invoke validation with Great Expectations in an Airflow DAG.
+The ``GreatExpectationsOperator`` in the `Great Expectations Airflow Provider package <https://github.com/great-expectations/airflow-provider-great-expectations>`_ is a convenient way to invoke validation with Great Expectations in an Airflow DAG.
 
-#. Ensure that the ``great_expectations`` directory that defines your Data Context is accessible by your DAG. Ideally, it should be located in the same project as your DAG, but you can point the operator at any location.
+#. Ensure that the ``great_expectations`` directory that defines your Data Context is accessible by your DAG. Typically, it will be located in the same project as your DAG, but you can point the operator at any location.
 
 #. Install Great Expectations and the Great Expectations provider in your environment
 
@@ -51,7 +51,7 @@ The ``GreatExpectationsOperator`` in the `Great Expectations Airflow Provider pa
 
 #. Create a task using the ``GreatExpectationsOperator``
 
-The ``GreatExpectationsOperator`` supports multiple ways of invoking validation with Great Expectations: a) using an expectation suite name and batch_kwargs, b) using a list of expectation suite names and batch_kwargs, c) using a checkpoint. This means that the parameters depend on how you would like to invoke Great Expectations validation. As a simple example, assuming you have a single Expectation Suite “my_suite” and a simple batch of data, such as a database table called “my_table”, you can use the following parameters:
+The ``GreatExpectationsOperator`` supports multiple ways of invoking validation with Great Expectations: a) using an expectation suite name and batch_kwargs, b) using a list of expectation suite names and batch_kwargs (using the `assets_to_validate` parameter), c) using a checkpoint. This means that the parameters depend on how you would like to invoke Great Expectations validation. As a simple example, assuming you have a single Expectation Suite “my_suite” and a simple batch of data, such as a database table called “my_table”, you can use the following parameters:
 
 .. code-block:: python
 
@@ -69,7 +69,7 @@ The ``GreatExpectationsOperator`` supports multiple ways of invoking validation 
 
 By default, a ``GreatExpectationsOperator`` task will run validation and raise an ``AirflowException`` if any of the tests fails. To override this behavior and continue running even if tests fail, set the ``fail_task_on_validation_failure`` flag to ``False``.
 
-For more information about possible parameters and examples, see the `README in the repository<https://github.com/great-expectations/airflow-provider-great-expectations>`_, and the `example DAG in the provider package <https://github.com/great-expectations/airflow-provider-great-expectations/tree/main/great_expectations_provider/examples>`_
+For more information about possible parameters and examples, see the `README in the repository <https://github.com/great-expectations/airflow-provider-great-expectations>`_, and the `example DAG in the provider package <https://github.com/great-expectations/airflow-provider-great-expectations/tree/main/great_expectations_provider/examples>`_
 
 
 Running validation using a ``PythonOperator``

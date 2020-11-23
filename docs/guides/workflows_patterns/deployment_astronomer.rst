@@ -3,12 +3,12 @@
 Deploying Great Expectations with Astronomer
 =============================================
 
-This guide will help you deploy Great Expectations within an Airflow pipeline that runs in `Astronomer<https://www.astronomer.io/>`_.  You can use Great Expectations to automate validation of data integrity and navigate your DAG based on the output of validations.
+This guide will help you deploy Great Expectations within an Airflow pipeline that runs in `Astronomer <https://www.astronomer.io/>`_.  You can use Great Expectations to automate validation of data integrity and navigate your DAG based on the output of validations.
 
 .. admonition:: Prerequisites: This workflow pattern assumes you have already:
 
     - Followed the instructions for :ref:`creating a Great Expectations validation task in an Airflow DAG<deployment_airflow>`
-    - Set up an `Astronomer deploy<https://www.astronomer.io/docs/cloud/stable/develop/cli-quickstart/>`_
+    - Set up an `Astronomer deploy <https://www.astronomer.io/docs/cloud/stable/develop/cli-quickstart/>`_
 
 Using the Great Expectations Airflow Operator in an Astronomer Deployment
 =========================================================================
@@ -18,7 +18,7 @@ There are only few additional requirements to deploy a DAG using the Great Expec
 Step 1: Set the DataContext root directory
 -------------------------------------------
 
-Great Expectations needs to know where to find the Data Context by passing the Data Context root directory, which you can then access in the DAG. We recommend adding this variable to your Dockerfile, but you can use any of the methods described in the `Astronomer documentation<https://www.astronomer.io/docs/cloud/stable/deploy/environment-variables/>`_.
+Great Expectations needs to know where to find the :ref:`Data Context<reference__core_concepts__data_context>` by passing the Data Context root directory, which you can then access in the DAG. We recommend adding this variable to your Dockerfile, but you can use any of the methods described in the `Astronomer documentation <https://www.astronomer.io/docs/cloud/stable/deploy/environment-variables/>`_.
 
 For example, if you decide to keep ``great_expectations`` directory in the ``include`` directory in your Astronomer project, the environment variable will look like this:
 
@@ -50,6 +50,5 @@ Step 2: Set the environment variables for credentials
 
 You will need to configure environment variables for any credentials required for external data connections, see :ref:`how_to_guides__configuring_data_contexts__how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials` for an explanation of how to use environment variables in your ``great_expectations.yml``.
 
-Then add the environment variables to your local ``.env file`` in your Astronomer deploy and as secret environment variables in the Astronomer Cloud settings, following the instructions in the `Astronomer documentation<https://www.astronomer.io/docs/cloud/stable/deploy/environment-variables/>`_.
-
+Then add the environment variables to your local ``.env file`` in your Astronomer deploy and as secret environment variables in the Astronomer Cloud settings, following the instructions in the `Astronomer documentation <https://www.astronomer.io/docs/cloud/stable/deploy/environment-variables/>`_.
 
