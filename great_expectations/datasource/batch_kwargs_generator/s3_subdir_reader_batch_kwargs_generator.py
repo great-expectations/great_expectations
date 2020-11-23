@@ -13,7 +13,11 @@ from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator
     BatchKwargsGenerator,
 )
 from great_expectations.datasource.types import PathBatchKwargs, S3BatchKwargs
-from great_expectations.exceptions import BatchKwargsError, InvalidConfigError, ClassInstantiationError
+from great_expectations.exceptions import (
+    BatchKwargsError,
+    ClassInstantiationError,
+    InvalidConfigError,
+)
 
 logger = logging.getLogger(__name__)
 

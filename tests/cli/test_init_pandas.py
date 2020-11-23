@@ -57,7 +57,10 @@ def test_cli_init_on_new_project(
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "What are you processing your files with" in stdout
-    assert "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)" in stdout
+    assert (
+        "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)"
+        in stdout
+    )
     assert "Name the new Expectation Suite [Titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
@@ -210,7 +213,10 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert "Error: invalid input" not in stdout
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
-    assert "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)" in stdout
+    assert (
+        "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)"
+        in stdout
+    )
     assert "Name the new Expectation Suite [Titanic.warning]:" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
@@ -424,7 +430,10 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
 
     assert "Error: invalid input" not in stdout
     assert "Always know what to expect from your data" in stdout
-    assert "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)" in stdout
+    assert (
+        "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)"
+        in stdout
+    )
     assert "Generating example Expectation Suite..." in stdout
     assert "The following Data Docs sites will be built" in stdout
     assert "Great Expectations is now set up" in stdout
@@ -455,7 +464,10 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "What are you processing your files with" in stdout
-    assert "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)" in stdout
+    assert (
+        "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)"
+        in stdout
+    )
     assert "Cannot load file." in stdout
     assert (
         "- Please check the file and try again or select a different data file."
@@ -521,7 +533,10 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "What are you processing your files with" in stdout
-    assert "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)" in stdout
+    assert (
+        "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)"
+        in stdout
+    )
     assert "Cannot load file." in stdout
     assert (
         "- Please check the file and try again or select a different data file."
