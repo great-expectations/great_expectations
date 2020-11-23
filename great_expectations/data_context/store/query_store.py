@@ -90,7 +90,7 @@ class SqlAlchemyQueryStore(Store):
         result = self._store_backend.get(self._convert_key(key).to_tuple())
         if isinstance(result, dict):
             query = result.get("query")
-            return_type = result.get("return_type")
+            return_type = result.get("return_type", "list")
             if return_type not in ["list", "scalar"]:
                 raise ValueError(
                     "The return_type of a SqlAlchemyQueryStore query must be one of either 'list' "
