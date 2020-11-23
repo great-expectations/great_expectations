@@ -445,8 +445,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def _set(
         self, key, value, content_encoding="utf-8", content_type="application/json"
     ):
-        import boto3
         import os
+        import boto3
         
         session = boto3.session.Session(profile_name=os.getenv('AWS_PROFILE'))
         s3 = session.resource("s3", endpoint_url=self.endpoint_url)
