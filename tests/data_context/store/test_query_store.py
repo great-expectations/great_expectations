@@ -58,6 +58,8 @@ def test_queries_with_return_types(sqlalchemy_query_store_specified_return_type)
     with pytest.raises(ValueError):
         sqlalchemy_query_store_specified_return_type.get_query_result("error_query")
 
+
+def test_query_store_store_backend_id(basic_sqlalchemy_query_store):
     """
     What does this test and why?
     A Store should be able to report it's store_backend_id
