@@ -11,6 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
+from collections import OrderedDict
 from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
@@ -209,6 +210,7 @@ class BaseDataContext:
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
+    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     @classmethod
     def validate_config(cls, project_config):
@@ -510,6 +512,7 @@ class BaseDataContext:
         resource_identifier=None,
         site_name: Optional[str] = None,
         only_if_exists=True,
+        site_names: Optional[List[str]] = None,
     ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
@@ -524,12 +527,24 @@ class BaseDataContext:
                 the URLs of the index page.
             site_name: Optionally specify which site to open. If not specified,
                 return all urls in the project.
+            site_names: Optionally specify which sites are active. Sites not in
+                this list are not processed, even if specified in site_name.
 
         Returns:
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        sites = self._project_config_with_variables_substituted.data_docs_sites
+        unfiltered_sites = (
+            self._project_config_with_variables_substituted.data_docs_sites
+        )
+
+        # Filter out sites that are not in site_names
+        sites = (
+            {k: v for k, v in unfiltered_sites.items() if k in site_names}
+            if site_names
+            else unfiltered_sites
+        )
+
         if not sites:
             logger.debug("Found no data_docs_sites.")
             return []
@@ -703,7 +718,9 @@ class BaseDataContext:
             config = self._project_config
 
         substituted_config_variables = substitute_all_config_variables(
-            dict(self._load_config_variables_file()), dict(os.environ)
+            dict(self._load_config_variables_file()),
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
         substitutions = {
@@ -713,8 +730,39 @@ class BaseDataContext:
         }
 
         return DataContextConfig(
-            **substitute_all_config_variables(config, substitutions)
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
         )
+
+    def escape_all_config_variables(
+        self,
+        value: Union[str, dict, list],
+        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+    ) -> Union[str, dict, list]:
+        """
+        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
+
+        Args:
+            value: config variable value
+            dollar_sign_escape_string: replaces instances of `$`
+
+        Returns:
+            input value with all `$` characters replaced with the escape string
+        """
+
+        if isinstance(value, dict) or isinstance(value, OrderedDict):
+            return {
+                k: self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for k, v in value.items()
+            }
+
+        elif isinstance(value, list):
+            return [
+                self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for v in value
+            ]
+        return value.replace("$", dollar_sign_escape_string)
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
@@ -727,6 +775,7 @@ class BaseDataContext:
             None
         """
         config_variables = self._load_config_variables_file()
+        value = self.escape_all_config_variables(value, self.DOLLAR_SIGN_ESCAPE_STRING)
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:
@@ -1548,7 +1597,7 @@ class BaseDataContext:
             for site_name, site_config in sites.items():
                 logger.debug("Building Data Docs Site %s" % site_name,)
 
-                if (site_names and site_name in site_names) or not site_names:
+                if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
                     module_name = "great_expectations.render.renderer.site_builder"
                     site_builder = instantiate_class_from_config(

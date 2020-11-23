@@ -7,12 +7,18 @@ The only requirement from an action is for it to have a take_action method.
 import logging
 import warnings
 
+try:
+    import pypd
+except ImportError:
+    pypd = None
+
+
 from great_expectations.data_context.util import instantiate_class_from_config
 
 from ..data_context.store.metric_store import MetricStore
 from ..data_context.types.resource_identifiers import ValidationResultIdentifier
 from ..exceptions import ClassInstantiationError, DataContextError
-from .util import send_slack_notification
+from .util import send_opsgenie_alert, send_slack_notification
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +39,7 @@ class ValidationAction:
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
-        **kwargs
+        **kwargs,
     ):
         """
 
@@ -47,7 +53,7 @@ class ValidationAction:
             validation_result_suite,
             validation_result_suite_identifier,
             data_asset,
-            **kwargs
+            **kwargs,
         )
 
     def _run(
@@ -173,6 +179,200 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             return {"slack_notification_result": slack_notif_result}
         else:
             return {"slack_notification_result": ""}
+
+
+class PagerdutyAlertAction(ValidationAction):
+    """
+PagerdutyAlertAction sends a pagerduty event
+
+**Configuration**
+
+.. code-block:: yaml
+
+    - name: send_pagerduty_alert_on_validation_result
+    action:
+      class_name: PagerdutyAlertAction
+      api_key: ${pagerduty_api_key} # Events API v2 key
+      routing_key: # The 32 character Integration Key for an integration on a service or on a global ruleset.
+      notify_on: failure # possible values: "all", "failure", "success"
+
+    """
+
+    def __init__(
+        self, data_context, api_key, routing_key, notify_on="failure",
+    ):
+        """Construct a PagerdutyAlertAction
+
+        Args:
+            data_context:
+            api_key: Events API v2 key for pagerduty.
+            routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
+            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
+        """
+        super().__init__(data_context)
+        if not pypd:
+            raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
+        self.api_key = api_key
+        assert api_key, "No Pagerduty api_key found in action config."
+        self.routing_key = routing_key
+        assert routing_key, "No Pagerduty routing_key found in action config."
+        self.notify_on = notify_on
+
+    def _run(
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset=None,
+        payload=None,
+    ):
+        logger.debug("PagerdutyAlertAction.run")
+
+        if validation_result_suite is None:
+            return
+
+        if not isinstance(
+            validation_result_suite_identifier, ValidationResultIdentifier
+        ):
+            raise TypeError(
+                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
+
+        validation_success = validation_result_suite.success
+
+        if (
+            self.notify_on == "all"
+            or self.notify_on == "success"
+            and validation_success
+            or self.notify_on == "failure"
+            and not validation_success
+        ):
+            expectation_suite_name = validation_result_suite.meta.get(
+                "expectation_suite_name", "__no_expectation_suite_name__"
+            )
+            pypd.api_key = self.api_key
+            pypd.EventV2.create(
+                data={
+                    "routing_key": self.routing_key,
+                    "dedup_key": expectation_suite_name,
+                    "event_action": "trigger",
+                    "payload": {
+                        "summary": f"Great Expectations suite check {expectation_suite_name} has failed",
+                        "severity": "critical",
+                        "source": "Great Expectations",
+                    },
+                }
+            )
+
+            return {"pagerduty_alert_result": "success"}
+        return {"pagerduty_alert_result": "none sent"}
+
+
+class OpsgenieAlertAction(ValidationAction):
+    """
+    OpsgenieAlertAction creates and sends an Opsgenie alert
+
+    **Configuration**
+
+    .. code-block:: yaml
+
+        - name: send_opsgenie_alert_on_validation_result
+        action:
+          class_name: OpsgenieAlertAction
+          # put the actual webhook URL in the uncommitted/config_variables.yml file
+          api_key: ${opsgenie_api_key} # Opsgenie API key
+          region: specifies the Opsgenie region. Populate 'EU' for Europe otherwise leave empty
+          priority: specify the priority of the alert (P1 - P5) defaults to P3
+          notify_on: failure # possible values: "all", "failure", "success"
+
+    """
+
+    def __init__(
+        self,
+        data_context,
+        renderer,
+        api_key,
+        region=None,
+        priority="P3",
+        notify_on="failure",
+    ):
+        """Construct a OpsgenieAlertAction
+
+        Args:
+            data_context:
+            api_key: Opsgenie API key
+            region: specifies the Opsgenie region. Populate 'EU' for Europe otherwise do not set
+            priority: specify the priority of the alert (P1 - P5) defaults to P3
+            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
+        """
+        super().__init__(data_context)
+        self.renderer = instantiate_class_from_config(
+            config=renderer, runtime_environment={}, config_defaults={},
+        )
+        module_name = renderer["module_name"]
+        if not self.renderer:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=renderer["class_name"],
+            )
+
+        self.api_key = api_key
+        assert api_key, "opsgenie_api_key missing in config_variables.yml"
+        self.region = region
+        self.priority = priority
+        self.notify_on = notify_on
+
+    def _run(
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset=None,
+        payload=None,
+    ):
+        logger.debug("OpsgenieAlertAction.run")
+
+        if validation_result_suite is None:
+            return
+
+        if not isinstance(
+            validation_result_suite_identifier, ValidationResultIdentifier
+        ):
+            raise TypeError(
+                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
+
+        validation_success = validation_result_suite.success
+
+        if (
+            self.notify_on == "all"
+            or self.notify_on == "success"
+            and validation_success
+            or self.notify_on == "failure"
+            and not validation_success
+        ):
+            expectation_suite_name = validation_result_suite.meta.get(
+                "expectation_suite_name", "__no_expectation_suite_name__"
+            )
+
+            settings = {
+                "api_key": self.api_key,
+                "region": self.region,
+                "priority": self.priority,
+            }
+
+            description = self.renderer.render(validation_result_suite, None, None)
+
+            alert_result = send_opsgenie_alert(
+                description, expectation_suite_name, settings
+            )
+
+            return {"opsgenie_alert_result": alert_result}
+        else:
+            return {"opsgenie_alert_result": ""}
 
 
 class StoreValidationResultAction(ValidationAction):
@@ -444,7 +644,8 @@ list of sites to update:
 
         # get the URL for the validation result
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
-            resource_identifier=validation_result_suite_identifier
+            resource_identifier=validation_result_suite_identifier,
+            site_names=self._site_names,
         )
         # process payload
         data_docs_validation_results = {}

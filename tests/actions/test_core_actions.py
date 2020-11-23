@@ -1,3 +1,5 @@
+from unittest import mock
+
 from freezegun import freeze_time
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
@@ -7,6 +9,8 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.validation_operators import (
+    OpsgenieAlertAction,
+    PagerdutyAlertAction,
     SlackNotificationAction,
     StoreValidationResultAction,
 )
@@ -73,7 +77,11 @@ def test_StoreAction():
     ) == ExpectationSuiteValidationResult(success=False, results=[])
 
 
-def test_SlackNotificationAction(data_context_parameterized_expectation_suite):
+def test_SlackNotificationAction(
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
+):
     renderer = {
         "module_name": "great_expectations.render.renderer.slack_renderer",
         "class_name": "SlackRenderer",
@@ -88,34 +96,84 @@ def test_SlackNotificationAction(data_context_parameterized_expectation_suite):
         notify_on=notify_on,
     )
 
-    validation_result_suite = ExpectationSuiteValidationResult(
-        results=[],
-        success=True,
-        statistics={
-            "evaluated_expectations": 0,
-            "successful_expectations": 0,
-            "unsuccessful_expectations": 0,
-            "success_percent": None,
-        },
-        meta={
-            "great_expectations_version": "v0.8.0__develop",
-            "expectation_suite_name": "asset.default",
-            "run_id": "test_100",
-        },
-    )
-
-    validation_result_suite_id = ValidationResultIdentifier(
-        expectation_suite_identifier=ExpectationSuiteIdentifier("asset.default"),
-        run_id="test_100",
-        batch_identifier="1234",
-    )
-
     # TODO: improve this test - currently it is verifying a failed call to Slack. It returns a "empty" payload
     assert slack_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
         data_asset=None,
     ) == {"slack_notification_result": None}
+
+
+@mock.patch("pypd.EventV2")
+def test_PagerdutyAlertAction(
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
+):
+    api_key = "test"
+    routing_key = "test"
+
+    pagerduty_action = PagerdutyAlertAction(
+        data_context=data_context_parameterized_expectation_suite,
+        api_key=api_key,
+        routing_key=routing_key,
+    )
+
+    # Make sure the alert is sent by default when the validation has success = False
+    validation_result_suite.success = False
+
+    assert pagerduty_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"pagerduty_alert_result": "success"}
+
+    # Make sure the alert is not sent by default when the validation has success = True
+    validation_result_suite.success = True
+
+    assert pagerduty_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"pagerduty_alert_result": "none sent"}
+
+
+def test_OpsgenieAlertAction(
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
+):
+
+    renderer = {
+        "module_name": "great_expectations.render.renderer.opsgenie_renderer",
+        "class_name": "OpsgenieRenderer",
+    }
+    opsgenie_action = OpsgenieAlertAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        api_key="testapikey",
+        region=None,
+        priority="P3",
+        notify_on="all",
+    )
+
+    # Make sure the alert is sent by default when the validation has success = False
+    validation_result_suite.success = False
+
+    assert opsgenie_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"opsgenie_alert_result": "error"}
+
+    # Make sure the alert is not sent by default when the validation has success = True
+    validation_result_suite.success = True
+
+    assert opsgenie_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"opsgenie_alert_result": "error"}
 
 
 # def test_ExtractAndStoreEvaluationParamsAction():

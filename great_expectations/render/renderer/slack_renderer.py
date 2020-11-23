@@ -15,7 +15,6 @@ class SlackRenderer(Renderer):
     def render(
         self, validation_result=None, data_docs_pages=None, notify_with=None,
     ):
-
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
@@ -37,29 +36,35 @@ class SlackRenderer(Renderer):
                 "expectation_suite_name", "__no_expectation_suite_name__"
             )
 
+            if "batch_kwargs" in validation_result.meta:
+                data_asset_name = validation_result.meta["batch_kwargs"].get(
+                    "data_asset_name", "__no_data_asset_name__"
+                )
+            else:
+                data_asset_name = "__no_data_asset_name__"
+
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
             run_id = validation_result.meta.get("run_id", "__no_run_id__")
             batch_id = BatchKwargs(
                 validation_result.meta.get("batch_kwargs", {})
             ).to_id()
-            check_details_text = "*{}* of *{}* expectations were met".format(
-                n_checks_succeeded, n_checks
+            check_details_text = (
+                f"*{n_checks_succeeded}* of *{n_checks}* expectations were met"
             )
 
             if validation_result.success:
                 status = "Success :tada:"
 
-            summary_text = """*Batch Validation Status*: {}
-*Expectation suite name*: `{}`
-*Run ID*: `{}`
-*Batch ID*: `{}`
-*Summary*: {}""".format(
-                status, expectation_suite_name, run_id, batch_id, check_details_text,
-            )
+            summary_text = f"""*Batch Validation Status*: {status}
+*Expectation suite name*: `{expectation_suite_name}`
+*Data asset name*: `{data_asset_name}`
+*Run ID*: `{run_id}`
+*Batch ID*: `{batch_id}`
+*Summary*: {check_details_text}"""
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message
-            query["text"] = "{}: {}".format(expectation_suite_name, status)
+            query["text"] = f"{expectation_suite_name}: {status}"
 
             if data_docs_pages:
                 if notify_with is not None:
@@ -90,25 +95,23 @@ class SlackRenderer(Renderer):
                             query["blocks"].append(report_element)
 
             if "result_reference" in validation_result.meta:
+                result_reference = validation_result.meta["result_reference"]
                 report_element = {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "- *Validation Report*: {}".format(
-                            validation_result.meta["result_reference"]
-                        ),
+                        "text": f"- *Validation Report*: {result_reference}",
                     },
                 }
                 query["blocks"].append(report_element)
 
             if "dataset_reference" in validation_result.meta:
+                dataset_reference = validation_result.meta["dataset_reference"]
                 dataset_element = {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "- *Validation data asset*: {}".format(
-                            validation_result.meta["dataset_reference"]
-                        ),
+                        "text": f"- *Validation data asset*: {dataset_reference}",
                     },
                 }
                 query["blocks"].append(dataset_element)
@@ -123,9 +126,7 @@ class SlackRenderer(Renderer):
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Learn how to review validation results in Data Docs: {}".format(
-                        documentation_url
-                    ),
+                    "text": f"Learn how to review validation results in Data Docs: {documentation_url}",
                 }
             ],
         }
@@ -139,15 +140,17 @@ class SlackRenderer(Renderer):
         return None
 
     def _get_report_element(self, docs_link):
-        if "file:///" in docs_link:
+        if docs_link is None:
+            logger.warn("No docs link found. Skipping data docs link in slack message.")
+            return
+
+        if "file://" in docs_link:
             # handle special case since Slack does not render these links
             report_element = {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*DataDocs* can be found here: `{}` \n (Please copy and paste link into a browser to view)\n".format(
-                        docs_link
-                    ),
+                    "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into a browser to view)\n",
                 },
             }
         else:
@@ -155,9 +158,7 @@ class SlackRenderer(Renderer):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*DataDocs* can be found here: <{}|{}>".format(
-                        docs_link, docs_link
-                    ),
+                    "text": f"*DataDocs* can be found here: <{docs_link}|{docs_link}>",
                 },
             }
         return report_element

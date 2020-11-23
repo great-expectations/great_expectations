@@ -7,6 +7,70 @@ Changelog
 Develop
 -----------------
 
+0.12.9
+-----------------
+* [BUGFIX] Fixed the import of s3fs to use the optional import pattern - issue #2053
+* [DOCS] Updated the title styling and added a Discuss comment article for the OpsgenieAlertAction how-to guide
+
+0.12.8
+-----------------
+* [FEATURE] Add OpsgenieAlertAction #2012 (thanks @miike!)
+* [FEATURE] Add S3SubdirReaderBatchKwargsGenerator #2001 (thanks @noklam)
+* [ENHANCEMENT] Snowflake uses temp tables by default while still allowing transient tables
+* [ENHANCEMENT] Enabled use of lowercase table and column names in GE with the `use_quoted_name` key in batch_kwargs #2023
+* [BUGFIX] Basic suite builder profiler (suite scaffold) now skips excluded expectations #2037
+* [BUGFIX] Off-by-one error in linking to static images #2036 (thanks @NimaVaziri!)
+* [BUGFIX] Improve handling of pandas NA type issue #2029 PR #2039 (thanks @isichei!)
+* [DOCS] Update Virtual Environment Example #2027 (thanks @shapiroj18!)
+* [DOCS] Update implemented_expectations.rst (thanks @jdimatteo!)
+* [DOCS] Update how_to_configure_a_pandas_s3_datasource.rst #2042 (thanks @CarstenFrommhold!)
+
+0.12.7
+-----------------
+* [ENHANCEMENT] CLI supports s3a:// or gs:// paths for Pandas Datasources (issue #2006)
+* [ENHANCEMENT] Escape $ characters in configuration, support multiple substitutions (#2005 & #2015)
+* [ENHANCEMENT] Implement Skip prompt flag on datasource profile cli (#1881 Thanks @thcidale0808!)
+* [BUGFIX] Fixed bug where slack messages cause stacktrace when data docs pages have issue
+* [DOCS] How to use docker images (#1797)
+* [DOCS] Remove incorrect doc line from PagerdutyAlertAction (Thanks @niallrees!)
+* [MAINTENANCE] Update broken link (Thanks @noklam!)
+* [MAINTENANCE] Fix path for how-to guide (Thanks @gauthamzz!)
+
+0.12.6
+-----------------
+* [BUGFIX] replace black in requirements.txt
+
+0.12.5
+-----------------
+* [ENHANCEMENT] Implement expect_column_values_to_be_json_parseable in spark (Thanks @mikaylaedwards!)
+* [ENHANCEMENT] Fix boto3 options passing into datasource correctly (Thanks @noklam!)
+* [ENHANCEMENT] Add .pkl to list of recognized extensions (Thanks @KPLauritzen!)
+* [BUGFIX] Query batch kwargs support for Athena backend (issue 1964)
+* [BUGFIX] Skip config substitution if key is "password" (issue 1927)
+* [BUGFIX] fix site_names functionality and add site_names param to get_docs_sites_urls (issue 1991)
+* [BUGFIX] Always render expectation suites in data docs unless passing a specific ExpectationSuiteIdentifier in resource_identifiers (issue 1944)
+* [BUGFIX] remove black from requirements.txt
+* [BUGFIX] docs build cli: fix --yes argument (Thanks @varunbpatil!)
+* [DOCS] Update docstring for SubdirReaderBatchKwargsGenerator (Thanks @KPLauritzen!)
+* [DOCS] Fix broken link in README.md (Thanks @eyaltrabelsi!)
+* [DOCS] Clarifications on several docs (Thanks all!!)
+
+0.12.4
+-----------------
+* [FEATURE] Add PagerdutyAlertAction (Thanks @NiallRees!)
+* [FEATURE] enable using Minio for S3 backend (Thanks @noklam!)
+* [ENHANCEMENT] Add SqlAlchemy support for expect_compound_columns_to_be_unique (Thanks @jhweaver!)
+* [ENHANCEMENT] Add Spark support for expect_compound_columns_to_be_unique (Thanks @tscottcoombes1!)
+* [ENHANCEMENT] Save expectation suites with datetimes in evaluation parameters (Thanks @mbakunze!)
+* [ENHANCEMENT] Show data asset name in Slack message (Thanks @haydarai!)
+* [ENHANCEMENT] Enhance data doc to show data asset name in overview block (Thanks @noklam!)
+* [ENHANCEMENT] Clean up checkpoint output
+* [BUGFIX] Change default prefix for TupleStoreBackend (issue 1907)
+* [BUGFIX] Duplicate s3 approach for GCS for building object keys
+* [BUGFIX] import NotebookConfig (Thanks @cclauss!)
+* [BUGFIX] Improve links (Thanks @sbrugman!)
+* [MAINTENANCE] Unpin black in requirements (Thanks @jtilly!)
+* [MAINTENANCE] remove test case name special characters
 
 0.12.3
 -----------------
@@ -24,10 +88,8 @@ Develop
 * [DOCS] Update to Deploying Great Expectations with Google Cloud Composer
 * [MAINTENANCE] Update moto dependency to include cryptography (see #spulec/moto/3290)
 
-
 0.12.2
 -----------------
-
 * [ENHANCEMENT] Update schema for anonymized expectation types to avoid large key domain
 * [ENHANCEMENT] BaseProfiler type mapping expanded to include more pandas and numpy dtypes
 * [BUGFIX] Allow for pandas reader option inference with parquet and Excel (thanks @dlachasse)!

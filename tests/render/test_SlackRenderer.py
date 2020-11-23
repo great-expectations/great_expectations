@@ -20,6 +20,7 @@ def test_SlackRenderer_validation_results_with_datadocs():
         },
         meta={
             "great_expectations_version": "v0.8.0__develop",
+            "batch_kwargs": {"data_asset_name": "x/y/z"},
             "data_asset_name": {
                 "datasource": "x",
                 "generator": "y",
@@ -38,7 +39,7 @@ def test_SlackRenderer_validation_results_with_datadocs():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data asset name*: `x/y/z`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `data_asset_name=x/y/z`\n*Summary*: *0* of *0* expectations were met",
                 },
             },
             {"type": "divider"},
@@ -54,6 +55,8 @@ def test_SlackRenderer_validation_results_with_datadocs():
         ],
         "text": "default: Success :tada:",
     }
+    print(rendered_output)
+    print(expected_output)
     assert rendered_output == expected_output
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
@@ -68,7 +71,7 @@ def test_SlackRenderer_validation_results_with_datadocs():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data asset name*: `x/y/z`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `data_asset_name=x/y/z`\n*Summary*: *0* of *0* expectations were met",
                 },
             },
             {
@@ -105,7 +108,7 @@ def test_SlackRenderer_validation_results_with_datadocs():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data asset name*: `x/y/z`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `data_asset_name=x/y/z`\n*Summary*: *0* of *0* expectations were met",
                 },
             },
             {

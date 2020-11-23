@@ -1,4 +1,5 @@
 import datetime
+from typing import Iterable
 
 import numpy as np
 from dateutil.parser import parse
@@ -136,136 +137,230 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return column_cardinality
 
     @classmethod
-    def _create_expectations_for_low_card_column(cls, dataset, column, column_cache):
-        cls._create_non_nullity_expectations(dataset, column)
-
-        value_set = dataset.expect_column_distinct_values_to_be_in_set(
-            column, value_set=None, result_format="SUMMARY"
-        ).result["observed_value"]
-        dataset.expect_column_distinct_values_to_be_in_set(
-            column, value_set=value_set, result_format="SUMMARY"
+    def _create_expectations_for_low_card_column(
+        cls,
+        dataset,
+        column,
+        column_cache,
+        excluded_expectations=None,
+        included_expectations=None,
+    ):
+        cls._create_non_nullity_expectations(
+            dataset,
+            column,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
         )
 
-        if cls._get_column_cardinality_with_caching(dataset, column, column_cache) in [
-            ProfilerCardinality.TWO,
-            ProfilerCardinality.VERY_FEW,
-        ]:
-            partition_object = build_categorical_partition_object(dataset, column)
-            dataset.expect_column_kl_divergence_to_be_less_than(
-                column,
-                partition_object=partition_object,
-                threshold=0.6,
-                catch_exceptions=True,
+        if (
+            not excluded_expectations
+            or "expect_column_distinct_values_to_be_in_set" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_distinct_values_to_be_in_set" in included_expectations
+        ):
+            value_set = dataset.expect_column_distinct_values_to_be_in_set(
+                column, value_set=None, result_format="SUMMARY"
+            ).result["observed_value"]
+            dataset.expect_column_distinct_values_to_be_in_set(
+                column, value_set=value_set, result_format="SUMMARY"
             )
+
+        if (
+            not excluded_expectations
+            or "expect_column_kl_divergence_to_be_less_than"
+            not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_kl_divergence_to_be_less_than" in included_expectations
+        ):
+            if cls._get_column_cardinality_with_caching(
+                dataset, column, column_cache
+            ) in [ProfilerCardinality.TWO, ProfilerCardinality.VERY_FEW,]:
+                partition_object = build_categorical_partition_object(dataset, column)
+                dataset.expect_column_kl_divergence_to_be_less_than(
+                    column,
+                    partition_object=partition_object,
+                    threshold=0.6,
+                    catch_exceptions=True,
+                )
 
     @classmethod
-    def _create_non_nullity_expectations(cls, dataset, column):
-        not_null_result = dataset.expect_column_values_to_not_be_null(column)
-        if not not_null_result.success:
-            unexpected_percent = float(not_null_result.result["unexpected_percent"])
-            potential_mostly_value = (100.0 - unexpected_percent - 10) / 100.0
-            safe_mostly_value = round(max(0.001, potential_mostly_value), 3)
-            dataset.expect_column_values_to_not_be_null(
-                column, mostly=safe_mostly_value
-            )
+    def _create_non_nullity_expectations(
+        cls, dataset, column, excluded_expectations=None, included_expectations=None
+    ):
+        if (
+            not excluded_expectations
+            or "expect_column_values_to_not_be_null" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_values_to_not_be_null" in included_expectations
+        ):
+            not_null_result = dataset.expect_column_values_to_not_be_null(column)
+            if not not_null_result.success:
+                unexpected_percent = float(not_null_result.result["unexpected_percent"])
+                potential_mostly_value = (100.0 - unexpected_percent - 10) / 100.0
+                safe_mostly_value = round(max(0.001, potential_mostly_value), 3)
+                dataset.expect_column_values_to_not_be_null(
+                    column, mostly=safe_mostly_value
+                )
 
     @classmethod
-    def _create_expectations_for_numeric_column(cls, dataset, column):
-        cls._create_non_nullity_expectations(dataset, column)
+    def _create_expectations_for_numeric_column(
+        cls, dataset, column, excluded_expectations=None, included_expectations=None
+    ):
+        cls._create_non_nullity_expectations(
+            dataset,
+            column,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
+        )
 
-        observed_min = dataset.expect_column_min_to_be_between(
-            column, min_value=None, max_value=None, result_format="SUMMARY"
-        ).result["observed_value"]
-        if not _is_nan(observed_min):
-            dataset.expect_column_min_to_be_between(
-                column, min_value=observed_min - 1, max_value=observed_min + 1
-            )
-        else:
-            logger.debug(
-                f"Skipping expect_column_min_to_be_between because observed value is nan: {observed_min}"
-            )
+        if (
+            not excluded_expectations
+            or "expect_column_min_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_min_to_be_between" in included_expectations
+        ):
+            observed_min = dataset.expect_column_min_to_be_between(
+                column, min_value=None, max_value=None, result_format="SUMMARY"
+            ).result["observed_value"]
+            if not _is_nan(observed_min):
+                dataset.expect_column_min_to_be_between(
+                    column, min_value=observed_min - 1, max_value=observed_min + 1
+                )
+            else:
+                logger.debug(
+                    f"Skipping expect_column_min_to_be_between because observed value is nan: {observed_min}"
+                )
 
-        observed_max = dataset.expect_column_max_to_be_between(
-            column, min_value=None, max_value=None, result_format="SUMMARY"
-        ).result["observed_value"]
-        if not _is_nan(observed_max):
-            dataset.expect_column_max_to_be_between(
-                column, min_value=observed_max - 1, max_value=observed_max + 1
-            )
-        else:
-            logger.debug(
-                f"Skipping expect_column_max_to_be_between because observed value is nan: {observed_max}"
-            )
+        if (
+            not excluded_expectations
+            or "expect_column_max_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_max_to_be_between" in included_expectations
+        ):
+            observed_max = dataset.expect_column_max_to_be_between(
+                column, min_value=None, max_value=None, result_format="SUMMARY"
+            ).result["observed_value"]
+            if not _is_nan(observed_max):
+                dataset.expect_column_max_to_be_between(
+                    column, min_value=observed_max - 1, max_value=observed_max + 1
+                )
+            else:
+                logger.debug(
+                    f"Skipping expect_column_max_to_be_between because observed value is nan: {observed_max}"
+                )
 
-        observed_mean = dataset.expect_column_mean_to_be_between(
-            column, min_value=None, max_value=None, result_format="SUMMARY"
-        ).result["observed_value"]
-        if not _is_nan(observed_mean):
-            dataset.expect_column_mean_to_be_between(
-                column, min_value=observed_mean - 1, max_value=observed_mean + 1
-            )
-        else:
-            logger.debug(
-                f"Skipping expect_column_mean_to_be_between because observed value is nan: {observed_mean}"
-            )
+        if (
+            not excluded_expectations
+            or "expect_column_mean_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_mean_to_be_between" in included_expectations
+        ):
+            observed_mean = dataset.expect_column_mean_to_be_between(
+                column, min_value=None, max_value=None, result_format="SUMMARY"
+            ).result["observed_value"]
+            if not _is_nan(observed_mean):
+                dataset.expect_column_mean_to_be_between(
+                    column, min_value=observed_mean - 1, max_value=observed_mean + 1
+                )
+            else:
+                logger.debug(
+                    f"Skipping expect_column_mean_to_be_between because observed value is nan: {observed_mean}"
+                )
 
-        observed_median = dataset.expect_column_median_to_be_between(
-            column, min_value=None, max_value=None, result_format="SUMMARY"
-        ).result["observed_value"]
-        if not _is_nan(observed_median):
-            dataset.expect_column_median_to_be_between(
-                column, min_value=observed_median - 1, max_value=observed_median + 1
-            )
-        else:
-            logger.debug(
-                f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
-            )
+        if (
+            not excluded_expectations
+            or "expect_column_median_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_median_to_be_between" in included_expectations
+        ):
+            observed_median = dataset.expect_column_median_to_be_between(
+                column, min_value=None, max_value=None, result_format="SUMMARY"
+            ).result["observed_value"]
+            if not _is_nan(observed_median):
+                dataset.expect_column_median_to_be_between(
+                    column, min_value=observed_median - 1, max_value=observed_median + 1
+                )
+            else:
+                logger.debug(
+                    f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
+                )
 
         allow_relative_error: bool = dataset.attempt_allowing_relative_error()
 
-        quantile_result = dataset.expect_column_quantile_values_to_be_between(
-            column,
-            quantile_ranges={
-                "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
-                "value_ranges": [
-                    [None, None],
-                    [None, None],
-                    [None, None],
-                    [None, None],
-                    [None, None],
-                ],
-            },
-            allow_relative_error=allow_relative_error,
-            result_format="SUMMARY",
-            catch_exceptions=True,
-        )
-        if quantile_result.exception_info and (
-            quantile_result.exception_info["exception_traceback"]
-            or quantile_result.exception_info["exception_message"]
+        if (
+            not excluded_expectations
+            or "expect_column_quantile_values_to_be_between"
+            not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_quantile_values_to_be_between" in included_expectations
         ):
-            # TODO quantiles are not implemented correctly on sqlite, and likely other sql dialects
-            logger.debug(quantile_result.exception_info["exception_traceback"])
-            logger.debug(quantile_result.exception_info["exception_message"])
-        else:
-            dataset.set_config_value("interactive_evaluation", False)
-            dataset.expect_column_quantile_values_to_be_between(
+            quantile_result = dataset.expect_column_quantile_values_to_be_between(
                 column,
                 quantile_ranges={
-                    "quantiles": quantile_result.result["observed_value"]["quantiles"],
+                    "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
                     "value_ranges": [
-                        [v - 1, v + 1]
-                        for v in quantile_result.result["observed_value"]["values"]
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                        [None, None],
                     ],
                 },
                 allow_relative_error=allow_relative_error,
+                result_format="SUMMARY",
                 catch_exceptions=True,
             )
-            dataset.set_config_value("interactive_evaluation", True)
+            if quantile_result.exception_info and (
+                quantile_result.exception_info["exception_traceback"]
+                or quantile_result.exception_info["exception_message"]
+            ):
+                # TODO quantiles are not implemented correctly on sqlite, and likely other sql dialects
+                logger.debug(quantile_result.exception_info["exception_traceback"])
+                logger.debug(quantile_result.exception_info["exception_message"])
+            else:
+                dataset.set_config_value("interactive_evaluation", False)
+                dataset.expect_column_quantile_values_to_be_between(
+                    column,
+                    quantile_ranges={
+                        "quantiles": quantile_result.result["observed_value"][
+                            "quantiles"
+                        ],
+                        "value_ranges": [
+                            [v - 1, v + 1]
+                            for v in quantile_result.result["observed_value"]["values"]
+                        ],
+                    },
+                    allow_relative_error=allow_relative_error,
+                    catch_exceptions=True,
+                )
+                dataset.set_config_value("interactive_evaluation", True)
 
     @classmethod
-    def _create_expectations_for_string_column(cls, dataset, column):
-        cls._create_non_nullity_expectations(dataset, column)
-        dataset.expect_column_value_lengths_to_be_between(column, min_value=1)
+    def _create_expectations_for_string_column(
+        cls, dataset, column, excluded_expectations=None, included_expectations=None
+    ):
+        cls._create_non_nullity_expectations(
+            dataset,
+            column,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
+        )
+        if (
+            not excluded_expectations
+            or "expect_column_value_lengths_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_value_lengths_to_be_between" in included_expectations
+        ):
+            dataset.expect_column_value_lengths_to_be_between(column, min_value=1)
 
     @classmethod
     def _find_next_low_card_column(
@@ -356,50 +451,78 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return None
 
     @classmethod
-    def _create_expectations_for_datetime_column(cls, dataset, column):
-        cls._create_non_nullity_expectations(dataset, column)
+    def _create_expectations_for_datetime_column(
+        cls, dataset, column, excluded_expectations=None, included_expectations=None
+    ):
+        cls._create_non_nullity_expectations(
+            dataset,
+            column,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
+        )
 
-        min_value = dataset.expect_column_min_to_be_between(
-            column, min_value=None, max_value=None, result_format="SUMMARY"
-        ).result["observed_value"]
+        if (
+            not excluded_expectations
+            or "expect_column_min_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_min_to_be_between" in included_expectations
+        ):
+            min_value = dataset.expect_column_min_to_be_between(
+                column, min_value=None, max_value=None, result_format="SUMMARY"
+            ).result["observed_value"]
 
-        if min_value is not None:
-            dataset.remove_expectation(
-                ExpectationConfiguration(
-                    expectation_type="expect_column_min_to_be_between",
-                    kwargs={"column": column},
-                ),
-                match_type="domain",
-            )
-            try:
-                min_value = min_value + datetime.timedelta(days=-365)
-            except OverflowError:
-                min_value = datetime.datetime.min
-            except TypeError:
-                min_value = parse(min_value) + datetime.timedelta(days=-365)
+            if min_value is not None:
+                dataset.remove_expectation(
+                    ExpectationConfiguration(
+                        expectation_type="expect_column_min_to_be_between",
+                        kwargs={"column": column},
+                    ),
+                    match_type="domain",
+                )
+                try:
+                    min_value = min_value + datetime.timedelta(days=-365)
+                except OverflowError:
+                    min_value = datetime.datetime.min
+                except TypeError:
+                    min_value = parse(min_value) + datetime.timedelta(days=-365)
 
-        max_value = dataset.expect_column_max_to_be_between(
-            column, min_value=None, max_value=None, result_format="SUMMARY"
-        ).result["observed_value"]
-        if max_value is not None:
-            dataset.remove_expectation(
-                ExpectationConfiguration(
-                    expectation_type="expect_column_max_to_be_between",
-                    kwargs={"column": column},
-                ),
-                match_type="domain",
-            )
-            try:
-                max_value = max_value + datetime.timedelta(days=365)
-            except OverflowError:
-                max_value = datetime.datetime.max
-            except TypeError:
-                max_value = parse(max_value) + datetime.timedelta(days=365)
+        if (
+            not excluded_expectations
+            or "expect_column_max_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_max_to_be_between" in included_expectations
+        ):
+            max_value = dataset.expect_column_max_to_be_between(
+                column, min_value=None, max_value=None, result_format="SUMMARY"
+            ).result["observed_value"]
+            if max_value is not None:
+                dataset.remove_expectation(
+                    ExpectationConfiguration(
+                        expectation_type="expect_column_max_to_be_between",
+                        kwargs={"column": column},
+                    ),
+                    match_type="domain",
+                )
+                try:
+                    max_value = max_value + datetime.timedelta(days=365)
+                except OverflowError:
+                    max_value = datetime.datetime.max
+                except TypeError:
+                    max_value = parse(max_value) + datetime.timedelta(days=365)
 
-        if min_value is not None or max_value is not None:
-            dataset.expect_column_values_to_be_between(
-                column, min_value, max_value, parse_strings_as_datetimes=True
-            )
+        if (
+            not excluded_expectations
+            or "expect_column_min_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_column_min_to_be_between" in included_expectations
+        ):
+            if min_value is not None or max_value is not None:
+                dataset.expect_column_values_to_be_between(
+                    column, min_value, max_value, parse_strings_as_datetimes=True
+                )
 
     @classmethod
     def _profile(cls, dataset, configuration=None):
@@ -427,6 +550,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 _check_that_expectations_are_available(dataset, included_expectations)
             if "excluded_expectations" in configuration:
                 excluded_expectations = configuration["excluded_expectations"]
+                if excluded_expectations in [False, None, []]:
+                    excluded_expectations = None
                 _check_that_expectations_are_available(dataset, excluded_expectations)
 
             if (
@@ -438,6 +563,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 )
             elif "included_columns" in configuration:
                 selected_columns = configuration["included_columns"]
+                if selected_columns in [False, None, []]:
+                    selected_columns = []
             elif "excluded_columns" in configuration:
                 excluded_columns = configuration["excluded_columns"]
                 if excluded_columns in [False, None, []]:
@@ -452,9 +579,17 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             return suite
 
         dataset.set_default_expectation_argument("catch_exceptions", False)
-        dataset = cls._build_table_row_count_expectation(dataset)
+        dataset = cls._build_table_row_count_expectation(
+            dataset,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
+        )
         dataset.set_config_value("interactive_evaluation", True)
-        dataset = cls._build_table_column_expectations(dataset)
+        dataset = cls._build_table_column_expectations(
+            dataset,
+            excluded_expectations=excluded_expectations,
+            included_expectations=included_expectations,
+        )
 
         column_cache = {}
         if selected_columns:
@@ -488,9 +623,19 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     if column_type in [ProfilerDataType.INT, ProfilerDataType.FLOAT]:
                         cls._create_expectations_for_numeric_column(dataset, column)
                     elif column_type in [ProfilerDataType.DATETIME]:
-                        cls._create_expectations_for_datetime_column(dataset, column)
+                        cls._create_expectations_for_datetime_column(
+                            dataset,
+                            column,
+                            excluded_expectations=excluded_expectations,
+                            included_expectations=included_expectations,
+                        )
                     elif column_type in [ProfilerDataType.STRING]:
-                        cls._create_expectations_for_string_column(dataset, column)
+                        cls._create_expectations_for_string_column(
+                            dataset,
+                            column,
+                            excluded_expectations=excluded_expectations,
+                            included_expectations=included_expectations,
+                        )
                     elif column_type in [ProfilerDataType.UNKNOWN]:
                         logger.debug(
                             f"Skipping expectation creation for column {column} of unknown type: {column_type}"
@@ -582,23 +727,52 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return expectation_suite
 
     @classmethod
-    def _build_table_row_count_expectation(cls, dataset, tolerance=0.1):
+    def _build_table_row_count_expectation(
+        cls,
+        dataset,
+        tolerance=0.1,
+        excluded_expectations=None,
+        included_expectations=None,
+    ):
         assert tolerance >= 0, "Tolerance must be greater than zero"
-        value = dataset.expect_table_row_count_to_be_between(
-            min_value=0, max_value=None
-        ).result["observed_value"]
-        min_value = max(0, int(value * (1 - tolerance)))
-        max_value = int(value * (1 + tolerance))
-        dataset.expect_table_row_count_to_be_between(
-            min_value=min_value, max_value=max_value
-        )
+        if (
+            not excluded_expectations
+            or "expect_table_row_count_to_be_between" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_table_row_count_to_be_between" in included_expectations
+        ):
+            value = dataset.expect_table_row_count_to_be_between(
+                min_value=0, max_value=None
+            ).result["observed_value"]
+            min_value = max(0, int(value * (1 - tolerance)))
+            max_value = int(value * (1 + tolerance))
+            dataset.expect_table_row_count_to_be_between(
+                min_value=min_value, max_value=max_value
+            )
         return dataset
 
     @classmethod
-    def _build_table_column_expectations(cls, dataset):
+    def _build_table_column_expectations(
+        cls, dataset, excluded_expectations=None, included_expectations=None
+    ):
         columns = dataset.get_table_columns()
-        dataset.expect_table_column_count_to_equal(len(columns))
-        dataset.expect_table_columns_to_match_ordered_list(columns)
+        if (
+            not excluded_expectations
+            or "expect_table_column_count_to_equal" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_table_column_count_to_equal" in included_expectations
+        ):
+            dataset.expect_table_column_count_to_equal(len(columns))
+        if (
+            not excluded_expectations
+            or "expect_table_columns_to_match_ordered_list" not in excluded_expectations
+        ) and (
+            not included_expectations
+            or "expect_table_columns_to_match_ordered_list" in included_expectations
+        ):
+            dataset.expect_table_columns_to_match_ordered_list(columns)
         return dataset
 
     @classmethod

@@ -14,7 +14,7 @@
     },
     "tests" : [
     {
-      "title" : "Basic positive test",
+      "title" : "basic_positive_test",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -28,7 +28,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title" : "Positive test with multiple regexes",
+      "title" : "positive_test_with_multiple_regexes",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -42,7 +42,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title" : "Basic negative test",
+      "title" : "basic_negative_test",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -56,7 +56,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title" : "Negative test with more string-ish strings",
+      "title" : "negative_test_with_more_string-ish_strings",
       "exact_match_out" : false,
       "in": {
         "column": "x",
