@@ -224,9 +224,7 @@ class DatasourceConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.datasource")
     data_asset_type = fields.Nested(ClassConfigSchema)
-    boto3_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), allow_none=True
-    )
+    boto3_options = fields.Dict(keys=fields.Str(), values=fields.Str(), allow_none=True)
     # TODO: Update to generator-specific
     # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
     batch_kwargs_generators = fields.Dict(

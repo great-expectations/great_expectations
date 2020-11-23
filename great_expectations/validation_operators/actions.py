@@ -18,7 +18,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from ..data_context.store.metric_store import MetricStore
 from ..data_context.types.resource_identifiers import ValidationResultIdentifier
 from ..exceptions import ClassInstantiationError, DataContextError
-from .util import send_slack_notification, send_opsgenie_alert
+from .util import send_opsgenie_alert, send_slack_notification
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +64,7 @@ class ValidationAction:
 
 class NoOpAction(ValidationAction):
     def __init__(
-        self,
-        data_context,
+        self, data_context,
     ):
         super().__init__(data_context)
 
@@ -309,9 +308,7 @@ class OpsgenieAlertAction(ValidationAction):
         """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
+            config=renderer, runtime_environment={}, config_defaults={},
         )
         module_name = renderer["module_name"]
         if not self.renderer:
