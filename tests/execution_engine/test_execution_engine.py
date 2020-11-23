@@ -48,8 +48,8 @@ def test_add_column_row_condition_with_unsupported_conditions():
         new_domain_kwargs = e.add_column_row_condition({})
 
 
-
 def test_resolve_metrics_with_aggregates_and_column_map():
+    # Testing resolve metric function for a variety of cases - test from test_core used
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     mean = MetricConfiguration(
@@ -96,4 +96,26 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     assert results[desired_metric.id] == 0
+
+
+def test_resolve_metrics_with_extraneous_value_key():
+    df = pd.DataFrame({"a": [1, 2, 3, None]})
+    engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
+    mean = MetricConfiguration(
+        metric_name="column.mean",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies= {})
+
+    # Ensuring that an unused value key will not mess up computation
+    stdev = MetricConfiguration(
+        metric_name="column.standard_deviation",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"value_set": [1,2,3,4,5]},
+    )
+    desired_metrics = (mean, stdev)
+    metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
+
+    # Ensuring extraneous value key did not change computation
+    assert metrics[('column.standard_deviation', 'column=a', 'value_set=[1, 2, 3, 4, 5]')] == 1.0
 
