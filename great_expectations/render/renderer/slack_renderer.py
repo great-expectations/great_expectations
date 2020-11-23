@@ -49,7 +49,9 @@ class SlackRenderer(Renderer):
             batch_id = BatchKwargs(
                 validation_result.meta.get("batch_kwargs", {})
             ).to_id()
-            check_details_text = f"*{n_checks_succeeded}* of *{n_checks}* expectations were met"
+            check_details_text = (
+                f"*{n_checks_succeeded}* of *{n_checks}* expectations were met"
+            )
 
             if validation_result.success:
                 status = "Success :tada:"
@@ -98,7 +100,7 @@ class SlackRenderer(Renderer):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"- *Validation Report*: {result_reference}"
+                        "text": f"- *Validation Report*: {result_reference}",
                     },
                 }
                 query["blocks"].append(report_element)
@@ -109,7 +111,7 @@ class SlackRenderer(Renderer):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"- *Validation data asset*: {dataset_reference}"
+                        "text": f"- *Validation data asset*: {dataset_reference}",
                     },
                 }
                 query["blocks"].append(dataset_element)
@@ -124,7 +126,7 @@ class SlackRenderer(Renderer):
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": f"Learn how to review validation results in Data Docs: {documentation_url}"
+                    "text": f"Learn how to review validation results in Data Docs: {documentation_url}",
                 }
             ],
         }
@@ -148,7 +150,7 @@ class SlackRenderer(Renderer):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into a browser to view)\n"
+                    "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into a browser to view)\n",
                 },
             }
         else:
@@ -156,7 +158,7 @@ class SlackRenderer(Renderer):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*DataDocs* can be found here: <{docs_link}|{docs_link}>"
+                    "text": f"*DataDocs* can be found here: <{docs_link}|{docs_link}>",
                 },
             }
         return report_element
