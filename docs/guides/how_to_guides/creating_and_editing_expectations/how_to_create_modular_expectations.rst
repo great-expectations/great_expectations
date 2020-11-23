@@ -73,10 +73,12 @@ _____
    The structure of a Modular Expectation now exists within its own specialized class - indicating it will usually exist in a separate file from the Metric. This structure has 3 fundamental components: Expectation Parameters, Dependency Validation, and Expectation Validation. In this step, we will address setting up our parameters.
 
    The parameters of an Expectation consist of the following:
-   - Metric Dependencies - A tuple consisting of the names of all metrics necessary to evaluate the Expectation.
-   - Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
-   Examples: Thresholds, Value Sets to validate data against, etc.
-   - Default Kwarg Values (Optional)  -  Default values for success keys and the defined domain, among other values.
+   
+   - **Metric Dependencies** - A tuple consisting of the names of all metrics necessary to evaluate the Expectation.
+   - **Success Keys** - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+      - Examples: Thresholds, Value Sets to validate data against, etc.
+   - **Default Kwarg Values (Optional)**  -  Default values for success keys and the defined domain, among other values.
+   
    An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class and building our Expectation in a separate file from our Metric):
 
 
