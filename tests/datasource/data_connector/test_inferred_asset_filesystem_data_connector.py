@@ -32,7 +32,7 @@ def test_basic_instantiation(tmp_path_factory):
 
     my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
         name="my_data_connector",
-        datasource_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={
             "pattern": r"(.+)/(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "letter", "number"],
@@ -75,7 +75,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
 
     my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
         name="my_data_connector",
-        datasource_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={
             "pattern": r"(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "number",],
@@ -130,7 +130,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
 
     my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
         name="my_data_connector",
-        datasource_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={
             "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
             "group_names": ["year_dir", "month_dir", "data_asset_name"],
@@ -162,7 +162,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
             BatchDefinition
         ] = my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
-                datasource_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+                datasource_name="FAKE_DATASOURCE_NAME",
                 data_connector_name="non_existent_data_connector",
                 data_asset_name="my_data_asset",
             )
@@ -172,7 +172,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
-                    datasource_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+                    datasource_name="FAKE_DATASOURCE_NAME",
                     data_connector_name="my_data_connector",
                     data_asset_name="alpha",
                 )
@@ -205,7 +205,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
 
     assert my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=BatchRequest(
-            datasource_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            datasource_name="FAKE_DATASOURCE_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
             partition_request={
@@ -214,7 +214,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
         )
     ) == [
         BatchDefinition(
-            datasource_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+            datasource_name="FAKE_DATASOURCE_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
             partition_definition=PartitionDefinition(year_dir="2020", month_dir="03",),
@@ -231,7 +231,7 @@ def test_self_check(tmp_path_factory):
 
     my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
         name="my_data_connector",
-        datasource_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={
             "pattern": r"(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "number"],
@@ -286,7 +286,7 @@ def test_test_yaml_config(empty_data_context_v3, tmp_path_factory):
         f"""
 module_name: great_expectations.datasource.data_connector
 class_name: InferredAssetFilesystemDataConnector
-datasource_name: FAKE_EXECUTION_ENVIRONMENT
+datasource_name: FAKE_DATASOURCE
 name: TEST_DATA_CONNECTOR
 base_directory: {base_directory}/
 glob_directive: "*/*/*.csv"
@@ -358,7 +358,7 @@ def test_yaml_config_excluding_non_regex_matching_files(
         f"""
 module_name: great_expectations.datasource.data_connector
 class_name: InferredAssetFilesystemDataConnector
-datasource_name: FAKE_EXECUTION_ENVIRONMENT
+datasource_name: FAKE_DATASOURCE
 name: TEST_DATA_CONNECTOR
 
 base_directory: {base_directory}/
@@ -432,7 +432,7 @@ def test_nested_directory_data_asset_name_in_folder(
         f"""
     module_name: great_expectations.datasource.data_connector
     class_name: InferredAssetFilesystemDataConnector
-    datasource_name: FAKE_EXECUTION_ENVIRONMENT
+    datasource_name: FAKE_DATASOURCE
     name: TEST_DATA_CONNECTOR
     base_directory: {base_directory}/
     glob_directive: "*/*.csv"
@@ -493,7 +493,7 @@ def test_redundant_information_in_naming_convention_random_hash(
         f"""
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetFilesystemDataConnector
-          datasource_name: FAKE_EXECUTION_ENVIRONMENT
+          datasource_name: FAKE_DATASOURCE
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
           glob_directive: "*/*/*/*.txt.gz"
@@ -552,7 +552,7 @@ def test_redundant_information_in_naming_convention_timestamp(
         f"""
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetFilesystemDataConnector
-          datasource_name: FAKE_EXECUTION_ENVIRONMENT
+          datasource_name: FAKE_DATASOURCE
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
           glob_directive: "*.txt.gz"
@@ -609,7 +609,7 @@ def test_redundant_information_in_naming_convention_bucket(
         f"""
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetFilesystemDataConnector
-          datasource_name: FAKE_EXECUTION_ENVIRONMENT
+          datasource_name: FAKE_DATASOURCE
           name: TEST_DATA_CONNECTOR
           base_directory: {base_directory}/
           glob_directive: "*/*/*/*/*.txt.gz"

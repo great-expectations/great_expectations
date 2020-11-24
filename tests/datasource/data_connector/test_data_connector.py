@@ -35,7 +35,7 @@ def basic_data_connector(tmp_path_factory):
             f"""
 class_name: ConfiguredAssetFilesystemDataConnector
 base_directory: {base_directory}
-datasource_name: FAKE_EXECUTION_ENVIRONMENT
+datasource_name: FAKE_DATASOURCE
 
 default_regex:
     pattern: "(.*)"
@@ -63,7 +63,7 @@ def test_basic_instantiation(tmp_path_factory):
         name="my_data_connector",
         base_directory=base_directory,
         glob_directive="*.csv",
-        datasource_name="FAKE_EXECUTION_ENVIRONMENT",
+        datasource_name="FAKE_DATASOURCE",
         default_regex={"pattern": "(.*)", "group_names": ["file_name"],},
         assets={"my_asset_name": {}},
     )
@@ -98,7 +98,7 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         name="my_data_connector",
         base_directory=base_directory,
         glob_directive="*/*/*.csv",
-        datasource_name="FAKE_EXECUTION_ENVIRONMENT",
+        datasource_name="FAKE_DATASOURCE",
         default_regex={"pattern": "(.*).csv", "group_names": ["name"],},
         assets={"stuff": {}},
     )
@@ -205,7 +205,7 @@ def test__batch_definition_matches_batch_request():
     assert batch_definition_matches_batch_request(
         batch_definition=BatchDefinition(
             **{
-                "datasource_name": "FAKE_EXECUTION_ENVIRONMENT",
+                "datasource_name": "FAKE_DATASOURCE",
                 "data_connector_name": "TEST_DATA_CONNECTOR",
                 "data_asset_name": "DEFAULT_ASSET_NAME",
                 "partition_definition": PartitionDefinition({"index": "3"}),
@@ -213,7 +213,7 @@ def test__batch_definition_matches_batch_request():
         ),
         batch_request=BatchRequest(
             **{
-                "datasource_name": "FAKE_EXECUTION_ENVIRONMENT",
+                "datasource_name": "FAKE_DATASOURCE",
                 "data_connector_name": "TEST_DATA_CONNECTOR",
                 "data_asset_name": "DEFAULT_ASSET_NAME",
                 "partition_request": None,
@@ -241,7 +241,7 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_PandasExecuti
         name="my_data_connector",
         base_directory=base_directory,
         glob_directive="*.csv",
-        datasource_name="FAKE_EXECUTION_ENVIRONMENT",
+        datasource_name="FAKE_DATASOURCE",
         execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": "(.+)_(\\d+)_(\\d+)\\.csv",
@@ -273,7 +273,7 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecut
         name="my_data_connector",
         base_directory=base_directory,
         glob_directive="*.csv",
-        datasource_name="FAKE_EXECUTION_ENVIRONMENT",
+        datasource_name="FAKE_DATASOURCE",
         execution_engine=SparkDFExecutionEngine(),
         default_regex={
             "pattern": "(.+)_(\\d+)_(\\d+)\\.csv",

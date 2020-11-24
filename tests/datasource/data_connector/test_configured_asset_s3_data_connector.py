@@ -43,7 +43,7 @@ def test_basic_instantiation():
 
     my_data_connector = ConfiguredAssetS3DataConnector(
         name="my_data_connector",
-        datasource_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={"pattern": "alpha-(.*)\\.csv", "group_names": ["index"],},
         bucket=bucket,
         prefix="",
@@ -112,7 +112,7 @@ def test_instantiation_from_a_config(empty_data_context_v3):
         f"""
         module_name: great_expectations.datasource.data_connector
         class_name: ConfiguredAssetS3DataConnector
-        datasource_name: FAKE_EXECUTION_ENVIRONMENT
+        datasource_name: FAKE_DATASOURCE
         name: TEST_DATA_CONNECTOR
         default_regex:
             pattern: alpha-(.*)\\.csv
@@ -172,7 +172,7 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_conte
         f"""
 module_name: great_expectations.datasource.data_connector
 class_name: ConfiguredAssetS3DataConnector
-datasource_name: FAKE_EXECUTION_ENVIRONMENT
+datasource_name: FAKE_DATASOURCE
 name: TEST_DATA_CONNECTOR
 
 bucket: {bucket}
@@ -954,7 +954,7 @@ def test_example_with_explicit_data_asset_names():
 
     yaml_string = f"""
 class_name: ConfiguredAssetS3DataConnector
-datasource_name: FAKE_EXECUTION_ENVIRONMENT_NAME
+datasource_name: FAKE_DATASOURCE_NAME
 bucket: {bucket}
 prefix: my_base_directory/
 default_regex:

@@ -318,7 +318,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
 
     my_data_connector = ConfiguredAssetS3DataConnector(
         name="my_data_connector",
-        datasource_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={"pattern": "alpha-(.*)\\.csv", "group_names": ["index"],},
         bucket=bucket,
         prefix="",
