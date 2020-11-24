@@ -172,7 +172,6 @@ Steps
                                     pattern: (.+)\\.csv
                                     group_names:
                                         - full_name
-
                         """
 
             Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
