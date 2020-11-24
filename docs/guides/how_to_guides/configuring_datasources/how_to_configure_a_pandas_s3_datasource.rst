@@ -152,7 +152,7 @@ Steps
 
         #. **Create or copy a yaml config**
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name is passed in as an environment variable.
+            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as environment variables.
 
             **Note**: The ``ConfiguredAssetS3DataConnector`` used in this example is closely related to the ``InferreddAssetS3DataConnector`` with some key differences. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
@@ -166,14 +166,13 @@ Steps
                             my_data_connector:
                                 class_name: ConfiguredAssetS3DataConnector
                                 bucket: {bucket}
-                                prefix: ''
+                                prefix: {prefix}
                                 assets:
-                                  TestAsset:
-                                    pattern: (.+)_(\\d+)_(\\d+)\\.csv
+                                  test_asset:
+                                    pattern: (.+)\\.csv
                                     group_names:
-                                        - name
-                                        - timestamp
-                                        - size
+                                        - full_name
+
                         """
 
             Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
