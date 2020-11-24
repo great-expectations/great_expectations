@@ -10,12 +10,12 @@ import pandas as pd
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.execution_environment.types import (
+from great_expectations.datasource.types import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.execution_environment.util import S3Url
+from great_expectations.datasource.util import S3Url
 
 try:
     import boto3
@@ -25,7 +25,7 @@ except ImportError:
 from ..core.batch import BatchMarkers
 from ..core.id_dict import BatchSpec
 from ..exceptions import BatchSpecError, GreatExpectationsError, ValidationError
-from ..execution_environment.util import hash_pandas_dataframe
+from ..datasource.util import hash_pandas_dataframe
 from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 logger = logging.getLogger(__name__)

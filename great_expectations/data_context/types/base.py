@@ -96,7 +96,7 @@ class SorterConfigSchema(Schema):
     name = fields.String(required=True)
     class_name = fields.String(required=True)
     module_name = fields.String(
-        missing="great_expectations.execution_environment.data_connector.partitioner.sorter"
+        missing="great_expectations.datasource.data_connector.partitioner.sorter"
     )
     orderby = fields.String(required=False, missing="asc", allow_none=False)
 
@@ -157,7 +157,7 @@ class PartitionerConfigSchema(Schema):
 
     class_name = fields.String(required=True)
     module_name = fields.String(
-        missing="great_expectations.execution_environment.data_connector.partitioner"
+        missing="great_expectations.datasource.data_connector.partitioner"
     )
 
     sorters = fields.List(
@@ -233,7 +233,7 @@ class DataConnectorConfigSchema(Schema):
 
     class_name = fields.String(required=True)
     module_name = fields.String(
-        missing="great_expectations.execution_environment.data_connector"
+        missing="great_expectations.datasource.data_connector"
     )
 
     assets = fields.Dict(
@@ -358,7 +358,7 @@ class DatasourceConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(missing="Datasource")
-    module_name = fields.String(missing="great_expectations.execution_environment")
+    module_name = fields.String(missing="great_expectations.datasource")
     execution_engine = fields.Nested(ExecutionEngineConfigSchema)
 
     data_connectors = fields.Dict(
@@ -377,7 +377,7 @@ class DatasourceConfigSchema(Schema):
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_execution_environment_config(self, data, **kwargs):
+    def make_datasource_config(self, data, **kwargs):
         return DatasourceConfig(**data)
 
 

@@ -265,8 +265,8 @@ class BaseDataContext:
         # Store cached datasources but don't init them
         self._cached_datasources = {}  # TODO: deprecate
 
-        # Store cached execution_environments but don't init them
-        self._cached_execution_environments = {}
+        # Store cached datasources but don't init them
+        self._cached_datasources = {}
 
         # Init stores
         self._stores = dict()
@@ -663,13 +663,13 @@ class BaseDataContext:
         }
 
     @property
-    def execution_environments(self) -> Dict[str, Datasource]:
+    def datasources(self) -> Dict[str, Datasource]:
         """A single holder for all Datasources in this context"""
         return {
-            execution_environment: self.get_execution_environment(
-                execution_environment_name=execution_environment
+            datasource: self.get_datasource(
+                datasource_name=datasource
             )
-            for execution_environment in self._project_config_with_variables_substituted.execution_environments
+            for datasource in self._project_config_with_variables_substituted.datasources
         }
 
     @property
@@ -835,29 +835,29 @@ class BaseDataContext:
             else:
                 raise ValueError("Datasource {} not found".format(datasource_name))
 
-    def delete_execution_environment(self, execution_environment_name=None):
+    def delete_datasource(self, datasource_name=None):
         """Delete a data source
         Args:
-            execution_environment_name: The name of the execution_environment to delete.
+            datasource_name: The name of the datasource to delete.
 
         Raises:
-            ValueError: If the execution_environment name isn't provided or cannot be found.
+            ValueError: If the datasource name isn't provided or cannot be found.
         """
-        if execution_environment_name is None:
-            raise ValueError("Datasource names must be a execution_environment name")
+        if datasource_name is None:
+            raise ValueError("Datasource names must be a datasource name")
         else:
-            execution_environment = self.get_execution_environment(
-                execution_environment_name
+            datasource = self.get_datasource(
+                datasource_name
             )
-            if execution_environment:
+            if datasource:
                 # remove key until we have a delete method on project_config
-                # self._project_config_with_variables_substituted.execution_environments[
-                # execution_environment_name].remove()
-                # del self._project_config["execution_environments"][execution_environment_name]
-                del self._cached_execution_environments[execution_environment_name]
+                # self._project_config_with_variables_substituted.datasources[
+                # datasource_name].remove()
+                # del self._project_config["datasources"][datasource_name]
+                del self._cached_datasources[datasource_name]
             else:
                 raise ValueError(
-                    "Datasource {} not found".format(execution_environment_name)
+                    "Datasource {} not found".format(datasource_name)
                 )
 
     def get_available_data_asset_names(
@@ -979,17 +979,17 @@ class BaseDataContext:
     def get_batch_list_from_new_style_datasource(
         self, batch_request: dict
     ) -> List[Batch]:
-        execution_environment_name: str = batch_request.get(
-            "execution_environment_name"
+        datasource_name: str = batch_request.get(
+            "datasource_name"
         )
-        if not execution_environment_name:
+        if not datasource_name:
             raise ge_exceptions.DatasourceError(
-                message="Batch request must specify an execution_environment."
+                message="Batch request must specify an datasource."
             )
 
-        execution_environment: Datasource = self.datasources[execution_environment_name]
+        datasource: Datasource = self.datasources[datasource_name]
         batch_request: BatchRequest = BatchRequest(**batch_request)
-        return execution_environment.get_batch_list_from_batch_request(
+        return datasource.get_batch_list_from_batch_request(
             batch_request=batch_request
         )
 
@@ -1172,26 +1172,27 @@ class BaseDataContext:
 
         return datasource
 
-    def add_execution_environment(
-        self, execution_environment_name, execution_environment_config
-    ):
-        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
-
-        Args:
-            execution_environment_name (str): a key for the new Datasource in in self._datasources
-            execution_environment_config (dict): a config for the Datasource to add
-
-        Returns:
-            execution_environment (Datasource)
-        """
-
-        new_execution_environment = self._build_execution_environment_from_config(
-            execution_environment_name, execution_environment_config,
-        )
-        self._project_config["datasources"][
-            execution_environment_name
-        ] = execution_environment_config
-        return new_execution_environment
+    # TODO: <Alex></Alex>
+    # def add_datasource(
+    #     self, datasource_name, datasource_config
+    # ):
+    #     """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
+    #
+    #     Args:
+    #         datasource_name (str): a key for the new Datasource in in self._datasources
+    #         datasource_config (dict): a config for the Datasource to add
+    #
+    #     Returns:
+    #         datasource (Datasource)
+    #     """
+    #
+    #     new_datasource = self._build_datasource_from_config(
+    #         datasource_name, datasource_config,
+    #     )
+    #     self._project_config["datasources"][
+    #         datasource_name
+    #     ] = datasource_config
+    #     return new_datasource
 
     # TODO: deprecate
     def add_batch_kwargs_generator(
@@ -1271,34 +1272,35 @@ class BaseDataContext:
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
-    def _build_execution_environment_from_config(
-        self, name: str, config: dict,
-    ) -> Datasource:
-        module_name: str = "great_expectations.execution_environment"
-        runtime_environment: dict = {
-            "name": name,
-            "data_context_root_directory": self.root_directory,
-        }
-        new_execution_environment: Datasource = instantiate_class_from_config(
-            config=config,
-            runtime_environment=runtime_environment,
-            config_defaults={"module_name": module_name},
-        )
-
-        if not new_execution_environment:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=config["class_name"],
-            )
-
-        if not isinstance(new_execution_environment, BaseDatasource):
-            raise TypeError(
-                f"Newly instantiated component {name} is not an instance of BaseDatasource. Please check class_name in the config."
-            )
-
-        self._cached_datasources[name] = new_execution_environment
-        return new_execution_environment
+    # TODO: <Alex></Alex>
+    # def _build_datasource_from_config(
+    #     self, name: str, config: dict,
+    # ) -> Datasource:
+    #     module_name: str = "great_expectations.datasource"
+    #     runtime_environment: dict = {
+    #         "name": name,
+    #         "data_context_root_directory": self.root_directory,
+    #     }
+    #     new_datasource: Datasource = instantiate_class_from_config(
+    #         config=config,
+    #         runtime_environment=runtime_environment,
+    #         config_defaults={"module_name": module_name},
+    #     )
+    #
+    #     if not new_datasource:
+    #         raise ge_exceptions.ClassInstantiationError(
+    #             module_name=module_name,
+    #             package_name=None,
+    #             class_name=config["class_name"],
+    #         )
+    #
+    #     if not isinstance(new_datasource, BaseDatasource):
+    #         raise TypeError(
+    #             f"Newly instantiated component {name} is not an instance of BaseDatasource. Please check class_name in the config."
+    #         )
+    #
+    #     self._cached_datasources[name] = new_datasource
+    #     return new_datasource
 
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""
@@ -1326,22 +1328,22 @@ class BaseDataContext:
             datasources.append(value)
         return datasources
 
-    def list_execution_environments(self):
-        """List currently-configured execution_environments on this context.
+    def list_datasources(self):
+        """List currently-configured datasources on this context.
 
         Returns:
             List(dict): each dictionary includes "name", "class_name", and "module_name" keys
         """
-        execution_environments = []
+        datasources = []
         for (
             key,
             value,
         ) in (
-            self._project_config_with_variables_substituted.execution_environments.items()
+            self._project_config_with_variables_substituted.datasources.items()
         ):
             value["name"] = key
-            execution_environments.append(value)
-        return execution_environments
+            datasources.append(value)
+        return datasources
 
     def list_stores(self):
         """List currently-configured Stores on this context"""
@@ -2532,20 +2534,21 @@ class DataContext(BaseDataContext):
 
         return delete_datasource
 
-    def add_execution_environment(
-        self, execution_environment_name, execution_environment_config
-    ):
-        logger.debug(
-            "Starting DataContext.add_execution_environment for execution_environment %s"
-            % execution_environment_name
-        )
-
-        new_execution_environment = super().add_execution_environment(
-            execution_environment_name, execution_environment_config
-        )
-        self._save_project_config()
-
-        return new_execution_environment
+    # TODO: <Alex></Alex>
+    # def add_datasource(
+    #     self, datasource_name, datasource_config
+    # ):
+    #     logger.debug(
+    #         "Starting DataContext.add_datasource for datasource %s"
+    #         % datasource_name
+    #     )
+    #
+    #     new_datasource = super().add_datasource(
+    #         datasource_name, datasource_config
+    #     )
+    #     self._save_project_config()
+    #
+    #     return new_datasource
 
     @classmethod
     def find_context_root_dir(cls):

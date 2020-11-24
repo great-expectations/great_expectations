@@ -1595,12 +1595,12 @@ data_connectors:
 """
 
     config = yaml.load(yaml_config)
-    context.add_execution_environment(
+    context.add_datasource(
         "my_directory_datasource", config,
     )
 
     my_validator = context.get_validator(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         partition_identifiers={"alphanumeric": "some_file",},
@@ -1641,12 +1641,12 @@ data_connectors:
 """
 
     config = yaml.load(yaml_config)
-    context.add_execution_environment(
+    context.add_datasource(
         "my_directory_datasource", config,
     )
 
     my_validator = context.get_validator(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         partition_identifiers={"alphanumeric": "some_file",},

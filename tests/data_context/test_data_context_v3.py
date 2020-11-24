@@ -87,7 +87,7 @@ data_connectors:
     # print(context.datasources)
 
     my_batch = context.get_batch(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         batch_spec_passthrough={
@@ -116,7 +116,7 @@ data_connectors:
     )
 
     my_batch = context.get_batch(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         batch_spec_passthrough={

@@ -73,7 +73,7 @@ store_backend:
     )
 
 
-def test_execution_environment_config(empty_data_context_v3):
+def test_datasource_config(empty_data_context_v3):
     temp_dir = str(tempfile.mkdtemp())
     create_files_in_directory(
         directory=temp_dir,
@@ -218,10 +218,10 @@ introspection:
             n: ${sampling_n}
 """
 
-    my_execution_environment = context.test_yaml_config(first_config)
+    my_datasource = context.test_yaml_config(first_config)
     assert (
         "test_cases_for_sql_data_connector.db"
-        in my_execution_environment.execution_engine.connection_string
+        in my_datasource.execution_engine.connection_string
     )
 
     report_object = context.test_yaml_config(first_config, return_mode="report_object")
@@ -233,7 +233,7 @@ introspection:
     }
 
 
-def test_golden_path_sql_execution_environment_configuration(
+def test_golden_path_sql_datasource_configuration(
     sa, empty_data_context_v3, test_connectable_postgresql_db
 ):
     """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
@@ -278,7 +278,7 @@ introspection:
         )
 
     my_validator = context.get_validator(
-        execution_environment_name="my_datasource",
+        datasource_name="my_datasource",
         data_connector_name="whole_table_with_limits",
         data_asset_name="test_df",
         expectation_suite=ExpectationSuite("my_expectation_suite"),
@@ -297,7 +297,7 @@ introspection:
     # assert my_evr.success
 
 
-def test_golden_path_inferred_asset_pandas_execution_environment_configuration(
+def test_golden_path_inferred_asset_pandas_datasource_configuration(
     empty_data_context_v3, test_df, tmp_path_factory
 ):
     """
@@ -305,7 +305,7 @@ def test_golden_path_inferred_asset_pandas_execution_environment_configuration(
     """
     base_directory = str(
         tmp_path_factory.mktemp(
-            "test_golden_path_pandas_execution_environment_configuration"
+            "test_golden_path_pandas_datasource_configuration"
         )
     )
 
@@ -365,7 +365,7 @@ data_connectors:
     # print(context.datasources)
 
     my_batch = context.get_batch(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         partition_identifiers={"number": "2",},
@@ -397,13 +397,13 @@ data_connectors:
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         my_batch = context.get_batch(
-            execution_environment_name="my_directory_datasource",
+            datasource_name="my_directory_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="DOES_NOT_EXIST",
         )
 
     my_validator = context.get_validator(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
         partition_request={"partition_identifiers": {"number": "3"}},
@@ -426,7 +426,7 @@ data_connectors:
     # assert my_evr.success
 
 
-def test_golden_path_configured_asset_pandas_execution_environment_configuration(
+def test_golden_path_configured_asset_pandas_datasource_configuration(
     empty_data_context_v3, test_df, tmp_path_factory
 ):
     """
@@ -434,7 +434,7 @@ def test_golden_path_configured_asset_pandas_execution_environment_configuration
     """
     base_directory = str(
         tmp_path_factory.mktemp(
-            "test_golden_path_pandas_execution_environment_configuration"
+            "test_golden_path_pandas_datasource_configuration"
         )
     )
 
@@ -520,7 +520,7 @@ data_connectors:
     # print(context.datasources)
 
     my_batch = context.get_batch(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         partition_identifiers={"number": "2",},
@@ -552,13 +552,13 @@ data_connectors:
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         my_batch = context.get_batch(
-            execution_environment_name="my_directory_datasource",
+            datasource_name="my_directory_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="DOES_NOT_EXIST",
         )
 
     my_validator = context.get_validator(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="C",
         partition_request={"partition_identifiers": {"year": "2019"}},

@@ -15,11 +15,11 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
 )
-from great_expectations.execution_environment.data_connector import (
+from great_expectations.datasource.data_connector import (
     ConfiguredAssetS3DataConnector,
     InferredAssetS3DataConnector,
 )
-from great_expectations.execution_environment.types.batch_spec import (
+from great_expectations.datasource.types.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
@@ -318,7 +318,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
 
     my_data_connector = ConfiguredAssetS3DataConnector(
         name="my_data_connector",
-        execution_environment_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
+        datasource_name="FAKE_EXECUTION_ENVIRONMENT_NAME",
         default_regex={"pattern": "alpha-(.*)\\.csv", "group_names": ["index"],},
         bucket=bucket,
         prefix="",
