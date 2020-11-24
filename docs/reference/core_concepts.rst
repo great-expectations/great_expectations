@@ -77,6 +77,8 @@ A **Batch** is reference to a set of data, with metadata about it. *The Batch is
    :maxdepth: 2
 
    /reference/core_concepts/datasource.rst
+   /reference/core_concepts/partitioning.rst
+
 
 .. _reference__core_concepts__validation:
 
