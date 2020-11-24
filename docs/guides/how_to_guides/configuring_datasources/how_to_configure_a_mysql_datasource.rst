@@ -19,11 +19,11 @@ Steps
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
           - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-          - Obtained database credentials for mysql, including username, password, hostname, and database.
+          - Obtained database credentials for MySql, including username, password, hostname, and database.
 
         #. **Install the required modules**
 
-            If you have not already done so, install required modules for connecting to mysql.
+            If you have not already done so, install required modules for connecting to MySql.
 
             .. code-block:: bash
 
@@ -113,13 +113,13 @@ Steps
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
             - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
-            - Obtained database credentials for mysql, including username, password, hostname, and database.
+            - Obtained database credentials for MySql, including username, password, hostname, and database.
 
         To add a MySql datasource, do the following:
 
         #. **Install the required modules**
 
-            If you have not already done so, install required modules for connecting to mysql.
+            If you have not already done so, install required modules for connecting to MySql.
 
             .. code-block:: bash
 
@@ -202,7 +202,7 @@ Steps
                 3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance\r
                 4        5  Father of the Bride Part II (1995)                                       Comedy\r
 
-             This means all has went well and you can proceed with exploring the data sets in your new mysql data source.
+             This means all has went well and you can proceed with exploring the data sets in your new MySql datasource.
 
             **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
