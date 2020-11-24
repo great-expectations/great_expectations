@@ -37,7 +37,7 @@ def test_add_execution_environment(empty_data_context):
     assert "my_new_execution_environment" not in context.datasources
     assert "my_new_execution_environment" not in read_config_from_file(config_filename)
 
-    # Config doesn't instantiate an ExecutionEnvironment
+    # Config doesn't instantiate an Datasource
     with pytest.raises(TypeError):
         context.add_execution_environment(
             "my_new_execution_environment",
@@ -49,11 +49,11 @@ def test_add_execution_environment(empty_data_context):
     assert "my_new_execution_environment" not in context.datasources
     assert "my_new_execution_environment" not in read_config_from_file(config_filename)
 
-    # Config successfully instantiates an ExecutionEnvironment
+    # Config successfully instantiates an Datasource
     context.add_execution_environment(
         "my_new_execution_environment",
         {
-            "class_name": "ExecutionEnvironment",
+            "class_name": "Datasource",
             "execution_engine": {"class_name": "PandasExecutionEngine"},
             "data_connectors": {
                 "test_runtime_data_connector": {

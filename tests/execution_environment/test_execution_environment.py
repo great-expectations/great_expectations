@@ -18,7 +18,7 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
-from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment import Datasource
 from great_expectations.execution_environment.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
@@ -33,10 +33,10 @@ def basic_execution_environment(tmp_path_factory):
         tmp_path_factory.mktemp("basic_execution_environment_filesystem_data_connector")
     )
 
-    basic_execution_environment: ExecutionEnvironment = instantiate_class_from_config(
+    basic_execution_environment: Datasource = instantiate_class_from_config(
         yaml.load(
             f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -84,10 +84,10 @@ def sample_execution_environment_with_single_partition_file_data_connector(
         )
     )
 
-    sample_execution_environment: ExecutionEnvironment = instantiate_class_from_config(
+    sample_execution_environment: Datasource = instantiate_class_from_config(
         yaml.load(
             f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -445,7 +445,7 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
 def test_get_available_data_asset_names_with_single_partition_file_data_connector(
     sample_execution_environment_with_single_partition_file_data_connector,
 ):
-    execution_environment: ExecutionEnvironment = sample_execution_environment_with_single_partition_file_data_connector
+    execution_environment: Datasource = sample_execution_environment_with_single_partition_file_data_connector
     data_connector_names: Optional[Union[List, str]] = None
 
     # Call "get_batch_list_from_batch_request()" to fill up the caches

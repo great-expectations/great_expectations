@@ -316,7 +316,7 @@ class ExecutionEngineConfigSchema(Schema):
         return ExecutionEngineConfig(**data)
 
 
-class ExecutionEnvironmentConfig(DictDot):
+class DatasourceConfig(DictDot):
     def __init__(
         self,
         class_name=None,
@@ -353,11 +353,11 @@ class ExecutionEnvironmentConfig(DictDot):
         return self._module_name
 
 
-class ExecutionEnvironmentConfigSchema(Schema):
+class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(missing="ExecutionEnvironment")
+    class_name = fields.String(missing="Datasource")
     module_name = fields.String(missing="great_expectations.execution_environment")
     execution_engine = fields.Nested(ExecutionEngineConfigSchema)
 
@@ -378,7 +378,7 @@ class ExecutionEnvironmentConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @post_load
     def make_execution_environment_config(self, data, **kwargs):
-        return ExecutionEnvironmentConfig(**data)
+        return DatasourceConfig(**data)
 
 
 class LegacyDatasourceConfig(DictDot):
@@ -735,7 +735,7 @@ class DataContextConfigSchema(Schema):
     )
     execution_environments = fields.Dict(
         keys=fields.Str(),
-        values=fields.Nested(ExecutionEnvironmentConfigSchema),
+        values=fields.Nested(DatasourceConfigSchema),
         allow_none=True,
     )
     expectations_store_name = fields.Str()
@@ -800,7 +800,7 @@ class DataContextConfigSchema(Schema):
 
 dataContextConfigSchema = DataContextConfigSchema()
 legacyDatasourceConfigSchema = LegacyDatasourceConfigSchema()
-executionEnvironmentConfigSchema = ExecutionEnvironmentConfigSchema()
+datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
 assetConfigSchema = AssetConfigSchema()
 partitionerConfigSchema = PartitionerConfigSchema()

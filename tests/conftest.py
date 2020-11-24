@@ -31,7 +31,7 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment import Datasource
 from great_expectations.util import import_library_module
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
@@ -3054,7 +3054,7 @@ def data_context_with_sql_execution_environment_for_testing_get_batch(
 
     config = yaml.load(
         f"""
-class_name: StreamlinedSqlExecutionEnvironment
+class_name: StreamlinedSqlDatasource
 connection_string: sqlite:///{db_file}
 """
         + """
@@ -3095,10 +3095,10 @@ def basic_execution_environment(tmp_path_factory):
         tmp_path_factory.mktemp("basic_execution_environment_runtime_data_connector")
     )
 
-    basic_execution_environment: ExecutionEnvironment = instantiate_class_from_config(
+    basic_execution_environment: Datasource = instantiate_class_from_config(
         config=yaml.load(
             f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 data_connectors:
     test_runtime_data_connector:

@@ -47,11 +47,11 @@ from great_expectations.data_context.types.base import (  # TODO: deprecate
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     LegacyDatasourceConfig,
-    ExecutionEnvironmentConfig,
+    DatasourceConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     legacyDatasourceConfigSchema,
-    executionEnvironmentConfigSchema,
+    datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -68,8 +68,8 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource  # TODO: deprecate
 from great_expectations.exceptions import DataContextError
 from great_expectations.execution_environment import (
-    BaseExecutionEnvironment,
-    ExecutionEnvironment,
+    BaseDatasource,
+    Datasource,
 )
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
@@ -666,8 +666,8 @@ class BaseDataContext:
         }
 
     @property
-    def execution_environments(self) -> Dict[str, ExecutionEnvironment]:
-        """A single holder for all ExecutionEnvironments in this context"""
+    def execution_environments(self) -> Dict[str, Datasource]:
+        """A single holder for all Datasources in this context"""
         return {
             execution_environment: self.get_execution_environment(
                 execution_environment_name=execution_environment
@@ -848,7 +848,7 @@ class BaseDataContext:
         """
         if execution_environment_name is None:
             raise ValueError(
-                "ExecutionEnvironment names must be a execution_environment name"
+                "Datasource names must be a execution_environment name"
             )
         else:
             execution_environment = self.get_execution_environment(
@@ -862,7 +862,7 @@ class BaseDataContext:
                 del self._cached_execution_environments[execution_environment_name]
             else:
                 raise ValueError(
-                    "ExecutionEnvironment {} not found".format(
+                    "Datasource {} not found".format(
                         execution_environment_name
                     )
                 )
@@ -990,11 +990,11 @@ class BaseDataContext:
             "execution_environment_name"
         )
         if not execution_environment_name:
-            raise ge_exceptions.ExecutionEnvironmentError(
+            raise ge_exceptions.DatasourceError(
                 message="Batch request must specify an execution_environment."
             )
 
-        execution_environment: ExecutionEnvironment = self.datasources[
+        execution_environment: Datasource = self.datasources[
             execution_environment_name
         ]
         batch_request: BatchRequest = BatchRequest(**batch_request)
@@ -1187,11 +1187,11 @@ class BaseDataContext:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
-            execution_environment_name (str): a key for the new ExecutionEnvironment in in self._datasources
-            execution_environment_config (dict): a config for the ExecutionEnvironment to add
+            execution_environment_name (str): a key for the new Datasource in in self._datasources
+            execution_environment_config (dict): a config for the Datasource to add
 
         Returns:
-            execution_environment (ExecutionEnvironment)
+            execution_environment (Datasource)
         """
 
         new_execution_environment = self._build_execution_environment_from_config(
@@ -1282,13 +1282,13 @@ class BaseDataContext:
 
     def _build_execution_environment_from_config(
         self, name: str, config: dict,
-    ) -> ExecutionEnvironment:
+    ) -> Datasource:
         module_name: str = "great_expectations.execution_environment"
         runtime_environment: dict = {
             "name": name,
             "data_context_root_directory": self.root_directory,
         }
-        new_execution_environment: ExecutionEnvironment = instantiate_class_from_config(
+        new_execution_environment: Datasource = instantiate_class_from_config(
             config=config,
             runtime_environment=runtime_environment,
             config_defaults={"module_name": module_name},
@@ -1301,9 +1301,9 @@ class BaseDataContext:
                 class_name=config["class_name"],
             )
 
-        if not isinstance(new_execution_environment, BaseExecutionEnvironment):
+        if not isinstance(new_execution_environment, BaseDatasource):
             raise TypeError(
-                f"Newly instantiated component {name} is not an instance of BaseExecutionEnvironment. Please check class_name in the config."
+                f"Newly instantiated component {name} is not an instance of BaseDatasource. Please check class_name in the config."
             )
 
         self._cached_datasources[name] = new_execution_environment
@@ -1699,7 +1699,7 @@ class BaseDataContext:
 
         These make it simple to visualize data quality in your project. These
         include Expectations, Validations & Profiles. The are built for all
-        ExecutionEnvironments from JSON artifacts in the local repo including validations
+        Datasources from JSON artifacts in the local repo including validations
         & profiles from the uncommitted directory.
 
         :param site_names: if specified, build data docs only for these sites, otherwise,

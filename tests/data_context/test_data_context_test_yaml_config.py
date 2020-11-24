@@ -94,7 +94,7 @@ def test_execution_environment_config(empty_data_context_v3):
 
     return_obj = empty_data_context_v3.test_yaml_config(
         yaml_config=f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -141,7 +141,7 @@ data_connectors:
 def test_error_states(empty_data_context_v3):
 
     first_config = """
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: NOT_A_REAL_CLASS_NAME
@@ -162,7 +162,7 @@ execution_engine:
     # For good measure, do it again, with a different config and a different type of error
     temp_dir = str(tempfile.mkdtemp())
     second_config = f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -207,7 +207,7 @@ def test_config_variables_in_test_yaml_config(empty_data_context_v3, sa):
     print(context.config_variables)
 
     first_config = """
-class_name: StreamlinedSqlExecutionEnvironment
+class_name: StreamlinedSqlDatasource
 connection_string: sqlite:///${db_file}
 
 introspection:
@@ -236,7 +236,7 @@ introspection:
 def test_golden_path_sql_execution_environment_configuration(
     sa, empty_data_context_v3, test_connectable_postgresql_db
 ):
-    """Tests the golden path for setting up a StreamlinedSQLExecutionEnvironment using test_yaml_config"""
+    """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
     context = empty_data_context_v3
 
     os.chdir(context.root_directory)
@@ -247,7 +247,7 @@ def test_golden_path_sql_execution_environment_configuration(
     context = ge.get_context()
 
     yaml_config = """
-class_name: StreamlinedSqlExecutionEnvironment
+class_name: StreamlinedSqlDatasource
 credentials:
     drivername: postgresql
     username: postgres
@@ -336,7 +336,7 @@ def test_golden_path_inferred_asset_pandas_execution_environment_configuration(
     context = ge.get_context()
 
     yaml_config = f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -467,7 +467,7 @@ def test_golden_path_configured_asset_pandas_execution_environment_configuration
     context = ge.get_context()
 
     yaml_config = f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine

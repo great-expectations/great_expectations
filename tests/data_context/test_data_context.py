@@ -1577,7 +1577,7 @@ def test_get_validator_with_instantiated_expectation_suite(
     )
 
     yaml_config = f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -1623,7 +1623,7 @@ def test_get_validator_with_attach_expectation_suite(
     )
 
     yaml_config = f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine

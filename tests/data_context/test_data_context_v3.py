@@ -59,7 +59,7 @@ def test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas
     context = empty_data_context_v3
 
     yaml_config = f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine

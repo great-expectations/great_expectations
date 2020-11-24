@@ -17,10 +17,10 @@ class DataConnector:
     DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
     can use to get individual batches of data. They add flexibility in how to obtain data
     such as with time-based partitioning, downsampling, or other techniques appropriate
-    for the ExecutionEnvironment.
+    for the Datasource.
 
     For example, a DataConnector could produce a SQL query that logically represents "rows in
-    the Events table with a timestamp on February 7, 2012," which a SqlAlchemyExecutionEnvironment
+    the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource
     could use to materialize a SqlAlchemyDataset corresponding to that batch of data and
     ready for validation.
 
@@ -29,7 +29,7 @@ class DataConnector:
 
     A Batch is the primary unit of validation in the Great Expectations DataContext.
     Batches include metadata that identifies how they were constructed--the same “batch_spec”
-    assembled by the data connector, While not every ExecutionEnvironment will enable re-fetching a
+    assembled by the data connector, While not every Datasource will enable re-fetching a
     specific batch of data, GE can store snapshots of batches or store metadata from an
     external data version control system.
     """

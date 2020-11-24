@@ -18,7 +18,7 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
-from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment import Datasource
 from great_expectations.execution_environment.data_connector import (
     DataConnector,
     InferredAssetFilesystemDataConnector,
@@ -77,7 +77,7 @@ def basic_files_dataconnector_yaml(tmp_path_factory):
 def basic_datasource(basic_files_dataconnector_yaml):
     my_datasource_yaml = f"""
 module_name: great_expectations.execution_environment.execution_environment
-class_name: ExecutionEnvironment
+class_name: Datasource
 execution_engine:
     class_name: PandasExecutionEngine
 data_connectors:
@@ -86,7 +86,7 @@ data_connectors:
 
     my_datasource_loaded_yaml = yaml.load(my_datasource_yaml, Loader=yaml.FullLoader)
 
-    my_datasource: ExecutionEnvironment = instantiate_class_from_config(
+    my_datasource: Datasource = instantiate_class_from_config(
         config=my_datasource_loaded_yaml,
         runtime_environment={
             "name": "general_data_source",
@@ -100,7 +100,7 @@ data_connectors:
 
 
 def test_stub(basic_datasource):
-    assert isinstance(basic_datasource, ExecutionEnvironment)
+    assert isinstance(basic_datasource, Datasource)
 
     # TODO : see if empty BatchRequest can be used to return full batch_list
     # batch_list = basic_datasource.get_batch_list_from_batch_request(BatchRequest(data_connector_name="my_connector"))

@@ -161,11 +161,11 @@ class DataContextV3(DataContext):
                 )
 
             elif class_name in [
-                "ExecutionEnvironment",
-                "StreamlinedSqlExecutionEnvironment",
+                "Datasource",
+                "StreamlinedSqlDatasource",
             ]:
                 print(
-                    f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}"
+                    f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
                 execution_environment_name = name or "my_temp_execution_environment"
                 instantiated_class = self._build_execution_environment_from_config(
@@ -291,10 +291,10 @@ class DataContextV3(DataContext):
                     pass
 
                 # Currently, the implementation of splitting and sampling is inconsistent between the
-                # ExecutionEnvironment and StreamlinedSqlExecutionEnvironment classes.  The former communicates these
+                # Datasource and StreamlinedSqlDatasource classes.  The former communicates these
                 # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
                 # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
-                # StreamlinedSqlExecutionEnvironment uses "PartitionRequest" to relay the splitting and sampling
+                # StreamlinedSqlDatasource uses "PartitionRequest" to relay the splitting and sampling
                 # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
                 # of partitions is implemented using the PartitionQuery class, it will not recognized the keys
                 # representing the splitting and sampling directives and raise an exception.  Additional work is needed

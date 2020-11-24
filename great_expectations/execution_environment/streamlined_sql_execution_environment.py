@@ -1,15 +1,15 @@
 import copy
 import logging
 
-from great_expectations.execution_environment import BaseExecutionEnvironment
+from great_expectations.execution_environment import BaseDatasource
 
 logger = logging.getLogger(__name__)
 
 
-class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
-    """A specialized ExecutionEnvironment for SQL backends
+class StreamlinedSqlDatasource(BaseDatasource):
+    """A specialized Datasource for SQL backends
 
-    StreamlinedSqlExecutionEnvironment is designed to minimize boilerplate configuration and new concepts
+    StreamlinedSqlDatasource is designed to minimize boilerplate configuration and new concepts
     """
 
     def __init__(
@@ -44,7 +44,7 @@ class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
         self._execution_environment_config = {}
 
     # noinspection PyMethodOverriding
-    # Note: This method is meant to overwrite ExecutionEnvironment._init_data_connectors (dispite signature mismatch).
+    # Note: This method is meant to overwrite Datasource._init_data_connectors (dispite signature mismatch).
     def _init_data_connectors(
         self, introspection_configs: dict, table_configs: dict,
     ):

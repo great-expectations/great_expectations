@@ -19,7 +19,7 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
     config = yaml.load(
         """
     name: my_sql_data_connector
-    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+    execution_environment_name: FAKE_Datasource_NAME
 
     data_assets:
         table_partitioned_by_date_column__A:
@@ -73,7 +73,7 @@ def test_get_batch_definition_list_from_batch_request(
     config = yaml.load(
         """
     name: my_sql_data_connector
-    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+    execution_environment_name: FAKE_Datasource_NAME
 
     data_assets:
         table_partitioned_by_date_column__A:
@@ -90,7 +90,7 @@ def test_get_batch_definition_list_from_batch_request(
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=BatchRequest(
-            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+            execution_environment_name="FAKE_Datasource_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request={"partition_identifiers": {"date": "2020-01-01"}},
@@ -100,7 +100,7 @@ def test_get_batch_definition_list_from_batch_request(
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=BatchRequest(
-            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+            execution_environment_name="FAKE_Datasource_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request={"partition_identifiers": {}},
@@ -115,7 +115,7 @@ def test_get_batch_definition_list_from_batch_request(
     # with pytest.raises(DataConnectorError) as e:
     #     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
     #         batch_request=BatchRequest(
-    #             execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+    #             execution_environment_name="FAKE_Datasource_NAME",
     #             data_connector_name="my_sql_data_connector",
     #             data_asset_name="table_partitioned_by_date_column__A",
     #             partition_request={
@@ -127,7 +127,7 @@ def test_get_batch_definition_list_from_batch_request(
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=BatchRequest(
-            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+            execution_environment_name="FAKE_Datasource_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
         )
@@ -137,7 +137,7 @@ def test_get_batch_definition_list_from_batch_request(
     with pytest.raises(KeyError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
-                execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+                execution_environment_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
             )
         )
@@ -145,7 +145,7 @@ def test_get_batch_definition_list_from_batch_request(
     with pytest.raises(KeyError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
-                execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+                execution_environment_name="FAKE_Datasource_NAME",
             )
         )
 
@@ -162,7 +162,7 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
     config = yaml.load(
         """
     name: my_sql_data_connector
-    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+    execution_environment_name: FAKE_Datasource_NAME
 
     data_assets:
         table_partitioned_by_date_column__A:
@@ -214,7 +214,7 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
     config = yaml.load(
         """
     name: my_sql_data_connector
-    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+    execution_environment_name: FAKE_Datasource_NAME
 
     data_assets:
         table_partitioned_by_timestamp_column__B:
@@ -265,7 +265,7 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     config = yaml.load(
         """
     name: my_sql_data_connector
-    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+    execution_environment_name: FAKE_Datasource_NAME
 
     data_assets:
         table_partitioned_by_regularly_spaced_incrementing_id_column__C:
@@ -315,7 +315,7 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
     config = yaml.load(
         """
     name: my_sql_data_connector
-    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+    execution_environment_name: FAKE_Datasource_NAME
 
     data_assets:
         table_partitioned_by_incrementing_batch_id__E:
@@ -366,7 +366,7 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
     config = yaml.load(
         """
     name: my_sql_data_connector
-    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+    execution_environment_name: FAKE_Datasource_NAME
 
     data_assets:
         table_partitioned_by_foreign_key__F:
@@ -418,7 +418,7 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
     config = yaml.load(
         """
     name: my_sql_data_connector
-    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+    execution_environment_name: FAKE_Datasource_NAME
 
     data_assets:
         table_partitioned_by_multiple_columns__G:
@@ -476,7 +476,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
     # config = yaml.load("""
     # name: my_sql_data_connector
-    # execution_environment_name: FAKE_ExecutionEnvironment_NAME
+    # execution_environment_name: FAKE_Datasource_NAME
 
     # data_assets:
     #     table_that_should_be_partitioned_by_random_hash__H:
@@ -681,7 +681,7 @@ def test_default_behavior_with_no_splitter(
     config = yaml.load(
         """
     name: my_sql_data_connector
-    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+    execution_environment_name: FAKE_Datasource_NAME
 
     data_assets:
         table_partitioned_by_date_column__A: {}
@@ -695,7 +695,7 @@ def test_default_behavior_with_no_splitter(
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         BatchRequest(
-            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+            execution_environment_name="FAKE_Datasource_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
         )
@@ -705,7 +705,7 @@ def test_default_behavior_with_no_splitter(
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         BatchRequest(
-            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+            execution_environment_name="FAKE_Datasource_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request={},
@@ -716,7 +716,7 @@ def test_default_behavior_with_no_splitter(
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         BatchRequest(
-            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+            execution_environment_name="FAKE_Datasource_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request={"partition_identifiers": {}},
@@ -734,7 +734,7 @@ def test_behavior_with_whole_table_splitter(
     config = yaml.load(
         """
     name: my_sql_data_connector
-    execution_environment_name: FAKE_ExecutionEnvironment_NAME
+    execution_environment_name: FAKE_Datasource_NAME
 
     data_assets:
         table_partitioned_by_date_column__A:
@@ -750,7 +750,7 @@ def test_behavior_with_whole_table_splitter(
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         BatchRequest(
-            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+            execution_environment_name="FAKE_Datasource_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
         )
@@ -760,7 +760,7 @@ def test_behavior_with_whole_table_splitter(
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         BatchRequest(
-            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+            execution_environment_name="FAKE_Datasource_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request={},
@@ -771,7 +771,7 @@ def test_behavior_with_whole_table_splitter(
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         BatchRequest(
-            execution_environment_name="FAKE_ExecutionEnvironment_NAME",
+            execution_environment_name="FAKE_Datasource_NAME",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request={"partition_identifiers": {}},

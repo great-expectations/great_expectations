@@ -17,9 +17,9 @@ from great_expectations.execution_environment.types import PathBatchSpec
 logger = logging.getLogger(__name__)
 
 
-class BaseExecutionEnvironment:
+class BaseDatasource:
     """
-    An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
+    An Datasource is the glue between an ExecutionEngine and a DataConnector.
     """
 
     recognized_batch_parameters: set = {"limit"}
@@ -31,7 +31,7 @@ class BaseExecutionEnvironment:
         data_context_root_directory: Optional[str] = None,
     ):
         """
-        Build a new ExecutionEnvironment.
+        Build a new Datasource.
 
         Args:
             name: the name for the datasource
@@ -281,7 +281,7 @@ class BaseExecutionEnvironment:
         ):
             raise ValueError(
                 f"""execution_envrironment_name in BatchRequest: "{batch_request.execution_environment_name}" does not
-                match ExecutionEnvironment name: "{self.name}".
+                match Datasource name: "{self.name}".
                 """
             )
 
@@ -305,9 +305,9 @@ class BaseExecutionEnvironment:
         return copy.deepcopy(self._execution_environment_config)
 
 
-class ExecutionEnvironment(BaseExecutionEnvironment):
+class Datasource(BaseDatasource):
     """
-    An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
+    An Datasource is the glue between an ExecutionEngine and a DataConnector.
     """
 
     recognized_batch_parameters: set = {"limit"}
@@ -320,7 +320,7 @@ class ExecutionEnvironment(BaseExecutionEnvironment):
         data_context_root_directory: Optional[str] = None,
     ):
         """
-        Build a new ExecutionEnvironment with data connectors.
+        Build a new Datasource with data connectors.
 
         Args:
             name: the name for the datasource

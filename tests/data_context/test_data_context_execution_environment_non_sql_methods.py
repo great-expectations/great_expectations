@@ -35,7 +35,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_execution_env
 
     config = yaml.load(
         f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -112,7 +112,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_execution_env
 
     config = yaml.load(
         f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine

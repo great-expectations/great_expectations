@@ -28,7 +28,7 @@ class BatchMarkers(BatchSpec):
         return self.get("ge_load_time")
 
 
-class PandasExecutionEnvironmentBatchSpec(BatchSpec, metaclass=ABCMeta):
+class PandasDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
@@ -36,7 +36,7 @@ class PandasExecutionEnvironmentBatchSpec(BatchSpec, metaclass=ABCMeta):
     pass
 
 
-class SparkDFExecutionEnvironmentBatchSpec(BatchSpec, metaclass=ABCMeta):
+class SparkDFDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
@@ -44,7 +44,7 @@ class SparkDFExecutionEnvironmentBatchSpec(BatchSpec, metaclass=ABCMeta):
     pass
 
 
-class SqlAlchemyExecutionEnvironmentBatchSpec(BatchSpec, metaclass=ABCMeta):
+class SqlAlchemyDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
@@ -59,7 +59,7 @@ class SqlAlchemyExecutionEnvironmentBatchSpec(BatchSpec, metaclass=ABCMeta):
 
 
 class PathBatchSpec(
-    PandasExecutionEnvironmentBatchSpec, SparkDFExecutionEnvironmentBatchSpec
+    PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec
 ):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -76,7 +76,7 @@ class PathBatchSpec(
 
 
 class S3BatchSpec(
-    PandasExecutionEnvironmentBatchSpec, SparkDFExecutionEnvironmentBatchSpec
+    PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec
 ):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
