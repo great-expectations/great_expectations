@@ -185,10 +185,6 @@ Steps
 
                 Attempting to instantiate class from config...
                 Instantiating as a ExecutionEnvironment, since class_name is ExecutionEnvironment
-                20/11/19 17:21:45 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-                Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
-                Setting default log level to "WARN".
-                To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
                 Instantiating class from config without an explicit class_name is dangerous. Consider adding an explicit class_name for None
                     Successfully instantiated ExecutionEnvironment
 
