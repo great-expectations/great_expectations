@@ -1,11 +1,14 @@
 The Definitive Checklist to Building Your Own Custom Expectations
 _________________________________________________________________
 
+This guide will walk you through the process of creating your own Modular Expectations in 6 simple steps! 
 
-In 0.13, building a custom Expectation is far easier than ever before  - a new Modular structure to Expectations has allowed 
-GE to remove much of the boilerplate that once hampered the implementation of a custom Expectation (for a far more detailed look, 
-please read *An Introductory Reference Guide to Modular Expectation Logic*). Now, we walk through the process of implementing our own
-modular expectations!
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+  
+A Modular Expectation is the new style Expectation, one that utilizes a Class Structure. The Expectation classes are significantly easier to build than
+ever before and are explained below!
 
 
 Steps:
@@ -17,16 +20,14 @@ _____
 
    Once you’ve decided on an Expectation to implement, think of the different aggregations, mappings, or metadata you’ll need to validate your data within the Expectation - each of these will be a separate metric that must be implemented prior to validating your Expectation. 
 
-   For example, in trying to compute a Z-score for each one of a column’s values and validating that it is between a min and max threshold, one would need to compute: the mean, the standard deviation, the z-score itself (which depends on the mean and standard deviation), and then check whether the z-scores are between the thresholds - all of which are separate metrics. 
-
-   Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is very possible you will find that the Metric you’d like to implement already exists within the GE framework and can be readily deployed within your Expectation. Even if it doesn’t, it is always worthwhile to check!
+   Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is very possible you will find that the Metric you’d like to implement already exists within the GE framework and can be readily deployed.
 
 
 #. **Implement your Metric (Sometimes)**
 
    If your metric does not yet exist within the framework, you will need to implement it yourself within a new file - a task that is quick and simple within the new modular framework. 
 
-   Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark dialects (other implementations can be found in the dictionary of metrics):
+   Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark dialects (other implementations can be found in the dictionary of metrics). You can find Metric Naming Conventions (insert link here)
 
 
 .. code-block:: python
@@ -76,7 +77,6 @@ _____
    
    - **Metric Dependencies** - A tuple consisting of the names of all metrics necessary to evaluate the Expectation.
    - **Success Keys** - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
-      - Examples: Thresholds, Value Sets to validate data against, etc.
    - **Default Kwarg Values (Optional)**  -  Default values for success keys and the defined domain, among other values.
    
    An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class and building our Expectation in a separate file from our Metric):
@@ -108,9 +108,7 @@ _____
 
    We have almost reached the end of our journey in implementing an Expectation! Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a validate_configuration method. 
 
-   In this method, given a configuration the user has provided, we check that certain conditions are satisfied by the configuration. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold.
-
-   An example is shown below:
+   In this method, given a configuration the user has provided, we check that certain conditions are satisfied by the configuration. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold:
 
 
 .. code-block:: python
@@ -164,9 +162,9 @@ _____
 
 5. **Validate (Sometimes)**
 
-   In this final step, we simply need to validate that the results of our metrics meet our Expectations. For Expectations of type ColumnMapDatasetExpectation, which maps a column to a boolean series by asking questions that are fundamentally boolean in nature (Ex: are my column values nonnull?), this is implemented automatically by the GE machinery and does not require user implementation. If your data inquiry can be summed up by a true or false question, feel free to skip this step.
+   In this step, we simply need to validate that the results of our metrics meet our Expectation.
 
-   The validate method is implemented as _validate. This method takes a dictionary named Metrics, which contains all metrics requested by your metric dependencies, and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not. In order to obtain these success keys, the Expectation parent class has a get_success_kwargs method which returns a dictionary containing all necessary success keys:
+   The validate method is implemented as _validate. This method takes a dictionary named Metrics, which contains all metrics requested by your metric dependencies, and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not:
 
 .. code-block:: python
 
@@ -207,9 +205,17 @@ _____
 
       return {"success": success, "result": {"observed_value": column_max}}
 
+6. **Test**
 
+   When developing an Expectation, there are several different points at which you should test what you have written:
 
-We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference (Link to core concepts).
+   - During development, you should import and run your expectation. You may also want to write tests for the get_evaluation_parameters method 
+   if it is on the complicated end.
+   - It is often helpful to generate several examples demonstrating the functionality of your Expectation in different circumstances, which helps
+   verify the Expectation works as intended.
+   - If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the         tests/test_definitions/name_of_your_expectation directory.
+
+   We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference (Link to core concepts).
 
 
 
