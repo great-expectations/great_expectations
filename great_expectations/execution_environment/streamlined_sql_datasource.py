@@ -1,7 +1,7 @@
 import copy
 import logging
 
-from great_expectations.execution_environment import BaseDatasource
+from great_expectations.datasource.new_datasource import BaseDatasource
 
 logger = logging.getLogger(__name__)
 

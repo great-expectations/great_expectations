@@ -18,7 +18,7 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
-from great_expectations.execution_environment import Datasource
+from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.execution_environment.data_connector import (
     DataConnector,
     InferredAssetFilesystemDataConnector,

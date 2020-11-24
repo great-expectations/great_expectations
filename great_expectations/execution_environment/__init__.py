@@ -1,3 +1,3 @@
 from .data_connector.data_connector import DataConnector
-from .execution_environment import BaseDatasource, Datasource
-from .streamlined_sql_execution_environment import StreamlinedSqlDatasource
+from .new_datasource import BaseDatasource, Datasource
+from .streamlined_sql_datasource import StreamlinedSqlDatasource

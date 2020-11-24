@@ -31,7 +31,7 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_environment import Datasource
+from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.util import import_library_module
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
