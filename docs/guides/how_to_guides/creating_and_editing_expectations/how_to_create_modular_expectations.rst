@@ -108,7 +108,7 @@ _____
 
    We have almost reached the end of our journey in implementing an Expectation! Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a validate_configuration method. 
 
-   In this method, given a configuration the user has provided, we check that certain conditions are satisfied by the configuration. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold:
+   In this method, the user provides a configuration and we check that certain conditions are satisfied by the configuration. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold:
 
 
 .. code-block:: python
@@ -214,6 +214,5 @@ _____
    3. If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the         tests/test_definitions/name_of_your_expectation directory.
 
 We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference (Link to core concepts).
-
 
 
