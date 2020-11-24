@@ -553,7 +553,9 @@ class DataContextConfigDefaults(enum.Enum):
 
 class BaseBackendEcosystem(DictDot):
     """
-    Define base defaults
+    Define base defaults for BackendEcosystems.
+    BackendEcosystems define defaults for specific cases of often used configurations.
+    For example, if you plan to store expectations, validations, and data_docs in s3 use the S3BackendEcosystem and you may be able to specify less parameters.
     """
 
     def __init__(self):
@@ -573,12 +575,27 @@ class BaseBackendEcosystem(DictDot):
 
 
 class S3BackendEcosystem(BaseBackendEcosystem):
+    """
+    Default store configs for s3 backends, with some accessible parameters
+    Args:
+        default_bucket_name: Use this bucket name for stores that do not have a bucket name provided
+        expectations_store_bucket_name: Overrides default_bucket_name if supplied
+        validations_store_bucket_name: Overrides default_bucket_name if supplied
+        data_docs_bucket_name: Overrides default_bucket_name if supplied
+        expectations_store_prefix: Overrides default if supplied
+        validations_store_prefix: Overrides default if supplied
+        data_docs_prefix: Overrides default if supplied
+        expectations_store_name: Overrides default if supplied
+        validations_store_name: Overrides default if supplied
+        evaluation_parameter_store_name: Overrides default if supplied
+    """
+
     def __init__(
         self,
-        default_bucket_name: str,
-        expectations_store_bucket_name: str = None,
-        validations_store_bucket_name: str = None,
-        data_docs_bucket_name: str = None,
+        default_bucket_name: Optional[str] = None,
+        expectations_store_bucket_name: Optional[str] = None,
+        validations_store_bucket_name: Optional[str] = None,
+        data_docs_bucket_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
         data_docs_prefix: str = "data_docs",
@@ -609,7 +626,6 @@ class S3BackendEcosystem(BaseBackendEcosystem):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        # TODO: Instead of creating from scratch, modify existing default to keep a bit more DRY?
         self.stores = {
             expectations_store_name: {
                 "class_name": "ExpectationsStore",
@@ -655,16 +671,35 @@ class FilesystemBackendEcosystem(BaseBackendEcosystem):
 
 
 class GCSBackendEcosystem(BaseBackendEcosystem):
+    """
+    Default store configs for Google Cloud Storage (GCS) backends, with some accessible parameters
+    Args:
+        default_bucket_name: Use this bucket name for stores that do not have a bucket name provided
+        default_project_name: Use this project name for stores that do not have a project name provided
+        expectations_store_bucket_name: Overrides default_bucket_name if supplied
+        validations_store_bucket_name: Overrides default_bucket_name if supplied
+        data_docs_bucket_name: Overrides default_bucket_name if supplied
+        expectations_store_project_name: Overrides default_project_name if supplied
+        validations_store_project_name: Overrides default_project_name if supplied
+        data_docs_project_name: Overrides default_project_name if supplied
+        expectations_store_prefix: Overrides default if supplied
+        validations_store_prefix: Overrides default if supplied
+        data_docs_prefix: Overrides default if supplied
+        expectations_store_name: Overrides default if supplied
+        validations_store_name: Overrides default if supplied
+        evaluation_parameter_store_name: Overrides default if supplied
+    """
+
     def __init__(
         self,
-        default_bucket_name: str,
-        default_project_name: str,
-        expectations_store_bucket_name: str = None,
-        validations_store_bucket_name: str = None,
-        data_docs_bucket_name: str = None,
-        expectations_store_project_name: str = None,
-        validations_store_project_name: str = None,
-        data_docs_project_name: str = None,
+        default_bucket_name: Optional[str] = None,
+        default_project_name: Optional[str] = None,
+        expectations_store_bucket_name: Optional[str] = None,
+        validations_store_bucket_name: Optional[str] = None,
+        data_docs_bucket_name: Optional[str] = None,
+        expectations_store_project_name: Optional[str] = None,
+        validations_store_project_name: Optional[str] = None,
+        data_docs_project_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
         data_docs_prefix: str = "data_docs",
@@ -752,11 +787,22 @@ class GCSBackendEcosystem(BaseBackendEcosystem):
 
 
 class DatabaseBackendEcosystem(BaseBackendEcosystem):
+    """
+    Default store configs for database backends, with some accessible parameters
+    Args:
+        default_credentials: Use these credentials for all stores that do not have credentials provided
+        expectations_store_credentials: Overrides default_credentials if supplied
+        validations_store_credentials: Overrides default_credentials if supplied
+        expectations_store_name: Overrides default if supplied
+        validations_store_name: Overrides default if supplied
+        evaluation_parameter_store_name: Overrides default if supplied
+    """
+
     def __init__(
         self,
-        default_credentials: Dict = None,
-        expectations_store_credentials: Dict = None,
-        validations_store_credentials: Dict = None,
+        default_credentials: Optional[Dict] = None,
+        expectations_store_credentials: Optional[Dict] = None,
+        validations_store_credentials: Optional[Dict] = None,
         expectations_store_name: str = "expectations_database_store",
         validations_store_name: str = "validations_database_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
