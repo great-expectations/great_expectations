@@ -3052,7 +3052,7 @@ def data_context_with_sql_datasource_for_testing_get_batch(empty_data_context_v3
 
     config = yaml.load(
         f"""
-class_name: StreamlinedSqlDatasource
+class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 """
         + """

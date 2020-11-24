@@ -214,8 +214,8 @@ Steps
             .. code-block:: bash
 
                 Attempting to instantiate class from config...
-                Instantiating as a ExecutionEnvironment, since class_name is StreamlinedSqlExecutionEnvironment
-                Successfully instantiated StreamlinedSqlExecutionEnvironment
+                Instantiating as a ExecutionEnvironment, since class_name is SimpleSqlalchemyDatasource
+                Successfully instantiated SimpleSqlalchemyDatasource
 
                 Execution engine: SqlAlchemyExecutionEngine
                 Data connectors:

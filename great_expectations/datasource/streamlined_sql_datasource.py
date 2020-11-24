@@ -6,10 +6,10 @@ from great_expectations.datasource.new_datasource import BaseDatasource
 logger = logging.getLogger(__name__)
 
 
-class StreamlinedSqlDatasource(BaseDatasource):
+class SimpleSqlDatasource(BaseDatasource):
     """A specialized Datasource for SQL backends
 
-    StreamlinedSqlDatasource is designed to minimize boilerplate configuration and new concepts
+    SimpleSqlDatasource is designed to minimize boilerplate configuration and new concepts
     """
 
     def __init__(

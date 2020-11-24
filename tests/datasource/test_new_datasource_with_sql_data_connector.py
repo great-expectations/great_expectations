@@ -97,9 +97,9 @@ data_connectors:
     }
 
 
-def test_StreamlinedSqlDatasource(empty_data_context_v3):
+def test_SimpleSqlalchemyDatasource(empty_data_context_v3):
     context = empty_data_context_v3
-    # This test mirrors the likely path to configure a StreamlinedSqlDatasource
+    # This test mirrors the likely path to configure a SimpleSqlalchemyDatasource
 
     db_file = file_relative_path(
         __file__,
@@ -109,7 +109,7 @@ def test_StreamlinedSqlDatasource(empty_data_context_v3):
     # Absolutely minimal starting config
     my_sql_datasource = context.test_yaml_config(
         f"""
-class_name: StreamlinedSqlDatasource
+class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 """
         + """
@@ -139,7 +139,7 @@ introspection:
     # Very thin starting config
     my_sql_datasource = context.test_yaml_config(
         f"""
-class_name: StreamlinedSqlDatasource
+class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 """
         + """
@@ -170,7 +170,7 @@ introspection:
     # Add some manually configured tables...
     my_sql_datasource = context.test_yaml_config(
         f"""
-class_name: StreamlinedSqlDatasource
+class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 
 introspection:
@@ -242,7 +242,7 @@ tables:
     # Drop the introspection...
     my_sql_datasource = context.test_yaml_config(
         f"""
-class_name: StreamlinedSqlDatasource
+class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 """
         + """
@@ -617,7 +617,7 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
 
 def test_skip_inapplicable_tables(empty_data_context_v3):
     context = empty_data_context_v3
-    # This test mirrors the likely path to configure a StreamlinedSqlDatasource
+    # This test mirrors the likely path to configure a SimpleSqlalchemyDatasource
 
     db_file = file_relative_path(
         __file__,
@@ -626,7 +626,7 @@ def test_skip_inapplicable_tables(empty_data_context_v3):
 
     my_sql_datasource = context.test_yaml_config(
         f"""
-class_name: StreamlinedSqlDatasource
+class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 introspection:
     daily:
@@ -650,7 +650,7 @@ introspection:
     with pytest.raises(ValueError):
         my_sql_datasource = context.test_yaml_config(
             f"""
-class_name: StreamlinedSqlDatasource
+class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 introspection:
     daily:

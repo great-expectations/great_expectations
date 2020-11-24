@@ -224,7 +224,7 @@ class DataContextV3(DataContext):
 
             elif class_name in [
                 "Datasource",
-                "StreamlinedSqlDatasource",
+                "SimpleSqlalchemyDatasource",
             ]:
                 print(
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
@@ -351,10 +351,10 @@ class DataContextV3(DataContext):
                     pass
 
                 # Currently, the implementation of splitting and sampling is inconsistent between the
-                # Datasource and StreamlinedSqlDatasource classes.  The former communicates these
+                # Datasource and SimpleSqlalchemyDatasource classes.  The former communicates these
                 # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
                 # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
-                # StreamlinedSqlDatasource uses "PartitionRequest" to relay the splitting and sampling
+                # SimpleSqlalchemyDatasource uses "PartitionRequest" to relay the splitting and sampling
                 # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
                 # of partitions is implemented using the PartitionQuery class, it will not recognized the keys
                 # representing the splitting and sampling directives and raise an exception.  Additional work is needed

@@ -207,7 +207,7 @@ def test_config_variables_in_test_yaml_config(empty_data_context_v3, sa):
     print(context.config_variables)
 
     first_config = """
-class_name: StreamlinedSqlDatasource
+class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///${db_file}
 
 introspection:
@@ -247,7 +247,7 @@ def test_golden_path_sql_datasource_configuration(
     context = ge.get_context()
 
     yaml_config = """
-class_name: StreamlinedSqlDatasource
+class_name: SimpleSqlalchemyDatasource
 credentials:
     drivername: postgresql
     username: postgres
