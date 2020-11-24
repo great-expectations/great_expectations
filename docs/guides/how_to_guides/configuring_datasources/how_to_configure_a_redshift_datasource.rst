@@ -178,7 +178,7 @@ Steps
 
             Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``StreamlinedSqlDataSource`` with associated credentials.  Username and  password are set as environment variables, and host, port, and database are set as strings.
 
-    Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
 
             .. code-block:: python
 
@@ -193,7 +193,6 @@ Steps
                     database: dev
                     query:
                         sslmode: prefer
-
                 introspection:
                     whole_table:
                         data_asset_name_suffix: __whole_table
@@ -210,15 +209,7 @@ Steps
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
 
-            **Note** : In the current example, the yaml config will only create a connector to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
-
-            ``self_check`` will do the following:
-
-                1. confirm that the connection works,
-                2. gather a list of available DataAssets (e.g. tables in SQL; files or folders in a filesystem), and
-                3. verify that it can successfully fetch at least one Batch from the source.
-
-            The output will look something like this:
+            The resulting output will look something like this:
 
             .. code-block:: bash
 
@@ -248,7 +239,10 @@ Steps
                     3        7                      Sabrina (1995)                               Comedy|Romance
                     4        9                 Sudden Death (1995)                                       Action
 
-            If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.  Whenever possible, test_yaml_config provides helpful warnings and error messages. It can't solve every problem, but it can solve many.
+
+            **Note**: In the current example, the yaml configuration will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add the configuration information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
+
+            If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.  Whenever possible, ``test_yaml_config`` provides helpful warnings and error messages, like the example below. It can't solve every problem, but it can solve many.
 
             .. code-block:: bash
 
