@@ -6,10 +6,10 @@ from great_expectations.execution_environment import BaseExecutionEnvironment
 logger = logging.getLogger(__name__)
 
 
-class StreamlinedSqlExecutionEnvironment(BaseExecutionEnvironment):
+class SimpleSqlalchemyDatasource(BaseExecutionEnvironment):
     """A specialized ExecutionEnvironment for SQL backends
 
-    StreamlinedSqlExecutionEnvironment is designed to minimize boilerplate configuration and new concepts
+    SimpleSqlalchemyDatasource is designed to minimize boilerplate configuration and new concepts
     """
 
     def __init__(

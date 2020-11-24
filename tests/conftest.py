@@ -3054,7 +3054,7 @@ def data_context_with_sql_execution_environment_for_testing_get_batch(
 
     config = yaml.load(
         f"""
-class_name: StreamlinedSqlExecutionEnvironment
+class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 """
         + """
