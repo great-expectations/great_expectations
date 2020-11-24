@@ -6,10 +6,10 @@ from great_expectations.datasource.new_datasource import BaseDatasource
 logger = logging.getLogger(__name__)
 
 
-class SimpleSqlDatasource(BaseDatasource):
+class SimpleSqlalchemyDatasource(BaseDatasource):
     """A specialized Datasource for SQL backends
 
-    SimpleSqlDatasource is designed to minimize boilerplate configuration and new concepts
+    SimpleSqlalchemyDatasource is designed to minimize boilerplate configuration and new concepts
     """
 
     def __init__(
