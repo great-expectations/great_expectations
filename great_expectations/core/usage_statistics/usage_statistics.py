@@ -22,6 +22,8 @@ from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymi
 )
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.execution_engine_anonymizer import (
     ExecutionEngineAnonymizer,
 )
 from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (

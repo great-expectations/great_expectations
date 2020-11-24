@@ -3,12 +3,12 @@ import pytest
 from great_expectations.datasource.batch_kwargs_generator import (
     GlobReaderBatchKwargsGenerator,
 )
-from great_expectations.exceptions import BatchKwargsError
-from great_expectations.execution_environment.types import (
+from great_expectations.datasource.types import (
     PandasDatasourceBatchKwargs,
     PathBatchKwargs,
     SparkDFDatasourceBatchKwargs,
 )
+from great_expectations.exceptions import BatchKwargsError
 
 try:
     from unittest import mock
