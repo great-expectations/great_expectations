@@ -30,7 +30,7 @@ helps reduce trips to domain experts and avoids leaving insights about data on t
 Expectation Concepts: Domain and Success Keys
 **********************************************
 
-A **domain** makes it possible to address a specific set of data, such as *column* in a table or dataframe, or even a metric computed on a previous batch of data.
+A **domain** makes it possible to address a specific set of data, such as a *table*, *query result*, *column* in a table or dataframe, or even a metric computed on a previous batch of data.
 
 - A domain is defined by a set of key-value pairs. The **domain keys** are the keys that uniquely define the domain for an Expectation. They vary depending on the Expectatation; for example, many Expectations apply to data in a single ``column``, but others apply to data from multiple columns or to properties that do not apply to a column at all.
 
@@ -40,9 +40,11 @@ For example, the ``expect_column_values_to_be_in_set`` Expectation relies on the
 
 - **Note**: The *batch_id* and *table* domain keys are often omitted when running a validation, because the Expectation is being applied to a single batch and table. However, they must be provided in cases where they could be ambiguous.
 
+**Metrics** use a similar concept: they also use the same kind of **domain keys** as Expectations, but instead of success keys, we call the keys that determine a Metric's value its **value keys**.
 
 
-.. _expectation_suites:
+
+.. _reference__core_concepts__expectations__expectation_suites:
 
 Expectation Suites
 ******************
@@ -82,8 +84,7 @@ Custom expectations
 *******************
 
 Expectations are especially useful when they capture critical aspects of data understanding that analysts and
-practitioners know based on its *semantic* meaning. It's common to want to extend Great Expectations with application-
-or domain-specific Expectations. For example:
+practitioners know based on its *semantic* meaning. It's common to want to extend Great Expectations with application-or domain-specific Expectations. For example:
 
 .. code-block:: bash
 
@@ -94,9 +95,6 @@ These Expectations aren't included in the default set, but could be very useful 
 
 Fear not! Great Expectations is designed for customization and extensibility.
 
-Building custom expectations is easy and allows your custom logic to become part of the validation, documentation, and
-even profiling workflows that make Great Expectations stand out. See the guide on :ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations`
+Building custom expectations is easy and allows your custom logic to become part of the validation, documentation, and even profiling workflows that make Great Expectations stand out. See the guide on :ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations`
 for more information on building expectations and updating DataContext configurations to automatically load batches
 of data with custom Data Assets.
-
-
