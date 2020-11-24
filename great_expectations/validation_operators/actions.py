@@ -639,7 +639,10 @@ list of sites to update:
         # build_data_docs will return the index page for the validation results, but we want to return the url for the valiation result using the code below
         data_docs_index_pages = self.data_context.build_data_docs(
             site_names=self._site_names,
-            resource_identifiers=[validation_result_suite_identifier],
+            resource_identifiers=[
+                validation_result_suite_identifier,
+                validation_result_suite_identifier.expectation_suite_identifier,
+            ],
         )
 
         # get the URL for the validation result
