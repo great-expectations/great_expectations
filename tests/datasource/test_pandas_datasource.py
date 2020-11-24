@@ -14,8 +14,8 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import DataContextConfigSchema
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
+from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.execution_environment.types import PathBatchKwargs
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 yaml = YAML()

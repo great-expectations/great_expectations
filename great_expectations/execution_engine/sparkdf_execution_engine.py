@@ -17,6 +17,7 @@ from great_expectations.execution_environment.types.batch_spec import (
 from ..exceptions import (
     BatchKwargsError,
     BatchSpecError,
+    ExecutionEngineError,
     GreatExpectationsError,
     ValidationError,
 )
@@ -39,6 +40,15 @@ try:
         StructField,
         StructType,
     )
+
+    class SparkDFBatchData(DataFrame):
+        def __init__(self, df):
+            super(self.__class__, self).__init__(df._jdf, df.sql_ctx)
+
+        def row_count(self):
+            return self.count()
+
+
 except ImportError:
     pyspark = None
     SparkSession = None
@@ -51,43 +61,12 @@ except ImportError:
     StringType = (None,)
     DateType = (None,)
     BooleanType = (None,)
+
+    SparkDFBatchData = None
+
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
-
-
-class SparkDFBatchData:
-    def __init__(
-        self,
-        dataframe: DataFrame = None,
-        dataframe_dict: Dict[str, DataFrame] = None,
-        default_table_name=None,
-    ):
-        assert (
-            dataframe is not None or dataframe_dict is not None
-        ), "dataframe or dataframe_dict is required"
-        assert (
-            not dataframe and dataframe_dict
-        ), "dataframe and dataframe_dict may not both be specified"
-
-        if dataframe is not None:
-            dataframe_dict = {"": dataframe}
-            default_table_name = ""
-
-        self._dataframe_dict = dataframe_dict
-        self._default_table_name = default_table_name
-
-    @property
-    def default(self):
-        if self._default_table_name in self._dataframe_dict:
-            return self._dataframe_dict[self._default_table_name]
-        return None
-
-    def __getattr__(self, item):
-        return self._dataframe_dict.get(item)
-
-    def __getitem__(self, item):
-        return self._dataframe_dict.get(item)
 
 
 class SparkDFExecutionEngine(ExecutionEngine):
@@ -220,12 +199,18 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             reader_method: str = batch_spec.get("reader_method")
             reader_options: dict = batch_spec.get("reader_options") or {}
             path: str = batch_spec.get("path") or batch_spec.get("s3")
-            reader_fn: Callable = self._get_reader_fn(
-                reader=self.spark.read.options(**reader_options),
-                reader_method=reader_method,
-                path=path,
-            )
-            batch_data = reader_fn(path)
+            try:
+                reader_options = self.spark.read.options(**reader_options)
+                reader_fn: Callable = self._get_reader_fn(
+                    reader=reader_options, reader_method=reader_method, path=path,
+                )
+                batch_data = reader_fn(path)
+            except AttributeError:
+                raise ExecutionEngineError(
+                    """
+                    Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
+                    """
+                )
         else:
             raise BatchSpecError(
                 """
@@ -234,8 +219,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
 
         batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
+        typed_batch_data = SparkDFBatchData(batch_data)
 
-        return batch_data, batch_markers
+        return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):

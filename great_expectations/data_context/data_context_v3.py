@@ -2,7 +2,7 @@ import copy
 import logging
 import os
 import traceback
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.compat import StringIO
@@ -213,8 +213,11 @@ class DataContextV3(DataContext):
         limit: int = None,
         index=None,
         custom_filter_function: Callable = None,
+        batch_spec_passthrough: Optional[dict] = None,
         sampling_method: str = None,
         sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
         **kwargs,
     ) -> Batch:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -233,8 +236,14 @@ class DataContextV3(DataContext):
             limit
             index
             custom_filter_function
+
             sampling_method
             sampling_kwargs
+
+            splitter_method
+            splitter_kwargs
+
+            batch_spec_passthrough
 
             **kwargs
 
@@ -264,26 +273,16 @@ class DataContextV3(DataContext):
 
         if batch_definition:
             # TODO: Raise a warning if any parameters besides batch_definition are specified
-
             return execution_environment.get_batch_from_batch_definition(
                 batch_definition
             )
-
         elif batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
-
-            batch_definitions = execution_environment.get_available_batch_definitions(
-                batch_request
+            return execution_environment.get_single_batch_from_batch_request(
+                batch_request=batch_request
             )
-            if len(batch_definitions) != 1:
-                raise ValueError(
-                    f"Instead of 1 batch_definition, this batch_request matches {len(batch_definitions)}."
-                )
-            return execution_environment.get_batch_from_batch_definition(
-                batch_definitions[0]
-            )
-
         else:
+            partition_request: PartitionRequest
             if partition_request is None:
                 if partition_identifiers is None:
                     partition_identifiers = kwargs
@@ -291,38 +290,49 @@ class DataContextV3(DataContext):
                     # Raise a warning if kwargs exist
                     pass
 
-                partition_request = PartitionRequest(
-                    {
-                        "partition_identifiers": partition_identifiers,
-                        "limit": limit,
-                        "index": index,
-                        "custom_filter_function": custom_filter_function,
-                        # TODO: <Alex>To be implemented as a follow-on task.</Alex>
-                        # "sampling_method": sampling_method,
-                        # "sampling_kwargs": sampling_kwargs,
+                # Currently, the implementation of splitting and sampling is inconsistent between the
+                # ExecutionEnvironment and StreamlinedSqlExecutionEnvironment classes.  The former communicates these
+                # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
+                # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
+                # StreamlinedSqlExecutionEnvironment uses "PartitionRequest" to relay the splitting and sampling
+                # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
+                # of partitions is implemented using the PartitionQuery class, it will not recognized the keys
+                # representing the splitting and sampling directives and raise an exception.  Additional work is needed
+                # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
+                partition_request_params: dict = {
+                    "partition_identifiers": partition_identifiers,
+                    "limit": limit,
+                    "index": index,
+                    "custom_filter_function": custom_filter_function,
+                }
+                if sampling_method is not None:
+                    sampling_params: dict = {
+                        "sampling_method": sampling_method,
                     }
-                )
-
+                    if sampling_kwargs is not None:
+                        sampling_params["sampling_kwargs"] = sampling_kwargs
+                    partition_request_params.update(sampling_params)
+                if splitter_method is not None:
+                    splitter_params: dict = {
+                        "splitter_method": splitter_method,
+                    }
+                    if splitter_kwargs is not None:
+                        splitter_params["splitter_kwargs"] = splitter_kwargs
+                    partition_request_params.update(splitter_params)
+                partition_request = PartitionRequest(partition_request_params)
             else:
                 # Raise a warning if partition_identifiers or kwargs exist
                 partition_request = PartitionRequest(partition_request)
 
-            batch_request = BatchRequest(
+            batch_request: BatchRequest = BatchRequest(
                 execution_environment_name=execution_environment_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
                 partition_request=partition_request,
+                batch_spec_passthrough=batch_spec_passthrough,
             )
-
-            batch_definitions = execution_environment.get_available_batch_definitions(
-                batch_request
-            )
-            if len(batch_definitions) != 1:
-                raise ValueError(
-                    f"Instead of 1 batch_definition, these parameters match {len(batch_definitions)}."
-                )
-            return execution_environment.get_batch_from_batch_definition(
-                batch_definitions[0]
+            return execution_environment.get_single_batch_from_batch_request(
+                batch_request=batch_request
             )
 
     def get_validator(
@@ -337,11 +347,14 @@ class DataContextV3(DataContext):
         limit: int = None,
         index=None,
         custom_filter_function: Callable = None,
-        sampling_method: str = None,
-        sampling_kwargs: dict = None,
         attach_new_expectation_suite: bool = False,
         expectation_suite_name: str = None,
         expectation_suite: ExpectationSuite = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
         **kwargs,
     ) -> Validator:
         if attach_new_expectation_suite:
@@ -370,8 +383,11 @@ class DataContextV3(DataContext):
             limit=limit,
             index=index,
             custom_filter_function=custom_filter_function,
+            batch_spec_passthrough=batch_spec_passthrough,
             sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
             **kwargs,
         )
 
