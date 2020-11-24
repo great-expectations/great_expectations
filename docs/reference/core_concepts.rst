@@ -2,22 +2,15 @@
 
 
 #####################################
-Core Great Expectations Concepts
+Core Concepts
 #####################################
 
-Great Expectations is all about helping you understand data better to communicate with your team and others about what you've built and what you expect. Great Expectations delivers three key features: **expectations validate data quality**, **tests are docs, and docs are tests**, and **automatic profiling of data**. This guide helps you understand *how* Great Expectations does that by describing the core concepts used in the tool. The guide aims for precision, which can sometimes make it a bit dense, but we include examples of common use cases to help build intuition.
+Great Expectations is all about helping you understand data better, so you can communicate with your team and others about what you've built and what you expect. Great Expectations delivers three key features: **expectations validate data quality**, **tests are docs, and docs are tests**, and **automatic profiling of data**. This guide helps you understand *how* Great Expectations does that by describing the core concepts used in the tool. The guide aims for precision, which can sometimes make it a bit dense, so we include examples of common use cases to help build intuition.
 
-Below, you'll find a brief introduction to the big ideas you'll need to understand how Great Expectations works, a more detailed definition of each of the core concepts, with an eye to how they're represented in the codebase, information on some of the defining design decisions in the tool, and links to more detailed documentation on concepts.
+Below, you'll find a brief introduction to the big ideas you'll need to understand how Great Expectations works, a more detailed definition of each of the core concepts (focused around how they're represented in the codebase), information on some of the defining design decisions in the tool, and links to more detailed documentation on concepts.
 
 
-.. toctree::
-   :maxdepth: 2
-
-   Key Ideas
-   Concepts in the codebase
-     follows
-   Design Decisions
-
+.. contents:: :depth: 2
 
 ************************************************
 Key Ideas
@@ -42,11 +35,8 @@ This section describes the foundational concepts used to integrate Great Expecta
 
 .. _reference__core_concepts__expectations:
 
-
 Expectations and Metrics
 =============================
-
-.. _reference__core_concepts__expectations__expectations:
 
 An **Expectation** is a declarative statements that a computer can evaluate, and that is semantically meaningful to humans, like ``expect_column_values_to_be_unique`` or ``expect_column_mean_to_be_between``.  Expectations are implemented as classes that provide a rich interface to the rest of the library to support validation, profiling, and translation. Those implementations provide a ``_validate`` method that determines whether the Expecation is satisfied by some data, and other methods to support the Great Expectations features.
 
@@ -63,29 +53,30 @@ An **Expectation Suite** combines multiple Expectation Configurations into an ov
 
    /reference/core_concepts/expectations/expectations.rst
    /reference/core_concepts/metrics.rst
+   /reference/core_concepts/expectations/expectation_suite_operations.rst
    /reference/core_concepts/expectations/distributional_expectations.rst
    /reference/core_concepts/expectations/standard_arguments.rst
    /reference/core_concepts/expectations/result_format.rst
    /reference/core_concepts/expectations/implemented_expectations.rst
    /reference/core_concepts/conditional_expectations.rst
 
-.. _reference__core_concepts__data_access:
+.. _reference__core_concepts__glossary__datasources:
 
-Data Access
+Datasources
 =================
 
 A **Datasource** is the primary way that you configure data access in Great Expectations. A Datasource can be a simple metadata layer that adds information about a datase you provide to Great Expectations at runtime, or it can handle one or more connections to external datasources, including identifying available data assets and batches.
 
 An **Execution Engine** is configured as part of a datasource. The Execution Engine provides the computing resources that will be used to actually perform validation. Great Expectations can take advantage of many different Execution Engines, such as Pandas, Spark, or SqlAlchemy, and can translate the same Expectations to validate data using different engines.
 
-A **Data Connector** facilitates access to an external data store, such as a database, filesystem, or cloud storage. The Data Connector can inspect an external data store to *identify available partitions*, *build batch definitions using parameters such as partition names*, and *translate batch definitions to Execution Engine-specific Batch Specs*. See the :ref:`Data Connectors reference <reference__core_concepts__data_access>` for more information including descriptions of Batch Definition and Batch Spec.
+A **Data Connector** facilitates access to an external data store, such as a database, filesystem, or cloud storage. The Data Connector can inspect an external data store to *identify available partitions*, *build batch definitions using parameters such as partition names*, and *translate batch definitions to Execution Engine-specific Batch Specs*. See the :ref:`Data Connectors reference <reference__core_concepts__datasources__data_connector>` for more information including descriptions of Batch Definition and Batch Spec.
 
 A **Batch** is reference to a set of data, with metadata about it. *The Batch is the fundamental building block for accessing data using Great Expectations*, but is not the data itself. Instantiating a Batch does not necessarily "fetch" the data by immediately running a query or pulling data into memory. Instead, think of a Batch as a wrapper that includes the information that you will need to fetch the right data when it’s time to validate.
 
 .. toctree::
    :maxdepth: 2
 
-   /reference/core_concepts/data_access.rst
+   /reference/core_concepts/datasource.rst
 
 .. _reference__core_concepts__validation:
 

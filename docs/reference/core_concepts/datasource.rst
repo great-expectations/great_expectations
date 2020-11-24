@@ -1,8 +1,10 @@
-.. _reference__core_concepts__data_access:
+.. _reference__core_concepts__datasources:
 
 ###################
-Data Access
+Datasources
 ###################
+
+.. _reference__core_concepts__datasources__data_connector:
 
 Data Connectors
 ===================

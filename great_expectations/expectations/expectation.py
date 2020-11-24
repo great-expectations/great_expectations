@@ -26,7 +26,6 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.expectations.util import legacy_method_parameters
 
-from ..core.batch import Batch
 from ..core.util import nested_update
 from ..data_asset.util import (
     parse_result_format,
