@@ -211,7 +211,7 @@ Steps
                 3           4  Allison, Mrs Hudson JC (Bessie Waldo Daniels)    1st  25.00  female         0        1
                 4           5                  Allison, Master Hudson Trevor    1st   0.92    male         1        0
 
-            **Note** : In the current example, the yaml config will only create a connector to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
+            **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
             This means all has went well and you can proceed with exploring the data sets in your new filesystem-backed Pandas data source.
 
@@ -240,4 +240,3 @@ Comments
 
     .. discourse::
         :topic_identifier: 167
-
