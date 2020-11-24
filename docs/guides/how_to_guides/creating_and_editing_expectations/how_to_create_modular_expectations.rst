@@ -1,4 +1,4 @@
-The Definitive Checklist to Building Your Own Custom Expectations
+How to define a custom Expectation type
 _________________________________________________________________
 
 This guide will walk you through the process of creating your own Modular Expectations in 6 simple steps! 
@@ -214,5 +214,4 @@ _____
    3. If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the         tests/test_definitions/name_of_your_expectation directory.
 
 We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference (Link to core concepts).
-
 
