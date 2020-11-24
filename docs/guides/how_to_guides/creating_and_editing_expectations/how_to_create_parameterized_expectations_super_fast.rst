@@ -12,7 +12,7 @@ it is easier than every before to inherit fromthese classes and build similar Ex
 
 Steps
 _____
-1. Select an Expectation to Inherit From
+1. Select an Expectation to inherit from
 ########################################
 
   For the purpose of this excercise, we will implement the new Expectation "expect_column_mean_to_be_positive" - a realistic Expectation of the data that
@@ -69,4 +69,3 @@ _____
           runtime_configuration=runtime_configuration,
           execution_engine=execution_engine,
       )
-
