@@ -139,7 +139,8 @@ Steps
         #.  **Create or copy a yaml config**
 
             Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetFilesystemDataConnector`` and ``SparkDFExecutionEngine``.
-            The config also defines ``TestAsset``, which has ``name``, ``timestamp`` and ``size`` as ``group_names``, which are informative fields of the filename that are extracted by the regex ``pattern``.
+
+    The config also defines ``TestAsset``, which has ``name``, ``timestamp`` and ``size`` as ``group_names``, which are informative fields of the filename that are extracted by the regex ``pattern``.
 
             **Note**: The ``ConfiguredAssetFilesystemDataConnector`` used in this example is closely related to the ``InferredAssetFilesystemDataConnector`` with some key differences. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
@@ -239,4 +240,3 @@ Comments
 
     .. discourse::
         :topic_identifier: 251
-
