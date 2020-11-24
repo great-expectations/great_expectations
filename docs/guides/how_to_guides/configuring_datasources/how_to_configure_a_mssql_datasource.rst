@@ -171,7 +171,34 @@ Steps
 
             The resulting output will look something like this:
 
+            .. code-block:: bash
 
+                Attempting to instantiate class from config...
+                    Instantiating as a ExecutionEnvironment, since class_name is StreamlinedSqlExecutionEnvironment
+                    Successfully instantiated StreamlinedSqlExecutionEnvironment
+
+                Execution engine: SqlAlchemyExecutionEngine
+                Data connectors:
+                    whole_table : InferredAssetSqlDataConnector
+
+                    Available data_asset_names (1 of 1):
+		                imdb_100k_main__whole_table (1 of 1): [{}]
+
+                    Unmatched data_references (0 of 0): []
+
+                    Choosing an example data reference...
+                        Reference chosen: {}
+
+                    Fetching batch data...
+                    [(58098,)]
+
+                            Showing 5 rows
+                       movieId                               title                                         genres
+                    0        1                    Toy Story (1995)  Adventure|Animation|Children|Comedy|Fantasy\r
+                    1        2                      Jumanji (1995)                   Adventure|Children|Fantasy\r
+                    2        3             Grumpier Old Men (1995)                               Comedy|Romance\r
+                    3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance\r
+                    4        5  Father of the Bride Part II (1995)                                       Comedy\r
 
             **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
