@@ -4,4 +4,4 @@ from .new_datasource import BaseDatasource, Datasource
 from .pandas_datasource import PandasDatasource
 from .sparkdf_datasource import SparkDFDatasource
 from .sqlalchemy_datasource import SqlAlchemyDatasource
-from .streamlined_sql_datasource import StreamlinedSqlDatasource
+from .simple_sqlalchemy_datasource import SimpleSqlAlchemyDatasource
