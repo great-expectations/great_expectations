@@ -11,9 +11,10 @@ This guide shows how to connect to a MySql Datasource. Great Expectations uses S
 Steps
 -----
 
+.. content-tabs::
+
     .. tab-container:: tab0
         :title: Show Docs for Stable API (up to 0.12.x)
-
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -103,6 +104,7 @@ Steps
 
                 The credentials will be saved in uncommitted/config_variables.yml under the key 'my_mysql_db'
 
+
     .. tab-container:: tab1
         :title: Show Docs for Experimental API (0.13)
 
@@ -113,6 +115,8 @@ Steps
             - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
             - Obtained database credentials for mysql, including username, password, hostname, and database.
 
+        To add a MySql datasource, do the following:
+
         #. **Install the required modules**
 
             If you have not already done so, install required modules for connecting to mysql.
@@ -121,8 +125,6 @@ Steps
 
                 pip install sqlalchemy
                 pip install PyMySQL
-
-        To add a Pandas filesystem datasource, do the following:
 
         #. **Instantiate a DataContext**
 
@@ -133,32 +135,28 @@ Steps
 
         #.  **Create or copy a yaml config**
 
-            #.  **Create or copy a yaml config**
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlDataSource`` with associated credentials passed in as environment variables.
+                Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlDataSource`` with associated credentials.  Username, password and db_name are set as environment variables, and host and port are set as strings.
+                **Note**: The ``SimpleSqlDataSource`` is related to ``DataSource`` but automatically configures a ``SqlDataConnector``. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+                **Note**: blurb on introspection :
 
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+                .. code-block:: python
 
-            **Note**: The ``SimpleSqlDataSource`` is related to ``DataSource`` but automatically configures a ``SqlDataConnector``. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+                    config = f"""
+                        class_name: SimpleSqlDataSource
+                        credentials:
+                            drivername: mysql+pymysql
+                            host: {host}
+                            port: {port}
+                            username: {user_name}
+                            password: {password}
+                            database: {db_name}
+                        introspection:
+                            whole_table:
+                                data_asset_name_suffix: __whole_table
+                        """
 
-            **Note**: blurb on introspection ;
-            **Note**: blurb on query.
-
-            .. code-block:: python
-
-                config = f"""
-                    class_name: StreamlinedSqlExecutionEnvironment
-                    credentials:
-                        drivername: mysql+pymysql
-                        host: ge-test-mysql-0.cvqwgt8yqwtz.us-east-2.rds.amazonaws.com
-                        port: 3306
-                        username: {user_name}
-                        password: {password}
-                        database: {db_name}
-                    introspection:
-                        whole_table:
-                            data_asset_name_suffix: __whole_table
-                    """
 
         #. **Run context.test_yaml_config.**
 
@@ -176,8 +174,8 @@ Steps
             .. code-block:: bash
 
                 Attempting to instantiate class from config...
-                Instantiating as a ExecutionEnvironment, since class_name is StreamlinedSqlExecutionEnvironment
-                Successfully instantiated StreamlinedSqlExecutionEnvironment
+                Instantiating as a DataSource, since class_name is SimpleSqlDataSource
+                Successfully instantiated SimpleSqlDataSource
 
                 Execution engine: SqlAlchemyExecutionEngine
                 Data connectors:
@@ -206,6 +204,7 @@ Steps
             **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
             This means all has went well and you can proceed with exploring the data sets in your new filesystem-backed Pandas data source.
+
 
 Additional notes
 ----------------
