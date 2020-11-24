@@ -213,7 +213,7 @@ Steps
                 3     3            Allison, Mr Hudson Joshua Creighton     1st   30    male         0        0
                 4     4  Allison, Mrs Hudson JC (Bessie Waldo Daniels)     1st   25  female         0        1
 
-            This means all has went well and you can proceed with exploring the data sets in your new filesystem-backed Pandas data source.
+            This means all has gone well and you can proceed with exploring the data sets in your new filesystem-backed Pandas data source.
 
             **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
