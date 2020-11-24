@@ -46,11 +46,11 @@ from great_expectations.data_context.types.base import (  # TODO: deprecate
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
-    DatasourceConfig,
+    LegacyDatasourceConfig,
     ExecutionEnvironmentConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
-    datasourceConfigSchema,
+    legacyDatasourceConfigSchema,
     executionEnvironmentConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -65,7 +65,7 @@ from great_expectations.data_context.util import (
     substitute_config_variable,
 )
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import Datasource  # TODO: deprecate
+from great_expectations.datasource import LegacyDatasource  # TODO: deprecate
 from great_expectations.exceptions import DataContextError
 from great_expectations.execution_environment import (
     BaseExecutionEnvironment,
@@ -1165,7 +1165,7 @@ class BaseDataContext:
         else:
             config = kwargs
 
-        config = datasourceConfigSchema.load(config)
+        config = legacyDatasourceConfigSchema.load(config)
         self._project_config["datasources"][name] = config
 
         # We perform variable substitution in the datasource's config here before using the config
@@ -1231,8 +1231,8 @@ class BaseDataContext:
     # TODO: deprecate
     def _build_datasource_from_config(self, name, config):
         # We convert from the type back to a dictionary for purposes of instantiation
-        if isinstance(config, DatasourceConfig):
-            config = datasourceConfigSchema.dump(config)
+        if isinstance(config, LegacyDatasourceConfig):
+            config = legacyDatasourceConfigSchema.dump(config)
         config.update({"name": name})
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
@@ -1249,7 +1249,7 @@ class BaseDataContext:
         return datasource
 
     # TODO: deprecate
-    def get_datasource(self, datasource_name: str = "default") -> Datasource:
+    def get_datasource(self, datasource_name: str = "default") -> LegacyDatasource:
         """Get the named datasource
 
         Args:
@@ -1273,7 +1273,7 @@ class BaseDataContext:
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
-        datasource_config = datasourceConfigSchema.load(datasource_config)
+        datasource_config = legacyDatasourceConfigSchema.load(datasource_config)
         datasource = self._build_datasource_from_config(
             datasource_name, datasource_config
         )

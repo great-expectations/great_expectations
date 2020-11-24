@@ -381,7 +381,7 @@ class ExecutionEnvironmentConfigSchema(Schema):
         return ExecutionEnvironmentConfig(**data)
 
 
-class DatasourceConfig(DictDot):
+class LegacyDatasourceConfig(DictDot):
     def __init__(
         self,
         class_name,
@@ -499,7 +499,7 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
         return data
 
 
-class DatasourceConfigSchema(Schema):
+class LegacyDatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
@@ -526,7 +526,7 @@ class DatasourceConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
-        return DatasourceConfig(**data)
+        return LegacyDatasourceConfig(**data)
 
 
 class NotebookTemplateConfig(DictDot):
@@ -731,7 +731,7 @@ class DataContextConfigSchema(Schema):
         error_messages={"invalid": "config version must " "be a number."},
     )
     datasources = fields.Dict(
-        keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema), allow_none=True
+        keys=fields.Str(), values=fields.Nested(LegacyDatasourceConfigSchema), allow_none=True
     )
     execution_environments = fields.Dict(
         keys=fields.Str(),
@@ -799,7 +799,7 @@ class DataContextConfigSchema(Schema):
 
 
 dataContextConfigSchema = DataContextConfigSchema()
-datasourceConfigSchema = DatasourceConfigSchema()
+legacyDatasourceConfigSchema = LegacyDatasourceConfigSchema()
 executionEnvironmentConfigSchema = ExecutionEnvironmentConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
 assetConfigSchema = AssetConfigSchema()

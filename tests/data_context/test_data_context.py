@@ -24,7 +24,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.exceptions import (
     BatchKwargsError,
@@ -293,7 +293,7 @@ def test_data_context_get_validation_result(titanic_data_context):
 
 
 def test_data_context_get_datasource(titanic_data_context):
-    isinstance(titanic_data_context.get_datasource("mydatasource"), Datasource)
+    isinstance(titanic_data_context.get_datasource("mydatasource"), LegacyDatasource)
 
 
 def test_data_context_expectation_suite_delete(empty_data_context):
