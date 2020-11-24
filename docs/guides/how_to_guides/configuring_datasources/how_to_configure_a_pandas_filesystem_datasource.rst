@@ -122,11 +122,10 @@ Steps
                 import great_expectations as ge
                 context = ge.get_context()
 
-        #.  **Create or copy a yaml config**
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetFilesystemDataConnector`` and one asset named ``TestAsset``.
+        #. **List files in your directory**
 
-            **Note**: The ``ConfiguredAssetFilesystemDataConnector`` used in this example is closely related to the ``InferredAssetFilesystemDataConnector`` with some key differences. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+            Use a utility like ``tree`` on the command line or ``glob`` to list files, so that you can see how paths and filenames are formatted. Our example will use the following 3 files in the ``test_directory/`` folder.
 
             .. code-block:: bash
 
@@ -134,9 +133,13 @@ Steps
                 test_directory/alex_20201212_300.csv
                 test_directory/will_20201008_100.csv
 
+
+        #.  **Create or copy a yaml config**
+
+            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetFilesystemDataConnector`` and one asset named ``TestAsset``.
             The example yaml config will take the 3 files shown above and create 1 asset named ``TestAsset``, with ``name``, ``timestamp`` and ``size`` as the group names.
 
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+            **Note**: The ``ConfiguredAssetFilesystemDataConnector`` used in this example is closely related to the ``InferredAssetFilesystemDataConnector`` with some key differences. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
             .. code-block:: python
 
@@ -162,7 +165,9 @@ Steps
                                             - name
                                             - timestamp
                                             - size
-                            """
+                        """
+
+            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
 
         #. **Run context.test_yaml_config.**
 
@@ -206,9 +211,9 @@ Steps
                 3           4  Allison, Mrs Hudson JC (Bessie Waldo Daniels)    1st  25.00  female         0        1
                 4           5                  Allison, Master Hudson Trevor    1st   0.92    male         1        0
 
-        **Note** : In the current example, the yaml config will only create a connector to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
+            **Note** : In the current example, the yaml config will only create a connector to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
-        This means all has went well and you can proceed with exploring the data sets in your new filesystem-backed Pandas data source.
+            This means all has went well and you can proceed with exploring the data sets in your new filesystem-backed Pandas data source.
 
 
 ----------------
