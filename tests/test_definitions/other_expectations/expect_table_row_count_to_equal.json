@@ -32,8 +32,7 @@
       "tests": [
         {
           "title": "basic_positive_case",
-                    "exact_match_out": false,
-
+          "exact_match_out": false,
           "in": [
             4
           ],

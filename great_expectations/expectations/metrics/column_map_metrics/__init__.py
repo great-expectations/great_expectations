@@ -3,6 +3,7 @@ from .column_values_between import ColumnValuesBetween
 from .column_values_dateutil_parseable import ColumnValuesDateutilParseable
 from .column_values_decreasing import ColumnValuesDecreasing
 from .column_values_in_set import ColumnValuesInSet
+from .column_values_in_type_list import ColumnValuesInTypeList
 from .column_values_increasing import ColumnValuesIncreasing
 from .column_values_json_parseable import ColumnValuesJsonParseable
 from .column_values_match_json_schema import ColumnValuesMatchJsonSchema
@@ -20,5 +21,6 @@ from .column_values_not_match_like_pattern_list import (
 from .column_values_not_match_regex import ColumnValuesNotMatchRegex
 from .column_values_not_match_regex_list import ColumnValuesNotMatchRegexList
 from .column_values_null import ColumnValuesNull
+from .column_values_of_type import ColumnValuesOfType
 from .column_values_unique import ColumnValuesUnique
 from .column_values_z_score import ColumnValuesZScore

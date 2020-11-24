@@ -65,7 +65,7 @@ class ExpectColumnValueRatioToBeBetween(TableExpectation):
        """
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.value_ratio",)
+    metric_dependencies = ("column.value_ratio",)
     success_keys = ("value", "min_value", "strict_min", "max_value", "strict_max")
 
     # Default values
@@ -207,7 +207,7 @@ class ExpectColumnValueRatioToBeBetween(TableExpectation):
                 "result_format", self.default_kwarg_values.get("result_format")
             )
 
-        value_ratio = metric_vals.get("column.aggregate.value_ratio")
+        value_ratio = metric_vals.get("column.value_ratio")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")

@@ -9,7 +9,8 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
-    column_aggregate_metric,
+    column_aggregate_partial,
+    column_aggregate_value,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.expectations.metrics.util import (
@@ -35,10 +36,10 @@ from scipy import stats
 class ColumnBootstrappedKSTestPValue(ColumnMetricProvider):
     """MetricProvider Class for Aggregate Standard Deviation metric"""
 
-    metric_name = "column.aggregate.bootstrapped_ks_test_p_value"
+    metric_name = "column.bootstrapped_ks_test_p_value"
     value_keys = ("partition_object", "p", "bootstrap_sample", "bootstrap_sample_size")
 
-    @column_aggregate_metric(engine=PandasExecutionEngine)
+    @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
         column,

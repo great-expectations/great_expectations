@@ -184,7 +184,7 @@
           "_comment": "postgresql, mssql, and spark will not allow coercing the boolean type to an average"
         },
         {
-          "title": "typeerror_catch_exceptions___non_number_min_value",
+          "title": "catch_exceptions___non_number_min_value",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -192,11 +192,11 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "ValueError"
+            "traceback_substring": "must be a number"
           }
         },
         {
-          "title": "typeerror_catch_exceptions___non_number_max_value",
+          "title": "catch_exceptions___non_number_max_value",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -204,7 +204,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "ValueError"
+            "traceback_substring": "must be a number"
           }
         }]},
     {

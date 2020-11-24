@@ -1,8 +1,8 @@
+import copy
 import datetime
 import hashlib
 import json
-import copy
-from typing import Union, Any, Optional
+from typing import Any, Optional, Union
 
 from great_expectations.core.id_dict import (
     BatchKwargs,
@@ -11,8 +11,8 @@ from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionRequest,
 )
-from great_expectations.types import DictDot
 from great_expectations.exceptions import InvalidBatchIdError
+from great_expectations.types import DictDot
 
 
 class BatchDefinition(DictDot):
@@ -22,6 +22,7 @@ class BatchDefinition(DictDot):
         data_connector_name: str,
         data_asset_name: str,
         partition_definition: PartitionDefinition,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         self._validate_batch_definition(
             execution_environment_name=execution_environment_name,
@@ -37,6 +38,7 @@ class BatchDefinition(DictDot):
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_definition = partition_definition
+        self._batch_spec_passthrough = batch_spec_passthrough
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
@@ -113,6 +115,14 @@ class BatchDefinition(DictDot):
     def partition_definition(self) -> PartitionDefinition:
         return self._partition_definition
 
+    @property
+    def batch_spec_passthrough(self) -> dict:
+        return self._batch_spec_passthrough
+
+    @batch_spec_passthrough.setter
+    def batch_spec_passthrough(self, batch_spec_passthrough: Optional[dict]):
+        self._batch_spec_passthrough = batch_spec_passthrough
+
     def get_json_dict(self) -> dict:
         return {
             "execution_environment_name": self.execution_environment_name,
@@ -136,18 +146,17 @@ class BatchDefinition(DictDot):
     def __str__(self):
         return json.dumps(self.get_json_dict(), indent=2)
 
-
     def __hash__(self) -> int:
         """Overrides the default implementation"""
-        _result_hash: int = hash(self.execution_environment_name) ^ \
-                            hash(self.data_connector_name) ^ \
-                            hash(self.data_asset_name)
+        _result_hash: int = hash(self.execution_environment_name) ^ hash(
+            self.data_connector_name
+        ) ^ hash(self.data_asset_name)
         if self.definition is not None:
             for key, value in self.partition_definition.items():
                 _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
         return _result_hash
 
-  
+
 class BatchRequest(DictDot):
     """
     This class contains all attributes of a batch_request.
@@ -158,10 +167,10 @@ class BatchRequest(DictDot):
         execution_environment_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        partition_request: Optional[dict] = None,
+        partition_request: Optional[Union[PartitionRequest, dict]] = None,
         batch_data: Any = None,
         limit: Union[int, None] = None,
-        sampling: Union[dict, None] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         self._validate_batch_request(
             execution_environment_name=execution_environment_name,
@@ -177,7 +186,7 @@ class BatchRequest(DictDot):
         self._partition_request = partition_request
         self._batch_data = batch_data
         self._limit = limit
-        self._sampling = sampling
+        self._batch_spec_passthrough = batch_spec_passthrough
 
     @property
     def execution_environment_name(self) -> str:
@@ -192,7 +201,7 @@ class BatchRequest(DictDot):
         return self._data_asset_name
 
     @property
-    def partition_request(self) -> dict:  # PartitionRequest:
+    def partition_request(self) -> Union[PartitionRequest, dict]:  # PartitionRequest:
         return self._partition_request
 
     @property
@@ -202,6 +211,10 @@ class BatchRequest(DictDot):
     @property
     def limit(self) -> int:
         return self._limit
+
+    @property
+    def batch_spec_passthrough(self) -> dict:
+        return self._batch_spec_passthrough
 
     @staticmethod
     def _validate_batch_request(
@@ -250,7 +263,9 @@ is illegal.
         if self.partition_request is not None:
             partition_request = copy.deepcopy(self.partition_request)
             if partition_request.get("custom_filter_function") is not None:
-                partition_request["custom_filter_function"] = partition_request["custom_filter_function"].__name__
+                partition_request["custom_filter_function"] = partition_request[
+                    "custom_filter_function"
+                ].__name__
         return {
             "execution_environment_name": self.execution_environment_name,
             "data_connector_name": self.data_connector_name,
@@ -383,14 +398,24 @@ class Batch(DictDot):
 
     @property
     def id(self):
-        return self._batch_definition.id
+        batch_definition = self._batch_definition
+        return (
+            batch_definition.id
+            if isinstance(batch_definition, BatchDefinition)
+            else batch_definition.to_id()
+        )
 
     def __str__(self):
         json_dict = {
             "data": str(self.data),
             "batch_request": self.batch_request.get_json_dict(),
-            "batch_definition": self.batch_definition.get_json_dict(),
+            "batch_definition": self.batch_definition.get_json_dict()
+            if isinstance(self.batch_definition, BatchDefinition)
+            else {},
             "batch_spec": str(self.batch_spec),
             "batch_markers": str(self.batch_markers),
         }
         return json.dumps(json_dict, indent=2)
+
+    def head(self):
+        return self._batch_data.head()

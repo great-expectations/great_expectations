@@ -9,15 +9,13 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.metrics.column_map_metric import (
-    MapMetricProvider,
-    column_map_condition,
-    map_condition,
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F, SQLContext
+from great_expectations.expectations.metrics.map_metric import MapMetricProvider
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 
 
@@ -27,9 +25,13 @@ class ColumnPairValuesInSet(MapMetricProvider):
         "value_pairs_set",
         "ignore_row_if",
     )
-    domain_keys = ("batch_id", "table", "column_a", "column_b")
+    condition_domain_keys = ("batch_id", "table", "column_A", "column_B")
 
-    @map_condition(engine=PandasExecutionEngine)
+    @metric_partial(
+        engine=PandasExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
+        domain_type=MetricDomainTypes.COLUMN_PAIR,
+    )
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
@@ -44,13 +46,17 @@ class ColumnPairValuesInSet(MapMetricProvider):
         if not ignore_row_if:
             ignore_row_if = "both_values_are_missing"
 
-        df, compute_domain, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs
+        (
+            df,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN_PAIR
         )
 
         column_A, column_B = filter_pair_metric_nulls(
-            df[metric_domain_kwargs["column_a"]],
-            df[metric_domain_kwargs["column_b"]],
+            df[metric_domain_kwargs["column_A"]],
+            df[metric_domain_kwargs["column_B"]],
             ignore_row_if=ignore_row_if,
         )
 
@@ -75,9 +81,13 @@ class ColumnPairValuesInSet(MapMetricProvider):
 
             results.append((a, b) in value_pairs_set)
 
-        return pd.Series(results)
+        return pd.Series(results), compute_domain_kwargs, accessor_domain_kwargs
 
-    @map_condition(engine=SparkDFExecutionEngine)
+    @metric_partial(
+        engine=SparkDFExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+        domain_type=MetricDomainTypes.COLUMN_PAIR,
+    )
     def _spark(
         cls,
         execution_engine: "SparkDFExecutionEngine",
@@ -102,8 +112,12 @@ class ColumnPairValuesInSet(MapMetricProvider):
             )
             compute_domain_kwargs["condition_parser"] = "spark"
 
-        df, compute_domain_kwargs, _ = execution_engine.get_compute_domain(
-            compute_domain_kwargs
+        (
+            df,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            compute_domain_kwargs, domain_type=MetricDomainTypes.COLUMN_PAIR
         )
 
         df = df.withColumn(
@@ -126,4 +140,4 @@ class ColumnPairValuesInSet(MapMetricProvider):
             "__success",
             F.when(F.col("set_AB").isNull(), F.lit(False)).otherwise(F.lit(True)),
         )
-        return df["__success"], compute_domain_kwargs
+        return df["__success"], compute_domain_kwargs, accessor_domain_kwargs
