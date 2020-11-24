@@ -211,7 +211,6 @@ _____
 
    1. During development, you should import and run your Expectation, writing additional tests for get_evaluation parameters if it is complicated
    2. It is often helpful to generate examples showing the functionality of your Expectation, which helps verify the Expectation works as intended.
-   3. If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the         tests/test_definitions/name_of_your_expectation directory.
+   3. If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the ``tests/test_definitions/name_of_your_expectation`` directory.
 
 We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference (Link to core concepts).
-
