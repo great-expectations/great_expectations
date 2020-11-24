@@ -135,16 +135,18 @@ Steps
 
         #.  **Create or copy a yaml config**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlDataSource`` with associated credentials passed in as environment variables.
-                Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as environment variables.
+                ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use in connecting data living in a sql database. More information on ``Datasources``
+                in GE 0.13 can found in :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
-                **Note**: The ``SimpleSqlDataSource`` is related to ``DataSource`` but automatically configures a ``SqlDataConnector``. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
-                **Note**: blurb on introspection :
+                This example also uses ``introspection`` to configure the datasource, where each table in the database is associated with its own ``data_asset``.  A deeper explanation on the different modes of building ``data_asset`` from data (``introspective`` / ``inferred`` vs ``configured``) can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+
+                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
 
                 .. code-block:: python
 
                     config = f"""
-                        class_name: SimpleSqlDataSource
+                        class_name: SimpleSqlalchemyDatasource
                         credentials:
                             drivername: mysql+pymysql
                             host: {host}
@@ -174,8 +176,8 @@ Steps
             .. code-block:: bash
 
                 Attempting to instantiate class from config...
-                Instantiating as a DataSource, since class_name is SimpleSqlDataSource
-                Successfully instantiated SimpleSqlDataSource
+                Instantiating as a DataSource, since class_name is SimpleSqlalchemyDatasource
+                Successfully instantiated SimpleSqlalchemyDatasource
 
                 Execution engine: SqlAlchemyExecutionEngine
                 Data connectors:
@@ -200,11 +202,9 @@ Steps
                 3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance\r
                 4        5  Father of the Bride Part II (1995)                                       Comedy\r
 
+             This means all has went well and you can proceed with exploring the data sets in your new mysql data source.
 
             **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
-
-            This means all has went well and you can proceed with exploring the data sets in your new filesystem-backed Pandas data source.
-
 
 Additional notes
 ----------------
