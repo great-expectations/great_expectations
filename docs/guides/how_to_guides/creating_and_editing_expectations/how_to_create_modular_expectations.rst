@@ -16,18 +16,18 @@ _____
 
 #. **Plan Metric Dependencies**
 
-   In the new Modular Expectation design, Expectations rely on Metrics defined by separate MetricProvider Classes, which are then referenced within the Expectation and used for computation.
+   In the new Modular Expectation design, Expectations rely on Metrics defined by separate MetricProvider Classes, which are then referenced within the Expectation and used for computation. For more on Metric Naming Conventions, look at :ref:`Metric Naming Conventions <core_concepts>`
 
    Once you’ve decided on an Expectation to implement, think of the different aggregations, mappings, or metadata you’ll need to validate your data within the Expectation - each of these will be a separate metric that must be implemented prior to validating your Expectation. 
 
-   Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is very possible you will find that the Metric you’d like to implement already exists within the GE framework and can be readily deployed.
+   Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the GE framework and can be readily deployed.
 
 
-#. **Implement your Metric (Sometimes)**
+#. **Implement your Metric**
 
    If your metric does not yet exist within the framework, you will need to implement it yourself within a new file - a task that is quick and simple within the new modular framework. 
 
-   Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark dialects (other implementations can be found in the dictionary of metrics). You can find Metric Naming Conventions (insert link here)
+   Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark dialects (other implementations can be found in the dictionary of metrics).
 
 
 .. code-block:: python
@@ -160,7 +160,7 @@ _____
         ), "Provided max threshold must be a number"
 
 
-5. **Validate (Sometimes)**
+5. **Validate**
 
    In this step, we simply need to validate that the results of our metrics meet our Expectation.
 
