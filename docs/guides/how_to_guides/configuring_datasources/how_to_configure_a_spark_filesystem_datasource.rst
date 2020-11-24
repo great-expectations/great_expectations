@@ -18,8 +18,9 @@ Steps
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-          - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-
+            - :ref:`Set up a working deployment of Great Expectations. <tutorials__getting_started>`
+            - Installed the pyspark package. (``pip install pyspark``)
+            - Setup ``SPARK_HOME`` and ``JAVA_HOME`` variables for runtime environment.
 
         To add a filesystem-backed Spark datasource do this:
 
@@ -109,9 +110,11 @@ Steps
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-            - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-            - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+            - Installed the pyspark package (``pip install pyspark``).
+            - Setup ``SPARK_HOME`` and ``JAVA_HOME`` variables for runtime environment.
+            - :ref:`Set up a working deployment of Great Expectations. <tutorials__getting_started>`
+            - :ref:`Understand the basics of ExecutionEnvironments. <execution_environments>`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config. <how_configure_data_context_using_test_yaml_config>`
 
         To add a Pandas filesystem datasource, do the following:
 
