@@ -7,7 +7,7 @@ This guide will walk you through the process of creating your own Modular Expect
 
   - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   
-A Modular Expectation is the new style Expectation, one that utilizes a Class Structure. The Expectation classes are significantly easier to build than
+Modular Expectations are new in version 0.13. They utilize a class structure that is significantly easier to build than
 ever before and are explained below!
 
 
@@ -214,7 +214,6 @@ _____
    3. If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the         tests/test_definitions/name_of_your_expectation directory.
 
 We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference (Link to core concepts).
-
 
 
 
