@@ -112,6 +112,10 @@ class StoreConfigurationError(DataContextError):
     pass
 
 
+class DatasourceConfigurationError(DataContextError):
+    pass
+
+
 class InvalidExpectationKwargsError(GreatExpectationsError):
     pass
 

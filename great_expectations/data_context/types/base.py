@@ -105,9 +105,9 @@ class SparkDFDatasourceDefaults(DatasourceDefaults):
 class DatasourceConfig(DictDot):
     def set_defaults(
         self,
-        class_name: Optional[str],
-        module_name: Optional[str],
-        data_asset_type: Optional[dict],
+        class_name: str,
+        module_name: Optional[str] = None,
+        data_asset_type: Optional[dict] = None,
     ):
         """
         Return defaults based on the type of datasource being configured
@@ -122,13 +122,18 @@ class DatasourceConfig(DictDot):
         Returns:
             module_name and data_asset_type as configured or defaults
         """
-        defaults_class = None
-        if class_name == PandasDatasourceDefaults.class_name():
-            defaults_class = PandasDatasourceDefaults
-        elif class_name == SqlAlchemyDatasourceDefaults.class_name():
-            defaults_class = SqlAlchemyDatasourceDefaults
-        elif class_name == SparkDFDatasourceDefaults.class_name():
-            defaults_class = SparkDFDatasourceDefaults
+
+        supported_classes = {
+            PandasDatasourceDefaults.class_name(): PandasDatasourceDefaults,
+            SqlAlchemyDatasourceDefaults.class_name(): SqlAlchemyDatasourceDefaults,
+            SparkDFDatasourceDefaults.class_name(): SparkDFDatasourceDefaults,
+        }
+        try:
+            defaults_class = supported_classes[class_name]
+        except KeyError:
+            raise ge_exceptions.DatasourceConfigurationError(
+                f"class_name should be one of the following supported classes: {list(supported_classes.keys())}"
+            )
 
         data_asset_type = (
             defaults_class.data_asset_type()
@@ -151,7 +156,7 @@ class DatasourceConfig(DictDot):
         boto3_options=None,
         reader_method=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         # Set Defaults
         module_name, data_asset_type = self.set_defaults(
