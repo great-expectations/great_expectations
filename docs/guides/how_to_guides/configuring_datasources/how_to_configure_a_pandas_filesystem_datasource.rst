@@ -159,7 +159,6 @@ Steps
 
                                 assets:
                                     TestAsset:
-                                        base_directory: {base_directory}
                                         pattern: (.+)_(\\d+)_(\\d+)\\.csv
                                         group_names:
                                             - name
