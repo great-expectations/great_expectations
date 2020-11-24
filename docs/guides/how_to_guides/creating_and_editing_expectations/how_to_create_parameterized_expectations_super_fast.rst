@@ -18,7 +18,7 @@ _____
   For the purpose of this excercise, we will implement the new Expectation "expect_column_mean_to_be_positive" - a realistic Expectation of the data that
   can easily inherit from ``expect_column_mean_to_be_between``.
 
-2. Select Default Values for Your Class
+2. Select default values for your class
 ###########################################################
 
   As can be seen in the implementation below, we have chosen to keep our default minimum value at 0, given that we are validating that all our
@@ -69,5 +69,4 @@ _____
           runtime_configuration=runtime_configuration,
           execution_engine=execution_engine,
       )
-
 
