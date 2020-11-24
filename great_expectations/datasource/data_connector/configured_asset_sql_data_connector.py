@@ -8,14 +8,12 @@ from great_expectations.core.batch import (
     BatchSpec,
     PartitionDefinition,
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.datasource.data_connector.asset.asset import Asset
-from great_expectations.datasource.data_connector.data_connector import (
-    DataConnector,
-)
+from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
+from great_expectations.execution_engine import ExecutionEngine
 
 try:
     import sqlalchemy as sa

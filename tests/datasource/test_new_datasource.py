@@ -18,10 +18,10 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
-from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
+from great_expectations.datasource.new_datasource import Datasource
 from tests.test_utils import create_files_in_directory
 
 yaml = YAML()
@@ -75,9 +75,7 @@ data_connectors:
 
 
 @pytest.fixture
-def sample_datasource_with_single_partition_file_data_connector(
-    tmp_path_factory,
-):
+def sample_datasource_with_single_partition_file_data_connector(tmp_path_factory,):
     base_directory: str = str(
         tmp_path_factory.mktemp(
             "basic_datasource_single_partition_filesystem_data_connector"
@@ -180,9 +178,7 @@ def test_some_very_basic_stuff(basic_datasource):
         partition_definition=PartitionDefinition({"letter": "B", "number": "1",}),
     )
 
-    batch_list: List[
-        Batch
-    ] = basic_datasource.get_batch_list_from_batch_request(
+    batch_list: List[Batch] = basic_datasource.get_batch_list_from_batch_request(
         batch_request=BatchRequest(
             datasource_name="my_datasource",
             data_connector_name="my_filesystem_data_connector",
@@ -194,9 +190,7 @@ def test_some_very_basic_stuff(basic_datasource):
     )
     assert len(batch_list) == 0
 
-    batch_list: List[
-        Batch
-    ] = basic_datasource.get_batch_list_from_batch_request(
+    batch_list: List[Batch] = basic_datasource.get_batch_list_from_batch_request(
         batch_request=BatchRequest(
             datasource_name="my_datasource",
             data_connector_name="my_filesystem_data_connector",
@@ -254,9 +248,7 @@ def test_get_batch_list_from_batch_request(basic_datasource):
         # }
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = basic_datasource.get_batch_list_from_batch_request(
+    batch_list: List[Batch] = basic_datasource.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
 
@@ -292,9 +284,7 @@ def test_get_batch_with_pipeline_style_batch_request(basic_datasource):
         "limit": None,
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = basic_datasource.get_batch_list_from_batch_request(
+    batch_list: List[Batch] = basic_datasource.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
 
@@ -332,9 +322,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_e
     batch_request: BatchRequest = BatchRequest(**batch_request)
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        batch_list: List[
-            Batch
-        ] = basic_datasource.get_batch_list_from_batch_request(
+        batch_list: List[Batch] = basic_datasource.get_batch_list_from_batch_request(
             batch_request=batch_request
         )
 
@@ -358,9 +346,7 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
     # noinspection PyUnusedLocal
-    batch_list: List[
-        Batch
-    ] = basic_datasource.get_batch_list_from_batch_request(
+    batch_list: List[Batch] = basic_datasource.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
 

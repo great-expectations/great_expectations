@@ -7,6 +7,7 @@ from typing import Callable, Optional, Union
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.compat import StringIO
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
@@ -15,14 +16,13 @@ from great_expectations.core.batch import (
     PartitionRequest,
 )
 from great_expectations.data_context.data_context import DataContext
-from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.data_context.types.base import dataContextConfigSchema
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
 )
+from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.validator.validator import Validator
-import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -67,13 +67,11 @@ class DataContextV3(DataContext):
         # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
         return dict(self._load_config_variables_file())
 
-    # TODO: <Alex></Alex>
-    def add_datasource(
-        self, datasource_name, datasource_config
-    ):
+    # TODO: <Alex>We need to standardize the signatures of methods in all subclasses of BaseDataContext</Alex>
+    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
+    def add_datasource(self, datasource_name, datasource_config):
         logger.debug(
-            "Starting DataContext.add_datasource for datasource %s"
-            % datasource_name
+            "Starting DataContext.add_datasource for datasource %s" % datasource_name
         )
 
         new_datasource = self._build_and_add_datasource(
@@ -83,10 +81,8 @@ class DataContextV3(DataContext):
 
         return new_datasource
 
-    # TODO: <Alex></Alex>
-    def _build_and_add_datasource(
-        self, datasource_name, datasource_config
-    ):
+    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
+    def _build_and_add_datasource(self, datasource_name, datasource_config):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
@@ -100,15 +96,11 @@ class DataContextV3(DataContext):
         new_datasource = self._build_datasource_from_config(
             datasource_name, datasource_config,
         )
-        self._project_config["datasources"][
-            datasource_name
-        ] = datasource_config
+        self._project_config["datasources"][datasource_name] = datasource_config
         return new_datasource
 
-    # TODO: <Alex></Alex>
-    def _build_datasource_from_config(
-        self, name: str, config: dict,
-    ) -> BaseDatasource:
+    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
+    def _build_datasource_from_config(self, name: str, config: dict,) -> BaseDatasource:
         module_name: str = "great_expectations.datasource"
         runtime_environment: dict = {
             "name": name,
@@ -343,9 +335,7 @@ class DataContextV3(DataContext):
 
         if batch_definition:
             # TODO: Raise a warning if any parameters besides batch_definition are specified
-            return datasource.get_batch_from_batch_definition(
-                batch_definition
-            )
+            return datasource.get_batch_from_batch_definition(batch_definition)
         elif batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
             return datasource.get_single_batch_from_batch_request(
@@ -462,9 +452,7 @@ class DataContextV3(DataContext):
         )
 
         validator = Validator(
-            execution_engine=self.datasources[
-                datasource_name
-            ].execution_engine,
+            execution_engine=self.datasources[datasource_name].execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
             data_context=self,

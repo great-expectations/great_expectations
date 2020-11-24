@@ -10,8 +10,8 @@ from great_expectations.core.batch import (
     PartitionDefinition,
     PartitionRequest,
 )
-from great_expectations.exceptions import InvalidBatchSpecError
 from great_expectations.datasource.types import RuntimeDataBatchSpec
+from great_expectations.exceptions import InvalidBatchSpecError
 
 
 def test_batch_definition_id():

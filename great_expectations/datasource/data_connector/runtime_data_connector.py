@@ -7,10 +7,7 @@ from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionDefinitionSubset,
 )
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.datasource.data_connector.data_connector import (
-    DataConnector,
-)
+from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
@@ -19,6 +16,7 @@ from great_expectations.datasource.types import (
     BatchSpec,
     RuntimeDataBatchSpec,
 )
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -108,8 +106,7 @@ class RuntimeDataConnector(DataConnector):
             BatchDefinition
         ] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
-                datasource_name=self.datasource_name,
-                data_connector_name=self.name,
+                datasource_name=self.datasource_name, data_connector_name=self.name,
             )
         )
 

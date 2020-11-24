@@ -3,10 +3,7 @@ from typing import Iterator, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.datasource.data_connector.data_connector import (
-    DataConnector,
-)
+from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.partition_query import (
     PartitionQuery,
     build_partition_query,
@@ -19,6 +16,7 @@ from great_expectations.datasource.data_connector.util import (
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
 from great_expectations.datasource.types import PathBatchSpec
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

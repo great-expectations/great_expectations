@@ -1,10 +1,8 @@
 from typing import Dict, List, Optional
 
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetSqlDataConnector,
-)
+from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.execution_engine import ExecutionEngine
 
 try:
     import sqlalchemy as sa

@@ -232,9 +232,7 @@ class DataConnectorConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(
-        missing="great_expectations.datasource.data_connector"
-    )
+    module_name = fields.String(missing="great_expectations.datasource.data_connector")
 
     assets = fields.Dict(
         keys=fields.Str(),

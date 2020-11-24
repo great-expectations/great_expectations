@@ -8,11 +8,11 @@ except ImportError:
     boto3 = None
 
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.datasource.data_connector import (
     InferredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import list_s3_keys
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

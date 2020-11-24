@@ -5,9 +5,7 @@ import pytest
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchRequest, BatchSpec
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetSqlDataConnector,
-)
+from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 
 yaml = YAML()
 
@@ -144,9 +142,7 @@ def test_get_batch_definition_list_from_batch_request(
 
     with pytest.raises(KeyError):
         my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="FAKE_Datasource_NAME",
-            )
+            batch_request=BatchRequest(datasource_name="FAKE_Datasource_NAME",)
         )
 
     with pytest.raises(KeyError):

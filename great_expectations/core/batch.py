@@ -59,9 +59,7 @@ class BatchDefinition(DictDot):
     ):
         if datasource_name is None:
             raise ValueError("A valid datasource must be specified.")
-        if datasource_name and not isinstance(
-            datasource_name, str
-        ):
+        if datasource_name and not isinstance(datasource_name, str):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
 "{str(type(datasource_name))}", which is illegal.
@@ -224,9 +222,7 @@ class BatchRequest(DictDot):
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
         limit: Union[int, None] = None,
     ):
-        if datasource_name and not isinstance(
-            datasource_name, str
-        ):
+        if datasource_name and not isinstance(datasource_name, str):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
 "{str(type(datasource_name))}", which is illegal.

@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
@@ -11,6 +10,7 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
     normalize_directory_path,
 )
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

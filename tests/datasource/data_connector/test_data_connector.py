@@ -8,16 +8,16 @@ from great_expectations.core.batch import (
     PartitionDefinition,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
     InferredAssetFilesystemDataConnector,
 )
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
+)
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
 )
 from tests.test_utils import create_files_in_directory
 
@@ -47,9 +47,7 @@ assets:
 """,
         ),
         runtime_environment={"name": "my_data_connector"},
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     return basic_data_connector
 
@@ -170,26 +168,20 @@ def test__batch_definition_matches_batch_request():
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(
-            datasource_name="A", data_connector_name="a",
-        ),
+        batch_request=BatchRequest(datasource_name="A", data_connector_name="a",),
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
-            datasource_name="A",
-            data_connector_name="a",
-            data_asset_name="aaa",
+            datasource_name="A", data_connector_name="a", data_asset_name="aaa",
         ),
     )
 
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
-            datasource_name="A",
-            data_connector_name="a",
-            data_asset_name="bbb",
+            datasource_name="A", data_connector_name="a", data_asset_name="bbb",
         ),
     )
 

@@ -66,8 +66,8 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource  # TODO: deprecate
-from great_expectations.exceptions import DataContextError
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -666,9 +666,7 @@ class BaseDataContext:
     def datasources(self) -> Dict[str, Datasource]:
         """A single holder for all Datasources in this context"""
         return {
-            datasource: self.get_datasource(
-                datasource_name=datasource
-            )
+            datasource: self.get_datasource(datasource_name=datasource)
             for datasource in self._project_config_with_variables_substituted.datasources
         }
 
@@ -846,9 +844,7 @@ class BaseDataContext:
         if datasource_name is None:
             raise ValueError("Datasource names must be a datasource name")
         else:
-            datasource = self.get_datasource(
-                datasource_name
-            )
+            datasource = self.get_datasource(datasource_name)
             if datasource:
                 # remove key until we have a delete method on project_config
                 # self._project_config_with_variables_substituted.datasources[
@@ -856,9 +852,7 @@ class BaseDataContext:
                 # del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
-                raise ValueError(
-                    "Datasource {} not found".format(datasource_name)
-                )
+                raise ValueError("Datasource {} not found".format(datasource_name))
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
@@ -979,9 +973,7 @@ class BaseDataContext:
     def get_batch_list_from_new_style_datasource(
         self, batch_request: dict
     ) -> List[Batch]:
-        datasource_name: str = batch_request.get(
-            "datasource_name"
-        )
+        datasource_name: str = batch_request.get("datasource_name")
         if not datasource_name:
             raise ge_exceptions.DatasourceError(
                 message="Batch request must specify an datasource."
@@ -989,9 +981,7 @@ class BaseDataContext:
 
         datasource: Datasource = self.datasources[datasource_name]
         batch_request: BatchRequest = BatchRequest(**batch_request)
-        return datasource.get_batch_list_from_batch_request(
-            batch_request=batch_request
-        )
+        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     def get_batch(
         self,
@@ -1172,28 +1162,6 @@ class BaseDataContext:
 
         return datasource
 
-    # TODO: <Alex></Alex>
-    # def add_datasource(
-    #     self, datasource_name, datasource_config
-    # ):
-    #     """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
-    #
-    #     Args:
-    #         datasource_name (str): a key for the new Datasource in in self._datasources
-    #         datasource_config (dict): a config for the Datasource to add
-    #
-    #     Returns:
-    #         datasource (Datasource)
-    #     """
-    #
-    #     new_datasource = self._build_datasource_from_config(
-    #         datasource_name, datasource_config,
-    #     )
-    #     self._project_config["datasources"][
-    #         datasource_name
-    #     ] = datasource_config
-    #     return new_datasource
-
     # TODO: deprecate
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
@@ -1272,36 +1240,6 @@ class BaseDataContext:
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
-    # TODO: <Alex></Alex>
-    # def _build_datasource_from_config(
-    #     self, name: str, config: dict,
-    # ) -> Datasource:
-    #     module_name: str = "great_expectations.datasource"
-    #     runtime_environment: dict = {
-    #         "name": name,
-    #         "data_context_root_directory": self.root_directory,
-    #     }
-    #     new_datasource: Datasource = instantiate_class_from_config(
-    #         config=config,
-    #         runtime_environment=runtime_environment,
-    #         config_defaults={"module_name": module_name},
-    #     )
-    #
-    #     if not new_datasource:
-    #         raise ge_exceptions.ClassInstantiationError(
-    #             module_name=module_name,
-    #             package_name=None,
-    #             class_name=config["class_name"],
-    #         )
-    #
-    #     if not isinstance(new_datasource, BaseDatasource):
-    #         raise TypeError(
-    #             f"Newly instantiated component {name} is not an instance of BaseDatasource. Please check class_name in the config."
-    #         )
-    #
-    #     self._cached_datasources[name] = new_datasource
-    #     return new_datasource
-
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""
         try:
@@ -1338,9 +1276,7 @@ class BaseDataContext:
         for (
             key,
             value,
-        ) in (
-            self._project_config_with_variables_substituted.datasources.items()
-        ):
+        ) in self._project_config_with_variables_substituted.datasources.items():
             value["name"] = key
             datasources.append(value)
         return datasources
@@ -2533,22 +2469,6 @@ class DataContext(BaseDataContext):
         self._save_project_config()
 
         return delete_datasource
-
-    # TODO: <Alex></Alex>
-    # def add_datasource(
-    #     self, datasource_name, datasource_config
-    # ):
-    #     logger.debug(
-    #         "Starting DataContext.add_datasource for datasource %s"
-    #         % datasource_name
-    #     )
-    #
-    #     new_datasource = super().add_datasource(
-    #         datasource_name, datasource_config
-    #     )
-    #     self._save_project_config()
-    #
-    #     return new_datasource
 
     @classmethod
     def find_context_root_dir(cls):

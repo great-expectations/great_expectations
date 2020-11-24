@@ -4,10 +4,10 @@ from typing import Any, List, Optional, Tuple
 
 from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.datasource.data_connector.util import (
     fetch_batch_data_as_pandas_df,
 )
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -266,8 +266,7 @@ class DataConnector:
     def _validate_batch_request(self, batch_request: BatchRequest):
         if not (
             batch_request.datasource_name is None
-            or batch_request.datasource_name
-            == self.datasource_name
+            or batch_request.datasource_name == self.datasource_name
         ):
             raise ValueError(
                 f"""execution_envrironment_name in BatchRequest: "{batch_request.datasource_name}" does not

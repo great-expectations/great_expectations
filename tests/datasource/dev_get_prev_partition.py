@@ -18,14 +18,12 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
-from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.datasource.data_connector import (
     DataConnector,
     InferredAssetFilesystemDataConnector,
 )
-from great_expectations.datasource.data_connector.partitioner.partition import (
-    Partition,
-)
+from great_expectations.datasource.data_connector.partitioner.partition import Partition
+from great_expectations.datasource.new_datasource import Datasource
 from tests.test_utils import (
     create_files_for_regex_partitioner,
     create_files_in_directory,
@@ -108,8 +106,7 @@ def test_stub(basic_datasource):
 
     batch_definitions = basic_datasource.get_available_batch_definitions(
         BatchRequest(
-            data_connector_name="my_connector",
-            datasource_name="general_data_source",
+            data_connector_name="my_connector", datasource_name="general_data_source",
         )
     )
     for defin in batch_definitions:

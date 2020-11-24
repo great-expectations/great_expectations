@@ -15,10 +15,8 @@ from great_expectations.core.batch import (
     PartitionRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetS3DataConnector,
-)
 
 yaml = YAML()
 
@@ -261,9 +259,7 @@ def test_return_all_batch_definitions_unsorted():
             "name": "general_s3_data_connector",
             "datasource_name": "test_environment",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     with pytest.raises(TypeError):
@@ -436,9 +432,7 @@ def test_return_all_batch_definitions_sorted():
             "name": "general_s3_data_connector",
             "datasource_name": "test_environment",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     self_check_report = my_data_connector.self_check()
@@ -633,9 +627,7 @@ def test_alpha():
             "name": "general_s3_data_connector",
             "datasource_name": "BASE",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     self_check_report = my_data_connector.self_check()
     print(json.dumps(self_check_report, indent=2))
@@ -739,9 +731,7 @@ def test_foxtrot():
             "name": "general_s3_data_connector",
             "datasource_name": "BASE",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     self_check_report = my_data_connector.self_check()
     assert self_check_report == {
@@ -987,9 +977,7 @@ assets:
     config = yaml.load(yaml_string)
     my_data_connector = instantiate_class_from_config(
         config,
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         runtime_environment={"name": "my_data_connector"},
     )
     # noinspection PyProtectedMember

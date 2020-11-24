@@ -3,10 +3,8 @@ import logging
 from typing import List, Optional
 
 from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.datasource.data_connector import FilePathDataConnector
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.datasource.data_connector import (
-    FilePathDataConnector,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +78,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             BatchDefinition
         ] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
-                datasource_name=self.datasource_name,
-                data_connector_name=self.name,
+                datasource_name=self.datasource_name, data_connector_name=self.name,
             )
         )
 

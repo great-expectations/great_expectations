@@ -7,12 +7,12 @@ from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.id_dict import IDDict
-from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.datasource.types.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
+from great_expectations.exceptions import exceptions as ge_exceptions
 
 from ..exceptions import (
     BatchKwargsError,

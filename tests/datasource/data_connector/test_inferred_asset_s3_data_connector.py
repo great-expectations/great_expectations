@@ -13,9 +13,7 @@ from great_expectations.core.batch import (
     PartitionDefinition,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import (
-    InferredAssetS3DataConnector,
-)
+from great_expectations.datasource.data_connector import InferredAssetS3DataConnector
 
 yaml = YAML()
 
@@ -775,9 +773,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
             "datasource_name": "test_environment",
             "execution_engine": "BASE_ENGINE",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(

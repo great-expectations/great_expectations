@@ -217,9 +217,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             "name": "general_filesystem_data_connector",
             "datasource_name": "test_environment",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     with pytest.raises(TypeError):
@@ -385,9 +383,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
             "name": "general_filesystem_data_connector",
             "datasource_name": "test_environment",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     self_check_report = my_data_connector.self_check()
@@ -573,9 +569,7 @@ def test_alpha(tmp_path_factory):
             "name": "general_filesystem_data_connector",
             "datasource_name": "BASE",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     self_check_report = my_data_connector.self_check()
     print(json.dumps(self_check_report, indent=2))
@@ -671,9 +665,7 @@ def test_foxtrot(tmp_path_factory):
             "name": "general_filesystem_data_connector",
             "datasource_name": "BASE",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     self_check_report = my_data_connector.self_check()
     assert self_check_report == {
@@ -887,9 +879,7 @@ assets:
     config = yaml.load(yaml_string)
     my_data_connector = instantiate_class_from_config(
         config,
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         runtime_environment={"name": "my_data_connector"},
     )
     # noinspection PyProtectedMember

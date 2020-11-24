@@ -117,11 +117,7 @@ introspection:
     whole_table: {}
 """
     )
-    print(
-        json.dumps(
-            my_sql_datasource.get_available_data_asset_names(), indent=4
-        )
-    )
+    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
 
     assert my_sql_datasource.get_available_data_asset_names() == {
         "whole_table": [
@@ -225,11 +221,7 @@ tables:
 """
     )
 
-    print(
-        json.dumps(
-            my_sql_datasource.get_available_data_asset_names(), indent=4
-        )
-    )
+    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
     assert my_sql_datasource.get_available_data_asset_names() == {
         "whole_table": [
             "table_containing_id_spacers_for_D",
@@ -275,11 +267,7 @@ tables:
                     divisor: 12
 """
     )
-    print(
-        json.dumps(
-            my_sql_datasource.get_available_data_asset_names(), indent=4
-        )
-    )
+    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
     assert my_sql_datasource.get_available_data_asset_names() == {
         "whole_table": ["table_partitioned_by_date_column__A",],
         "daily": ["table_partitioned_by_date_column__A",],
@@ -305,9 +293,7 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
             "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
             "datasource_name": "my_test_datasource",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     # print(my_data_connector._introspect_db())
@@ -493,9 +479,7 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(
             "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
             "datasource_name": "my_test_datasource",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     report_object = my_data_connector.self_check()
@@ -571,9 +555,7 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
             "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
             "datasource_name": "my_test_datasource",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     report_object = my_data_connector.self_check()
@@ -655,11 +637,7 @@ introspection:
             date_format_string: "%Y-%m-%d"
 """
     )
-    print(
-        json.dumps(
-            my_sql_datasource.get_available_data_asset_names(), indent=4
-        )
-    )
+    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
 
     assert my_sql_datasource.get_available_data_asset_names() == {
         "daily": [

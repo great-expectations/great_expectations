@@ -3,10 +3,8 @@ from string import Template
 
 from marshmallow import Schema, ValidationError, fields, post_load
 
+from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
-from great_expectations.datasource.types import (
-    SqlAlchemyDatasourceTableBatchKwargs,
-)
 
 from .data_connector import DataConnector
 

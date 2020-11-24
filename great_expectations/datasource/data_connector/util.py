@@ -18,10 +18,10 @@ from great_expectations.core.id_dict import (
     PartitionDefinitionSubset,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
 )
-from great_expectations.datasource.data_connector.sorter import Sorter
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +46,7 @@ def batch_definition_matches_batch_request(
     assert isinstance(batch_request, BatchRequest)
 
     if batch_request.datasource_name:
-        if (
-            batch_request.datasource_name
-            != batch_definition.datasource_name
-        ):
+        if batch_request.datasource_name != batch_definition.datasource_name:
             return False
     if batch_request.data_connector_name:
         if batch_request.data_connector_name != batch_definition.data_connector_name:

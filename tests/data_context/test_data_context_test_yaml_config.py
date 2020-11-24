@@ -304,9 +304,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
     """
     base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_golden_path_pandas_datasource_configuration"
-        )
+        tmp_path_factory.mktemp("test_golden_path_pandas_datasource_configuration")
     )
 
     create_files_in_directory(
@@ -433,9 +431,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
     """
     base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_golden_path_pandas_datasource_configuration"
-        )
+        tmp_path_factory.mktemp("test_golden_path_pandas_datasource_configuration")
     )
 
     create_files_in_directory(

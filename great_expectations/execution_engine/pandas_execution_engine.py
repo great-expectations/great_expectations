@@ -24,8 +24,8 @@ except ImportError:
 
 from ..core.batch import BatchMarkers
 from ..core.id_dict import BatchSpec
-from ..exceptions import BatchSpecError, GreatExpectationsError, ValidationError
 from ..datasource.util import hash_pandas_dataframe
+from ..exceptions import BatchSpecError, GreatExpectationsError, ValidationError
 from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 logger = logging.getLogger(__name__)

@@ -78,9 +78,7 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
             "datasource_name": "test_environment",
             "execution_engine": "BASE_ENGINE",
         },
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     return my_data_connector
 
