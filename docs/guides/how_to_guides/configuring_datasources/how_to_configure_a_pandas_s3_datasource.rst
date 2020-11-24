@@ -201,7 +201,7 @@ Steps
                     my_data_connector : ConfiguredAssetS3DataConnector
 
                     Available data_asset_names (1 of 1):
-                        A (1 of 1): ['abe_20201119_200.csv']
+                        test_asset (1 of 1): ['abe_20201119_200.csv']
 
                     Unmatched data_references (0 of 0): []
 
