@@ -58,9 +58,7 @@ class SqlAlchemyDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
         return self.get("schema")
 
 
-class PathBatchSpec(
-    PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec
-):
+class PathBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "path" not in self:
@@ -75,9 +73,7 @@ class PathBatchSpec(
         return self.get("reader_method")
 
 
-class S3BatchSpec(
-    PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec
-):
+class S3BatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "s3" not in self:

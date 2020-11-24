@@ -731,7 +731,9 @@ class DataContextConfigSchema(Schema):
         error_messages={"invalid": "config version must " "be a number."},
     )
     datasources = fields.Dict(
-        keys=fields.Str(), values=fields.Nested(LegacyDatasourceConfigSchema), allow_none=True
+        keys=fields.Str(),
+        values=fields.Nested(LegacyDatasourceConfigSchema),
+        allow_none=True,
     )
     execution_environments = fields.Dict(
         keys=fields.Str(),

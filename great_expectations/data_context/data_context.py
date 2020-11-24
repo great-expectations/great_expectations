@@ -46,12 +46,12 @@ from great_expectations.data_context.types.base import (  # TODO: deprecate
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
-    LegacyDatasourceConfig,
     DatasourceConfig,
+    LegacyDatasourceConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
-    legacyDatasourceConfigSchema,
     datasourceConfigSchema,
+    legacyDatasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -67,10 +67,7 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource  # TODO: deprecate
 from great_expectations.exceptions import DataContextError
-from great_expectations.execution_environment import (
-    BaseDatasource,
-    Datasource,
-)
+from great_expectations.execution_environment import BaseDatasource, Datasource
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -847,9 +844,7 @@ class BaseDataContext:
             ValueError: If the execution_environment name isn't provided or cannot be found.
         """
         if execution_environment_name is None:
-            raise ValueError(
-                "Datasource names must be a execution_environment name"
-            )
+            raise ValueError("Datasource names must be a execution_environment name")
         else:
             execution_environment = self.get_execution_environment(
                 execution_environment_name
@@ -862,9 +857,7 @@ class BaseDataContext:
                 del self._cached_execution_environments[execution_environment_name]
             else:
                 raise ValueError(
-                    "Datasource {} not found".format(
-                        execution_environment_name
-                    )
+                    "Datasource {} not found".format(execution_environment_name)
                 )
 
     def get_available_data_asset_names(
@@ -994,9 +987,7 @@ class BaseDataContext:
                 message="Batch request must specify an execution_environment."
             )
 
-        execution_environment: Datasource = self.datasources[
-            execution_environment_name
-        ]
+        execution_environment: Datasource = self.datasources[execution_environment_name]
         batch_request: BatchRequest = BatchRequest(**batch_request)
         return execution_environment.get_batch_list_from_batch_request(
             batch_request=batch_request
