@@ -110,7 +110,6 @@ Steps
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-            - Set up a DataContext
             - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
             - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
 
@@ -127,18 +126,17 @@ Steps
 
             Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetFilesystemDataConnector`` and one asset named ``TestAsset``.
 
+            **Note**: The ``ConfiguredAssetFilesystemDataConnector`` used in this example is closely related to the ``InferredAssetFilesystemDataConnector`` with some key differences. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+
             .. code-block:: bash
 
                 test_directory/abe_20201119_200.csv
                 test_directory/alex_20201212_300.csv
                 test_directory/will_20201008_100.csv
 
-            The example will take the 3 files shown above and create 1 asset named ``TestAsset``, with ``name``, ``timestamp`` and ``size`` as the group names.
+            The example yaml config will take the 3 files shown above and create 1 asset named ``TestAsset``, with ``name``, ``timestamp`` and ``size`` as the group names.
+
             Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
-
-            The example will also touch upon concepts like ``assets``, ``data_conenctors`` and ``PartitionDefinitions``. For additional information on these please look at the ``core_concepts`` document.
-
-            #<WILL> see if this section can be smoothed.
 
             .. code-block:: python
 
@@ -177,15 +175,7 @@ Steps
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
 
-            **Note** : In the current example, the yaml config will only create a connector to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
-
-            ``self_check`` will do the following:
-
-                1. confirm that the connection works,
-                2. gather a list of available DataAssets (e.g. tables in SQL; files or folders in a filesystem), and
-                3. verify that it can successfully fetch at least one Batch from the source.
-
-            The output will look something like this:
+            The resulting output will look something like this:
 
             .. code-block:: bash
 
@@ -216,6 +206,7 @@ Steps
                 3           4  Allison, Mrs Hudson JC (Bessie Waldo Daniels)    1st  25.00  female         0        1
                 4           5                  Allison, Master Hudson Trevor    1st   0.92    male         1        0
 
+        **Note** : In the current example, the yaml config will only create a connector to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
         This means all has went well and you can proceed with exploring the data sets in your new filesystem-backed Pandas data source.
 
@@ -232,6 +223,11 @@ Additional Notes
         great_expectations datasource new
 
     command is executed.
+
+
+#.
+    For the Experimental API (0.13), relative path locations should be specified from the perspective of the ``great_expectations/`` directory.
+
 
 --------
 Comments
