@@ -280,7 +280,7 @@ class BaseDatasource:
             or batch_request.datasource_name == self.name
         ):
             raise ValueError(
-                f"""execution_envrironment_name in BatchRequest: "{batch_request.datasource_name}" does not
+                f"""execution_environment_name in BatchRequest: "{batch_request.datasource_name}" does not
                 match Datasource name: "{self.name}".
                 """
             )

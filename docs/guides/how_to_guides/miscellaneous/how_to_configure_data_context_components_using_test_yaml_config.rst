@@ -3,14 +3,11 @@
 How to configure DataContext components using ``test_yaml_config``
 ==================================================================
 
-``test_yaml_config`` is a convenience method for configuring the moving parts of a Great Expectations deployment. It allows you to quickly test out configs for Datasources, Checkpoints, and each type of Store (ExpectationStores, ValidationResultStores, and MetricsStores). For many deployments of Great Expectations, these components (plus Expectations) are the only ones you'll need.
+``test_yaml_config`` is a convenience method for configuring the moving parts of a Great Expectations deployment. It allows you to quickly test out configs for Datasources and Stores. In the future, we will also enable similar a workflow for configuring Checkpoints. For many deployments of Great Expectations, these components (plus Expectations) are the only ones you'll need.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-  - Set up a DataContext
-  - Understand the basics of ExecutionEnvironments
-  - Learned how to use ``test_yaml_config``
 
 ``test_yaml_config`` is primarily intended for use within a notebook, where you can iterate through an edit-run-check loop in seconds.
 
@@ -59,40 +56,49 @@ Steps
 
         1. confirming that the connection works,
         2. gathering a list of available DataAssets (e.g. tables in SQL; files or folders in a filesystem), and
-        3. verify that it can successfully fetch at least one Batch from the source.
+        3. verifying that it can successfully fetch at least one Batch from the source.
 
     The output will look something like this:
 
     .. code-block:: bash
 
         Attempting to instantiate class from config...
-            Instantiating as a ExecutionEnvironment, since class_name is ExecutionEnvironment
-            Successfully instantiated ExecutionEnvironment
+            Instantiating as a Datasource, since class_name is SimpleSqlalchemyDatasource
+            Successfully instantiated SimpleSqlalchemyDatasource
 
-        Execution engine: PandasExecutionEngine
+        Execution engine: SqlAlchemyExecutionEngine
         Data connectors:
-            my_filesystem_data_connector : InferredAssetFilesystemDataConnector
+            whole_table : InferredAssetSqlDataConnector
 
-            Available data_asset_names (1 of 1):
-                DEFAULT_ASSET_NAME (3 of 10): ['abe_20200809_1040.csv', 'alex_20200809_1000.csv', 'alex_20200819_1300.csv']
+            Available data_asset_names (3 of 14440):
+                expect_table_row_count_to_equal_other_table_data_1 (1 of 1): [{}]
+                expect_table_row_count_to_equal_other_table_data_2 (1 of 1): [{}]
+                expect_table_row_count_to_equal_other_table_data_3 (1 of 1): [{}]
 
             Unmatched data_references (0 of 0): []
 
             Choosing an example data reference...
-                Reference chosen: alex_20200819_1300.csv
+                Reference chosen: {}
 
                 Fetching batch data...
-                Successfuly fetched 100 rows of data.
+
+                Showing 5 rows
+                c1 c2    c3   c4
+                0   4  a  None  4.0
+                1   5  b  None  3.0
+                2   6  c  None  3.5
+                3   7  d  None  1.2
+
+        <great_expectations.datasource.simple_sqlalchemy_datasource.SimpleSqlalchemyDatasource at 0x12c1e4d50>
 
     If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.  Whenever possible, test_yaml_config provides helpful warnings and error messages. It can't solve every problem, but it can solve many.
-
 
     .. code-block:: bash
 
         Attempting to instantiate class from config...
             Instantiating as a ExecutionEnvironment, since class_name is StreamlinedSqlExecutionEnvironment
         ---------------------------------------------------------------------------
-        DatabaseError                             Traceback (most recent call last)
+        OperationalError                          Traceback (most recent call last)
         ~/anaconda2/envs/py3/lib/python3.7/site-packages/sqlalchemy/engine/base.py in _wrap_pool_connect(self, fn, connection)
         2338         try:
         -> 2339             return fn()
@@ -100,218 +106,34 @@ Steps
 
         ...
 
-        DatabaseError: (snowflake.connector.errors.DatabaseError) 250001 (08001): Failed to connect to DB: oca29081.us-east-1.snowflakecomputing.com:443. Incorrect username or password was specified.
-        (Background on this error at: http://sqlalche.me/e/13/4xp6)
+        OperationalError: (psycopg2.OperationalError) could not connect to server: Connection refused
+            Is the server running on host "localhost" (::1) and accepting
+            TCP/IP connections on port 5433?
+        could not connect to server: Connection refused
+            Is the server running on host "localhost" (127.0.0.1) and accepting
+            TCP/IP connections on port 5433?
 
+        (Background on this error at: http://sqlalche.me/e/13/e3q8)
 
 #. **Iterate as necessary.**
 
+    From here, iterate by editing your config and re-running ``test_yaml_config``, adding config blocks for additional introspection, data assets, sampling, etc. Please see <doc> for options and ideas.
 
+    Note that when ``test_yaml_config`` runs successfully, it adds the specified Datasource to your DataContext. This means that you can also test other methods, such as ``context.get_validator``, right within your notebook:
 
-#. **Iterate as necessary.**
+    .. code-block:: python
 
-.. code-block:: yaml
+        validator = context.get_validator(
+            datasource_name="my_datasource",
+            data_connector_name="whole_table",
+            data_asset_name="my_table",
+            create_expectation_suite_with_name="my_expectation_suite",
+        )
+        validator.expect_column_values_to_be_in_set("c1", [4,5,6])
 
-    import great_expectations as ge
-    context = ge.DataContext()
+#. **Save the config.**
 
-    context.test_yaml_config("""
-    class_name: ExecutionEnvironment
-
-    execution_engine:
-        class_name: PandasExecutionEngine
-
-    data_connectors:
-        my_filesystem_data_connector:
-            {data_connector configuration goes here}
-    """)
-
-
-If you’re not familiar with the ``test_yaml_config`` method, please check out [How to configure all sorts of stuff with test_yaml_config]() or the corresponding [video tutorial here]().
-
-Principles for configuring ``MultiPartitionFileDataConnectors``
-----------------------------------------------------------------
-
-One of your ``group_names`` must be ``data_asset_name``.
-
-
-Example 1: something something
------------------------------------------------------
-
-* test_dir_foxtrot
-* test_dir_golf
-* test_dir_hotel
-* test_dir_india
-
-For example, imagine you have the following files in the directory ``my_directory/``:
-
-.. literalinclude:: test.txt
-
-Then this configuration...
-
-.. literalinclude:: multipartition_yaml_example_1.yaml
-   :language: yaml
-
-...will make available the following data_references:
-
-.. code-block::
-
-    Available data_asset_names (1 of 1):
-        alpha (3 of 3): [
-            'alpha-2020-01-01.csv',
-            'alpha-2020-01-02.csv',
-            'alpha-2020-01-03.csv'
-        ]
-
-    Unmatched data_references (0 of 0): []
-
-.. invisible-code-block: python
-
-    >>> import os
-    >>> from great_expectations.data_context.util import file_relative_path
-    >>> filename = file_relative_path(__file__, "./multipartition_yaml_example_1.yaml")
-    >>> print(filename)
-    >>> my_yaml_string = open(filename).read()
-    >>> my_yaml_dict = yaml.load(my_yaml_string, Loader=yaml.FullLoader)
-    >>> assert "baz_2" in my_yaml_dict["foo"]["bar"]
-
-Once configured, you can get ``Validators`` from the ``DataContext`` as follows:
-
-.. code-block:: python
-
-    my_validator = my_context.get_validator(
-        execution_engine_name="my_execution_engine",
-            data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-        partition_request={
-            year="2020",
-            month="01",
-            day="01",
-        }
-    )
-
-Example 2: Basic configuration with more than one DataAsset
------------------------------------------------------------
-
-Here’s a similar example, with two different DataAssets mixed together.
-
-.. code-block::
-
-    alpha-2020-01-01.csv
-    beta-2020-01-01.csv
-    alpha-2020-01-02.csv
-    beta-2020-01-02.csv
-    alpha-2020-01-03.csv
-    beta-2020-01-03.csv
-
-The same configuration as Example 1...
-
-.. code-block:: yaml
-
-    class_name: SinglePartitionerFileDataConnector
-    base_directory: my_directory/
-
-    partitioner:
-        class_name: RegexPartitioner
-        group_names:
-            - data_asset_name
-            - year
-            - month
-            - day
-        pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv
-
-...will now make "alpha" and "beta" both available a DataAssets, with the following data_references:
-
-.. code-block::
-
-    Available data_asset_names (2 of 2):
-        alpha (3 of 3): [
-            'alpha-2020-01-01.csv',
-            'alpha-2020-01-02.csv',
-            'alpha-2020-01-03.csv'
-        ]
-
-        beta (3 of 3): [
-            'beta-2020-01-01.csv',
-            'beta-2020-01-02.csv',
-            'beta-2020-01-03.csv'
-        ]
-
-    Unmatched data_references (0 of 0): []
-
-
-Example 4: Nested directory structure with the data_asset_name on the inside
-----------------------------------------------------------------------------
-
-Here’s another example...
-
-.. code-block::
-
-    2020/01/01/alpha.csv
-    2020/01/02/alpha.csv
-    2020/01/03/alpha.csv
-    2020/01/04/alpha.csv
-    2020/01/04/beta.csv
-    2020/01/05/alpha.csv
-    2020/01/05/beta.csv
-
-Here’s a configuration...
-
-.. code-block:: yaml
-
-    class_name: SinglePartitionerFileDataConnector
-    base_directory: my_directory/
-
-    partitioner:
-        class_name: RegexPartitioner
-        group_names:
-            - year
-            - month
-            - day
-            - data_asset_name
-        pattern: (\d{4})/(\d{2})/(\d{2})/(.*).csv
-
-...will now make "alpha" and "beta" both available a DataAssets, with the following data_references:
-
-.. code-block::
-
-    Available data_asset_names (2 of 2):
-        alpha (3 of 5): [
-            'alpha-2020-01-01.csv',
-            'alpha-2020-01-02.csv',
-            'alpha-2020-01-03.csv'
-        ]
-
-        beta (2 of 2): [
-            'beta-2020-01-04.csv',
-            'beta-2020-01-05.csv',
-        ]
-
-    Unmatched data_references (0 of 0): []
-
-
-Example 5: Nested directory structure with the data_asset_name on the outside
------------------------------------------------------------------------------
-
-test_dir_charlie
-
-Example 6: Redundant information in the naming convention
----------------------------------------------------------
-
-Example 3 here: https://github.com/superconductive/design/blob/main/docs/20201015_partitioners_v2.md
-
-
-More examples to be written:
-----------------------------
-
-* Missing information in the naming convention: Examples 1 and 2 here: https://github.com/superconductive/design/blob/main/docs/20201015_partitioners_v2.md
-* Extraneous files; show "Unmatched data_references"; show how to filter out with the optional glob_directive parameter: test_dir_juliette
-* {{{Example to demonstrate sorting}}}
-* {{{Example to demonstrate grouping}}}
-* {{{Example to demonstrate splitting}}}
-* {{{Example to demonstrate sampling}}}
-* Be careful with regexes: test_dir_lima
-* If there are many files, then `test_yaml_config` will only show three. (<>What's the workflow here?</>): test_dir_november
+    Once you are satisfied with your config, you can make it a permanent part of your Great Expectations setup by copying it into the appropriate section of your `great_expectations/great_expectations.yml` file.
 
 
 Additional Resources
