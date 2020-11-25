@@ -10,8 +10,8 @@ from great_expectations.core.batch import (
     PartitionDefinition,
     PartitionRequest,
 )
+from great_expectations.datasource.types import RuntimeDataBatchSpec
 from great_expectations.exceptions import InvalidBatchSpecError
-from great_expectations.execution_environment.types import RuntimeDataBatchSpec
 
 
 def test_batch_definition_id():
@@ -49,12 +49,12 @@ def test_batch__str__method():
     batch = Batch(
         data=None,
         batch_request=BatchRequest(
-            execution_environment_name="my_execution_environment",
+            datasource_name="my_datasource",
             data_connector_name="my_data_connector",
             data_asset_name="my_data_asset_name",
         ),
         batch_definition=BatchDefinition(
-            execution_environment_name="my_execution_environment",
+            datasource_name="my_datasource",
             data_connector_name="my_data_connector",
             data_asset_name="my_data_asset_name",
             partition_definition=PartitionDefinition({}),
@@ -69,13 +69,13 @@ def test_batch__str__method():
         == """{
   "data": "None",
   "batch_request": {
-    "execution_environment_name": "my_execution_environment",
+    "datasource_name": "my_datasource",
     "data_connector_name": "my_data_connector",
     "data_asset_name": "my_data_asset_name",
     "partition_request": null
   },
   "batch_definition": {
-    "execution_environment_name": "my_execution_environment",
+    "datasource_name": "my_datasource",
     "data_connector_name": "my_data_connector",
     "data_asset_name": "my_data_asset_name",
     "partition_definition": {}
@@ -88,7 +88,7 @@ def test_batch__str__method():
 
 def test_batch_request_instantiation():
     BatchRequest(
-        execution_environment_name="A",
+        datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
         partition_request={"id": "A"},
@@ -115,7 +115,7 @@ def test_batch_request_instantiation():
     BatchRequest(partition_request={"id": "A"})
 
     BatchRequest(
-        execution_environment_name="A", data_connector_name="a", data_asset_name="aaa",
+        datasource_name="A", data_connector_name="a", data_asset_name="aaa",
     )
 
 

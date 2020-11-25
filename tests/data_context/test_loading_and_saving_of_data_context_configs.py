@@ -25,35 +25,35 @@ def test_add_store_immediately_adds_to_config(empty_data_context):
     assert "my_new_store" in read_config_from_file(config_filename)
 
 
-def test_add_execution_environment(empty_data_context):
-    context = empty_data_context
+def test_add_datasource(empty_data_context_v3):
+    context = empty_data_context_v3
     config_filename = context.root_directory + "/great_expectations.yml"
 
     # Config can't be instantiated
     with pytest.raises(KeyError):
-        context.add_execution_environment(
-            "my_new_execution_environment", {"some": "broken", "config": "yikes",}
+        context.add_datasource(
+            "my_new_datasource", {"some": "broken", "config": "yikes",}
         )
-    assert "my_new_execution_environment" not in context.datasources
-    assert "my_new_execution_environment" not in read_config_from_file(config_filename)
+    assert "my_new_datasource" not in context.datasources
+    assert "my_new_datasource" not in read_config_from_file(config_filename)
 
-    # Config doesn't instantiate an ExecutionEnvironment
+    # Config doesn't instantiate an Datasource
     with pytest.raises(TypeError):
-        context.add_execution_environment(
-            "my_new_execution_environment",
+        context.add_datasource(
+            "my_new_datasource",
             {
                 "module_name": "great_expectations.data_context.store",
                 "class_name": "ExpectationsStore",
             },
         )
-    assert "my_new_execution_environment" not in context.datasources
-    assert "my_new_execution_environment" not in read_config_from_file(config_filename)
+    assert "my_new_datasource" not in context.datasources
+    assert "my_new_datasource" not in read_config_from_file(config_filename)
 
-    # Config successfully instantiates an ExecutionEnvironment
-    context.add_execution_environment(
-        "my_new_execution_environment",
+    # Config successfully instantiates an Datasource
+    context.add_datasource(
+        "my_new_datasource",
         {
-            "class_name": "ExecutionEnvironment",
+            "class_name": "Datasource",
             "execution_engine": {"class_name": "PandasExecutionEngine"},
             "data_connectors": {
                 "test_runtime_data_connector": {
@@ -63,5 +63,5 @@ def test_add_execution_environment(empty_data_context):
             },
         },
     )
-    assert "my_new_execution_environment" in context.datasources
-    assert "my_new_execution_environment" in read_config_from_file(config_filename)
+    assert "my_new_datasource" in context.datasources
+    assert "my_new_datasource" in read_config_from_file(config_filename)

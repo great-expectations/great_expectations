@@ -23,7 +23,7 @@ from great_expectations.cli.util import (
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
-from great_expectations.data_context.types.base import DatasourceConfigSchema
+from great_expectations.data_context.types.base import LegacyDatasourceConfigSchema
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
@@ -392,7 +392,7 @@ def _add_pandas_datasource(
 
         configuration["class_name"] = "PandasDatasource"
         configuration["module_name"] = "great_expectations.datasource"
-        errors = DatasourceConfigSchema().validate(configuration)
+        errors = LegacyDatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
                 "Invalid Datasource configuration: {:s}".format(errors)
@@ -521,7 +521,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
 
             configuration["class_name"] = "SqlAlchemyDatasource"
             configuration["module_name"] = "great_expectations.datasource"
-            errors = DatasourceConfigSchema().validate(configuration)
+            errors = LegacyDatasourceConfigSchema().validate(configuration)
             if len(errors) != 0:
                 raise ge_exceptions.GreatExpectationsError(
                     "Invalid Datasource configuration: {:s}".format(errors)
@@ -885,7 +885,7 @@ def _add_spark_datasource(
         )
         configuration["class_name"] = "SparkDFDatasource"
         configuration["module_name"] = "great_expectations.datasource"
-        errors = DatasourceConfigSchema().validate(configuration)
+        errors = LegacyDatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
                 "Invalid Datasource configuration: {:s}".format(errors)
