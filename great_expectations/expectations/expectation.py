@@ -51,12 +51,18 @@ def camel_to_snake(name):
 
 
 class MetaExpectation(ABCMeta):
-    """MetaExpectation registers Expectations as they are defined."""
+    """MetaExpectation registers Expectations as they are defined, adding them to the Expectation registry.
+
+    Any class inheriting from Expectation will be registered based on the value of the "expectation_type" class
+    attribute, or, if that is not set, by snake-casing the name of the class.
+    """
 
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
         if not isabstract(newclass):
-            newclass.expectation_type = camel_to_snake(clsname)
+            expectation_type = getattr(newclass, "expectation_type", None)
+            if expectation_type is None:
+                newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
         newclass._register_renderer_functions()
         default_kwarg_values = dict()
@@ -71,7 +77,32 @@ class MetaExpectation(ABCMeta):
 
 
 class Expectation(ABC, metaclass=MetaExpectation):
-    """Base class for all Expectations."""
+    """Base class for all Expectations.
+
+    Expectation classes *must* have the following attributes set:
+        1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
+           expectation
+        2. `success_keys`: a tuple of the *keys* used to determine the success of
+           the expectation.
+
+    In some cases, subclasses of Expectation, such as TableExpectation will already
+    have correct values that may simply be inherited.
+
+    They *may* optionally override `runtime_keys` and `default_kwarg_values`, and
+    may optionally set an explicit value for expectation_type.
+
+    Expectation classes *must* implement the following:
+        1. `_validate`
+        2. `get_validation_dependencies`
+
+    In some cases, subclasses of Expectation, such as ColumnMapExpectation will already
+    have correct implementations that may simply be inherited.
+
+    Additionally, they *may* provide implementations of:
+        1. `validate_configuration`
+        2. Data Docs rendering methods decorated with the @renderer decorator
+
+    """
 
     version = ge_version
     domain_keys = tuple()
