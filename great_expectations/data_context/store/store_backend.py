@@ -28,16 +28,22 @@ class StoreBackend(metaclass=ABCMeta):
         fixed_length_key=False,
         suppress_store_backend_id=False,
         manually_initialize_store_backend_id: str = "",
+        store_name="no_store_name",
     ):
         self._fixed_length_key = fixed_length_key
         self._suppress_store_backend_id = suppress_store_backend_id
         self._manually_initialize_store_backend_id = (
             manually_initialize_store_backend_id
         )
+        self._store_name = store_name
 
     @property
     def fixed_length_key(self):
         return self._fixed_length_key
+
+    @property
+    def store_name(self):
+        return self._store_name
 
     @property
     def store_backend_id(self) -> str:
@@ -51,7 +57,7 @@ class StoreBackend(metaclass=ABCMeta):
         """
         if self._suppress_store_backend_id:
             logger.warning(
-                f"You are attempting to access store_backend_id of a store_backend that has been explicitly suppressed."
+                f"You are attempting to access store_backend_id of a store or store_backend named {self.store_name} that has been explicitly suppressed."
             )
             return
         try:
@@ -72,7 +78,7 @@ class StoreBackend(metaclass=ABCMeta):
                 return store_id
         except Exception:
             logger.warning(
-                f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__}"
+                f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}"
             )
             return "00000000-0000-0000-0000-00000000e003"
 
