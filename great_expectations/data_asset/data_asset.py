@@ -1157,7 +1157,7 @@ class DataAsset:
                         Counter(unexpected_list).most_common(
                             result_format["partial_unexpected_count"]
                         ),
-                        key=lambda x: (-x[1], x[0]),
+                        key=lambda x: (-x[1], str(x[0])),
                     )
                 ]
             except TypeError:
