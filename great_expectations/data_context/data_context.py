@@ -265,7 +265,9 @@ class BaseDataContext:
         self._project_config.anonymous_usage_statistics.data_context_id = (
             self._construct_data_context_id()
         )
-        self._initialize_usage_statistics(project_config.anonymous_usage_statistics)
+        self._initialize_usage_statistics(
+            self._project_config.anonymous_usage_statistics
+        )
 
         # Store cached datasources but don't init them
         self._cached_datasources = {}
