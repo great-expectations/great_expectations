@@ -206,7 +206,7 @@ class DataContextV3(DataContext):
         execution_environment_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        batch_definition: BatchDefinition = None,
+        *,
         batch_request: BatchRequest = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
@@ -223,14 +223,12 @@ class DataContextV3(DataContext):
         """Get exactly one batch, based on a variety of flexible input types.
 
         Args:
-            batch_definition
-            batch_request
-
             execution_environment_name
             data_connector_name
             data_asset_name
-            partition_request
 
+            batch_request
+            partition_request
             partition_identifiers
 
             limit
@@ -257,26 +255,19 @@ class DataContextV3(DataContext):
         This method attempts returns exactly one batch.
         If 0 or more than batches would be returned, it raises an error.
         """
-        if batch_definition:
+        
+        if batch_request:
             if not isinstance(batch_definition, BatchDefinition):
                 raise TypeError(
                     f"batch_definition must be an instance of BatchDefinition object, not {type(batch_definition)}"
                 )
-
-            execution_environment_name = batch_definition.execution_environment_name
-        elif batch_request:
             execution_environment_name = batch_request.execution_environment_name
         else:
             execution_environment_name = execution_environment_name
 
         execution_environment = self.datasources[execution_environment_name]
 
-        if batch_definition:
-            # TODO: Raise a warning if any parameters besides batch_definition are specified
-            return execution_environment.get_batch_from_batch_definition(
-                batch_definition
-            )
-        elif batch_request:
+        if batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
             return execution_environment.get_single_batch_from_batch_request(
                 batch_request=batch_request
@@ -340,7 +331,7 @@ class DataContextV3(DataContext):
         execution_environment_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        batch_definition: BatchDefinition = None,
+        *,
         batch_request: BatchRequest = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
@@ -376,7 +367,6 @@ class DataContextV3(DataContext):
             execution_environment_name=execution_environment_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            batch_definition=batch_definition,
             batch_request=batch_request,
             partition_request=partition_request,
             partition_identifiers=partition_identifiers,
@@ -391,9 +381,11 @@ class DataContextV3(DataContext):
             **kwargs,
         )
 
+        batch_definition = batch.batch_definition
+
         validator = Validator(
             execution_engine=self.datasources[
-                batch.execution_environment_name
+                batch_definition.execution_environment_name
             ].execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,

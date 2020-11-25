@@ -28,29 +28,6 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
         )
     )
 
-    # Successful specification using a BatchDefinition
-    context.get_batch(
-        batch_definition=BatchDefinition(
-            execution_environment_name="my_sqlite_db",
-            data_connector_name="daily",
-            data_asset_name="table_partitioned_by_date_column__A",
-            partition_definition=PartitionDefinition(date="2020-01-15",),
-        )
-    )
-
-    # Failed specification using a mistyped batch_definition
-    with pytest.raises(TypeError):
-        context.get_batch(
-            batch_definition=BatchRequest(
-                execution_environment_name="my_sqlite_db",
-                data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A",
-                partition_request=PartitionRequest(
-                    partition_identifiers={"date": "2020-01-15"}
-                ),
-            )
-        )
-
     # Successful specification using a typed BatchRequest
     context.get_batch(
         batch_request=BatchRequest(
