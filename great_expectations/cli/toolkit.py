@@ -25,7 +25,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import LegacyDatasource
 from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
@@ -358,7 +358,9 @@ def load_checkpoint(
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
-def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
+def select_datasource(
+    context: DataContext, datasource_name: str = None
+) -> LegacyDatasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
     data_source = None

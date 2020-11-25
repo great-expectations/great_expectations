@@ -14,8 +14,8 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import DataContextConfigSchema
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
+from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.execution_environment.types import PathBatchKwargs
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 yaml = YAML()
@@ -48,9 +48,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path_csv):
     # auto_batch_kwargs.update(
     #     {"reader_options": {"sep": ",", "header": 0, "index_col": 0}}
     # )
-    auto_batch_kwargs.update(
-        {"reader_options": {"sep": ","}}
-    )
+    auto_batch_kwargs.update({"reader_options": {"sep": ","}})
     batch = datasource.get_batch(batch_kwargs=auto_batch_kwargs)
     assert isinstance(batch, Batch)
     dataset = batch.data

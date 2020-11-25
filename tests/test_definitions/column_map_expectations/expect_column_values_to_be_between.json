@@ -376,28 +376,6 @@
         }
       },
       {
-        "title" : "negative_test_with_parse_strings_as_datetimes",
-        "exact_match_out": false,
-        "out": {
-          "unexpected_list": [
-            "Jan 01 1970 12:00",
-            "Dec 31 1999 12:00",
-            "Jan 01 2001 12:00"
-          ],
-          "unexpected_index_list": [
-            0, 1, 9
-          ],
-          "success": false
-        },
-        "in": {
-          "column": "ts",
-          "max_value": "Dec 31 2000",
-          "min_value": "Jan 01 2000",
-          "parse_strings_as_datetimes": true,
-          "output_strftime_format" : "%b %d %Y %H:%M"
-        }
-      },
-      {
         "title" : "error_on_string-to-int_comparisons",
         "exact_match_out": false,
         "in": {

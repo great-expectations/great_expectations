@@ -91,8 +91,7 @@ class Validator:
             self._execution_engine.load_batch_data(batch.id, batch.data)
             self._batches[batch.id] = batch
 
-        # TURN TO self.interactive_evaluation (single flag -> property)
-        self._validator_config = {"interactive_evaluation": interactive_evaluation}
+        self.interactive_evaluation = interactive_evaluation
         self._initialize_expectations(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
@@ -180,11 +179,12 @@ class Validator:
                 meta = None
                 # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
                 # positional arguments to expectation methods
+                legacy_arg_names = expectation_impl.legacy_method_parameters.get(
+                    name, tuple()
+                )
                 for idx, arg in enumerate(args):
                     try:
-                        arg_name = expectation_impl.legacy_method_parameters.get(
-                            name, tuple()
-                        )[idx]
+                        arg_name = legacy_arg_names[idx]
                         if arg_name in allowed_config_keys:
                             expectation_kwargs[arg_name] = arg
                         if arg_name == "meta":
@@ -204,15 +204,33 @@ class Validator:
                 configuration = ExpectationConfiguration(
                     expectation_type=name, kwargs=expectation_kwargs, meta=meta
                 )
-                runtime_configuration = configuration.get_runtime_kwargs()
+                # runtime_configuration = configuration.get_runtime_kwargs()
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 validation_result = expectation.validate(
-                    validator=self, runtime_configuration=runtime_configuration,
+                    validator=self, runtime_configuration=basic_runtime_configuration
                 )
-                if isinstance(validation_result, dict):
-                    validation_result = ExpectationValidationResult(**validation_result)
+
+                # If validate has set active_validation to true, then we do not save the config to avoid
+                # saving updating expectation configs to the same suite during validation runs
+                if self._active_validation is True:
+                    stored_config = configuration
+                else:
+                    # Append the expectation to the config.
+                    stored_config = self._expectation_suite.add_expectation(
+                        configuration
+                    )
+
+                # If there was no interactive evaluation, success will not have been computed.
+                if validation_result.success is not None:
+                    # Add a "success" object to the config
+                    stored_config.success_on_last_run = validation_result.success
+
+                if self._data_context is not None:
+                    validation_result = self._data_context.update_return_obj(
+                        self, validation_result
+                    )
 
             except Exception as err:
                 if basic_runtime_configuration.get("catch_exceptions"):
@@ -247,7 +265,7 @@ class Validator:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
-    def _populate_dependencies(
+    def build_metric_dependency_graph(
         self,
         graph: ValidationGraph,
         child_node: MetricConfiguration,
@@ -264,7 +282,10 @@ class Validator:
             child_node.metric_name, execution_engine=execution_engine
         )[0]
         metric_dependencies = metric_impl.get_evaluation_dependencies(
-            child_node, configuration
+            metric=child_node,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
         )
         child_node.metric_dependencies = metric_dependencies
 
@@ -276,7 +297,12 @@ class Validator:
 
         else:
             for metric_dependency in metric_dependencies.values():
-                self._populate_dependencies(
+                if metric_dependency.id == child_node.id:
+                    logger.warning(
+                        f"Metric {str(child_node.id)} has created a circular dependency"
+                    )
+                    continue
+                self.build_metric_dependency_graph(
                     graph,
                     metric_dependency,
                     configuration,
@@ -310,10 +336,19 @@ class Validator:
                     A list of Validations, validating that all necessary metrics are available.
         """
         graph = ValidationGraph()
+        if runtime_configuration is None:
+            runtime_configuration = dict()
+
+        if runtime_configuration.get("catch_exceptions", True):
+            catch_exceptions = True
+        else:
+            catch_exceptions = False
+
+        processed_configurations = []
+        evrs = []
         for configuration in configurations:
             # Validating
             try:
-                # Todo: try to find a way to access table columns so as to verify column is in table
                 assert (
                     configuration.expectation_type is not None
                 ), "Given configuration should include expectation type"
@@ -325,18 +360,63 @@ class Validator:
                 configuration, self._execution_engine, runtime_configuration
             )["metrics"]
 
-            for metric in validation_dependencies.values():
-                self._populate_dependencies(
-                    graph,
-                    metric,
-                    configuration,
-                    self._execution_engine,
-                    runtime_configuration=runtime_configuration,
-                )
+            try:
+                for metric in validation_dependencies.values():
+                    self.build_metric_dependency_graph(
+                        graph,
+                        metric,
+                        configuration,
+                        self._execution_engine,
+                        runtime_configuration=runtime_configuration,
+                    )
+                processed_configurations.append(configuration)
+            except Exception as err:
+                if catch_exceptions:
+                    raised_exception = True
+                    exception_traceback = traceback.format_exc()
+                    result = ExpectationValidationResult(
+                        success=False,
+                        exception_info={
+                            "raised_exception": raised_exception,
+                            "exception_traceback": exception_traceback,
+                            "exception_message": str(err),
+                        },
+                    )
+                    evrs.append(result)
+                else:
+                    raise err
 
         if metrics is None:
             metrics = dict()
 
+        metrics = self.resolve_validation_graph(graph, metrics, runtime_configuration)
+        for configuration in processed_configurations:
+            try:
+                result = configuration.metrics_validate(
+                    metrics,
+                    execution_engine=self._execution_engine,
+                    runtime_configuration=runtime_configuration,
+                )
+                evrs.append(result)
+            except Exception as err:
+                if catch_exceptions:
+                    raised_exception = True
+                    exception_traceback = traceback.format_exc()
+
+                    result = ExpectationValidationResult(
+                        success=False,
+                        exception_info={
+                            "raised_exception": raised_exception,
+                            "exception_traceback": exception_traceback,
+                            "exception_message": str(err),
+                        },
+                    )
+                    evrs.append(result)
+                else:
+                    raise err
+        return evrs
+
+    def resolve_validation_graph(self, graph, metrics, runtime_configuration=None):
         done: bool = False
         while not done:
             ready_metrics, needed_metrics = self._parse_validation_graph(graph, metrics)
@@ -351,37 +431,28 @@ class Validator:
             if len(ready_metrics) + len(needed_metrics) == 0:
                 done = True
 
-        evrs = list()
-        for configuration in configurations:
-            evrs.append(
-                configuration.metrics_validate(
-                    metrics,
-                    execution_engine=self._execution_engine,
-                    runtime_configuration=runtime_configuration,
-                )
-            )
-        return evrs
+        return metrics
 
     def _parse_validation_graph(self, validation_graph, metrics):
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
-        needed_metric_ids = set()
-        needed_metrics = set()
-        ready_metric_ids = set()
-        ready_metrics = set()
+        unmet_dependency_ids = set()
+        unmet_dependency = set()
+        maybe_ready_ids = set()
+        maybe_ready = set()
 
         for edge in validation_graph.edges:
             if edge.left.id not in metrics:
                 if edge.right is None or edge.right.id in metrics:
-                    if edge.left.id not in ready_metric_ids:
-                        ready_metric_ids.add(edge.left.id)
-                        ready_metrics.add(edge.left)
+                    if edge.left.id not in maybe_ready_ids:
+                        maybe_ready_ids.add(edge.left.id)
+                        maybe_ready.add(edge.left)
                 else:
-                    if edge.left.id not in needed_metric_ids:
-                        needed_metric_ids.add(edge.left.id)
-                        needed_metrics.add(edge.left)
+                    if edge.left.id not in unmet_dependency_ids:
+                        unmet_dependency_ids.add(edge.left.id)
+                        unmet_dependency.add(edge.left)
 
-        return ready_metrics, needed_metrics
+        return maybe_ready - unmet_dependency, unmet_dependency
 
     def _resolve_metrics(
         self,
@@ -543,7 +614,7 @@ class Validator:
         return self.execution_engine.active_batch_data_id
 
     @property
-    def batch_markers(self):
+    def active_batch_markers(self):
         """Getter for active batch's batch markers"""
         if not self.active_batch:
             return None
@@ -551,7 +622,7 @@ class Validator:
             return self.active_batch.batch_markers
 
     @property
-    def batch_definition(self):
+    def active_batch_definition(self):
         """Getter for the active batch's batch definition"""
         if not self.active_batch:
             return None
@@ -880,7 +951,6 @@ class Validator:
             validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-
             assert not (run_id and run_name) and not (
                 run_id and run_time
             ), "Please provide either a run_id or run_name and/or run_time."
@@ -903,7 +973,8 @@ class Validator:
                 run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
             self._active_validation = True
-
+            if result_format is None:
+                result_format = {"result_format": "BASIC"}
             # If a different validation data context was provided, override
             validate__data_context = self._data_context
             if data_context is None and self._data_context is not None:
@@ -911,8 +982,6 @@ class Validator:
             elif data_context is not None:
                 # temporarily set self._data_context so it is used inside the expectation decorator
                 self._data_context = data_context
-
-            results = []
 
             if expectation_suite is None:
                 expectation_suite = self.get_expectation_suite(
@@ -991,16 +1060,15 @@ class Validator:
                     "WARNING: No great_expectations version found in configuration object."
                 )
 
-            ###
-            # This is an early example of what will become part of the ValidationOperator
-            # This operator would be dataset-semantic aware
-            # Adding now to simply ensure we can be slightly better at ordering our expectation evaluation
-            ###
-
             # Group expectations by column
             columns = {}
 
             for expectation in expectation_suite.expectations:
+                expectation.build_evaluation_parameters(
+                    evaluation_parameters=runtime_evaluation_parameters,
+                    interactive_evaluation=self.interactive_evaluation,
+                    data_context=self._data_context,
+                )
                 if "column" in expectation.kwargs and isinstance(
                     expectation.kwargs["column"], Hashable
                 ):
@@ -1015,64 +1083,13 @@ class Validator:
             for col in columns:
                 expectations_to_evaluate.extend(columns[col])
 
-            for expectation in expectations_to_evaluate:
-
-                try:
-                    # copy the config so we can modify it below if needed
-                    expectation = copy.deepcopy(expectation)
-
-                    expectation_method = getattr(self, expectation.expectation_type)
-
-                    if result_format is not None:
-                        expectation.kwargs.update({"result_format": result_format})
-
-                    # A missing parameter will raise an EvaluationParameterError
-                    (
-                        evaluation_args,
-                        substituted_parameters,
-                    ) = build_evaluation_parameters(
-                        expectation.kwargs,
-                        runtime_evaluation_parameters,
-                        self._validator_config.get("interactive_evaluation", True),
-                        self._data_context,
-                    )
-
-                    result = expectation_method(
-                        catch_exceptions=catch_exceptions,
-                        include_config=True,
-                        **evaluation_args,
-                    )
-
-                except Exception as err:
-                    if catch_exceptions:
-                        raised_exception = True
-                        exception_traceback = traceback.format_exc()
-
-                        result = ExpectationValidationResult(
-                            success=False,
-                            exception_info={
-                                "raised_exception": raised_exception,
-                                "exception_traceback": exception_traceback,
-                                "exception_message": str(err),
-                            },
-                        )
-
-                    else:
-                        raise err
-
-                # if include_config:
-                result.expectation_config = expectation
-
-                # Add an empty exception_info object if no exception was caught
-                if catch_exceptions and result.exception_info is None:
-                    result.exception_info = {
-                        "raised_exception": False,
-                        "exception_traceback": None,
-                        "exception_message": None,
-                    }
-
-                results.append(result)
-
+            results = self.graph_validate(
+                expectations_to_evaluate,
+                runtime_configuration={
+                    "catch_exceptions": catch_exceptions,
+                    "result_format": result_format,
+                },
+            )
             statistics = _calc_validation_statistics(results)
 
             if only_return_failures:
@@ -1098,15 +1115,15 @@ class Validator:
                     "great_expectations_version": ge_version,
                     "expectation_suite_name": expectation_suite_name,
                     "run_id": run_id,
-                    "batch_spec": self.batch_spec,
-                    "batch_markers": self.batch_markers,
-                    "batch_definition": self.batch_definition,
+                    "batch_spec": self.active_batch_spec,
+                    "batch_markers": self.active_batch_markers,
+                    "active_batch_definition": self.active_batch_definition,
                     "validation_time": validation_time,
                 },
             )
 
             self._data_context = validate__data_context
-        except Exception:
+        except Exception as e:
             if getattr(data_context, "_usage_statistics_handler", None):
                 handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
@@ -1168,9 +1185,9 @@ class Validator:
         if batch_spec is None:
             batch_spec = self.batch_spec
         if batch_markers is None:
-            batch_markers = self.batch_markers
+            batch_markers = self.active_batch_markers
         if batch_definition is None:
-            batch_definition = self.batch_definition
+            batch_definition = self.active_batch_definition
         self._expectation_suite.add_citation(
             comment,
             batch_spec=batch_spec,

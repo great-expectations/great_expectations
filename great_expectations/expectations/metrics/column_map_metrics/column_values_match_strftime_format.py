@@ -4,18 +4,18 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_map_metric import (
-    ColumnMapMetricProvider,
-    column_map_condition,
-)
 from great_expectations.expectations.metrics.import_manager import F, sparktypes
+from great_expectations.expectations.metrics.map_metric import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
 
 
 class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
     condition_metric_name = "column_values.match_strftime_format"
-    condition_value_keys = "strftime_format"
+    condition_value_keys = ("strftime_format",)
 
-    @column_map_condition(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, strftime_format, **kwargs):
         def is_parseable_by_format(val):
             try:
@@ -30,7 +30,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
 
         return column.map(is_parseable_by_format)
 
-    @column_map_condition(engine=SparkDFExecutionEngine)
+    @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, strftime_format, **kwargs):
         # Below is a simple validation that the provided format can both format and parse a datetime object.
         # %D is an example of a format that can format but not parse, e.g.
@@ -42,6 +42,8 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
             raise ValueError(f"Unable to use provided strftime_format: {str(e)}")
 
         def is_parseable_by_format(val):
+            if val is None:
+                return False
             try:
                 datetime.strptime(val, strftime_format)
                 return True

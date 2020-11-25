@@ -6,115 +6,228 @@ How to configure a Pandas/S3 Datasource
 
 This guide shows how to connect to a Pandas Datasource such that the data is accessible in the form of files located on the AWS S3 service.
 
-.. admonition:: Prerequisites: This how-to guide assumes you have already:
-
-  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-
 -----
 Steps
 -----
 
-To add an S3-backed Pandas datasource do this:
+.. content-tabs::
 
-#. **Edit your great_expectations/great_expectations.yml file**
+    .. tab-container:: tab0
+        :title: Show Docs for Stable API (up to 0.12.x)
 
-    Update your ``datasources:`` section to include a ``PandasDatasource``.
+        .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    .. code-block:: yaml
+            - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
 
-        datasources:
-          pandas_s3:
-            class_name: PandasDatasource
+        To add an S3-backed Pandas datasource do the following:
 
-#. **Load data from S3 using native S3 path-based Batch Kwargs.**
+        #. **Edit your great_expectations/great_expectations.yml file**
 
-    Because Pandas provides native support for reading from S3 paths, this simple configuration will allow loading datasources from S3 using native S3 paths.
+            Update your ``datasources:`` section to include a ``PandasDatasource``.
 
-    .. code-block:: python
+            .. code-block:: yaml
 
-        context = DataContext()
-        batch_kwargs = {
-            "datasource": "pandas_s3",
-            "path": "s3a://my_bucket/my_prefix/key.csv",
-        }
-        batch = context.get_batch(batch_kwargs, "existing_expectation_suite_name")
+                datasources:
+                  pandas_s3:
+                    class_name: PandasDatasource
 
-#. **Optionally, configure a BatchKwargsGenerator that will allow you to generate Data Assets and Partitions from your S3 bucket.**
+        #. **Load data from S3 using native S3 path-based Batch Kwargs.**
 
-    Update your datasource configuration to include the new Batch Kwargs Generator:
+            Because Pandas provides native support for reading from S3 paths, this simple configuration will allow loading datasources from S3 using native S3 paths.
 
-    .. code-block:: yaml
+            .. code-block:: python
 
-        datasources:
-          pandas_s3:
-            class_name: PandasDatasource
-            batch_kwargs_generators:
-              pandas_s3_generator:
-                class_name: S3GlobReaderBatchKwargsGenerator
-                bucket: your_s3_bucket # Only the bucket name here (i.e., no prefix)
-                assets:
-                  your_first_data_asset_name:
-                    prefix: prefix_to_folder_containing_your_first_data_asset_files/ # trailing slash is important
-                    regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
-                  your_second_data_asset_name:
-                    prefix: prefix_to_folder_containing_your_second_data_asset_files/ # trailing slash is important
-                    regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
-                  your_third_data_asset_name:
-                    prefix: prefix_to_folder_containing_your_third_data_asset_files/ # trailing slash is important
-                    regex_filter: .*  # The regex filter will filter the results returned by S3 for the prefix to only those matching the regex. Note: construct your regex to match the entire S3 key (including the prefix).
-            module_name: great_expectations.datasource
-            data_asset_type:
-              class_name: PandasDataset
-              module_name: great_expectations.dataset
+                context = DataContext()
+                batch_kwargs = {
+                    "datasource": "pandas_s3",
+                    "path": "s3a://my_bucket/my_prefix/key.csv",
+                }
+                batch = context.get_batch(batch_kwargs, "existing_expectation_suite_name")
 
-    Update the configuration of the ``assets:`` section to reflect your project's data storage system.  There is no limit on the number of data assets, but you should only keep the ones that are actually used in the configuration file (i.e., delete the unused ones from the above template and/or add as many as needed for your project).
+        #. **Optionally, configure a BatchKwargsGenerator that will allow you to generate Data Assets and Partitions from your S3 bucket.**
 
-    Note: Multiple data sources can easily be configured in the Data Context by adding a new configuration block for each in the data sources section.  Each data source name should be at the same level of indentation.
+            Update your datasource configuration to include the new Batch Kwargs Generator:
 
-#. **Optionally, run ``great_expectations suite scaffold`` to verify your new Datasource and BatchKwargsGenerator configurations.**
+            .. code-block:: yaml
 
-    Since you edited the Great Expectations configuration file, the updated configuration should be tested to make sure that no errors were introduced.
+                datasources:
+                  pandas_s3:
+                    class_name: PandasDatasource
+                    batch_kwargs_generators:
+                      pandas_s3_generator:
+                        class_name: S3GlobReaderBatchKwargsGenerator
+                        bucket: your_s3_bucket # Only the bucket name here (i.e., no prefix)
+                        assets:
+                          your_first_data_asset_name:
+                            prefix: prefix_to_folder_containing_your_first_data_asset_files/ # trailing slash is important
+                            regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
+                          your_second_data_asset_name:
+                            prefix: prefix_to_folder_containing_your_second_data_asset_files/ # trailing slash is important
+                            regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
+                          your_third_data_asset_name:
+                            prefix: prefix_to_folder_containing_your_third_data_asset_files/ # trailing slash is important
+                            regex_filter: .*  # The regex filter will filter the results returned by S3 for the prefix to only those matching the regex. Note: construct your regex to match the entire S3 key (including the prefix).
+                    module_name: great_expectations.datasource
+                    data_asset_type:
+                      class_name: PandasDataset
+                      module_name: great_expectations.dataset
 
-    #. **From the command line, run:**
+            Update the configuration of the ``assets:`` section to reflect your project's data storage system.  There is no limit on the number of data assets, but you should only keep the ones that are actually used in the configuration file (i.e., delete the unused ones from the above template and/or add as many as needed for your project).
 
-        .. code-block:: bash
+            Note: Multiple data sources can easily be configured in the Data Context by adding a new configuration block for each in the data sources section.  Each data source name should be at the same level of indentation.
 
-            great_expectations suite scaffold name_of_new_expectation_suite
+        #. **Optionally, run ``great_expectations suite scaffold`` to verify your new Datasource and BatchKwargsGenerator configurations.**
 
-        .. code-block:: bash
+            Since you edited the Great Expectations configuration file, the updated configuration should be tested to make sure that no errors were introduced.
 
-            Select a datasource
-                1. local_filesystem
-                2. some_sql_db
-                3. pandas_s3
-            : 3
+            #. **From the command line, run:**
 
-        Note: If ``pandas_s3`` is the only available data source, then you will not be offered a choice of the data source; in this case, the ``pandas_s3`` data source will be chosen automatically.
+                .. code-block:: bash
 
-    #. **Choose to see "a list of data assets in this datasource"**
+                    great_expectations suite scaffold name_of_new_expectation_suite
 
-        .. code-block:: bash
+                .. code-block:: bash
 
-            Would you like to:
-                1. choose from a list of data assets in this datasource
-                2. enter the path of a data file
-            : 1
+                    Select a datasource
+                        1. local_filesystem
+                        2. some_sql_db
+                        3. pandas_s3
+                    : 3
 
-    #. **Verify that all your data assets appear in the list**
+                Note: If ``pandas_s3`` is the only available data source, then you will not be offered a choice of the data source; in this case, the ``pandas_s3`` data source will be chosen automatically.
 
-        .. code-block::
+            #. **Choose to see "a list of data assets in this datasource"**
 
-            Which data would you like to use?
-                1. your_first_data_asset_name (file)
-                2. your_second_data_asset_name (file)
-                3. your_third_data_asset_name (file)
-                Don't see the name of the data asset in the list above? Just type it
-            :
+                .. code-block:: bash
 
-        When you select the number corresponding to a data asset, a Jupyter notebook will open, pre-populated with the code for adding expectations to the expectation suite specified on the command line against the data set you selected.
+                    Would you like to:
+                        1. choose from a list of data assets in this datasource
+                        2. enter the path of a data file
+                    : 1
 
-        Check the composition of the ``batch_kwargs`` variable at the top of the notebook to make sure that the S3 file used appropriately corresponds to the data set you selected.
-        Repeat this check for all data sets you configured.  An inconsistency is likely due to an incorrect regular expression pattern in the respective data set configuration.
+            #. **Verify that all your data assets appear in the list**
+
+                .. code-block::
+
+                    Which data would you like to use?
+                        1. your_first_data_asset_name (file)
+                        2. your_second_data_asset_name (file)
+                        3. your_third_data_asset_name (file)
+                        Don't see the name of the data asset in the list above? Just type it
+                    :
+
+                When you select the number corresponding to a data asset, a Jupyter notebook will open, pre-populated with the code for adding expectations to the expectation suite specified on the command line against the data set you selected.
+
+                Check the composition of the ``batch_kwargs`` variable at the top of the notebook to make sure that the S3 file used appropriately corresponds to the data set you selected.
+                Repeat this check for all data sets you configured.  An inconsistency is likely due to an incorrect regular expression pattern in the respective data set configuration.
+
+
+    .. tab-container:: tab1
+        :title: Show Docs for Experimental API (0.13)
+
+        .. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+            - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+            - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+
+        To add an S3-backed Pandas datasource do the following:
+
+        #. **Install the required modules**
+
+            If you haven't already, install these modules for connecting to S3.
+
+            .. code-block:: bash
+
+                pip install boto3
+                pip install fsspec
+                pip install s3fs
+
+        #. **Instantiate a DataContext**
+
+            .. code-block:: python
+
+                import great_expectations as ge
+                context = ge.get_context()
+
+        #. **Create or copy a yaml config**
+
+            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as environment variables.
+
+            **Note**: The ``ConfiguredAssetS3DataConnector`` used in this example is closely related to the ``InferreddAssetS3DataConnector`` with some key differences. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+
+            .. code-block:: python
+
+                config = f"""
+                        class_name: DataSource
+                        execution_engine:
+                            class_name: PandasExecutionEngine
+                        data_connectors:
+                            my_data_connector:
+                                class_name: ConfiguredAssetS3DataConnector
+                                bucket: {bucket}
+                                prefix: {prefix}
+                                assets:
+                                  test_asset:
+                                    pattern: (.+)\\.csv
+                                    group_names:
+                                        - full_name
+                        """
+
+            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+
+        #. **Run context.test_yaml_config.**
+
+            .. code-block:: python
+
+                context.test_yaml_config(
+                    name="my_pandas_s3_datasource",
+                    yaml_config=my_config
+                )
+
+            When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
+
+            The resulting output will look something like this:
+
+            .. code-block:: bash
+
+                Attempting to instantiate class from config...
+                    Instantiating as a ExecutionEnvironment, since class_name is ExecutionEnvironment
+                Instantiating class from config without an explicit class_name is dangerous. Consider adding an explicit class_name for None
+                    Successfully instantiated ExecutionEnvironment
+
+                Execution engine: PandasExecutionEngine
+                Data connectors:
+                    my_data_connector : ConfiguredAssetS3DataConnector
+
+                    Available data_asset_names (1 of 1):
+                        test_asset (1 of 1): ['abe_20201119_200.csv']
+
+                    Unmatched data_references (0 of 0): []
+
+                    Choosing an example data reference...
+                        Reference chosen: abe_20201119_200.csv
+
+                        Fetching batch data...
+
+                        Showing 5 rows
+                   Unnamed: 0                                           Name PClass    Age     Sex  Survived  SexCode
+                0           1                   Allen, Miss Elisabeth Walton    1st  29.00  female         1        1
+                1           2                    Allison, Miss Helen Loraine    1st   2.00  female         0        1
+                2           3            Allison, Mr Hudson Joshua Creighton    1st  30.00    male         0        0
+                3           4  Allison, Mrs Hudson JC (Bessie Waldo Daniels)    1st  25.00  female         0        1
+                4           5                  Allison, Master Hudson Trevor    1st   0.92    male         1        0
+
+            **Note** : In the current example, the yaml config will only create a connector to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please copy-paste your yaml_config string into the data_sources section in your  ``great_expectations/great_expectations.yml`` config file.
+
+            If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.  Whenever possible, test_yaml_config provides helpful warnings and error messages. It can't solve every problem, but it can solve many.
+
+            .. code-block:: bash
+
+                ...
+
+                raise error_class(parsed_response, operation_name)
+                botocore.exceptions.ClientError: An error occurred (AccessDenied) when calling the ListObjectsV2 operation: Access Denied
 
 ----------------
 Additional Notes

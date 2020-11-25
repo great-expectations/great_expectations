@@ -335,7 +335,9 @@ def print_validation_operator_results_details(
         stats = vr.statistics
         passed = stats["successful_expectations"]
         evaluated = stats["evaluated_expectations"]
-        percentage_slug = f"{round(passed / evaluated * 100, 2)} %"
+        percentage_slug = (
+            f"{round(passed / evaluated * 100, 2) if evaluated > 0 else 100} %"
+        )
         stats_slug = f"{passed} of {evaluated} ({percentage_slug})"
         if vr.success:
             status_slug = "<green>✔ Passed</green>"

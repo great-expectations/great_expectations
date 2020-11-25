@@ -66,8 +66,8 @@ def convert_to_json_serializable(data):
         return data.to_json_dict()
 
     try:
-        if not isinstance(data, list) and np.isnan(data):
-            # np.isnan is functionally vectorized, but we only want to apply this to single objects
+        if not isinstance(data, list) and pd.isna(data):
+            # pd.isna is functionally vectorized, but we only want to apply this to single objects
             # Hence, why we test for `not isinstance(list))`
             return None
     except TypeError:
@@ -172,8 +172,8 @@ def ensure_json_serializable(data):
     import pandas as pd
 
     try:
-        if not isinstance(data, list) and np.isnan(data):
-            # np.isnan is functionally vectorized, but we only want to apply this to single objects
+        if not isinstance(data, list) and pd.isna(data):
+            # pd.isna is functionally vectorized, but we only want to apply this to single objects
             # Hence, why we test for `not isinstance(list))`
             return
     except TypeError:

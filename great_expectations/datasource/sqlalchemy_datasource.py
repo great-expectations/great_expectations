@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import nested_update
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import LegacyDatasource
 from great_expectations.exceptions import (
     DatasourceInitializationError,
     DatasourceKeyPairAuthBadPassphraseError,
@@ -46,7 +46,7 @@ if sqlalchemy != None:
         )
 
 
-class SqlAlchemyDatasource(Datasource):
+class SqlAlchemyDatasource(LegacyDatasource):
     """
 A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using the following rules:
     - if the batch_kwargs include a table key, the datasource will provide a dataset object connected to that table
@@ -243,12 +243,14 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
             elif "connection_string" in kwargs:
                 connection_string = kwargs.pop("connection_string")
                 self.engine = create_engine(connection_string, **kwargs)
-                self.engine.connect()
+                connection = self.engine.connect()
+                connection.close()
             elif "url" in credentials:
                 url = credentials.pop("url")
                 self.drivername = urlparse(url).scheme
                 self.engine = create_engine(url, **kwargs)
-                self.engine.connect()
+                connection = self.engine.connect()
+                connection.close()
 
             # Otherwise, connect using remaining kwargs
             else:
@@ -259,7 +261,8 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
                 ) = self._get_sqlalchemy_connection_options(**kwargs)
                 self.drivername = drivername
                 self.engine = create_engine(options, **create_engine_kwargs)
-                self.engine.connect()
+                connection = self.engine.connect()
+                connection.close()
 
             # since we switched to lazy loading of Datasources when we initialise a DataContext,
             # the dialect of SQLAlchemy Datasources cannot be obtained reliably when we send

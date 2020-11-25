@@ -12,176 +12,283 @@ Great Expectations supports 3 different authentication mechanisms for Snowflake:
     * Single sign-on (SSO)
     * Key pair
 
-.. admonition:: Prerequisites: This how-to guide assumes you have already:
-
-  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-
 -----
 Steps
 -----
 
-To add a Snowflake datasource, for all authentication mechanisms:
+.. content-tabs::
 
-#. **Install the required modules**
+    .. tab-container:: tab0
+        :title: Show Docs for Stable API (up to 0.12.x)
 
-    If you haven't already, install these modules for connecting to Snowflake.
+        .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    .. code-block:: bash
+            - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
 
-        pip install sqlalchemy
+        To add a Snowflake datasource, for all authentication mechanisms:
 
-        pip install snowflake-connector-python
+        #. **Install the required modules**
 
-        pip install snowflake-sqlalchemy
+            If you haven't already, install these modules for connecting to Snowflake.
 
-#. **Run datasource new**
+            .. code-block:: bash
 
-    From the command line, run:
+                pip install sqlalchemy
 
-    .. code-block:: bash
+                pip install snowflake-connector-python
 
-        great_expectations datasource new
+                pip install snowflake-sqlalchemy
 
-#. **Choose "Relational database (SQL)"**
+        #. **Run datasource new**
 
-    .. code-block:: bash
+            From the command line, run:
 
-        What data would you like Great Expectations to connect to?
-            1. Files on a filesystem (for processing with Pandas or Spark)
-            2. Relational database (SQL)
-        : 2
+            .. code-block:: bash
 
-#. **Choose Snowflake**
+                great_expectations datasource new
 
-    .. code-block:: bash
+        #. **Choose "Relational database (SQL)"**
 
-        Which database backend are you using?
-            1. MySQL
-            2. Postgres
-            3. Redshift
-            4. Snowflake
-            5. BigQuery
-            6. other - Do you have a working SQLAlchemy connection string?
-        : 4
+            .. code-block:: bash
 
-#. **Give your Datasource a name**
+                What data would you like Great Expectations to connect to?
+                    1. Files on a filesystem (for processing with Pandas or Spark)
+                    2. Relational database (SQL)
+                : 2
 
-    When prompted, provide a custom name for your Snowflake data source, or hit Enter to accept the default.
+        #. **Choose Snowflake**
 
-    .. code-block:: bash
+            .. code-block:: bash
 
-        Give your new Datasource a short name.
-         [my_snowflake_db]:
+                Which database backend are you using?
+                    1. MySQL
+                    2. Postgres
+                    3. Redshift
+                    4. Snowflake
+                    5. BigQuery
+                    6. other - Do you have a working SQLAlchemy connection string?
+                : 4
 
-#. **Choose an authentication mechanism**
+        #. **Give your Datasource a name**
 
-    .. code-block:: bash
+            When prompted, provide a custom name for your Snowflake data source, or hit Enter to accept the default.
 
-        What authentication method would you like to use?
+            .. code-block:: bash
 
-        1. User and Password
-        2. Single sign-on (SSO)
-        3. Key pair authentication
+                Give your new Datasource a short name.
+                 [my_snowflake_db]:
 
-#. **Enter connection information**
+        #. **Choose an authentication mechanism**
 
-    Next, you will be asked for information common to all authentication mechanisms.
+            .. code-block:: bash
 
-    .. code-block:: bash
+                What authentication method would you like to use?
 
-        Next, we will configure database credentials and store them in the `my_snowflake_db` section
-        of this config file: great_expectations/uncommitted/config_variables.yml:
+                1. User and Password
+                2. Single sign-on (SSO)
+                3. Key pair authentication
 
-        What is the user login name for the snowflake connection? []: myusername
-        What is the account name for the snowflake connection (include region -- ex 'ABCD.us-east-1')? []: xyz12345.us-east-1
-        What is database name for the snowflake connection? (optional -- leave blank for none) []: MY_DATABASE
-        What is schema name for the snowflake connection? (optional -- leave blank for none) []: MY_SCHEMA
-        What is warehouse name for the snowflake connection? (optional -- leave blank for none) []: MY_COMPUTE_WH
-        What is role name for the snowflake connection? (optional -- leave blank for none) []: MY_ROLE
+        #. **Enter connection information**
 
-#. **For "User and Password": provide password**
+            Next, you will be asked for information common to all authentication mechanisms.
 
-    Next, you will be asked to supply the password for your Snowflake instance:
+            .. code-block:: bash
 
-    .. code-block:: bash
+                Next, we will configure database credentials and store them in the `my_snowflake_db` section
+                of this config file: great_expectations/uncommitted/config_variables.yml:
 
-        What is the password for the snowflake connection?:
+                What is the user login name for the snowflake connection? []: myusername
+                What is the account name for the snowflake connection (include region -- ex 'ABCD.us-east-1')? []: xyz12345.us-east-1
+                What is database name for the snowflake connection? (optional -- leave blank for none) []: MY_DATABASE
+                What is schema name for the snowflake connection? (optional -- leave blank for none) []: MY_SCHEMA
+                What is warehouse name for the snowflake connection? (optional -- leave blank for none) []: MY_COMPUTE_WH
+                What is role name for the snowflake connection? (optional -- leave blank for none) []: MY_ROLE
 
-    Great Expectations will store these secrets privately on your machine. They will not be committed to git.
+        #. **For "User and Password": provide password**
 
-#. **For "Single sign-on (SSO)": provide SSO information**
+            Next, you will be asked to supply the password for your Snowflake instance:
 
-    Next, you will be asked to enter single sign-on information:
+            .. code-block:: bash
 
-    .. code-block:: bash
+                What is the password for the snowflake connection?:
 
-        Valid okta URL or 'externalbrowser' used to connect through SSO: externalbrowser
+            Great Expectations will store these secrets privately on your machine. They will not be committed to git.
 
-#. **For "Key pair authentication": provide key pair information**
+        #. **For "Single sign-on (SSO)": provide SSO information**
 
-    Next, you will be asked to enter key pair authentication information:
+            Next, you will be asked to enter single sign-on information:
 
-    .. code-block:: bash
+            .. code-block:: bash
 
-        Path to the private key used for authentication: ~/.ssh/my_snowflake.p8
-        Passphrase for the private key used for authentication (optional -- leave blank for none): mypass
+                Valid okta URL or 'externalbrowser' used to connect through SSO: externalbrowser
 
-    Great Expectations will store these secrets privately on your machine. They will not be committed to git.
+        #. **For "Key pair authentication": provide key pair information**
 
-#. **Wait to verify your connection**
+            Next, you will be asked to enter key pair authentication information:
 
-    You will then see the following message on your terminal screen:
+            .. code-block:: bash
 
-    .. code-block:: bash
+                Path to the private key used for authentication: ~/.ssh/my_snowflake.p8
+                Passphrase for the private key used for authentication (optional -- leave blank for none): mypass
 
-        Attempting to connect to your database. This may take a moment...
+            Great Expectations will store these secrets privately on your machine. They will not be committed to git.
 
-    For SSO, you will additionally see a "browser tab" open, follow the authentication process and close the tab once
-    the following message is displayed:
+        #. **Wait to verify your connection**
 
-    .. code-block:: bash
+            You will then see the following message on your terminal screen:
 
-        Your identity was confirmed and propagated to Snowflake PythonConnector. You can close this window now and go back where you started from.
+            .. code-block:: bash
 
-    If all goes well, it will be followed by the message:
+                Attempting to connect to your database. This may take a moment...
 
-    .. code-block:: bash
+            For SSO, you will additionally see a "browser tab" open, follow the authentication process and close the tab once
+            the following message is displayed:
 
-        Great Expectations connected to your database!
+            .. code-block:: bash
 
-    If you run into an error, you will see something like:
+                Your identity was confirmed and propagated to Snowflake PythonConnector. You can close this window now and go back where you started from.
 
-    .. code-block:: bash
+            If all goes well, it will be followed by the message:
 
-        Cannot connect to the database.
-          - Please check your environment and the configuration you provided.
-          - Database Error: Cannot initialize datasource my_snowflake_db, error: (snowflake.connector.errors.DatabaseError) 250001 (08001): Failed to connect to DB: oca29081.us-east-1.snowflakecomputing.com:443. Incorrect username or password was specified.
+            .. code-block:: bash
 
-        (Background on this error at: http://sqlalche.me/e/4xp6)
-        Enter the credentials again? [Y/n]:
+                Great Expectations connected to your database!
 
-    In this case, please check your credentials, ports, firewall, etc. and try again.
+            If you run into an error, you will see something like:
 
-#. **Save your new configuration**
+            .. code-block:: bash
 
-    Finally, you'll be asked to confirm that you want to save your configuration:
+                Cannot connect to the database.
+                  - Please check your environment and the configuration you provided.
+                  - Database Error: Cannot initialize datasource my_snowflake_db, error: (snowflake.connector.errors.DatabaseError) 250001 (08001): Failed to connect to DB: oca29081.us-east-1.snowflakecomputing.com:443. Incorrect username or password was specified.
 
-    .. code-block:: bash
+                (Background on this error at: http://sqlalche.me/e/4xp6)
+                Enter the credentials again? [Y/n]:
 
-        Great Expectations will now add a new Datasource 'my_snowflake_db' to your deployment, by adding this entry to your great_expectations.yml:
+            In this case, please check your credentials, ports, firewall, etc. and try again.
 
-          my_snowflake_db:
-            credentials: ${my_snowflake_db}
-            data_asset_type:
-              class_name: SqlAlchemyDataset
-              module_name: great_expectations.dataset
-            class_name: SqlAlchemyDatasource
+        #. **Save your new configuration**
 
-        The credentials will be saved in uncommitted/config_variables.yml under the key 'my_snowflake_db'
+            Finally, you'll be asked to confirm that you want to save your configuration:
 
-        Would you like to proceed? [Y/n]:
+            .. code-block:: bash
 
-    After this confirmation, you can proceed with exploring the data sets in your new Snowflake Datasource.
+                Great Expectations will now add a new Datasource 'my_snowflake_db' to your deployment, by adding this entry to your great_expectations.yml:
+
+                  my_snowflake_db:
+                    credentials: ${my_snowflake_db}
+                    data_asset_type:
+                      class_name: SqlAlchemyDataset
+                      module_name: great_expectations.dataset
+                    class_name: SqlAlchemyDatasource
+
+                The credentials will be saved in uncommitted/config_variables.yml under the key 'my_snowflake_db'
+
+                Would you like to proceed? [Y/n]:
+
+            After this confirmation, you can proceed with exploring the data sets in your new Snowflake Datasource.
+
+    .. tab-container:: tab1
+        :title: Show Docs for Experimental API (0.13)
+
+        .. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+            - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+            - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+
+        To add a Snowflake datasource, do the following:
+
+        #. **Install the required modules**
+
+            If you haven't already, install these modules for connecting to Snowflake.
+
+            .. code-block:: bash
+
+                pip install sqlalchemy
+                pip install snowflake-connector-python
+                pip install snowflake-sqlalchemy
+
+        #. **Instantiate a DataContext**
+
+            .. code-block:: python
+
+                import great_expectations as ge
+                context = ge.get_context()
+
+        #.  **Create or copy a yaml config**
+
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials using username and password authentication.  Username, password and host are set as environment variables, and database and query are set as strings.
+                ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use in connecting data living in a sql database. More information on ``Datasources``
+                in GE 0.13 can found in :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+
+                This example also uses ``introspection`` to configure the datasource, where each table in the database is associated with its own ``data_asset``.  A deeper explanation on the different modes of building ``data_asset`` from data (``introspective`` / ``inferred`` vs ``configured``) can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+
+                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`. Examples of yaml configurations for Key pair and SSO authentication can be found in the **Additional Notes** section below.
+
+                .. code-block:: python
+
+                    config = f"""
+                        class_name: SimpleSqlalchemyDatasource
+                        credentials:
+                            drivername: snowflake
+                            username: ${snowflake_username}
+                            password: ${snowflake_pw}
+                            host: ${snowflake_host}
+                            database: TEST
+                            query:
+                                schema: KAGGLE_MOVIE_DATASET
+                         
+                        introspection:
+                            whole_table:
+                                data_asset_name_suffix: __whole_table
+                        """
+
+        #. **Run context.test_yaml_config.**
+
+            .. code-block:: python
+
+                context.test_yaml_config(
+                    name="my_snowflake_datasource",
+                    yaml_config=my_config
+                )
+
+            When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
+
+            The output will look something like this:
+
+            .. code-block:: bash
+
+                Attempting to instantiate class from config...
+                Instantiating as a DataSource, since class_name is StreamlinedSqlDataSource
+                Successfully instantiated StreamlinedSqlExecutionEnvironment
+
+                Execution engine: SqlAlchemyExecutionEngine
+                Data connectors:
+                    whole_table : InferredAssetSqlDataConnector
+
+                    Available data_asset_names (1 of 1):
+                        imdb_100k_main__whole_table (1 of 1): [{}]
+
+                    Unmatched data_references (0 of 0): []
+
+                    Choosing an example data reference...
+                        Reference chosen: {}
+
+                        Fetching batch data...
+                        [(50832,)]
+
+                Showing 5 rows
+               movieid                               title                                       genres
+                0        1                    Toy Story (1995)  Adventure|Animation|Children|Comedy|Fantasy
+                1        2                      Jumanji (1995)                   Adventure|Children|Fantasy
+                2        3             Grumpier Old Men (1995)                               Comedy|Romance
+                3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance
+                4        5  Father of the Bride Part II (1995)                                       Comedy
+
+            This means all has went well and you can proceed with exploring the data sets in your new Snowflake datasource.
+
+            **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
 ----------------
 Additional Notes
@@ -249,10 +356,63 @@ Additional Notes
 
     And make sure the version of your ``snowflake-connector-python`` library is ``>=2.2.8``
 
+
+#.
+    **Single sign-on (SSO) Authentication for Experimental API (0.13)**
+
+    Add ``connect_args`` and ``authenticator`` to ``credentials`` in the yaml configuration.
+    The value for ``authenticator`` can be ``externalbrowser``, or a valid okta URL.
+
+    .. code-block:: python
+
+        config = f"""
+            class_name: SimpleSqlalchemyDatasource
+            credentials:
+                drivername: snowflake
+                username: ${snowflake_username}
+                host: ${snowflake_host}
+                database: TEST
+                connect_args:
+                    authenticator: externalbrowser
+                query:
+                    schema: KAGGLE_MOVIE_DATASET
+            introspection:
+                whole_table:
+                    data_asset_name_suffix: __whole_table
+            """
+
+    **Note** This feature is still experimental, so please leave us a comment below if you run into any problems.
+
+#.
+    **Key pair Authentication for Experimental API (0.13)**
+
+    Add ``private_key_path`` and optional ``private_key_passphrase`` to ``credentials`` in the yaml configuration.
+
+        - ``private_key_path`` will need to be set to the path to the private key used for authentication ( ie ``~/.ssh/my_snowflake.p8`` ).
+        - ``private_key_passphrase``: is the optional passphrase used for authentication with private key ( ie ``mypass`` ).
+
+        .. code-block:: python
+
+            config = f"""
+                class_name: SimpleSqlalchemyDatasource
+                credentials:
+                    drivername: snowflake
+                    username: ${snowflake_username}
+                    private_key_path: ~/.ssh/my_snowflake.p8
+                    private_key_passphrase: mypass
+                    host: ${snowflake_host}
+                    database: TEST
+                    query:
+                        schema: KAGGLE_MOVIE_DATASET
+                introspection:
+                    whole_table:
+                        data_asset_name_suffix: __whole_table
+                """
+    **Note** This feature is still experimental, so please leave us a comment below if you run into any problems.
+
 --------
 Comments
 --------
 
     .. discourse::
         :topic_identifier: 171
-
