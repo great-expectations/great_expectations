@@ -142,8 +142,8 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
         partition_identifiers={"date": "2020-01-15"},
     )
 
-def test_get_validator(data_context_with_sql_execution_environment_for_testing_get_batch):
-    context = data_context_with_sql_execution_environment_for_testing_get_batch
+def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
+    context = data_context_with_sql_datasource_for_testing_get_batch
     context.create_expectation_suite("my_expectations")
 
     print(
@@ -156,7 +156,7 @@ def test_get_validator(data_context_with_sql_execution_environment_for_testing_g
     # Successful specification using a typed BatchRequest
     context.get_validator(
         batch_request=BatchRequest(
-            execution_environment_name="my_sqlite_db",
+            datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request=PartitionRequest(
@@ -170,7 +170,7 @@ def test_get_validator(data_context_with_sql_execution_environment_for_testing_g
     with pytest.raises(TypeError):
         context.get_validator(
             batch_request={
-                "execution_environment_name": "my_sqlite_db",
+                "datasource_name": "my_sqlite_db",
                 "data_connector_name": "daily",
                 "data_asset_name": "table_partitioned_by_date_column__A",
                 "partition_request": {"partition_identifiers": {"date": "2020-01-15"}},
@@ -182,7 +182,7 @@ def test_get_validator(data_context_with_sql_execution_environment_for_testing_g
     with pytest.raises(ValueError):
         context.get_validator(
             batch_request=BatchRequest(
-                execution_environment_name="my_sqlite_db",
+                datasource_name="my_sqlite_db",
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
                 partition_request=PartitionRequest(partition_identifiers={}),
@@ -194,7 +194,7 @@ def test_get_validator(data_context_with_sql_execution_environment_for_testing_g
     with pytest.raises(ValueError):
         context.get_validator(
             batch_request=BatchRequest(
-                execution_environment_name="my_sqlite_db",
+                datasource_name="my_sqlite_db",
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
             ),
@@ -205,7 +205,7 @@ def test_get_validator(data_context_with_sql_execution_environment_for_testing_g
     with pytest.raises(KeyError):
         context.get_validator(
             batch_request=BatchRequest(
-                execution_environment_name="my_sqlite_db", data_connector_name="daily",
+                datasource_name="my_sqlite_db", data_connector_name="daily",
             ),
             expectation_suite_name="my_expectations",
         )
@@ -215,7 +215,7 @@ def test_get_validator(data_context_with_sql_execution_environment_for_testing_g
     with pytest.raises(KeyError):
         context.get_validator(
             batch_request=BatchRequest(
-                # execution_environment_name=MISSING
+                # datasource_name=MISSING
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
                 partition_request=PartitionRequest(partition_identifiers={}),
@@ -225,7 +225,7 @@ def test_get_validator(data_context_with_sql_execution_environment_for_testing_g
 
     # Successful specification using parameters
     context.get_validator(
-        execution_environment_name="my_sqlite_db",
+        datasource_name="my_sqlite_db",
         data_connector_name="daily",
         data_asset_name="table_partitioned_by_date_column__A",
         date="2020-01-15",
@@ -269,13 +269,13 @@ def test_get_validator(data_context_with_sql_execution_environment_for_testing_g
         expectation_suite_name="my_expectations",
     )
 
-def test_get_validator_expectation_suite_options(data_context_with_sql_execution_environment_for_testing_get_batch):
-    context = data_context_with_sql_execution_environment_for_testing_get_batch
+def test_get_validator_expectation_suite_options(data_context_with_sql_datasource_for_testing_get_batch):
+    context = data_context_with_sql_datasource_for_testing_get_batch
     context.create_expectation_suite("some_expectations")
 
     # Successful specification with an existing expectation_suite_name
     context.get_validator(
-        execution_environment_name="my_sqlite_db",
+        datasource_name="my_sqlite_db",
         data_connector_name="daily",
         data_asset_name="table_partitioned_by_date_column__A",
         date="2020-01-15",
@@ -285,7 +285,7 @@ def test_get_validator_expectation_suite_options(data_context_with_sql_execution
     # Successful specification with a fetched ExpectationSuite object
     some_expectations = context.get_expectation_suite("some_expectations")
     context.get_validator(
-        execution_environment_name="my_sqlite_db",
+        datasource_name="my_sqlite_db",
         data_connector_name="daily",
         data_asset_name="table_partitioned_by_date_column__A",
         date="2020-01-15",
@@ -297,7 +297,7 @@ def test_get_validator_expectation_suite_options(data_context_with_sql_execution
         expectation_suite_name="some_more_expectations"
     )
     context.get_validator(
-        execution_environment_name="my_sqlite_db",
+        datasource_name="my_sqlite_db",
         data_connector_name="daily",
         data_asset_name="table_partitioned_by_date_column__A",
         date="2020-01-15",
@@ -307,7 +307,7 @@ def test_get_validator_expectation_suite_options(data_context_with_sql_execution
     # Successful specification using create_expectation_suite_with_name
     context.get_validator(
         batch_request=BatchRequest(
-            execution_environment_name="my_sqlite_db",
+            datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request=PartitionRequest(
@@ -320,7 +320,7 @@ def test_get_validator_expectation_suite_options(data_context_with_sql_execution
     # Failed specification, because the named expectation suite already exists
     with pytest.raises(DataContextError):
         context.get_validator(
-            execution_environment_name="my_sqlite_db",
+            datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
             date="2020-01-15",
@@ -330,7 +330,7 @@ def test_get_validator_expectation_suite_options(data_context_with_sql_execution
     # Failed specification: incorrectly typed expectation suite
     with pytest.raises(ValidationError):
         context.get_validator(
-            execution_environment_name="my_sqlite_db",
+            datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
             date="2020-01-15",

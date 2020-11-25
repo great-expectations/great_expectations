@@ -325,9 +325,6 @@ class DataContextV3(DataContext):
                 raise TypeError(
                     f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
                 )
-
-            datasource_name = batch_definition.datasource_name
-        elif batch_request:
             datasource_name = batch_request.datasource_name
         else:
             datasource_name = datasource_name
