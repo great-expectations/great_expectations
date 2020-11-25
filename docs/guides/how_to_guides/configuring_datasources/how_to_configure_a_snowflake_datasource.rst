@@ -376,7 +376,6 @@ Additional Notes
                     authenticator: externalbrowser
                 query:
                     schema: KAGGLE_MOVIE_DATASET
-                    
             introspection:
                 whole_table:
                     data_asset_name_suffix: __whole_table
