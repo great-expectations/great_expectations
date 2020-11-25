@@ -32,11 +32,13 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         suppress_store_backend_id=False,
         manually_initialize_store_backend_id: str = "",
         base_public_path=None,
+        store_name=None,
     ):
         super().__init__(
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
+            store_name=store_name,
         )
         if forbidden_substrings is None:
             forbidden_substrings = ["/", "\\"]
@@ -223,6 +225,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         suppress_store_backend_id=False,
         manually_initialize_store_backend_id: str = "",
         base_public_path=None,
+        store_name=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -234,6 +237,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             suppress_store_backend_id=suppress_store_backend_id,
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             base_public_path=base_public_path,
+            store_name=store_name,
         )
         if os.path.isabs(base_directory):
             self.full_base_directory = base_directory
@@ -409,6 +413,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         manually_initialize_store_backend_id: str = "",
         base_public_path=None,
         endpoint_url=None,
+        store_name=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -420,6 +425,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             suppress_store_backend_id=suppress_store_backend_id,
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             base_public_path=base_public_path,
+            store_name=store_name,
         )
         self.bucket = bucket
         if prefix:
@@ -666,6 +672,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         manually_initialize_store_backend_id: str = "",
         public_urls=True,
         base_public_path=None,
+        store_name=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -677,6 +684,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             suppress_store_backend_id=suppress_store_backend_id,
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             base_public_path=base_public_path,
+            store_name=store_name,
         )
         self.bucket = bucket
         self.prefix = prefix
