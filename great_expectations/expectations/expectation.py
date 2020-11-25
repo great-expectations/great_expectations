@@ -85,11 +85,15 @@ class Expectation(ABC, metaclass=MetaExpectation):
         2. `success_keys`: a tuple of the *keys* used to determine the success of
            the expectation.
 
-    In some cases, subclasses of Expectation, such as TableExpectation will already
-    have correct values that may simply be inherited.
+    In some cases, subclasses of Expectation (such as TableExpectation) can
+    inherit these properties from their parent class.
 
     They *may* optionally override `runtime_keys` and `default_kwarg_values`, and
     may optionally set an explicit value for expectation_type.
+        1. runtime_keys lists the keys that can be used to control output but will
+           not affect the actual success value of the expectation (such as result_format).
+        2. default_kwarg_values is a dictionary that will be used to fill unspecified
+           kwargs from the Expectation Configuration.
 
     Expectation classes *must* implement the following:
         1. `_validate`
@@ -99,8 +103,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
     have correct implementations that may simply be inherited.
 
     Additionally, they *may* provide implementations of:
-        1. `validate_configuration`
-        2. Data Docs rendering methods decorated with the @renderer decorator
+        1. `validate_configuration`, which should raise an error if the configuration
+           will not be usable for the Expectation
+        2. Data Docs rendering methods decorated with the @renderer decorator. See the
+
 
     """
 

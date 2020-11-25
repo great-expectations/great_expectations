@@ -89,7 +89,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
     In some cases, subclasses of Expectation, such as TableMetricProvider will already
     have correct values that may simply be inherited.
 
-    They *may* optionally override `default_kwarg_values` attribute.
+    They *may* optionally override the `default_kwarg_values` attribute.
 
     MetricProvider classes *must* implement the following:
         1. `_get_evaluation_dependencies`. Note that often, _get_evaluation_dependencies should
@@ -99,7 +99,8 @@ class MetricProvider(metaclass=MetaMetricProvider):
     have correct implementations that may simply be inherited.
 
     Additionally, they *may* provide implementations of:
-        1. Data Docs rendering methods decorated with the @renderer decorator
+        1. Data Docs rendering methods decorated with the @renderer decorator. See the guide
+        "How to create renderers for custom expectations" for more information.
 
     """
 
