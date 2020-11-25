@@ -799,7 +799,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self, evaluation_parameters, interactive_evaluation=True, data_context=None
     ):
         if self._raw_kwargs is not None:
-            logger.warning(
+            logger.debug(
                 "evaluation_parameters have already been built on this expectation"
             )
 

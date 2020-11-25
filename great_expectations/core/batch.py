@@ -2,7 +2,7 @@ import copy
 import datetime
 import hashlib
 import json
-from typing import Any, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from great_expectations.core.id_dict import (
     BatchKwargs,
@@ -12,10 +12,10 @@ from great_expectations.core.id_dict import (
     PartitionRequest,
 )
 from great_expectations.exceptions import InvalidBatchIdError
-from great_expectations.types import DictDot
+from great_expectations.types import DictDot, SerializableDictDot
 
 
-class BatchDefinition(DictDot):
+class BatchDefinition(SerializableDictDot):
     def __init__(
         self,
         datasource_name: str,
@@ -39,6 +39,14 @@ class BatchDefinition(DictDot):
         self._data_asset_name = data_asset_name
         self._partition_definition = partition_definition
         self._batch_spec_passthrough = batch_spec_passthrough
+
+    def to_json_dict(self) -> Dict:
+        return {
+            "datasource_name": self._datasource_name,
+            "data_connector_name": self._data_connector_name,
+            "data_asset_name": self.data_asset_name,
+            "partition_definition": self._partition_definition,
+        }
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
