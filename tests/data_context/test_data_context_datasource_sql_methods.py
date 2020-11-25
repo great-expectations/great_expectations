@@ -3,6 +3,7 @@ import json
 import pytest
 from ruamel.yaml import YAML
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -10,12 +11,11 @@ from great_expectations.core.batch import (
     PartitionDefinition,
     PartitionRequest,
 )
-from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
 )
-from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.marshmallow__shade.exceptions import ValidationError
 
 yaml = YAML()
