@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Updated the BigQuery Integration to create a view instead of a table.
 
 0.12.9
 -----------------
