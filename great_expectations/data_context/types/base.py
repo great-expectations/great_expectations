@@ -96,7 +96,7 @@ class SorterConfigSchema(Schema):
     name = fields.String(required=True)
     class_name = fields.String(required=True)
     module_name = fields.String(
-        missing="great_expectations.execution_environment.data_connector.partitioner.sorter"
+        missing="great_expectations.datasource.data_connector.partitioner.sorter"
     )
     orderby = fields.String(required=False, missing="asc", allow_none=False)
 
@@ -157,7 +157,7 @@ class PartitionerConfigSchema(Schema):
 
     class_name = fields.String(required=True)
     module_name = fields.String(
-        missing="great_expectations.execution_environment.data_connector.partitioner"
+        missing="great_expectations.datasource.data_connector.partitioner"
     )
 
     sorters = fields.List(
@@ -232,9 +232,7 @@ class DataConnectorConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(
-        missing="great_expectations.execution_environment.data_connector"
-    )
+    module_name = fields.String(missing="great_expectations.datasource.data_connector")
 
     assets = fields.Dict(
         keys=fields.Str(),
@@ -316,7 +314,7 @@ class ExecutionEngineConfigSchema(Schema):
         return ExecutionEngineConfig(**data)
 
 
-class ExecutionEnvironmentConfig(DictDot):
+class DatasourceConfig(DictDot):
     def __init__(
         self,
         class_name=None,
@@ -353,12 +351,12 @@ class ExecutionEnvironmentConfig(DictDot):
         return self._module_name
 
 
-class ExecutionEnvironmentConfigSchema(Schema):
+class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(missing="ExecutionEnvironment")
-    module_name = fields.String(missing="great_expectations.execution_environment")
+    class_name = fields.String(missing="Datasource")
+    module_name = fields.String(missing="great_expectations.datasource")
     execution_engine = fields.Nested(ExecutionEngineConfigSchema)
 
     data_connectors = fields.Dict(
@@ -377,11 +375,11 @@ class ExecutionEnvironmentConfigSchema(Schema):
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_execution_environment_config(self, data, **kwargs):
-        return ExecutionEnvironmentConfig(**data)
+    def make_datasource_config(self, data, **kwargs):
+        return DatasourceConfig(**data)
 
 
-class DatasourceConfig(DictDot):
+class LegacyDatasourceConfig(DictDot):
     def __init__(
         self,
         class_name,
@@ -499,7 +497,7 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
         return data
 
 
-class DatasourceConfigSchema(Schema):
+class LegacyDatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
@@ -526,7 +524,7 @@ class DatasourceConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
-        return DatasourceConfig(**data)
+        return LegacyDatasourceConfig(**data)
 
 
 class NotebookTemplateConfig(DictDot):
@@ -667,7 +665,6 @@ class DataContextConfig(DictDot):
         anonymous_usage_statistics=None,
         commented_map=None,
         datasources=None,
-        execution_environments=None,
     ):
         if commented_map is None:
             commented_map = CommentedMap()
@@ -676,9 +673,6 @@ class DataContextConfig(DictDot):
         if datasources is None:
             datasources = {}
         self.datasources = datasources
-        if execution_environments is None:
-            execution_environments = {}
-        self.execution_environments = execution_environments
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
@@ -730,12 +724,10 @@ class DataContextConfigSchema(Schema):
         validate=lambda x: 0 < x < 100,
         error_messages={"invalid": "config version must " "be a number."},
     )
+    # TODO: <Alex>Proper Schema enforcement for the new Datasource must be implemented.</Alex>
     datasources = fields.Dict(
-        keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema), allow_none=True
-    )
-    execution_environments = fields.Dict(
         keys=fields.Str(),
-        values=fields.Nested(ExecutionEnvironmentConfigSchema),
+        values=fields.Nested(LegacyDatasourceConfigSchema),
         allow_none=True,
     )
     expectations_store_name = fields.Str()
@@ -799,8 +791,8 @@ class DataContextConfigSchema(Schema):
 
 
 dataContextConfigSchema = DataContextConfigSchema()
+legacyDatasourceConfigSchema = LegacyDatasourceConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
-executionEnvironmentConfigSchema = ExecutionEnvironmentConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
 assetConfigSchema = AssetConfigSchema()
 partitionerConfigSchema = PartitionerConfigSchema()
