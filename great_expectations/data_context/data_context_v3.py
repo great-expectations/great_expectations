@@ -268,7 +268,7 @@ class DataContextV3(DataContext):
         datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        batch_definition: BatchDefinition = None,
+        *,
         batch_request: BatchRequest = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
@@ -285,14 +285,14 @@ class DataContextV3(DataContext):
         """Get exactly one batch, based on a variety of flexible input types.
 
         Args:
-            batch_definition
             batch_request
 
             datasource_name
             data_connector_name
             data_asset_name
-            partition_request
 
+            batch_request
+            partition_request
             partition_identifiers
 
             limit
@@ -319,24 +319,19 @@ class DataContextV3(DataContext):
         This method attempts returns exactly one batch.
         If 0 or more than batches would be returned, it raises an error.
         """
-        if batch_definition:
-            if not isinstance(batch_definition, BatchDefinition):
-                raise TypeError(
-                    f"batch_definition must be an instance of BatchDefinition object, not {type(batch_definition)}"
-                )
 
-            datasource_name = batch_definition.datasource_name
-        elif batch_request:
+        if batch_request:
+            if not isinstance(batch_request, BatchRequest):
+                raise TypeError(
+                    f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
+                )
             datasource_name = batch_request.datasource_name
         else:
             datasource_name = datasource_name
 
         datasource = self.datasources[datasource_name]
 
-        if batch_definition:
-            # TODO: Raise a warning if any parameters besides batch_definition are specified
-            return datasource.get_batch_from_batch_definition(batch_definition)
-        elif batch_request:
+        if batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
             return datasource.get_single_batch_from_batch_request(
                 batch_request=batch_request
@@ -400,16 +395,16 @@ class DataContextV3(DataContext):
         datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        batch_definition: BatchDefinition = None,
+        *,
         batch_request: BatchRequest = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
         limit: int = None,
         index=None,
         custom_filter_function: Callable = None,
-        attach_new_expectation_suite: bool = False,
         expectation_suite_name: str = None,
         expectation_suite: ExpectationSuite = None,
+        create_expectation_suite_with_name: str = None,
         batch_spec_passthrough: Optional[dict] = None,
         sampling_method: str = None,
         sampling_kwargs: dict = None,
@@ -417,26 +412,33 @@ class DataContextV3(DataContext):
         splitter_kwargs: dict = None,
         **kwargs,
     ) -> Validator:
-        if attach_new_expectation_suite:
-            expectation_suite = ExpectationSuite(f"{data_asset_name}_expectation_suite")
-        if expectation_suite is None:
-            if expectation_suite_name:
-                expectation_suite = self.get_expectation_suite(expectation_suite_name)
-            else:
-                raise ValueError(
-                    "expectation_suite and expectation_suite_name cannot both be None"
-                )
-        else:
-            if expectation_suite_name:
-                raise Warning(
-                    "get_validator received values for both expectation_suite and expectation_suite_name. Defaulting to expectation_suite."
-                )
+        if (
+            sum(
+                bool(x)
+                for x in [
+                    expectation_suite is not None,
+                    expectation_suite_name is not None,
+                    create_expectation_suite_with_name is not None,
+                ]
+            )
+            != 1
+        ):
+            raise ValueError(
+                "Exactly one of expectation_suite_name, expectation_suite, or create_expectation_suite_with_name must be specified"
+            )
+
+        if expectation_suite_name is not None:
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)
+
+        if create_expectation_suite_with_name is not None:
+            expectation_suite = self.create_expectation_suite(
+                expectation_suite_name=create_expectation_suite_with_name
+            )
 
         batch = self.get_batch(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            batch_definition=batch_definition,
             batch_request=batch_request,
             partition_request=partition_request,
             partition_identifiers=partition_identifiers,
@@ -451,8 +453,13 @@ class DataContextV3(DataContext):
             **kwargs,
         )
 
+        batch_definition = batch.batch_definition
+        execution_engine = self.datasources[
+            batch_definition.datasource_name
+        ].execution_engine
+
         validator = Validator(
-            execution_engine=self.datasources[datasource_name].execution_engine,
+            execution_engine=execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
             data_context=self,

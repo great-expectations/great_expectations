@@ -566,7 +566,7 @@ data_connectors:
                 "hash_value": "f",
             },
         },
-        attach_new_expectation_suite=True,
+        create_expectation_suite_with_name="my_expectations",
     )
     my_evr = my_validator.expect_column_values_to_be_between(
         column="d", min_value=1, max_value=31

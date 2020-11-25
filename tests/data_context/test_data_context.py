@@ -1650,6 +1650,6 @@ data_connectors:
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         partition_identifiers={"alphanumeric": "some_file",},
-        attach_new_expectation_suite=True,
+        create_expectation_suite_with_name="A_expectation_suite",
     )
     assert my_validator.expectation_suite_name == "A_expectation_suite"
