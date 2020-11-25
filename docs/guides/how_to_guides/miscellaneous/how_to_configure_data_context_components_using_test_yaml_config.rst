@@ -133,7 +133,7 @@ Steps
 
 #. **Save the config.**
 
-    Once you are satisfied with your config, you can make it a permanent part of your Great Expectations setup by copying it into the appropriate section of your `great_expectations/great_expectations.yml` file.
+    Once you are satisfied with your config, you can make it a permanent part of your Great Expectations setup by copying it into the appropriate section of your ``great_expectations/great_expectations.yml`` file.
 
 
 Additional Resources
