@@ -10,9 +10,18 @@ from great_expectations.core.batch import (
     PartitionDefinition,
     PartitionRequest,
 )
+from great_expectations.core import (
+    ExpectationSuite
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
+)
+from great_expectations.exceptions.exceptions import (
+    DataContextError
+)
+from great_expectations.marshmallow__shade.exceptions import (
+    ValidationError
 )
 
 yaml = YAML()
@@ -41,8 +50,7 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
     )
 
     # Failed specification using an untyped BatchRequest
-    # with pytest.raises(AttributeError):
-    if 1:
+    with pytest.raises(TypeError):
         context.get_batch(
             batch_request={
                 "execution_environment_name": "my_sqlite_db",
@@ -133,6 +141,206 @@ def test_get_batch(data_context_with_sql_execution_environment_for_testing_get_b
         "table_partitioned_by_date_column__A",
         partition_identifiers={"date": "2020-01-15"},
     )
+
+def test_get_validator(data_context_with_sql_execution_environment_for_testing_get_batch):
+    context = data_context_with_sql_execution_environment_for_testing_get_batch
+    context.create_expectation_suite("my_expectations")
+
+    print(
+        json.dumps(
+            context.datasources["my_sqlite_db"].get_available_data_asset_names(),
+            indent=4,
+        )
+    )
+
+    # Successful specification using a typed BatchRequest
+    context.get_validator(
+        batch_request=BatchRequest(
+            execution_environment_name="my_sqlite_db",
+            data_connector_name="daily",
+            data_asset_name="table_partitioned_by_date_column__A",
+            partition_request=PartitionRequest(
+                partition_identifiers={"date": "2020-01-15"}
+            ),
+        ),
+        expectation_suite_name="my_expectations",
+    )
+
+    # Failed specification using an untyped BatchRequest
+    with pytest.raises(TypeError):
+        context.get_validator(
+            batch_request={
+                "execution_environment_name": "my_sqlite_db",
+                "data_connector_name": "daily",
+                "data_asset_name": "table_partitioned_by_date_column__A",
+                "partition_request": {"partition_identifiers": {"date": "2020-01-15"}},
+            },
+            expectation_suite_name="my_expectations",
+        )
+
+    # Failed specification using an incomplete BatchRequest
+    with pytest.raises(ValueError):
+        context.get_validator(
+            batch_request=BatchRequest(
+                execution_environment_name="my_sqlite_db",
+                data_connector_name="daily",
+                data_asset_name="table_partitioned_by_date_column__A",
+                partition_request=PartitionRequest(partition_identifiers={}),
+            ),
+            expectation_suite_name="my_expectations",
+        )
+
+    # Failed specification using an incomplete BatchRequest
+    with pytest.raises(ValueError):
+        context.get_validator(
+            batch_request=BatchRequest(
+                execution_environment_name="my_sqlite_db",
+                data_connector_name="daily",
+                data_asset_name="table_partitioned_by_date_column__A",
+            ),
+            expectation_suite_name="my_expectations",
+        )
+
+    # Failed specification using an incomplete BatchRequest
+    with pytest.raises(KeyError):
+        context.get_validator(
+            batch_request=BatchRequest(
+                execution_environment_name="my_sqlite_db", data_connector_name="daily",
+            ),
+            expectation_suite_name="my_expectations",
+        )
+
+    # Failed specification using an incomplete BatchRequest
+    # with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
+        context.get_validator(
+            batch_request=BatchRequest(
+                # execution_environment_name=MISSING
+                data_connector_name="daily",
+                data_asset_name="table_partitioned_by_date_column__A",
+                partition_request=PartitionRequest(partition_identifiers={}),
+            ),
+            expectation_suite_name="my_expectations",
+        )
+
+    # Successful specification using parameters
+    context.get_validator(
+        execution_environment_name="my_sqlite_db",
+        data_connector_name="daily",
+        data_asset_name="table_partitioned_by_date_column__A",
+        date="2020-01-15",
+        expectation_suite_name="my_expectations",
+    )
+
+    # Successful specification using parameters without parameter names for the identifying triple
+    # This is the thinnest this can plausibly get.
+    context.get_validator(
+        "my_sqlite_db",
+        "daily",
+        "table_partitioned_by_date_column__A",
+        date="2020-01-15",
+        expectation_suite_name="my_expectations",
+    )
+
+    # Successful specification using parameters without parameter names for the identifying triple
+    # In the case of a data_asset containing a single Batch, we don't even need parameters
+    context.get_validator(
+        "my_sqlite_db", "whole_table", "table_partitioned_by_date_column__A",
+        expectation_suite_name="my_expectations",
+    )
+
+    # Successful specification using parameters and partition_request
+    context.get_validator(
+        "my_sqlite_db",
+        "daily",
+        "table_partitioned_by_date_column__A",
+        partition_request=PartitionRequest(
+            {"partition_identifiers": {"date": "2020-01-15"}}
+        ),
+        expectation_suite_name="my_expectations",
+    )
+
+    # Successful specification using parameters and partition_identifiers
+    context.get_validator(
+        "my_sqlite_db",
+        "daily",
+        "table_partitioned_by_date_column__A",
+        partition_identifiers={"date": "2020-01-15"},
+        expectation_suite_name="my_expectations",
+    )
+
+def test_get_validator_expectation_suite_options(data_context_with_sql_execution_environment_for_testing_get_batch):
+    context = data_context_with_sql_execution_environment_for_testing_get_batch
+    context.create_expectation_suite("some_expectations")
+
+    # Successful specification with an existing expectation_suite_name
+    context.get_validator(
+        execution_environment_name="my_sqlite_db",
+        data_connector_name="daily",
+        data_asset_name="table_partitioned_by_date_column__A",
+        date="2020-01-15",
+        expectation_suite_name="some_expectations",
+    )
+
+    # Successful specification with a fetched ExpectationSuite object
+    some_expectations = context.get_expectation_suite("some_expectations")
+    context.get_validator(
+        execution_environment_name="my_sqlite_db",
+        data_connector_name="daily",
+        data_asset_name="table_partitioned_by_date_column__A",
+        date="2020-01-15",
+        expectation_suite=some_expectations,
+    )
+
+    # Successful specification with a fresh ExpectationSuite object
+    some_more_expectations = context.create_expectation_suite(
+        expectation_suite_name="some_more_expectations"
+    )
+    context.get_validator(
+        execution_environment_name="my_sqlite_db",
+        data_connector_name="daily",
+        data_asset_name="table_partitioned_by_date_column__A",
+        date="2020-01-15",
+        expectation_suite=some_more_expectations,
+    )
+
+    # Successful specification using create_expectation_suite_with_name
+    context.get_validator(
+        batch_request=BatchRequest(
+            execution_environment_name="my_sqlite_db",
+            data_connector_name="daily",
+            data_asset_name="table_partitioned_by_date_column__A",
+            partition_request=PartitionRequest(
+                partition_identifiers={"date": "2020-01-15"}
+            ),
+        ),
+        create_expectation_suite_with_name="yet_more_expectations",
+    )
+
+    # Failed specification, because the named expectation suite already exists
+    with pytest.raises(DataContextError):
+        context.get_validator(
+            execution_environment_name="my_sqlite_db",
+            data_connector_name="daily",
+            data_asset_name="table_partitioned_by_date_column__A",
+            date="2020-01-15",
+            create_expectation_suite_with_name="some_expectations",
+        )
+
+    # Failed specification: incorrectly typed expectation suite
+    with pytest.raises(ValidationError):
+        context.get_validator(
+            execution_environment_name="my_sqlite_db",
+            data_connector_name="daily",
+            data_asset_name="table_partitioned_by_date_column__A",
+            date="2020-01-15",
+            expectation_suite={
+                "im": "a",
+                "dictionary": "not a",
+                "ExepctationSuite": False
+            },
+        )
+
 
 
 def test_get_batch_list_from_new_style_datasource_with_sql_execution_environment(

@@ -258,8 +258,9 @@ class DataContextV3(DataContext):
         
         if batch_request:
             if not isinstance(batch_request, BatchRequest):
-                # Attempt to convert to a typed BatchRequest object
-                batch_request = BatchRequest(**batch_request)
+                raise TypeError(
+                    f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
+                )
 
             execution_environment_name = batch_request.execution_environment_name
         else:
@@ -338,9 +339,9 @@ class DataContextV3(DataContext):
         limit: int = None,
         index=None,
         custom_filter_function: Callable = None,
-        attach_new_expectation_suite: bool = False,
         expectation_suite_name: str = None,
         expectation_suite: ExpectationSuite = None,
+        create_expectation_suite_with_name: str = None,
         batch_spec_passthrough: Optional[dict] = None,
         sampling_method: str = None,
         sampling_kwargs: dict = None,
@@ -348,20 +349,28 @@ class DataContextV3(DataContext):
         splitter_kwargs: dict = None,
         **kwargs,
     ) -> Validator:
-        if attach_new_expectation_suite:
-            expectation_suite = ExpectationSuite(f"{data_asset_name}_expectation_suite")
-        if expectation_suite is None:
-            if expectation_suite_name:
-                expectation_suite = self.get_expectation_suite(expectation_suite_name)
-            else:
-                raise ValueError(
-                    "expectation_suite and expectation_suite_name cannot both be None"
-                )
-        else:
-            if expectation_suite_name:
-                raise Warning(
-                    "get_validator received values for both expectation_suite and expectation_suite_name. Defaulting to expectation_suite."
-                )
+        if sum(bool(x) for x in [
+            expectation_suite is not None,
+            expectation_suite_name is not None,
+            create_expectation_suite_with_name is not None,
+        ]) != 1:
+            print(expectation_suite)
+            print(expectation_suite is not None)
+            print(expectation_suite_name)
+            print(expectation_suite_name is not None)
+            print(create_expectation_suite_with_name)
+            print(create_expectation_suite_with_name is not None)
+            raise ValueError(
+                "Exactly one of expectation_suite_name, expectation_suite, or create_expectation_suite_with_name must be specified"
+            )
+
+        if expectation_suite_name is not None:
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)
+
+        if create_expectation_suite_with_name is not None:
+            expectation_suite = self.create_expectation_suite(
+                expectation_suite_name=create_expectation_suite_with_name
+            )
 
         batch = self.get_batch(
             execution_environment_name=execution_environment_name,
