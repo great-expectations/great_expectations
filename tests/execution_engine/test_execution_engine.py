@@ -1,9 +1,9 @@
+import pandas as pd
 import pytest
 
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.validator.validation_graph import MetricConfiguration
-import pandas as pd
 
 
 # Testing ordinary process of adding column row condition
@@ -12,22 +12,32 @@ def test_add_column_row_condition():
 
     # Checking that adding a simple column row condition is functional
     new_domain_kwargs = e.add_column_row_condition({}, "a")
-    assert new_domain_kwargs == {"condition_parser": 'great_expectations__experimental__',
-                                 "row_condition" : 'col("a").notnull()'}
+    assert new_domain_kwargs == {
+        "condition_parser": "great_expectations__experimental__",
+        "row_condition": 'col("a").notnull()',
+    }
 
     # Ensuring that this also works when formatted differently
-    new_domain_kwargs = e.add_column_row_condition({"column":'a'})
-    assert new_domain_kwargs == {"column": "a", "condition_parser": 'great_expectations__experimental__',
-                                 "row_condition": 'col("a").notnull()'}
+    new_domain_kwargs = e.add_column_row_condition({"column": "a"})
+    assert new_domain_kwargs == {
+        "column": "a",
+        "condition_parser": "great_expectations__experimental__",
+        "row_condition": 'col("a").notnull()',
+    }
 
     # Ensuring that everything still works if a row condition of None given
-    new_domain_kwargs = e.add_column_row_condition({"column": 'a', "row_condition": None})
-    assert new_domain_kwargs == {"column": "a", "row_condition": None,
-                                 "condition_parser": 'great_expectations__experimental__',
-                                 "row_condition": 'col("a").notnull()'}
+    new_domain_kwargs = e.add_column_row_condition(
+        {"column": "a", "row_condition": None}
+    )
+    assert new_domain_kwargs == {
+        "column": "a",
+        "row_condition": None,
+        "condition_parser": "great_expectations__experimental__",
+        "row_condition": 'col("a").notnull()',
+    }
 
     # Identity case
-    new_domain_kwargs = e.add_column_row_condition({}, "a", filter_null = False)
+    new_domain_kwargs = e.add_column_row_condition({}, "a", filter_null=False)
     assert new_domain_kwargs == {}
 
 
@@ -41,7 +51,9 @@ def test_add_column_row_condition_with_unsupported_conditions():
 
     # Having a pre-existing row condition should result in an error, as we should not be updating it
     with pytest.raises(GreatExpectationsError) as error:
-        new_domain_kwargs = e.add_column_row_condition({"column":'a', "row_condition": "col(a) == 2"})
+        new_domain_kwargs = e.add_column_row_condition(
+            {"column": "a", "row_condition": "col(a) == 2"}
+        )
 
     # Testing that error raised when column not given
     with pytest.raises(AssertionError) as error:
@@ -69,7 +81,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean, },
+        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean,},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -105,19 +117,23 @@ def test_resolve_metrics_with_extraneous_value_key():
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies= {})
+        metric_dependencies={},
+    )
 
     # Ensuring that an unused value key will not mess up computation
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"value_set": [1,2,3,4,5]},
+        metric_value_kwargs={"value_set": [1, 2, 3, 4, 5]},
     )
     desired_metrics = (mean, stdev)
     metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
     # Ensuring extraneous value key did not change computation
-    assert metrics[('column.standard_deviation', 'column=a', 'value_set=[1, 2, 3, 4, 5]')] == 1.0
+    assert (
+        metrics[("column.standard_deviation", "column=a", "value_set=[1, 2, 3, 4, 5]")]
+        == 1.0
+    )
 
 
 # Testing that metric resolution also works with metric partial function
@@ -139,12 +155,9 @@ def test_resolve_metrics_with_incomplete_metric_input():
         metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean, },
+        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean,},
     )
 
     # Ensuring that incomplete metrics given raises a GreatExpectationsError
     with pytest.raises(GreatExpectationsError) as error:
-        engine.resolve_metrics(
-            metrics_to_resolve=(desired_metric,), metrics={}
-        )
-
+        engine.resolve_metrics(metrics_to_resolve=(desired_metric,), metrics={})
