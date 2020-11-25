@@ -262,7 +262,7 @@ class BaseDataContext:
         self._init_stores(self._project_config_with_variables_substituted.stores)
 
         # Override the project_config data_context_id if an expectations_store was already set up
-        project_config.anonymous_usage_statistics.data_context_id = (
+        self._project_config.anonymous_usage_statistics.data_context_id = (
             self._construct_data_context_id()
         )
         self._initialize_usage_statistics(project_config.anonymous_usage_statistics)
