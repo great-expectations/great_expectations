@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Dict, Optional, Set
 
 import boto3
 from moto import mock_s3
@@ -16,6 +16,7 @@ def build_in_memory_data_context_project_config(
     expectations_store_prefix: str = "expectations_store_prefix",
     validations_store_prefix: str = "validations_store_prefix",
     data_docs_store_prefix: str = "data_docs_store_prefix",
+    stores: Optional[Dict] = None,
 ) -> DataContextConfig:
     """
     Create a project config for an in-memory data context.
@@ -25,26 +26,13 @@ def build_in_memory_data_context_project_config(
         validations_store_prefix: prefix for validations store
         data_docs_store_prefix: prefix for data docs
         bucket: name of the s3 bucket
+        stores: optional overwrite of the default stores
 
     Returns:
         DataContextConfig using s3 for all stores.
     """
-    project_config = DataContextConfig(
-        config_version=2,
-        plugins_directory=None,
-        config_variables_file_path=None,
-        datasources={
-            "my_spark_datasource": {
-                "data_asset_type": {
-                    "class_name": "SparkDFDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-                "class_name": "SparkDFDatasource",
-                "module_name": "great_expectations.datasource",
-                "batch_kwargs_generators": {},
-            }
-        },
-        stores={
+    if stores is None:
+        stores = {
             "expectations_S3_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
@@ -62,7 +50,23 @@ def build_in_memory_data_context_project_config(
                 },
             },
             "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        }
+    project_config = DataContextConfig(
+        config_version=2,
+        plugins_directory=None,
+        config_variables_file_path=None,
+        datasources={
+            "my_spark_datasource": {
+                "data_asset_type": {
+                    "class_name": "SparkDFDataset",
+                    "module_name": "great_expectations.dataset",
+                },
+                "class_name": "SparkDFDatasource",
+                "module_name": "great_expectations.datasource",
+                "batch_kwargs_generators": {},
+            }
         },
+        stores=stores,
         expectations_store_name="expectations_S3_store",
         validations_store_name="validations_S3_store",
         evaluation_parameter_store_name="evaluation_parameter_store",
@@ -337,4 +341,115 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_env_var_GE_DATA
         == in_memory_data_context.stores[
             in_memory_data_context.expectations_store_name
         ].store_backend_id
+    )
+
+
+@mock_s3
+def test_suppress_store_backend_id_is_true_for_inactive_stores():
+    """
+    What does this test and why?
+
+    Trying to read / set the store_backend_id for inactive stores should not be attempted during DataContext initialization. This test ensures that the _suppress_store_backend_id parameter is set to True for inactive stores.
+
+    """
+
+    bucket = "leakybucket"
+    expectations_store_prefix = "expectations_store_prefix"
+    validations_store_prefix = "validations_store_prefix"
+    data_docs_store_prefix = "data_docs_store_prefix"
+
+    # Create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    # Create a DataContext
+    # Add inactive stores
+    inactive_bucket = "inactive_leakybucket"
+    stores = {
+        "expectations_S3_store": {
+            "class_name": "ExpectationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": bucket,
+                "prefix": expectations_store_prefix,
+            },
+        },
+        "validations_S3_store": {
+            "class_name": "ValidationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": bucket,
+                "prefix": validations_store_prefix,
+            },
+        },
+        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "inactive_expectations_S3_store": {
+            "class_name": "ExpectationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": inactive_bucket,
+                "prefix": expectations_store_prefix,
+            },
+        },
+        "inactive_validations_S3_store": {
+            "class_name": "ValidationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": inactive_bucket,
+                "prefix": validations_store_prefix,
+            },
+        },
+        "inactive_evaluation_parameter_store": {
+            "class_name": "EvaluationParameterStore"
+        },
+    }
+    in_memory_data_context_project_config = build_in_memory_data_context_project_config(
+        bucket="leakybucket",
+        expectations_store_prefix=expectations_store_prefix,
+        validations_store_prefix=validations_store_prefix,
+        data_docs_store_prefix=data_docs_store_prefix,
+        stores=stores,
+    )
+    in_memory_data_context = BaseDataContext(
+        project_config=in_memory_data_context_project_config
+    )
+
+    # Check here that suppress_store_backend_id == True for inactive stores
+    # and False for active stores
+    assert (
+        in_memory_data_context.stores.get(
+            "inactive_expectations_S3_store"
+        ).store_backend._suppress_store_backend_id
+        is True
+    )
+    assert (
+        in_memory_data_context.stores.get(
+            "inactive_validations_S3_store"
+        ).store_backend._suppress_store_backend_id
+        is True
+    )
+    assert (
+        in_memory_data_context.stores.get(
+            "expectations_S3_store"
+        ).store_backend._suppress_store_backend_id
+        is False
+    )
+    assert (
+        in_memory_data_context.stores.get(
+            "validations_S3_store"
+        ).store_backend._suppress_store_backend_id
+        is False
+    )
+    # InMemoryStoreBackend created for evaluation_parameters_store & inactive_evaluation_parameters_store
+    assert (
+        in_memory_data_context.stores.get(
+            "inactive_evaluation_parameter_store"
+        ).store_backend._suppress_store_backend_id
+        is False
+    )
+    assert (
+        in_memory_data_context.stores.get(
+            "evaluation_parameter_store"
+        ).store_backend._suppress_store_backend_id
+        is False
     )

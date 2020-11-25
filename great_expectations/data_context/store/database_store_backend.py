@@ -35,10 +35,12 @@ class DatabaseStoreBackend(StoreBackend):
         table_name,
         key_columns,
         fixed_length_key=True,
+        suppress_store_backend_id=False,
         manually_initialize_store_backend_id: str = "",
     ):
         super().__init__(
             fixed_length_key=fixed_length_key,
+            suppress_store_backend_id=suppress_store_backend_id,
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
         )
         if not sqlalchemy:
