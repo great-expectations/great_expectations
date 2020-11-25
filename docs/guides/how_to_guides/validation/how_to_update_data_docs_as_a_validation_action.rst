@@ -68,7 +68,7 @@ Steps
 Additional notes
 ----------------
 
-The ``UpdateDataDocsAction`` generates an HTML file for the latest validation result and updates the index page to link to the new file, and re-renders expectation suite pages. It does not perform a full rebuild of Data Docs sites. This means that if you wish to render older Validation Results, you should run full Data Docs rebuild (via CLI's ``great_expectations docs build`` command or by calling ``context.build_data_docs()``).
+The ``UpdateDataDocsAction`` generates an HTML file for the latest validation result and updates the index page to link to the new file, and re-renders pages for the suite used for that validation. It does not perform a full rebuild of Data Docs sites. This means that if you wish to render older Validation Results, you should run full Data Docs rebuild (via CLI's ``great_expectations docs build`` command or by calling ``context.build_data_docs()``).
 
 
 Additional resources
