@@ -4,6 +4,7 @@ from .column_section_renderer import (
     ProfilingResultsColumnSectionRenderer,
     ValidationResultsColumnSectionRenderer,
 )
+from .opsgenie_renderer import OpsgenieRenderer
 from .page_renderer import (
     ExpectationSuitePageRenderer,
     ProfilingResultsPageRenderer,
