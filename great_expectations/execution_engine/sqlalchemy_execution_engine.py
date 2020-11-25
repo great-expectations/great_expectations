@@ -293,8 +293,9 @@ class SqlAlchemyBatchData:
         elif self.sql_engine_dialect.name == "mssql":
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
-            # Note: transforming query to uppercase/lowercase has uninteded consequences (i.e.,
+            # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
             # changing column names), so this is not an option!
+            query = query.string  # extracting string from MSSQLCompiler object
             if "from" in query:
                 strsep = "from"
             else:
