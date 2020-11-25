@@ -24,7 +24,8 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import LegacyDatasource
+from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.exceptions import (
     BatchKwargsError,
     CheckpointError,
@@ -32,7 +33,6 @@ from great_expectations.exceptions import (
     ConfigNotFoundError,
     DataContextError,
 )
-from great_expectations.execution_environment.types import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -293,7 +293,7 @@ def test_data_context_get_validation_result(titanic_data_context):
 
 
 def test_data_context_get_datasource(titanic_data_context):
-    isinstance(titanic_data_context.get_datasource("mydatasource"), Datasource)
+    isinstance(titanic_data_context.get_datasource("mydatasource"), LegacyDatasource)
 
 
 def test_data_context_expectation_suite_delete(empty_data_context):
@@ -1577,7 +1577,7 @@ def test_get_validator_with_instantiated_expectation_suite(
     )
 
     yaml_config = f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -1595,12 +1595,12 @@ data_connectors:
 """
 
     config = yaml.load(yaml_config)
-    context.add_execution_environment(
+    context.add_datasource(
         "my_directory_datasource", config,
     )
 
     my_validator = context.get_validator(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         partition_identifiers={"alphanumeric": "some_file",},
@@ -1623,7 +1623,7 @@ def test_get_validator_with_attach_expectation_suite(
     )
 
     yaml_config = f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -1641,12 +1641,12 @@ data_connectors:
 """
 
     config = yaml.load(yaml_config)
-    context.add_execution_environment(
+    context.add_datasource(
         "my_directory_datasource", config,
     )
 
     my_validator = context.get_validator(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         partition_identifiers={"alphanumeric": "some_file",},

@@ -97,18 +97,13 @@ class ValidationResultsPageRenderer(Renderer):
         ) or validation_results.meta.get("batch_spec", {})
 
         # add datasource key to batch_kwargs if missing
-        if (
-            "datasource" not in batch_kwargs
-            and "execution_environment" not in batch_kwargs
-        ):
+        if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
             # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
             if len(expectation_suite_name.split(".")) == 4:
                 if "batch_kwargs" in validation_results.meta:
                     batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
                 else:
-                    batch_kwargs[
-                        "execution_environment"
-                    ] = expectation_suite_name.split(".")[0]
+                    batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
 
         # Group EVRs by column
         columns = {}
@@ -834,18 +829,13 @@ class ProfilingResultsPageRenderer(Renderer):
         ) or validation_results.meta.get("batch_spec", {})
 
         # add datasource key to batch_kwargs if missing
-        if (
-            "datasource" not in batch_kwargs
-            and "execution_environment" not in batch_kwargs
-        ):
+        if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
             # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
             if len(expectation_suite_name.split(".")) == 4:
                 if "batch_kwargs" in validation_results.meta:
                     batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
                 else:
-                    batch_kwargs[
-                        "execution_environment"
-                    ] = expectation_suite_name.split(".")[0]
+                    batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
 
         # Group EVRs by column
         # TODO: When we implement a ValidationResultSuite class, this method will move there.

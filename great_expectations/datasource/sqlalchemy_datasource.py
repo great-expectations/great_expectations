@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import nested_update
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import LegacyDatasource
 from great_expectations.exceptions import (
     DatasourceInitializationError,
     DatasourceKeyPairAuthBadPassphraseError,
@@ -46,7 +46,7 @@ if sqlalchemy != None:
         )
 
 
-class SqlAlchemyDatasource(Datasource):
+class SqlAlchemyDatasource(LegacyDatasource):
     """
 A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using the following rules:
     - if the batch_kwargs include a table key, the datasource will provide a dataset object connected to that table

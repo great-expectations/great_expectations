@@ -18,14 +18,14 @@ from great_expectations.types import DictDot
 class BatchDefinition(DictDot):
     def __init__(
         self,
-        execution_environment_name: str,
+        datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
         partition_definition: PartitionDefinition,
         batch_spec_passthrough: Optional[dict] = None,
     ):
         self._validate_batch_definition(
-            execution_environment_name=execution_environment_name,
+            datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             partition_definition=partition_definition,
@@ -34,7 +34,7 @@ class BatchDefinition(DictDot):
 
         assert type(partition_definition) == PartitionDefinition
 
-        self._execution_environment_name = execution_environment_name
+        self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_definition = partition_definition
@@ -42,7 +42,7 @@ class BatchDefinition(DictDot):
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
-            "execution_environment_name": self._execution_environment_name,
+            "datasource_name": self._datasource_name,
             "data_connector_name": self._data_connector_name,
             "data_asset_name": self.data_asset_name,
             "partition_definition": repr(self._partition_definition),
@@ -51,20 +51,18 @@ class BatchDefinition(DictDot):
 
     @staticmethod
     def _validate_batch_definition(
-        execution_environment_name: str,
+        datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
         partition_definition: PartitionDefinition,
         # limit: Union[int, None] = None,
     ):
-        if execution_environment_name is None:
-            raise ValueError("A valid execution_environment must be specified.")
-        if execution_environment_name and not isinstance(
-            execution_environment_name, str
-        ):
+        if datasource_name is None:
+            raise ValueError("A valid datasource must be specified.")
+        if datasource_name and not isinstance(datasource_name, str):
             raise TypeError(
-                f"""The type of an execution_environment name must be a string (Python "str").  The type given is
-"{str(type(execution_environment_name))}", which is illegal.
+                f"""The type of an datasource name must be a string (Python "str").  The type given is
+"{str(type(datasource_name))}", which is illegal.
             """
             )
         if data_connector_name is None:
@@ -100,8 +98,8 @@ class BatchDefinition(DictDot):
     #             )
 
     @property
-    def execution_environment_name(self) -> str:
-        return self._execution_environment_name
+    def datasource_name(self) -> str:
+        return self._datasource_name
 
     @property
     def data_connector_name(self) -> str:
@@ -125,7 +123,7 @@ class BatchDefinition(DictDot):
 
     def get_json_dict(self) -> dict:
         return {
-            "execution_environment_name": self.execution_environment_name,
+            "datasource_name": self.datasource_name,
             "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
             "partition_definition": self.partition_definition,
@@ -148,7 +146,7 @@ class BatchDefinition(DictDot):
 
     def __hash__(self) -> int:
         """Overrides the default implementation"""
-        _result_hash: int = hash(self.execution_environment_name) ^ hash(
+        _result_hash: int = hash(self.datasource_name) ^ hash(
             self.data_connector_name
         ) ^ hash(self.data_asset_name)
         if self.definition is not None:
@@ -164,7 +162,7 @@ class BatchRequest(DictDot):
 
     def __init__(
         self,
-        execution_environment_name: str = None,
+        datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
@@ -173,14 +171,14 @@ class BatchRequest(DictDot):
         batch_spec_passthrough: Optional[dict] = None,
     ):
         self._validate_batch_request(
-            execution_environment_name=execution_environment_name,
+            datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             partition_request=partition_request,
             limit=limit,
         )
 
-        self._execution_environment_name = execution_environment_name
+        self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_request = partition_request
@@ -189,8 +187,8 @@ class BatchRequest(DictDot):
         self._batch_spec_passthrough = batch_spec_passthrough
 
     @property
-    def execution_environment_name(self) -> str:
-        return self._execution_environment_name
+    def datasource_name(self) -> str:
+        return self._datasource_name
 
     @property
     def data_connector_name(self) -> str:
@@ -218,18 +216,16 @@ class BatchRequest(DictDot):
 
     @staticmethod
     def _validate_batch_request(
-        execution_environment_name: str,
+        datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
         limit: Union[int, None] = None,
     ):
-        if execution_environment_name and not isinstance(
-            execution_environment_name, str
-        ):
+        if datasource_name and not isinstance(datasource_name, str):
             raise TypeError(
-                f"""The type of an execution_environment name must be a string (Python "str").  The type given is
-"{str(type(execution_environment_name))}", which is illegal.
+                f"""The type of an datasource name must be a string (Python "str").  The type given is
+"{str(type(datasource_name))}", which is illegal.
             """
             )
         if data_connector_name and not isinstance(data_connector_name, str):
@@ -267,7 +263,7 @@ is illegal.
                     "custom_filter_function"
                 ].__name__
         return {
-            "execution_environment_name": self.execution_environment_name,
+            "datasource_name": self.datasource_name,
             "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
             "partition_request": partition_request,
@@ -309,7 +305,7 @@ class BatchMarkers(BatchKwargs):
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
 #  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
-# TODO: <Alex>See also "great_expectations/execution_environment/types/batch_spec.py".</Alex>
+# TODO: <Alex>See also "great_expectations/datasource/types/batch_spec.py".</Alex>
 class Batch(DictDot):
     def __init__(
         self,
@@ -416,3 +412,6 @@ class Batch(DictDot):
             "batch_markers": str(self.batch_markers),
         }
         return json.dumps(json_dict, indent=2)
+
+    def head(self):
+        return self._batch_data.head()

@@ -30,8 +30,8 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
+from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_environment import ExecutionEnvironment
 from great_expectations.util import import_library_module
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
@@ -3043,9 +3043,7 @@ SELECT EXISTS (
 
 
 @pytest.fixture
-def data_context_with_sql_execution_environment_for_testing_get_batch(
-    empty_data_context_v3,
-):
+def data_context_with_sql_datasource_for_testing_get_batch(empty_data_context_v3,):
     context = empty_data_context_v3
 
     db_file = file_relative_path(
@@ -3054,7 +3052,7 @@ def data_context_with_sql_execution_environment_for_testing_get_batch(
 
     config = yaml.load(
         f"""
-class_name: StreamlinedSqlExecutionEnvironment
+class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 """
         + """
@@ -3082,7 +3080,7 @@ introspection:
     )
 
     try:
-        context.add_execution_environment("my_sqlite_db", config)
+        context.add_datasource("my_sqlite_db", config)
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
@@ -3090,19 +3088,19 @@ introspection:
 
 
 @pytest.fixture
-def basic_execution_environment(tmp_path_factory):
+def basic_datasource(tmp_path_factory):
     base_directory: str = str(
-        tmp_path_factory.mktemp("basic_execution_environment_runtime_data_connector")
+        tmp_path_factory.mktemp("basic_datasource_runtime_data_connector")
     )
 
-    basic_execution_environment: ExecutionEnvironment = instantiate_class_from_config(
+    basic_datasource: Datasource = instantiate_class_from_config(
         config=yaml.load(
             f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 data_connectors:
     test_runtime_data_connector:
-        module_name: great_expectations.execution_environment.data_connector
+        module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
         runtime_keys:
         - pipeline_stage_name
@@ -3114,8 +3112,8 @@ execution_engine:
 
     """,
         ),
-        runtime_environment={"name": "my_execution_environment",},
-        config_defaults={"module_name": "great_expectations.execution_environment",},
+        runtime_environment={"name": "my_datasource",},
+        config_defaults={"module_name": "great_expectations.datasource",},
     )
 
-    return basic_execution_environment
+    return basic_datasource

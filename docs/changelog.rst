@@ -4,6 +4,10 @@ X.. _changelog:
 Changelog
 #########
 
+BREAKING CHANGES:
+* **Renamed** Datasource to LegacyDatasource and introduced the new Datasource class. Because most installations rely on one PandasDatasource, SqlAlchemyDatasource, or SparkDFDatasource, most users will not be affected. If you have implemented highly customized Datasource class inheriting from the base class, you may need to update your inheritance. 
+
+
 Develop
 -----------------
 

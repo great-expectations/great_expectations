@@ -73,7 +73,7 @@ store_backend:
     )
 
 
-def test_execution_environment_config(empty_data_context_v3):
+def test_datasource_config(empty_data_context_v3):
     temp_dir = str(tempfile.mkdtemp())
     create_files_in_directory(
         directory=temp_dir,
@@ -94,7 +94,7 @@ def test_execution_environment_config(empty_data_context_v3):
 
     return_obj = empty_data_context_v3.test_yaml_config(
         yaml_config=f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -141,7 +141,7 @@ data_connectors:
 def test_error_states(empty_data_context_v3):
 
     first_config = """
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: NOT_A_REAL_CLASS_NAME
@@ -162,7 +162,7 @@ execution_engine:
     # For good measure, do it again, with a different config and a different type of error
     temp_dir = str(tempfile.mkdtemp())
     second_config = f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -207,7 +207,7 @@ def test_config_variables_in_test_yaml_config(empty_data_context_v3, sa):
     print(context.config_variables)
 
     first_config = """
-class_name: StreamlinedSqlExecutionEnvironment
+class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///${db_file}
 
 introspection:
@@ -218,10 +218,10 @@ introspection:
             n: ${sampling_n}
 """
 
-    my_execution_environment = context.test_yaml_config(first_config)
+    my_datasource = context.test_yaml_config(first_config)
     assert (
         "test_cases_for_sql_data_connector.db"
-        in my_execution_environment.execution_engine.connection_string
+        in my_datasource.execution_engine.connection_string
     )
 
     report_object = context.test_yaml_config(first_config, return_mode="report_object")
@@ -233,19 +233,21 @@ introspection:
     }
 
 
-def test_golden_path_sql_execution_environment_configuration(
+def test_golden_path_sql_datasource_configuration(
     sa, empty_data_context_v3, test_connectable_postgresql_db
 ):
-    """Tests the golden path for setting up a StreamlinedSQLExecutionEnvironment using test_yaml_config"""
+    """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
     context = empty_data_context_v3
 
     os.chdir(context.root_directory)
+
+    # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
     import great_expectations as ge
 
     context = ge.get_context()
 
     yaml_config = """
-class_name: StreamlinedSqlExecutionEnvironment
+class_name: SimpleSqlalchemyDatasource
 credentials:
     drivername: postgresql
     username: postgres
@@ -268,7 +270,7 @@ introspection:
     print(context.datasources)
 
     my_batch = context.get_batch("my_datasource", "whole_table_with_limits", "test_df",)
-    assert len(my_batch.data.fetchall()) == 10
+    # assert len(my_batch.data.fetchall()) == 10
 
     with pytest.raises(KeyError):
         my_batch = context.get_batch(
@@ -276,16 +278,18 @@ introspection:
         )
 
     my_validator = context.get_validator(
-        execution_environment_name="my_datasource",
+        datasource_name="my_datasource",
         data_connector_name="whole_table_with_limits",
         data_asset_name="test_df",
         expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
+    my_evr = my_validator.expect_table_columns_to_match_set(column_set=[])
+    print(my_evr)
 
     # my_evr = my_validator.expect_column_values_to_be_between(
-    #     column="a",
-    #     min_value=10,
-    #     max_value=100,
+    #     column="x",
+    #     min_value=0,
+    #     max_value=4,
     # )
     # assert my_evr.success
 
@@ -293,16 +297,14 @@ introspection:
     # assert my_evr.success
 
 
-def test_golden_path_inferred_asset_pandas_execution_environment_configuration(
+def test_golden_path_inferred_asset_pandas_datasource_configuration(
     empty_data_context_v3, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
     """
     base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_golden_path_pandas_execution_environment_configuration"
-        )
+        tmp_path_factory.mktemp("test_golden_path_pandas_datasource_configuration")
     )
 
     create_files_in_directory(
@@ -332,7 +334,7 @@ def test_golden_path_inferred_asset_pandas_execution_environment_configuration(
     context = ge.get_context()
 
     yaml_config = f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -361,7 +363,7 @@ data_connectors:
     # print(context.datasources)
 
     my_batch = context.get_batch(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         partition_identifiers={"number": "2",},
@@ -393,13 +395,13 @@ data_connectors:
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         my_batch = context.get_batch(
-            execution_environment_name="my_directory_datasource",
+            datasource_name="my_directory_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="DOES_NOT_EXIST",
         )
 
     my_validator = context.get_validator(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
         partition_request={"partition_identifiers": {"number": "3"}},
@@ -422,16 +424,14 @@ data_connectors:
     # assert my_evr.success
 
 
-def test_golden_path_configured_asset_pandas_execution_environment_configuration(
+def test_golden_path_configured_asset_pandas_datasource_configuration(
     empty_data_context_v3, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
     """
     base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_golden_path_pandas_execution_environment_configuration"
-        )
+        tmp_path_factory.mktemp("test_golden_path_pandas_datasource_configuration")
     )
 
     create_files_in_directory(
@@ -463,7 +463,7 @@ def test_golden_path_configured_asset_pandas_execution_environment_configuration
     context = ge.get_context()
 
     yaml_config = f"""
-class_name: ExecutionEnvironment
+class_name: Datasource
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -516,7 +516,7 @@ data_connectors:
     # print(context.datasources)
 
     my_batch = context.get_batch(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         partition_identifiers={"number": "2",},
@@ -548,13 +548,13 @@ data_connectors:
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         my_batch = context.get_batch(
-            execution_environment_name="my_directory_datasource",
+            datasource_name="my_directory_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="DOES_NOT_EXIST",
         )
 
     my_validator = context.get_validator(
-        execution_environment_name="my_directory_datasource",
+        datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="C",
         partition_request={"partition_identifiers": {"year": "2019"}},
