@@ -164,6 +164,7 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
             config_defaults={
                 "module_name": module_name,
                 "filepath_template": filepath_template,
+                "suppress_store_backend_id": True,
             },
         )
         if not index_page_obj:
@@ -180,6 +181,7 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
             config_defaults={
                 "module_name": module_name,
                 "filepath_template": filepath_template,
+                "suppress_store_backend_id": True,
             },
         )
         if not static_assets_obj:
