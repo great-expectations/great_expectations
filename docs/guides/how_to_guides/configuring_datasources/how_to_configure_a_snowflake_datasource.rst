@@ -238,7 +238,7 @@ Steps
                             database: TEST
                             query:
                                 schema: KAGGLE_MOVIE_DATASET
-                                role: ADMIN
+                         
                         introspection:
                             whole_table:
                                 data_asset_name_suffix: __whole_table
@@ -420,4 +420,3 @@ Comments
 
     .. discourse::
         :topic_identifier: 171
-
