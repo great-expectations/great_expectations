@@ -9,19 +9,19 @@ from io import BytesIO
 import pandas as pd
 
 from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.datasource.util import S3Url, hash_pandas_dataframe
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.execution_environment.util import S3Url, hash_pandas_dataframe
 from great_expectations.types import ClassConfig
 
 from ..types.configurations import classConfigSchema
-from .datasource import Datasource
+from .datasource import LegacyDatasource
 
 logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
 
 
-class PandasDatasource(Datasource):
+class PandasDatasource(LegacyDatasource):
     """The PandasDatasource produces PandasDataset objects and supports generators capable of
     interacting with the local filesystem (the default subdir_reader generator), and from
     existing in-memory dataframes.

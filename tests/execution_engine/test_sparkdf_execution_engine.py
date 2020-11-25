@@ -9,15 +9,15 @@ import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch
-from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
-from great_expectations.execution_engine import SparkDFExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.execution_environment.types.batch_spec import (
+from great_expectations.datasource.types.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
+from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.exceptions.metric_exceptions import MetricProviderError
+from great_expectations.execution_engine import SparkDFExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics import (
     ColumnMean,
     ColumnStandardDeviation,

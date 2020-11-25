@@ -7,6 +7,7 @@ from typing import Callable, Optional, Union
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.compat import StringIO
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
@@ -20,6 +21,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
 )
+from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -64,6 +66,66 @@ class DataContextV3(DataContext):
     def config_variables(self):
         # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
         return dict(self._load_config_variables_file())
+
+    # TODO: <Alex>We need to standardize the signatures of methods in all subclasses of BaseDataContext</Alex>
+    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
+    def add_datasource(self, datasource_name, datasource_config):
+        logger.debug(
+            "Starting DataContext.add_datasource for datasource %s" % datasource_name
+        )
+
+        new_datasource = self._build_and_add_datasource(
+            datasource_name, datasource_config
+        )
+        self._save_project_config()
+
+        return new_datasource
+
+    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
+    def _build_and_add_datasource(self, datasource_name, datasource_config):
+        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
+
+        Args:
+            datasource_name (str): a key for the new Datasource in in self._datasources
+            datasource_config (dict): a config for the Datasource to add
+
+        Returns:
+            datasource (Datasource)
+        """
+
+        new_datasource = self._build_datasource_from_config(
+            datasource_name, datasource_config,
+        )
+        self._project_config["datasources"][datasource_name] = datasource_config
+        return new_datasource
+
+    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
+    def _build_datasource_from_config(self, name: str, config: dict,) -> BaseDatasource:
+        module_name: str = "great_expectations.datasource"
+        runtime_environment: dict = {
+            "name": name,
+            "data_context_root_directory": self.root_directory,
+        }
+        new_datasource: BaseDatasource = instantiate_class_from_config(
+            config=config,
+            runtime_environment=runtime_environment,
+            config_defaults={"module_name": module_name},
+        )
+
+        if not new_datasource:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=config["class_name"],
+            )
+
+        if not isinstance(new_datasource, BaseDatasource):
+            raise TypeError(
+                f"Newly instantiated component {name} is not an instance of BaseDatasource. Please check class_name in the config."
+            )
+
+        self._cached_datasources[name] = new_datasource
+        return new_datasource
 
     @property
     def datasources(self):
@@ -161,15 +223,15 @@ class DataContextV3(DataContext):
                 )
 
             elif class_name in [
-                "ExecutionEnvironment",
-                "StreamlinedSqlExecutionEnvironment",
+                "Datasource",
+                "SimpleSqlalchemyDatasource",
             ]:
                 print(
-                    f"\tInstantiating as a ExecutionEnvironment, since class_name is {class_name}"
+                    f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
-                execution_environment_name = name or "my_temp_execution_environment"
-                instantiated_class = self._build_execution_environment_from_config(
-                    execution_environment_name, config,
+                datasource_name = name or "my_temp_datasource"
+                instantiated_class = self._build_datasource_from_config(
+                    datasource_name, config,
                 )
 
             else:
@@ -203,7 +265,7 @@ class DataContextV3(DataContext):
 
     def get_batch(
         self,
-        execution_environment_name: str = None,
+        datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
         *,
@@ -223,7 +285,9 @@ class DataContextV3(DataContext):
         """Get exactly one batch, based on a variety of flexible input types.
 
         Args:
-            execution_environment_name
+            batch_request
+
+            datasource_name
             data_connector_name
             data_asset_name
 
@@ -262,15 +326,17 @@ class DataContextV3(DataContext):
                     f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
                 )
 
-            execution_environment_name = batch_request.execution_environment_name
+            datasource_name = batch_definition.datasource_name
+        elif batch_request:
+            datasource_name = batch_request.datasource_name
         else:
-            execution_environment_name = execution_environment_name
+            datasource_name = datasource_name
 
-        execution_environment = self.datasources[execution_environment_name]
+        datasource = self.datasources[datasource_name]
 
         if batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
-            return execution_environment.get_single_batch_from_batch_request(
+            return datasource.get_single_batch_from_batch_request(
                 batch_request=batch_request
             )
         else:
@@ -283,10 +349,10 @@ class DataContextV3(DataContext):
                     pass
 
                 # Currently, the implementation of splitting and sampling is inconsistent between the
-                # ExecutionEnvironment and StreamlinedSqlExecutionEnvironment classes.  The former communicates these
+                # Datasource and SimpleSqlalchemyDatasource classes.  The former communicates these
                 # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
                 # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
-                # StreamlinedSqlExecutionEnvironment uses "PartitionRequest" to relay the splitting and sampling
+                # SimpleSqlalchemyDatasource uses "PartitionRequest" to relay the splitting and sampling
                 # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
                 # of partitions is implemented using the PartitionQuery class, it will not recognized the keys
                 # representing the splitting and sampling directives and raise an exception.  Additional work is needed
@@ -317,19 +383,19 @@ class DataContextV3(DataContext):
                 partition_request = PartitionRequest(partition_request)
 
             batch_request: BatchRequest = BatchRequest(
-                execution_environment_name=execution_environment_name,
+                datasource_name=datasource_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
                 partition_request=partition_request,
                 batch_spec_passthrough=batch_spec_passthrough,
             )
-            return execution_environment.get_single_batch_from_batch_request(
+            return datasource.get_single_batch_from_batch_request(
                 batch_request=batch_request
             )
 
     def get_validator(
         self,
-        execution_environment_name: str = None,
+        datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
         *,
@@ -354,12 +420,6 @@ class DataContextV3(DataContext):
             expectation_suite_name is not None,
             create_expectation_suite_with_name is not None,
         ]) != 1:
-            print(expectation_suite)
-            print(expectation_suite is not None)
-            print(expectation_suite_name)
-            print(expectation_suite_name is not None)
-            print(create_expectation_suite_with_name)
-            print(create_expectation_suite_with_name is not None)
             raise ValueError(
                 "Exactly one of expectation_suite_name, expectation_suite, or create_expectation_suite_with_name must be specified"
             )
@@ -373,7 +433,7 @@ class DataContextV3(DataContext):
             )
 
         batch = self.get_batch(
-            execution_environment_name=execution_environment_name,
+            datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             batch_request=batch_request,
@@ -391,11 +451,10 @@ class DataContextV3(DataContext):
         )
 
         batch_definition = batch.batch_definition
+        execution_engine = self.datasources[batch_definition.datasource_name].execution_engine
 
         validator = Validator(
-            execution_engine=self.datasources[
-                batch_definition.execution_environment_name
-            ].execution_engine,
+            execution_engine=execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
             data_context=self,
