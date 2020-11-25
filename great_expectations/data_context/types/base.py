@@ -665,7 +665,6 @@ class DataContextConfig(DictDot):
         anonymous_usage_statistics=None,
         commented_map=None,
         datasources=None,
-        execution_environments=None,
     ):
         if commented_map is None:
             commented_map = CommentedMap()
@@ -674,9 +673,6 @@ class DataContextConfig(DictDot):
         if datasources is None:
             datasources = {}
         self.datasources = datasources
-        if execution_environments is None:
-            execution_environments = {}
-        self.execution_environments = execution_environments
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
@@ -728,14 +724,10 @@ class DataContextConfigSchema(Schema):
         validate=lambda x: 0 < x < 100,
         error_messages={"invalid": "config version must " "be a number."},
     )
+    # TODO: <Alex>Proper Schema enforcement for the new Datasource must be implemented.</Alex>
     datasources = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(LegacyDatasourceConfigSchema),
-        allow_none=True,
-    )
-    execution_environments = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(DatasourceConfigSchema),
         allow_none=True,
     )
     expectations_store_name = fields.Str()
