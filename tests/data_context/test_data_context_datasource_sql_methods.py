@@ -10,19 +10,13 @@ from great_expectations.core.batch import (
     PartitionDefinition,
     PartitionRequest,
 )
-from great_expectations.core import (
-    ExpectationSuite
-)
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
 )
-from great_expectations.exceptions.exceptions import (
-    DataContextError
-)
-from great_expectations.marshmallow__shade.exceptions import (
-    ValidationError
-)
+from great_expectations.exceptions.exceptions import DataContextError
+from great_expectations.marshmallow__shade.exceptions import ValidationError
 
 yaml = YAML()
 
@@ -142,6 +136,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
         partition_identifiers={"date": "2020-01-15"},
     )
 
+
 def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
     context = data_context_with_sql_datasource_for_testing_get_batch
     context.create_expectation_suite("my_expectations")
@@ -245,7 +240,9 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
     # Successful specification using parameters without parameter names for the identifying triple
     # In the case of a data_asset containing a single Batch, we don't even need parameters
     context.get_validator(
-        "my_sqlite_db", "whole_table", "table_partitioned_by_date_column__A",
+        "my_sqlite_db",
+        "whole_table",
+        "table_partitioned_by_date_column__A",
         expectation_suite_name="my_expectations",
     )
 
@@ -269,7 +266,10 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
         expectation_suite_name="my_expectations",
     )
 
-def test_get_validator_expectation_suite_options(data_context_with_sql_datasource_for_testing_get_batch):
+
+def test_get_validator_expectation_suite_options(
+    data_context_with_sql_datasource_for_testing_get_batch,
+):
     context = data_context_with_sql_datasource_for_testing_get_batch
     context.create_expectation_suite("some_expectations")
 
@@ -337,10 +337,9 @@ def test_get_validator_expectation_suite_options(data_context_with_sql_datasourc
             expectation_suite={
                 "im": "a",
                 "dictionary": "not a",
-                "ExepctationSuite": False
+                "ExepctationSuite": False,
             },
         )
-
 
 
 def test_get_batch_list_from_new_style_datasource_with_sql_datasource(

@@ -319,7 +319,7 @@ class DataContextV3(DataContext):
         This method attempts returns exactly one batch.
         If 0 or more than batches would be returned, it raises an error.
         """
-        
+
         if batch_request:
             if not isinstance(batch_request, BatchRequest):
                 raise TypeError(
@@ -412,11 +412,17 @@ class DataContextV3(DataContext):
         splitter_kwargs: dict = None,
         **kwargs,
     ) -> Validator:
-        if sum(bool(x) for x in [
-            expectation_suite is not None,
-            expectation_suite_name is not None,
-            create_expectation_suite_with_name is not None,
-        ]) != 1:
+        if (
+            sum(
+                bool(x)
+                for x in [
+                    expectation_suite is not None,
+                    expectation_suite_name is not None,
+                    create_expectation_suite_with_name is not None,
+                ]
+            )
+            != 1
+        ):
             raise ValueError(
                 "Exactly one of expectation_suite_name, expectation_suite, or create_expectation_suite_with_name must be specified"
             )
@@ -448,7 +454,9 @@ class DataContextV3(DataContext):
         )
 
         batch_definition = batch.batch_definition
-        execution_engine = self.datasources[batch_definition.datasource_name].execution_engine
+        execution_engine = self.datasources[
+            batch_definition.datasource_name
+        ].execution_engine
 
         validator = Validator(
             execution_engine=execution_engine,
