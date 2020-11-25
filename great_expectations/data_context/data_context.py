@@ -315,7 +315,7 @@ class BaseDataContext:
             new_store = instantiate_class_from_config(
                 config=store_config,
                 runtime_environment={"root_directory": self.root_directory,},
-                config_defaults={"module_name": module_name},
+                config_defaults={"module_name": module_name, "store_name": store_name},
             )
         except ge_exceptions.DataContextError as e:
             new_store = None

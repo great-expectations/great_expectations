@@ -23,16 +23,22 @@ class Store:
 
     _key_class = DataContextKey
 
-    def __init__(self, store_backend=None, runtime_environment=None):
+    def __init__(
+        self, store_backend=None, runtime_environment=None, store_name="no_store_name"
+    ):
         """Runtime environment may be necessary to instantiate store backend elements."""
         if store_backend is None:
             store_backend = {"class_name": "InMemoryStoreBackend"}
+        self._store_name = store_name
         logger.debug("Building store_backend.")
         module_name = "great_expectations.data_context.store"
         self._store_backend = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment or {},
-            config_defaults={"module_name": module_name},
+            config_defaults={
+                "module_name": module_name,
+                "store_name": self._store_name,
+            },
         )
         if not self._store_backend:
             raise ClassInstantiationError(
@@ -57,6 +63,10 @@ class Store:
     @property
     def store_backend(self):
         return self._store_backend
+
+    @property
+    def store_name(self):
+        return self._store_name
 
     @property
     def store_backend_id(self) -> str:
