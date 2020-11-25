@@ -257,10 +257,10 @@ class DataContextV3(DataContext):
         """
         
         if batch_request:
-            if not isinstance(batch_definition, BatchDefinition):
-                raise TypeError(
-                    f"batch_definition must be an instance of BatchDefinition object, not {type(batch_definition)}"
-                )
+            if not isinstance(batch_request, BatchRequest):
+                # Attempt to convert to a typed BatchRequest object
+                batch_request = BatchRequest(**batch_request)
+
             execution_environment_name = batch_request.execution_environment_name
         else:
             execution_environment_name = execution_environment_name
