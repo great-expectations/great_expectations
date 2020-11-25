@@ -25,7 +25,6 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
 
-
         To add a Snowflake datasource, for all authentication mechanisms:
 
         #. **Install the required modules**
@@ -219,33 +218,31 @@ Steps
 
         #.  **Create or copy a yaml config**
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlDataSource`` with associated credentials.  Username, password and host are set as environment variables, and database and query are set as strings.
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials using username and password authentication.  Username, password and host are set as environment variables, and database and query are set as strings.
+                ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use in connecting data living in a sql database. More information on ``Datasources``
+                in GE 0.13 can found in :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+                This example also uses ``introspection`` to configure the datasource, where each table in the database is associated with its own ``data_asset``.  A deeper explanation on the different modes of building ``data_asset`` from data (``introspective`` / ``inferred`` vs ``configured``) can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
-            **Note**: The ``SimpleSqlDataSource`` is related to ``DataSource`` but automatically configures a ``SqlDataConnector``. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`. Examples of yaml configurations for Key pair and SSO authentication can be found in the **Additional Notes** section below.
 
-            **Note**: blurb on introspection ;
-            **Note**: blurb on query. 
+                .. code-block:: python
 
-            .. code-block:: python
-
-                config = f"""
-                    class_name: SimpleSqlDataSource
-                    credentials:
-                        drivername: snowflake
-                        username: ${snowflake_username}
-                        password: ${snowflake_pw}
-                        host: ${snowflake_host}
-                        database: TEST
-                        query:
-                            schema: KAGGLE_MOVIE_DATASET
-                            warehouse: COMPUTE_WH
-                            role: TESTER
-                    introspection:
-                        whole_table:
-                            data_asset_name_suffix: __whole_table
-                    """
+                    config = f"""
+                        class_name: SimpleSqlalchemyDatasource
+                        credentials:
+                            drivername: snowflake
+                            username: ${snowflake_username}
+                            password: ${snowflake_pw}
+                            host: ${snowflake_host}
+                            database: TEST
+                            query:
+                                schema: KAGGLE_MOVIE_DATASET
+                                role: ADMIN
+                        introspection:
+                            whole_table:
+                                data_asset_name_suffix: __whole_table
+                        """
 
         #. **Run context.test_yaml_config.**
 
@@ -289,7 +286,7 @@ Steps
                 3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance
                 4        5  Father of the Bride Part II (1995)                                       Comedy
 
-            This means all has went well and you can proceed with exploring the data sets in your new filesystem-backed Pandas data source.
+            This means all has went well and you can proceed with exploring the data sets in your new Snowflake datasource.
 
             **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
@@ -358,6 +355,64 @@ Additional Notes
         alter account set allow_id_token = true;
 
     And make sure the version of your ``snowflake-connector-python`` library is ``>=2.2.8``
+
+
+#.
+    **Single sign-on (SSO) Authentication for Experimental API (0.13)**
+
+    Add ``connect_args`` and ``authenticator`` to ``credentials`` in the yaml configuration.
+    The value for ``authenticator`` can be ``externalbrowser``, or a valid okta URL.
+
+    .. code-block:: python
+
+        config = f"""
+            class_name: SimpleSqlalchemyDatasource
+            credentials:
+                drivername: snowflake
+                username: ${snowflake_username}
+                host: ${snowflake_host}
+                database: TEST
+                connect_args:
+                    authenticator: externalbrowser
+                query:
+                    schema: KAGGLE_MOVIE_DATASET
+                    warehouse: COMPUTE_WH
+                    role: ADMIN
+            introspection:
+                whole_table:
+                    data_asset_name_suffix: __whole_table
+            """
+
+    **Note** This feature is still experimental, so please leave us a comment below if you run into any problems.
+
+#.
+    **Key pair Authentication for Experimental API (0.13)**
+
+    Add ``private_key_path`` and optional ``private_key_passphrase`` to ``credentials`` in the yaml configuration.
+
+        - ``private_key_path`` will need to be set to the path to the private key used for authentication ( ie ``~/.ssh/my_snowflake.p8`` ).
+        - ``private_key_passphrase``: is the optional passphrase used for authentication with private key ( ie ``mypass`` ).
+
+        .. code-block:: python
+
+            config = f"""
+                class_name: SimpleSqlalchemyDatasource
+                credentials:
+                    drivername: snowflake
+                    username: ${snowflake_username}
+                    private_key_path: ~/.ssh/my_snowflake.p8
+                    private_key_passphrase: mypass
+                    host: ${snowflake_host}
+                    database: TEST
+                    query:
+                        schema: KAGGLE_MOVIE_DATASET
+                        warehouse: COMPUTE_WH
+                        role: ADMIN
+                introspection:
+                    whole_table:
+                        data_asset_name_suffix: __whole_table
+                """
+    **Note** This feature is still experimental, so please leave us a comment below if you run into any problems.
 
 --------
 Comments
