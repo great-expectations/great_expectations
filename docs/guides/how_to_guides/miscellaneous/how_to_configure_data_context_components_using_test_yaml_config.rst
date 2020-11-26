@@ -3,7 +3,7 @@
 How to configure DataContext components using ``test_yaml_config``
 ==================================================================
 
-``test_yaml_config`` is a convenience method for configuring the moving parts of a Great Expectations deployment. It allows you to quickly test out configs for Datasources and Stores. In the future, we will also enable similar a workflow for configuring Checkpoints. For many deployments of Great Expectations, these components (plus Expectations) are the only ones you'll need.
+``test_yaml_config`` is a convenience method for configuring the moving parts of a Great Expectations deployment. It allows you to quickly test out configs for Datasources and Stores. In the future, we will also enable a similar workflow for configuring Checkpoints. For many deployments of Great Expectations, these components (plus Expectations) are the only ones you'll need.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -135,7 +135,7 @@ Steps
 
 #. **Save the config.**
 
-    Once you are satisfied with your config, you can make it a permanent part of your Great Expectations setup by copying it into the appropriate section of your `great_expectations/great_expectations.yml` file.
+    Once you are satisfied with your config, you can make it a permanent part of your Great Expectations setup by copying it into the appropriate section of your ``great_expectations/great_expectations.yml`` file.
 
     .. code-block:: yaml
 
