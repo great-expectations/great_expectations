@@ -12,7 +12,7 @@ This guide will help you implement renderers for your custom Expectations, allow
 
     - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
-    - Implemented a :ref:`custom Expectation <how_to_guides__creating_and_editing_expectations__how_to_create_modular_expectations>`.
+    - Implemented a :ref:`custom Expectation <how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations>`.
     - Set up a :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>` site.
     - Configured an :ref:`Expectations Suite <tutorials__getting_started__create_your_first_expectations>` containing your custom Expectation.
     - Generated one Validation Result (from running a :ref:`Checkpoint <how_to_guides__validation__how_to_create_a_new_checkpoint>` or :ref:`Validation Operator <how_to_guides__validation__how_to_add_a_validation_operator>`) containing your custom Expectation
