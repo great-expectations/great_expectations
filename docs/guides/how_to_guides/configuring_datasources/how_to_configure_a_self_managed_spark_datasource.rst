@@ -117,7 +117,7 @@ Additional Notes
 To provide custom configuration options either:
 
 1. Create curated `spark-defaults.conf` configuration file in `$SPARK_HOME/conf` directory
-2. Provide `spark_context` dictionary to Datasource config:
+2. Provide `spark_config` dictionary to Datasource config:
 
     .. code-block:: yaml
 
@@ -133,7 +133,7 @@ To provide custom configuration options either:
                   ${query_name}: ${spark_sql_query}
             module_name: great_expectations.datasource
             class_name: SparkDFDatasource
-            spark_context:
+            spark_config:
                 spark.master: local[*]
 
 Full list of Spark configuration options is available here: [https://spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html)
