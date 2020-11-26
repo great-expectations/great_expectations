@@ -244,23 +244,25 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
                 ]
             )
 
-        quantile_range_table = RenderedTableContent(**{
-            "content_block_type": "table",
-            "header_row": table_header_row,
-            "table": table_rows,
-            "styling": {
-                "body": {
-                    "classes": [
-                        "table",
-                        "table-sm",
-                        "table-unbordered",
-                        "col-4",
-                        "mt-2",
-                    ],
+        quantile_range_table = RenderedTableContent(
+            **{
+                "content_block_type": "table",
+                "header_row": table_header_row,
+                "table": table_rows,
+                "styling": {
+                    "body": {
+                        "classes": [
+                            "table",
+                            "table-sm",
+                            "table-unbordered",
+                            "col-4",
+                            "mt-2",
+                        ],
+                    },
+                    "parent": {"styles": {"list-style-type": "none"}},
                 },
-                "parent": {"styles": {"list-style-type": "none"}},
-            },
-        })
+            }
+        )
 
         return [expectation_string_obj, quantile_range_table]
 
