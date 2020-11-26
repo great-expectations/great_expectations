@@ -11,6 +11,8 @@ Metrics are the core tool used to validate data. When an Expectation should be e
 
 Metrics are produced using ExecutionEngine-specific logic that is defined in a ``MetricProvider``. When a MetricProvider class is first encountered, Great Expectations will register the metric and any methods that it defines as able to produce Metrics.
 
+.. _reference__core_concepts__metrics__naming_conventions:
+
 Metrics can have any name. However, for the "core" Great Expectations metrics, we use the following conventions:
 
 - For aggregate metrics, such as the mean value of a column, we use describe the domain and name of the statistic, such as ``column.mean`` or ``column.max``.
