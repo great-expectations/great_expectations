@@ -8,6 +8,18 @@ Develop
 -----------------
 * [ENHANCEMENT] Updated the BigQuery Integration to create a view instead of a table.
 
+0.12.10
+-----------------
+* [BUGFIX] Update requirements.txt for ruamel.yaml to >=0.16 - #2048 (thanks @mmetzger!)
+* [BUGFIX] Added option to return scalar instead of list from query store #2060
+* [BUGFIX] Add missing markdown_content_block_container #2063
+* [BUGFIX] Fixed a divided by zero error for checkpoints on empty expectation suites #2064
+* [BUGFIX] Updated sort to correctly return partial unexpected results when expect_column_values_to_be_of_type has more than one unexpected type #2074
+* [BUGFIX] Resolve Data Docs resource identifier issues to speed up UpdateDataDocs action #2078
+* [DOCS] Updated contribution changelog location #2051 (thanks @shapiroj18!)
+* [DOCS] Adding Airflow operator and Astrononomer deploy guides #2070
+* [DOCS] Missing image link to bigquery logo #2071 (thanks @nelsonauner!)
+
 0.12.9
 -----------------
 * [BUGFIX] Fixed the import of s3fs to use the optional import pattern - issue #2053
