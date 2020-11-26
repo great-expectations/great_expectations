@@ -510,7 +510,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
             Add the following attributes to your Expectation class:
 
-           - **Metric Dependencies** - A tuple consisting of the names of all metrics necessary to evaluate the Expectation.
+           - **Metric Dependencies** - A tuple consisting of the names of all metrics necessary to evaluate the Expectation. Using this shortcut tuple will provide the dependent metric with the same domain kwargs and value kwargs as the Expectation.
            - **Success Keys** - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
            - **Default Kwarg Values (Optional)**  -  Default values for success keys and the defined domain, among other values.
 
@@ -532,10 +532,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
                   "max_value": None,
                   "strict_min": None,
                   "strict_max": None,
-                  "mostly": 1,
-                  "result_format": "BASIC",
-                  "include_config": True,
-                  "catch_exceptions": False,
+                  "mostly": 1
               }
 
 

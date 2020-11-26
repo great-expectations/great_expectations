@@ -892,16 +892,21 @@ class ExpectationConfiguration(SerializableDictDot):
         }
 
     def get_domain_kwargs(self):
-        impl = get_expectation_impl(self.expectation_type)
-        if impl is not None:
-            domain_keys = impl.domain_keys
-            default_kwarg_values = impl.default_kwarg_values
-        else:
-            expectation_kwargs_dict = self.kwarg_lookup_dict.get(
-                self.expectation_type, None
-            )
-            if expectation_kwargs_dict is None:
+        expectation_kwargs_dict = self.kwarg_lookup_dict.get(
+            self.expectation_type, None
+        )
+        if expectation_kwargs_dict is None:
+            impl = get_expectation_impl(self.expectation_type)
+            if impl is not None:
+                domain_keys = impl.domain_keys
+                default_kwarg_values = impl.default_kwarg_values
+            else:
                 expectation_kwargs_dict = self._get_default_custom_kwargs()
+                default_kwarg_values = expectation_kwargs_dict.get(
+                    "default_kwarg_values", dict()
+                )
+                domain_keys = expectation_kwargs_dict["domain_kwargs"]
+        else:
             default_kwarg_values = expectation_kwargs_dict.get(
                 "default_kwarg_values", dict()
             )
@@ -918,16 +923,21 @@ class ExpectationConfiguration(SerializableDictDot):
         return domain_kwargs
 
     def get_success_kwargs(self):
-        impl = get_expectation_impl(self.expectation_type)
-        if impl is not None:
-            success_keys = impl.success_keys
-            default_kwarg_values = impl.default_kwarg_values
-        else:
-            expectation_kwargs_dict = self.kwarg_lookup_dict.get(
-                self.expectation_type, None
-            )
-            if expectation_kwargs_dict is None:
+        expectation_kwargs_dict = self.kwarg_lookup_dict.get(
+            self.expectation_type, None
+        )
+        if expectation_kwargs_dict is None:
+            impl = get_expectation_impl(self.expectation_type)
+            if impl is not None:
+                success_keys = impl.success_keys
+                default_kwarg_values = impl.default_kwarg_values
+            else:
                 expectation_kwargs_dict = self._get_default_custom_kwargs()
+                default_kwarg_values = expectation_kwargs_dict.get(
+                    "default_kwarg_values", dict()
+                )
+                success_keys = expectation_kwargs_dict["success_kwargs"]
+        else:
             default_kwarg_values = expectation_kwargs_dict.get(
                 "default_kwarg_values", dict()
             )
@@ -941,20 +951,26 @@ class ExpectationConfiguration(SerializableDictDot):
         return success_kwargs
 
     def get_runtime_kwargs(self, runtime_configuration=None):
-        impl = get_expectation_impl(self.expectation_type)
-        if impl is not None:
-            runtime_keys = impl.runtime_keys
-            default_kwarg_values = impl.default_kwarg_values
-        else:
-            expectation_kwargs_dict = self.kwarg_lookup_dict.get(
-                self.expectation_type, None
-            )
-            if expectation_kwargs_dict is None:
+        expectation_kwargs_dict = self.kwarg_lookup_dict.get(
+            self.expectation_type, None
+        )
+        if expectation_kwargs_dict is None:
+            impl = get_expectation_impl(self.expectation_type)
+            if impl is not None:
+                runtime_keys = impl.runtime_keys
+                default_kwarg_values = impl.default_kwarg_values
+            else:
                 expectation_kwargs_dict = self._get_default_custom_kwargs()
+                default_kwarg_values = expectation_kwargs_dict.get(
+                    "default_kwarg_values", dict()
+                )
+                runtime_keys = self.runtime_kwargs
+        else:
             default_kwarg_values = expectation_kwargs_dict.get(
                 "default_kwarg_values", dict()
             )
             runtime_keys = self.runtime_kwargs
+
         success_kwargs = self.get_success_kwargs()
         lookup_kwargs = deepcopy(self.kwargs)
         if runtime_configuration:
