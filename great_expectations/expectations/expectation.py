@@ -1,6 +1,6 @@
 import logging
 import re
-from abc import ABC, ABCMeta
+from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
@@ -60,9 +60,7 @@ class MetaExpectation(ABCMeta):
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
         if not isabstract(newclass):
-            expectation_type = getattr(newclass, "expectation_type", None)
-            if expectation_type is None:
-                newclass.expectation_type = camel_to_snake(clsname)
+            newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
         newclass._register_renderer_functions()
         default_kwarg_values = dict()
@@ -124,7 +122,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
         "result_format": "BASIC",
     }
     legacy_method_parameters = legacy_method_parameters
-    default_kwarg_values = {}
 
     def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
         if configuration is not None:
@@ -142,6 +139,25 @@ class Expectation(ABC, metaclass=MetaExpectation):
             register_renderer(
                 object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj
             )
+
+    @abstractmethod
+    def get_validation_dependencies(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        raise NotImplementedError
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -669,22 +685,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
             del all_args["meta"]
         else:
             meta = None
-
-        # all_args = recursively_convert_to_json_serializable(all_args)
-        #
-        # # Patch in PARAMETER args, and remove locally-supplied arguments
-        # # This will become the stored config
-        # expectation_args = copy.deepcopy(all_args)
-        #
-        # if self._expectation_suite.evaluation_parameters:
-        #     evaluation_args = build_evaluation_parameters(
-        #         expectation_args,
-        #         self._expectation_suite.evaluation_parameters,
-        #         self._config.get("interactive_evaluation", True)
-        #     )
-        # else:
-        #     evaluation_args = build_evaluation_parameters(
-        #         expectation_args, None, self._config.get("interactive_evaluation", True))
 
         # Construct the expectation_config object
         return ExpectationConfiguration(

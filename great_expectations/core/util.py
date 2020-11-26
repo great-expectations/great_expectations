@@ -171,6 +171,9 @@ def ensure_json_serializable(data):
     import numpy as np
     import pandas as pd
 
+    if isinstance(data, SerializableDictDot):
+        return
+
     try:
         if not isinstance(data, list) and pd.isna(data):
             # pd.isna is functionally vectorized, but we only want to apply this to single objects
