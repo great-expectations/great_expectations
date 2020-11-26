@@ -1,12 +1,14 @@
+.. _how_to_guides__creating_and_editing_expectations__how_to_create_modular_expectations:
+
 How to define a custom Expectation type
 _________________________________________________________________
 
-This guide will walk you through the process of creating your own Modular Expectations in 6 simple steps! 
+This guide will walk you through the process of creating your own Modular Expectations in 6 simple steps!
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-  
+
 Modular Expectations are new in version 0.13. They utilize a class structure that is significantly easier to build than
 ever before and are explained below!
 
@@ -18,14 +20,14 @@ _____
 
    In the new Modular Expectation design, Expectations rely on Metrics defined by separate MetricProvider Classes, which are then referenced within the Expectation and used for computation. For more on Metric Naming Conventions, look at :ref:`Metric Naming Conventions <core_concepts>`
 
-   Once you’ve decided on an Expectation to implement, think of the different aggregations, mappings, or metadata you’ll need to validate your data within the Expectation - each of these will be a separate metric that must be implemented prior to validating your Expectation. 
+   Once you’ve decided on an Expectation to implement, think of the different aggregations, mappings, or metadata you’ll need to validate your data within the Expectation - each of these will be a separate metric that must be implemented prior to validating your Expectation.
 
    Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the GE framework and can be readily deployed.
 
 
 #. **Implement your Metric**
 
-   If your metric does not yet exist within the framework, you will need to implement it yourself within a new file - a task that is quick and simple within the new modular framework. 
+   If your metric does not yet exist within the framework, you will need to implement it yourself within a new file - a task that is quick and simple within the new modular framework.
 
    Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark dialects. (Other implementations can be found in the dictionary of metrics).
 
@@ -69,16 +71,16 @@ _____
 
 3. **Define Parameters**
 
-   We have already reached the point where we can start building our Expectation! 
+   We have already reached the point where we can start building our Expectation!
 
    The structure of a Modular Expectation now exists within its own specialized class - indicating it will usually exist in a separate file from the Metric. This structure has 3 fundamental components: Expectation Parameters, Dependency Validation, and Expectation Validation. In this step, we will address setting up our parameters.
 
    The parameters of an Expectation consist of the following:
-   
+
    - **Metric Dependencies** - A tuple consisting of the names of all metrics necessary to evaluate the Expectation.
    - **Success Keys** - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
    - **Default Kwarg Values (Optional)**  -  Default values for success keys and the defined domain, among other values.
-   
+
    An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class and building our Expectation in a separate file from our Metric):
 
 
@@ -102,11 +104,11 @@ _____
           "include_config": True,
           "catch_exceptions": False,
       }
-      
+
 
 4. **Validate Configuration**
 
-   We have almost reached the end of our journey in implementing an Expectation! Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a validate_configuration method. 
+   We have almost reached the end of our journey in implementing an Expectation! Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a validate_configuration method.
 
    In this method, the user provides a configuration and we check that certain conditions are satisfied by the configuration. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold:
 
