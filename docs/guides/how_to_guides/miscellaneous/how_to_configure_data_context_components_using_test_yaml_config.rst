@@ -1,4 +1,4 @@
-.. _how_to_guides__miscellaneous__how_to_configure_a_multipartitionfiledataconnector:
+.. _how_to_guides__miscellaneous__how_to_configure_datacontext_components_using_test_yaml_config:
 
 How to configure DataContext components using ``test_yaml_config``
 ==================================================================
