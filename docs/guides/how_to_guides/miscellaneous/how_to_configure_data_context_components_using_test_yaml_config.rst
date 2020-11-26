@@ -119,6 +119,8 @@ Steps
 
     From here, iterate by editing your config and re-running ``test_yaml_config``, adding config blocks for additional introspection, data assets, sampling, etc. Please see <doc> for options and ideas.
 
+#. **(Optional:) Test additional methods.**
+
     Note that when ``test_yaml_config`` runs successfully, it adds the specified Datasource to your DataContext. This means that you can also test other methods, such as ``context.get_validator``, right within your notebook:
 
     .. code-block:: python
@@ -134,6 +136,38 @@ Steps
 #. **Save the config.**
 
     Once you are satisfied with your config, you can make it a permanent part of your Great Expectations setup by copying it into the appropriate section of your `great_expectations/great_expectations.yml` file.
+
+    .. code-block:: yaml
+
+        datasources:
+            my_datasource:
+                class_name: SimpleSqlalchemyDatasource
+                credentials:
+                    drivername: postgresql
+                    username: postgres
+                    password: ""
+                    host: localhost
+                    port: 5432
+                    database: test_ci
+
+                introspection:
+                    whole_table: {}
+
+#. **Check your modified config.**
+
+    In a fresh notebook, test your edited config file by re-instantiating your DataContext:
+
+    .. code-block:: python
+
+        context = ge.get_context()
+
+        validator = context.get_validator(
+            datasource_name="my_datasource",
+            data_connector_name="whole_table",
+            data_asset_name="my_table",
+            create_expectation_suite_with_name="my_expectation_suite",
+        )
+        validator.expect_column_values_to_be_in_set("c1", [4,5,6])
 
 
 Additional Resources
