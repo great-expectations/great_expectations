@@ -294,7 +294,7 @@ All the log files will be mapped to a single data_asset named ``my_bucket``.
 
 
 
-Example 6: Redundant information in the naming convention (random hash in name)
+Example 6: Random information in the naming convention
 -------------------------------------------------------------------------------
 
 In the following example, files are placed in folders according to the date of creation, and given a random hash value in their name.
