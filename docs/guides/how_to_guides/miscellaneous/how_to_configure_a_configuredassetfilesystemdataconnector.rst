@@ -8,7 +8,6 @@ This guide demonstrates how to configure a ``ConfiguredAssetFilesystemDataConnec
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-  - Set up a DataContext
   - Understand the basics of ExecutionEnvironments
   - Learned how to use ``test_yaml_config``
 
