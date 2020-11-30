@@ -14,7 +14,7 @@ This guide demonstrates how to configure a ``ConfiguredAssetFilesystemDataConnec
 
 Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data:
 
-    - A ``ConfiguredAssetFilesSystemDataconnector`` allows users to have the most fine-tuning, and requires an explicit listing of each DataAsset you want to connect to.
+    - A ``ConfiguredAssetFilesSystemDataconnector`` requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
     - An ``InferredAssetFileSystemDataConnector`` infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
 If you're not sure which one to use, please check out :ref:`Which DataConnector should I use? <which_data_connector_should_i_use>`
