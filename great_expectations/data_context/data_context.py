@@ -468,7 +468,8 @@ class BaseDataContext:
             self._project_config_with_variables_substituted.expectations_store_name
         ]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
-            return expectations_store.store_backend_id
+            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
+            return expectations_store.store_backend_id_warnings_suppressed
 
         # Otherwise choose the id stored in the project_config
         else:

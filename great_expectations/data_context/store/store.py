@@ -77,6 +77,15 @@ class Store:
         """
         return self._store_backend.store_backend_id
 
+    @property
+    def store_backend_id_warnings_suppressed(self):
+        """
+        Report the store_backend_id of the currently-configured StoreBackend, suppressing warnings for invalid configurations.
+        Returns:
+            store_backend_id which is a UUID(version=4)
+        """
+        return self._store_backend.store_backend_id_warnings_suppressed
+
     # noinspection PyMethodMayBeStatic
     def serialize(self, key, value):
         return value

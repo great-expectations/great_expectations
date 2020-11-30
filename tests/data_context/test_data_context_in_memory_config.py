@@ -453,3 +453,135 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
         ).store_backend._suppress_store_backend_id
         is False
     )
+
+
+@mock_s3
+def test_inaccessible_active_bucket_error_messages(caplog):
+    """
+    What does this test and why?
+
+    Trying to create a data context with unreachable ACTIVE stores should show an error message once per store
+    e.g. Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store
+    Active stores are those named in:
+    "expectations_store_name", "validations_store_name", "evaluation_parameter_store_name"
+    """
+
+    bucket = "leakybucket"
+    expectations_store_prefix = "expectations_store_prefix"
+    validations_store_prefix = "validations_store_prefix"
+    data_docs_store_prefix = "data_docs_store_prefix"
+
+    # Create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    # Create a DataContext
+    # Add inactive stores
+    inactive_bucket = "inactive_leakybucket"
+    stores = {
+        "expectations_S3_store": {
+            "class_name": "ExpectationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": inactive_bucket,
+                "prefix": expectations_store_prefix,
+            },
+        },
+        "validations_S3_store": {
+            "class_name": "ValidationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": inactive_bucket,
+                "prefix": validations_store_prefix,
+            },
+        },
+        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+    }
+    in_memory_data_context_project_config = build_in_memory_data_context_project_config(
+        bucket="leakybucket",
+        expectations_store_prefix=expectations_store_prefix,
+        validations_store_prefix=validations_store_prefix,
+        data_docs_store_prefix=data_docs_store_prefix,
+        stores=stores,
+    )
+    _ = BaseDataContext(project_config=in_memory_data_context_project_config)
+    assert len(caplog.records) == 2
+    assert (
+        caplog.records[0].message
+        == "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store"
+    )
+    assert (
+        caplog.records[1].message
+        == "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validations_S3_store"
+    )
+
+
+@mock_s3
+def test_inaccessible_inactive_bucket_no_error_messages(caplog):
+    """
+    What does this test and why?
+
+    Trying to create a data context with unreachable INACTIVE stores should show no warning messages
+    Inactive stores are those NOT named in:
+    "expectations_store_name", "validations_store_name", "evaluation_parameter_store_name"
+    """
+
+    bucket = "leakybucket"
+    expectations_store_prefix = "expectations_store_prefix"
+    validations_store_prefix = "validations_store_prefix"
+    data_docs_store_prefix = "data_docs_store_prefix"
+
+    # Create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    # Create a DataContext
+    # Add inactive stores
+    inactive_bucket = "inactive_leakybucket"
+    stores = {
+        "expectations_S3_store": {
+            "class_name": "ExpectationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": bucket,
+                "prefix": expectations_store_prefix,
+            },
+        },
+        "validations_S3_store": {
+            "class_name": "ValidationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": bucket,
+                "prefix": validations_store_prefix,
+            },
+        },
+        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "inactive_expectations_S3_store": {
+            "class_name": "ExpectationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": inactive_bucket,
+                "prefix": expectations_store_prefix,
+            },
+        },
+        "inactive_validations_S3_store": {
+            "class_name": "ValidationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": inactive_bucket,
+                "prefix": validations_store_prefix,
+            },
+        },
+        "inactive_evaluation_parameter_store": {
+            "class_name": "EvaluationParameterStore"
+        },
+    }
+    in_memory_data_context_project_config = build_in_memory_data_context_project_config(
+        bucket="leakybucket",
+        expectations_store_prefix=expectations_store_prefix,
+        validations_store_prefix=validations_store_prefix,
+        data_docs_store_prefix=data_docs_store_prefix,
+        stores=stores,
+    )
+    _ = BaseDataContext(project_config=in_memory_data_context_project_config)
+    assert len(caplog.records) == 0

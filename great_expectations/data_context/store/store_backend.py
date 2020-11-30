@@ -22,6 +22,7 @@ class StoreBackend(metaclass=ABCMeta):
     IGNORED_FILES = [".ipynb_checkpoints"]
     STORE_BACKEND_ID_KEY = (".ge_store_backend_id",)
     STORE_BACKEND_ID_PREFIX = "store_backend_id = "
+    STORE_BACKEND_INVALID_CONFIGURATION_ID = "00000000-0000-0000-0000-00000000e003"
 
     def __init__(
         self,
@@ -45,20 +46,23 @@ class StoreBackend(metaclass=ABCMeta):
     def store_name(self):
         return self._store_name
 
-    @property
-    def store_backend_id(self) -> str:
+    def _construct_store_backend_id(self, suppress_warning: bool = False) -> str:
         """
         Create a store_backend_id if one does not exist, and return it if it exists
         If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id
         and there is not already an existing store_backend_id then the store_backend_id
         from param manually_initialize_store_backend_id is used to create it.
+        Args:
+            suppress_warning: boolean flag for whether warnings are logged
+
         Returns:
             store_backend_id which is a UUID(version=4)
         """
         if self._suppress_store_backend_id:
-            logger.warning(
-                f"You are attempting to access store_backend_id of a store or store_backend named {self.store_name} that has been explicitly suppressed."
-            )
+            if not suppress_warning:
+                logger.warning(
+                    f"You are attempting to access store_backend_id of a store or store_backend named {self.store_name} that has been explicitly suppressed."
+                )
             return
         try:
             try:
@@ -77,10 +81,19 @@ class StoreBackend(metaclass=ABCMeta):
                 )
                 return store_id
         except Exception:
-            logger.warning(
-                f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}"
-            )
-            return "00000000-0000-0000-0000-00000000e003"
+            if not suppress_warning:
+                logger.warning(
+                    f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}"
+                )
+            return self.STORE_BACKEND_INVALID_CONFIGURATION_ID
+
+    @property
+    def store_backend_id(self):
+        return self._construct_store_backend_id(suppress_warning=False)
+
+    @property
+    def store_backend_id_warnings_suppressed(self):
+        return self._construct_store_backend_id(suppress_warning=True)
 
     def get(self, key, **kwargs):
         self._validate_key(key)
