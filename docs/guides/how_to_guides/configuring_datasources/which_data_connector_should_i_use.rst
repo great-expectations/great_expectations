@@ -1,9 +1,9 @@
-.. _which_data_connector_should_i_use:
+.. _which_data_connector_to_use:
 
-Which ``DataConnector`` Should I Use?
+How to choose which ``DataConnector`` to use:
 =======================================================
 
-Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data:
+Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk, but also things like S3 object stores, etc:
 
     - A ``ConfiguredAssetFilesSystemDataconnector`` allows users to have the most fine-tuning, and requires an explicit listing of each DataAsset you want to connect to.
     - An ``InferredAssetFileSystemDataConnector`` infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
@@ -151,8 +151,8 @@ In that case, this config...
 Additional Notes
 ----------------
 
-    - Additional examples and configurations for ``ConfiguredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure a ConfiguredAssetFilesystemDataConnector <how_to_guides__miscellaneous__how_to_configure_a_configuredassetfilesystemdataconnector>`
-    - Additional examples and configurations for ``InferredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure an InferredAssetFilesystemDataConnector <how_to_guides__miscellaneous__how_to_configure_a_inferredassetfilesystemdataconnector>`
+    - Additional examples and configurations for ``ConfiguredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure a ConfiguredAssetFilesystemDataConnector <how_to_guides_how_to_configure_a_configuredassetfilesystemdataconnector>`
+    - Additional examples and configurations for ``InferredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure an InferredAssetFilesystemDataConnector <how_to_guides__how_to_configure_a_inferredassetfilesystemdataconnector>`
 
 .. discourse::
    :topic_identifier: 520

@@ -1,4 +1,4 @@
-.. _how_to_guides__miscellaneous__how_to_configure_datacontext_components_using_test_yaml_config:
+.. _how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config:
 
 How to configure DataContext components using ``test_yaml_config``
 ==================================================================
@@ -170,9 +170,10 @@ Steps
         validator.expect_column_values_to_be_in_set("c1", [4,5,6])
 
 
+
 Additional Resources
 --------------------
 
 
 .. discourse::
-   :topic_identifier: NEED TO ADD ID HERE
+   :topic_identifier: 524

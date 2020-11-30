@@ -1,27 +1,29 @@
-.. _how_to_guides__miscellaneous__how_to_configure_a_inferredassetfilesystemdataconnector:
+.. _how_to_guides__how_to_configure_a_inferredassetfilesystemdataconnector:
 
 How to configure an ``InferredAssetFilesystemDataConnector``
 ============================================================
 
-This guide demonstrates how to configure an ``InferredAssetFilesystemDataConnector``, and provides several examples you can use for configuration.
+This guide demonstrates how to configure an ``InferredAssetFilesystemDataConnector``, and provides several examples you
+can use for configuration.
+
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-  - Set up a DataContext
-  - Understand the basics of ExecutionEnvironments
+  - Understand the basics of Datasources
   - Learned how to use ``test_yaml_config``
 
-Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data:
+Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk,
+but also things like S3 object stores, etc:
 
-    - A ``ConfiguredAssetFilesSystemDataconnector`` allows users to have the most fine-tuning, and requires an explicit listing of each DataAsset you want to connect to.
+
+    - A ``ConfiguredAssetFilesSystemDataconnector`` requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
     - An ``InferredAssetFileSystemDataConnector`` infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
 ``InferredAssetFileSystemDataConnector`` has fewer options, so it's simpler to set up. It’s a good choice if you want to connect to a single ``DataAsset``, or several ``DataAssets`` that all share the same naming convention.
 Since ``InferredAssetFileSystemDataConnector`` will infer the ``data_asset_name`` from the filename or folder, one of your ``group_names`` must be ``data_asset_name``.
 
-
-If you're not sure which one to use, please check out :ref:`Which DataConnector should I use? <which_data_connector_should_i_use>`
+If you're not sure which one to use, please check out :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
 Set up a Datasource
 -------------------
@@ -101,23 +103,27 @@ Once configured, you can get ``Validators`` from the ``DataContext`` as follows:
 Example 2: Basic configuration with more than one DataAsset
 -----------------------------------------------------------
 
-Here’s a similar example, with two different DataAssets mixed together.
+Here’s a similar example, but this time two data_assets are mixed together in one folder.
+
+**Note**: This is a great example to demonstrate the differences in how ``ConfiguredAssetFilesSystemDataconnector``
+and ``InferredAssetFileSystemDataConnector`` are configured. Please see Example 2 in :ref:`How to configure a ConfiguredAssetFilesystemDataConnector <how_to_guides_how_to_configure_a_configuredassetfilesystemdataconnector>`
+
 
 .. code-block::
 
-    alpha-2020-01-01.csv
-    beta-2020-01-01.csv
-    alpha-2020-01-02.csv
-    beta-2020-01-02.csv
-    alpha-2020-01-03.csv
-    beta-2020-01-03.csv
+    test_data/alpha-2020-01-01.csv
+    test_data/beta-2020-01-01.csv
+    test_data/alpha-2020-01-02.csv
+    test_data/beta-2020-01-02.csv
+    test_data/alpha-2020-01-03.csv
+    test_data/beta-2020-01-03.csv
 
 The same configuration as Example 1...
 
 .. code-block:: yaml
 
     class_name: InferredAssetFilesystemDataConnector
-    base_directory: my_directory/
+    base_directory: test_data/
     default_regex:
         group_names:
             - data_asset_name

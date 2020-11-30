@@ -1,4 +1,4 @@
-.. _how_to_guides__miscellaneous__how_to_configure_a_configuredassetfilesystemdataconnector:
+.. _how_to_guides_how_to_configure_a_configuredassetfilesystemdataconnector:
 
 How to configure a ``ConfiguredAssetFilesystemDataConnector``
 =============================================================
@@ -12,12 +12,13 @@ This guide demonstrates how to configure a ``ConfiguredAssetFilesystemDataConnec
   - Understand the basics of Datasources in 0.13 and later.
   - Learned how to use ``test_yaml_config``
 
-Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data:
+Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk,
+but also things like S3 object stores, etc:
 
     - A ``ConfiguredAssetFilesSystemDataconnector`` requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
     - An ``InferredAssetFileSystemDataConnector`` infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
-If you're not sure which one to use, please check out :ref:`Which DataConnector should I use? <which_data_connector_should_i_use>`
+If you're not sure which one to use, please check out :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
 Set up a Datasource
 -------------------
@@ -41,7 +42,7 @@ All of the examples below assume you’re testing configuration using something 
     """)
 
 
-If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides__miscellaneous__how_to_configure_datacontext_components_using_test_yaml_config>`
+If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 Example 1: Basic Configuration for a single DataAsset
 -----------------------------------------------------
@@ -89,49 +90,14 @@ Once configured, you can get a ``Validator`` from the ``DataContext`` as follows
         }
     )
 
-Example 2: Basic Configuration for a single DataAsset where Regex does not match path
--------------------------------------------------------------------------------------
 
-Here’s a similar example, but this time the regex does not match the file-paths.
-
-.. code-block::
-
-    test/alpha-1.csv
-    test/alpha-2.csv
-    test/alpha-3.csv
-
-Then this configuration...
-
-.. code-block:: yaml
-
-    class_name: ConfiguredAssetFilesystemDataConnector
-    base_directory: test/
-    default_regex:
-        pattern: beta-(.*)\\.csv
-        group_names:
-            - index
-    assets:
-        alpha:
-
-...will give you this output
-
-.. code-block:: yaml
-
-    Successfully instantiated ConfiguredAssetFilesystemDataConnector
-    Available data_asset_names (1 of 1):
-		alpha (0 of 0): []
-
-	Unmatched data_references (3 of 3): ['alpha-1.csv', 'alpha-2.csv', 'alpha-3.csv']
-
-Notice that ``alpha`` has 0 data_references, and there are 3 ``Unmatched data_references`` listed.
-This would indicate that some part of the configuration is incorrect and would need to be reviewed.
-In our case, changing ``pattern`` to : ``alpha-(.*)\\.csv`` will fix our problem and give the same output to Example 1 above.
-
-
-Example 3: Configuring Multiple Data Assets
---------------------------------------------
+Example 2: Basic configuration with more than one DataAsset
+-----------------------------------------------------------
 
 Here’s a similar example, but this time two data_assets are mixed together in one folder.
+
+**Note**: This is a great example to demonstrate the differences in how ``ConfiguredAssetFilesSystemDataconnector``
+and ``InferredAssetFileSystemDataConnector`` are configured. Please see Example 2 in :ref:`How to configure an InferredAssetFilesystemDataConnector <how_to_guides__how_to_configure_a_inferredassetfilesystemdataconnector>`
 
 .. code-block::
 
@@ -184,8 +150,7 @@ Then this configuration...
 
     Unmatched data_references (0 of 0): []
 
-
-Example 4: Example with Nested Folders
+Example 3: Example with Nested Folders
 --------------------------------------------------
 
 In the following example, files are placed folders that match the ``data_asset_names`` we want: ``A``, ``B``, ``C``, and ``D``.
@@ -263,7 +228,7 @@ In the following example, files are placed folders that match the ``data_asset_n
         ]
 
 
-Example 5: Example with Explicit data_asset_names and more complex nesting
+Example 4: Example with Explicit data_asset_names and more complex nesting
 --------------------------------------------------------------------------
 
 In this example, the assets ``alpha``, ``beta`` and ``gamma`` are being explicitly defined in the configuration, and have a more complex nesting pattern.
