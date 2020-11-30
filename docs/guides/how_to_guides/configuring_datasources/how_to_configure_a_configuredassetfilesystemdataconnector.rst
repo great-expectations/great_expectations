@@ -91,6 +91,36 @@ Once configured, you can get a ``Validator`` from the ``DataContext`` as follows
     )
 
 
+But what if the regex does not match any files in the directory?
+
+Then this configuration...
+
+.. code-block:: yaml
+
+    class_name: ConfiguredAssetFilesystemDataConnector
+    base_directory: test/
+    default_regex:
+        pattern: beta-(.*)\\.csv
+        group_names:
+            - index
+    assets:
+        alpha:
+
+...will give you this output
+
+.. code-block:: yaml
+
+    Successfully instantiated ConfiguredAssetFilesystemDataConnector
+    Available data_asset_names (1 of 1):
+        alpha (0 of 0): []
+
+    Unmatched data_references (3 of 3): ['alpha-1.csv', 'alpha-2.csv', 'alpha-3.csv']
+
+Notice that ``alpha`` has 0 data_references, and there are 3 `Unmatched data_references` listed.
+This would indicate that some part of the configuration is incorrect and would need to be reviewed.
+In our case, changing ``pattern`` to : ``alpha-(.*)\\.csv`` will fix our problem and give the same output to above.
+
+
 Example 2: Basic configuration with more than one DataAsset
 -----------------------------------------------------------
 
