@@ -110,6 +110,7 @@ To enable running Great Expectations against dataframe created by Spark SQL quer
         :title: Show Docs for Experimental API (0.13)
 
             New content A
+
             .. code-block:: yaml
 
                 datasources:
@@ -186,6 +187,7 @@ To provide custom configuration options either:
         :title: Show Docs for Experimental API (0.13)
 
         New content B
+
         .. code-block:: yaml
 
             datasources:
