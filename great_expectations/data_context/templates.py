@@ -14,7 +14,7 @@ class YAMLToString(YAML):
 
     def dump(self, data, stream=None, **kw):
         inefficient = False
-        if stream is None:
+        if not stream:
             inefficient = True
             stream = StringIO()
         YAML.dump(self, data, stream, **kw)
