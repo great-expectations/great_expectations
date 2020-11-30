@@ -76,7 +76,7 @@ Then this configuration...
             'alpha-3.csv'
         ]
 
-Once configured, you can get ``Validators`` from the ``DataContext`` as follows:
+Once configured, you can get a ``Validator`` from the ``DataContext`` as follows:
 
 .. code-block:: python
 
