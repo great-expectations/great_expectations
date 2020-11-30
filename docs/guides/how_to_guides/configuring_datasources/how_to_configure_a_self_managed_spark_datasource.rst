@@ -109,6 +109,7 @@ To enable running Great Expectations against dataframe created by Spark SQL quer
     .. tab-container:: tab1
         :title: Show Docs for Experimental API (0.13)
 
+            New content A
             .. code-block:: yaml
 
                 datasources:
@@ -184,6 +185,7 @@ To provide custom configuration options either:
     .. tab-container:: tab1
         :title: Show Docs for Experimental API (0.13)
 
+        New content B
         .. code-block:: yaml
 
             datasources:
