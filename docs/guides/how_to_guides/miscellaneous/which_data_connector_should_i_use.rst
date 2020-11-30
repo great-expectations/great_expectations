@@ -155,4 +155,4 @@ Additional Notes
     - Additional examples and configurations for ``InferredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure an InferredAssetFilesystemDataConnector <how_to_guides__miscellaneous__how_to_configure_a_inferredassetfilesystemdataconnector>`
 
 .. discourse::
-   :topic_identifier: NEED TO ADD ID HERE
+   :topic_identifier: 520
