@@ -558,20 +558,29 @@ class BaseBackendEcosystem(DictDot):
     For example, if you plan to store expectations, validations, and data_docs in s3 use the S3BackendEcosystem and you may be able to specify less parameters.
     """
 
-    def __init__(self):
-        self.config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
-        self.expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value
-        self.validations_store_name = (
+    def __init__(
+        self,
+        config_version=DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value,
+        expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
+        validations_store_name=(
             DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value
-        )
-        self.evaluation_parameter_store_name = (
+        ),
+        evaluation_parameter_store_name=(
             DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value
-        )
-        self.validation_operators = (
+        ),
+        validation_operators=(
             DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
-        )
-        self.stores = DataContextConfigDefaults.DEFAULT_STORES.value
-        self.data_docs_sites = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
+        ),
+        stores=DataContextConfigDefaults.DEFAULT_STORES.value,
+        data_docs_sites=DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value,
+    ):
+        self.config_version = config_version
+        self.expectations_store_name = expectations_store_name
+        self.validations_store_name = validations_store_name
+        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.validation_operators = validation_operators
+        self.stores = stores
+        self.data_docs_sites = data_docs_sites
 
 
 class S3BackendEcosystem(BaseBackendEcosystem):
