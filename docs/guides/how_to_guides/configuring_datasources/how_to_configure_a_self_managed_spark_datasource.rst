@@ -70,36 +70,75 @@ To enable running Great Expectations against dataframe created by Spark SQL quer
 
 #. **Replace lines in great_expectations.yml file**
 
-    .. code-block:: yaml
+.. content-tabs::
 
-        datasources:
-          spark_dataframe:
-            data_asset_type:
-              class_name: SparkDFDataset
-              module_name: great_expectations.dataset
-            batch_kwargs_generators:
-              subdir_reader:
-                class_name: SubdirReaderBatchKwargsGenerator
-                base_directory: /tmp
-            class_name: SparkDFDatasource
-            module_name: great_expectations.datasource
+    .. tab-container:: tab0
+        :title: Show Docs for Stable API (up to 0.12.x)
 
-    with
+            .. code-block:: yaml
 
-    .. code-block:: yaml
+                datasources:
+                  spark_dataframe:
+                    data_asset_type:
+                      class_name: SparkDFDataset
+                      module_name: great_expectations.dataset
+                    batch_kwargs_generators:
+                      subdir_reader:
+                        class_name: SubdirReaderBatchKwargsGenerator
+                        base_directory: /tmp
+                    class_name: SparkDFDatasource
+                    module_name: great_expectations.datasource
 
-        datasources:
-          spark_dataframe:
-            data_asset_type:
-              class_name: SparkDFDataset
-              module_name: great_expectations.dataset
-            batch_kwargs_generators:
-              spark_sql_query:
-                class_name: QueryBatchKwargsGenerator
-                queries:
-                  ${query_name}: ${spark_sql_query}
-            module_name: great_expectations.datasource
-            class_name: SparkDFDatasource
+            with
+
+            .. code-block:: yaml
+
+                datasources:
+                  spark_dataframe:
+                    data_asset_type:
+                      class_name: SparkDFDataset
+                      module_name: great_expectations.dataset
+                    batch_kwargs_generators:
+                      spark_sql_query:
+                        class_name: QueryBatchKwargsGenerator
+                        queries:
+                          ${query_name}: ${spark_sql_query}
+                    module_name: great_expectations.datasource
+                    class_name: SparkDFDatasource
+
+    .. tab-container:: tab1
+        :title: Show Docs for Experimental API (0.13)
+
+            .. code-block:: yaml
+
+                datasources:
+                  spark_dataframe:
+                    data_asset_type:
+                      class_name: SparkDFDataset
+                      module_name: great_expectations.dataset
+                    batch_kwargs_generators:
+                      subdir_reader:
+                        class_name: SubdirReaderBatchKwargsGenerator
+                        base_directory: /tmp
+                    class_name: SparkDFDatasource
+                    module_name: great_expectations.datasource
+
+            with
+
+            .. code-block:: yaml
+
+                datasources:
+                  spark_dataframe:
+                    data_asset_type:
+                      class_name: SparkDFDataset
+                      module_name: great_expectations.dataset
+                    batch_kwargs_generators:
+                      spark_sql_query:
+                        class_name: QueryBatchKwargsGenerator
+                        queries:
+                          ${query_name}: ${spark_sql_query}
+                    module_name: great_expectations.datasource
+                    class_name: SparkDFDatasource
 
 #. **Fill values:**
 
@@ -117,6 +156,12 @@ Additional Notes
 To provide custom configuration options either:
 
 1. Create curated `spark-defaults.conf` configuration file in `$SPARK_HOME/conf` directory
+
+.. content-tabs::
+
+    .. tab-container:: tab0
+        :title: Show Docs for Stable API (up to 0.12.x)
+
 2. Provide `spark_context` dictionary to Datasource config:
 
     .. code-block:: yaml
