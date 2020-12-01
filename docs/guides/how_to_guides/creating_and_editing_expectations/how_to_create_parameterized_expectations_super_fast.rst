@@ -23,7 +23,7 @@ _____
 
 As can be seen in the implementation below, we have chosen to keep our default minimum value at 0, given that we are validating that all our values are positive. Setting the upper bound to ``None`` means that no upper bound will be checked -- effectively setting the threshold at ∞ and allowing any positive value.
 
-Notice that we do not need to set default_kwarg_values for all kwargs: it is sufficient to set them only for ones for which we would like to set a default value. To keep our implementation simple, we do not override the ``metric_dependencies`` or ``success_keys``.
+Notice that we do not need to set ``default_kwarg_values`` for all kwargs: it is sufficient to set them only for ones for which we would like to set a default value. To keep our implementation simple, we do not override the ``metric_dependencies`` or ``success_keys``.
   
 .. code-block:: python
 
