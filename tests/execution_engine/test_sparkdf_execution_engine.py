@@ -690,10 +690,7 @@ def dataframes_equal(first_table, second_table):
 
 
 # Builds a Spark Execution Engine
-def _build_spark_engine(df):
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder.getOrCreate()
+def _build_spark_engine(df, spark):
     df = spark.createDataFrame(
         [
             tuple(
@@ -714,7 +711,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     import datetime
 
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), spark_session
     )
 
     desired_metric_1 = MetricConfiguration(
@@ -800,9 +797,9 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
 
 
 # Ensuring functionality of compute_domain when no domain kwargs are given
-def test_get_compute_domain_with_no_domain_kwargs():
+def test_get_compute_domain_with_no_domain_kwargs_alt(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), spark_session
     )
     df = engine.dataframe
 
@@ -821,9 +818,9 @@ def test_get_compute_domain_with_no_domain_kwargs():
 
 
 # Testing for only untested use case - multicolumn
-def test_get_compute_domain_with_column_pair():
+def test_get_compute_domain_with_column_pair(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), spark_session
     )
     df = engine.dataframe
 
@@ -859,9 +856,10 @@ def test_get_compute_domain_with_column_pair():
 
 
 # Testing for only untested use case - multicolumn
-def test_get_compute_domain_with_multicolumn():
+def test_get_compute_domain_with_multicolumn(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 3, None]})
+        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 3, None]}),
+        spark_session,
     )
     df = engine.dataframe
 
@@ -897,9 +895,9 @@ def test_get_compute_domain_with_multicolumn():
 
 
 # Testing whether compute domain is properly calculated, but this time obtaining a column
-def test_get_compute_domain_with_column_domain():
+def test_get_compute_domain_with_column_domain_alt(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), spark_session
     )
     df = engine.dataframe
 
@@ -918,9 +916,9 @@ def test_get_compute_domain_with_column_domain():
 
 
 # Using an unmeetable row condition to see if empty dataset will result in errors
-def test_get_compute_domain_with_row_condition():
+def test_get_compute_domain_with_row_condition_alt(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), spark_session
     )
     df = engine.dataframe
     expected_df = df.where("b > 2")
@@ -946,9 +944,9 @@ def test_get_compute_domain_with_row_condition():
 
 
 # What happens when we filter such that no value meets the condition?
-def test_get_compute_domain_with_unmeetable_row_condition():
+def test_get_compute_domain_with_unmeetable_row_condition_alt(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), spark_session
     )
     df = engine.dataframe
     expected_df = df.where("b > 24")
@@ -985,9 +983,9 @@ def test_get_compute_domain_with_unmeetable_row_condition():
 
 
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
-def test_get_compute_domain_with_ge_experimental_condition_parser():
+def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), spark_session
     )
     df = engine.dataframe
 
@@ -1038,9 +1036,9 @@ def test_get_compute_domain_with_ge_experimental_condition_parser():
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
-def test_get_compute_domain_with_nonexistent_condition_parser():
+def test_get_compute_domain_with_nonexistent_condition_parser(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), spark_session
     )
     df = engine.dataframe
 
@@ -1059,9 +1057,9 @@ def test_get_compute_domain_with_nonexistent_condition_parser():
 
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
-def test_resolve_metric_bundle_with_nonexistent_metric():
+def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), spark_session
     )
 
     desired_metric_1 = MetricConfiguration(
@@ -1099,14 +1097,11 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
 
 
 # Making sure dataframe property is functional
-def test_dataframe_property_given_loaded_batch():
-    from pyspark.sql import SparkSession
-
+def test_dataframe_property_given_loaded_batch(spark_session):
     engine = SparkDFExecutionEngine()
 
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(df)
+    df = spark_session.createDataFrame(df)
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")

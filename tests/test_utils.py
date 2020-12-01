@@ -6,7 +6,7 @@ import string
 import threading
 import uuid
 from functools import wraps
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -270,10 +270,10 @@ def get_dataset(
             return None
 
         if sqlite_db_path is not None:
-            engine = create_engine(f"sqlite:////{sqlite_db_path}")
+            # Create a new database
+            engine = connection_manager.get_engine(f"sqlite:////{sqlite_db_path}")
         else:
-            engine = create_engine("sqlite://")
-        conn = engine.connect()
+            engine = connection_manager.get_engine("sqlite://")
         # Add the data to the database as a new table
 
         sql_dtypes = {}
@@ -317,7 +317,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -325,7 +325,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "postgresql":
@@ -394,7 +394,7 @@ def get_dataset(
         if not create_engine:
             return None
 
-        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+        engine = connection_manager.get_engine("mysql+pymysql://root@localhost/test_ci")
 
         sql_dtypes = {}
         if (
@@ -452,9 +452,8 @@ def get_dataset(
         if not create_engine:
             return None
 
-        engine = create_engine(
+        engine = connection_manager.get_engine(
             "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
-            # echo=True,
         )
 
         # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
@@ -529,7 +528,6 @@ def get_dataset(
             "DataType": sparktypes.DataType,
             "NullType": sparktypes.NullType,
         }
-
         spark = SparkSession.builder.getOrCreate()
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
@@ -781,18 +779,15 @@ def get_test_validator_with_data(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return _build_spark_validator_with_data(df=spark_df)
+        return _build_spark_validator_with_data(df=spark_df, spark=spark)
 
     else:
         raise ValueError("Unknown dataset_type " + str(execution_engine))
 
 
-def _build_spark_engine(df):
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder.getOrCreate()
+def _build_spark_engine(df, spark_session):
     if isinstance(df, pd.DataFrame):
-        df = spark.createDataFrame(
+        df = spark_session.createDataFrame(
             [
                 tuple(
                     None if isinstance(x, (float, int)) and np.isnan(x) else x
@@ -807,10 +802,7 @@ def _build_spark_engine(df):
     return engine
 
 
-def _build_spark_validator_with_data(df):
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder.getOrCreate()
+def _build_spark_validator_with_data(df, spark):
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
             [
@@ -827,9 +819,7 @@ def _build_spark_validator_with_data(df):
     return Validator(execution_engine=SparkDFExecutionEngine(), batches=(batch,))
 
 
-def _build_sa_engine(df):
-    import sqlalchemy as sa
-
+def _build_sa_engine(df, sa):
     eng = sa.create_engine("sqlite://", echo=False)
     df.to_sql("test", eng)
     batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")

@@ -245,9 +245,13 @@ def build_test_backends_list_cfe(metafunc):
 def pytest_generate_tests(metafunc):
     test_backends = build_test_backends_list(metafunc)
     if "test_backend" in metafunc.fixturenames:
-        metafunc.parametrize("test_backend", test_backends, scope="module")
+        metafunc.parametrize(
+            "test_backend", test_backends, ids=test_backends, scope="module"
+        )
     if "test_backends" in metafunc.fixturenames:
-        metafunc.parametrize("test_backends", [test_backends], scope="module")
+        metafunc.parametrize(
+            "test_backends", [test_backends], ids=["backend_specific"], scope="module"
+        )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -2153,8 +2157,6 @@ def sqlalchemy_dataset(test_backends):
 @pytest.fixture
 def sqlitedb_engine(test_backend):
     if test_backend == "sqlite":
-        import sqlalchemy as sa
-
         try:
             import sqlalchemy as sa
 
@@ -3045,8 +3047,6 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
 
     if "postgresql" not in test_backends:
         pytest.skip("skipping fixture because postgresql not selected")
-
-    import sqlalchemy as sa
 
     url = sa.engine.url.URL(
         drivername="postgresql",
