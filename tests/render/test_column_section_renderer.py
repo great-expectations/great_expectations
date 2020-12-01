@@ -3,11 +3,10 @@ from collections import OrderedDict
 
 import pytest
 
-from great_expectations.core import (
-    ExpectationConfiguration,
+from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
-    expectationSuiteSchema,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer import (
@@ -262,7 +261,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(
     for evr in distinct_values_evrs:
         content_blocks.append(
             ProfilingResultsColumnSectionRenderer()
-            ._render_bar_chart_table(distinct_values_evrs)
+            ._render_value_counts_bar_chart(distinct_values_evrs)
             .to_json_dict()
         )
 

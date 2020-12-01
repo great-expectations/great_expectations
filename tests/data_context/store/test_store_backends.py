@@ -9,7 +9,7 @@ import pytest
 from moto import mock_s3
 
 import tests.test_utils as test_utils
-from great_expectations.core import RunIdentifier
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import (
     InMemoryStoreBackend,
     StoreBackend,
@@ -355,7 +355,7 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     my_store.set(("BBB",), "bbb")
     assert my_store.get(("BBB",)) == "bbb"
 
-    assert set(my_store.list_keys()) == {("BBB",), (".ge_store_backend_id",), ("AAA",)}
+    assert set(my_store.list_keys()) == {(".ge_store_backend_id",), ("AAA",), ("BBB",)}
     assert (
         gen_directory_tree_str(project_path)
         == """\

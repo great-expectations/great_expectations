@@ -4,13 +4,13 @@ import pytest
 from freezegun import freeze_time
 
 import tests.test_utils as test_utils
-from great_expectations.core import (
-    ExpectationConfiguration,
+from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
-    RunIdentifier,
 )
 from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 
 

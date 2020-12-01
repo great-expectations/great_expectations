@@ -33,116 +33,357 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
-class DatasourceDefaults(metaclass=abc.ABCMeta):
-    """
-    Abstract class with defaults applicable to all datasource types. Defines the base interface.
-    """
+class AssetConfig(DictDot):
+    def __init__(
+        self,
+        # partitioner_name=None,
+        **kwargs,
+    ):
+        # if partitioner_name is not None:
+        #     self._partitioner_name = partitioner_name
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
-    _default_module_name = "great_expectations.datasource"
-
-    @classmethod
-    def module_name(cls):
-        return cls._default_module_name
-
-    @classmethod
-    @abc.abstractmethod
-    def class_name(cls):
-        raise NotImplementedError
-
-    @classmethod
-    @abc.abstractmethod
-    def data_asset_type(cls):
-        raise NotImplementedError
+    # @property
+    # def partitioner_name(self):
+    #     return self._partitioner_name
 
 
-class PandasDatasourceDefaults(DatasourceDefaults):
-    _class_name = "PandasDatasource"
-    _data_asset_type = {
-        "module_name": "great_expectations.dataset",
-        "class_name": "PandasDataset",
-    }
+class AssetConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
 
-    @classmethod
-    def class_name(cls):
-        return cls._class_name
+    # partitioner_name = fields.String(required=False, allow_none=True)
 
-    @classmethod
-    def data_asset_type(cls):
-        return cls._data_asset_type
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
 
-
-class SqlAlchemyDatasourceDefaults(DatasourceDefaults):
-    _class_name = "SqlAlchemyDatasource"
-    _data_asset_type = {
-        "module_name": "great_expectations.dataset",
-        "class_name": "SqlAlchemyDataset",
-    }
-
-    @classmethod
-    def class_name(cls):
-        return cls._class_name
-
-    @classmethod
-    def data_asset_type(cls):
-        return cls._data_asset_type
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_asset_config(self, data, **kwargs):
+        return AssetConfig(**data)
 
 
-class SparkDFDatasourceDefaults(DatasourceDefaults):
-    _class_name = "SparkDFDatasource"
-    _data_asset_type = {
-        "module_name": "great_expectations.dataset",
-        "class_name": "SparkDFDataset",
-    }
+class SorterConfig(DictDot):
+    def __init__(
+        self, name, class_name=None, module_name=None, orderby="asc", **kwargs,
+    ):
+        self._name = name
+        self._class_name = class_name
+        self._module_name = module_name
+        self._orderby = orderby
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
-    @classmethod
-    def class_name(cls):
-        return cls._class_name
+    @property
+    def name(self):
+        return self._name
 
-    @classmethod
-    def data_asset_type(cls):
-        return cls._data_asset_type
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+    @property
+    def orderby(self):
+        return self._orderby
+
+
+class SorterConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    name = fields.String(required=True)
+    class_name = fields.String(required=True)
+    module_name = fields.String(
+        missing="great_expectations.datasource.data_connector.partitioner.sorter"
+    )
+    orderby = fields.String(required=False, missing="asc", allow_none=False)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_sorter_config(self, data, **kwargs):
+        return SorterConfig(**data)
+
+
+class PartitionerConfig(DictDot):
+    def __init__(
+        self,
+        class_name,
+        module_name=None,
+        sorters=None,
+        allow_multipart_partitions=False,
+        runtime_keys=None,
+        **kwargs,
+    ):
+        self._class_name = class_name
+        self._module_name = module_name
+        if sorters is not None:
+            self._sorters = sorters
+        self._allow_multipart_partitions = allow_multipart_partitions
+        if runtime_keys is not None:
+            self._runtime_keys = runtime_keys
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+    @property
+    def sorters(self):
+        return self._sorters
+
+    @property
+    def allow_multipart_partitions(self):
+        return self._allow_multipart_partitions
+
+    @property
+    def runtime_keys(self):
+        return self._runtime_keys
+
+
+class PartitionerConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String(required=True)
+    module_name = fields.String(
+        missing="great_expectations.datasource.data_connector.partitioner"
+    )
+
+    sorters = fields.List(
+        cls_or_instance=fields.Nested(SorterConfigSchema),
+        required=False,
+        allow_none=True,
+    )
+
+    allow_multipart_partitions = fields.Boolean(
+        required=False, missing=False, allow_none=False
+    )
+
+    runtime_keys = fields.List(
+        cls_or_instance=fields.String(), required=False, allow_none=True
+    )
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_partitioner_config(self, data, **kwargs):
+        return PartitionerConfig(**data)
+
+
+# TODO: <Alex></Alex>
+class DataConnectorConfig(DictDot):
+    def __init__(
+        self,
+        class_name,
+        module_name=None,
+        # partitioners=None,
+        # default_partitioner_name=None,
+        assets=None,
+        **kwargs,
+    ):
+        self._class_name = class_name
+        self._module_name = module_name
+        # if partitioners is not None:
+        #     self._partitioners = partitioners
+        # if default_partitioner_name is not None:
+        #     self._default_partitioner_name = default_partitioner_name
+        if assets is not None:
+            self._assets = assets
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    # @property
+    # def partitioners(self):
+    #     return self._partitioners
+
+    # @property
+    # def default_partitioner_name(self):
+    #     return self._default_partitioner_name
+
+    @property
+    def assets(self):
+        return self._assets
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+
+class DataConnectorConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String(required=True)
+    module_name = fields.String(missing="great_expectations.datasource.data_connector")
+
+    assets = fields.Dict(
+        keys=fields.Str(),
+        values=fields.Nested(AssetConfigSchema),
+        required=False,
+        allow_none=True,
+    )
+
+    # TODO: <Alex></Alex>
+    # partitioners = fields.Dict(
+    #     keys=fields.Str(),
+    #     values=fields.Nested(PartitionerConfigSchema),
+    #     required=False,
+    #     allow_none=True,
+    # )
+
+    # default_partitioner_name = fields.String(
+    #     required=False,
+    #     allow_none=True,
+    # )
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_data_connector_config(self, data, **kwargs):
+        return DataConnectorConfig(**data)
+
+
+class ExecutionEngineConfig(DictDot):
+    def __init__(
+        self,
+        class_name,
+        module_name=None,
+        caching=None,
+        batch_spec_defaults=None,
+        **kwargs,
+    ):
+        self._class_name = class_name
+        self._module_name = module_name
+        if caching is not None:
+            self.caching = caching
+        if batch_spec_defaults is not None:
+            self._batch_spec_defaults = batch_spec_defaults
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def batch_spec_defaults(self):
+        return self._batch_spec_defaults
+
+
+class ExecutionEngineConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String(required=True)
+    module_name = fields.String(missing="great_expectations.execution_engine")
+    caching = fields.Boolean()
+    batch_spec_defaults = fields.Dict(allow_none=True)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_execution_engine_config(self, data, **kwargs):
+        return ExecutionEngineConfig(**data)
 
 
 class DatasourceConfig(DictDot):
-    def set_defaults(
+    def __init__(
         self,
-        class_name: str,
-        module_name: Optional[str] = None,
-        data_asset_type: Optional[dict] = None,
+        class_name=None,
+        module_name=None,
+        execution_engine=None,
+        data_connectors=None,
+        credentials=None,
+        reader_method=None,
+        limit=None,
+        **kwargs,
     ):
-        """
-        Return defaults based on the type of datasource being configured
-        Args:
-            class_name: Datasource class name
-            module_name: Datasource module name
-            data_asset_type: module_name and class_name for the data_asset e.g. for Pandas dataset: {
-                "module_name": "great_expectations.dataset",
-                "class_name": "PandasDataset",
-            }
+        # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
+        self._class_name = class_name
+        self._module_name = module_name
+        self.execution_engine = execution_engine
+        if data_connectors is None:
+            data_connectors = {}
+        self.data_connectors = data_connectors
+        if credentials is not None:
+            self.credentials = credentials
+        if reader_method is not None:
+            self.reader_method = reader_method
+        if limit is not None:
+            self.limit = limit
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
-        Returns:
-            module_name and data_asset_type as configured or defaults
-        """
+    @property
+    def class_name(self):
+        return self._class_name
 
-        supported_classes = {
-            PandasDatasourceDefaults.class_name(): PandasDatasourceDefaults,
-            SqlAlchemyDatasourceDefaults.class_name(): SqlAlchemyDatasourceDefaults,
-            SparkDFDatasourceDefaults.class_name(): SparkDFDatasourceDefaults,
-        }
-        try:
-            defaults_class = supported_classes[class_name]
-        except KeyError:
-            raise ge_exceptions.DatasourceConfigurationError(
-                f"class_name should be one of the following supported classes: {list(supported_classes.keys())}"
-            )
+    @property
+    def module_name(self):
+        return self._module_name
 
-        data_asset_type = (
-            defaults_class.data_asset_type() if not data_asset_type else data_asset_type
-        )
-        module_name = defaults_class.module_name() if not module_name else module_name
 
-        return module_name, data_asset_type
+class DatasourceConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
 
+    class_name = fields.String(missing="Datasource")
+    module_name = fields.String(missing="great_expectations.datasource")
+    execution_engine = fields.Nested(ExecutionEngineConfigSchema)
+
+    data_connectors = fields.Dict(
+        keys=fields.Str(),
+        values=fields.Nested(DataConnectorConfigSchema),
+        required=True,
+        allow_none=False,
+    )
+
+    credentials = fields.Raw(allow_none=True)
+    spark_context = fields.Raw(allow_none=True)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_datasource_config(self, data, **kwargs):
+        return DatasourceConfig(**data)
+
+
+class LegacyDatasourceConfig(DictDot):
     def __init__(
         self,
         class_name,
@@ -166,7 +407,7 @@ class DatasourceConfig(DictDot):
         # Since these classes have optional build_configuration methods
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
-        # TODO: Set defaults from config or kwargs passed into constructor
+        # AJB TODO: Set defaults from config or kwargs passed into constructor
         #  E.g. self._class_name = config.get("class_name", class_name)
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = config.get("class_name", class_name)
@@ -273,7 +514,7 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
         return data
 
 
-class DatasourceConfigSchema(Schema):
+class LegacyDatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
@@ -300,7 +541,7 @@ class DatasourceConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
-        return DatasourceConfig(**data)
+        return LegacyDatasourceConfig(**data)
 
 
 class NotebookTemplateConfig(DictDot):
@@ -425,13 +666,86 @@ class NotebooksConfigSchema(Schema):
         return NotebooksConfig(**data)
 
 
+class DataContextConfig(DictDot):
+    def __init__(
+        self,
+        config_version,
+        expectations_store_name,
+        validations_store_name,
+        evaluation_parameter_store_name,
+        plugins_directory,
+        validation_operators,
+        stores,
+        data_docs_sites,
+        notebooks=None,
+        config_variables_file_path=None,
+        anonymous_usage_statistics=None,
+        commented_map=None,
+        datasources=None,
+    ):
+        if commented_map is None:
+            commented_map = CommentedMap()
+        self._commented_map = commented_map
+        self._config_version = config_version
+        if datasources is None:
+            datasources = {}
+        self.datasources = datasources
+        self.expectations_store_name = expectations_store_name
+        self.validations_store_name = validations_store_name
+        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.plugins_directory = plugins_directory
+        if not isinstance(validation_operators, dict):
+            raise ValueError(
+                "validation_operators must be configured with a dictionary"
+            )
+        self.validation_operators = validation_operators
+        self.stores = stores
+        self.notebooks = notebooks
+        self.data_docs_sites = data_docs_sites
+        self.config_variables_file_path = config_variables_file_path
+        if anonymous_usage_statistics is None:
+            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
+        elif isinstance(anonymous_usage_statistics, dict):
+            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
+                **anonymous_usage_statistics
+            )
+        self.anonymous_usage_statistics = anonymous_usage_statistics
+
+    @property
+    def commented_map(self):
+        return self._commented_map
+
+    @property
+    def config_version(self):
+        return self._config_version
+
+    @classmethod
+    def from_commented_map(cls, commented_map):
+        try:
+            config = dataContextConfigSchema.load(commented_map)
+            return cls(commented_map=commented_map, **config)
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading data context config. See ValidationError for more details."
+            )
+            raise
+
+    def to_yaml(self, outfile):
+        commented_map = deepcopy(self.commented_map)
+        commented_map.update(dataContextConfigSchema.dump(self))
+        yaml.dump(commented_map, outfile)
+
+
 class DataContextConfigSchema(Schema):
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,
         error_messages={"invalid": "config version must " "be a number."},
     )
+    # TODO: <Alex>Proper Schema enforcement for the new Datasource must be implemented.</Alex>
     datasources = fields.Dict(
-        keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema)
+        keys=fields.Str(),
+        values=fields.Nested(LegacyDatasourceConfigSchema),
+        allow_none=True,
     )
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
@@ -971,6 +1285,11 @@ class DataContextConfig(DictDot):
 
 
 dataContextConfigSchema = DataContextConfigSchema()
+legacyDatasourceConfigSchema = LegacyDatasourceConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
+dataConnectorConfigSchema = DataConnectorConfigSchema()
+assetConfigSchema = AssetConfigSchema()
+partitionerConfigSchema = PartitionerConfigSchema()
+sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
