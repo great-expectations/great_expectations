@@ -64,7 +64,7 @@ In some environments, you might not be able to use the :ref:`CLI <command_line>`
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - Launched a generic notebook (e.g. ``jupyter notebook``, ``jupyter lab``, etc.)
             - :ref:`Configured a Datasource <how_to_guides__configuring_datasources>`
-            - Understand the basics of batch requests
+            - Understand the basics of :ref:`batch requests <reference__core_concepts__datasources>`
             - Have a data asset (e.g. a database table) you want to use to create Expectations
             - Have your Data Context configured to save Expectations to your filesystem or another :ref:`Expectation Store <how_to_guides__configuring_metadata_stores>` if you are in a hosted environment
 
@@ -93,7 +93,7 @@ In some environments, you might not be able to use the :ref:`CLI <command_line>`
             validator = context.get_validator(batch_request=batch_request, expectation_suite=suite)
 
 
-        **Note:** The `batch_request` depends on what type of data asset you want to connect to (a database table or view, Pandas dataframe, etc.). See :ref:`how_to_guides__creating_batches` for your configuration. You can then start creating Expectations based on your batch using the methods described in the :ref:`expectation_glossary` and eventually save the Suite to JSON:
+        **Note:** The `batch_request` depends on what type of data asset you want to connect to (a database table or view, Pandas dataframe, etc.). See :ref:`Datasources Reference <reference__core_concepts__datasources>` to learn more about specifying batch requests. You can then start creating Expectations based on your batch using the methods described in the :ref:`expectation_glossary` and eventually save the Suite to JSON:
 
         .. code-block:: python
 
