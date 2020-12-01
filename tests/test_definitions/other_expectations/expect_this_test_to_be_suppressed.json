@@ -5,7 +5,7 @@
       "data": { "b": [1, 2, 3, 4] },
       "tests": [
         {
-          "title": "This test should never run!",
+          "title": "this_test_should_never_run",
           "exact_match_out": false,
           "suppress_test_for": ["pandas", "sqlalchemy", "spark"],
           "in": ["a"],

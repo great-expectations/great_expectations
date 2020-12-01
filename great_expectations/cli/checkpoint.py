@@ -9,7 +9,7 @@
     how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html
     maturity: Experimental
     maturity_details:
-        api_stability: Unstable (expect changes to batch definition; "assets to validate" is still totally untyped)
+        api_stability: Unstable (expect changes to batch request; "assets to validate" is still totally untyped)
         implementation_completeness: Complete
         unit_test_coverage: Partial ("golden path"-focused tests; error checking tests need to be improved)
         integration_infrastructure_test_coverage: N/A
@@ -24,7 +24,7 @@
     how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
     maturity: Experimental
     maturity_details:
-        api_stability: Unstable (expect changes to batch definition; no checkpoint store)
+        api_stability: Unstable (expect changes to batch request; no checkpoint store)
         implementation_completeness: Complete
         unit_test_coverage: Complete
         integration_infrastructure_test_coverage: N/A
@@ -111,6 +111,7 @@
 
 import os
 import sys
+from typing import Dict
 
 import click
 from ruamel.yaml import YAML
@@ -119,7 +120,7 @@ from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_list
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DataContextError
@@ -212,7 +213,7 @@ def _verify_checkpoint_does_not_exist(
 
 
 def _write_checkpoint_to_disk(
-    context: DataContext, checkpoint: dict, checkpoint_name: str
+    context: DataContext, checkpoint: Dict, checkpoint_name: str
 ) -> str:
     # TODO this should be the responsibility of the DataContext
     checkpoint_dir = os.path.join(context.root_directory, context.CHECKPOINTS_DIR,)
@@ -396,7 +397,7 @@ def checkpoint_script(checkpoint, directory):
 
 
 def _validate_at_least_one_suite_is_listed(
-    context: DataContext, batch: dict, checkpoint_file: str
+    context: DataContext, batch: Dict, checkpoint_file: str
 ) -> None:
     batch_kwargs = batch["batch_kwargs"]
     suites = batch["expectation_suite_names"]
