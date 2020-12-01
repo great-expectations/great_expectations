@@ -219,7 +219,6 @@ Additional Notes
               spark_dataframe:
                 class_name: Datasource
                 execution_engine:
-                  module_name: great_expectations.execution_engine
                   class_name: SparkDFExecutionEngine
                   spark_context:
                     spark.master: local[*]
