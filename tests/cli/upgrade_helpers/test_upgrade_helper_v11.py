@@ -163,7 +163,6 @@ great_expectations/
         config_variables.yml
         data_docs/
             local_site/
-                .ge_store_backend_id
                 expectations/
                     .gitkeep
                 static/
@@ -271,7 +270,6 @@ great_expectations/
         config_variables.yml
         data_docs/
             local_site/
-                .ge_store_backend_id
                 expectations/
                     .gitkeep
                 static/
@@ -377,7 +375,6 @@ great_expectations/
         config_variables.yml
         data_docs/
             local_site/
-                .ge_store_backend_id
                 expectations/
                     .gitkeep
                 static/

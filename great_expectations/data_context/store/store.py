@@ -52,7 +52,7 @@ class Store:
         self._use_fixed_length_key = self._store_backend.fixed_length_key
 
     def _validate_key(self, key):
-        # Skip validation of key if it is the STORE_BACKEND_ID_KEY
+        # STORE_BACKEND_ID_KEY always validated
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return
         elif not isinstance(key, self._key_class):
