@@ -1,25 +1,32 @@
-.. _how_to_guides__miscellaneous__how_to_configure_a_singlepartitionfiledataconnector:
+.. _how_to_guides_how_to_configure_a_inferredassetfilesystemdataconnector:
 
-How to configure a ``SinglePartitionerFileDataConnector``
-=======================================================
+How to configure an ``InferredAssetFilesystemDataConnector``
+============================================================
 
-This guide demonstrates how to configure a ``SinglePartitionerFileDataConnector``, and provides several examples you can use for configuration.
+This guide demonstrates how to configure an ``InferredAssetFilesystemDataConnector``, and provides several examples you
+can use for configuration.
+
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-  - Set up a DataContext
-  - Understand the basics of ExecutionEnvironments
+  - Understand the basics of Datasources
   - Learned how to use ``test_yaml_config``
 
-Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data: ``SinglePartitionerFileDataConnector`` and ``MultiPartitionFileDataConnector``.
+Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk,
+but also things like S3 object stores, etc:
 
-``SinglePartitionerFileDataConnector`` has fewer options, so it's simpler to set up. It’s a good choice if you want to connect to a single ``DataAsset``, or several ``DataAssets`` that all share the same naming convention. It's not difficult to migrate from a ``SinglePartitionerFileDataConnector`` to a ``MultiPartitionFileDataConnector``, so we recommend starting with ``SinglePartitionerFileDataConnector`` unless you're sure you need the extra features of a ``MultiPartitionFileDataConnector``.
 
-Steps
------
+    - A ``ConfiguredAssetFilesSystemDataconnector`` requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
+    - An ``InferredAssetFileSystemDataConnector`` infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
-#. **Set up an ExecutionEnvironment with the following configuration**
+``InferredAssetFileSystemDataConnector`` has fewer options, so it's simpler to set up. It’s a good choice if you want to connect to a single ``DataAsset``, or several ``DataAssets`` that all share the same naming convention.
+Since ``InferredAssetFileSystemDataConnector`` will infer the ``data_asset_name`` from the filename or folder, one of your ``group_names`` must be ``data_asset_name``.
+
+If you're not sure which one to use, please check out :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
+
+Set up a Datasource
+-------------------
 
 All of the examples below assume you’re testing configuration using something like:
 
@@ -29,7 +36,7 @@ All of the examples below assume you’re testing configuration using something 
     context = ge.DataContext()
 
     context.test_yaml_config("""
-    class_name: ExecutionEnvironment
+    class_name: Datasource
 
     execution_engine:
         class_name: PandasExecutionEngine
@@ -40,35 +47,28 @@ All of the examples below assume you’re testing configuration using something 
     """)
 
 
-If you’re not familiar with the ``test_yaml_config`` method, please check out [How to configure all sorts of stuff with test_yaml_config]() or the corresponding [video tutorial here]().
-
-Principles for configuring ``SinglePartitionerFileDataConnectors``
-----------------------------------------------------------------
-
-One of your ``group_names`` must be ``data_asset_name``.
+If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 
 Example 1: Basic configuration for a single DataAsset
 -----------------------------------------------------
 
-For example, imagine you have the following files in the directory ``my_directory/``:
+Imagine you have the following files in the directory ``my_directory/``:
 
-.. code-block:: python
+.. code-block:: bash
 
-    alpha-2020-01-01.csv
-    alpha-2020-01-02.csv
-    alpha-2020-01-03.csv
+    my_directory/alpha-2020-01-01.csv
+    my_directory/alpha-2020-01-02.csv
+    my_directory/alpha-2020-01-03.csv
 
 
 Then this configuration...
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionerFileDataConnector
+    class_name: InferredAssetFilesystemDataConnector
     base_directory: my_directory/
-
-    partitioner:
-        class_name: RegexPartitioner
+    default_regex:
         group_names:
             - data_asset_name
             - year
@@ -95,38 +95,36 @@ Once configured, you can get ``Validators`` from the ``DataContext`` as follows:
 
     my_validator = my_context.get_validator(
         execution_engine_name="my_execution_engine",
-            data_connector_name="my_data_connector",
+        data_connector_name="my_data_connector",
         data_asset_name="alpha",
-        partition_request={
-            year="2020",
-            month="01",
-            day="01",
-        }
+        create_expectation_suite_with_name="my_expectation_suite",
     )
 
 Example 2: Basic configuration with more than one DataAsset
 -----------------------------------------------------------
 
-Here’s a similar example, with two different DataAssets mixed together.
+Here’s a similar example, but this time two data_assets are mixed together in one folder.
+
+
+**Note**: For an equivalent configuration using ``ConfiguredAssetFilesSystemDataconnector``, please see Example 2
+in :ref:`How to configure an ConfiguredAssetFilesystemDataConnector <how_to_guides_how_to_configure_a_configuredassetfilesystemdataconnector>`
 
 .. code-block::
 
-    alpha-2020-01-01.csv
-    beta-2020-01-01.csv
-    alpha-2020-01-02.csv
-    beta-2020-01-02.csv
-    alpha-2020-01-03.csv
-    beta-2020-01-03.csv
+    test_data/alpha-2020-01-01.csv
+    test_data/beta-2020-01-01.csv
+    test_data/alpha-2020-01-02.csv
+    test_data/beta-2020-01-02.csv
+    test_data/alpha-2020-01-03.csv
+    test_data/beta-2020-01-03.csv
 
 The same configuration as Example 1...
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionerFileDataConnector
-    base_directory: my_directory/
-
-    partitioner:
-        class_name: RegexPartitioner
+    class_name: InferredAssetFilesystemDataConnector
+    base_directory: test_data/
+    default_regex:
         group_names:
             - data_asset_name
             - year
@@ -134,7 +132,7 @@ The same configuration as Example 1...
             - day
         pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv
 
-...will now make "alpha" and "beta" both available a DataAssets, with the following data_references:
+...will now make ``alpha`` and ``beta`` both available a DataAssets, with the following data_references:
 
 .. code-block::
 
@@ -154,10 +152,10 @@ The same configuration as Example 1...
     Unmatched data_references (0 of 0): []
 
 
-Example 4: Nested directory structure with the data_asset_name on the inside
+Example 3: Nested directory structure with the data_asset_name on the inside
 ----------------------------------------------------------------------------
 
-Here’s another example...
+Here’s a similar example, with a nested directory structure...
 
 .. code-block::
 
@@ -169,15 +167,13 @@ Here’s another example...
     2020/01/05/alpha.csv
     2020/01/05/beta.csv
 
-Here’s a configuration...
+Then this configuration...
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionerFileDataConnector
+    class_name: InferredAssetFilesystemDataConnector
     base_directory: my_directory/
-
-    partitioner:
-        class_name: RegexPartitioner
+    default_regex:
         group_names:
             - year
             - month
@@ -185,7 +181,7 @@ Here’s a configuration...
             - data_asset_name
         pattern: (\d{4})/(\d{2})/(\d{2})/(.*).csv
 
-...will now make "alpha" and "beta" both available a DataAssets, with the following data_references:
+...will now make ``alpha`` and ``beta`` both available a DataAssets, with the following data_references:
 
 .. code-block::
 
@@ -204,7 +200,7 @@ Here’s a configuration...
     Unmatched data_references (0 of 0): []
 
 
-Example 5: Nested directory structure with the data_asset_name on the outside
+Example 4: Nested directory structure with the data_asset_name on the outside
 -----------------------------------------------------------------------------
 
 In the following example, files are placed in a folder structure with the ``data_asset_name`` defined by the folder name (A, B, C, or D)
@@ -224,15 +220,14 @@ In the following example, files are placed in a folder structure with the ``data
     D/D-2.csv
     D/D-3.csv
 
-Here’s a configuration...
+Then this configuration...
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionerFileDataConnector
+    class_name: InferredAssetFilesystemDataConnector
     base_directory: /
 
-    partitioner:
-        class_name: RegexPartitioner
+    default_regex:
         group_names:
             - data_asset_name
             - letter
@@ -240,7 +235,7 @@ Here’s a configuration...
         pattern: (\w{1})/(\w{1})-(\d{1}).csv
 
 
-...will now make "A" and "B" and "C" into data_assets, with each containing 3 data_references
+...will now make ``A`` and ``B`` and ``C`` into data_assets, with each containing 3 data_references
 
 .. code-block::
 
@@ -258,7 +253,7 @@ Here’s a configuration...
 	Unmatched data_references (0 of 0): []
 
 
-Example 6: Redundant information in the naming convention (S3 Bucket)
+Example 5: Redundant information in the naming convention (S3 Bucket)
 ----------------------------------------------------------------------
 
 Here’s another example of a nested directory structure with data_asset_name defined in the bucket_name.
@@ -278,11 +273,10 @@ Here’s a configuration that will allow all the log files in the bucket to be a
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionerFileDataConnector
+    class_name: InferredAssetFilesystemDataConnector
     base_directory: /
 
-    partitioner:
-        class_name: RegexPartitioner
+    default_regex:
          group_names:
             - year
             - month
@@ -306,7 +300,7 @@ All the log files will be mapped to a single data_asset named ``my_bucket``.
 
 
 
-Example 7: Redundant information in the naming convention (random hash in name)
+Example 6: Random information in the naming convention
 -------------------------------------------------------------------------------
 
 In the following example, files are placed in folders according to the date of creation, and given a random hash value in their name.
@@ -326,11 +320,10 @@ Here’s a configuration that will allow all the log files to be associated with
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionerFileDataConnector
+    class_name: InferredAssetFilesystemDataConnector
     base_directory: /
 
-    partitioner:
-        class_name: RegexPartitioner
+    default_regex:
         group_names:
             - year
             - month
@@ -338,6 +331,7 @@ Here’s a configuration that will allow all the log files to be associated with
             - data_asset_name
         pattern: (\d{4})/(\d{2})/(\d{2})/(log_file)-.*\.txt\.gz
 
+... will give you the following output
 
 .. code-block::
 
@@ -351,8 +345,8 @@ Here’s a configuration that will allow all the log files to be associated with
     Unmatched data_references (0 of 0): []
 
 
-Example 8: Redundant information in the naming convention (timestamp of file creation)
--------------------------------------------------------------------------------
+Example 7: Redundant information in the naming convention (timestamp of file creation)
+--------------------------------------------------------------------------------------
 
 In the following example, files are placed in a single folder, and the name includes a timestamp of when the files were created
 
@@ -371,11 +365,10 @@ Here’s a configuration that will allow all the log files to be associated with
 
 .. code-block:: yaml
 
-    class_name: SinglePartitionerFileDataConnector
+    class_name: InferredAssetFilesystemDataConnector
     base_directory: /
 
-    partitioner:
-        class_name: RegexPartitioner
+    default_regex:
         group_names:
             - data_asset_name
             - year
@@ -398,21 +391,5 @@ All the log files will be mapped to the data_asset ``log_file``.
     Unmatched data_references (0 of 0): []
 
 
-More examples to be written:
----------
-
-* Extraneous files; show "Unmatched data_references"; show how to filter out with the optional glob_directive parameter: test_dir_juliette
-* {{{Example to demonstrate sorting}}}
-* {{{Example to demonstrate grouping}}}
-* {{{Example to demonstrate splitting}}}
-* {{{Example to demonstrate sampling}}}
-* Be careful with regexes: test_dir_lima
-* If there are many files, then `test_yaml_config` will only show three. (<>What's the workflow here?</>): test_dir_november
-
-
-Additional Resources
---------------------
-
-
 .. discourse::
-   :topic_identifier: NEED TO ADD ID HERE
+   :topic_identifier: 522
