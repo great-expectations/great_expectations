@@ -822,7 +822,7 @@ def is_numeric(value: Any) -> bool:
 def is_int(value: Any) -> bool:
     try:
         num: int = int(value)
-    except ValueError:
+    except (TypeError, ValueError):
         return False
     return True
 
@@ -830,7 +830,7 @@ def is_int(value: Any) -> bool:
 def is_float(value: Any) -> bool:
     try:
         num: float = float(value)
-    except ValueError:
+    except (TypeError, ValueError):
         return False
     return True
 
