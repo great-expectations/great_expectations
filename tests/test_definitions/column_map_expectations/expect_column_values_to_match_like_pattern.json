@@ -23,7 +23,7 @@
     },
     "tests": [
     {
-      "title": "Negative test, insufficient Mostly + one non-matching value",
+      "title": "negative_test__insufficient_mostly_and_one_non_matching_value",
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -38,7 +38,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title": "Positive test, exact mostly w/ one non-matching value",
+      "title": "positive_test__exact_mostly_w___one_non_matching_value",
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -53,7 +53,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title": "Positive_test_column_name_has_space",
+      "title": "positive_test_column_name_has_space",
       "exact_match_out" : false,
       "in": {
         "column": "column_name with space",
@@ -68,7 +68,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title": "Positive test, sufficient mostly w/ one non-matching value",
+      "title": "positive_test__sufficient_mostly_w___one_non_matching_value",
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -83,7 +83,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title": "Negative test, one missing value and insufficent mostly",
+      "title": "negative_test__one_missing_value_and_insufficent_mostly",
       "exact_match_out" : false,
       "in": {
         "column": "b",
@@ -98,7 +98,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title": "Positive test, one missing value and exact mostly",
+      "title": "positive_test__one_missing_value_and_exact_mostly",
       "exact_match_out" : false,
       "in": {
         "column": "b",
@@ -113,7 +113,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title": "Positive test, one missing value and sufficent mostly",
+      "title": "positive_test__one_missing_value_and_sufficent_mostly",
       "exact_match_out" : false,
       "in": {
         "column": "b",
@@ -128,7 +128,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title": "Positive test. all missing values",
+      "title": "positive_test___all_missing_values",
       "exact_match_out" : false,
       "in": {
         "column": "c",
@@ -142,7 +142,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title": "Positive test. all missing values, mostly",
+      "title": "positive_test___all_missing_values__mostly",
       "exact_match_out" : false,
       "in": {
         "column": "c",
@@ -157,7 +157,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title": "Positive test, match characters not at the beginning of string",
+      "title": "positive_test__match_characters_not_at_the_beginning_of_string",
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -172,7 +172,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title": "Negative test, insufficient Mostly + one non-matching value",
+      "title": "negative_test__insufficient_mostly_and_one_non_matching_value",
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -187,7 +187,7 @@
       "only_for": ["sqlite", "postresql", "mysql"]
     },
     {
-      "title": "Positive test, exact mostly w/ one non-matching value",
+      "title": "positive_test__exact_mostly_w___one_non_matching_value",
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -202,7 +202,7 @@
       "only_for": ["sqlite", "postresql", "mysql"]
     },
     {
-      "title": "Positive_test_column_name_has_space",
+      "title": "positive_test_column_name_has_space",
       "exact_match_out" : false,
       "in": {
         "column": "column_name with space",
@@ -217,7 +217,7 @@
       "only_for": ["sqlite", "postresql", "mysql"]
     },
     {
-      "title": "Positive test, sufficient mostly w/ one non-matching value",
+      "title": "positive_test__sufficient_mostly_w___one_non_matching_value",
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -232,7 +232,7 @@
       "only_for": ["sqlite", "postresql", "mysql"]
     },
     {
-      "title": "Negative test, one missing value and insufficent mostly",
+      "title": "negative_test__one_missing_value_and_insufficent_mostly",
       "exact_match_out" : false,
       "in": {
         "column": "b",
@@ -247,7 +247,7 @@
       "only_for": ["sqlite", "postresql", "mysql"]
     },
     {
-      "title": "Positive test, one missing value and exact mostly",
+      "title": "positive_test__one_missing_value_and_exact_mostly",
       "exact_match_out" : false,
       "in": {
         "column": "b",
@@ -262,7 +262,7 @@
       "only_for": ["sqlite", "postresql", "mysql"]
     },
     {
-      "title": "Positive test, one missing value and sufficent mostly",
+      "title": "positive_test__one_missing_value_and_sufficent_mostly",
       "exact_match_out" : false,
       "in": {
         "column": "b",
@@ -277,7 +277,7 @@
       "only_for": ["sqlite", "postresql", "mysql"]
     },
     {
-      "title": "Positive test. all missing values",
+      "title": "positive_test___all_missing_values",
       "exact_match_out" : false,
       "in": {
         "column": "c",
@@ -291,7 +291,7 @@
       "only_for": ["sqlite", "postresql", "mysql"]
     },
     {
-      "title": "Positive test. all missing values, mostly",
+      "title": "positive_test___all_missing_values__mostly",
       "exact_match_out" : false,
       "in": {
         "column": "c",
@@ -306,7 +306,7 @@
       "only_for": ["sqlite", "postresql", "mysql"]
     },
     {
-      "title": "Positive test, match characters not at the beginning of string",
+      "title": "positive_test__match_characters_not_at_the_beginning_of_string",
       "exact_match_out" : false,
       "in": {
         "column": "a",

@@ -17,7 +17,7 @@ yaml = YAML()
 yaml.default_flow_style = False
 
 
-class Datasource:
+class LegacyDatasource:
     """
 A Datasource connects to a compute environment and one or more storage environments and produces batches of data
 that Great Expectations can validate in that compute environment.
@@ -299,6 +299,7 @@ to configure the datasource to load and return DataAssets of the custom type.
 
         return generators
 
+    # TODO: move to data connector
     def process_batch_parameters(self, limit=None, dataset_options=None):
         """Use datasource-specific configuration to translate any batch parameters into batch kwargs at the datasource
         level.
@@ -324,6 +325,7 @@ to configure the datasource to load and return DataAssets of the custom type.
 
         return batch_kwargs
 
+    # TODO: move to execution engine or make a wrapper
     def get_batch(self, batch_kwargs, batch_parameters=None):
         """Get a batch of data from the datasource.
 
@@ -377,6 +379,7 @@ to configure the datasource to load and return DataAssets of the custom type.
             ] = generator.get_available_data_asset_names()
         return available_data_asset_names
 
+    # TODO: move to connector
     def build_batch_kwargs(
         self, batch_kwargs_generator, data_asset_name=None, partition_id=None, **kwargs
     ):

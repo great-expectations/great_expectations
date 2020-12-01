@@ -62,6 +62,8 @@
         "column": "zz",
         "parse_strings_as_datetimes": true
       },
+      "_note": "deprecating this test 20201109 because we are dropping support for parse_strings_as_datetimes; added empty only_for",
+      "only_for": [],
       "out": {
         "unexpected_list": [],
         "unexpected_index_list": [],
