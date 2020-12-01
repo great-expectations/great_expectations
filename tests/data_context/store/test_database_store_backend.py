@@ -6,6 +6,34 @@ from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.exceptions import StoreBackendError
 
 
+def test_database_store_backend_schema_spec(caplog, sa, test_backends):
+    if "postgresql" not in test_backends:
+        pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
+
+    store_backend = DatabaseStoreBackend(
+        credentials={
+            "drivername": "postgresql",
+            "username": "postgres",
+            "password": "",
+            "host": "localhost",
+            "port": "5432",
+            "schema": "special",
+            "database": "test_ci",
+        },
+        table_name="test_database_store_backend_url_key",
+        key_columns=["k1"],
+    )
+
+    # existing key
+    key = ("2",)
+
+    store_backend.set(key, "hello")
+    assert "hello" == store_backend.get(key)
+
+    # clean up values
+    store_backend.engine.execute(f"DROP TABLE {store_backend._table};")
+
+
 def test_database_store_backend_get_url_for_key(caplog, sa, test_backends):
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
