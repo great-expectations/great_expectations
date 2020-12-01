@@ -47,7 +47,7 @@ All of the examples below assume you’re testing configuration using something 
     """)
 
 
-If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides__miscellaneous__how_to_configure_datacontext_components_using_test_yaml_config>`
+If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 
 Example 1: Basic configuration for a single DataAsset
