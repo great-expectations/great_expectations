@@ -245,16 +245,10 @@ class BaseDatasource:
         return batch_definition_list
 
     def self_check(self, pretty_print=True, max_examples=3):
-        report_object = {
-            "execution_engine": {
-                "class_name": self.execution_engine.__class__.__name__,
-            }
-        }
         # Provide visibility into parameters that ExecutionEngine was instantiated with.
-        execution_engine_params_dict = {
-            k.lstrip("_"): v for k, v in self.execution_engine.__dict__.items()
+        report_object = {
+            "execution_engine": self.execution_engine.config
         }
-        report_object["execution_engine"].update(execution_engine_params_dict)
 
         if pretty_print:
             print(f"Execution engine: {self.execution_engine.__class__.__name__}")

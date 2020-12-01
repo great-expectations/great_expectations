@@ -16,6 +16,10 @@ from great_expectations.datasource.types import (
     S3BatchSpec,
 )
 from great_expectations.datasource.util import S3Url
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
 
 try:
     import boto3
@@ -82,16 +86,20 @@ Notes:
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
-        boto3_options: dict = None
-        if boto3_options is None:
-            boto3_options = {}
+        boto3_options: dict = kwargs.get("boto3_options", {})
 
         # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
         try:
             self._s3 = boto3.client("s3", **boto3_options)
         except (TypeError, AttributeError):
             self._s3 = None
+
         super().__init__(*args, **kwargs)
+
+        self._config = {
+            "discard_subset_failing_expectations": self.discard_subset_failing_expectations,
+            "boto3_options": boto3_options,
+        }
 
     def configure_validator(self, validator):
         super().configure_validator(validator)

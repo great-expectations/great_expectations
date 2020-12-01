@@ -9,6 +9,10 @@ from great_expectations.core.batch import Batch, BatchSpec
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -99,6 +103,10 @@ class ExecutionEngine:
     def loaded_batch_data_dict(self):
         """The current dictionary of batches."""
         return self._batch_data_dict
+
+    @property
+    def config(self) -> dict:
+        return self._config
 
     def get_batch_data(self, batch_spec: BatchSpec,) -> Any:
         """Interprets batch_data and returns the appropriate data.
