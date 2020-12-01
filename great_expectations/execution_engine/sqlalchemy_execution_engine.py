@@ -20,9 +20,9 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
 from great_expectations.util import (
-    import_library_module,
+    filter_properties_dict,
     get_currently_executing_function_call_arguments,
-    filter_properties_dict
+    import_library_module,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
@@ -382,13 +382,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     a url can be used to access the data. This will be overridden by all other configuration
                     options if any are provided.
         """
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
-        self._config = get_currently_executing_function_call_arguments(
-            include_module_name=True, **{"class_name": self.__class__.__name__, }
-        )
-        filter_properties_dict(properties=self._config, inplace=True)
-
         super().__init__(name=name, batch_data_dict=batch_data_dict)  # , **kwargs)
         self._name = name
 
@@ -467,6 +460,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 },
                 success=True,
             )
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            **{"class_name": self.__class__.__name__}
+        )
+        filter_properties_dict(
+            properties=self._config,
+            delete_fields=["connection_string", "kwargs"],
+            inplace=True,
+        )
 
     @property
     def credentials(self):

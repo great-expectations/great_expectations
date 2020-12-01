@@ -13,6 +13,11 @@ from great_expectations.datasource.types.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
+
 from ..exceptions import (
     BatchKwargsError,
     BatchSpecError,
@@ -23,10 +28,6 @@ from ..exceptions import (
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
 from .execution_engine import ExecutionEngine, MetricDomainTypes
-from great_expectations.util import (
-    filter_properties_dict,
-    get_currently_executing_function_call_arguments,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -172,10 +173,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         super().__init__(*args, **kwargs)
 
-        self._config = {
-            "persist": self._persist,
-            "spark_config": self._spark_config,
-        }
+        self._config.update(
+            {"persist": self._persist, "spark_config": self._spark_config,}
+        )
 
     @property
     def dataframe(self):

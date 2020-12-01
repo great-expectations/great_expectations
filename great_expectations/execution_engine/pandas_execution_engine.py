@@ -96,10 +96,12 @@ Notes:
 
         super().__init__(*args, **kwargs)
 
-        self._config = {
-            "discard_subset_failing_expectations": self.discard_subset_failing_expectations,
-            "boto3_options": boto3_options,
-        }
+        self._config.update(
+            {
+                "discard_subset_failing_expectations": self.discard_subset_failing_expectations,
+                "boto3_options": boto3_options,
+            }
+        )
 
     def configure_validator(self, validator):
         super().configure_validator(validator)

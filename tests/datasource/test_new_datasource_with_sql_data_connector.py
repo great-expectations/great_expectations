@@ -60,13 +60,8 @@ data_connectors:
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=4))
 
-    report["execution_engine"].pop("connection_string")
-    report["execution_engine"].pop("kwargs")
     assert report == {
-        "execution_engine": {
-            "class_name": "SqlAlchemyExecutionEngine",
-            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine"
-        },
+        "execution_engine": {"class_name": "SqlAlchemyExecutionEngine",},
         "data_connectors": {
             "count": 1,
             "my_sqlite_db": {

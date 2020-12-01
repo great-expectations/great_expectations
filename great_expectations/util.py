@@ -4,10 +4,8 @@ import json
 import logging
 import os
 import time
-from functools import wraps
-from pathlib import Path
-from typing import Callable, Union
 from collections import OrderedDict
+from functools import wraps
 from gc import get_referrers
 from inspect import (
     ArgInfo,
@@ -19,7 +17,10 @@ from inspect import (
     getmodule,
     signature,
 )
+from pathlib import Path
 from types import CodeType, FrameType, ModuleType
+from typing import Callable, Union
+
 import black
 from pkg_resources import Distribution
 
@@ -99,7 +100,7 @@ def get_currently_executing_function_call_arguments(
         referer
         for referer in get_referrers(fc)
         if getattr(referer, "__code__", None) is fc
-           and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
+        and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
     ][0]
     cur_mod = getmodule(cur_func_obj)
     sig: Signature = signature(cur_func_obj)
