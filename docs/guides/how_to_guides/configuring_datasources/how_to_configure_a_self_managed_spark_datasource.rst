@@ -140,7 +140,6 @@ To enable running Great Expectations against dataframe created by Spark SQL quer
               spark_dataframe:
                 class_name: Datasource
                 execution_engine:
-                  module_name: great_expectations.execution_engine
                   class_name: SparkDFExecutionEngine
                 data_connectors:
                   simple_filesystem_data_connector:
