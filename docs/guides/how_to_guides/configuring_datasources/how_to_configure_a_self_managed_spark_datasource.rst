@@ -143,7 +143,6 @@ To enable running Great Expectations against dataframe created by Spark SQL quer
                   class_name: SparkDFExecutionEngine
                 data_connectors:
                   simple_filesystem_data_connector:
-                    module_name: great_expectations.datasource.data_connector
                     class_name: InferredAssetFilesystemDataConnector
                     base_directory: /root/directory/containing/data/files
                     glob_directive: '*'
