@@ -12,7 +12,7 @@ import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -393,6 +393,12 @@ Notes:
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.discard_subset_failing_expectations = kwargs.get(
+            "discard_subset_failing_expectations", False
+        )
+
     @property
     def _constructor(self):
         return self.__class__
@@ -411,12 +417,6 @@ Notes:
                 self.discard_failing_expectations()
         super().__finalize__(other, method, **kwargs)
         return self
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.discard_subset_failing_expectations = kwargs.get(
-            "discard_subset_failing_expectations", False
-        )
 
     def _apply_row_condition(self, row_condition, condition_parser):
         if condition_parser not in ["python", "pandas"]:

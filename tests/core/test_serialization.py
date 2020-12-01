@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 
-from great_expectations.core import convert_to_json_serializable
+from great_expectations.core.util import convert_to_json_serializable
 
 
 def test_lossy_serialization_warning(caplog):

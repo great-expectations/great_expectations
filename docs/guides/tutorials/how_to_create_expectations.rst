@@ -17,7 +17,7 @@ Once the initial setup of Great Expectations is complete, the workflow looks lik
 3. If the observed properties of the data are found to be different from the expected ones, the team responds by rejecting (or fixing) the data, updating the Expectations, or both.
 
 
-Expectations are grouped into Expectations Suites. An Expectation Suite combines multiple Expectations into an overall description of a dataset. For example, a team can group all the Expectations about the ``rating`` table in the movie ratings database into an Expectation Suite and call it "movieratings.table.expectations".
+Expectations are grouped into Expectation Suites. An Expectation Suite combines multiple Expectations into an overall description of a dataset. For example, a team can group all the Expectations about the ``rating`` table in the movie ratings database into an Expectation Suite and call it "movieratings.table.expectations".
 
 Each Expectation Suite is saved as a JSON file in the ``great_expectations/expectations`` subdirectory of the Data Context. Users check these files into version control each time they are updated, in the same way they treat their source files.
 
@@ -42,8 +42,6 @@ This command prompts you to name your new Expectation Suite and to select a samp
 
 The command concludes by saving the newly generated Expectation Suite as a JSON file and rendering the expectation suite into an HTML page in the Data Docs website of the Data Context.
 
-
-
 Review an Expectation Suite
 ---------------------------
 
@@ -54,7 +52,7 @@ It helps to keep your entire team on the same page as data evolves.
 
 Reviewing Expectations is best done in Data Docs:
 
-.. image:: /images/sample_e_s_view.png
+.. figure:: /images/sample_e_s_view.png
 
 Edit an Expectation Suite
 -------------------------
@@ -67,17 +65,15 @@ For every expectation type there is a Python method that sets its arguments, eva
 
 Take a look at the screenshot below. It shows the HTML view and the Python method for the same expectation (``expect_column_distinct_values_to_be_in_set``) side by side:
 
-.. image:: /images/exp_html_python_side_by_side .png
+.. figure:: /images/exp_html_python_side_by_side .png
 
 The :ref:`CLI <command_line>` provides a command that, given an Expectation Suite, generates a Jupyter notebook to edit it. It takes care of generating a cell for every expectation in the suite and of getting a sample batch of data. The HTML page for each Expectation Suite has the CLI command syntax in order to make it easier for users.
 
-.. image:: /images/edit_e_s_popup.png
+.. figure:: /images/edit_e_s_popup.png
 
 The generated Jupyter notebook can be discarded, since it is auto-generated.
 
 To understand this auto-generated notebook in more depth, jump to this section: :ref:`jupyter_notebook_for_creating_and_editing_expectation_suites`.
-
-
 
 .. _jupyter_notebook_for_creating_and_editing_expectation_suites:
 
@@ -89,6 +85,9 @@ edit this Expectation Suite, use the :ref:`CLI <command_line>` again to generate
 
 If you do not use the :ref:`CLI <command_line>`, create a new notebook in the``great_expectations/notebooks/`` folder in your project.
 
+.. admonition:: If Using Experimental API (0.13)
+
+    The following steps are only applicable for the stable API (up to 0.12.x). If you are using the experimental API (0.13), follow the steps outlined in the how-to guide on :ref:`how to create a Expectation Suite without the CLI <how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_without_the_cli>`.
 
 1. Setup
 ********************************************
@@ -113,7 +112,6 @@ If you do not use the :ref:`CLI <command_line>`, create a new notebook in the``g
 
 
 If an expectation suite with this name already exists for this data_asset, you will get an error. If you would like to overwrite this expectation suite, set ``overwrite_existing=True``.
-
 
 2. Load a batch of data to create Expectations
 **********************************************
@@ -236,20 +234,20 @@ column.
 
 Here is how we can add an expectation that expresses that knowledge:
 
-.. image:: /images/expect_column_values_to_be_unique_success.png
+.. figure:: /images/expect_column_values_to_be_unique_success.png
 
 Other Expectations can be created by examining the data in the batch. For example, suppose you want to protect a pipeline
 against improper values in the "Provider Other Organization Name Type Code" column. Even if you don't know exactly what the
 "improper" values are, you can explore the data by trying some values to check if the data in the batch meets your expectation:
 
-.. image:: /images/expect_column_values_to_be_in_set_failure.png
+.. figure:: /images/expect_column_values_to_be_in_set_failure.png
 
 Validating the expectation against the batch resulted in failure - there are some values in the column that do not meet
 the expectation. The "partial_unexpected_list" key in the result dictionary contains examples of non-conforming values.
 Examining these examples shows that some titles are not in the expected set. Adjust the ``value_set`` and rerun
 the expectation method:
 
-.. image:: /images/expect_column_values_to_be_in_set_success.png
+.. figure:: /images/expect_column_values_to_be_in_set_success.png
 
 This time validation was successful - all values in the column meet the expectation.
 
@@ -266,10 +264,8 @@ How do I know which types of Expectations I can add?
 * Visit the :ref:`expectation_glossary` for a complete
   list of Expectations that are currently part of the great Expectations vocabulary. Here is a short preview of the glossary:
 
-.. image:: /images/glossary_of_expectations_preview.png
+.. figure:: /images/glossary_of_expectations_preview.png
     :width: 400px
-
-
 
 4. Finalize
 ********************************************
