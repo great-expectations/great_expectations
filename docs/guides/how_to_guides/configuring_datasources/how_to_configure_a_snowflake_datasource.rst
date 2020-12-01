@@ -260,7 +260,7 @@ Steps
             .. code-block:: bash
 
                 Attempting to instantiate class from config...
-                Instantiating as a DataSource, since class_name is StreamlinedSqlDataSource
+                Instantiating as a DataSource, since class_name is SimpleSqlalchemyDatasource
                 Successfully instantiated StreamlinedSqlExecutionEnvironment
 
                 Execution engine: SqlAlchemyExecutionEngine

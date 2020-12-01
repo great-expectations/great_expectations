@@ -176,14 +176,14 @@ Steps
 
         #. **Create or copy a yaml config**
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``StreamlinedSqlDataSource`` with associated credentials.  Username and  password are set as environment variables, and host, port, and database are set as strings.
+            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials.  Username and  password are set as environment variables, and host, port, and database are set as strings.
 
             Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
 
             .. code-block:: python
 
                 my_config = f"""
-                class_name: StreamlinedSqlDataSource
+                class_name: SimpleSqlalchemyDatasource
                 credentials:
                     drivername: postgresql+psycopg2
                     username: ${my_username}
@@ -240,7 +240,6 @@ Steps
                     4        9                 Sudden Death (1995)                                       Action
 
 
-            **Note**: In the current example, the yaml configuration will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add the configuration information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
 
             If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.  Whenever possible, ``test_yaml_config`` provides helpful warnings and error messages, like the example below. It can't solve every problem, but it can solve many.
 
@@ -250,6 +249,12 @@ Steps
 
                 psycopg2.OperationalError: FATAL:  password authentication failed for user "my_username"
                 FATAL:  password authentication failed for user "my_username"
+
+            **Note**: In the current example, the yaml configuration will only create a connection to the Datasource for the current session. After you exit python, the Datasource and configuration will be gone.
+
+        #. **Save the config.**
+
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup by copying it into the ``datasources`` section of your ``great_expectations/great_expectations.yml`` file.
 
 ----------------
 Additional Notes
