@@ -149,7 +149,7 @@ To enable running Great Expectations against dataframe created by Spark SQL quer
                     base_directory: /root/directory/containing/data/files
                     glob_directive: '*'
                     default_regex:
-                      pattern: (.+)\..+
+                      pattern: (.+)\.csv
                       group_names:
                       - data_asset_name
 
@@ -232,7 +232,7 @@ Additional Notes
                     base_directory: /root/directory/containing/data/files
                     glob_directive: '*'
                     default_regex:
-                      pattern: (.+)\..+
+                      pattern: (.+)\.csv
                       group_names:
                       - data_asset_name
 
