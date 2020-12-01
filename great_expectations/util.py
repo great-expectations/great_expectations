@@ -19,7 +19,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Callable, Union, Optional, Any
+from typing import Any, Callable, Optional, Union
 
 import black
 from pkg_resources import Distribution
@@ -794,8 +794,8 @@ def filter_properties_dict(
     if clean_empty:
         keys_for_deletion.extend(
             [
-                key for key, value
-                in properties.items()
+                key
+                for key, value in properties.items()
                 if not (
                     (keep_fields and key in keep_fields)
                     or is_numeric(value=value)

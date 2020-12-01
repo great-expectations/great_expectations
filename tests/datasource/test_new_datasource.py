@@ -189,45 +189,39 @@ def test_basic_pandas_datasource_self_check(basic_pandas_datasource):
             "caching": True,
             "class_name": "PandasExecutionEngine",
             "discard_subset_failing_expectations": False,
-            "boto3_options": {}
+            "boto3_options": {},
         },
         "data_connectors": {
             "count": 2,
             "my_filesystem_data_connector": {
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
                 "data_asset_count": 1,
-                "example_data_asset_names": [
-                    "Titanic"
-                ],
+                "example_data_asset_names": ["Titanic"],
                 "data_assets": {
                     "Titanic": {
                         "batch_definition_count": 0,
-                        "example_data_references": []
+                        "example_data_references": [],
                     }
                 },
                 "unmatched_data_reference_count": 0,
                 "example_unmatched_data_references": [],
-                "example_data_reference": {}
+                "example_data_reference": {},
             },
             "test_runtime_data_connector": {
                 "class_name": "RuntimeDataConnector",
                 "data_asset_count": 1,
-                "example_data_asset_names": [
-                    "IN_MEMORY_DATA_ASSET"
-                ],
+                "example_data_asset_names": ["IN_MEMORY_DATA_ASSET"],
                 "data_assets": {
                     "IN_MEMORY_DATA_ASSET": {
                         "batch_definition_count": 1,
-                        "example_data_references": [
-                            ""
-                        ]
+                        "example_data_references": [""],
                     }
                 },
                 "unmatched_data_reference_count": 0,
                 "example_unmatched_data_references": [],
-                "example_data_reference": {}
-            }
-        }
+                "example_data_reference": {},
+            },
+        },
     }
 
 
@@ -245,9 +239,9 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
                     "spark.driver.memory": "6g",
                     "spark.ui.showConsoleProgress": False,
                     "spark.sql.shuffle.partitions": 2,
-                    "spark.default.parallelism": 4
+                    "spark.default.parallelism": 4,
                 }
-            }
+            },
         },
         "data_connectors": {
             "count": 2,
@@ -257,27 +251,23 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
                 "example_data_asset_names": [],
                 "data_assets": {},
                 "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": []
+                "example_unmatched_data_references": [],
             },
             "test_runtime_data_connector": {
                 "class_name": "RuntimeDataConnector",
                 "data_asset_count": 1,
-                "example_data_asset_names": [
-                    "IN_MEMORY_DATA_ASSET"
-                ],
+                "example_data_asset_names": ["IN_MEMORY_DATA_ASSET"],
                 "data_assets": {
                     "IN_MEMORY_DATA_ASSET": {
                         "batch_definition_count": 1,
-                        "example_data_references": [
-                            ""
-                        ]
+                        "example_data_references": [""],
                     }
                 },
                 "unmatched_data_reference_count": 0,
                 "example_unmatched_data_references": [],
-                "example_data_reference": {}
-            }
-        }
+                "example_data_reference": {},
+            },
+        },
     }
 
 
@@ -465,7 +455,9 @@ def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_e
     batch_request: BatchRequest = BatchRequest(**batch_request)
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        batch_list: List[Batch] = basic_pandas_datasource.get_batch_list_from_batch_request(
+        batch_list: List[
+            Batch
+        ] = basic_pandas_datasource.get_batch_list_from_batch_request(
             batch_request=batch_request
         )
 
