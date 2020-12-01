@@ -31,6 +31,14 @@ class StoreBackend(metaclass=ABCMeta):
         manually_initialize_store_backend_id: str = "",
         store_name="no_store_name",
     ):
+        """
+        Initialize a StoreBackend
+        Args:
+            fixed_length_key:
+            suppress_store_backend_id: skip construction of a StoreBackend.store_backend_id
+            manually_initialize_store_backend_id: UUID as a string to use if the store_backend_id is not already set
+            store_name: store name given in the DataContextConfig (via either in-code or yaml configuration)
+        """
         self._fixed_length_key = fixed_length_key
         self._suppress_store_backend_id = suppress_store_backend_id
         self._manually_initialize_store_backend_id = (

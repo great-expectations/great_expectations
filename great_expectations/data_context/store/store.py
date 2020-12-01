@@ -27,7 +27,13 @@ class Store:
     def __init__(
         self, store_backend=None, runtime_environment=None, store_name="no_store_name"
     ):
-        """Runtime environment may be necessary to instantiate store backend elements."""
+        """
+        Runtime environment may be necessary to instantiate store backend elements.
+        Args:
+            store_backend:
+            runtime_environment:
+            store_name: store name given in the DataContextConfig (via either in-code or yaml configuration)
+        """
         if store_backend is None:
             store_backend = {"class_name": "InMemoryStoreBackend"}
         self._store_name = store_name
