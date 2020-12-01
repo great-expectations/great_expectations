@@ -127,7 +127,6 @@ great_expectations/
         config_variables.yml
         data_docs/
             local_site/
-                .ge_store_backend_id
                 index.html
                 expectations/
                     warning.html

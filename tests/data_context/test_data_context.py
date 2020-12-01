@@ -499,7 +499,6 @@ project_path/
         == """\
 data_docs/
     local_site/
-        .ge_store_backend_id
         index.html
         expectations/
             random/

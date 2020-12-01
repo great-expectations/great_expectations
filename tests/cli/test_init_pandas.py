@@ -116,7 +116,6 @@ def test_cli_init_on_new_project(
         config_variables.yml
         data_docs/
             local_site/
-                .ge_store_backend_id
                 index.html
                 expectations/
                     Titanic/
@@ -606,7 +605,6 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         config_variables.yml
         data_docs/
             local_site/
-                .ge_store_backend_id
                 index.html
                 expectations/
                     Titanic/

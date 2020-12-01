@@ -83,7 +83,6 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
         == """\
 test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir0/
     my_store/
-        .ge_store_backend_id
         validations/
             a/
                 b/
