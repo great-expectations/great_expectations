@@ -41,10 +41,11 @@ class DatabaseStoreBackend(StoreBackend):
             )
 
         drivername = credentials.pop("drivername")
+        schema = credentials.pop("schema", None)
         options = URL(drivername, **credentials)
         self.engine = create_engine(options)
 
-        meta = MetaData()
+        meta = MetaData(schema=schema)
         self.key_columns = key_columns
         # Dynamically construct a SQLAlchemy table with the name and column names we'll use
         cols = []
@@ -67,6 +68,8 @@ class DatabaseStoreBackend(StoreBackend):
         except NoSuchTableError:
             table = Table(table_name, meta, *cols)
             try:
+                if schema:
+                    self.engine.execute(f"CREATE SCHEMA IF NOT EXISTS {schema};")
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
                 raise ge_exceptions.StoreBackendError(
