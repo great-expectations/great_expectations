@@ -1,15 +1,33 @@
-X.. _changelog:
+.. _changelog:
 
 #########
 Changelog
 #########
 
-BREAKING CHANGES:
-* **Renamed** Datasource to LegacyDatasource and introduced the new Datasource class. Because most installations rely on one PandasDatasource, SqlAlchemyDatasource, or SparkDFDatasource, most users will not be affected. If you have implemented highly customized Datasource class inheriting from the base class, you may need to update your inheritance. 
 
 
-Develop
+0.13.0
 -----------------
+* INTRODUCING THE NEW MODULAR EXPECTATIONS API (Experimental): this release introduces a new way to create expectation logic in its own class, making it much easier to author and share expectations. ``Expectation`` and ``MetricProvider`` classes now work together to validate data and consolidate logic for all backends by function. See the how-to guides in our documentation for more information on how to use the new API.
+* INTRODUCING THE NEW DATASOURCE API (Experimental): this release introduces a new way to connect to datasources providing much richer guarantees for discovering ("inferring") data assets and partitions. The new API replaces "BatchKwargs" and "BatchKwargsGenerators" with BatchDefinition and BatchSpec objects built from DataConnector classes. You can read about the new API in our docs.
+* The Core Concepts section of our documentation has been updated with descriptions of the classes and concepts used in the new API; we will continue to update that section and welcome questions and improvements.
+* BREAKING: Data Docs rendering is now handled in the new Modular Expectations, which means that any custom expectation rendering needs to be migrated to the new API to function in version 0.13.0.
+* BREAKING: **Renamed** Datasource to LegacyDatasource and introduced the new Datasource class. Because most installations rely on one PandasDatasource, SqlAlchemyDatasource, or SparkDFDatasource, most users will not be affected. However, if you have implemented highly customized Datasource class inheriting from the base class, you may need to update your inheritance.
+* BREAKING: The new Modular Expectations API will begin removing the ``parse_strings_as_datetimes`` and ``allow_cross_type_comparisons`` flags in expectations. Expectation Suites that use the flags will need to be updated to use the new Modular Expectations. In general, simply removing the flag will produce correct behavior; if you still want the exact same semantics, you should ensure your raw data already has typed datetime objects.
+* **NOTE:** Both the new Datasource API and the new Modular Expectations API are *experimental* and will change somewhat during the next several point releases. We are extremely excited for your feedback while we iterate rapidly, and continue to welcome new community contributions.
+
+
+0.12.10
+-----------------
+* [BUGFIX] Update requirements.txt for ruamel.yaml to >=0.16 - #2048 (thanks @mmetzger!)
+* [BUGFIX] Added option to return scalar instead of list from query store #2060
+* [BUGFIX] Add missing markdown_content_block_container #2063
+* [BUGFIX] Fixed a divided by zero error for checkpoints on empty expectation suites #2064
+* [BUGFIX] Updated sort to correctly return partial unexpected results when expect_column_values_to_be_of_type has more than one unexpected type #2074
+* [BUGFIX] Resolve Data Docs resource identifier issues to speed up UpdateDataDocs action #2078
+* [DOCS] Updated contribution changelog location #2051 (thanks @shapiroj18!)
+* [DOCS] Adding Airflow operator and Astrononomer deploy guides #2070
+* [DOCS] Missing image link to bigquery logo #2071 (thanks @nelsonauner!)
 
 0.12.9
 -----------------

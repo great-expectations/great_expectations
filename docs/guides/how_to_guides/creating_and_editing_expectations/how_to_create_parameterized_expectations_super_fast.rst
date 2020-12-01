@@ -1,7 +1,7 @@
 How to Create Parameterized Expectations - Super Fast
 _____________________________________________________
 
-This guide will walk you through the process of creating Parameterized Expectations - very quickly. 
+This guide will walk you through the process of creating Parameterized Expectations - very quickly. This method is only available using the new Modular Expectations API in 0.13.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 

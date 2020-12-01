@@ -1,13 +1,11 @@
 from typing import Dict, Optional
 
 import numpy as np
-import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.batch import Batch
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import Expectation, TableExpectation
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.registry import extract_metrics
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
@@ -246,23 +244,25 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
                 ]
             )
 
-        quantile_range_table = {
-            "content_block_type": "table",
-            "header_row": table_header_row,
-            "table": table_rows,
-            "styling": {
-                "body": {
-                    "classes": [
-                        "table",
-                        "table-sm",
-                        "table-unbordered",
-                        "col-4",
-                        "mt-2",
-                    ],
+        quantile_range_table = RenderedTableContent(
+            **{
+                "content_block_type": "table",
+                "header_row": table_header_row,
+                "table": table_rows,
+                "styling": {
+                    "body": {
+                        "classes": [
+                            "table",
+                            "table-sm",
+                            "table-unbordered",
+                            "col-4",
+                            "mt-2",
+                        ],
+                    },
+                    "parent": {"styles": {"list-style-type": "none"}},
                 },
-                "parent": {"styles": {"list-style-type": "none"}},
-            },
-        }
+            }
+        )
 
         return [expectation_string_obj, quantile_range_table]
 

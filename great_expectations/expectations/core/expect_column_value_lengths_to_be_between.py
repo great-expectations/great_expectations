@@ -1,15 +1,22 @@
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
+from ...core import ExpectationValidationResult
 from ...data_asset.util import parse_result_format
 from ...exceptions import InvalidExpectationConfigurationError
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
+from ...render.types import (
+    RenderedBulletListContent,
+    RenderedContent,
+    RenderedGraphContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+)
 from ...render.util import (
     handle_strict_min_max,
     num_to_str,
@@ -129,12 +136,22 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: ExpectationConfiguration = None,
+        result: ExpectationValidationResult = None,
+        language: str = None,
+        runtime_configuration: dict = None,
         **kwargs,
-    ):
+    ) -> List[
+        Union[
+            dict,
+            str,
+            RenderedStringTemplateContent,
+            RenderedTableContent,
+            RenderedBulletListContent,
+            RenderedGraphContent,
+            Any,
+        ]
+    ]:
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
