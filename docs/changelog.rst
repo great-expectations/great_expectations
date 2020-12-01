@@ -8,6 +8,9 @@ Develop
 -----------------
 * [ENHANCEMENT] Add support for connection_string and url in configuring DatabaseStoreBackend, bringing parity to other SQL-based objects. In the rare case of user code that instantiates a DatabaseStoreBackend without using the Great Expectations config architecture, users should ensure they are providing kwargs to init, because the init signature order has changed.
 
+Develop
+-----------------
+
 
 0.13.0
 -----------------

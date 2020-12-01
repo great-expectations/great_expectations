@@ -332,7 +332,7 @@ stages:
             inputs:
               pythonUploadServiceConnection: pypi
 
-          # Use command line script to 'twine upload', use --requirement (or -r) to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
+          # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
           - script: |
-              python -m twine upload --requirement great-expectations --config-file $(PYPIRC_PATH) dist/*
+              python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
             displayName: 'Upload'
