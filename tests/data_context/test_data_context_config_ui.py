@@ -10,9 +10,9 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     DataContextConfigSchema,
-    DatasourceConfig,
     FilesystemBackendEcosystem,
     GCSBackendEcosystem,
+    LegacyDatasourceConfig,
     S3BackendEcosystem,
 )
 
@@ -112,7 +112,7 @@ def test_DataContextConfig_with_BaseBackendEcosystem_and_simple_defaults(
 
     data_context_config = DataContextConfig(
         datasources={
-            "my_pandas_datasource": DatasourceConfig(
+            "my_pandas_datasource": LegacyDatasourceConfig(
                 class_name="PandasDatasource",
                 batch_kwargs_generators={
                     "subdir_reader": {
@@ -146,7 +146,7 @@ def test_DataContextConfig_with_S3BackendEcosystem(
 
     data_context_config = DataContextConfig(
         datasources={
-            "my_pandas_datasource": DatasourceConfig(
+            "my_pandas_datasource": LegacyDatasourceConfig(
                 class_name="PandasDatasource",
                 batch_kwargs_generators={
                     "subdir_reader": {
@@ -221,7 +221,7 @@ def test_DataContextConfig_with_S3BackendEcosystem_using_all_parameters(
 
     data_context_config = DataContextConfig(
         datasources={
-            "my_pandas_datasource": DatasourceConfig(
+            "my_pandas_datasource": LegacyDatasourceConfig(
                 class_name="PandasDatasource",
                 module_name="great_expectations.datasource",
                 data_asset_type={
@@ -313,7 +313,7 @@ def test_DataContextConfig_with_FilesystemBackendEcosystem_and_simple_defaults(
 
     data_context_config = DataContextConfig(
         datasources={
-            "my_pandas_datasource": DatasourceConfig(
+            "my_pandas_datasource": LegacyDatasourceConfig(
                 class_name="PandasDatasource",
                 batch_kwargs_generators={
                     "subdir_reader": {
@@ -349,7 +349,7 @@ def test_DataContextConfig_with_GCSBackendEcosystem(
 
     data_context_config = DataContextConfig(
         datasources={
-            "my_pandas_datasource": DatasourceConfig(
+            "my_pandas_datasource": LegacyDatasourceConfig(
                 class_name="PandasDatasource",
                 module_name="great_expectations.datasource",
                 data_asset_type={
@@ -436,7 +436,7 @@ def test_DataContextConfig_with_GCSBackendEcosystem_using_all_parameters(
 
     data_context_config = DataContextConfig(
         datasources={
-            "my_pandas_datasource": DatasourceConfig(
+            "my_pandas_datasource": LegacyDatasourceConfig(
                 class_name="PandasDatasource",
                 module_name="great_expectations.datasource",
                 data_asset_type={
@@ -535,7 +535,7 @@ def test_DataContextConfig_with_DatabaseBackendEcosystem(
 
     data_context_config = DataContextConfig(
         datasources={
-            "my_pandas_datasource": DatasourceConfig(
+            "my_pandas_datasource": LegacyDatasourceConfig(
                 class_name="PandasDatasource",
                 module_name="great_expectations.datasource",
                 data_asset_type={
@@ -635,7 +635,7 @@ def test_DataContextConfig_with_DatabaseBackendEcosystem_using_all_parameters(
 
     data_context_config = DataContextConfig(
         datasources={
-            "my_pandas_datasource": DatasourceConfig(
+            "my_pandas_datasource": LegacyDatasourceConfig(
                 class_name="PandasDatasource",
                 module_name="great_expectations.datasource",
                 data_asset_type={
@@ -753,7 +753,7 @@ def test_override_general_defaults(
     """
     What does this test and why?
     A DataContextConfig should be able to be created by passing items into the constructor that override any defaults.
-    It should also be able to handle multiple datasources, even if they are configured with a dictionary or a DatasourceConfig.
+    It should also be able to handle multiple datasources, even if they are configured with a dictionary or a LegacyDatasourceConfig.
     """
 
     data_context_config = DataContextConfig(
@@ -770,7 +770,7 @@ def test_override_general_defaults(
                 "module_name": "great_expectations.datasource",
                 "batch_kwargs_generators": {},
             },
-            "my_pandas_datasource": DatasourceConfig(
+            "my_pandas_datasource": LegacyDatasourceConfig(
                 class_name="PandasDatasource",
                 batch_kwargs_generators={
                     "subdir_reader": {
@@ -983,7 +983,7 @@ def test_DataContextConfig_with_S3BackendEcosystem_and_simple_defaults_with_vari
 
     data_context_config = DataContextConfig(
         datasources={
-            "my_pandas_datasource": DatasourceConfig(
+            "my_pandas_datasource": LegacyDatasourceConfig(
                 class_name="PandasDatasource",
                 batch_kwargs_generators={
                     "subdir_reader": {
