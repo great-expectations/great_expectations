@@ -32,6 +32,7 @@ except ImportError:
 try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.engine.url import URL
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
@@ -501,7 +502,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _get_sqlalchemy_key_pair_auth_url(
         self, drivername: str, credentials: dict
-    ) -> Tuple[str, dict]:
+    ) -> Tuple[URL, Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
