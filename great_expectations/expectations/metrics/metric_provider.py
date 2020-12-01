@@ -76,6 +76,34 @@ class MetaMetricProvider(type):
 
 
 class MetricProvider(metaclass=MetaMetricProvider):
+    """Base class for all metric providers.
+
+    MetricProvider classes *must* have the following attributes set:
+        1. `metric_name`: the name to use. Metric Name must be globally unique in
+           a great_expectations installation.
+        1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
+           metric
+        2. `value_keys`: a tuple of the *keys* used to determine the value of
+           the metric.
+
+    In some cases, subclasses of Expectation, such as TableMetricProvider will already
+    have correct values that may simply be inherited.
+
+    They *may* optionally override the `default_kwarg_values` attribute.
+
+    MetricProvider classes *must* implement the following:
+        1. `_get_evaluation_dependencies`. Note that often, _get_evaluation_dependencies should
+        augment dependencies provided by a parent class; consider calling super()._get_evaluation_dependencies
+
+    In some cases, subclasses of Expectation, such as MapMetricProvider will already
+    have correct implementations that may simply be inherited.
+
+    Additionally, they *may* provide implementations of:
+        1. Data Docs rendering methods decorated with the @renderer decorator. See the guide
+        "How to create renderers for custom expectations" for more information.
+
+    """
+
     domain_keys = tuple()
     value_keys = tuple()
     default_kwarg_values = dict()
