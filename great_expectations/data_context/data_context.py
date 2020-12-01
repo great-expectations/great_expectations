@@ -266,9 +266,12 @@ class BaseDataContext:
         self._stores = dict()
         self._init_stores(self._project_config_with_variables_substituted.stores)
 
+        # Init data_context_id
+        self._data_context_id = self._construct_data_context_id()
+
         # Override the project_config data_context_id if an expectations_store was already set up
         self._project_config.anonymous_usage_statistics.data_context_id = (
-            self._construct_data_context_id()
+            self._data_context_id
         )
         self._initialize_usage_statistics(
             self._project_config.anonymous_usage_statistics
@@ -486,7 +489,7 @@ class BaseDataContext:
 
         self._usage_statistics_handler = UsageStatisticsHandler(
             data_context=self,
-            data_context_id=self._construct_data_context_id(),
+            data_context_id=self._data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
