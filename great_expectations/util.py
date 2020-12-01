@@ -19,7 +19,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Callable, Union
+from typing import Callable, Union, Optional, Any
 
 import black
 from pkg_resources import Distribution
@@ -754,11 +754,11 @@ def lint_code(code):
 
 def filter_properties_dict(
     properties: dict,
-    keep_fields: list = None,
-    delete_fields: list = None,
-    clean_empty: bool = True,
-    inplace: bool = False,
-) -> Union[dict, None]:
+    keep_fields: Optional[list] = None,
+    delete_fields: Optional[list] = None,
+    clean_empty: Optional[bool] = True,
+    inplace: Optional[bool] = False,
+) -> Optional[dict]:
     """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
 
     Args:
@@ -793,7 +793,15 @@ def filter_properties_dict(
 
     if clean_empty:
         keys_for_deletion.extend(
-            [key for key, value in properties.items() if not value]
+            [
+                key for key, value
+                in properties.items()
+                if not (
+                    (keep_fields and key in keep_fields)
+                    or is_numeric(value=value)
+                    or value
+                )
+            ]
         )
 
     keys_for_deletion = list(set(keys_for_deletion))
@@ -805,6 +813,26 @@ def filter_properties_dict(
         return None
 
     return properties
+
+
+def is_numeric(value: Any) -> bool:
+    return value is not None and (is_int(value) or is_float(value))
+
+
+def is_int(value: Any) -> bool:
+    try:
+        num: int = int(value)
+    except ValueError:
+        return False
+    return True
+
+
+def is_float(value: Any) -> bool:
+    try:
+        num: float = float(value)
+    except ValueError:
+        return False
+    return True
 
 
 def get_context():
