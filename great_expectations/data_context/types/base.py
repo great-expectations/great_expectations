@@ -678,76 +678,6 @@ class NotebooksConfigSchema(Schema):
         return NotebooksConfig(**data)
 
 
-class DataContextConfig(DictDot):
-    def __init__(
-        self,
-        config_version,
-        expectations_store_name,
-        validations_store_name,
-        evaluation_parameter_store_name,
-        plugins_directory,
-        validation_operators,
-        stores,
-        data_docs_sites,
-        notebooks=None,
-        config_variables_file_path=None,
-        anonymous_usage_statistics=None,
-        commented_map=None,
-        datasources=None,
-    ):
-        if commented_map is None:
-            commented_map = CommentedMap()
-        self._commented_map = commented_map
-        self._config_version = config_version
-        if datasources is None:
-            datasources = {}
-        self.datasources = datasources
-        self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        self.plugins_directory = plugins_directory
-        if not isinstance(validation_operators, dict):
-            raise ValueError(
-                "validation_operators must be configured with a dictionary"
-            )
-        self.validation_operators = validation_operators
-        self.stores = stores
-        self.notebooks = notebooks
-        self.data_docs_sites = data_docs_sites
-        self.config_variables_file_path = config_variables_file_path
-        if anonymous_usage_statistics is None:
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
-        elif isinstance(anonymous_usage_statistics, dict):
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-                **anonymous_usage_statistics
-            )
-        self.anonymous_usage_statistics = anonymous_usage_statistics
-
-    @property
-    def commented_map(self):
-        return self._commented_map
-
-    @property
-    def config_version(self):
-        return self._config_version
-
-    @classmethod
-    def from_commented_map(cls, commented_map):
-        try:
-            config = dataContextConfigSchema.load(commented_map)
-            return cls(commented_map=commented_map, **config)
-        except ValidationError:
-            logger.error(
-                "Encountered errors during loading data context config. See ValidationError for more details."
-            )
-            raise
-
-    def to_yaml(self, outfile):
-        commented_map = deepcopy(self.commented_map)
-        commented_map.update(dataContextConfigSchema.dump(self))
-        yaml.dump(commented_map, outfile)
-
-
 class DataContextConfigSchema(Schema):
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,
@@ -943,19 +873,13 @@ class S3BackendEcosystem(BaseBackendEcosystem):
         super().__init__()
 
         # Use default_bucket_name if separate store buckets are not provided
-        expectations_store_bucket_name = (
-            expectations_store_bucket_name
-            if expectations_store_bucket_name
-            else default_bucket_name
-        )
-        validations_store_bucket_name = (
-            validations_store_bucket_name
-            if validations_store_bucket_name
-            else default_bucket_name
-        )
-        data_docs_bucket_name = (
-            data_docs_bucket_name if data_docs_bucket_name else default_bucket_name
-        )
+        if expectations_store_bucket_name is None:
+            expectations_store_bucket_name = default_bucket_name
+        if validations_store_bucket_name is None:
+            validations_store_bucket_name = default_bucket_name
+        if data_docs_bucket_name is None:
+            data_docs_bucket_name = default_bucket_name
+
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
@@ -1054,38 +978,21 @@ class GCSBackendEcosystem(BaseBackendEcosystem):
         super().__init__()
 
         # Use default_bucket_name if separate store buckets are not provided
-        expectations_store_bucket_name = (
-            expectations_store_bucket_name
-            if expectations_store_bucket_name is not None
-            else default_bucket_name
-        )
-        # TODO: Change to this style
         if expectations_store_bucket_name is None:
             expectations_store_bucket_name = default_bucket_name
-
-        validations_store_bucket_name = (
-            validations_store_bucket_name
-            if validations_store_bucket_name
-            else default_bucket_name
-        )
-        data_docs_bucket_name = (
-            data_docs_bucket_name if data_docs_bucket_name else default_bucket_name
-        )
+        if validations_store_bucket_name is None:
+            validations_store_bucket_name = default_bucket_name
+        if data_docs_bucket_name is None:
+            data_docs_bucket_name = default_bucket_name
 
         # Use default_project_name if separate store projects are not provided
-        expectations_store_project_name = (
-            expectations_store_project_name
-            if expectations_store_project_name
-            else default_project_name
-        )
-        validations_store_project_name = (
-            validations_store_project_name
-            if validations_store_project_name
-            else default_project_name
-        )
-        data_docs_project_name = (
-            data_docs_project_name if data_docs_project_name else default_project_name
-        )
+        if expectations_store_project_name is None:
+            expectations_store_project_name = default_project_name
+        if validations_store_project_name is None:
+            validations_store_project_name = default_project_name
+        if data_docs_project_name is None:
+            data_docs_project_name = default_project_name
+
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
@@ -1154,16 +1061,10 @@ class DatabaseBackendEcosystem(BaseBackendEcosystem):
         super().__init__()
 
         # Use default credentials if seprate credentials not supplied for expectations_store and validations_store
-        expectations_store_credentials = (
-            expectations_store_credentials
-            if expectations_store_credentials
-            else default_credentials
-        )
-        validations_store_credentials = (
-            validations_store_credentials
-            if validations_store_credentials
-            else default_credentials
-        )
+        if expectations_store_credentials is None:
+            expectations_store_credentials = default_credentials
+        if validations_store_credentials is None:
+            validations_store_credentials = default_credentials
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
@@ -1214,45 +1115,30 @@ class DataContextConfig(DictDot):
     ):
 
         # Set defaults via backend_ecosystem if one is passed in
-        # What happens / should happen if a user specifies a backend_ecosystem
-        #  and also items that would be specified inside of it e.g. expectations_store_name?
         # Override attributes from backend_ecosystem with any items passed into the constructor:
-        if backend_ecosystem:
-            config_version = (
-                config_version if config_version else backend_ecosystem.config_version
-            )
-            stores = stores if stores is not None else backend_ecosystem.stores
-            expectations_store_name = (
-                expectations_store_name
-                if expectations_store_name
-                else backend_ecosystem.expectations_store_name
-            )
-            validations_store_name = (
-                validations_store_name
-                if validations_store_name
-                else backend_ecosystem.validations_store_name
-            )
-            evaluation_parameter_store_name = (
-                evaluation_parameter_store_name
-                if evaluation_parameter_store_name
-                else backend_ecosystem.evaluation_parameter_store_name
-            )
-            validation_operators = (
-                validation_operators
-                if validation_operators
-                else backend_ecosystem.validation_operators
-            )
-            data_docs_sites = (
-                data_docs_sites
-                if data_docs_sites
-                else backend_ecosystem.data_docs_sites
-            )
+        if backend_ecosystem is not None:
+            if config_version is None:
+                config_version = backend_ecosystem.config_version
+            if stores is None:
+                stores = backend_ecosystem.stores
+            if expectations_store_name is None:
+                expectations_store_name = backend_ecosystem.expectations_store_name
+            if validations_store_name is None:
+                validations_store_name = backend_ecosystem.validations_store_name
+            if evaluation_parameter_store_name is None:
+                evaluation_parameter_store_name = (
+                    backend_ecosystem.evaluation_parameter_store_name
+                )
+            if validation_operators is None:
+                validation_operators = backend_ecosystem.validation_operators
+            if data_docs_sites is None:
+                data_docs_sites = backend_ecosystem.data_docs_sites
 
-        if not commented_map:
+        if commented_map is None:
             commented_map = CommentedMap()
         self._commented_map = commented_map
         self._config_version = config_version
-        if not datasources:
+        if datasources is None:
             datasources = {}
         self.datasources = datasources
         self.expectations_store_name = expectations_store_name
@@ -1268,7 +1154,7 @@ class DataContextConfig(DictDot):
         self.notebooks = notebooks
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
-        if not anonymous_usage_statistics:
+        if anonymous_usage_statistics is None:
             anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
         elif isinstance(anonymous_usage_statistics, dict):
             anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
