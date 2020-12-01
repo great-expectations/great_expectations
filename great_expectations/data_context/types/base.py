@@ -20,6 +20,7 @@ from great_expectations.marshmallow__shade import (
 )
 from great_expectations.types import DictDot
 from great_expectations.types.configurations import ClassConfigSchema
+from great_expectations.util import load_class
 
 logger = logging.getLogger(__name__)
 
@@ -136,20 +137,16 @@ class DatasourceConfig(DictDot):
             )
 
         data_asset_type = (
-            defaults_class.data_asset_type()
-            if not data_asset_type
-            else data_asset_type
+            defaults_class.data_asset_type() if not data_asset_type else data_asset_type
         )
-        module_name = (
-            defaults_class.module_name() if not module_name else module_name
-        )
+        module_name = defaults_class.module_name() if not module_name else module_name
 
         return module_name, data_asset_type
 
     def __init__(
         self,
         class_name,
-        module_name=None,
+        module_name: Optional[str] = "great_expectations.datasource",
         data_asset_type=None,
         batch_kwargs_generators=None,
         credentials=None,
@@ -159,12 +156,20 @@ class DatasourceConfig(DictDot):
         **kwargs,
     ):
         # Set Defaults
-        module_name, data_asset_type = self.set_defaults(
-            class_name, module_name, data_asset_type
-        )
+        # module_name, data_asset_type = self.set_defaults(
+        #     class_name, module_name, data_asset_type
+        # )
 
+        # AJB TODO: defaults_config = load_class().build_configuration(class_name, module_name,...)
+        datasource_class = load_class(module_name=module_name, class_name=class_name)
+
+        # Since these classes have optional build_configuration methods
+        if hasattr(datasource_class, "build_configuration"):
+            config = datasource_class.build_configuration(**kwargs)
+        # TODO: Set defaults from config or kwargs passed into constructor
+        #  E.g. self._class_name = config.get("class_name", class_name)
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
-        self._class_name = class_name
+        self._class_name = config.get("class_name", class_name)
         self._module_name = module_name
         self.data_asset_type = data_asset_type
         if batch_kwargs_generators is not None:
@@ -489,10 +494,6 @@ class DataContextConfigSchema(Schema):
 
 
 class DataContextConfigDefaults(enum.Enum):
-    # TODO: should default plugins_directory be "plugins/" or None?
-    #  I think it may depend on in-memory or not. Is there checking
-    #  for this directory when it is used and graceful handling if not found?
-
     DEFAULT_CONFIG_VERSION = CURRENT_CONFIG_VERSION
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
@@ -627,9 +628,7 @@ class S3BackendEcosystem(BaseBackendEcosystem):
             else default_bucket_name
         )
         data_docs_bucket_name = (
-            data_docs_bucket_name
-            if data_docs_bucket_name
-            else default_bucket_name
+            data_docs_bucket_name if data_docs_bucket_name else default_bucket_name
         )
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
@@ -722,18 +721,20 @@ class GCSBackendEcosystem(BaseBackendEcosystem):
         # Use default_bucket_name if separate store buckets are not provided
         expectations_store_bucket_name = (
             expectations_store_bucket_name
-            if expectations_store_bucket_name
+            if expectations_store_bucket_name is not None
             else default_bucket_name
         )
+        # TODO: Change to this style
+        if expectations_store_bucket_name is None:
+            expectations_store_bucket_name = default_bucket_name
+
         validations_store_bucket_name = (
             validations_store_bucket_name
             if validations_store_bucket_name
             else default_bucket_name
         )
         data_docs_bucket_name = (
-            data_docs_bucket_name
-            if data_docs_bucket_name
-            else default_bucket_name
+            data_docs_bucket_name if data_docs_bucket_name else default_bucket_name
         )
 
         # Use default_project_name if separate store projects are not provided
@@ -748,9 +749,7 @@ class GCSBackendEcosystem(BaseBackendEcosystem):
             else default_project_name
         )
         data_docs_project_name = (
-            data_docs_project_name
-            if data_docs_project_name
-            else default_project_name
+            data_docs_project_name if data_docs_project_name else default_project_name
         )
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
@@ -889,9 +888,7 @@ class DataContextConfig(DictDot):
         # Override attributes from backend_ecosystem with any items passed into the constructor:
         if backend_ecosystem:
             config_version = (
-                config_version
-                if config_version
-                else backend_ecosystem.config_version
+                config_version if config_version else backend_ecosystem.config_version
             )
             stores = stores if stores is not None else backend_ecosystem.stores
             expectations_store_name = (
