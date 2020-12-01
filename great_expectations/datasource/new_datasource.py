@@ -251,7 +251,9 @@ class BaseDatasource:
             }
         }
         # Provide visibility into parameters that ExecutionEngine was instantiated with.
-        execution_engine_params_dict = {k.lstrip("_"): v for k, v in self.execution_engine.__dict__.items()}
+        execution_engine_params_dict = {
+            k.lstrip("_"): v for k, v in self.execution_engine.__dict__.items()
+        }
         report_object["execution_engine"].update(execution_engine_params_dict)
 
         if pretty_print:
