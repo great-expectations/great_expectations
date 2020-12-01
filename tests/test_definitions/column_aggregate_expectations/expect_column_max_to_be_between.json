@@ -5,9 +5,6 @@
       "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
       "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
       "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
-      "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
-      "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", "2/1/2017", null, null, null, null],
-      "zzz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", "2/1/2017", null, null, null, null],
       "a" : [null, 0, null, null, 1, null, null, 2, null, null],
       "b" : [null, 0, null, null, 2, null, null, 1, null, null]
     },
@@ -16,9 +13,6 @@
         "w" : "INTEGER",
         "x" : "INTEGER",
         "y" : "INTEGER",
-        "z" : "VARCHAR",
-        "zz" : "DATETIME",
-        "zzz" : "VARCHAR",
         "a" : "INTEGER",
         "b" : "INTEGER"
       },
@@ -26,15 +20,12 @@
         "w" : "INTEGER",
         "x" : "INTEGER",
         "y" : "INTEGER",
-        "z" : "TEXT",
-        "zz" : "TIMESTAMP",
-        "zzz" : "TEXT",
         "a" : "INTEGER",
         "b" : "INTEGER"
       }
     },
     "tests" : [{
-      "title": "Basic positive test case",
+      "title": "basic_positive_test_case",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -47,7 +38,7 @@
         "observed_value": 5
       }
     },{
-      "title": "Basic negative test case",
+      "title": "basic_negative_test_case",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -60,7 +51,7 @@
         "observed_value": 5
       }
     },{
-      "title": "Test case with result_format=SUMMARY. Also verifies that max_value is inclusive",
+      "title": "test_case_with_result_format__summary___also_verifies_that_max_value_is_inclusive",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -73,7 +64,7 @@
         "observed_value": 5
       }
     },{
-      "title": "Test case with only a lower bound, and a missing value",
+      "title": "test_case_with_only_a_lower_bound__and_a_missing_value",
       "exact_match_out" : false,
       "in": {
         "column": "x",
@@ -84,7 +75,7 @@
         "observed_value": 9.0
       }
     },{
-      "title": "Negative test case with only a lower bound",
+      "title": "negative_test_case_with_only_a_lower_bound",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -94,53 +85,13 @@
         "success": false,
         "observed_value": 5
       }
-    },{
-      "title": "Test on a series containing dates, with an output_strftime_format value",
-      "exact_match_out" : false,
-      "suppress_test_for": ["sqlalchemy"],
-      "in": {
-        "column": "zz",
-        "min_value": "2/1/2016",
-        "max_value": "3/1/2016",
-        "parse_strings_as_datetimes": true,
-        "output_strftime_format" : "%m/%d/%Y"
-      },
-      "out": {
-        "success": false,
-        "observed_value": "02/01/2017"
-      }
-    },{
-      "title": "Test on a date-like series containing strings",
-      "exact_match_out" : false,
-      "in": {
-        "column": "zzz",
-        "min_value": "2/1/2016",
-        "max_value": "3/1/2016",
-        "parse_strings_as_datetimes": false
-      },
-      "out": {
-        "success": true,
-        "observed_value": "3/1/2016"
-      }
-    },{
-      "title": "Test on strings",
-      "exact_match_out" : false,
-      "in": {
-        "column": "z",
-        "min_value": "d",
-        "max_value": "f"
-      },
-      "out": {
-        "success": true,
-        "observed_value": "e"
-      }
     }]},
     {
       "data": {
         "empty_column": []
       },
       "tests": [{
-        "title": "Test empty column; should be false (no observed value with which to compare)",
+        "title": "test_empty_column__should_be_false_no_observed_value_with_which_to_compare",
         "exact_match_out": false,
         "in": {
           "column": "empty_column",

@@ -1,6 +1,6 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.datasource import (
-    Datasource,
+    LegacyDatasource,
     PandasDatasource,
     SparkDFDatasource,
     SqlAlchemyDatasource,
@@ -16,7 +16,7 @@ class DatasourceAnonymizer(Anonymizer):
             PandasDatasource,
             SqlAlchemyDatasource,
             SparkDFDatasource,
-            Datasource,
+            LegacyDatasource,
         ]
 
     def anonymize_datasource_info(self, name, config):

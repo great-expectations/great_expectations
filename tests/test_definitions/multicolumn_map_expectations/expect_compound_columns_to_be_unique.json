@@ -20,7 +20,7 @@
       }
     },
     "tests" : [{
-      "title": "Basic test; ignore if all are missing (the default behavior)",
+      "title": "basic_test__ignore_if_all_are_missing_the_default_behavior",
       "exact_match_out" : false,
       "in": {
         "column_list": ["w", "x"]
@@ -31,7 +31,7 @@
         "success": true
       }
     },{
-      "title": "Basic test; ignore if any are missing",
+      "title": "basic_test__ignore_if_any_are_missing",
       "exact_match_out" : false,
       "in": {
         "column_list": ["w", "x"],
@@ -43,7 +43,7 @@
         "success": true
       }
     },{
-      "title": "Unexpected Values",
+      "title": "unexpected_values",
       "exact_match_out" : false,
       "in": {
         "column_list": ["a", "b"]
@@ -91,7 +91,7 @@
         "success": false
       }
     },{
-      "title": "Unexpected Values - exact match out",
+      "title": "unexpected_values___exact_match_out",
       "exact_match_out" : true,
       "in": {
         "column_list": ["a", "b"]
