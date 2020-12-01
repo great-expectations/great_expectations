@@ -808,11 +808,11 @@ class DataContextConfigDefaults(enum.Enum):
     }
 
 
-class BaseBackendEcosystem(DictDot):
+class BaseStoreBackendDefaults(DictDot):
     """
-    Define base defaults for BackendEcosystems.
-    BackendEcosystems define defaults for specific cases of often used configurations.
-    For example, if you plan to store expectations, validations, and data_docs in s3 use the S3BackendEcosystem and you may be able to specify less parameters.
+    Define base defaults for platform specific StoreBackendDefaults.
+    StoreBackendDefaults define defaults for specific cases of often used configurations.
+    For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults and you may be able to specify less parameters.
     """
 
     def __init__(
@@ -840,7 +840,7 @@ class BaseBackendEcosystem(DictDot):
         self.data_docs_sites = data_docs_sites
 
 
-class S3BackendEcosystem(BaseBackendEcosystem):
+class S3StoreBackendDefaults(BaseStoreBackendDefaults):
     """
     Default store configs for s3 backends, with some accessible parameters
     Args:
@@ -920,7 +920,7 @@ class S3BackendEcosystem(BaseBackendEcosystem):
         }
 
 
-class FilesystemBackendEcosystem(BaseBackendEcosystem):
+class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
     """
     Default store configs for filesystem backends, with some accessible parameters
     Args:
@@ -937,7 +937,7 @@ class FilesystemBackendEcosystem(BaseBackendEcosystem):
         self.plugins_directory = plugins_directory
 
 
-class GCSBackendEcosystem(BaseBackendEcosystem):
+class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
     """
     Default store configs for Google Cloud Storage (GCS) backends, with some accessible parameters
     Args:
@@ -1036,7 +1036,7 @@ class GCSBackendEcosystem(BaseBackendEcosystem):
         }
 
 
-class DatabaseBackendEcosystem(BaseBackendEcosystem):
+class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
     """
     Default store configs for database backends, with some accessible parameters
     Args:
@@ -1111,28 +1111,28 @@ class DataContextConfig(DictDot):
         config_variables_file_path: Optional[str] = None,
         anonymous_usage_statistics=None,
         commented_map=None,
-        backend_ecosystem: Optional[BaseBackendEcosystem] = None,
+        store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
     ):
 
-        # Set defaults via backend_ecosystem if one is passed in
-        # Override attributes from backend_ecosystem with any items passed into the constructor:
-        if backend_ecosystem is not None:
+        # Set defaults via store_backend_defaults if one is passed in
+        # Override attributes from store_backend_defaults with any items passed into the constructor:
+        if store_backend_defaults is not None:
             if config_version is None:
-                config_version = backend_ecosystem.config_version
+                config_version = store_backend_defaults.config_version
             if stores is None:
-                stores = backend_ecosystem.stores
+                stores = store_backend_defaults.stores
             if expectations_store_name is None:
-                expectations_store_name = backend_ecosystem.expectations_store_name
+                expectations_store_name = store_backend_defaults.expectations_store_name
             if validations_store_name is None:
-                validations_store_name = backend_ecosystem.validations_store_name
+                validations_store_name = store_backend_defaults.validations_store_name
             if evaluation_parameter_store_name is None:
                 evaluation_parameter_store_name = (
-                    backend_ecosystem.evaluation_parameter_store_name
+                    store_backend_defaults.evaluation_parameter_store_name
                 )
             if validation_operators is None:
-                validation_operators = backend_ecosystem.validation_operators
+                validation_operators = store_backend_defaults.validation_operators
             if data_docs_sites is None:
-                data_docs_sites = backend_ecosystem.data_docs_sites
+                data_docs_sites = store_backend_defaults.data_docs_sites
 
         if commented_map is None:
             commented_map = CommentedMap()

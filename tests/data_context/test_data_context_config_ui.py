@@ -5,21 +5,21 @@ import pytest
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
-    BaseBackendEcosystem,
-    DatabaseBackendEcosystem,
+    BaseStoreBackendDefaults,
+    DatabaseStoreBackendDefaults,
     DataContextConfig,
     DataContextConfigDefaults,
     DataContextConfigSchema,
-    FilesystemBackendEcosystem,
-    GCSBackendEcosystem,
+    FilesystemStoreBackendDefaults,
+    GCSStoreBackendDefaults,
     LegacyDatasourceConfig,
-    S3BackendEcosystem,
+    S3StoreBackendDefaults,
 )
 
 """
 What does this test and why?
 
-This file will hold various tests to ensure that the UI functions as expected when creating a DataContextConfig object. It will ensure that the appropriate defaults are used, including when the backend_ecosystem parameter is set.
+This file will hold various tests to ensure that the UI functions as expected when creating a DataContextConfig object. It will ensure that the appropriate defaults are used, including when the store_backend_defaults parameter is set.
 """
 
 
@@ -101,7 +101,7 @@ def default_spark_datasource_config():
     }
 
 
-def test_DataContextConfig_with_BaseBackendEcosystem_and_simple_defaults(
+def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
     """
@@ -122,7 +122,7 @@ def test_DataContextConfig_with_BaseBackendEcosystem_and_simple_defaults(
                 },
             )
         },
-        backend_ecosystem=BaseBackendEcosystem(),
+        store_backend_defaults=BaseStoreBackendDefaults(),
     )
 
     desired_config = construct_data_context_config(
@@ -135,12 +135,12 @@ def test_DataContextConfig_with_BaseBackendEcosystem_and_simple_defaults(
     assert DataContext.validate_config(project_config=data_context_config)
 
 
-def test_DataContextConfig_with_S3BackendEcosystem(
+def test_DataContextConfig_with_S3StoreBackendDefaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
     """
     What does this test and why?
-    Make sure that using S3BackendEcosystem as the backend_ecosystem applies appropriate
+    Make sure that using S3StoreBackendDefaults as the store_backend_defaults applies appropriate
     defaults, including default_bucket_name getting propagated to all stores.
     """
 
@@ -156,7 +156,9 @@ def test_DataContextConfig_with_S3BackendEcosystem(
                 },
             )
         },
-        backend_ecosystem=S3BackendEcosystem(default_bucket_name="my_default_bucket"),
+        store_backend_defaults=S3StoreBackendDefaults(
+            default_bucket_name="my_default_bucket"
+        ),
     )
 
     # Create desired config
@@ -210,12 +212,12 @@ def test_DataContextConfig_with_S3BackendEcosystem(
     assert DataContext.validate_config(project_config=data_context_config)
 
 
-def test_DataContextConfig_with_S3BackendEcosystem_using_all_parameters(
+def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
     construct_data_context_config, default_pandas_datasource_config
 ):
     """
     What does this test and why?
-    Make sure that S3BackendEcosystem parameters are handled appropriately
+    Make sure that S3StoreBackendDefaults parameters are handled appropriately
     E.g. Make sure that default_bucket_name is ignored if individual bucket names are passed
     """
 
@@ -236,7 +238,7 @@ def test_DataContextConfig_with_S3BackendEcosystem_using_all_parameters(
                 },
             )
         },
-        backend_ecosystem=S3BackendEcosystem(
+        store_backend_defaults=S3StoreBackendDefaults(
             default_bucket_name="custom_default_bucket_name",
             expectations_store_bucket_name="custom_expectations_store_bucket_name",
             validations_store_bucket_name="custom_validations_store_bucket_name",
@@ -303,12 +305,12 @@ def test_DataContextConfig_with_S3BackendEcosystem_using_all_parameters(
     assert DataContext.validate_config(project_config=data_context_config)
 
 
-def test_DataContextConfig_with_FilesystemBackendEcosystem_and_simple_defaults(
+def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
     """
     What does this test and why?
-    Ensure that a very simple DataContextConfig setup using FilesystemBackendEcosystem is created accurately
+    Ensure that a very simple DataContextConfig setup using FilesystemStoreBackendDefaults is created accurately
     """
 
     data_context_config = DataContextConfig(
@@ -323,7 +325,7 @@ def test_DataContextConfig_with_FilesystemBackendEcosystem_and_simple_defaults(
                 },
             )
         },
-        backend_ecosystem=FilesystemBackendEcosystem(),
+        store_backend_defaults=FilesystemStoreBackendDefaults(),
     )
 
     # Create desired config
@@ -337,12 +339,12 @@ def test_DataContextConfig_with_FilesystemBackendEcosystem_and_simple_defaults(
     assert DataContext.validate_config(project_config=data_context_config)
 
 
-def test_DataContextConfig_with_GCSBackendEcosystem(
+def test_DataContextConfig_with_GCSStoreBackendDefaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
     """
     What does this test and why?
-    Make sure that using GCSBackendEcosystem as the backend_ecosystem applies appropriate
+    Make sure that using GCSStoreBackendDefaults as the store_backend_defaults applies appropriate
     defaults, including default_bucket_name & default_project_name getting propagated
     to all stores.
     """
@@ -364,7 +366,7 @@ def test_DataContextConfig_with_GCSBackendEcosystem(
                 },
             )
         },
-        backend_ecosystem=GCSBackendEcosystem(
+        store_backend_defaults=GCSStoreBackendDefaults(
             default_bucket_name="my_default_bucket",
             default_project_name="my_default_project",
         ),
@@ -425,12 +427,12 @@ def test_DataContextConfig_with_GCSBackendEcosystem(
     assert DataContext.validate_config(project_config=data_context_config)
 
 
-def test_DataContextConfig_with_GCSBackendEcosystem_using_all_parameters(
+def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
     construct_data_context_config, default_pandas_datasource_config
 ):
     """
     What does this test and why?
-    Make sure that GCSBackendEcosystem parameters are handled appropriately
+    Make sure that GCSStoreBackendDefaults parameters are handled appropriately
     E.g. Make sure that default_bucket_name is ignored if individual bucket names are passed
     """
 
@@ -451,7 +453,7 @@ def test_DataContextConfig_with_GCSBackendEcosystem_using_all_parameters(
                 },
             )
         },
-        backend_ecosystem=GCSBackendEcosystem(
+        store_backend_defaults=GCSStoreBackendDefaults(
             default_bucket_name="custom_default_bucket_name",
             default_project_name="custom_default_project_name",
             expectations_store_bucket_name="custom_expectations_store_bucket_name",
@@ -524,12 +526,12 @@ def test_DataContextConfig_with_GCSBackendEcosystem_using_all_parameters(
     assert DataContext.validate_config(project_config=data_context_config)
 
 
-def test_DataContextConfig_with_DatabaseBackendEcosystem(
+def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
     """
     What does this test and why?
-    Make sure that using DatabaseBackendEcosystem as the backend_ecosystem applies appropriate
+    Make sure that using DatabaseStoreBackendDefaults as the store_backend_defaults applies appropriate
     defaults, including default_credentials getting propagated to stores and not data_docs
     """
 
@@ -550,7 +552,7 @@ def test_DataContextConfig_with_DatabaseBackendEcosystem(
                 },
             )
         },
-        backend_ecosystem=DatabaseBackendEcosystem(
+        store_backend_defaults=DatabaseStoreBackendDefaults(
             default_credentials={
                 "drivername": "postgresql",
                 "host": "localhost",
@@ -624,12 +626,12 @@ def test_DataContextConfig_with_DatabaseBackendEcosystem(
     assert DataContext.validate_config(project_config=data_context_config)
 
 
-def test_DataContextConfig_with_DatabaseBackendEcosystem_using_all_parameters(
+def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameters(
     construct_data_context_config, default_pandas_datasource_config
 ):
     """
     What does this test and why?
-    Make sure that DatabaseBackendEcosystem parameters are handled appropriately
+    Make sure that DatabaseStoreBackendDefaults parameters are handled appropriately
     E.g. Make sure that default_credentials is ignored if individual store credentials are passed
     """
 
@@ -650,7 +652,7 @@ def test_DataContextConfig_with_DatabaseBackendEcosystem_using_all_parameters(
                 },
             )
         },
-        backend_ecosystem=DatabaseBackendEcosystem(
+        store_backend_defaults=DatabaseStoreBackendDefaults(
             default_credentials={
                 "drivername": "postgresql",
                 "host": "localhost",
@@ -970,7 +972,7 @@ def test_override_general_defaults(
     assert DataContext.validate_config(project_config=data_context_config)
 
 
-def test_DataContextConfig_with_S3BackendEcosystem_and_simple_defaults_with_variable_sub(
+def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_variable_sub(
     monkeypatch, construct_data_context_config, default_pandas_datasource_config
 ):
     """
@@ -993,7 +995,9 @@ def test_DataContextConfig_with_S3BackendEcosystem_and_simple_defaults_with_vari
                 },
             )
         },
-        backend_ecosystem=S3BackendEcosystem(default_bucket_name="my_default_bucket"),
+        store_backend_defaults=S3StoreBackendDefaults(
+            default_bucket_name="my_default_bucket"
+        ),
     )
 
     # Create desired config
