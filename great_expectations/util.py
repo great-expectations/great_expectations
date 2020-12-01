@@ -7,12 +7,12 @@ from functools import wraps
 from inspect import getcallargs
 from pathlib import Path
 from types import ModuleType
-from typing import Callable, Union
+from typing import Any, Callable, Union
 
 import black
 from pkg_resources import Distribution
 
-from great_expectations.core import expectationSuiteSchema
+from great_expectations.core.expectation_suite import expectationSuiteSchema
 from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
@@ -687,3 +687,9 @@ def lint_code(code):
         return linted_code
     except (black.NothingChanged, RuntimeError):
         return code
+
+
+def get_context():
+    from great_expectations.data_context.data_context_v3 import DataContextV3
+
+    return DataContextV3()

@@ -46,7 +46,7 @@
           "unexpected_index_list": []
         }
       },{
-        "title": "Basic Negative Case, all non-unique character values",
+        "title": "basic_negative_case__all_non_unique_character_values",
         "exact_match_out": false,
         "in": {
           "column": "a"
@@ -57,7 +57,7 @@
           "unexpected_index_list": [0, 1, 2]
         }
       },{
-        "title": "Multi-type column, contains 2 and '2'. Suppressed for SQAlchemy",
+        "title": "multi_type_column__contains_2_and_quoted_2_suppressed_for_sqalchemy",
         "suppress_test_for": ["sqlalchemy"],
         "exact_match_out": false,
         "in": {
@@ -70,7 +70,7 @@
           "unexpected_index_list": [0, 1]
         }
       },{
-        "title": "Positive Case, using Mostly",
+        "title": "positive_case__using_mostly",
         "exact_match_out": false,
         "in": {
           "column": "c",
@@ -82,7 +82,7 @@
           "unexpected_index_list": [0, 1]
         }
       },{
-        "title": "Negative Case, using Mostly",
+        "title": "negative_case__using_mostly",
         "exact_match_out": false,
         "in": {
           "column": "c",
@@ -105,7 +105,7 @@
           "unexpected_index_list": []
         }
       },{
-        "title": "Negative case, non-unique numeric values",
+        "title": "negative_case__non_unique_numeric_values",
         "exact_match_out": false,
         "in": {
           "column": "c"
@@ -127,7 +127,7 @@
           "unexpected_index_list": []
         }
       },{
-        "title": "Negative, Multiple duplicate values",
+        "title": "negative__multiple_duplicate_values",
         "exact_match_out": false,
         "in": {
           "column": "mult_dup"

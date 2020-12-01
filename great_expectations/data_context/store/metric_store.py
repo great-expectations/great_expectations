@@ -1,7 +1,7 @@
 import json
 
-from great_expectations.core import ensure_json_serializable
 from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.util import ensure_json_serializable
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
