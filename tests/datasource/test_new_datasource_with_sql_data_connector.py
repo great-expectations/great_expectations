@@ -61,7 +61,7 @@ data_connectors:
     print(json.dumps(report, indent=4))
 
     assert report == {
-        "execution_engine": {"class_name": "SqlAlchemyExecutionEngine",},
+        "execution_engine": {"class_name": "SqlAlchemyExecutionEngine"},
         "data_connectors": {
             "count": 1,
             "my_sqlite_db": {
