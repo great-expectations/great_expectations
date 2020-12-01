@@ -8,7 +8,7 @@ Changelog
 Develop
 -----------------
 * [ENHANCEMENT] Add a store_backend_id property to StoreBackend #2030
-* [ENHANCEMENT] Use an existing expectation_store.store_backend_id to initialize an in-memory DataContext #2046
+* [ENHANCEMENT] Use an existing expectation_store.store_backend_id to initialize an in-code DataContext #2046
 
 
 0.13.0

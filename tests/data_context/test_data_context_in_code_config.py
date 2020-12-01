@@ -19,7 +19,7 @@ def build_in_memory_data_context_project_config(
     stores: Optional[Dict] = None,
 ) -> DataContextConfig:
     """
-    Create a project config for an in-memory data context.
+    Create a project config for an in-code data context.
     Not a fixture because we want to control when this is built (after the expectation store).
     Args:
         expectations_store_prefix: prefix for expectations store
