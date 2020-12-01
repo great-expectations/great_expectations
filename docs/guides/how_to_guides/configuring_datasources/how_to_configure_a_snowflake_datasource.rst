@@ -194,7 +194,7 @@ Steps
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-            - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
+            - :ref:`Understand the basics of Datasources <datasources>`
             - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
 
         To add a Snowflake datasource, do the following:
@@ -261,7 +261,7 @@ Steps
 
                 Attempting to instantiate class from config...
                 Instantiating as a DataSource, since class_name is SimpleSqlalchemyDatasource
-                Successfully instantiated StreamlinedSqlExecutionEnvironment
+                Successfully instantiated SimpleSqlalchemyDatasource
 
                 Execution engine: SqlAlchemyExecutionEngine
                 Data connectors:

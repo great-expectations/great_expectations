@@ -113,7 +113,7 @@ Steps
             - Installed the pyspark package (``pip install pyspark``).
             - Setup ``SPARK_HOME`` and ``JAVA_HOME`` variables for runtime environment.
             - :ref:`Set up a working deployment of Great Expectations. <tutorials__getting_started>`
-            - :ref:`Understand the basics of ExecutionEnvironments. <execution_environments>`
+            - :ref:`Understand the basics of Datasources. <datasources>`
             - Learned how to configure a :ref:`DataContext using test_yaml_config. <how_configure_data_context_using_test_yaml_config>`
 
         To add a Pandas filesystem datasource, do the following:
@@ -184,9 +184,9 @@ Steps
             .. code-block:: bash
 
                 Attempting to instantiate class from config...
-                Instantiating as a ExecutionEnvironment, since class_name is ExecutionEnvironment
+                Instantiating as a Datasource, since class_name is Datasource
                 Instantiating class from config without an explicit class_name is dangerous. Consider adding an explicit class_name for None
-                    Successfully instantiated ExecutionEnvironment
+                    Successfully instantiated Datasource
 
                 Execution engine: SparkDFExecutionEngine
                 Data connectors:
