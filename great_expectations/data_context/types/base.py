@@ -998,10 +998,19 @@ class S3BackendEcosystem(BaseBackendEcosystem):
 
 class FilesystemBackendEcosystem(BaseBackendEcosystem):
     """
-    The default backend BaseBackendEcosystem is currently filesystem based. This class is just a convenience to make that explicit, and a placeholder for future modifications. This should be used in place of BaseBackendEcosystem.
+    Default store configs for filesystem backends, with some accessible parameters
+    Args:
+        plugins_directory: Overrides default if supplied
     """
 
-    pass
+    def __init__(
+        self,
+        plugins_directory=DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value,
+    ):
+        # Initialize base defaults
+        super().__init__()
+
+        self.plugins_directory = plugins_directory
 
 
 class GCSBackendEcosystem(BaseBackendEcosystem):
@@ -1203,10 +1212,6 @@ class DataContextConfig(DictDot):
         commented_map=None,
         backend_ecosystem: Optional[BaseBackendEcosystem] = None,
     ):
-
-        # TODO: should default plugins_directory be "plugins/" or None?
-        #  I think it may depend on in-memory or not. Is there checking
-        #  for this directory when it is used and graceful handling if not found?
 
         # Set defaults via backend_ecosystem if one is passed in
         # What happens / should happen if a user specifies a backend_ecosystem
