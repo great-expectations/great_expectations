@@ -152,7 +152,7 @@ Additional Notes
 ----------------
 
     - Additional examples and configurations for ``ConfiguredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure a ConfiguredAssetFilesystemDataConnector <how_to_guides_how_to_configure_a_configuredassetfilesystemdataconnector>`
-    - Additional examples and configurations for ``InferredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure an InferredAssetFilesystemDataConnector <how_to_guides__how_to_configure_a_inferredassetfilesystemdataconnector>`
+    - Additional examples and configurations for ``InferredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure an InferredAssetFilesystemDataConnector <how_to_guides_how_to_configure_a_inferredassetfilesystemdataconnector>`
 
 .. discourse::
    :topic_identifier: 520

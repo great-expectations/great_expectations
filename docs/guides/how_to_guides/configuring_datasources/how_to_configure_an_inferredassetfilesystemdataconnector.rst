@@ -1,4 +1,4 @@
-.. _how_to_guides__how_to_configure_a_inferredassetfilesystemdataconnector:
+.. _how_to_guides_how_to_configure_a_inferredassetfilesystemdataconnector:
 
 How to configure an ``InferredAssetFilesystemDataConnector``
 ============================================================

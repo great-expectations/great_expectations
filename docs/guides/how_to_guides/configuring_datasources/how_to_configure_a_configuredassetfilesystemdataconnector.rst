@@ -126,7 +126,7 @@ Example 2: Basic configuration with more than one DataAsset
 
 Here’s a similar example, but this time two data_assets are mixed together in one folder.
 
-**Note**: For an equivalent configuration using ``InferredAssetFileSystemDataConnector``, please see Example 2 in :ref:`How to configure an InferredAssetFilesystemDataConnector <how_to_guides__how_to_configure_a_inferredassetfilesystemdataconnector>`
+**Note**: For an equivalent configuration using ``InferredAssetFileSystemDataConnector``, please see Example 2 in :ref:`How to configure an InferredAssetFilesystemDataConnector <how_to_guides_how_to_configure_a_inferredassetfilesystemdataconnector>`
 
 .. code-block::
 
