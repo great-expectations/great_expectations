@@ -1,15 +1,15 @@
 import datetime
 import logging
 import uuid
+import warnings
 
-from great_expectations.datasource.types import BatchMarkers
 from great_expectations.types import ClassConfig
 
-from ..core.batch import Batch
+from ..core.batch import Batch, BatchMarkers
 from ..dataset import SparkDFDataset
 from ..exceptions import BatchKwargsError
 from ..types.configurations import classConfigSchema
-from .datasource import Datasource
+from .datasource import LegacyDatasource
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ except ImportError:
     )
 
 
-class SparkDFDatasource(Datasource):
+class SparkDFDatasource(LegacyDatasource):
     """The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local
     filesystem (the default subdir_reader batch kwargs  generator) and databricks notebooks.
 
@@ -185,6 +185,13 @@ class SparkDFDatasource(Datasource):
         )
 
         if "path" in batch_kwargs or "s3" in batch_kwargs:
+            if "s3" in batch_kwargs:
+                warnings.warn(
+                    "Direct GE Support for the s3 BatchKwarg will be removed in a future release. Please use a path "
+                    "including the s3a:// protocol instead.",
+                    DeprecationWarning,
+                )
+
             # If both are present, let s3 override
             path = batch_kwargs.get("path")
             path = batch_kwargs.get("s3", path)

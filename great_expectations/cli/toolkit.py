@@ -16,7 +16,7 @@ from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.cli.util import cli_colorize_string, cli_message
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
@@ -25,7 +25,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import LegacyDatasource
 from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
@@ -358,7 +358,9 @@ def load_checkpoint(
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
-def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
+def select_datasource(
+    context: DataContext, datasource_name: str = None
+) -> LegacyDatasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
     data_source = None

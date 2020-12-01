@@ -68,87 +68,171 @@ To enable running Great Expectations against dataframe created by Spark SQL quer
 
         Would you like to proceed? [Y/n]: Y
 
-#. **Replace lines in great_expectations.yml file**
+.. content-tabs::
 
-    .. code-block:: yaml
+    .. tab-container:: tab0
+        :title: Show Docs for Stable API (up to 0.12.x)
 
-        datasources:
-          spark_dataframe:
-            data_asset_type:
-              class_name: SparkDFDataset
-              module_name: great_expectations.dataset
-            batch_kwargs_generators:
-              subdir_reader:
-                class_name: SubdirReaderBatchKwargsGenerator
-                base_directory: /tmp
-            class_name: SparkDFDatasource
-            module_name: great_expectations.datasource
+        #. **Replace lines in great_expectations.yml file**
 
-    with
+        .. code-block:: yaml
 
-    .. code-block:: yaml
+            datasources:
+              spark_dataframe:
+                data_asset_type:
+                  class_name: SparkDFDataset
+                  module_name: great_expectations.dataset
+                batch_kwargs_generators:
+                  subdir_reader:
+                    class_name: SubdirReaderBatchKwargsGenerator
+                    base_directory: /tmp
+                class_name: SparkDFDatasource
+                module_name: great_expectations.datasource
 
-        datasources:
-          spark_dataframe:
-            data_asset_type:
-              class_name: SparkDFDataset
-              module_name: great_expectations.dataset
-            batch_kwargs_generators:
-              spark_sql_query:
-                class_name: QueryBatchKwargsGenerator
-                queries:
-                  ${query_name}: ${spark_sql_query}
-            module_name: great_expectations.datasource
-            class_name: SparkDFDatasource
+        with
 
-#. **Fill values:**
+        .. code-block:: yaml
 
-* **query_name** - Name by which you want to reference the datasource. For next points we will use `my_first_query` name. You will use this name to select datasource when creating expectations.
-* **spark_sql_query** - Spark SQL Query that will create DataFrame against which GE validations will be run. For next points we will use `select * from mydb.mytable` query.
+            datasources:
+              spark_dataframe:
+                data_asset_type:
+                  class_name: SparkDFDataset
+                  module_name: great_expectations.dataset
+                batch_kwargs_generators:
+                  spark_sql_query:
+                    class_name: QueryBatchKwargsGenerator
+                    queries:
+                      ${query_name}: ${spark_sql_query}
+                module_name: great_expectations.datasource
+                class_name: SparkDFDatasource
 
-Now, when creating new expectation suite, query `main` will be available in the list of datasources.
+        #. **Fill values:**
+
+        * **query_name** - Name by which you want to reference the datasource. For next points we will use `my_first_query` name. You will use this name to select datasource when creating expectations.
+        * **spark_sql_query** - Spark SQL Query that will create DataFrame against which GE validations will be run. For next points we will use `select * from mydb.mytable` query.
+
+        Now, when creating new expectation suite, query `main` will be available in the list of datasources.
+
+    .. tab-container:: tab1
+        :title: Show Docs for Experimental API (0.13)
+
+        #. **Replace lines in great_expectations.yml file**
+
+        .. code-block:: yaml
+
+            datasources:
+              spark_dataframe:
+                data_asset_type:
+                  class_name: SparkDFDataset
+                  module_name: great_expectations.dataset
+                batch_kwargs_generators:
+                  subdir_reader:
+                    class_name: SubdirReaderBatchKwargsGenerator
+                    base_directory: /tmp
+                class_name: SparkDFDatasource
+                module_name: great_expectations.datasource
+
+        with
+
+        .. code-block:: yaml
+
+            datasources:
+              spark_dataframe:
+                class_name: Datasource
+                execution_engine:
+                  class_name: SparkDFExecutionEngine
+                data_connectors:
+                  simple_filesystem_data_connector:
+                    class_name: InferredAssetFilesystemDataConnector
+                    base_directory: /root/directory/containing/data/files
+                    glob_directive: '*'
+                    default_regex:
+                      pattern: (.+)\.csv
+                      group_names:
+                      - data_asset_name
+
+        #. **Fill values:**
+
+        * **base_directory** - Either absolute path or relative path with respect to Great Expectations installation directory is acceptable
+        * **class_name** - A different DataConnector class with its corresponding configuration parameters may be substituted into the above snippet as best suitable for the given use case.
 
 ----------------
 Additional Notes
 ----------------
 
-#. **Configuring Spark options**
+.. content-tabs::
 
-To provide custom configuration options either:
+    .. tab-container:: tab0
+        :title: Show Docs for Stable API (up to 0.12.x)
 
-1. Create curated `spark-defaults.conf` configuration file in `$SPARK_HOME/conf` directory
-2. Provide `spark_context` dictionary to Datasource config:
+        #. **Configuring Spark options**
 
-    .. code-block:: yaml
+        To provide custom configuration options either:
 
-        datasources:
-          spark_dataframe:
-            data_asset_type:
-              class_name: SparkDFDataset
-              module_name: great_expectations.dataset
-            batch_kwargs_generators:
-              spark_sql_query:
-                class_name: QueryBatchKwargsGenerator
-                queries:
-                  ${query_name}: ${spark_sql_query}
-            module_name: great_expectations.datasource
-            class_name: SparkDFDatasource
-            spark_context:
-                spark.master: local[*]
+        1. Create curated `spark-defaults.conf` configuration file in `$SPARK_HOME/conf` directory
+        2. Provide `spark_context` dictionary to Datasource config:
 
-Full list of Spark configuration options is available here: [https://spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html)
+            .. code-block:: yaml
 
-**Spark catalog**
+                datasources:
+                  spark_dataframe:
+                    data_asset_type:
+                      class_name: SparkDFDataset
+                      module_name: great_expectations.dataset
+                    batch_kwargs_generators:
+                      spark_sql_query:
+                        class_name: QueryBatchKwargsGenerator
+                        queries:
+                          ${query_name}: ${spark_sql_query}
+                    module_name: great_expectations.datasource
+                    class_name: SparkDFDatasource
+                    spark_context:
+                        spark.master: local[*]
 
-Running SQL queries requires either registering temporary views or enabling Spark catalog (like Hive metastore).
+        Full list of Spark configuration options is available here: [https://spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html)
 
-This configuraiton options enable using Hive Metastore catalog - an equivalent of `.enableHiveSupport()`
+        **Spark catalog**
 
-    .. code-block:: bash
+        Running SQL queries requires either registering temporary views or enabling Spark catalog (like Hive metastore).
 
-        spark.sql.catalogImplementation     hive
-        spark.sql.warehouse.dir             /tmp/hive
-        spark.hadoop.hive.metastore.uris    thrift://localhost:9083
+        This configuraiton options are enabled using Hive Metastore catalog - an equivalent of `.enableHiveSupport()`.
+
+            .. code-block:: bash
+
+                spark.sql.catalogImplementation     hive
+                spark.sql.warehouse.dir             /tmp/hive
+                spark.hadoop.hive.metastore.uris    thrift://localhost:9083
+
+    .. tab-container:: tab1
+        :title: Show Docs for Experimental API (0.13)
+
+        #. **Configuring Spark options**
+
+        To provide custom configuration options either:
+
+        1. Create curated `spark-defaults.conf` configuration file in `$SPARK_HOME/conf` directory
+        2. Provide `spark_context` dictionary to Datasource config:
+
+        .. code-block:: yaml
+
+            datasources:
+              spark_dataframe:
+                class_name: Datasource
+                execution_engine:
+                  class_name: SparkDFExecutionEngine
+                  spark_context:
+                    spark.master: local[*]
+                data_connectors:
+                  simple_filesystem_data_connector:
+                    class_name: InferredAssetFilesystemDataConnector
+                    base_directory: /root/directory/containing/data/files
+                    glob_directive: '*'
+                    default_regex:
+                      pattern: (.+)\.csv
+                      group_names:
+                      - data_asset_name
+
+        Full list of Spark configuration options is available here: [https://spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html)
 
 .. discourse::
     :topic_identifier: 170

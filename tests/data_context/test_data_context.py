@@ -1,17 +1,17 @@
 import json
 import os
 import shutil
+from typing import List
 
+import pandas as pd
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
-    RunIdentifier,
-    expectationSuiteSchema,
-)
+from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.batch import Batch
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
     BaseDataContext,
     DataContext,
@@ -24,7 +24,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.exceptions import (
     BatchKwargsError,
@@ -37,7 +37,7 @@ from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
-from tests.test_utils import safe_remove
+from tests.test_utils import create_files_in_directory, safe_remove
 
 try:
     from unittest import mock
@@ -293,7 +293,7 @@ def test_data_context_get_validation_result(titanic_data_context):
 
 
 def test_data_context_get_datasource(titanic_data_context):
-    isinstance(titanic_data_context.get_datasource("mydatasource"), Datasource)
+    isinstance(titanic_data_context.get_datasource("mydatasource"), LegacyDatasource)
 
 
 def test_data_context_expectation_suite_delete(empty_data_context):
@@ -1567,3 +1567,97 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
 
     with pytest.raises(CheckpointError) as e:
         context.get_checkpoint("foo")
+
+
+def test_get_validator_with_instantiated_expectation_suite(
+    empty_data_context_v3, tmp_path_factory
+):
+    context = empty_data_context_v3
+
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_get_validator_with_instantiated_expectation_suite"
+        )
+    )
+
+    create_files_in_directory(
+        directory=base_directory, file_name_list=["some_file.csv",],
+    )
+
+    yaml_config = f"""
+class_name: Datasource
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        class_name: ConfiguredAssetFilesystemDataConnector
+        base_directory: {base_directory}
+        default_regex:
+            pattern: (.+)\\.csv
+            group_names:
+                - alphanumeric
+        assets:
+            A:
+"""
+
+    config = yaml.load(yaml_config)
+    context.add_datasource(
+        "my_directory_datasource", config,
+    )
+
+    my_validator = context.get_validator(
+        datasource_name="my_directory_datasource",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="A",
+        partition_identifiers={"alphanumeric": "some_file",},
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
+    )
+    assert my_validator.expectation_suite_name == "my_expectation_suite"
+
+
+def test_get_validator_with_attach_expectation_suite(
+    empty_data_context_v3, tmp_path_factory
+):
+    context = empty_data_context_v3
+
+    base_directory = str(
+        tmp_path_factory.mktemp("test_get_validator_with_attach_expectation_suite")
+    )
+
+    create_files_in_directory(
+        directory=base_directory, file_name_list=["some_file.csv",],
+    )
+
+    yaml_config = f"""
+class_name: Datasource
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        class_name: ConfiguredAssetFilesystemDataConnector
+        base_directory: {base_directory}
+        default_regex:
+            pattern: (.+)\\.csv
+            group_names:
+                - alphanumeric
+        assets:
+            A:
+"""
+
+    config = yaml.load(yaml_config)
+    context.add_datasource(
+        "my_directory_datasource", config,
+    )
+
+    my_validator = context.get_validator(
+        datasource_name="my_directory_datasource",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="A",
+        partition_identifiers={"alphanumeric": "some_file",},
+        create_expectation_suite_with_name="A_expectation_suite",
+    )
+    assert my_validator.expectation_suite_name == "A_expectation_suite"
