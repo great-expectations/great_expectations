@@ -36,7 +36,7 @@ CONFIG_VARIABLES_INTRO = """
 # nested value such as a dictionary, or an environment variable (i.e. ${ENV_VAR})
 #
 #
-# https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html
+# https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html
 
 """
 

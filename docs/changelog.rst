@@ -6,8 +6,48 @@ Changelog
 
 Develop
 -----------------
-
 * [FEATURE] Add TupleAzureBlobStoreBackend
+
+0.12.10
+-----------------
+* [BUGFIX] Update requirements.txt for ruamel.yaml to >=0.16 - #2048 (thanks @mmetzger!)
+* [BUGFIX] Added option to return scalar instead of list from query store #2060
+* [BUGFIX] Add missing markdown_content_block_container #2063
+* [BUGFIX] Fixed a divided by zero error for checkpoints on empty expectation suites #2064
+* [BUGFIX] Updated sort to correctly return partial unexpected results when expect_column_values_to_be_of_type has more than one unexpected type #2074
+* [BUGFIX] Resolve Data Docs resource identifier issues to speed up UpdateDataDocs action #2078
+* [DOCS] Updated contribution changelog location #2051 (thanks @shapiroj18!)
+* [DOCS] Adding Airflow operator and Astrononomer deploy guides #2070
+* [DOCS] Missing image link to bigquery logo #2071 (thanks @nelsonauner!)
+
+0.12.9
+-----------------
+* [BUGFIX] Fixed the import of s3fs to use the optional import pattern - issue #2053
+* [DOCS] Updated the title styling and added a Discuss comment article for the OpsgenieAlertAction how-to guide
+
+0.12.8
+-----------------
+* [FEATURE] Add OpsgenieAlertAction #2012 (thanks @miike!)
+* [FEATURE] Add S3SubdirReaderBatchKwargsGenerator #2001 (thanks @noklam)
+* [ENHANCEMENT] Snowflake uses temp tables by default while still allowing transient tables
+* [ENHANCEMENT] Enabled use of lowercase table and column names in GE with the `use_quoted_name` key in batch_kwargs #2023
+* [BUGFIX] Basic suite builder profiler (suite scaffold) now skips excluded expectations #2037
+* [BUGFIX] Off-by-one error in linking to static images #2036 (thanks @NimaVaziri!)
+* [BUGFIX] Improve handling of pandas NA type issue #2029 PR #2039 (thanks @isichei!)
+* [DOCS] Update Virtual Environment Example #2027 (thanks @shapiroj18!)
+* [DOCS] Update implemented_expectations.rst (thanks @jdimatteo!)
+* [DOCS] Update how_to_configure_a_pandas_s3_datasource.rst #2042 (thanks @CarstenFrommhold!)
+
+0.12.7
+-----------------
+* [ENHANCEMENT] CLI supports s3a:// or gs:// paths for Pandas Datasources (issue #2006)
+* [ENHANCEMENT] Escape $ characters in configuration, support multiple substitutions (#2005 & #2015)
+* [ENHANCEMENT] Implement Skip prompt flag on datasource profile cli (#1881 Thanks @thcidale0808!)
+* [BUGFIX] Fixed bug where slack messages cause stacktrace when data docs pages have issue
+* [DOCS] How to use docker images (#1797)
+* [DOCS] Remove incorrect doc line from PagerdutyAlertAction (Thanks @niallrees!)
+* [MAINTENANCE] Update broken link (Thanks @noklam!)
+* [MAINTENANCE] Fix path for how-to guide (Thanks @gauthamzz!)
 
 0.12.6
 -----------------

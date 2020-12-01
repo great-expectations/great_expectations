@@ -11,4 +11,5 @@ This page contains a collection of instructional guides for workflows, best prac
 
    /guides/workflows_patterns/deployment_airflow
    /guides/workflows_patterns/deployment_google_cloud_composer
+   /guides/workflows_patterns/deployment_astronomer
    /guides/workflows_patterns/deployment_hosted_environments

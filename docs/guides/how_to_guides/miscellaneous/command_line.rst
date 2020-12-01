@@ -184,7 +184,7 @@ To this end, this command interactively helps you choose some data, creates the 
 .. code-block:: bash
 
     $ great_expectations suite new
-    Enter the path (relative or absolute) of a data file
+    Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
     : data/npi.csv
 
     Name the new expectation suite [npi.warning]:
@@ -226,7 +226,7 @@ If you already know the name of the suite you want to create you can skip one of
 .. code-block:: bash
 
     $ great_expectations suite new --suite npi.warning
-    Enter the path (relative or absolute) of a data file
+    Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
     : data/npi.csv
     ... (same as above)
 
@@ -245,7 +245,7 @@ If you prefer to skip the example expectations and start writing expectations in
 .. code-block:: bash
 
     $ great_expectations suite new --empty
-    Enter the path (relative or absolute) of a data file
+    Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
     : data/npi.csv
 
     Name the new expectation suite [npi.warning]: npi.warning
@@ -266,7 +266,7 @@ If you already know the name of the suite you want to delete you can skip one of
 .. code-block:: bash
 
     $ great_expectations suite delete --suite npi.warning
-    Enter the path (relative or absolute) of a data file
+    Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
     : data/npi.csv
     ... (same as above)
 
@@ -280,7 +280,7 @@ If you prefer to disable Great Expectations from automatically opening the gener
 
     $ great_expectations suite new --empty --no-jupyter
 
-    Enter the path (relative or absolute) of a data file
+    Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
     : data/npi.csv
 
     Name the new expectation suite [npi.warning]: npi.warning
@@ -361,7 +361,7 @@ To create a new suite called "npi_distribution" in a project that has a single f
     $ great_expectations suite scaffold npi_distribution
     Heads up! This feature is Experimental. It may change. Please give us your feedback!
 
-    Enter the path (relative or absolute) of a data file
+    Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
     : npi.csv
     ...jupyter opens
 
@@ -399,7 +399,7 @@ The notebook will be created in your ``great_expectations/uncommitted`` director
     suite scaffold npi_distributions --no-jupyter
     Heads up! This feature is Experimental. It may change. Please give us your feedback!
 
-    Enter the path (relative or absolute) of a data file
+    Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
     : npi.csv
     To continue scaffolding this suite, run `jupyter notebook uncommitted/scaffold_npi_distributions.ipynb`
 
@@ -423,7 +423,7 @@ To this end, this command interactively helps you choose some data, creates the 
 .. code-block:: bash
 
     $ great_expectations suite demo
-    Enter the path (relative or absolute) of a data file
+    Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
     : data/npi.csv
 
     Name the new expectation suite [npi.warning]:
@@ -508,7 +508,7 @@ The command will help you specify the batch of data that you want the validation
 
     Let us help you specify the batch of data you want the validation operator to validate.
 
-    Enter the path (relative or absolute) of a data file
+    Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
     : data/npi_small.csv
     Validation succeeded!
 

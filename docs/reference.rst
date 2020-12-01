@@ -13,5 +13,6 @@ the thinking behind the tools.
    /reference/glossary_of_expectations
    /reference/core_concepts
    /reference/supporting_resources
+   /reference/spare_parts
    API Reference <autoapi/great_expectations/index>
 
