@@ -502,7 +502,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _get_sqlalchemy_key_pair_auth_url(
         self, drivername: str, credentials: dict
-    ) -> Tuple[URL, Dict]:
+    ) -> Tuple[sa.engine.url.URL, Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
