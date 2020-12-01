@@ -396,35 +396,47 @@ class LegacyDatasourceConfig(DictDot):
         limit=None,
         **kwargs,
     ):
-        # Set Defaults
-        # module_name, data_asset_type = self.set_defaults(
-        #     class_name, module_name, data_asset_type
-        # )
-
-        # AJB TODO: defaults_config = load_class().build_configuration(class_name, module_name,...)
+        # Set default parameters from Datasource class build_configuration if not passed into constructor
         datasource_class = load_class(module_name=module_name, class_name=class_name)
-
-        # Since these classes have optional build_configuration methods
+        config = {}
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
-        # AJB TODO: Set defaults from config or kwargs passed into constructor
-        #  E.g. self._class_name = config.get("class_name", class_name)
+
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
-        self._class_name = config.get("class_name", class_name)
+        self._class_name = class_name
         self._module_name = module_name
+
+        if data_asset_type is None:
+            data_asset_type = config.get("data_asset_type")
         self.data_asset_type = data_asset_type
+
+        if batch_kwargs_generators is None:
+            batch_kwargs_generators = config.get("batch_kwargs_generators")
         if batch_kwargs_generators is not None:
             self.batch_kwargs_generators = batch_kwargs_generators
+
+        if credentials is None:
+            credentials = config.get("credentials")
         if credentials is not None:
             self.credentials = credentials
-        if reader_method is not None:
-            self.reader_method = reader_method
-        if limit is not None:
-            self.limit = limit
-        for k, v in kwargs.items():
-            setattr(self, k, v)
+
+        if boto3_options is None:
+            boto3_options = config.get("boto3_options")
         if boto3_options is not None:
             self.boto3_options = boto3_options
+
+        if reader_method is None:
+            reader_method = config.get("reader_method")
+        if reader_method is not None:
+            self.reader_method = reader_method
+
+        if limit is None:
+            limit = config.get("limit")
+        if limit is not None:
+            self.limit = limit
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     @property
     def class_name(self):
