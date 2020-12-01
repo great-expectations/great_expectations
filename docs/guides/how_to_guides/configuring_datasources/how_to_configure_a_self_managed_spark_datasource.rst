@@ -224,7 +224,7 @@ Additional Notes
                   module_name: great_expectations.execution_engine
                   class_name: SparkDFExecutionEngine
                   spark_context:
-                      spark.master: local[*]
+                    spark.master: local[*]
                 data_connectors:
                   simple_filesystem_data_connector:
                     module_name: great_expectations.datasource.data_connector
