@@ -173,9 +173,6 @@ class Validator:
                 expectation_impl = get_expectation_impl(name)
                 allowed_config_keys = expectation_impl.get_allowed_config_keys()
                 expectation_kwargs = kwargs
-                # expectation_kwargs = {
-                #     key: val for (key, val) in kwargs.items() if key in allowed_config_keys
-                # }
                 meta = None
                 # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
                 # positional arguments to expectation methods
