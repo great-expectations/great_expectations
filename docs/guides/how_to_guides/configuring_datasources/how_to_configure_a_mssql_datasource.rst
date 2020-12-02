@@ -114,7 +114,7 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config < how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config >`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config >`
             - Obtained database credentials for MSSQL, including username, password, hostname, and database.
 
         To add a MSSQL datasource, do the following:
