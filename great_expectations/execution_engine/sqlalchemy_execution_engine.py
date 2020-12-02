@@ -340,7 +340,6 @@ class SqlAlchemyBatchData(object):
             sa.select([sa.func.count()]).select_from(self._selectable)
         )
         rows = result_object.fetchall()
-        print(rows)
 
         return rows[0][0]
 
