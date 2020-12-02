@@ -8,6 +8,10 @@ from ruamel.yaml import YAML
 from great_expectations.core.batch import Batch, BatchSpec
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -67,6 +71,15 @@ class ExecutionEngine:
         self._load_batch_data_from_dict(batch_data_dict)
         self._active_batch_data_id = None
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            **{"class_name": self.__class__.__name__}
+        )
+        filter_properties_dict(
+            properties=self._config, inplace=True,
+        )
+
     def configure_validator(self, validator):
         """Optionally configure the validator as appropriate for the execution engine."""
         pass
@@ -99,6 +112,10 @@ class ExecutionEngine:
     def loaded_batch_data_dict(self):
         """The current dictionary of batches."""
         return self._batch_data_dict
+
+    @property
+    def config(self) -> dict:
+        return self._config
 
     def get_batch_data(self, batch_spec: BatchSpec,) -> Any:
         """Interprets batch_data and returns the appropriate data.
