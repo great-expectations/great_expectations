@@ -7,11 +7,6 @@ How to configure a MSSQL Datasource
 
 This guide shows how to connect to a MSSQL Datasource. Great Expectations uses SqlAlchemy to connect to MSSQL, and relies further on the PyODBC driver.
 
-.. admonition:: Prerequisites: This how-to guide assumes you have already:
-
-  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-  - Obtained database credentials for MSSQL, including username, password, hostname, and database.
-
 Steps
 -----
 
@@ -118,8 +113,8 @@ Steps
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-            - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+            - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config >`
             - Obtained database credentials for MSSQL, including username, password, hostname, and database.
 
         To add a MSSQL datasource, do the following:
@@ -177,8 +172,8 @@ Steps
             .. code-block:: bash
 
                 Attempting to instantiate class from config...
-                    Instantiating as a ExecutionEnvironment, since class_name is StreamlinedSqlExecutionEnvironment
-                    Successfully instantiated StreamlinedSqlExecutionEnvironment
+                    Instantiating as a Datasource, since class_name is SimpleSqlalchemyDatasource
+                    Successfully instantiated SimpleSqlalchemyDatasource
 
                 Execution engine: SqlAlchemyExecutionEngine
                 Data connectors:
