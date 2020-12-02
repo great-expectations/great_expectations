@@ -152,7 +152,6 @@ def test_HtmlSiteStore_S3_backend():
             Bucket=bucket, Prefix=prefix
         )["Contents"]
     } == {
-        "test/prefix/.ge_store_backend_id",
         "test/prefix/expectations/asset/quarantine.html",
         "test/prefix/index.html",
         "test/prefix/validations/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/1234.html",
