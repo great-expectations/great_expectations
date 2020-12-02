@@ -1,11 +1,10 @@
-class_name: SinglePartitionerFileDataConnector
+class_name: InferredAssetFilesystemDataConnector
 base_directory: my_directory/
 
-partitioner:
-    class_name: RegexPartitioner
+glob_directive: "*/*/*.csv"
+default_regex:
+    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
     group_names:
+        - year_dir
+        - month_dir
         - data_asset_name
-        - year
-        - month
-        - day
-    pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv

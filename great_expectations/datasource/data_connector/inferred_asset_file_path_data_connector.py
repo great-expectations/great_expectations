@@ -10,15 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class InferredAssetFilePathDataConnector(FilePathDataConnector):
-    """InferredAssetFilePathDataConnector is a base class for DataConnectors that require exactly one Partitioner be configured in the declaration.
-
-    Instead, its data_references are stored in a data_reference_dictionary : {
-        "pretend/path/A-100.csv" : pandas_df_A_100,
-        "pretend/path/A-101.csv" : pandas_df_A_101,
-        "pretend/directory/B-1.csv" : pandas_df_B_1,
-        "pretend/directory/B-2.csv" : pandas_df_B_2,
-        ...
-    }
+    """InferredAssetFilePathDataConnector is a base class for DataConnectors that operate on file paths and determine
+    the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names.
     """
 
     def __init__(
