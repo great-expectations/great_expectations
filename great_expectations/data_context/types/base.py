@@ -31,8 +31,7 @@ DEFAULT_USAGE_STATISTICS_URL = (
 
 class AssetConfig(DictDot):
     def __init__(
-        self,
-        **kwargs,
+        self, **kwargs,
     ):
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -103,11 +102,7 @@ class SorterConfigSchema(Schema):
 
 class DataConnectorConfig(DictDot):
     def __init__(
-        self,
-        class_name,
-        module_name=None,
-        assets=None,
-        **kwargs,
+        self, class_name, module_name=None, assets=None, **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
