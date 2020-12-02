@@ -695,7 +695,6 @@ class BaseStoreBackendDefaults(DictDot):
 
     def __init__(
         self,
-        config_version=DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
         validations_store_name=(
             DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value
@@ -709,7 +708,6 @@ class BaseStoreBackendDefaults(DictDot):
         stores=DataContextConfigDefaults.DEFAULT_STORES.value,
         data_docs_sites=DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value,
     ):
-        self.config_version = config_version
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
@@ -991,12 +989,13 @@ class DataContextConfig(DictDot):
         commented_map=None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
     ):
+        # Set defaults
+        if config_version is None:
+            config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
 
         # Set defaults via store_backend_defaults if one is passed in
         # Override attributes from store_backend_defaults with any items passed into the constructor:
         if store_backend_defaults is not None:
-            if config_version is None:
-                config_version = store_backend_defaults.config_version
             if stores is None:
                 stores = store_backend_defaults.stores
             if expectations_store_name is None:
@@ -1051,7 +1050,7 @@ class DataContextConfig(DictDot):
     @classmethod
     def from_commented_map(cls, commented_map):
         try:
-            config = dataContextConfigSchema.load(commented_map, partial=True)
+            config = dataContextConfigSchema.load(commented_map)
             return cls(commented_map=commented_map, **config)
         except ValidationError:
             logger.error(
