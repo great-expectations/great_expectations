@@ -96,6 +96,7 @@ def test_cli_init_on_new_project(
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
         Titanic/
             warning.json
     notebooks/
@@ -151,6 +152,7 @@ def test_cli_init_on_new_project(
                                 20190926T134241.000000Z/
                                     foobarbazguid.html
         validations/
+            .ge_store_backend_id
             Titanic/
                 warning/
                     20190926T134241.000000Z/
@@ -583,6 +585,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
         Titanic/
             warning.json
     notebooks/
@@ -638,6 +641,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
                                 20190926T134241.000000Z/
                                     foobarbazguid.html
         validations/
+            .ge_store_backend_id
             Titanic/
                 warning/
                     20190926T134241.000000Z/
