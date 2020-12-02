@@ -458,7 +458,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
 @mock_s3
 def test_inaccessible_active_bucket_warning_messages(caplog):
     """
-    What does this test and why?
+    What does this test do and why?
 
     Trying to create a data context with unreachable ACTIVE stores should show an warning message once per store
     e.g. Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store
@@ -519,7 +519,7 @@ def test_inaccessible_active_bucket_warning_messages(caplog):
 @mock_s3
 def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
     """
-    What does this test and why?
+    What does this test do and why?
 
     Trying to create a data context with unreachable INACTIVE stores should show no warning messages
     Inactive stores are those NOT named in:

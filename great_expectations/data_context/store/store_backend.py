@@ -69,7 +69,7 @@ class StoreBackend(metaclass=ABCMeta):
         if self._suppress_store_backend_id:
             if not suppress_warning:
                 logger.warning(
-                    f"You are attempting to access store_backend_id of a store or store_backend named {self.store_name} that has been explicitly suppressed."
+                    f"You are attempting to access the store_backend_id of a store or store_backend named {self.store_name} that has been explicitly suppressed."
                 )
             return
         try:
