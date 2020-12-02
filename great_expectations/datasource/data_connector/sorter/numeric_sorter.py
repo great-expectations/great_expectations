@@ -4,10 +4,7 @@ from typing import Any
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector.sorter import Sorter
-from great_expectations.util import (
-    is_numeric,
-    is_int,
-)
+from great_expectations.util import is_int, is_numeric
 
 logger = logging.getLogger(__name__)
 
