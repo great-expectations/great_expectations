@@ -7,9 +7,10 @@ from typing import Any
 
 from dateutil.parser import parse
 
-from great_expectations.core import ExpectationSuite, RunIdentifier
 from great_expectations.exceptions import GreatExpectationsError
 
+from ..core.expectation_suite import ExpectationSuite
+from ..core.run_identifier import RunIdentifier
 from ..data_asset import DataAsset
 from ..dataset import Dataset
 

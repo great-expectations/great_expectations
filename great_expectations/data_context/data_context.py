@@ -8,25 +8,26 @@ import logging
 import os
 import shutil
 import sys
+import traceback
 import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core import (
-    ExpectationSuite,
-    RunIdentifier,
-    get_metric_kwargs_id,
-)
+from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
-from great_expectations.core.usage_statistics.usage_statistics import (
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.usage_statistics.usage_statistics import (  # TODO: deprecate
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
     run_validation_operator_usage_statistics,
@@ -35,20 +36,23 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.store import TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
-from great_expectations.data_context.types.base import (
+from great_expectations.data_context.types.base import (  # TODO: deprecate
     CURRENT_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     DatasourceConfig,
+    LegacyDatasourceConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
+    legacyDatasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -62,12 +66,14 @@ from great_expectations.data_context.util import (
     substitute_config_variable,
 )
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import LegacyDatasource  # TODO: deprecate
+from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -255,18 +261,29 @@ class BaseDataContext:
         self._in_memory_instance_id = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
-        self._initialize_usage_statistics(project_config.anonymous_usage_statistics)
-
-        # Store cached datasources but don't init them
-        self._cached_datasources = {}
 
         # Init stores
         self._stores = dict()
         self._init_stores(self._project_config_with_variables_substituted.stores)
 
+        # Init data_context_id
+        self._data_context_id = self._construct_data_context_id()
+
+        # Override the project_config data_context_id if an expectations_store was already set up
+        self._project_config.anonymous_usage_statistics.data_context_id = (
+            self._data_context_id
+        )
+        self._initialize_usage_statistics(
+            self._project_config.anonymous_usage_statistics
+        )
+
+        # Store cached datasources but don't init them
+        self._cached_datasources = {}  # TODO: deprecate
+
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
-        # the way that datasources, validation operators, site builders and other plugins are built.
+        # the way that execution environments (AKA datasources), validation operators, site builders and other
+        # plugins are built.
         self.validation_operators = {}
         for (
             validation_operator_name,
@@ -279,13 +296,35 @@ class BaseDataContext:
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
-    def _build_store(self, store_name, store_config):
+    def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
         try:
+            # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+            # the expectations_store doesnt yet exist by:
+            # adding the data_context_id from the project_config
+            # to the store_config under the key manually_initialize_store_backend_id
+            if (store_name == self.expectations_store_name) and store_config.get(
+                "store_backend"
+            ):
+                store_config["store_backend"].update(
+                    {
+                        "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                    }
+                )
+
+            # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+            if (
+                store_name not in [store["name"] for store in self.list_active_stores()]
+                and store_config.get("store_backend") is not None
+            ):
+                store_config["store_backend"].update(
+                    {"suppress_store_backend_id": True}
+                )
+
             new_store = instantiate_class_from_config(
                 config=store_config,
                 runtime_environment={"root_directory": self.root_directory,},
-                config_defaults={"module_name": module_name},
+                config_defaults={"module_name": module_name, "store_name": store_name},
             )
         except ge_exceptions.DataContextError as e:
             new_store = None
@@ -308,19 +347,11 @@ class BaseDataContext:
             1. follow a clear key-value pattern, and
             2. are usually edited programmatically, using the Context
 
-        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
-        As of 9/21/2019, the following Stores had not yet been implemented
-            * great_expectations.yml
-            * expectations
-            * data documentation
-            * config_variables
-            * anything accessed via write_resource
-
         Note that stores do NOT manage plugins.
         """
 
         for store_name, store_config in store_configs.items():
-            self._build_store(store_name, store_config)
+            self._build_store_from_config(store_name, store_config)
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
@@ -425,6 +456,28 @@ class BaseDataContext:
                 pass
         return False
 
+    def _construct_data_context_id(self) -> str:
+        """
+        Choose the id of the currently-configured expectations store, if available and a persistent store.
+        If not, it should choose the id stored in DataContextConfig.
+        Returns:
+            UUID to use as the data_context_id
+        """
+
+        # Choose the id of the currently-configured expectations store, if it is a persistent store
+        expectations_store = self._stores[
+            self._project_config_with_variables_substituted.expectations_store_name
+        ]
+        if isinstance(expectations_store.store_backend, TupleStoreBackend):
+            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
+            return expectations_store.store_backend_id_warnings_suppressed
+
+        # Otherwise choose the id stored in the project_config
+        else:
+            return (
+                self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+            )
+
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
     ):
@@ -436,7 +489,7 @@ class BaseDataContext:
 
         self._usage_statistics_handler = UsageStatisticsHandler(
             data_context=self,
-            data_context_id=usage_statistics_config.data_context_id,
+            data_context_id=self._data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
@@ -452,7 +505,7 @@ class BaseDataContext:
         """
 
         self._project_config["stores"][store_name] = store_config
-        return self._build_store(store_name, store_config)
+        return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
         self, validation_operator_name, validation_operator_config
@@ -652,11 +705,20 @@ class BaseDataContext:
         """A single holder for all Stores in this context"""
         return self._stores
 
+    # TODO: deprecate
     @property
     def datasources(self):
         """A single holder for all Datasources in this context"""
         return {
             datasource: self.get_datasource(datasource)
+            for datasource in self._project_config_with_variables_substituted.datasources
+        }
+
+    @property
+    def datasources(self) -> Dict[str, Datasource]:
+        """A single holder for all Datasources in this context"""
+        return {
+            datasource: self.get_datasource(datasource_name=datasource)
             for datasource in self._project_config_with_variables_substituted.datasources
         }
 
@@ -800,6 +862,7 @@ class BaseDataContext:
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
+    # TODO: deprecate
     def delete_datasource(self, datasource_name=None):
         """Delete a data source
         Args:
@@ -818,6 +881,27 @@ class BaseDataContext:
                     datasource_name
                 ]
                 del self._project_config.datasources[datasource_name]
+                del self._cached_datasources[datasource_name]
+            else:
+                raise ValueError("Datasource {} not found".format(datasource_name))
+
+    def delete_datasource(self, datasource_name=None):
+        """Delete a data source
+        Args:
+            datasource_name: The name of the datasource to delete.
+
+        Raises:
+            ValueError: If the datasource name isn't provided or cannot be found.
+        """
+        if datasource_name is None:
+            raise ValueError("Datasource names must be a datasource name")
+        else:
+            datasource = self.get_datasource(datasource_name)
+            if datasource:
+                # remove key until we have a delete method on project_config
+                # self._project_config_with_variables_substituted.datasources[
+                # datasource_name].remove()
+                # del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError("Datasource {} not found".format(datasource_name))
@@ -937,6 +1021,20 @@ class BaseDataContext:
         )
         return batch_kwargs
 
+    # New get_batch (note: it returns the List of Batch objects, not a single Batch object).
+    def get_batch_list_from_new_style_datasource(
+        self, batch_request: dict
+    ) -> List[Batch]:
+        datasource_name: str = batch_request.get("datasource_name")
+        if not datasource_name:
+            raise ge_exceptions.DatasourceError(
+                message="Batch request must specify an datasource."
+            )
+
+        datasource: Datasource = self.datasources[datasource_name]
+        batch_request: BatchRequest = BatchRequest(**batch_request)
+        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+
     def get_batch(
         self,
         batch_kwargs: Union[dict, BatchKwargs],
@@ -946,7 +1044,6 @@ class BaseDataContext:
     ) -> DataAsset:
         """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
         batch_parameters are included, they will be available as attributes of the batch.
-
         Args:
             batch_kwargs: the batch_kwargs to use; must include a datasource key
             expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get
@@ -954,7 +1051,6 @@ class BaseDataContext:
                 generally be inferred from the datasource.
             batch_parameters: optional parameters to store as the reference description of the batch. They should
                 reflect parameters that would provide the passed BatchKwargs.
-
         Returns:
             DataAsset
         """
@@ -989,7 +1085,7 @@ class BaseDataContext:
         )
         if data_asset_type is None:
             data_asset_type = datasource.config.get("data_asset_type")
-        validator = Validator(
+        validator = BridgeValidator(
             batch=batch,
             expectation_suite=expectation_suite,
             expectation_engine=data_asset_type,
@@ -1032,7 +1128,7 @@ class BaseDataContext:
             )
 
         for batch in assets_to_validate:
-            if not isinstance(batch, (tuple, DataAsset)):
+            if not isinstance(batch, (tuple, DataAsset, Validator)):
                 raise ge_exceptions.DataContextError(
                     "Batches are required to be of type DataAsset"
                 )
@@ -1073,6 +1169,7 @@ class BaseDataContext:
             return []
         return list(self.validation_operators.keys())
 
+    # TODO: deprecate
     @usage_statistics_enabled_method(
         event_name="data_context.add_datasource",
         args_payload_fn=add_datasource_usage_statistics,
@@ -1101,7 +1198,7 @@ class BaseDataContext:
         else:
             config = kwargs
 
-        config = datasourceConfigSchema.load(config)
+        config = legacyDatasourceConfigSchema.load(config)
         self._project_config["datasources"][name] = config
 
         # We perform variable substitution in the datasource's config here before using the config
@@ -1117,6 +1214,7 @@ class BaseDataContext:
 
         return datasource
 
+    # TODO: deprecate
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):
@@ -1142,10 +1240,11 @@ class BaseDataContext:
     def get_config(self):
         return self._project_config
 
+    # TODO: deprecate
     def _build_datasource_from_config(self, name, config):
         # We convert from the type back to a dictionary for purposes of instantiation
-        if isinstance(config, DatasourceConfig):
-            config = datasourceConfigSchema.dump(config)
+        if isinstance(config, LegacyDatasourceConfig):
+            config = legacyDatasourceConfigSchema.dump(config)
         config.update({"name": name})
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
@@ -1161,7 +1260,8 @@ class BaseDataContext:
             )
         return datasource
 
-    def get_datasource(self, datasource_name: str = "default") -> Datasource:
+    # TODO: deprecate
+    def get_datasource(self, datasource_name: str = "default") -> LegacyDatasource:
         """Get the named datasource
 
         Args:
@@ -1185,7 +1285,7 @@ class BaseDataContext:
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
-        datasource_config = datasourceConfigSchema.load(datasource_config)
+        datasource_config = legacyDatasourceConfigSchema.load(datasource_config)
         datasource = self._build_datasource_from_config(
             datasource_name, datasource_config
         )
@@ -1201,6 +1301,22 @@ class BaseDataContext:
                 "Unable to find configured store: %s" % str(e)
             )
         return keys
+
+    # TODO: deprecate
+    def list_datasources(self):
+        """List currently-configured datasources on this context.
+
+        Returns:
+            List(dict): each dictionary includes "name", "class_name", and "module_name" keys
+        """
+        datasources = []
+        for (
+            key,
+            value,
+        ) in self._project_config_with_variables_substituted.datasources.items():
+            value["name"] = key
+            datasources.append(value)
+        return datasources
 
     def list_datasources(self):
         """List currently-configured datasources on this context.
@@ -1228,6 +1344,22 @@ class BaseDataContext:
             value["name"] = name
             stores.append(value)
         return stores
+
+    def list_active_stores(self):
+        """
+        List active Stores on this context. Active stores are identified by setting the following parameters:
+            expectations_store_name,
+            validations_store_name,
+            evaluation_parameter_store_name
+        """
+        active_store_names = [
+            self.expectations_store_name,
+            self.validations_store_name,
+            self.evaluation_parameter_store_name,
+        ]
+        return [
+            store for store in self.list_stores() if store["name"] in active_store_names
+        ]
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
@@ -1296,7 +1428,6 @@ class BaseDataContext:
         else:
             self._stores[self.expectations_store_name].remove_key(key)
             return True
-        return False
 
     def get_expectation_suite(self, expectation_suite_name):
         """Get a named expectation suite for the provided data_asset_name.
@@ -2561,7 +2692,7 @@ class DataContext(BaseDataContext):
             logger.debug(e)
 
     @staticmethod
-    def _validate_checkpoint(checkpoint: dict, checkpoint_name: str) -> dict:
+    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
         if checkpoint is None:
             raise ge_exceptions.CheckpointError(
                 f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."

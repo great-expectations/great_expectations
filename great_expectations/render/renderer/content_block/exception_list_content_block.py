@@ -43,15 +43,34 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     }
 
     @classmethod
-    def _missing_content_block_fn(cls, evr, styling=None, include_column_name=True):
+    def render(cls, render_object, **kwargs):
+        return super().render(
+            render_object=render_object, exception_list_content_block=True
+        )
+
+    @classmethod
+    def _missing_content_block_fn(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
         # Only render EVR objects for which an exception was raised
-        if evr.exception_info["raised_exception"] is True:
+        if result.exception_info["raised_exception"] is True:
             template_str = "$expectation_type raised an exception: $exception_message"
             if include_column_name:
                 template_str = "$column: " + template_str
 
             try:
-                column = evr.expectation_config.kwargs["column"]
+                column = result.expectation_config.kwargs["column"]
             except KeyError:
                 column = None
             return [
@@ -62,8 +81,8 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                             "template": template_str,
                             "params": {
                                 "column": column,
-                                "expectation_type": evr.expectation_config.expectation_type,
-                                "exception_message": evr.exception_info[
+                                "expectation_type": result.expectation_config.expectation_type,
+                                "exception_message": result.exception_info[
                                     "exception_message"
                                 ],
                             },

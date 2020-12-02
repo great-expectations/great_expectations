@@ -4,7 +4,7 @@ import traceback
 from collections import OrderedDict
 
 import great_expectations.exceptions as exceptions
-from great_expectations.core import nested_update
+from great_expectations.core.util import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
@@ -550,6 +550,7 @@ class DefaultSiteIndexBuilder:
         run_name=None,
         asset_name=None,
         batch_kwargs=None,
+        batch_spec=None,
     ):
         import os
 
@@ -588,6 +589,7 @@ class DefaultSiteIndexBuilder:
                 "run_name": run_name,
                 "asset_name": asset_name,
                 "batch_kwargs": batch_kwargs,
+                "batch_spec": batch_spec,
                 "expectation_suite_filepath": expectation_suite_filepath
                 if run_id
                 else None,
@@ -680,6 +682,7 @@ class DefaultSiteIndexBuilder:
 
         return results
 
+    # TODO: deprecate dual batch api support
     def build(self, skip_and_clean_missing=True):
         """
         :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
@@ -796,6 +799,7 @@ class DefaultSiteIndexBuilder:
                     )
 
                     batch_kwargs = validation.meta.get("batch_kwargs", {})
+                    batch_spec = validation.meta.get("batch_spec", {})
 
                     self.add_resource_info_to_index_links_dict(
                         index_links_dict=index_links_dict,
@@ -805,8 +809,10 @@ class DefaultSiteIndexBuilder:
                         run_id=profiling_result_key.run_id,
                         run_time=profiling_result_key.run_id.run_time,
                         run_name=profiling_result_key.run_id.run_name,
-                        asset_name=batch_kwargs.get("data_asset_name"),
+                        asset_name=batch_kwargs.get("data_asset_name")
+                        or batch_spec.get("data_asset_name"),
                         batch_kwargs=batch_kwargs,
+                        batch_spec=batch_spec,
                     )
                 except Exception:
                     error_msg = "Profiling result not found: {:s} - skipping".format(
@@ -849,6 +855,7 @@ class DefaultSiteIndexBuilder:
 
                     validation_success = validation.success
                     batch_kwargs = validation.meta.get("batch_kwargs", {})
+                    batch_spec = validation.meta.get("batch_spec", {})
 
                     self.add_resource_info_to_index_links_dict(
                         index_links_dict=index_links_dict,
@@ -859,8 +866,10 @@ class DefaultSiteIndexBuilder:
                         validation_success=validation_success,
                         run_time=validation_result_key.run_id.run_time,
                         run_name=validation_result_key.run_id.run_name,
-                        asset_name=batch_kwargs.get("data_asset_name"),
+                        asset_name=batch_kwargs.get("data_asset_name")
+                        or batch_spec.get("data_asset_name"),
                         batch_kwargs=batch_kwargs,
+                        batch_spec=batch_spec,
                     )
                 except Exception:
                     error_msg = "Validation result not found: {:s} - skipping".format(

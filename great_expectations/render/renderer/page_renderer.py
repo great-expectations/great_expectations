@@ -5,11 +5,12 @@ from typing import List
 
 from dateutil.parser import parse
 
-from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
 
+from ...core.expectation_validation_result import ExpectationSuiteValidationResult
+from ...core.run_identifier import RunIdentifier
 from ...validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
@@ -74,6 +75,7 @@ class ValidationResultsPageRenderer(Renderer):
             for validation_result in validation_operator_result.list_validation_results()
         ]
 
+    # TODO: deprecate dual batch api support in 0.14
     def render(self, validation_results: ExpectationSuiteValidationResult):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
@@ -90,13 +92,18 @@ class ValidationResultsPageRenderer(Renderer):
             run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
-        batch_kwargs = validation_results.meta.get("batch_kwargs")
+        batch_kwargs = validation_results.meta.get(
+            "batch_kwargs", {}
+        ) or validation_results.meta.get("batch_spec", {})
 
         # add datasource key to batch_kwargs if missing
-        if "datasource" not in validation_results.meta.get("batch_kwargs", {}):
+        if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
             # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
             if len(expectation_suite_name.split(".")) == 4:
-                batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
+                if "batch_kwargs" in validation_results.meta:
+                    batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
+                else:
+                    batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
 
         # Group EVRs by column
         columns = {}
@@ -121,7 +128,7 @@ class ValidationResultsPageRenderer(Renderer):
             self._render_validation_info(validation_results=validation_results)
         ]
 
-        if validation_results["meta"].get("batch_markers"):
+        if validation_results.meta.get("batch_markers"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
                     input_dict=validation_results["meta"].get("batch_markers"),
@@ -129,19 +136,35 @@ class ValidationResultsPageRenderer(Renderer):
                 )
             )
 
-        if validation_results["meta"].get("batch_kwargs"):
+        if validation_results.meta.get("batch_kwargs"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_kwargs"),
+                    input_dict=validation_results.meta.get("batch_kwargs"),
                     header="Batch Kwargs",
                 )
             )
 
-        if validation_results["meta"].get("batch_parameters"):
+        if validation_results.meta.get("batch_parameters"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_parameters"),
+                    input_dict=validation_results.meta.get("batch_parameters"),
                     header="Batch Parameters",
+                )
+            )
+
+        if validation_results.meta.get("batch_spec"):
+            collapse_content_blocks.append(
+                self._render_nested_table_from_dict(
+                    input_dict=validation_results.meta.get("batch_spec"),
+                    header="Batch Spec",
+                )
+            )
+
+        if validation_results.meta.get("batch_request"):
+            collapse_content_blocks.append(
+                self._render_nested_table_from_dict(
+                    input_dict=validation_results.meta.get("batch_request"),
+                    header="Batch Definition",
                 )
             )
 
@@ -216,7 +239,12 @@ class ValidationResultsPageRenderer(Renderer):
             **{
                 "renderer_type": "ValidationResultsPageRenderer",
                 "page_title": page_title,
-                "batch_kwargs": batch_kwargs,
+                "batch_kwargs": batch_kwargs
+                if "batch_kwargs" in validation_results.meta
+                else None,
+                "batch_spec": batch_kwargs
+                if "batch_spec" in validation_results.meta
+                else None,
                 "expectation_suite_name": expectation_suite_name,
                 "sections": sections,
                 "utm_medium": "validation-results-page",
@@ -235,7 +263,12 @@ class ValidationResultsPageRenderer(Renderer):
         expectation_suite_path = (
             os.path.join(*expectation_suite_path_components) + ".html"
         )
-        data_asset_name = validation_results.meta["batch_kwargs"].get("data_asset_name")
+        # TODO: deprecate dual batch api support in 0.14
+        batch_kwargs = validation_results.meta.get(
+            "batch_kwargs", {}
+        ) or validation_results.meta.get("batch_spec", {})
+        data_asset_name = batch_kwargs.get("data_asset_name")
+
         if success:
             success = "Succeeded"
             html_success_icon = (
@@ -441,7 +474,7 @@ class ValidationResultsPageRenderer(Renderer):
 
     @classmethod
     def _render_validation_statistics(cls, validation_results):
-        statistics = validation_results["statistics"]
+        statistics = validation_results.statistics
         statistics_dict = OrderedDict(
             [
                 ("evaluated_expectations", "Evaluated Expectations"),
@@ -746,7 +779,7 @@ class ProfilingResultsPageRenderer(Renderer):
             column_section_renderer = {
                 "class_name": "ProfilingResultsColumnSectionRenderer"
             }
-        module_name = "great_expectations.render.renderer.other_section_renderer"
+        module_name = "great_expectations.render.renderer.profiling_results_overview_section_renderer"
         self._overview_section_renderer = instantiate_class_from_config(
             config=overview_section_renderer,
             runtime_environment={},
@@ -791,13 +824,18 @@ class ProfilingResultsPageRenderer(Renderer):
             run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
-        batch_kwargs = validation_results.meta.get("batch_kwargs")
+        batch_kwargs = validation_results.meta.get(
+            "batch_kwargs", {}
+        ) or validation_results.meta.get("batch_spec", {})
 
         # add datasource key to batch_kwargs if missing
-        if "datasource" not in validation_results.meta.get("batch_kwargs", {}):
+        if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
             # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
             if len(expectation_suite_name.split(".")) == 4:
-                batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
+                if "batch_kwargs" in validation_results.meta:
+                    batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
+                else:
+                    batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
 
         # Group EVRs by column
         # TODO: When we implement a ValidationResultSuite class, this method will move there.
@@ -836,7 +874,12 @@ class ProfilingResultsPageRenderer(Renderer):
                 "page_title": page_title,
                 "expectation_suite_name": expectation_suite_name,
                 "utm_medium": "profiling-results-page",
-                "batch_kwargs": batch_kwargs,
+                "batch_kwargs": batch_kwargs
+                if "batch_kwargs" in validation_results.meta
+                else None,
+                "batch_spec": batch_kwargs
+                if "batch_spec" in validation_results.meta
+                else None,
                 "sections": [
                     self._overview_section_renderer.render(
                         validation_results, section_name="Overview"

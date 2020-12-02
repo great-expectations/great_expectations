@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -28,8 +29,22 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseStoreBackend(StoreBackend):
-    def __init__(self, credentials, table_name, key_columns, fixed_length_key=True):
-        super().__init__(fixed_length_key=fixed_length_key)
+    def __init__(
+        self,
+        credentials,
+        table_name,
+        key_columns,
+        fixed_length_key=True,
+        suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
+        store_name=None,
+    ):
+        super().__init__(
+            fixed_length_key=fixed_length_key,
+            suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
+            store_name=store_name,
+        )
         if not sqlalchemy:
             raise ge_exceptions.DataContextError(
                 "ModuleNotFoundError: No module named 'sqlalchemy'"
@@ -41,10 +56,11 @@ class DatabaseStoreBackend(StoreBackend):
             )
 
         drivername = credentials.pop("drivername")
+        schema = credentials.pop("schema", None)
         options = URL(drivername, **credentials)
         self.engine = create_engine(options)
 
-        meta = MetaData()
+        meta = MetaData(schema=schema)
         self.key_columns = key_columns
         # Dynamically construct a SQLAlchemy table with the name and column names we'll use
         cols = []
@@ -67,12 +83,35 @@ class DatabaseStoreBackend(StoreBackend):
         except NoSuchTableError:
             table = Table(table_name, meta, *cols)
             try:
+                if schema:
+                    self.engine.execute(f"CREATE SCHEMA IF NOT EXISTS {schema};")
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
                 raise ge_exceptions.StoreBackendError(
                     f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {str(e)}"
                 )
         self._table = table
+        # Initialize with store_backend_id
+        self._store_backend_id = None
+        self._store_backend_id = self.store_backend_id
+
+    @property
+    def store_backend_id(self) -> str:
+        """
+        Create a store_backend_id if one does not exist, and return it if it exists
+        Ephemeral store_backend_id for database_store_backend until there is a place to store metadata
+        Returns:
+            store_backend_id which is a UUID(version=4)
+        """
+
+        if not self._store_backend_id:
+            store_id = (
+                self._manually_initialize_store_backend_id
+                if self._manually_initialize_store_backend_id
+                else str(uuid.uuid4())
+            )
+            self._store_backend_id = f"{self.STORE_BACKEND_ID_PREFIX}{store_id}"
+        return self._store_backend_id.replace(self.STORE_BACKEND_ID_PREFIX, "")
 
     def _get(self, key):
         sel = (
