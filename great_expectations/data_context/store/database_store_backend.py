@@ -23,7 +23,7 @@ try:
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
 except ImportError:
-    sqlalchemy = None
+    sa = None
     create_engine = None
 
 
@@ -254,7 +254,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _has_key(self, key):
         sel = (
-            select([sqlalchemy.func.count(column("value"))])
+            select([sa.func.count(column("value"))])
             .select_from(self._table)
             .where(
                 and_(
