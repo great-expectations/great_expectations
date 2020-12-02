@@ -1,7 +1,4 @@
-import random
 from typing import Dict, List, Optional
-
-import pandas as pd
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -22,6 +19,16 @@ except ImportError:
 
 
 class ConfiguredAssetSqlDataConnector(DataConnector):
+    """
+        A DataConnector that requires explicit listing of Sql tables you want to connect to.
+
+    Args:
+        name (str): The name of this DataConnector
+        datasource_name (str): The name of the Datasource that contains it
+        execution_engine (ExecutionEngine): An ExecutionEngine
+        data_assets (str): data_assets
+    """
+
     def __init__(
         self,
         name: str,
@@ -141,8 +148,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _map_data_reference_to_batch_definition_list(
         self, data_reference, data_asset_name: Optional[str] = None  #: Any,
     ) -> Optional[List[BatchDefinition]]:
-        # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries, allowing us to invoke `PartitionDefinition(data_reference)`
-
+        # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,
+        # allowing us to invoke `PartitionDefinition(data_reference)`
         return [
             BatchDefinition(
                 datasource_name=self.datasource_name,
@@ -170,7 +177,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self, table_name: str,
     ):
         """'Split' by returning the whole table
-        
+
         Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
         """
 

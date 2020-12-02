@@ -16,6 +16,20 @@ logger = logging.getLogger(__name__)
 
 
 class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnector):
+    """ Extension of ConfiguredAssetFilePathDataConnector
+
+         DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
+        can use to get individual batches of data. They add flexibility in how to obtain data
+        such as with time-based partitioning, downsampling, or other techniques appropriate
+        for the Datasource.
+
+        The ConfiguredAssetFilePathDataConnector is one of two classes (InferredAssetFilePathDataConnector being the
+        other one) designed for connecting to filesystem-like data, more specifically files on disk.
+
+        A ConfiguredAssetFilesSystemDataconnector requires an explicit listing of each DataAsset you want to connect to.
+        This allows more fine-tuning, but also requires more setup.
+    """
+
     def __init__(
         self,
         name: str,

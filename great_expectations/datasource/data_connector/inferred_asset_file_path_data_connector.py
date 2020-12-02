@@ -10,8 +10,20 @@ logger = logging.getLogger(__name__)
 
 
 class InferredAssetFilePathDataConnector(FilePathDataConnector):
-    """InferredAssetFilePathDataConnector is a base class for DataConnectors that operate on file paths and determine
-    the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names.
+    """
+
+        DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
+        can use to get individual batches of data. They add flexibility in how to obtain data
+        such as with time-based partitioning, downsampling, or other techniques appropriate
+        for the Datasource.
+
+        The InferredAssetFilePathDataConnector is one of two classes (ConfiguredAssetFilePathDataConnector being the
+        other one) designed for connecting to filesystem-like data. This includes files on disk, but also things
+        like S3 object stores, etc:
+
+        InferredAssetFilePathDataConnector is a base class operates on file paths and determine
+        the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names.
+
     """
 
     def __init__(
@@ -33,8 +45,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         )
 
     def _refresh_data_references_cache(self):
-        """
-        """
+        """ refreshes data_reference cache """
         # Map data_references to batch_definitions
         self._data_references_cache = {}
 
@@ -47,6 +58,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
     def get_data_reference_list_count(self) -> int:
+        """ returns number of data_references in data_reference cache or throws an error """
         if self._data_references_cache is None:
             raise ValueError(
                 f"data references cache for {self.__class__.__name__} {self.name} has not yet been populated."
@@ -55,6 +67,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         return len(self._data_references_cache)
 
     def get_unmatched_data_references(self) -> List[str]:
+        """ returns number of data_references in data_reference cache or throws an error"""
         if self._data_references_cache is None:
             raise ValueError(
                 '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
@@ -63,6 +76,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         return [k for k, v in self._data_references_cache.items() if v is None]
 
     def get_available_data_asset_names(self) -> List[str]:
+        """ returns number of data_references in data_reference cache or throws an error"""
         if self._data_references_cache is None:
             self._refresh_data_references_cache()
 
