@@ -12,6 +12,7 @@ Develop
 * [ENHANCEMENT] Add a store_backend_id property to StoreBackend #2030, #2075
 * [ENHANCEMENT] Use an existing expectation_store.store_backend_id to initialize an in-code DataContext #2046, #2075
 * [BUGFIX] Corrected handling of boto3_options by PandasExecutionEngine
+* [BUGFIX] New Expectation via CLI / SQL Query no longer throws TypeError
 * [DOCS] Fixed a typo in the HOWTO guide for adding a self-managed Spark datasource
 
 0.13.0
