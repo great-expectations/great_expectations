@@ -7,7 +7,7 @@ Changelog
 
 Develop
 -----------------
-
+* [BUGFIX] New Expectation via CLI / SQL Query no longer throws TypeError
 
 0.13.0
 -----------------
