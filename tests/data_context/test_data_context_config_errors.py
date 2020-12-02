@@ -74,3 +74,11 @@ def test_DataContext_raises_error_on_missing_config_version_aka_version_zero():
     local_dir = file_relative_path(__file__, os.path.join(BASE_DIR, "version_zero"))
     with pytest.raises(ge_exceptions.InvalidDataContextConfigError):
         DataContext(local_dir)
+
+
+def test_DataContext_raises_error_on_missing_config_version_aka_version_zero_with_v2_config():
+    local_dir = file_relative_path(
+        __file__, os.path.join(BASE_DIR, "version_2-0_but_no_version_defined")
+    )
+    with pytest.raises(ge_exceptions.InvalidDataContextConfigError):
+        DataContext(local_dir)

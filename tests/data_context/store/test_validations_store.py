@@ -5,6 +5,8 @@ import pytest
 from freezegun import freeze_time
 from moto import mock_s3
 
+import tests.test_utils as test_utils
+from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -70,6 +72,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
             Bucket=bucket, Prefix=prefix
         )["Contents"]
     } == {
+        "test/prefix/.ge_store_backend_id",
         "test/prefix/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/batch_id.json",
         "test/prefix/asset/quarantine/20191007T151224.1234Z_prod_200/20190926T134241.000000Z/batch_id.json",
     }
@@ -79,6 +82,16 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
         ns_1,
         ns_2,
     }
+
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert my_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(my_store.store_backend_id)
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -127,6 +140,15 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
         ns_1,
         ns_2,
     }
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert my_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(my_store.store_backend_id)
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -186,6 +208,7 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
         == """\
 test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
     my_store/
+        .ge_store_backend_id
         asset/
             quarantine/
                 prod-100/
@@ -196,6 +219,27 @@ test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
                         batch_id.json
 """
     )
+
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert my_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(my_store.store_backend_id)
+
+    # Check that another store with the same configuration shares the same store_backend_id
+    my_store_duplicate = ValidationsStore(
+        store_backend={
+            "module_name": "great_expectations.data_context.store",
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": "my_store/",
+        },
+        runtime_environment={"root_directory": path},
+    )
+    assert my_store.store_backend_id == my_store_duplicate.store_backend_id
 
 
 def test_ValidationsStore_with_DatabaseStoreBackend(sa):
@@ -242,3 +286,13 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
         ns_1,
         ns_2,
     }
+
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert my_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(my_store.store_backend_id)
