@@ -128,8 +128,8 @@ Steps
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-            - :ref:`Understand the basics of Datasources <_reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <_how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add an S3-backed Pandas datasource do the following:
 
@@ -174,7 +174,7 @@ Steps
                                         - full_name
                         """
 
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <_how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         #. **Run context.test_yaml_config.**
 
