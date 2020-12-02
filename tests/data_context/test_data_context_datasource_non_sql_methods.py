@@ -59,7 +59,7 @@ data_connectors:
         "my_datasource", config,
     )
 
-    batch_list = context.get_batch_list_from_new_style_datasource(
+    batch: Batch = context.get_batch(
         {
             "datasource_name": "my_datasource",
             "data_connector_name": "my_data_connector",
@@ -73,10 +73,6 @@ data_connectors:
             },
         }
     )
-
-    assert len(batch_list) == 1
-
-    batch: Batch = batch_list[0]
 
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "path"
@@ -142,7 +138,7 @@ data_connectors:
         "my_datasource", config,
     )
 
-    batch_list = context.get_batch_list_from_new_style_datasource(
+    batch: Batch = context.get_batch(
         {
             "datasource_name": "my_datasource",
             "data_connector_name": "my_data_connector",
@@ -156,10 +152,6 @@ data_connectors:
             },
         }
     )
-
-    assert len(batch_list) == 1
-
-    batch: Batch = batch_list[0]
 
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "Titanic"

@@ -969,20 +969,6 @@ class BaseDataContext:
         )
         return batch_kwargs
 
-    # New get_batch (note: it returns the List of Batch objects, not a single Batch object).
-    def get_batch_list_from_new_style_datasource(
-        self, batch_request: dict
-    ) -> List[Batch]:
-        datasource_name: str = batch_request.get("datasource_name")
-        if not datasource_name:
-            raise ge_exceptions.DatasourceError(
-                message="Batch request must specify an datasource."
-            )
-
-        datasource: Datasource = self.datasources[datasource_name]
-        batch_request: BatchRequest = BatchRequest(**batch_request)
-        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
-
     def get_batch(
         self,
         batch_kwargs: Union[dict, BatchKwargs],
