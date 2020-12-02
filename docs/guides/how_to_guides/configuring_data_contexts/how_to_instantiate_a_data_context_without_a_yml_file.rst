@@ -5,6 +5,10 @@ How to instantiate a Data Context without a yml file
 
 This guide will help you instantiate a Data Context without a yml file, aka configure a Data Context in code. If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.) you may wish to configure your Data Context in code, within your notebook or workflow tool (e.g. Airflow DAG node).
 
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+    - :ref:`Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration<tutorials__getting_started>`.
+
 Steps
 -----
 
