@@ -178,7 +178,7 @@ Steps
 
             Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials.  Username and  password are set as environment variables, and host, port, and database are set as strings.
 
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <_how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
             .. code-block:: python
 
