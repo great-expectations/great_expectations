@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.datasource.data_connector.sorter.sorter import Sorter
+from great_expectations.datasource.data_connector.sorter import Sorter
 
 logger = logging.getLogger(__name__)
 
