@@ -54,19 +54,15 @@ def basic_files_dataconnector_yaml(tmp_path_factory):
         base_directory: {base_directory}
         glob_directive: "*/*.csv"
         datasource_name: general_data_source
-        assets:
-            default_asset:
-                base_directory:
-        partitioner:
-          class_name: RegexPartitioner
+        default_regex:
           pattern: .*\\/(my_asset)\\/(.*).csv
           group_names:
             - data_asset_name
             - name
-          sorters:
-            - orderby: desc
-              name: name
-              class_name: LexicographicSorter
+        sorters:
+          - name: name
+            class_name: LexicographicSorter
+            orderby: desc
        """,
     )
 
