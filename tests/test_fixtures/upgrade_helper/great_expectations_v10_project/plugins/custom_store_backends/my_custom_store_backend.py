@@ -11,6 +11,7 @@ class MyCustomStoreBackend(TupleStoreBackend):
         platform_specific_separator=True,
         fixed_length_key=False,
         suppress_store_backend_id=False,
+        store_name=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -20,6 +21,7 @@ class MyCustomStoreBackend(TupleStoreBackend):
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
+            store_name=store_name,
         )
 
     def _get(self, key):
