@@ -280,6 +280,11 @@ def test_filter_properties_dict():
     }
 
     d0_begin: dict = copy.deepcopy(source_dict)
+    with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
+        d0_end: dict = filter_properties_dict(
+            properties=d0_begin, keep_fields=["c"], delete_fields=["a", "e"],
+        )
     d0_end: dict = filter_properties_dict(properties=d0_begin,)
     d0_end_expected = copy.deepcopy(d0_begin)
     d0_end_expected.pop("b")
