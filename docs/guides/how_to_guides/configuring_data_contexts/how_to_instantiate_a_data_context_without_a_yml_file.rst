@@ -3,7 +3,7 @@
 How to instantiate a Data Context without a yml file
 ====================================================
 
-This guide will help you instantiate a Data Context without a yml file, aka configure a Data Context in memory. If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.) you may wish to configure your Data Context in memory, within your notebook or workflow tool (e.g. Airflow DAG node).
+This guide will help you instantiate a Data Context without a yml file, aka configure a Data Context in code. If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.) you may wish to configure your Data Context in code, within your notebook or workflow tool (e.g. Airflow DAG node).
 
 Steps
 -----
@@ -12,7 +12,7 @@ Steps
 
     The DataContextConfig holds all of the associated configuration parameters to build a DataContext. There are defaults set for you to minimize configuration in typical cases, but please note that every parameter is configurable and all defaults are overridable. Also note that DatasourceConfig also has defaults which can be overridden.
 
-    Here we will show a few examples of common configurations, using the ``backend_ecosystem`` parameter. Note that you can continue with the existing API sans defaults by omitting this parameter, and you can override all of the parameters as in the last example.
+    Here we will show a few examples of common configurations, using the ``store_backend_defaults`` parameter. Note that you can continue with the existing API sans defaults by omitting this parameter, and you can override all of the parameters as in the last example. Note that a parameter set in ``DataContextConfig`` will override a parameter set in ``store_backend_defaults`` if both are used.
 
     This example shows a Data Context configuration with an sqlalchemy datasource and an AWS s3 bucket for all metadata stores, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
 
@@ -32,7 +32,7 @@ Steps
                     },
                 )
             },
-            backend_ecosystem=S3BackendEcosystem(default_bucket_name="my_default_bucket"),
+            store_backend_defaults=S3StoreBackendDefaults(default_bucket_name="my_default_bucket"),
         )
 
     This example shows a Data Context configuration with a pandas datasource and local filesystem defaults for metadata stores.
@@ -40,18 +40,18 @@ Steps
     .. code-block:: python
 
         data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "../data/",
-                    }
-                },
-            )
-        },
-        backend_ecosystem=FilesystemBackendEcosystem(),
+            datasources={
+                "my_pandas_datasource": DatasourceConfig(
+                    class_name="PandasDatasource",
+                    batch_kwargs_generators={
+                        "subdir_reader": {
+                            "class_name": "SubdirReaderBatchKwargsGenerator",
+                            "base_directory": "../data/",
+                        }
+                    },
+                )
+            },
+            store_backend_defaults=FilesystemStoreBackendDefaults(),
     )
 
     This example shows setting overrides for many of the parameters available to you when creating a DataContextConfig and a Datasource
