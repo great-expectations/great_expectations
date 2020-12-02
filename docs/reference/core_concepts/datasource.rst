@@ -72,7 +72,7 @@ Given the following BatchDefinition:
 .. code-block:: json
 
     {
-      "execution_environment_name": "cloud_spark",
+      "datasource_name": "cloud_spark",
       "data_connector_name": "s3",
       "data_asset_name": "nightly_logs",
       "partition_definition": {
