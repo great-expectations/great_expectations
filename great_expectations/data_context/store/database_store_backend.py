@@ -76,7 +76,7 @@ class DatabaseStoreBackend(StoreBackend):
                 "Credentials, url, connection_string, or an engine are required for a DatabaseStoreBackend."
             )
 
-        meta = MetaData()
+        meta = MetaData(schema=self._schema_name)
         self.key_columns = key_columns
         # Dynamically construct a SQLAlchemy table with the name and column names we'll use
         cols = []
@@ -99,6 +99,10 @@ class DatabaseStoreBackend(StoreBackend):
         except NoSuchTableError:
             table = Table(table_name, meta, *cols)
             try:
+                if self._schema_name:
+                    self.engine.execute(
+                        f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};"
+                    )
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
                 raise ge_exceptions.StoreBackendError(
@@ -113,13 +117,7 @@ class DatabaseStoreBackend(StoreBackend):
         """
         # Update credentials with anything passed during connection time
         drivername = credentials.pop("drivername")
-        schema_name = credentials.pop("schema_name", None)
-        if schema_name is not None:
-            logger.warning(
-                "schema_name specified creating a URL with schema is not supported. Set a default "
-                "schema on the user connecting to your database."
-            )
-
+        self._schema_name = credentials.pop("schema_name", None)
         create_engine_kwargs = kwargs
         connect_args = credentials.pop("connect_args", None)
         if connect_args:
@@ -133,6 +131,7 @@ class DatabaseStoreBackend(StoreBackend):
             options = sa.engine.url.URL(drivername, **credentials)
 
         self.drivername = drivername
+
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
