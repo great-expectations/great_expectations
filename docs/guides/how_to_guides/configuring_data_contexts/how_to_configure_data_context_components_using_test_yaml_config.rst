@@ -28,7 +28,7 @@ Steps
     .. code-block:: python
 
         my_config = """
-        class_name: StreamlinedSqlExecutionEnvironment
+        class_name: SimpleSqlalchemyDatasource
         credentials:
             drivername: postgresql
             username: postgres
@@ -96,7 +96,7 @@ Steps
     .. code-block:: bash
 
         Attempting to instantiate class from config...
-            Instantiating as a ExecutionEnvironment, since class_name is StreamlinedSqlExecutionEnvironment
+            Instantiating as a Datasource, since class_name is SimpleSqlalchemyDatasource
         ---------------------------------------------------------------------------
         OperationalError                          Traceback (most recent call last)
         ~/anaconda2/envs/py3/lib/python3.7/site-packages/sqlalchemy/engine/base.py in _wrap_pool_connect(self, fn, connection)

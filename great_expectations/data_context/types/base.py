@@ -35,25 +35,15 @@ DEFAULT_USAGE_STATISTICS_URL = (
 
 class AssetConfig(DictDot):
     def __init__(
-        self,
-        # partitioner_name=None,
-        **kwargs,
+        self, **kwargs,
     ):
-        # if partitioner_name is not None:
-        #     self._partitioner_name = partitioner_name
         for k, v in kwargs.items():
             setattr(self, k, v)
-
-    # @property
-    # def partitioner_name(self):
-    #     return self._partitioner_name
 
 
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
-
-    # partitioner_name = fields.String(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -100,7 +90,7 @@ class SorterConfigSchema(Schema):
     name = fields.String(required=True)
     class_name = fields.String(required=True)
     module_name = fields.String(
-        missing="great_expectations.datasource.data_connector.partitioner.sorter"
+        missing="great_expectations.datasource.data_connector.sorter"
     )
     orderby = fields.String(required=False, missing="asc", allow_none=False)
 
@@ -114,109 +104,16 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
-class PartitionerConfig(DictDot):
-    def __init__(
-        self,
-        class_name,
-        module_name=None,
-        sorters=None,
-        allow_multipart_partitions=False,
-        runtime_keys=None,
-        **kwargs,
-    ):
-        self._class_name = class_name
-        self._module_name = module_name
-        if sorters is not None:
-            self._sorters = sorters
-        self._allow_multipart_partitions = allow_multipart_partitions
-        if runtime_keys is not None:
-            self._runtime_keys = runtime_keys
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-    @property
-    def class_name(self):
-        return self._class_name
-
-    @property
-    def module_name(self):
-        return self._module_name
-
-    @property
-    def sorters(self):
-        return self._sorters
-
-    @property
-    def allow_multipart_partitions(self):
-        return self._allow_multipart_partitions
-
-    @property
-    def runtime_keys(self):
-        return self._runtime_keys
-
-
-class PartitionerConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
-    class_name = fields.String(required=True)
-    module_name = fields.String(
-        missing="great_expectations.datasource.data_connector.partitioner"
-    )
-
-    sorters = fields.List(
-        cls_or_instance=fields.Nested(SorterConfigSchema),
-        required=False,
-        allow_none=True,
-    )
-
-    allow_multipart_partitions = fields.Boolean(
-        required=False, missing=False, allow_none=False
-    )
-
-    runtime_keys = fields.List(
-        cls_or_instance=fields.String(), required=False, allow_none=True
-    )
-
-    @validates_schema
-    def validate_schema(self, data, **kwargs):
-        pass
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_partitioner_config(self, data, **kwargs):
-        return PartitionerConfig(**data)
-
-
-# TODO: <Alex></Alex>
 class DataConnectorConfig(DictDot):
     def __init__(
-        self,
-        class_name,
-        module_name=None,
-        # partitioners=None,
-        # default_partitioner_name=None,
-        assets=None,
-        **kwargs,
+        self, class_name, module_name=None, assets=None, **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
-        # if partitioners is not None:
-        #     self._partitioners = partitioners
-        # if default_partitioner_name is not None:
-        #     self._default_partitioner_name = default_partitioner_name
         if assets is not None:
             self._assets = assets
         for k, v in kwargs.items():
             setattr(self, k, v)
-
-    # @property
-    # def partitioners(self):
-    #     return self._partitioners
-
-    # @property
-    # def default_partitioner_name(self):
-    #     return self._default_partitioner_name
 
     @property
     def assets(self):
@@ -244,19 +141,6 @@ class DataConnectorConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
-
-    # TODO: <Alex></Alex>
-    # partitioners = fields.Dict(
-    #     keys=fields.Str(),
-    #     values=fields.Nested(PartitionerConfigSchema),
-    #     required=False,
-    #     allow_none=True,
-    # )
-
-    # default_partitioner_name = fields.String(
-    #     required=False,
-    #     allow_none=True,
-    # )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -1192,7 +1076,6 @@ legacyDatasourceConfigSchema = LegacyDatasourceConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
 assetConfigSchema = AssetConfigSchema()
-partitionerConfigSchema = PartitionerConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()

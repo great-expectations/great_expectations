@@ -314,8 +314,7 @@ class ExecutionEngineError(DataContextError):
         super().__init__(self.message)
 
 
-# <WILL> Are we deprecating these?
-class PartitionerError(DataContextError):
+class PartitionQueryError(DataContextError):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)

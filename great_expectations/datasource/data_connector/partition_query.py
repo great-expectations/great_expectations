@@ -64,7 +64,7 @@ def build_partition_query(
         )
     partition_request_keys: set = set(partition_request_dict.keys())
     if not partition_request_keys <= PartitionQuery.RECOGNIZED_KEYS:
-        raise ge_exceptions.PartitionerError(
+        raise ge_exceptions.PartitionQueryError(
             f"""Unrecognized partition_request key(s):
 "{str(partition_request_keys - PartitionQuery.RECOGNIZED_KEYS)}" detected.
             """
@@ -73,7 +73,7 @@ def build_partition_query(
         "custom_filter_function"
     )
     if custom_filter_function and not isinstance(custom_filter_function, Callable):
-        raise ge_exceptions.PartitionerError(
+        raise ge_exceptions.PartitionQueryError(
             f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
 "{str(type(custom_filter_function))}", which is illegal.
             """
@@ -83,13 +83,13 @@ def build_partition_query(
     )
     if partition_identifiers:
         if not isinstance(partition_identifiers, dict):
-            raise ge_exceptions.PartitionerError(
+            raise ge_exceptions.PartitionQueryError(
                 f"""The type of a partition_identifiers must be a dictionary (Python "dict").  The type given is
 "{str(type(partition_identifiers))}", which is illegal.
                 """
             )
         if not all([isinstance(key, str) for key in partition_identifiers.keys()]):
-            raise ge_exceptions.PartitionerError(
+            raise ge_exceptions.PartitionQueryError(
                 'All partition_definition keys must strings (Python "str").'
             )
     if partition_identifiers is not None:
@@ -101,13 +101,13 @@ def build_partition_query(
     )
     limit: Union[int, None] = partition_request_dict.get("limit")
     if limit and (not isinstance(limit, int) or limit < 0):
-        raise ge_exceptions.PartitionerError(
+        raise ge_exceptions.PartitionQueryError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
 type and value given are "{str(type(limit))}" and "{limit}", respectively, which is illegal.
             """
         )
     if index is not None and limit is not None:
-        raise ge_exceptions.PartitionerError(
+        raise ge_exceptions.PartitionQueryError(
             "Only one of partition_index or limit, but not both, can be specified (specifying both is illegal)."
         )
     index = _parse_index(index=index)
@@ -128,13 +128,13 @@ def _parse_index(
         return index
     elif isinstance(index, (list, tuple)):
         if len(index) > 3:
-            raise ge_exceptions.PartitionerError(
+            raise ge_exceptions.PartitionQueryError(
                 f"""The number of partition_index slice components must be between 1 and 3 (the given number is
 {len(index)}).
                 """
             )
         if len(index) == 1:
-            return index(index=index[0])
+            return index[0]
         if len(index) == 2:
             return slice(index[0], index[1], None)
         if len(index) == 3:
@@ -144,7 +144,7 @@ def _parse_index(
             return _parse_index(index=int(index))
         return _parse_index(index=[int(idx_str) for idx_str in index.split(":")])
     else:
-        raise ge_exceptions.PartitionerError(
+        raise ge_exceptions.PartitionQueryError(
             f"""The type of a partition_index must be an integer (Python "int"), or a list (Python "list") or a tuple
 (Python "tuple"), or a Python "slice" object, or a string that has the format of a single integer or a slice argument.
 The type given is "{str(type(index))}", which is illegal.
