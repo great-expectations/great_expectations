@@ -1,11 +1,13 @@
 import os
 import shutil
+from typing import List, Union
 
 import pandas as pd
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.new_datasource import Datasource
 
 from ..test_utils import create_files_in_directory
 
@@ -59,19 +61,22 @@ data_connectors:
         "my_datasource", config,
     )
 
-    batch_list = context.get_batch_list_from_new_style_datasource(
-        {
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_data_connector",
-            "data_asset_name": "path",
-            "partition_request": {
-                "partition_identifiers": {
-                    # "data_asset_name": "path",
-                    "letter": "A",
-                    "number": "101",
-                }
-            },
-        }
+    datasource: Datasource = context.datasources["my_datasource"]
+    batch_request: Union[dict, BatchRequest] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_data_connector",
+        "data_asset_name": "path",
+        "partition_request": {
+            "partition_identifiers": {
+                # "data_asset_name": "path",
+                "letter": "A",
+                "number": "101",
+            }
+        },
+    }
+    batch_request = BatchRequest(**batch_request)
+    batch_list: List[Batch] = datasource.get_batch_list_from_batch_request(
+        batch_request=batch_request
     )
 
     assert len(batch_list) == 1
@@ -142,19 +147,22 @@ data_connectors:
         "my_datasource", config,
     )
 
-    batch_list = context.get_batch_list_from_new_style_datasource(
-        {
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_data_connector",
-            "data_asset_name": "Titanic",
-            "partition_request": {
-                "partition_identifiers": {
-                    "name": "Titanic",
-                    "timestamp": "19120414",
-                    "size": "1313",
-                }
-            },
-        }
+    datasource: Datasource = context.datasources["my_datasource"]
+    batch_request: Union[dict, BatchRequest] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_data_connector",
+        "data_asset_name": "Titanic",
+        "partition_request": {
+            "partition_identifiers": {
+                "name": "Titanic",
+                "timestamp": "19120414",
+                "size": "1313",
+            }
+        },
+    }
+    batch_request = BatchRequest(**batch_request)
+    batch_list: List[Batch] = datasource.get_batch_list_from_batch_request(
+        batch_request=batch_request
     )
 
     assert len(batch_list) == 1
