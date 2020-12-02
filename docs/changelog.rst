@@ -8,6 +8,9 @@ Changelog
 Develop
 -----------------
 * [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file
+* [ENHANCEMENT] More detailed information in Datasource.self_check() diagnostic (concerning ExecutionEngine objects)
+* [BUGFIX] Corrected handling of boto3_options by PandasExecutionEngine
+* [DOCS] Fixed a typo in the HOWTO guide for adding a self-managed Spark datasource
 
 
 0.13.0
