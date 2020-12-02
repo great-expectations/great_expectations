@@ -135,7 +135,6 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
     assert my_store.get(ns_2) == ExpectationSuiteValidationResult(
         success=False, statistics={}, results=[]
     )
-
     assert set(my_store.list_keys()) == {
         ns_1,
         ns_2,
