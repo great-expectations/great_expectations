@@ -7,11 +7,6 @@ How to configure a MSSQL Datasource
 
 This guide shows how to connect to a MSSQL Datasource. Great Expectations uses SqlAlchemy to connect to MSSQL, and relies further on the PyODBC driver.
 
-.. admonition:: Prerequisites: This how-to guide assumes you have already:
-
-  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-  - Obtained database credentials for MSSQL, including username, password, hostname, and database.
-
 Steps
 -----
 
