@@ -98,7 +98,6 @@ stages:
 
           - script: |
               python -m pip install --upgrade pip==20.2.4
-              python -m pip install --upgrade pip
               pip install $(GE_pytest_pip_opts)
               pip install $(pandas.constraint)
               # Consider fragmenting *all* integration tests into separate folder and run
