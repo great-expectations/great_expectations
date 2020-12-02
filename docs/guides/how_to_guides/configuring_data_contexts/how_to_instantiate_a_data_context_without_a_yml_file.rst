@@ -28,6 +28,9 @@ Steps
 
     .. code-block:: python
 
+        from great_expectations.data_context.types.base import DataContextConfig
+        from great_expectations.data_context import BaseDataContext
+
         data_context_config = DataContextConfig(
             datasources={
                 "my_sqlalchemy_datasource": DatasourceConfig(
@@ -45,7 +48,7 @@ Steps
             store_backend_defaults=S3StoreBackendDefaults(default_bucket_name="my_default_bucket"),
         )
 
-    The following example shows a Data Context configuration with a pandas datasource and local filesystem defaults for metadata stores.
+    The following example shows a Data Context configuration with a pandas datasource and local filesystem defaults for metadata stores. Note: imports are omitted in the following examples.
 
     .. code-block:: python
 
