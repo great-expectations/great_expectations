@@ -166,7 +166,7 @@ Steps
                                             - size
                         """
 
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <_how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         #. **Run context.test_yaml_config.**
 
