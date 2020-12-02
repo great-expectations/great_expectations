@@ -348,12 +348,10 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
     context = data_context_with_sql_datasource_for_testing_get_batch
 
     batch: Batch = context.get_batch(
-        {
-            "datasource_name": "my_sqlite_db",
-            "data_connector_name": "daily",
-            "data_asset_name": "table_partitioned_by_date_column__A",
-            "partition_request": {"partition_identifiers": {"date": "2020-01-15"}},
-        }
+        datasource_name="my_sqlite_db",
+        data_connector_name="daily",
+        data_asset_name="table_partitioned_by_date_column__A",
+        partition_request={"partition_identifiers": {"date": "2020-01-15"}},
     )
 
     assert batch.batch_spec is not None

@@ -60,18 +60,16 @@ data_connectors:
     )
 
     batch: Batch = context.get_batch(
-        {
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_data_connector",
-            "data_asset_name": "path",
-            "partition_request": {
-                "partition_identifiers": {
-                    # "data_asset_name": "path",
-                    "letter": "A",
-                    "number": "101",
-                }
-            },
-        }
+        datasource_name="my_datasource",
+        data_connector_name="my_data_connector",
+        data_asset_name="path",
+        partition_request={
+            "partition_identifiers": {
+                # "data_asset_name": "path",
+                "letter": "A",
+                "number": "101",
+            }
+        },
     )
 
     assert batch.batch_spec is not None
@@ -139,18 +137,16 @@ data_connectors:
     )
 
     batch: Batch = context.get_batch(
-        {
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_data_connector",
-            "data_asset_name": "Titanic",
-            "partition_request": {
-                "partition_identifiers": {
-                    "name": "Titanic",
-                    "timestamp": "19120414",
-                    "size": "1313",
-                }
-            },
-        }
+        datasource_name="my_datasource",
+        data_connector_name="my_data_connector",
+        data_asset_name="Titanic",
+        partition_request={
+            "partition_identifiers": {
+                "name": "Titanic",
+                "timestamp": "19120414",
+                "size": "1313",
+            }
+        },
     )
 
     assert batch.batch_spec is not None
