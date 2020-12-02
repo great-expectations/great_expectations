@@ -2,7 +2,7 @@ import copy
 import logging
 import os
 import traceback
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, List
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.compat import StringIO
@@ -467,3 +467,13 @@ class DataContextV3(DataContext):
         )
 
         return validator
+
+    def list_data_asset_names(
+        self,
+        datasource_name:str,
+        data_connector_name:str,
+    ) -> List[str]:
+        datasource = self.datasources[datasource_name]
+        
+        data_asset_names = datasource.get_available_data_asset_names(data_connector_name)[data_connector_name]
+        return data_asset_names
