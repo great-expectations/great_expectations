@@ -280,47 +280,41 @@ class LegacyDatasourceConfig(DictDot):
         limit=None,
         **kwargs,
     ):
-        # Set default parameters from Datasource class build_configuration if not passed into constructor
-        datasource_class = load_class(module_name=module_name, class_name=class_name)
-        config = {}
-        if hasattr(datasource_class, "build_configuration"):
-            config = datasource_class.build_configuration(**kwargs)
-
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
 
+        # NOTE - AJB - 20201202: This should use the datasource class build_configuration method as in DataContext.add_datasource()
         if data_asset_type is None:
-            data_asset_type = config.get("data_asset_type")
+            if class_name == "PandasDatasource":
+                data_asset_type = {
+                    "class_name": "PandasDataset",
+                    "module_name": "great_expectations.dataset",
+                }
+            elif class_name == "SqlAlchemyDatasource":
+                data_asset_type = {
+                    "class_name": "SqlAlchemyDataset",
+                    "module_name": "great_expectations.dataset",
+                }
+            elif class_name == "SparkDFDatasource":
+                data_asset_type = {
+                    "class_name": "SparkDFDataset",
+                    "module_name": "great_expectations.dataset",
+                }
         self.data_asset_type = data_asset_type
 
-        if batch_kwargs_generators is None:
-            batch_kwargs_generators = config.get("batch_kwargs_generators")
         if batch_kwargs_generators is not None:
             self.batch_kwargs_generators = batch_kwargs_generators
-
-        if credentials is None:
-            credentials = config.get("credentials")
         if credentials is not None:
             self.credentials = credentials
-
-        if boto3_options is None:
-            boto3_options = config.get("boto3_options")
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
-
-        if reader_method is None:
-            reader_method = config.get("reader_method")
         if reader_method is not None:
             self.reader_method = reader_method
-
-        if limit is None:
-            limit = config.get("limit")
         if limit is not None:
             self.limit = limit
-
         for k, v in kwargs.items():
             setattr(self, k, v)
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
 
     @property
     def class_name(self):
@@ -1057,7 +1051,7 @@ class DataContextConfig(DictDot):
     @classmethod
     def from_commented_map(cls, commented_map):
         try:
-            config = dataContextConfigSchema.load(commented_map)
+            config = dataContextConfigSchema.load(commented_map, partial=True)
             return cls(commented_map=commented_map, **config)
         except ValidationError:
             logger.error(
