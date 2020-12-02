@@ -36,6 +36,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # TODO:
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.store import TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -260,17 +261,24 @@ class BaseDataContext:
         self._in_memory_instance_id = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
-        self._initialize_usage_statistics(project_config.anonymous_usage_statistics)
-
-        # Store cached datasources but don't init them
-        self._cached_datasources = {}  # TODO: deprecate
-
-        # Store cached datasources but don't init them
-        self._cached_datasources = {}
 
         # Init stores
         self._stores = dict()
         self._init_stores(self._project_config_with_variables_substituted.stores)
+
+        # Init data_context_id
+        self._data_context_id = self._construct_data_context_id()
+
+        # Override the project_config data_context_id if an expectations_store was already set up
+        self._project_config.anonymous_usage_statistics.data_context_id = (
+            self._data_context_id
+        )
+        self._initialize_usage_statistics(
+            self._project_config.anonymous_usage_statistics
+        )
+
+        # Store cached datasources but don't init them
+        self._cached_datasources = {}  # TODO: deprecate
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
@@ -291,10 +299,32 @@ class BaseDataContext:
     def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
         try:
+            # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+            # the expectations_store doesnt yet exist by:
+            # adding the data_context_id from the project_config
+            # to the store_config under the key manually_initialize_store_backend_id
+            if (store_name == self.expectations_store_name) and store_config.get(
+                "store_backend"
+            ):
+                store_config["store_backend"].update(
+                    {
+                        "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                    }
+                )
+
+            # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+            if (
+                store_name not in [store["name"] for store in self.list_active_stores()]
+                and store_config.get("store_backend") is not None
+            ):
+                store_config["store_backend"].update(
+                    {"suppress_store_backend_id": True}
+                )
+
             new_store = instantiate_class_from_config(
                 config=store_config,
                 runtime_environment={"root_directory": self.root_directory,},
-                config_defaults={"module_name": module_name},
+                config_defaults={"module_name": module_name, "store_name": store_name},
             )
         except ge_exceptions.DataContextError as e:
             new_store = None
@@ -426,6 +456,28 @@ class BaseDataContext:
                 pass
         return False
 
+    def _construct_data_context_id(self) -> str:
+        """
+        Choose the id of the currently-configured expectations store, if available and a persistent store.
+        If not, it should choose the id stored in DataContextConfig.
+        Returns:
+            UUID to use as the data_context_id
+        """
+
+        # Choose the id of the currently-configured expectations store, if it is a persistent store
+        expectations_store = self._stores[
+            self._project_config_with_variables_substituted.expectations_store_name
+        ]
+        if isinstance(expectations_store.store_backend, TupleStoreBackend):
+            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
+            return expectations_store.store_backend_id_warnings_suppressed
+
+        # Otherwise choose the id stored in the project_config
+        else:
+            return (
+                self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+            )
+
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
     ):
@@ -437,7 +489,7 @@ class BaseDataContext:
 
         self._usage_statistics_handler = UsageStatisticsHandler(
             data_context=self,
-            data_context_id=usage_statistics_config.data_context_id,
+            data_context_id=self._data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
@@ -990,17 +1042,17 @@ class BaseDataContext:
         data_asset_type=None,
         batch_parameters=None,
     ) -> DataAsset:
-        """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If	
-        batch_parameters are included, they will be available as attributes of the batch.	
-        Args:	
-            batch_kwargs: the batch_kwargs to use; must include a datasource key	
-            expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get	
-            data_asset_type: the type of data_asset to build, with associated expectation implementations. This can	
-                generally be inferred from the datasource.	
-            batch_parameters: optional parameters to store as the reference description of the batch. They should	
-                reflect parameters that would provide the passed BatchKwargs.	
-        Returns:	
-            DataAsset	
+        """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
+        batch_parameters are included, they will be available as attributes of the batch.
+        Args:
+            batch_kwargs: the batch_kwargs to use; must include a datasource key
+            expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get
+            data_asset_type: the type of data_asset to build, with associated expectation implementations. This can
+                generally be inferred from the datasource.
+            batch_parameters: optional parameters to store as the reference description of the batch. They should
+                reflect parameters that would provide the passed BatchKwargs.
+        Returns:
+            DataAsset
         """
         if isinstance(batch_kwargs, dict):
             batch_kwargs = BatchKwargs(batch_kwargs)
@@ -1292,6 +1344,22 @@ class BaseDataContext:
             value["name"] = name
             stores.append(value)
         return stores
+
+    def list_active_stores(self):
+        """
+        List active Stores on this context. Active stores are identified by setting the following parameters:
+            expectations_store_name,
+            validations_store_name,
+            evaluation_parameter_store_name
+        """
+        active_store_names = [
+            self.expectations_store_name,
+            self.validations_store_name,
+            self.evaluation_parameter_store_name,
+        ]
+        return [
+            store for store in self.list_stores() if store["name"] in active_store_names
+        ]
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
