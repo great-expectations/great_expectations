@@ -35,7 +35,12 @@ class SqlAlchemyQueryStore(Store):
     _key_class = StringKey
 
     def __init__(
-        self, credentials, queries=None, store_backend=None, runtime_environment=None
+        self,
+        credentials,
+        queries=None,
+        store_backend=None,
+        runtime_environment=None,
+        store_name=None,
     ):
         if not sqlalchemy:
             raise ge_exceptions.DataContextError(
@@ -43,7 +48,9 @@ class SqlAlchemyQueryStore(Store):
                 "SqlAlchemyQueryStore"
             )
         super().__init__(
-            store_backend=store_backend, runtime_environment=runtime_environment
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+            store_name=store_name,
         )
         if queries:
             # If queries are defined in configuration, then we load them into an InMemoryStoreBackend

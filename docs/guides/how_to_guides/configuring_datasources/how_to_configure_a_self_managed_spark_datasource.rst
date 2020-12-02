@@ -220,8 +220,9 @@ Additional Notes
                 class_name: Datasource
                 execution_engine:
                   class_name: SparkDFExecutionEngine
-                  spark_context:
-                    spark.master: local[*]
+                  spark_config:
+                    spark_context:
+                      spark.master: local[*]
                 data_connectors:
                   simple_filesystem_data_connector:
                     class_name: InferredAssetFilesystemDataConnector

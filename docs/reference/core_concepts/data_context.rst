@@ -29,7 +29,7 @@ Here's a typical example:
 .. code-block:: python
 
     my_config = """
-    class_name: ExecutionEnvironment
+    class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine
     data_connectors:
