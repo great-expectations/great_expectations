@@ -93,7 +93,7 @@
       },
       "tests": [
         {
-          "title": "Basic failure test",
+          "title": "basic_failure_test",
           "in": {
             "column_A": "integer_1",
             "column_B": "integer_1"
@@ -107,7 +107,7 @@
           "only_for": ["pandas"]
         },
         {
-          "title": "Basic pass test",
+          "title": "basic_pass_test",
           "in": {
             "column_A": "integer_1",
             "column_B": "integer_2"
@@ -120,7 +120,7 @@
           "only_for": ["pandas"]
         },
         {
-          "title": "Basic pass int string test",
+          "title": "basic_pass_int_string_test",
           "in": {
             "column_A": "integer_1",
             "column_B": "string_3"
@@ -133,7 +133,7 @@
            "only_for": ["pandas"]
         },
         {
-          "title": "test string n_bins",
+          "title": "test_string_n_bins",
           "in": {
             "column_A": "string_1",
             "column_B": "string_2",
@@ -148,7 +148,7 @@
           "only_for": ["pandas"]
         },
         {
-          "title": "test string preconfigured bins",
+          "title": "test_string_preconfigured_bins",
           "in": {
             "column_A": "string_1",
             "column_B": "string_2",
@@ -175,7 +175,7 @@
           "only_for": ["pandas"]
         },
         {
-          "title": "test float bins preconfigured bins",
+          "title": "test_float_bins_preconfigured_bins",
           "in": {
             "column_A": "integer_1",
             "column_B": "float",
@@ -189,7 +189,7 @@
           "only_for": ["pandas"]
         },
         {
-          "title": "test float with missing",
+          "title": "test_float_with_missing",
           "in": {
             "column_A": "integer_1",
             "column_B": "float_with_missings_1",
@@ -203,7 +203,7 @@
           "only_for": ["pandas"]
         },
         {
-          "title": "test float and string with missings",
+          "title": "test_float_and_string_with_missings",
           "in": {
             "column_A": "float_with_missings_2",
             "column_B": "string_with_missings",

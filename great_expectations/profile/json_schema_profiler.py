@@ -4,7 +4,8 @@ from typing import Any, Dict, List, Optional
 
 import jsonschema
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.profile.base import Profiler, ProfilerTypeMapping
 
 logger = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ class JsonSchemaProfiler(Profiler):
         validator.check_schema(schema)
         return True
 
-    def _profile(self, schema: dict, suite_name: str = None) -> ExpectationSuite:
+    def _profile(self, schema: Dict, suite_name: str = None) -> ExpectationSuite:
         if not suite_name:
             raise ValueError("Please provide a suite name when using this profiler.")
         expectations = []

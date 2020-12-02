@@ -4,7 +4,7 @@ from typing import Iterable
 import numpy as np
 from dateutil.parser import parse
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.dataset.util import build_categorical_partition_object
 from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.base import ProfilerCardinality, ProfilerDataType
@@ -99,6 +99,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             column_type = cls._get_column_type(dataset, column_name)
             column_cache_entry["type"] = column_type
             # remove the expectation
+            # Does this change with different config format?
             dataset.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_values_to_be_in_type_list",
@@ -726,6 +727,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
         return expectation_suite
 
+    # TODO: MIGRATE TO CLASS-FIRST STRUCTURE
+    # Question: do Domain and Success kwargs need to be passed here as well?
     @classmethod
     def _build_table_row_count_expectation(
         cls,

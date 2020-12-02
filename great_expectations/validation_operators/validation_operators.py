@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 from dateutil.parser import parse
 
-from great_expectations.core import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
@@ -16,7 +15,9 @@ from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
+from great_expectations.validator.validator import Validator
 
+from ..core.run_identifier import RunIdentifier
 from .util import send_slack_notification
 
 logger = logging.getLogger(__name__)
@@ -260,7 +261,7 @@ The ``run`` method returns a ValidationOperatorResult object:
             A batch of data
 
         """
-        if not isinstance(item, DataAsset):
+        if not isinstance(item, (DataAsset, Validator)):
             if not (
                 isinstance(item, tuple)
                 and len(item) == 2

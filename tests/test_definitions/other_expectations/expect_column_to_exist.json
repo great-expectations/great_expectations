@@ -14,7 +14,7 @@
       }
     },
     "tests": [{
-      "title": "Basic positive test",
+      "title": "basic_positive_test",
       "exact_match_out": false,
       "in": {
         "column": "c1"
@@ -23,7 +23,7 @@
         "success": true
       }
     }, {
-      "title": "Basic negative test",
+      "title": "basic_negative_test",
       "exact_match_out": false,
       "in": {
         "column": "covfefe"
@@ -32,7 +32,7 @@
         "success": false
       }
     }, {
-      "title": "Positive test with column order",
+      "title": "positive_test_with_column_order",
       "exact_match_out": false,
       "in": {
         "column": "c2",
@@ -42,7 +42,7 @@
         "success": true
       }
     }, {
-      "title": "Column exists but wrong index",
+      "title": "column_exists_but_wrong_index",
       "exact_match_out": false,
       "in": {
         "column": "c3",

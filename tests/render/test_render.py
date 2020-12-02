@@ -4,7 +4,7 @@ from collections import OrderedDict
 import pytest
 
 import great_expectations as ge
-from great_expectations.core import expectationSuiteSchema
+from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer import (
@@ -19,7 +19,10 @@ from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
-from tests.test_utils import expectationSuiteValidationResultSchema
+from tests.test_utils import (
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
+)
 
 
 @pytest.fixture(scope="module")
@@ -50,7 +53,7 @@ def titanic_dataset_profiler_expectations():
         ),
     ) as infile:
         return expectationSuiteSchema.load(
-            json.load(infile, object_pairs_hook=OrderedDict)
+            json.load(fp=infile, object_pairs_hook=OrderedDict)
         )
 
 
@@ -63,7 +66,7 @@ def titanic_dataset_profiler_expectations_with_distribution():
         ),
     ) as infile:
         return expectationSuiteSchema.load(
-            json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict)
+            json.load(fp=infile, encoding="utf-8", object_pairs_hook=OrderedDict)
         )
 
 
@@ -212,7 +215,7 @@ def test_content_block_list_available_expectations():
         "expect_column_median_to_be_between",
         "expect_column_min_to_be_between",
         "expect_column_most_common_value_to_be_in_set",
-        "expect_column_pair_values_A_to_be_greater_than_B",
+        "expect_column_pair_values_a_to_be_greater_than_b",
         "expect_column_pair_values_to_be_equal",
         "expect_column_proportion_of_unique_values_to_be_between",
         "expect_column_stdev_to_be_between",

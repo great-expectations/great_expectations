@@ -28,7 +28,19 @@ Steps
             username: '<your_username>'
             password: '<your_password>'
             database: '<your_database_name>'
+    
+    It is also possible to specify `schema` as an additional keyword argument if you would like to use a specific schema as the backend, but this is entirely optional.
 
+    .. code-block:: yaml
+
+        db_creds:
+            drivername: postgres
+            host: '<your_host_name>'
+            port: '<your_port>'
+            username: '<your_username>'
+            password: '<your_password>'
+            database: '<your_database_name>'
+            schema: '<your_schema_name>'
 
 2. **Identify your Data Context Validations Store**
 

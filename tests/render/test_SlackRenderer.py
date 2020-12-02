@@ -1,8 +1,9 @@
 # from freezegun import freeze_time
 import pytest
 
-from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.exceptions import InvalidKeyError
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
 from great_expectations.render.renderer import SlackRenderer
 from tests.test_utils import modify_locale
 
