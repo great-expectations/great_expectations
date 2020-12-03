@@ -20,6 +20,7 @@ from great_expectations.marshmallow__shade import (
 )
 from great_expectations.types import DictDot
 from great_expectations.types.configurations import ClassConfigSchema
+from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
@@ -229,9 +230,6 @@ class DatasourceConfig(DictDot):
         self._module_name = module_name
         if execution_engine is not None:
             self.execution_engine = execution_engine
-        # TODO: <Alex></Alex>
-        # if data_connectors is None:
-        #     data_connectors = {}
         if data_connectors is not None and isinstance(data_connectors, dict):
             self.data_connectors = data_connectors
 
@@ -992,8 +990,7 @@ class DataContextConfig(DictDot):
             )
         self.validation_operators = validation_operators
         self.stores = stores
-        if notebooks is not None:
-            self.notebooks = notebooks
+        self.notebooks = notebooks
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymous_usage_statistics is None:
@@ -1044,7 +1041,9 @@ class DataContextConfig(DictDot):
         """
         :returns a dict containing the project configuration
         """
-        return dict(self.get_schema_validated_updated_commented_map())
+        return filter_properties_dict(
+            properties=dict(self.get_schema_validated_updated_commented_map())
+        )
 
 
 dataContextConfigSchema = DataContextConfigSchema()
