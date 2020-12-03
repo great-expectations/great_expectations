@@ -106,18 +106,24 @@ def get_currently_executing_function_call_arguments(
     cur_mod = getmodule(cur_func_obj)
     sig: Signature = signature(cur_func_obj)
     params: dict = {}
-    varargs: dict = {}
+    var_positional: dict = {}
+    var_keyword: dict = {}
     for key, param in sig.parameters.items():
         val: Any = argvs.locals[key]
         params[key] = val
-        if param.kind == Parameter.VAR_KEYWORD:
-            varargs[key] = val
+        if param.kind == Parameter.VAR_POSITIONAL:
+            var_positional[key] = val
+        elif param.kind == Parameter.VAR_KEYWORD:
+            var_keyword[key] = val
     bound_args: BoundArguments = sig.bind(**params)
     call_args: OrderedDict = bound_args.arguments
 
     call_args_dict: dict = dict(call_args)
 
-    for key, value in varargs.items():
+    for key, value in var_positional.items():
+        call_args_dict[key] = value
+
+    for key, value in var_keyword.items():
         call_args_dict.pop(key)
         call_args_dict.update(value)
 

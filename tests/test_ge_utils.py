@@ -264,7 +264,8 @@ def test_get_currently_executing_function_call_arguments(a=None, *args, **kwargs
             }
         )
         assert params["a"] == 0
-        assert params["kwargs"] == {"args": (1, 2, 3), "kwargs": {"b": 5}}
+        assert params["args"] == (1, 2, 3)
+        assert params["b"] == 5
         assert params["additional_param_0"] == "xyz_0"
         assert params["additional_param_1"] == "xyz_1"
         assert params["additional_param_2"] == "xyz_2"
