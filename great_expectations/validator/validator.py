@@ -103,7 +103,6 @@ class Validator:
         }
         self._validator_config = {}
 
-
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
         self._active_validation = False
