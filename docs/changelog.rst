@@ -19,6 +19,7 @@ Changelog
 * [DOCS] Fix doc create and editing expectations #2105 (thanks @Lee-W!)
 * [DOCS] Updated documentation on 0.13 classes
 * [DOCS] Fixed a typo in the HOWTO guide for adding a self-managed Spark datasource
+* [DOCS] Updated documentation for new UI for in-code data contexts
 
 0.13.0
 -----------------
