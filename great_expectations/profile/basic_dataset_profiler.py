@@ -138,7 +138,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
         df.set_config_value("interactive_evaluation", False)
 
         if isinstance(df, Validator):
-            # Note: Abe 20201202 : This is a hack. We should use the `table.columns` metric instead.
+            # Note: Abe 20201203 : This is a hack. We should use the `table.columns` metric instead.
             columns = df.active_batch.data.head().columns
             
         else:
