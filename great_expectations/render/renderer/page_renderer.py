@@ -94,7 +94,7 @@ class ValidationResultsPageRenderer(Renderer):
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         batch_kwargs = validation_results.meta.get(
             "batch_kwargs", {}
-        ) or validation_results.meta.get("batch_spec", {})
+        ) or validation_results.meta.get("batch_spec", {}) or {}
 
         # add datasource key to batch_kwargs if missing
         if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
