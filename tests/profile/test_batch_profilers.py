@@ -1,9 +1,11 @@
-import os
 import json
+import os
+
 import pytest
 
-from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.core.batch import BatchRequest
+from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+
 
 def test_BasicDatasetProfiler_with_sql_based_Validator(
     data_context_with_sql_datasource_for_testing_get_batch,
@@ -22,11 +24,19 @@ def test_BasicDatasetProfiler_with_sql_based_Validator(
     # NOTE: Abe 20201203: This test fails somewhere in the SQL resolve_metrics stack.
     # To my knowledge, I'm not doing anything crazy or new---just running BasicDatasetProfiler on a Batch.
     # Can you debug this?
+
+    ## JPC: this is because the profiler is asking for the median of a datetime column.
+
     my_profiler.profile(my_validator)
 
     # CAUTION: Abe 20201203: Also, I think this test somehow alters the contents of test_sets/test_cases_for_sql_data_connector.db
     # This file is committed as a test fixture---please be careful not to commit a changed version.
     # Also, tests should be read-only.
+
+    ## JPC: I see it too; I'd guess there is some state being written
+    ## to sqlite on error. But I don't think that's a GE issue so much
+    ## as an issue since I suspect it will go away when the test passes.
+
 
 def test_BasicDatasetProfiler_with_pandas_based_Validator(
     data_context_with_pandas_datasource_for_testing_get_batch,

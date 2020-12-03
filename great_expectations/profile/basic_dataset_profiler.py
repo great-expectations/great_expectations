@@ -6,7 +6,7 @@ from great_expectations.profile.base import (
     ProfilerDataType,
     ProfilerTypeMapping,
 )
-
+from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 try:
@@ -138,9 +138,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
         df.set_config_value("interactive_evaluation", False)
 
         if isinstance(df, Validator):
-            # Note: Abe 20201203 : This is a hack. We should use the `table.columns` metric instead.
-            columns = df.active_batch.data.head().columns
-            
+            columns = df.get_metric(MetricConfiguration("table.columns", dict()))
         else:
             columns = df.get_table_columns()
 
@@ -182,7 +180,6 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_MANY,
                     ProfilerCardinality.UNIQUE,
                 ]:
-                    # TODO: change to class-first expectation structure?
                     df.expect_column_min_to_be_between(
                         column, min_value=None, max_value=None
                     )
@@ -238,7 +235,6 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_MANY,
                     ProfilerCardinality.UNIQUE,
                 ]:
-                    # TODO: migrate to class first structure
                     df.expect_column_min_to_be_between(
                         column, min_value=None, max_value=None
                     )
