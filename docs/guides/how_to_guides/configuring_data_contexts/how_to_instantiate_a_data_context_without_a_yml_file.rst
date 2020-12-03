@@ -24,7 +24,7 @@ Steps
         - :py:class:`~great_expectations.data_context.types.base.DatabaseStoreBackendDefaults`
         - :py:class:`~great_expectations.data_context.types.base.FilesystemStoreBackendDefaults`
 
-    The following example shows a Data Context configuration with an sqlalchemy datasource and an AWS s3 bucket for all metadata stores, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
+    The following example shows a Data Context configuration with an SQLAlchemy datasource and an AWS s3 bucket for all metadata stores, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
 
     .. code-block:: python
 
@@ -48,7 +48,7 @@ Steps
             store_backend_defaults=S3StoreBackendDefaults(default_bucket_name="my_default_bucket"),
         )
 
-    The following example shows a Data Context configuration with a pandas datasource and local filesystem defaults for metadata stores. Note: imports are omitted in the following examples.
+    The following example shows a Data Context configuration with a Pandas datasource and local filesystem defaults for metadata stores. Note: imports are omitted in the following examples.
 
     .. code-block:: python
 
@@ -59,7 +59,7 @@ Steps
                     batch_kwargs_generators={
                         "subdir_reader": {
                             "class_name": "SubdirReaderBatchKwargsGenerator",
-                            "base_directory": "../data/",
+                            "base_directory": "/path/to/data",
                         }
                     },
                 )
@@ -67,8 +67,8 @@ Steps
             store_backend_defaults=FilesystemStoreBackendDefaults(),
     )
 
-    The following example shows a Data Context configuration with an sqlalchemy datasource and two GCS buckets for metadata stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. ``default_bucket_name``, ``default_project_name`` sets the default value for all stores that are not specified individually.
-    The resulting DataContextConfig from the following example creates an expectation store and data docs using the ``my_default_bucket`` and ``my_default_project`` parameters since their bucket and project is not specified explicitly. The validations store is created using the explicitly specified ``my_validations_bucket`` and ``my_validations_project``. Further, the prefixes are set for the expectations store and validations store, while data docs use the default ``data_docs`` prefix.
+    The following example shows a Data Context configuration with an SQLAlchemy datasource and two GCS buckets for metadata stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. ``default_bucket_name``, ``default_project_name`` sets the default value for all stores that are not specified individually.
+    The resulting DataContextConfig from the following example creates an Expectations store and Data Docs using the ``my_default_bucket`` and ``my_default_project`` parameters since their bucket and project is not specified explicitly. The validations store is created using the explicitly specified ``my_validations_bucket`` and ``my_validations_project``. Further, the prefixes are set for the Expectations store and validations store, while data docs use the default ``data_docs`` prefix.
 
     .. code-block:: python
 
@@ -121,16 +121,16 @@ Steps
                     "class_name": "ExpectationsStore",
                     "store_backend": {
                         "class_name": "TupleS3StoreBackend",
-                        "bucket": "REPLACE ME",  # TODO: replace with your value
-                        "prefix": "REPLACE ME",  # TODO: replace with your value
+                        "bucket": "my_expectations_store_bucket",
+                        "prefix": "my_expectations_store_prefix",
                     },
                 },
                 "validations_S3_store": {
                     "class_name": "ValidationsStore",
                     "store_backend": {
                         "class_name": "TupleS3StoreBackend",
-                        "bucket": "REPLACE ME",  # TODO: replace with your value
-                        "prefix": "REPLACE ME",  # TODO: replace with your value
+                        "bucket": "my_validations_store_bucket",
+                        "prefix": "my_validations_store_prefix",
                     },
                 },
                 "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
@@ -143,7 +143,8 @@ Steps
                     "class_name": "SiteBuilder",
                     "store_backend": {
                         "class_name": "TupleS3StoreBackend",
-                        "bucket":  "REPLACE ME",  # TODO: replace with your value
+                        "bucket":  "my_data_docs_bucket",
+                        "prefix":  "my_optional_data_docs_prefix",
                     },
                     "site_index_builder": {
                         "class_name": "DefaultSiteIndexBuilder",
