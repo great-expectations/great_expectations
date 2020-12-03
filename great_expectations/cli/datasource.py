@@ -39,7 +39,7 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import BridgeValidator
 
 logger = logging.getLogger(__name__)
 
@@ -1324,7 +1324,7 @@ Enter an SQL query
             else:
                 batch_kwargs = {"query": query, "datasource": datasource_name}
                 batch_kwargs.update(temp_table_kwargs)
-                Validator(
+                BridgeValidator(
                     batch=datasource.get_batch(batch_kwargs),
                     expectation_suite=ExpectationSuite("throwaway"),
                 ).get_dataset()

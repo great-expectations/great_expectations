@@ -531,6 +531,8 @@ data_connectors:
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
 
+    my_batch.head()
+
     df_data = my_batch.data
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(

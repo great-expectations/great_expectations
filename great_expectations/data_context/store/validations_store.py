@@ -88,7 +88,7 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
 
     _key_class = ValidationResultIdentifier
 
-    def __init__(self, store_backend=None, runtime_environment=None):
+    def __init__(self, store_backend=None, runtime_environment=None, store_name=None):
         self._expectationSuiteValidationResultSchema = (
             ExpectationSuiteValidationResultSchema()
         )
@@ -126,7 +126,9 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
                     ],
                 )
         super().__init__(
-            store_backend=store_backend, runtime_environment=runtime_environment
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+            store_name=store_name,
         )
 
     def serialize(self, key, value):
