@@ -206,9 +206,15 @@ class Validator:
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
-                validation_result = expectation.validate(
-                    validator=self, runtime_configuration=basic_runtime_configuration
-                )
+                if not self.interactive_evaluation and not self._active_validation:
+                    validation_result = ExpectationValidationResult(
+                        expectation_config=copy.deepcopy(expectation.configuration)
+                    )
+                else:
+                    validation_result = expectation.validate(
+                        validator=self,
+                        runtime_configuration=basic_runtime_configuration
+                    )
 
                 # If validate has set active_validation to true, then we do not save the config to avoid
                 # saving updating expectation configs to the same suite during validation runs
