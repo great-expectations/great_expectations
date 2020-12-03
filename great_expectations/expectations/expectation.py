@@ -750,8 +750,8 @@ class TableExpectation(Expectation, ABC):
             assert max_val is None or isinstance(
                 max_val, (float, int, dict)
             ), "Provided max threshold must be a number"
-            if isinstance(configuration.kwargs["value_set"], dict):
-                assert "$PARAMETER" in configuration.kwargs["value_set"], 'Evaluation Parameter dict for max_value ' \
+            if isinstance(max_val, dict):
+                assert "$PARAMETER" in max_val, 'Evaluation Parameter dict for max_value ' \
                                                                           'kwarg ' \
                                                                           'must have "$PARAMETER" key'
 
