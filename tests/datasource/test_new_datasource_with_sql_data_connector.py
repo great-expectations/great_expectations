@@ -60,6 +60,8 @@ data_connectors:
     report = my_data_connector.self_check()
     print(json.dumps(report, indent=4))
 
+    report["execution_engine"].pop("connection_string")
+
     assert report == {
         "execution_engine": {"class_name": "SqlAlchemyExecutionEngine"},
         "data_connectors": {

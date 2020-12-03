@@ -16,10 +16,6 @@ from great_expectations.datasource.types import (
     S3BatchSpec,
 )
 from great_expectations.datasource.util import S3Url
-from great_expectations.util import (
-    filter_properties_dict,
-    get_currently_executing_function_call_arguments,
-)
 
 try:
     import boto3
