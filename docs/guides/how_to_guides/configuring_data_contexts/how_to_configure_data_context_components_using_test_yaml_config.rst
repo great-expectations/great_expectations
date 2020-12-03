@@ -16,6 +16,8 @@ Steps
 
 #. **Instantiate a DataContext**
 
+    Create a new Jupyter Notebook, and an instantiate a DataContext by running the following lines:
+
     .. code-block:: python
 
         import great_expectations as ge
@@ -27,7 +29,7 @@ Steps
 
     .. code-block:: python
 
-        my_config = """
+        config = """
         class_name: SimpleSqlalchemyDatasource
         credentials:
             drivername: postgresql
@@ -47,7 +49,7 @@ Steps
 
         context.test_yaml_config(
             name="my_postgresql_datasource",
-            yaml_config=yaml_config
+            yaml_config=config
         )
 
     When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.

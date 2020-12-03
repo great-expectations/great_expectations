@@ -114,7 +114,7 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config >`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
             - Obtained database credentials for MSSQL, including username, password, hostname, and database.
 
         To add a MSSQL datasource, do the following:
@@ -134,6 +134,14 @@ Steps
 
                 pip install sqlalchemy
                 pip install pyodbc
+        #. **Instantiate a DataContext**
+
+            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+
+            .. code-block:: python
+
+                import great_expectations as ge
+                context = ge.get_context()
 
         #.  **Create or copy a yaml config**
 
@@ -144,7 +152,7 @@ Steps
 
                 This example also uses ``introspection`` to configure the datasource, where each table in the database is associated with its own ``data_asset``.  A deeper explanation on the different modes of building ``data_asset`` from data (``introspective`` / ``inferred`` vs ``configured``) can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
-                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
                 .. code-block:: python
 
@@ -152,8 +160,8 @@ Steps
                     class_name: SimpleSqlalchemyDatasource
                     connection_string: mssql+pyodbc://{user_name}:{password}@{host}:{port}/{database}?driver=ODBC Driver 17 for SQL Server&charset=utf&autocommit=true
                     introspection:
-                        whole_table:
-                            data_asset_name_suffix: __whole_table
+                      whole_table:
+                        data_asset_name_suffix: __whole_table
                     """
 
         #. **Run context.test_yaml_config.**
@@ -162,7 +170,7 @@ Steps
 
                 context.test_yaml_config(
                     name="my_mssql_datasource",
-                    yaml_config=my_config
+                    yaml_config=config
                 )
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
@@ -198,9 +206,15 @@ Steps
                     3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance\r
                     4        5  Father of the Bride Part II (1995)                                       Comedy\r
 
-            This means all has went well and you can proceed with exploring the data sets in your new MSSQL datasource.
+            This means all has went well and you can proceed with exploring datasets in your new MSSQL datasource.
 
-            **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
+        #. **Save the config.**
+
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
+            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_mssql_datasource`` in our example).
+            Next, copy the yml snippet from Step 4 into the new entry.
+
+            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
 
 
 Additional notes

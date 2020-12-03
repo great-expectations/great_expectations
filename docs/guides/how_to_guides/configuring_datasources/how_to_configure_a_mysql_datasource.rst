@@ -128,6 +128,8 @@ Steps
 
         #. **Instantiate a DataContext**
 
+            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+
             .. code-block:: python
 
                 import great_expectations as ge
@@ -141,22 +143,22 @@ Steps
 
                 This example also uses ``introspection`` to configure the datasource, where each table in the database is associated with its own ``data_asset``.  A deeper explanation on the different modes of building ``data_asset`` from data (``introspective`` / ``inferred`` vs ``configured``) can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
-                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
                 .. code-block:: python
 
                     config = f"""
                         class_name: SimpleSqlalchemyDatasource
                         credentials:
-                            drivername: mysql+pymysql
-                            host: {host}
-                            port: {port}
-                            username: {user_name}
-                            password: {password}
-                            database: {db_name}
+                          drivername: mysql+pymysql
+                          host: <host>
+                          port: <port>
+                          username: <user_name>
+                          password: <password>
+                          database: <db_name>
                         introspection:
-                            whole_table:
-                                data_asset_name_suffix: __whole_table
+                          whole_table:
+                            data_asset_name_suffix: __whole_table
                         """
 
 
@@ -166,7 +168,7 @@ Steps
 
                 context.test_yaml_config(
                     name="mysql_datasource",
-                    yaml_config=my_config
+                    yaml_config=config
                 )
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
@@ -202,9 +204,16 @@ Steps
                 3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance\r
                 4        5  Father of the Bride Part II (1995)                                       Comedy\r
 
-             This means all has went well and you can proceed with exploring the data sets in your new MySql datasource.
+             This means all has went well and you can proceed with exploring data in your new MySql datasource.
 
-            **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
+        #. **Save the config.**
+
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
+            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``mysql_datasource`` in our example).
+            Next, copy the yml snippet from Step 3 into the new entry.
+
+            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+
 
 Additional notes
 ----------------
