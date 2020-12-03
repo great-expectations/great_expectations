@@ -1,17 +1,14 @@
-import copy
 import logging
 import os
 import traceback
 from typing import Callable, List, Optional, Union
 
 from ruamel.yaml import YAML
-from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.data_context.data_context import DataContext
-from great_expectations.data_context.types.base import dataContextConfigSchema
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
@@ -42,7 +39,6 @@ class DataContextV3(DataContext):
 
         elif mode == "yaml":
             return config.to_yaml_str()
-            # config.commented_map.update(dataContextConfigSchema.dump(self))
 
         else:
             raise ValueError(f"Unknown config mode {mode}")
