@@ -1,5 +1,5 @@
 import os
-
+import json
 import pytest
 
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
@@ -44,4 +44,7 @@ def test_BasicDatasetProfiler_with_pandas_based_Validator(
         create_expectation_suite_with_name="my_expectation_suite",
     )
 
-    my_profiler.profile(my_validator)
+    expectations, validation_results = my_profiler.profile(my_validator)
+
+    print(json.dumps(expectations.to_json_dict(), indent=2))
+    print(json.dumps(validation_results.to_json_dict(), indent=2))

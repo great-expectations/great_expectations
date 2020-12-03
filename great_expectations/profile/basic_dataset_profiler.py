@@ -7,6 +7,8 @@ from great_expectations.profile.base import (
     ProfilerTypeMapping,
 )
 
+from great_expectations.validator.validator import Validator
+
 try:
     from sqlalchemy.exc import OperationalError
 except ModuleNotFoundError:
@@ -135,7 +137,12 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
         df.expect_table_columns_to_match_ordered_list(None)
         df.set_config_value("interactive_evaluation", False)
 
-        columns = df.get_table_columns()
+        if isinstance(df, Validator):
+            # Note: Abe 20201202 : This is a hack. We should use the `table.columns` metric instead.
+            columns = df.active_batch.data.head().columns
+            
+        else:
+            columns = df.get_table_columns()
 
         meta_columns = {}
         for column in columns:
