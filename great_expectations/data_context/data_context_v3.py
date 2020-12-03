@@ -17,10 +17,6 @@ from great_expectations.data_context.util import (
     substitute_all_config_variables,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.util import (
-    filter_properties_dict,
-    get_currently_executing_function_call_arguments,
-)
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -262,100 +258,6 @@ class DataContextV3(DataContext):
             else:
                 raise (e)
 
-    def process_batch_request(
-        self,
-        processing_method_name: str,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
-        *,
-        batch_request: BatchRequest = None,
-        partition_request: Union[PartitionRequest, dict] = None,
-        partition_identifiers: dict = None,
-        limit: int = None,
-        index=None,
-        custom_filter_function: Callable = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        sampling_method: str = None,
-        sampling_kwargs: dict = None,
-        splitter_method: str = None,
-        splitter_kwargs: dict = None,
-        **kwargs,
-    ) -> Union[Batch, List[Batch]]:
-        datasource_name: str
-        if batch_request:
-            if not isinstance(batch_request, BatchRequest):
-                raise TypeError(
-                    f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
-                )
-            datasource_name = batch_request.datasource_name
-        else:
-            datasource_name = datasource_name
-
-        datasource: Datasource = self.datasources[datasource_name]
-        try:
-            processing_method: Callable = getattr(datasource, processing_method_name)
-        except AttributeError:
-            raise ge_exceptions.DatasourceError(
-                f'The method "Datasource.{processing_method_name}(batch_request: BatchRequest)" does not exist.'
-            )
-
-        if batch_request:
-            # TODO: Raise a warning if any parameters besides batch_requests are specified
-            return processing_method(batch_request=batch_request)
-        else:
-            partition_request: PartitionRequest
-            if partition_request is None:
-                if partition_identifiers is None:
-                    partition_identifiers = kwargs
-                else:
-                    # Raise a warning if kwargs exist
-                    pass
-
-                # Currently, the implementation of splitting and sampling is inconsistent between the
-                # Datasource and SimpleSqlalchemyDatasource classes.  The former communicates these
-                # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
-                # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
-                # SimpleSqlalchemyDatasource uses "PartitionRequest" to relay the splitting and sampling
-                # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
-                # of partitions is implemented using the PartitionQuery class, it will not recognized the keys
-                # representing the splitting and sampling directives and raise an exception.  Additional work is needed
-                # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
-                partition_request_params: dict = {
-                    "partition_identifiers": partition_identifiers,
-                    "limit": limit,
-                    "index": index,
-                    "custom_filter_function": custom_filter_function,
-                }
-                if sampling_method is not None:
-                    sampling_params: dict = {
-                        "sampling_method": sampling_method,
-                    }
-                    if sampling_kwargs is not None:
-                        sampling_params["sampling_kwargs"] = sampling_kwargs
-                    partition_request_params.update(sampling_params)
-                if splitter_method is not None:
-                    splitter_params: dict = {
-                        "splitter_method": splitter_method,
-                    }
-                    if splitter_kwargs is not None:
-                        splitter_params["splitter_kwargs"] = splitter_kwargs
-                    partition_request_params.update(splitter_params)
-                partition_request = PartitionRequest(partition_request_params)
-            else:
-                # Raise a warning if partition_identifiers or kwargs exist
-                partition_request = PartitionRequest(partition_request)
-
-            batch_request: BatchRequest = BatchRequest(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                partition_request=partition_request,
-                batch_spec_passthrough=batch_spec_passthrough,
-            )
-            return processing_method(batch_request=batch_request)
-
-    # noinspection PyUnusedLocal
     def get_batch(
         self,
         datasource_name: str = None,
@@ -413,15 +315,30 @@ class DataContextV3(DataContext):
         If 0 or more than 1 batches would be returned, it raises an error.
         """
 
-        call_args: dict = get_currently_executing_function_call_arguments(
-            **{"processing_method_name": "get_single_batch_from_batch_request"}
+        batch_list: List[Batch] = self.get_batch_list(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            partition_request=partition_request,
+            partition_identifiers=partition_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            batch_spec_passthrough=batch_spec_passthrough,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            **kwargs,
         )
-        filter_properties_dict(
-            properties=call_args, inplace=True,
-        )
-        return self.process_batch_request(**call_args)
+        # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
+        if len(batch_list) != 1:
+            raise ValueError(
+                f"Got {len(batch_list)} batches instead of a single batch."
+            )
+        return batch_list[0]
 
-    # noinspection PyUnusedLocal
     def get_batch_list(
         self,
         datasource_name: str = None,
@@ -478,13 +395,78 @@ class DataContextV3(DataContext):
         This method attempts to return any number of batches, including an empty list.
         """
 
-        call_args: dict = get_currently_executing_function_call_arguments(
-            **{"processing_method_name": "get_batch_list_from_batch_request"}
-        )
-        filter_properties_dict(
-            properties=call_args, inplace=True,
-        )
-        return self.process_batch_request(**call_args)
+        datasource_name: str
+        if batch_request:
+            if not isinstance(batch_request, BatchRequest):
+                raise TypeError(
+                    f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
+                )
+            datasource_name = batch_request.datasource_name
+        else:
+            datasource_name = datasource_name
+
+        datasource: Datasource = self.datasources[datasource_name]
+        try:
+            processing_method: Callable = getattr(datasource, processing_method_name)
+        except AttributeError:
+            raise ge_exceptions.DatasourceError(
+                f'The method "Datasource.{processing_method_name}(batch_request: BatchRequest)" does not exist.'
+            )
+
+        if batch_request:
+            # TODO: Raise a warning if any parameters besides batch_requests are specified
+            return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+        else:
+            partition_request: PartitionRequest
+            if partition_request is None:
+                if partition_identifiers is None:
+                    partition_identifiers = kwargs
+                else:
+                    # Raise a warning if kwargs exist
+                    pass
+
+                # Currently, the implementation of splitting and sampling is inconsistent between the
+                # Datasource and SimpleSqlalchemyDatasource classes.  The former communicates these
+                # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
+                # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
+                # SimpleSqlalchemyDatasource uses "PartitionRequest" to relay the splitting and sampling
+                # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
+                # of partitions is implemented using the PartitionQuery class, it will not recognized the keys
+                # representing the splitting and sampling directives and raise an exception.  Additional work is needed
+                # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
+                partition_request_params: dict = {
+                    "partition_identifiers": partition_identifiers,
+                    "limit": limit,
+                    "index": index,
+                    "custom_filter_function": custom_filter_function,
+                }
+                if sampling_method is not None:
+                    sampling_params: dict = {
+                        "sampling_method": sampling_method,
+                    }
+                    if sampling_kwargs is not None:
+                        sampling_params["sampling_kwargs"] = sampling_kwargs
+                    partition_request_params.update(sampling_params)
+                if splitter_method is not None:
+                    splitter_params: dict = {
+                        "splitter_method": splitter_method,
+                    }
+                    if splitter_kwargs is not None:
+                        splitter_params["splitter_kwargs"] = splitter_kwargs
+                    partition_request_params.update(splitter_params)
+                partition_request = PartitionRequest(partition_request_params)
+            else:
+                # Raise a warning if partition_identifiers or kwargs exist
+                partition_request = PartitionRequest(partition_request)
+
+            batch_request: BatchRequest = BatchRequest(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                partition_request=partition_request,
+                batch_spec_passthrough=batch_spec_passthrough,
+            )
+            return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     def get_validator(
         self,
