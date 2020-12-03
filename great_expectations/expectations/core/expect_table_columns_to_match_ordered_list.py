@@ -96,7 +96,9 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
                 or configuration.kwargs["column_list"] is None
             ), "column_list must be a list, set, or None"
             if isinstance(configuration.kwargs["column_list"], dict):
-                assert "$PARAMETER" in configuration.kwargs["column_list"], 'Evaluation Parameter dict for column_list kwarg must have "$PARAMETER" key.'
+                assert (
+                    "$PARAMETER" in configuration.kwargs["column_list"]
+                ), 'Evaluation Parameter dict for column_list kwarg must have "$PARAMETER" key.'
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

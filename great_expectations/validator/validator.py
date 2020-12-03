@@ -219,7 +219,7 @@ class Validator:
                 else:
                     validation_result = expectation.validate(
                         validator=self,
-                        runtime_configuration=basic_runtime_configuration
+                        runtime_configuration=basic_runtime_configuration,
                     )
 
                 # If validate has set active_validation to true, then we do not save the config to avoid

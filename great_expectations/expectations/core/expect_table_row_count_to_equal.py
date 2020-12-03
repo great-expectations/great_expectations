@@ -95,7 +95,9 @@ class ExpectTableRowCountToEqual(TableExpectation):
                 raise ValueError("Provided row count must be an integer")
 
             if isinstance(value, dict):
-                assert "$PARAMETER" in value, 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
+                assert (
+                    "$PARAMETER" in value
+                ), 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 

@@ -101,7 +101,9 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
 
         try:
             if isinstance(strftime_format, dict):
-                assert "$PARAMETER" in strftime_format, 'Evaluation Parameter dict for strftime_format kwarg must have "$PARAMETER" key.'
+                assert (
+                    "$PARAMETER" in strftime_format
+                ), 'Evaluation Parameter dict for strftime_format kwarg must have "$PARAMETER" key.'
             else:
                 datetime.strptime(
                     datetime.strftime(datetime.now(), strftime_format), strftime_format,

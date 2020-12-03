@@ -59,7 +59,9 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
                 configuration.kwargs.get("like_pattern"), (str, dict)
             ), "like_pattern must be a string"
             if isinstance(configuration.kwargs.get("like_pattern"), dict):
-                assert "$PARAMETER" in configuration.kwargs.get("like_pattern"), 'Evaluation Parameter dict for like_pattern kwarg must have "$PARAMETER" key.'
+                assert "$PARAMETER" in configuration.kwargs.get(
+                    "like_pattern"
+                ), 'Evaluation Parameter dict for like_pattern kwarg must have "$PARAMETER" key.'
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

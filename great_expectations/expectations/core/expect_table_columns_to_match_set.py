@@ -46,7 +46,9 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
                 or configuration.kwargs["column_set"] is None
             ), "column_set must be a list, set, or None"
             if isinstance(configuration.kwargs["column_set"], dict):
-                assert "$PARAMETER" in configuration.kwargs["column_set"], 'Evaluation Parameter dict for column_set kwarg must have "$PARAMETER" key.'
+                assert (
+                    "$PARAMETER" in configuration.kwargs["column_set"]
+                ), 'Evaluation Parameter dict for column_set kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True

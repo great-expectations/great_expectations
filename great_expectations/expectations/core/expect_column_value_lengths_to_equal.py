@@ -106,7 +106,9 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 configuration.kwargs["value"], (float, int, dict)
             ), "given value must be numerical"
             if isinstance(configuration.kwargs["value"], dict):
-                assert "$PARAMETER" in configuration.kwargs["value"], 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
+                assert (
+                    "$PARAMETER" in configuration.kwargs["value"]
+                ), 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True

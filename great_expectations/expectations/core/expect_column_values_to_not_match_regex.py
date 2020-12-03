@@ -109,8 +109,9 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 configuration.kwargs["regex"], (str, dict)
             ), "regex must be a string"
             if isinstance(configuration.kwargs["regex"], dict):
-                assert "$PARAMETER" in configuration.kwargs[
-                    "regex"], 'Evaluation Parameter dict for regex kwarg must have "$PARAMETER" key.'
+                assert (
+                    "$PARAMETER" in configuration.kwargs["regex"]
+                ), 'Evaluation Parameter dict for regex kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
