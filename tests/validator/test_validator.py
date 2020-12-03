@@ -280,3 +280,48 @@ def test_graph_validate_with_runtime_config(basic_datasource):
             exception_info=None,
         )
     ]
+    
+def test_validator_default_expectation_args(basic_datasource):
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={"column": "b", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+    )
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        BatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "batch_data": df,
+                "partition_request": PartitionRequest(
+                    **{
+                        "partition_identifiers": {
+                            "pipeline_stage_name": 0,
+                            "run_id": 0,
+                            "custom_key_0": 0,
+                        }
+                    }
+                ),
+            }
+        )
+    )
+
+    my_validator = Validator(
+        execution_engine=PandasExecutionEngine(), batches=[batch]
+    )
+
+    print(my_validator.get_default_expectation_arguments())
+
+def test_validator_default_expectation_args(data_context_with_sql_datasource_for_testing_get_batch):
+    context = data_context_with_sql_datasource_for_testing_get_batch
+
+    my_validator = context.get_validator(
+        datasource_name= "my_sqlite_db",
+        data_connector_name= "daily",
+        data_asset_name= "table_partitioned_by_date_column__A",
+        partition_identifiers= {"date": "2020-01-15"},
+        create_expectation_suite_with_name="test_suite",
+    )
+
+    print(my_validator.get_default_expectation_arguments())
