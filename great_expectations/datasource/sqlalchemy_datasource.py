@@ -423,11 +423,15 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
 
                 else:
                     schema = batch_kwargs.get("schema")
+                    database = batch_kwargs.get("database")
                 raw_query = (
                     sqlalchemy.select([sqlalchemy.text("*")])
                     .select_from(
                         sqlalchemy.schema.Table(
-                            table, sqlalchemy.MetaData(), schema=schema
+                            table,
+                            sqlalchemy.MetaData(),
+                            schema=schema,
+                            database=database,
                         )
                     )
                     .offset(offset)
