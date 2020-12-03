@@ -56,11 +56,13 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                 "like_pattern_list" in configuration.kwargs
             ), "Must provide like_pattern_list"
             assert isinstance(
-                configuration.kwargs.get("like_pattern_list"), list
+                configuration.kwargs.get("like_pattern_list"), (list, dict)
             ), "like_pattern_list must be a list"
-            assert (
+            assert isinstance(configuration.kwargs.get("like_pattern_list"), dict) or (
                 len(configuration.kwargs.get("like_pattern_list")) > 0
             ), "At least one like_pattern must be supplied in the like_pattern_list."
+            if isinstance(configuration.kwargs.get("like_pattern_list"), dict):
+                assert "$PARAMETER" in configuration.kwargs.get("like_pattern_list"), 'Evaluation Parameter dict for like_pattern_list kwarg must have "$PARAMETER" key.'
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

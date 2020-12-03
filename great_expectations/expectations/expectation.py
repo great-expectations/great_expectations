@@ -742,11 +742,18 @@ class TableExpectation(Expectation, ABC):
         try:
             # Ensuring Proper interval has been provided
             assert min_val is None or isinstance(
-                min_val, (float, int)
+                min_val, (float, int, dict)
             ), "Provided min threshold must be a number"
+            if isinstance(min_val, dict):
+                assert "$PARAMETER" in min_val, 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key'
+
             assert max_val is None or isinstance(
-                max_val, (float, int)
+                max_val, (float, int, dict)
             ), "Provided max threshold must be a number"
+            if isinstance(configuration.kwargs["value_set"], dict):
+                assert "$PARAMETER" in configuration.kwargs["value_set"], 'Evaluation Parameter dict for max_value ' \
+                                                                          'kwarg ' \
+                                                                          'must have "$PARAMETER" key'
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

@@ -85,15 +85,18 @@ class ExpectTableRowCountToEqual(TableExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
 
         value = configuration.kwargs.get("value")
-        if value is None:
-            raise ValueError("An expected row count must be provided")
 
-        if not isinstance(value, int):
-            raise ValueError("Provided row count must be an integer")
+        try:
+            assert value is not None, "An expected row count must be provided"
+
+            assert isinstance(value, (int, dict)), "Provided row count must be an integer"
+
+            if isinstance(value, dict):
+                assert "$PARAMETER" in value, 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
 
         return True
 

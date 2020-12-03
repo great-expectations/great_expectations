@@ -100,11 +100,16 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
         strftime_format = configuration.kwargs["strftime_format"]
 
         try:
-            datetime.strptime(
-                datetime.strftime(datetime.now(), strftime_format), strftime_format,
-            )
+            if isinstance(strftime_format, dict):
+                assert "$PARAMETER" in strftime_format, 'Evaluation Parameter dict for strftime_format kwarg must have "$PARAMETER" key.'
+            else:
+                datetime.strptime(
+                    datetime.strftime(datetime.now(), strftime_format), strftime_format,
+                )
         except ValueError as e:
             raise ValueError("Unable to use provided strftime_format. " + str(e))
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
 
         return True
 

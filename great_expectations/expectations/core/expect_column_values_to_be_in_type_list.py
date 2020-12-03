@@ -109,9 +109,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         try:
             assert "type_list" in configuration.kwargs, "type_list is required"
             assert (
-                isinstance(configuration.kwargs["type_list"], list)
+                isinstance(configuration.kwargs["type_list"], (list, dict))
                 or configuration.kwargs["type_list"] is None
             ), "type_list must be a list or None"
+            if isinstance(configuration.kwargs["type_list"], dict):
+                assert "$PARAMETER" in configuration.kwargs["type_list"], 'Evaluation Parameter dict for type_list kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True

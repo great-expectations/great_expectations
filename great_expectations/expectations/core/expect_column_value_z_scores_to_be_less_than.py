@@ -96,11 +96,16 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
                 "threshold" in configuration.kwargs
             ), "A Z-score threshold must be provided"
             assert isinstance(
-                configuration.kwargs["threshold"], (float, int)
+                configuration.kwargs["threshold"], (float, int, dict)
             ), "Provided threshold must be a number"
+            if isinstance(configuration.kwargs["threshold"], dict):
+                assert "$PARAMETER" in configuration.kwargs["threshold"], 'Evaluation Parameter dict for threshold kwarg must have "$PARAMETER" key.'
+
             assert isinstance(
-                configuration.kwargs["double_sided"], bool
+                configuration.kwargs["double_sided"], (bool, dict)
             ), "Double sided parameter must be a boolean value"
+            if isinstance(configuration.kwargs["double_sided"], dict):
+                assert "$PARAMETER" in configuration.kwargs["double_sided"], 'Evaluation Parameter dict for double_sided kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True

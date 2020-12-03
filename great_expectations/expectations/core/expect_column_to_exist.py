@@ -131,9 +131,11 @@ class ExpectColumnToExist(TableExpectation):
                 configuration.kwargs["column"], str
             ), "Column name must be a string"
             assert (
-                isinstance(configuration.kwargs.get("column_index"), int)
+                isinstance(configuration.kwargs.get("column_index"), (int, dict))
                 or configuration.kwargs.get("column_index") is None
             ), "column_index must be an integer or None"
+            if isinstance(configuration.kwargs.get("column_index"), dict):
+                assert "$PARAMETER" in configuration.kwargs.get("column_index"), 'Evaluation Parameter dict for column_index kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True

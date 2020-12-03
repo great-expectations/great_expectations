@@ -91,8 +91,10 @@ class ExpectTableColumnCountToEqual(TableExpectation):
                 "value" in configuration.kwargs
             ), "An expected column count must be provided"
             assert isinstance(
-                configuration.kwargs["value"], int
+                configuration.kwargs["value"], (int, dict)
             ), "Provided threshold must be an integer"
+            if isinstance(configuration.kwargs["value"], dict):
+                assert "$PARAMETER" in configuration.kwargs["value"], 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

@@ -110,11 +110,13 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         try:
             assert "regex_list" in configuration.kwargs, "regex_list is required"
             assert isinstance(
-                configuration.kwargs["regex_list"], list
+                configuration.kwargs["regex_list"], (list, dict)
             ), "regex_list must be a list of regexes"
-            if len(configuration.kwargs["regex_list"]) > 0:
+            if not isinstance(configuration.kwargs["regex_list"], dict) and len(configuration.kwargs["regex_list"]) > 0:
                 for i in configuration.kwargs["regex_list"]:
                     assert isinstance(i, str), "regexes in list must be strings"
+            if isinstance(configuration.kwargs["regex_list"], dict):
+                assert "$PARAMETER" in configuration.kwargs["regex_list"], 'Evaluation Parameter dict for regex_list kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True

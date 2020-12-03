@@ -89,8 +89,6 @@ class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
         return True
 
     @classmethod
