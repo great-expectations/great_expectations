@@ -460,14 +460,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 success=True,
             )
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values,
+        # and set the instance "_config" variable equal to the resulting dictionary.
         self._config = get_currently_executing_function_call_arguments(
             **{"class_name": self.__class__.__name__}
         )
         filter_properties_dict(
             properties=self._config,
-            delete_fields=["connection_string", "kwargs"],
             inplace=True,
         )
 
