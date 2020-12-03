@@ -11,7 +11,7 @@ from tests.integration.usage_statistics.test_integration_usage_statistics import
 )
 
 
-def build_in_memory_data_context_project_config(
+def build_in_code_data_context_project_config(
     bucket: str = "leakybucket",
     expectations_store_prefix: str = "expectations_store_prefix",
     validations_store_prefix: str = "validations_store_prefix",
@@ -209,14 +209,14 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
     )
 
     # Create a DataContext (note existing expectations store already set up)
-    in_memory_data_context_project_config = build_in_memory_data_context_project_config(
+    in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",
         expectations_store_prefix=expectations_store_prefix,
         validations_store_prefix=validations_store_prefix,
         data_docs_store_prefix=data_docs_store_prefix,
     )
-    in_memory_data_context = BaseDataContext(
-        project_config=in_memory_data_context_project_config
+    in_code_data_context = BaseDataContext(
+        project_config=in_code_data_context_project_config
     )
     bucket_contents_after_instantiating_BaseDataContext = list_s3_bucket_contents(
         bucket=bucket, prefix=data_context_prefix
@@ -227,14 +227,14 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
     }
 
     # Make sure ids are consistent
-    in_memory_data_context_expectations_store_store_backend_id = in_memory_data_context.stores[
+    in_code_data_context_expectations_store_store_backend_id = in_code_data_context.stores[
         "expectations_S3_store"
     ].store_backend_id
-    in_memory_data_context_data_context_id = in_memory_data_context.data_context_id
-    constructed_data_context_id = in_memory_data_context._construct_data_context_id()
+    in_code_data_context_data_context_id = in_code_data_context.data_context_id
+    constructed_data_context_id = in_code_data_context._construct_data_context_id()
     assert (
-        in_memory_data_context_expectations_store_store_backend_id
-        == in_memory_data_context_data_context_id
+        in_code_data_context_expectations_store_store_backend_id
+        == in_code_data_context_data_context_id
         == expectations_store_backend_id_from_s3_file
         == s3_expectations_store_backend_id
         == constructed_data_context_id
@@ -272,26 +272,26 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
     conn.create_bucket(Bucket=bucket)
 
     # Create a DataContext (note NO existing expectations store already set up)
-    in_memory_data_context_project_config = build_in_memory_data_context_project_config(
+    in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",
         expectations_store_prefix=expectations_store_prefix,
         validations_store_prefix=validations_store_prefix,
         data_docs_store_prefix=data_docs_store_prefix,
     )
     # Manually set the data_context_id in the project_config
-    in_memory_data_context_project_config.anonymous_usage_statistics.data_context_id = (
+    in_code_data_context_project_config.anonymous_usage_statistics.data_context_id = (
         manually_created_uuid
     )
-    in_memory_data_context = BaseDataContext(
-        project_config=in_memory_data_context_project_config
+    in_code_data_context = BaseDataContext(
+        project_config=in_code_data_context_project_config
     )
 
     # Make sure the manually set data_context_id is propagated to all the appropriate places
     assert (
         manually_created_uuid
-        == in_memory_data_context.data_context_id
-        == in_memory_data_context.stores[
-            in_memory_data_context.expectations_store_name
+        == in_code_data_context.data_context_id
+        == in_code_data_context.stores[
+            in_code_data_context.expectations_store_name
         ].store_backend_id
     )
 
@@ -324,22 +324,22 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_env_var_GE_DATA
     conn.create_bucket(Bucket=bucket)
 
     # Create a DataContext (note NO existing expectations store already set up)
-    in_memory_data_context_project_config = build_in_memory_data_context_project_config(
+    in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",
         expectations_store_prefix=expectations_store_prefix,
         validations_store_prefix=validations_store_prefix,
         data_docs_store_prefix=data_docs_store_prefix,
     )
-    in_memory_data_context = BaseDataContext(
-        project_config=in_memory_data_context_project_config
+    in_code_data_context = BaseDataContext(
+        project_config=in_code_data_context_project_config
     )
 
     # Make sure the manually set data_context_id is propagated to all the appropriate places
     assert (
         manually_created_uuid
-        == in_memory_data_context.data_context_id
-        == in_memory_data_context.stores[
-            in_memory_data_context.expectations_store_name
+        == in_code_data_context.data_context_id
+        == in_code_data_context.stores[
+            in_code_data_context.expectations_store_name
         ].store_backend_id
     )
 
@@ -403,52 +403,52 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
             "class_name": "EvaluationParameterStore"
         },
     }
-    in_memory_data_context_project_config = build_in_memory_data_context_project_config(
+    in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",
         expectations_store_prefix=expectations_store_prefix,
         validations_store_prefix=validations_store_prefix,
         data_docs_store_prefix=data_docs_store_prefix,
         stores=stores,
     )
-    in_memory_data_context = BaseDataContext(
-        project_config=in_memory_data_context_project_config
+    in_code_data_context = BaseDataContext(
+        project_config=in_code_data_context_project_config
     )
 
     # Check here that suppress_store_backend_id == True for inactive stores
     # and False for active stores
     assert (
-        in_memory_data_context.stores.get(
+        in_code_data_context.stores.get(
             "inactive_expectations_S3_store"
         ).store_backend._suppress_store_backend_id
         is True
     )
     assert (
-        in_memory_data_context.stores.get(
+        in_code_data_context.stores.get(
             "inactive_validations_S3_store"
         ).store_backend._suppress_store_backend_id
         is True
     )
     assert (
-        in_memory_data_context.stores.get(
+        in_code_data_context.stores.get(
             "expectations_S3_store"
         ).store_backend._suppress_store_backend_id
         is False
     )
     assert (
-        in_memory_data_context.stores.get(
+        in_code_data_context.stores.get(
             "validations_S3_store"
         ).store_backend._suppress_store_backend_id
         is False
     )
     # InMemoryStoreBackend created for evaluation_parameters_store & inactive_evaluation_parameters_store
     assert (
-        in_memory_data_context.stores.get(
+        in_code_data_context.stores.get(
             "inactive_evaluation_parameter_store"
         ).store_backend._suppress_store_backend_id
         is False
     )
     assert (
-        in_memory_data_context.stores.get(
+        in_code_data_context.stores.get(
             "evaluation_parameter_store"
         ).store_backend._suppress_store_backend_id
         is False
@@ -497,22 +497,25 @@ def test_inaccessible_active_bucket_warning_messages(caplog):
         },
         "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
     }
-    in_memory_data_context_project_config = build_in_memory_data_context_project_config(
+    in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",
         expectations_store_prefix=expectations_store_prefix,
         validations_store_prefix=validations_store_prefix,
         data_docs_store_prefix=data_docs_store_prefix,
         stores=stores,
     )
-    _ = BaseDataContext(project_config=in_memory_data_context_project_config)
-    assert len(caplog.records) == 2
+    _ = BaseDataContext(project_config=in_code_data_context_project_config)
     assert (
-        caplog.records[0].message
-        == "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store"
+        caplog.messages.count(
+            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store"
+        )
+        == 1
     )
     assert (
-        caplog.records[1].message
-        == "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validations_S3_store"
+        caplog.messages.count(
+            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validations_S3_store"
+        )
+        == 1
     )
 
 
@@ -576,12 +579,23 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
             "class_name": "EvaluationParameterStore"
         },
     }
-    in_memory_data_context_project_config = build_in_memory_data_context_project_config(
+    in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",
         expectations_store_prefix=expectations_store_prefix,
         validations_store_prefix=validations_store_prefix,
         data_docs_store_prefix=data_docs_store_prefix,
         stores=stores,
     )
-    _ = BaseDataContext(project_config=in_memory_data_context_project_config)
-    assert len(caplog.records) == 0
+    _ = BaseDataContext(project_config=in_code_data_context_project_config)
+    assert (
+        caplog.messages.count(
+            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store"
+        )
+        == 0
+    )
+    assert (
+        caplog.messages.count(
+            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validations_S3_store"
+        )
+        == 0
+    )
