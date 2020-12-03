@@ -20,7 +20,6 @@ from great_expectations.marshmallow__shade import (
 )
 from great_expectations.types import DictDot
 from great_expectations.types.configurations import ClassConfigSchema
-from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
@@ -1041,9 +1040,7 @@ class DataContextConfig(DictDot):
         """
         :returns a dict containing the project configuration
         """
-        return filter_properties_dict(
-            properties=dict(self.get_schema_validated_updated_commented_map())
-        )
+        return dict(self.get_schema_validated_updated_commented_map())
 
 
 dataContextConfigSchema = DataContextConfigSchema()

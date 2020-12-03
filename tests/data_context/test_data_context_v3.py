@@ -22,6 +22,7 @@ def test_get_config(empty_data_context_v3):
 
     assert set(context.get_config("dict").keys()) == {
         "config_version",
+        "datasources",
         "config_variables_file_path",
         "plugins_directory",
         "validation_operators",
@@ -31,6 +32,7 @@ def test_get_config(empty_data_context_v3):
         "evaluation_parameter_store_name",
         "data_docs_sites",
         "anonymous_usage_statistics",
+        "notebooks",
     }
 
 
