@@ -409,8 +409,8 @@ class DataContextV3(DataContext):
         In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
         Instead, this method is intended to help the user pick the right parameters
 
-        This method attempts returns exactly one batch.
-        If 0 or more than batches would be returned, it raises an error.
+        This method attempts to return exactly one batch.
+        If 0 or more than 1 batches would be returned, it raises an error.
         """
 
         call_args: dict = get_currently_executing_function_call_arguments(
@@ -475,8 +475,7 @@ class DataContextV3(DataContext):
         In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
         Instead, this method is intended to help the user pick the right parameters
 
-        This method attempts returns exactly one batch.
-        If 0 or more than batches would be returned, it raises an error.
+        This method attempts to return any number of batches, including an empty list.
         """
 
         call_args: dict = get_currently_executing_function_call_arguments(
