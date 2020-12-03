@@ -9,6 +9,7 @@ Develop
 -----------------
 * [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file
 * [ENHANCEMENT] More detailed information in Datasource.self_check() diagnostic (concerning ExecutionEngine objects)
+* [ENHANCEMENT] Improve UI for in-code data contexts #2068
 * [ENHANCEMENT] Add a store_backend_id property to StoreBackend #2030, #2075
 * [ENHANCEMENT] Use an existing expectation_store.store_backend_id to initialize an in-code DataContext #2046, #2075
 * [BUGFIX] Corrected handling of boto3_options by PandasExecutionEngine
