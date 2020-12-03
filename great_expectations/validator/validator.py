@@ -97,6 +97,12 @@ class Validator:
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
         )
+        self._default_expectation_args = {
+            "include_config": True,
+            "catch_exceptions": False,
+            "result_format": "BASIC",
+        }
+        self._validator_config = {}
 
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
@@ -661,12 +667,12 @@ class Validator:
         See also:
             set_default_expectation_arguments
         """
-        return self.execution_engine.default_expectation_args
+        return self._default_expectation_args
 
     @property
     def default_expectation_args(self):
         """A getter for default Expectation arguments"""
-        return self.execution_engine.default_expectation_args
+        return self._default_expectation_args
 
     def set_default_expectation_argument(self, argument, value):
         """
@@ -682,9 +688,8 @@ class Validator:
         See also:
             get_default_expectation_arguments
         """
-        # !!! Maybe add a validation check here?
 
-        self.default_expectation_args[argument] = value
+        self._default_expectation_args[argument] = value
 
     def get_expectations_config(
         self,
