@@ -78,6 +78,7 @@ class Validator:
         self._data_context = data_context
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
+        self._validator_config = {}
 
         if batches is None:
             batches = tuple()
@@ -583,7 +584,7 @@ class Validator:
 
     def get_config_value(self, key):
         """Getter for config value"""
-        return self._validator_config[key]
+        return self._validator_config.get(key)
 
     @property
     def batches(self):
