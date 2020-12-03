@@ -16,7 +16,7 @@ Great Expectations provides two types of ``DataConnector`` classes for connectin
 but also things like S3 object stores, etc:
 
     - A ConfiguredAssetDataConnector requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
-    - An InferredAssetDataConnector infers ``data_asset_naßme`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
+    - An InferredAssetDataConnector infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
 InferredAssetDataConnector has fewer options, so it's simpler to set up. It’s a good choice if you want to connect to a single ``DataAsset``, or several ``DataAssets`` that all share the same naming convention.
 
@@ -138,7 +138,7 @@ A corresponding configuration for ``InferredAssetS3DataConnector`` would look si
               - month
               - day
             pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv
-e
+
 The following examples will show scenarios that InferredAssetDataConnectors can help you analyze, using ``InferredAssetFilesystemDataConnector`` as an example and only show the configuration under ``data_connectors`` for simplicity.
 
 

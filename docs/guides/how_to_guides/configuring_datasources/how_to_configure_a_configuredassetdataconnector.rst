@@ -30,18 +30,115 @@ All of the examples below assume you’re testing configuration using something 
     context = ge.DataContext()
 
     context.test_yaml_config("""
-    class_name: Datasource
-
-    execution_engine:
+    my_data_source:
+      class_name: Datasource
+      execution_engine:
         class_name: PandasExecutionEngine
-
-    data_connectors:
+      data_connectors:
         my_filesystem_data_connector:
-            {data_connector configuration goes here}
+          {data_connector configuration goes here}
     """)
 
 
 If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+
+Choose a DataConnector
+----------------------
+
+ConfiguredAssetDataConnectors like the ``ConfiguredAssetFilesystemDataConnector`` and ``ConfiguredAssetS3DataConnector``
+require the following information to be initialized:
+
+    1. name of data_connector as a ``str`` value
+    2. ``class_name`` of data_connector, such as ``ConfiguredAssetFilesystemDataConnector`` or ``ConfiguredAssetS3DataConnector``
+    3. ``datasource_name``, which name of associated ``Datasource`` as ``str`` value
+    4. ``assets`` that are named :
+
+
+
+The ``default_regex`` is used to take advantage of patterns that exist in the filename or folder structure.
+
+Imagine you have the following files in ``my_directory/``:
+
+.. code-block:: bash
+
+    my_directory/alpha-1.csv
+    my_directory/alpha-2.csv
+    my_directory/alpha-3.csv
+
+Then we can imagine 2 approaches to analyzing the data.
+
+The simplest approach would be to consider each file to be its own data_asset.  In that case, the configuration would look like the following:
+
+.. code-block:: yaml
+
+    my_data_source:
+      class_name: Datasource
+      execution_engine:
+        class_name: PandasExecutionEngine
+      data_connectors:
+        my_filesystem_data_connector:
+          class_name: InferredAssetFilesystemDataConnector
+          datasource_name: my_data_source
+          base_directory: my_directory/
+          default_regex:
+            group_names:
+              - data_asset_name
+            pattern: (.*).csv
+
+Notice that the ``default_regex`` is configured to have one capture group in the pattern (``(.*)``) which captures the entire filename. That capture group is assigned to ``data_asset_name`` under ``group_names``.
+
+However, a closer look at the file names reveals a pattern that is common to the 3 files. Each have the field ``alpha`` in the name, and have date information following.
+
+These are the types of patterns that InferredAssetDataConnectors allow you to take advantage of. We can consider each file to be a ``batch`` of one ``data_asset`` named ``alpha``, which will allow you to..?
+
+Taking this into consideration, if we were to capture ``alpha`` as the ``data_asset_name`` and add capture groups for the ``year``, ``month`` and ``day`` fields, then our configuration would become:
+
+.. code-block:: yaml
+
+    my_data_source:
+      class_name: Datasource
+      execution_engine:
+        class_name: PandasExecutionEngine
+      data_connectors:
+        my_filesystem_data_connector:
+          class_name: InferredAssetFilesystemDataConnector
+          datasource_name: my_data_source
+          base_directory: my_directory/
+          default_regex:
+            group_names:
+              - data_asset_name
+              - year
+              - month
+              - day
+            pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv
+
+**Note** We have chosen to be more specific in the capture groups for the ``year`` ``month`` and ``day`` by specifying the integer value (using ``\d``) and the number of digits, but a simpler capture group like ``(.*)`` would also work.
+
+A corresponding configuration for ``InferredAssetS3DataConnector`` would look similar but would require ``bucket`` and ``prefix`` values instead of ``base_directory``.
+
+.. code-block:: yaml
+
+    my_data_source:
+      class_name: Datasource
+      execution_engine:
+        class_name: PandasExecutionEngine
+      data_connectors:
+        my_filesystem_data_connector:
+          class_name: InferredAssetS3DataConnector
+          datasource_name: my_data_source
+          bucket: my_s3_bucket
+          prefix: my_s3_bucket_prefix
+          default_regex:
+            group_names:
+              - data_asset_name∂
+              - year
+              - month
+              - day
+            pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv
+
+The following examples will show scenarios that InferredAssetDataConnectors can help you analyze, using ``InferredAssetFilesystemDataConnector`` as an example and only show the configuration under ``data_connectors`` for simplicity.
+
+
 
 Example 1: Basic Configuration for a single DataAsset
 -----------------------------------------------------
@@ -64,6 +161,8 @@ Then this configuration...
         pattern: alpha-(.*)\\.csv
         group_names:
             - index
+    assets:
+        alpha:
 
 ...will make available ``alpha`` as a single DataAsset with the following data_references:
 
