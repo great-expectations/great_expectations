@@ -406,12 +406,6 @@ class DataContextV3(DataContext):
             datasource_name = datasource_name
 
         datasource: Datasource = self.datasources[datasource_name]
-        try:
-            processing_method: Callable = getattr(datasource, processing_method_name)
-        except AttributeError:
-            raise ge_exceptions.DatasourceError(
-                f'The method "Datasource.{processing_method_name}(batch_request: BatchRequest)" does not exist.'
-            )
 
         if batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
