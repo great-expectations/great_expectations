@@ -167,8 +167,8 @@ Steps
                         data_connectors:
                           my_data_connector:
                             class_name: ConfiguredAssetS3DataConnector
-                            bucket: ${your_s3_bucket_name}
-                            prefix: ${your_s3_prefix_name}
+                            bucket: {your_s3_bucket_name}
+                            prefix: {your_s3_prefix_name}
                             assets:
                               test_asset:
                                 pattern: (.+)\\.csv
