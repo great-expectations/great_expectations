@@ -71,8 +71,8 @@ class ExecutionEngine:
         self._load_batch_data_from_dict(batch_data_dict)
         self._active_batch_data_id = None
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values, and
+        # set the instance "_config" variable equal to the resulting dictionary.
         self._config = get_currently_executing_function_call_arguments(
             **{"class_name": self.__class__.__name__}
         )

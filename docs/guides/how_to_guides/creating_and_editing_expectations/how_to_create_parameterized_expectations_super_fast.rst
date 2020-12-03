@@ -6,12 +6,12 @@ This guide will walk you through the process of creating Parameterized Expectati
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-  
-A Parameterized Expectation is a great new capability unlocked by new Modular Expectations. Now that Expectations are structured in class form, 
-it is easier than every before to inherit fromthese classes and build similar Expectations that are adapted to your own needs. 
+
+A Parameterized Expectation is a great new capability unlocked by new Modular Expectations. Now that Expectations are structured in class form,
+it is easier than every before to inherit fromthese classes and build similar Expectations that are adapted to your own needs.
 
 Steps
-_____
+-----
 1. Select an Expectation to inherit from
 ########################################
 
@@ -24,7 +24,7 @@ _____
 As can be seen in the implementation below, we have chosen to keep our default minimum value at 0, given that we are validating that all our values are positive. Setting the upper bound to ``None`` means that no upper bound will be checked -- effectively setting the threshold at ∞ and allowing any positive value.
 
 Notice that we do not need to set ``default_kwarg_values`` for all kwargs: it is sufficient to set them only for ones for which we would like to set a default value. To keep our implementation simple, we do not override the ``metric_dependencies`` or ``success_keys``.
-  
+
 .. code-block:: python
 
    class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
