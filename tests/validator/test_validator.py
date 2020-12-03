@@ -293,6 +293,7 @@ def test_validator_default_expectation_args(data_context_with_sql_datasource_for
 
     print(my_validator.get_default_expectation_arguments())
 
+
 def test_validator_default_expectation_args__pandas(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
     expectationConfiguration = ExpectationConfiguration(
