@@ -38,7 +38,7 @@ class DataContextV3(DataContext):
             return config.commented_map
 
         elif mode == "dict":
-            return dict(config.to_dict())
+            return config.to_dict()
 
         elif mode == "yaml":
             return config.to_yaml_str()

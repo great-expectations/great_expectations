@@ -992,7 +992,8 @@ class DataContextConfig(DictDot):
             )
         self.validation_operators = validation_operators
         self.stores = stores
-        self.notebooks = notebooks
+        if notebooks is not None:
+            self.notebooks = notebooks
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymous_usage_statistics is None:
