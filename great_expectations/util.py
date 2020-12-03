@@ -11,6 +11,7 @@ from inspect import (
     ArgInfo,
     BoundArguments,
     Signature,
+    Parameter,
     currentframe,
     getargvalues,
     getclosurevars,
@@ -19,7 +20,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Union, Optional
 
 import black
 from pkg_resources import Distribution
@@ -104,11 +105,21 @@ def get_currently_executing_function_call_arguments(
     ][0]
     cur_mod = getmodule(cur_func_obj)
     sig: Signature = signature(cur_func_obj)
-    params: dict = {k: argvs.locals[k] for k in sig.parameters.keys()}
+    params: dict = {}
+    varargs: dict = {}
+    for key, param in sig.parameters.items():
+        val: Any = argvs.locals[key]
+        params[key] = val
+        if param.kind == Parameter.VAR_KEYWORD:
+            varargs[key] = val
     bound_args: BoundArguments = sig.bind(**params)
     call_args: OrderedDict = bound_args.arguments
 
     call_args_dict: dict = dict(call_args)
+
+    for key, value in varargs.items():
+        call_args_dict.pop(key)
+        call_args_dict.update(value)
 
     if include_module_name:
         call_args_dict.update({"module_name": cur_mod.__name__})

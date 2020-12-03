@@ -61,7 +61,6 @@ data_connectors:
         "my_datasource", config,
     )
 
-    datasource: Datasource = context.datasources["my_datasource"]
     batch_request: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
@@ -74,11 +73,13 @@ data_connectors:
             }
         },
     }
-    batch_request = BatchRequest(**batch_request)
-    batch_list: List[Batch] = datasource.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = context.get_batch_list(
+        **batch_request
     )
 
+    assert len(batch_list) == 1
+
+    batch: Batch = batch_list[0]
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "path"
     assert batch.batch_definition["partition_definition"] == {
@@ -143,7 +144,6 @@ data_connectors:
         "my_datasource", config,
     )
 
-    datasource: Datasource = context.datasources["my_datasource"]
     batch_request: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
@@ -156,11 +156,13 @@ data_connectors:
             }
         },
     }
-    batch_request = BatchRequest(**batch_request)
-    batch_list: List[Batch] = datasource.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = context.get_batch_list(
+        **batch_request
     )
 
+    assert len(batch_list) == 1
+
+    batch: Batch = batch_list[0]
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "Titanic"
     assert batch.batch_definition["partition_definition"] == {

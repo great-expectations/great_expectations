@@ -341,18 +341,19 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
 ):
     context = data_context_with_sql_datasource_for_testing_get_batch
 
-    datasource: Datasource = context.datasources["my_sqlite_db"]
     batch_request: Union[dict, BatchRequest] = {
         "datasource_name": "my_sqlite_db",
         "data_connector_name": "daily",
         "data_asset_name": "table_partitioned_by_date_column__A",
         "partition_request": {"partition_identifiers": {"date": "2020-01-15"}},
     }
-    batch_request = BatchRequest(**batch_request)
-    batch_list: List[Batch] = datasource.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = context.get_batch_list(
+        **batch_request
     )
 
+    assert len(batch_list) == 1
+
+    batch: Batch = batch_list[0]
     assert batch.batch_spec is not None
     assert (
         batch.batch_definition["data_asset_name"]
