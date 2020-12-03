@@ -2,7 +2,7 @@ import copy
 import logging
 import os
 import traceback
-from typing import Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.compat import StringIO
@@ -265,6 +265,7 @@ class DataContextV3(DataContext):
         data_asset_name: str = None,
         *,
         batch_request: BatchRequest = None,
+        batch_data: Any = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
         limit: int = None,
@@ -287,6 +288,7 @@ class DataContextV3(DataContext):
             data_asset_name
 
             batch_request
+            batch_data
             partition_request
             partition_identifiers
 
@@ -320,6 +322,7 @@ class DataContextV3(DataContext):
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             batch_request=batch_request,
+            batch_data=batch_data,
             partition_request=partition_request,
             partition_identifiers=partition_identifiers,
             limit=limit,
@@ -346,6 +349,7 @@ class DataContextV3(DataContext):
         data_asset_name: str = None,
         *,
         batch_request: BatchRequest = None,
+        batch_data: Any = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
         limit: int = None,
@@ -368,6 +372,7 @@ class DataContextV3(DataContext):
             data_asset_name
 
             batch_request
+            batch_data
             partition_request
             partition_identifiers
 
@@ -413,7 +418,6 @@ class DataContextV3(DataContext):
                 batch_request=batch_request
             )
         else:
-            partition_request: PartitionRequest
             if partition_request is None:
                 if partition_identifiers is None:
                     partition_identifiers = kwargs
@@ -459,6 +463,7 @@ class DataContextV3(DataContext):
                 datasource_name=datasource_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
+                batch_data=batch_data,
                 partition_request=partition_request,
                 batch_spec_passthrough=batch_spec_passthrough,
             )
@@ -473,6 +478,7 @@ class DataContextV3(DataContext):
         data_asset_name: str = None,
         *,
         batch_request: BatchRequest = None,
+        batch_data: Any = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
         limit: int = None,
@@ -516,6 +522,7 @@ class DataContextV3(DataContext):
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             batch_request=batch_request,
+            batch_data=batch_data,
             partition_request=partition_request,
             partition_identifiers=partition_identifiers,
             limit=limit,
