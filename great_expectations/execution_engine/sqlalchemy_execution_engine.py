@@ -466,8 +466,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             **{"class_name": self.__class__.__name__}
         )
         filter_properties_dict(
-            properties=self._config,
-            inplace=True,
+            properties=self._config, inplace=True,
         )
 
     @property
