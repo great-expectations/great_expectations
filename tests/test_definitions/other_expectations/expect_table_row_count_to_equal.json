@@ -84,7 +84,7 @@
           },
           "out": {
             "success": false,
-            "traceback_substring": "ValueError"
+            "traceback_substring": "row count must be an integer"
           }
         }
       ]
