@@ -117,7 +117,7 @@ Steps
 
         To add a MySql datasource, do the following:
 
-        #. **Install the required modules**
+        #. **Install the required modules.**
 
             If you have not already done so, install required modules for connecting to MySql.
 
@@ -126,7 +126,7 @@ Steps
                 pip install sqlalchemy
                 pip install PyMySQL
 
-        #. **Instantiate a DataContext**
+        #. **Instantiate a DataContext.**
 
             Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
 
@@ -135,7 +135,7 @@ Steps
                 import great_expectations as ge
                 context = ge.get_context()
 
-        #.  **Create or copy a yaml config**
+        #.  **Create or copy a yaml config.**
 
                 Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as environment variables.
                 ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use in connecting data living in a sql database. More information on ``Datasources``

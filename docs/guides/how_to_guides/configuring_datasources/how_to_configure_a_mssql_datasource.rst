@@ -119,14 +119,14 @@ Steps
 
         To add a MSSQL datasource, do the following:
 
-        #. **Install the required ODBC drivers**
+        #. **Install the required ODBC drivers.**
 
             Follow guides from Microsoft according to your operating system. We have included additional links to relevant resources for connecting to MSSQL databases in the Additional Information section below.
 
             * `Installing Microsoft ODBC driver for MacOS <https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos>`__
             * `Installing Microsoft ODBC driver for Linux <https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server>`__
 
-        #. **Install the required python modules**
+        #. **Install the required python modules.**
 
             If you have not already done so, install required modules for connecting to MSSQL.
 
@@ -134,7 +134,7 @@ Steps
 
                 pip install sqlalchemy
                 pip install pyodbc
-        #. **Instantiate a DataContext**
+        #. **Instantiate a DataContext.**
 
             Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
 
@@ -143,7 +143,7 @@ Steps
                 import great_expectations as ge
                 context = ge.get_context()
 
-        #.  **Create or copy a yaml config**
+        #.  **Create or copy a yaml config.**
 
                 Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as environment variables.  GE uses a ``connection_string`` to connect to MSSQL databases through sqlalchemy (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls).
 
