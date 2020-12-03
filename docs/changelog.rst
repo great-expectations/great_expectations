@@ -5,16 +5,21 @@ Changelog
 #########
 
 
-Develop
+0.13.1
 -----------------
-* [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file
+* [ENHANCEMENT] Improved data docs performance by ~30x for large projects and ~4x for smaller projects by changing instantiation of Jinja environment #2100
+* [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file #2058 (thanks @GTLangseth!)
 * [ENHANCEMENT] More detailed information in Datasource.self_check() diagnostic (concerning ExecutionEngine objects)
 * [ENHANCEMENT] Improve UI for in-code data contexts #2068
 * [ENHANCEMENT] Add a store_backend_id property to StoreBackend #2030, #2075
 * [ENHANCEMENT] Use an existing expectation_store.store_backend_id to initialize an in-code DataContext #2046, #2075
 * [BUGFIX] Corrected handling of boto3_options by PandasExecutionEngine
 * [BUGFIX] New Expectation via CLI / SQL Query no longer throws TypeError
+* [BUGFIX] Implement validator.default_expectations_arguments
+* [DOCS] Fix doc create and editing expectations #2105 (thanks @Lee-W!)
+* [DOCS] Updated documentation on 0.13 classes
 * [DOCS] Fixed a typo in the HOWTO guide for adding a self-managed Spark datasource
+* [DOCS] Updated documentation for new UI for in-code data contexts
 
 0.13.0
 -----------------
