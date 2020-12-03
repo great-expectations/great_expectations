@@ -234,9 +234,9 @@ Steps
                         class_name: SimpleSqlalchemyDatasource
                         credentials:
                           drivername: snowflake
-                          username: <snowflake_username>
-                          password: <snowflake_pw>
-                          host: <snowflake_host>
+                          username: {snowflake_username}
+                          password: {snowflake_pw}
+                          host: {snowflake_host}
                           database: TEST
                           query:
                             schema: KAGGLE_MOVIE_DATASET
@@ -376,8 +376,8 @@ Additional Notes
             class_name: SimpleSqlalchemyDatasource
             credentials:
                 drivername: snowflake
-                username: <snowflake_username>
-                host: <snowflake_host>
+                username: {snowflake_username}
+                host: {snowflake_host}
                 database: TEST
                 connect_args:
                     authenticator: externalbrowser
@@ -404,10 +404,10 @@ Additional Notes
                 class_name: SimpleSqlalchemyDatasource
                 credentials:
                     drivername: snowflake
-                    username: <snowflake_username>
+                    username: {snowflake_username}
                     private_key_path: ~/.ssh/my_snowflake.p8
                     private_key_passphrase: mypass
-                    host: <snowflake_host>
+                    host: {snowflake_host}
                     database: TEST
                     query:
                         schema: KAGGLE_MOVIE_DATASET
