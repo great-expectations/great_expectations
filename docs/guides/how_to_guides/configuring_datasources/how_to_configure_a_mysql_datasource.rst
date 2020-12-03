@@ -151,11 +151,11 @@ Steps
                         class_name: SimpleSqlalchemyDatasource
                         credentials:
                           drivername: mysql+pymysql
-                          host: <host>
-                          port: <port>
-                          username: <user_name>
-                          password: <password>
-                          database: <db_name>
+                          host: {host}
+                          port: {port}
+                          username: {user_name}
+                          password: {password}
+                          database: {db_name}
                         introspection:
                           whole_table:
                             data_asset_name_suffix: __whole_table
