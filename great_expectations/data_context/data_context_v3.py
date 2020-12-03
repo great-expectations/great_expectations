@@ -415,7 +415,9 @@ class DataContextV3(DataContext):
 
         if batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
-            return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+            return datasource.get_batch_list_from_batch_request(
+                batch_request=batch_request
+            )
         else:
             partition_request: PartitionRequest
             if partition_request is None:
@@ -466,7 +468,9 @@ class DataContextV3(DataContext):
                 partition_request=partition_request,
                 batch_spec_passthrough=batch_spec_passthrough,
             )
-            return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+            return datasource.get_batch_list_from_batch_request(
+                batch_request=batch_request
+            )
 
     def get_validator(
         self,
