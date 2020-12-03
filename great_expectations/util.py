@@ -10,8 +10,8 @@ from gc import get_referrers
 from inspect import (
     ArgInfo,
     BoundArguments,
-    Signature,
     Parameter,
+    Signature,
     currentframe,
     getargvalues,
     getclosurevars,
@@ -20,7 +20,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Union, Optional
+from typing import Any, Callable, Optional, Union
 
 import black
 from pkg_resources import Distribution

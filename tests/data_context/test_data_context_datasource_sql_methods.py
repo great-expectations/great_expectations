@@ -347,9 +347,7 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
         "data_asset_name": "table_partitioned_by_date_column__A",
         "partition_request": {"partition_identifiers": {"date": "2020-01-15"}},
     }
-    batch_list: List[Batch] = context.get_batch_list(
-        **batch_request
-    )
+    batch_list: List[Batch] = context.get_batch_list(**batch_request)
 
     assert len(batch_list) == 1
 

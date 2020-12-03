@@ -73,9 +73,7 @@ data_connectors:
             }
         },
     }
-    batch_list: List[Batch] = context.get_batch_list(
-        **batch_request
-    )
+    batch_list: List[Batch] = context.get_batch_list(**batch_request)
 
     assert len(batch_list) == 1
 
@@ -156,9 +154,7 @@ data_connectors:
             }
         },
     }
-    batch_list: List[Batch] = context.get_batch_list(
-        **batch_request
-    )
+    batch_list: List[Batch] = context.get_batch_list(**batch_request)
 
     assert len(batch_list) == 1
 

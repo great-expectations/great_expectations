@@ -2,18 +2,14 @@ import copy
 import logging
 import os
 import traceback
-from typing import List, Optional, Union, Callable
+from typing import Callable, List, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequest,
-    PartitionRequest,
-)
+from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import dataContextConfigSchema
 from great_expectations.data_context.util import (
@@ -21,11 +17,11 @@ from great_expectations.data_context.util import (
     substitute_all_config_variables,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.validator.validator import Validator
 from great_expectations.util import (
     filter_properties_dict,
     get_currently_executing_function_call_arguments,
 )
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -421,8 +417,7 @@ class DataContextV3(DataContext):
             **{"processing_method_name": "get_single_batch_from_batch_request"}
         )
         filter_properties_dict(
-            properties=call_args,
-            inplace=True,
+            properties=call_args, inplace=True,
         )
         return self.process_batch_request(**call_args)
 
@@ -488,8 +483,7 @@ class DataContextV3(DataContext):
             **{"processing_method_name": "get_batch_list_from_batch_request"}
         )
         filter_properties_dict(
-            properties=call_args,
-            inplace=True,
+            properties=call_args, inplace=True,
         )
         return self.process_batch_request(**call_args)
 
