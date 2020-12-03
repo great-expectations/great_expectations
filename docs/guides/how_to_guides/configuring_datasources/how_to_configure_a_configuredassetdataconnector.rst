@@ -1,22 +1,21 @@
-.. _how_to_guides_how_to_configure_a_configuredassetfilesystemdataconnector:
+.. _how_to_guides_how_to_configure_a_configuredassetdataconnector:
 
-How to configure a ``ConfiguredAssetFilesystemDataConnector``
-=============================================================
+How to configure a ConfiguredAssetDataConnector
+===============================================
 
-This guide demonstrates how to configure a ``ConfiguredAssetFilesystemDataConnector``, and provides several examples you can use for configuration.
+This guide demonstrates how to configure a ConfiguredAssetDataConnector, and provides several examples you can use for configuration.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-
-  - Understand the basics of Datasources in 0.13 and later.
-  - Learned how to use ``test_yaml_config``
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+    - :ref:`Understand the basics of Datasources in 0.13 or later <reference__core_concepts__datasources>`
+    - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk,
 but also things like S3 object stores, etc:
 
-    - A ``ConfiguredAssetFilesSystemDataconnector`` requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
-    - An ``InferredAssetFileSystemDataConnector`` infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
+    - A ConfiguredAssetDataConnector`` requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
+    - An InferredAssetDataConnector`` infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
 If you're not sure which one to use, please check out :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
