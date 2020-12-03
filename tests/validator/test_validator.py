@@ -280,8 +280,8 @@ def test_graph_validate_with_runtime_config(basic_datasource):
             exception_info=None,
         )
     ]
-    
-def test_validator_default_expectation_args(basic_datasource):
+
+def test_validator_default_expectation_args__pandas(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
@@ -313,7 +313,7 @@ def test_validator_default_expectation_args(basic_datasource):
 
     print(my_validator.get_default_expectation_arguments())
 
-def test_validator_default_expectation_args(data_context_with_sql_datasource_for_testing_get_batch):
+def test_validator_default_expectation_args__sql(data_context_with_sql_datasource_for_testing_get_batch):
     context = data_context_with_sql_datasource_for_testing_get_batch
 
     my_validator = context.get_validator(
