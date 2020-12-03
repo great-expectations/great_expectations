@@ -10,9 +10,9 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     DataContextConfigSchema,
+    DatasourceConfig,
     FilesystemStoreBackendDefaults,
     GCSStoreBackendDefaults,
-    DatasourceConfig,
     S3StoreBackendDefaults,
 )
 

@@ -282,7 +282,9 @@ class DatasourceConfigSchema(Schema):
     class_name = fields.String(missing="Datasource")
     module_name = fields.String(missing="great_expectations.datasource")
 
-    execution_engine = fields.Nested(ExecutionEngineConfigSchema, required=False, allow_none=True)
+    execution_engine = fields.Nested(
+        ExecutionEngineConfigSchema, required=False, allow_none=True
+    )
     data_connectors = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(DataConnectorConfigSchema),
@@ -291,7 +293,9 @@ class DatasourceConfigSchema(Schema):
     )
 
     data_asset_type = fields.Nested(ClassConfigSchema)
-    boto3_options = fields.Dict(keys=fields.Str(), values=fields.Str(), required=False, allow_none=True)
+    boto3_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
 
     # TODO: Update to generator-specific
     # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))

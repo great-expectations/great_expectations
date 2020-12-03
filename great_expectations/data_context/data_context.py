@@ -48,10 +48,8 @@ from great_expectations.data_context.types.base import (  # TODO: deprecate
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     DatasourceConfig,
-    DatasourceConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
-    datasourceConfigSchema,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
