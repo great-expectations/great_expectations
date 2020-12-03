@@ -22,7 +22,6 @@ def test_get_config(empty_data_context_v3):
 
     assert set(context.get_config("dict").keys()) == {
         "config_version",
-        "datasources",
         "config_variables_file_path",
         "plugins_directory",
         "validation_operators",
