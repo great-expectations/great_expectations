@@ -12,10 +12,10 @@ This guide demonstrates how to configure a ConfiguredAssetDataConnector, and pro
     - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk,
-but also things like S3 object stores, etc:
+but also S3 object stores, etc:
 
-    - A ConfiguredAssetDataConnector`` requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
-    - An InferredAssetDataConnector`` infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
+    - A ConfiguredAssetDataConnector requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
+    - An InferredAssetDataConnector infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
 If you're not sure which one to use, please check out :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
@@ -46,9 +46,8 @@ Choose a DataConnector
 ----------------------
 
 ConfiguredAssetDataConnectors like  ``ConfiguredAssetFilesystemDataConnector`` and ``ConfiguredAssetS3DataConnector`` require DataAssets to be
-explicitly named. Each DataAsset can configure their own regex ``pattern`` and ``group_names``.
-
-**Note:** If ``pattern`` and ``group_names`` are configured at the DataAsset level they will override any ``pattern`` or ``group_names`` set under the ``default_regex``.
+explicitly named. Each DataAsset can have their own regex ``pattern`` and ``group_names``, and if configured, will override any
+``pattern`` or ``group_names`` under ``default_regex``.
 
 Imagine you have the following files in ``my_directory/``:
 
@@ -57,6 +56,10 @@ Imagine you have the following files in ``my_directory/``:
     my_directory/alpha-1.csv
     my_directory/alpha-2.csv
     my_directory/alpha-3.csv
+
+
+We could create a DataAsset ``alpha`` that contains 3 data_references (``alpha-1.csv``, ``alpha-2.csv``, and ``alpha-3.csv``).
+In that case, the configuration would look like the following:
 
 .. code-block:: yaml
 
@@ -71,15 +74,15 @@ Imagine you have the following files in ``my_directory/``:
           default_regex:
           assets:
             alpha:
-              pattern: alpha-(.*)\\.csv
+              pattern: alpha-(.*)\.csv
               group_names:
                 - index
 
-Notice that we have specified a pattern that captures the number after ``alpha`` and assigns it to the ``group_name`` ``index``. The configuration will make available ``alpha`` as a single DataAsset with 3 data_references ( ``alpha-1.csv``, ``alpha-2.csv`` and ``alpha-3.csv``)
+Notice that we have specified a pattern that captures the number after ``alpha-`` in the filename and assigns it to the ``group_name`` ``index``.
 
-The same configuration would work with regex capturing entire filename (``pattern: (.*)\\.csv``). However,  capturing the index on its own allows for ``partition_identifiers`` to be used to retrieve a specific partition of the data_asset.
+The configuration would also work with a regex capturing entire filename (ie ``pattern: (.*)\\.csv``).  However, capturing the index on its own allows for ``partition_identifiers`` to be used to retrieve a specific partition of the DataAsset.
 
-The following example would retrieve ``alpha-2.csv`` of ``alpha`` as a batch:
+Later on we could retrieve the data in ``alpha-2.csv`` of ``alpha`` as its own batch using ``context.get_batch()`` by specifying ``{"index": "2"}`` as the ``partition_identifier``.
 
 .. code-block:: python
 
@@ -90,7 +93,9 @@ The following example would retrieve ``alpha-2.csv`` of ``alpha`` as a batch:
         partition_identifiers={"index": "2"}
         )
 
-For more information on ``batches`` and ``partition_identifiers``, please see the following core concepts document.
+
+This ability to access specific partitions using ``partition_identifiers`` is very useful when validating DataAssets that span multiple files.
+For more information on ``batches`` and ``partition_identifiers``, please refer to the :ref:`Core Concepts document. <reference__core_concepts>`
 
 A corresponding configuration for ``ConfiguredAssetS3DataConnector`` would look similar but would require ``bucket`` and ``prefix`` values instead of ``base_directory``.
 
@@ -102,10 +107,13 @@ A corresponding configuration for ``ConfiguredAssetS3DataConnector`` would look 
     default_regex:
     assets:
         alpha:
-          pattern: alpha-(.*)\\.csv
+          pattern: alpha-(.*)\.csv
           group_names:
             - index
-The following examples will show scenarios that ConfiguredAssetDataConnectors can help you analyze, using ``ConfiguredAssetFilesystemDataConnector`` as an example and only show the configuration under ``data_connectors`` for simplicity.
+
+The following examples will show scenarios that ConfiguredAssetDataConnectors can help you analyze, using ``ConfiguredAssetFilesystemDataConnector``.
+
+**Note**: The examples will only only show the configuration for ``data_connectors`` for simplicity.
 
 Example 1: Basic Configuration for a single DataAsset
 -----------------------------------------------------
@@ -127,9 +135,10 @@ Then this configuration...
     default_regex:
     assets:
         alpha:
-          pattern: alpha-(.*)\\.csv
+          pattern: alpha-(.*)\.csv
           group_names:
             - index
+
 ...will make available ``alpha`` as a single DataAsset with the following data_references:
 
 .. code-block:: bash
@@ -166,7 +175,7 @@ Then this configuration...
     default_regex:
     assets:
         alpha:
-          pattern: beta-(.*)\\.csv
+          pattern: beta-(.*)\.csv
           group_names:
             - index
 
@@ -214,14 +223,14 @@ Then this configuration...
                 - year
                 - month
                 - day
-            pattern: alpha-(\d{4})-(\d{2})-(\d{2}).csv
+            pattern: alpha-(\d{4})-(\d{2})-(\d{2})\.csv
         beta:
             group_names:
                 - name
                 - year
                 - month
                 - day
-            pattern: beta-(\d{4})-(\d{2})-(\d{2}).csv
+            pattern: beta-(\d{4})-(\d{2})-(\d{2})\.csv
 
 ...will now make ``alpha`` and ``beta`` both available a DataAssets, with the following data_references:
 
@@ -275,7 +284,7 @@ In the following example, files are placed folders that match the ``data_asset_n
             base_directory: A/
         B:
             base_directory: B/
-            pattern: (.*)-(.*)\\.txt
+            pattern: (.*)-(.*)\.txt
             group_names:
                 - part_1
                 - part_2
@@ -286,7 +295,7 @@ In the following example, files are placed folders that match the ``data_asset_n
             glob_directive: "*"
             base_directory: D/
     default_regex:
-        pattern: (.*)-(.*)\\.csv
+        pattern: (.*)-(.*)\.csv
         group_names:
             - part_1
             - part_2
@@ -347,7 +356,7 @@ The following configuration...
     class_name: ConfiguredAssetFilesystemDataConnector
     base_directory: my_base_directory/
     default_regex:
-        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+        pattern: ^(.+)-(\d{4})(\d{2})\.(csv|txt)$
         group_names:
             - data_asset_name
             - year_dir

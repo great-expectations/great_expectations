@@ -3,12 +3,12 @@
 How to choose which ``DataConnector`` to use:
 =======================================================
 
-Great Expectations provides two types of ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk, but also things like S3 object stores, etc:
+Great Expectations provides two types of ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk, but also S3 object stores, etc:
 
     - A ConfiguredAssetDataConnector allows users to have the most fine-tuning, and requires an explicit listing of each DataAsset you want to connect to. Examples of this type of ``DataConnector`` include ``ConfiguredAssetFilesystemDataConnector`` and ``ConfiguredAssetS3DataConnector``.
     - An InferredAssetDataConnector infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure. Examples of this type of ``DataConnector`` include ``InferredAssetFilesystemDataConnector`` and ``InferredAssetS3DataConnector``.
 
-The following examples will use ``DataConnector`` classes designed to connect to files on disk: ``InferredAssetFilesystemDataConnector`` and ``ConfiguredAssetFilesystemDataConnector``.
+The following examples will use ``DataConnector`` classes designed to connect to files on disk, namely ``InferredAssetFilesystemDataConnector`` and ``ConfiguredAssetFilesystemDataConnector``.
 
 ------------------------------------------
 When to use an InferredAssetDataConnector
@@ -92,7 +92,7 @@ If you have the following ``my_messier_data/`` directory in your filesystem,
     my_messier_data/bbb/D-2.csv
     my_messier_data/ccc/D-3.csv
 
-In that case, this config...
+Then this config...
 
 .. code-block:: yaml
 
@@ -155,8 +155,8 @@ In that case, this config...
 Additional Notes
 ----------------
 
-    - Additional examples and configurations for ``ConfiguredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure a ConfiguredAssetDataConnector <_how_to_guides_how_to_configure_a_configuredassetdataconnector>`
-    - Additional examples and configurations for ``InferredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure an InferredAssetDataConnector <_how_to_guides_how_to_configure_a_inferredassetdataconnector>`
+    - Additional examples and configurations for ``ConfiguredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure a ConfiguredAssetDataConnector <how_to_guides_how_to_configure_a_configuredassetdataconnector>`
+    - Additional examples and configurations for ``InferredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure an InferredAssetDataConnector <how_to_guides_how_to_configure_a_inferredassetdataconnector>`
 
 .. discourse::
    :topic_identifier: 520

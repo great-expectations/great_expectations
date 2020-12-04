@@ -13,7 +13,7 @@ can use for configuration.
     - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 Great Expectations provides two types of ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk,
-but also things like S3 object stores, etc:
+but also S3 object stores, etc:
 
     - A ConfiguredAssetDataConnector requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
     - An InferredAssetDataConnector infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
@@ -45,19 +45,11 @@ All of the examples below assume you’re testing configurations using something
 
 If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
-
 Choose a DataConnector
 ----------------------
 
 InferredAssetDataConnectors like the ``InferredAssetFilesystemDataConnector`` and ``InferredAssetS3DataConnector``
-require the following information to be initialized:
-
-    1. name of data_connector as a ``str`` value
-    2. ``class_name`` of data_connector, such as ``InferredAssetFilesystemDataConnector`` or ``InferredAssetS3DataConnector``
-    3. ``datasource_name``: name of associated ``Datasource`` as ``str`` value
-    4. ``default_regex`` which contains a regex ``pattern`` and a list of capture ``group_names``
-
-The ``default_regex`` is used to take advantage of patterns that exist in the filename or folder structure.
+require a ``default_regex`` parameter, with a configured regex ``pattern`` and capture ``group_names``.
 
 Imagine you have the following files in ``my_directory/``:
 
@@ -67,10 +59,9 @@ Imagine you have the following files in ``my_directory/``:
     my_directory/alpha-2020-01-02.csv
     my_directory/alpha-2020-01-03.csv
 
+We can imagine 2 approaches to loading the data into GE.
 
-Then we can imagine 2 approaches to analyzing the data.
-
-The simplest approach would be to consider each file to be its own data_asset.  In that case, the configuration would look like the following:
+The simplest approach would be to consider each file to be its own DataAsset.  In that case, the configuration would look like the following:
 
 .. code-block:: yaml
 
@@ -86,15 +77,16 @@ The simplest approach would be to consider each file to be its own data_asset.  
           default_regex:
             group_names:
               - data_asset_name
-            pattern: (.*).csv
+            pattern: (.*)\.csv
 
-Notice that the ``default_regex`` is configured to have one capture group in the pattern (``(.*)``) which captures the entire filename. That capture group is assigned to ``data_asset_name`` under ``group_names``.
+Notice that the ``default_regex`` is configured to have one capture group (``(.*)``) which captures the entire filename. That capture group is assigned to ``data_asset_name`` under ``group_names``.
+Running ``test_yaml_config()`` would result in 3 DataAssets : ``alpha-2020-01-01``, ``alpha-2020-01-02`` and ``alpha-2020-01-03``.
 
-However, a closer look at the file names reveals a pattern that is common to the 3 files. Each have the field ``alpha`` in the name, and have date information following.
+However, a closer look at the filenames reveals a pattern that is common to the 3 files. Each have ``alpha-`` in the name, and have date information afterwards. These are the types of patterns that InferredAssetDataConnectors allow you to take advantage of.
 
-These are the types of patterns that InferredAssetDataConnectors allow you to take advantage of. We can consider each file to be a ``batch`` of one ``data_asset`` named ``alpha``, which will allow you to..?
+We could treat ``alpha-*.csv`` files as batches within the ``alpha`` DataAsset with a more specific regex ``pattern`` and adding ``group_names`` for ``year``, ``month`` and ``day``.
 
-Taking this into consideration, if we were to capture ``alpha`` as the ``data_asset_name`` and add capture groups for the ``year``, ``month`` and ``day`` fields, then our configuration would become:
+**Note: ** We have chosen to be more specific in the capture groups for the ``year`` ``month`` and ``day`` by specifying the integer value (using ``\d``) and the number of digits, but a simpler capture group like ``(.*)`` would also work.
 
 .. code-block:: yaml
 
@@ -113,9 +105,9 @@ Taking this into consideration, if we were to capture ``alpha`` as the ``data_as
               - year
               - month
               - day
-            pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv
+            pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
 
-**Note** We have chosen to be more specific in the capture groups for the ``year`` ``month`` and ``day`` by specifying the integer value (using ``\d``) and the number of digits, but a simpler capture group like ``(.*)`` would also work.
+Running ``test_yaml_config()`` would result in 1 DataAsset ``alpha`` with 3 associated data_references: ``alpha-2020-01-01.csv``, ``alpha-2020-01-02.csv`` and ``alpha-2020-01-03.csv``, seen also in Example 1 below.
 
 A corresponding configuration for ``InferredAssetS3DataConnector`` would look similar but would require ``bucket`` and ``prefix`` values instead of ``base_directory``.
 
@@ -137,7 +129,7 @@ A corresponding configuration for ``InferredAssetS3DataConnector`` would look si
               - year
               - month
               - day
-            pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv
+            pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
 
 The following examples will show scenarios that InferredAssetDataConnectors can help you analyze, using ``InferredAssetFilesystemDataConnector`` as an example and only show the configuration under ``data_connectors`` for simplicity.
 
@@ -167,7 +159,7 @@ Then this configuration...
           - year
           - month
           - day
-        pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv
+        pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
 
 ...will make available the following data_references:
 
@@ -223,7 +215,7 @@ The same configuration as Example 1...
           - year
           - month
           - day
-      pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv
+      pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
 
 ...will now make ``alpha`` and ``beta`` both available a DataAssets, with the following data_references:
 
@@ -273,7 +265,7 @@ Then this configuration...
           - month
           - day
           - data_asset_name
-        pattern: (\d{4})/(\d{2})/(\d{2})/(.*).csv
+        pattern: (\d{4})/(\d{2})/(\d{2})/(.*)\.csv
 
 ...will now make ``alpha`` and ``beta`` both available a DataAssets, with the following data_references:
 
@@ -327,7 +319,7 @@ Then this configuration...
           - data_asset_name
           - letter
           - number
-        pattern: (\w{1})/(\w{1})-(\d{1}).csv
+        pattern: (\w{1})/(\w{1})-(\d{1})\.csv
 
 
 ...will now make ``A`` and ``B`` and ``C`` into data_assets, with each containing 3 data_references
@@ -378,7 +370,7 @@ Here’s a configuration that will allow all the log files in the bucket to be a
           - month
           - day
           - data_asset_name
-        pattern: (\w{11})/(\d{4})/(\d{2})/(\d{2})/log_file-.*.csv
+        pattern: (\w{11})/(\d{4})/(\d{2})/(\d{2})/log_file-.*\.csv
 
 
 All the log files will be mapped to a single data_asset named ``my_bucket``.
@@ -473,8 +465,7 @@ Here’s a configuration that will allow all the log files to be associated with
           - year
           - month
           - day
-        pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
-
+        pattern: (log_file)-(\d{4})-(\d{2})-(\d{2})-.*\.*\.txt\.gz
 
 All the log files will be mapped to the data_asset ``log_file``.
 
