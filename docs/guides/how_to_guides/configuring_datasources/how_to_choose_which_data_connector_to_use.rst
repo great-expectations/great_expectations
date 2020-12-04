@@ -3,16 +3,18 @@
 How to choose which ``DataConnector`` to use:
 ==============================================
 
-Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk, but also things like S3 object stores, etc:
+Great Expectations provides two types of ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk, but also S3 object stores, etc:
 
-    - A ``ConfiguredAssetFilesSystemDataconnector`` allows users to have the most fine-tuning, and requires an explicit listing of each DataAsset you want to connect to.
-    - An ``InferredAssetFileSystemDataConnector`` infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
+    - A ConfiguredAssetDataConnector allows users to have the most fine-tuning, and requires an explicit listing of each DataAsset you want to connect to. Examples of this type of ``DataConnector`` include ``ConfiguredAssetFilesystemDataConnector`` and ``ConfiguredAssetS3DataConnector``.
+    - An InferredAssetDataConnector infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure. Examples of this type of ``DataConnector`` include ``InferredAssetFilesystemDataConnector`` and ``InferredAssetS3DataConnector``.
 
----------------------------------------------------
-When to use an InferredAssetFileSystemDataConnector
----------------------------------------------------
+The following examples will use ``DataConnector`` classes designed to connect to files on disk, namely ``InferredAssetFilesystemDataConnector`` and ``ConfiguredAssetFilesystemDataConnector``.
 
-If you have a ``my_data`` directory structured as follows, and you want to treat the ``A-*.csv`` files as batches within the ``A`` DataAsset, and do the same for ``B`` and ``C``:
+------------------------------------------
+When to use an InferredAssetDataConnector
+------------------------------------------
+
+If you have the following ``my_data/`` directory in your filesystem, and you want to treat the ``A-*.csv`` files as batches within the ``A`` DataAsset, and do the same for ``B`` and ``C``:
 
 .. code-block:: bash
 
@@ -64,13 +66,15 @@ This config...
 
     Unmatched data_references (0 of 0): []
 
-Note that the ``InferredAssetFileSystemDataConnector`` **infers** ``data_asset_names`` **from the regex you provide.** This is the key difference between ``InferredAssetFileSystemDataConnector`` and ``ConfiguredAssetFilesSystemDataConnector``, and also requires that one of the ``group_names`` in the ``default_regex`` configuration be ``data_asset_name``.
+Note that the ``InferredAssetFileSystemDataConnector`` **infers** ``data_asset_names`` **from the regex you provide.** This is the key difference between InferredAssetDataConnector and ConfiguredAssetDataConnector, and also requires that one of the ``group_names`` in the ``default_regex`` configuration be ``data_asset_name``.
 
------------------------------------------------------
-When to use a ConfiguredAssetFilesSystemDataConnector
------------------------------------------------------
+------------------------------------------
+When to use a ConfiguredAssetDataConnector
+------------------------------------------
 
 On the other hand, ``ConfiguredAssetFilesSystemDataConnector`` requires an explicit listing of each DataAsset you want to connect to. This tends to be helpful when the naming conventions for your DataAssets are less standardized.
+
+If you have the following ``my_messier_data/`` directory in your filesystem,
 
 .. code-block:: bash
 
@@ -88,7 +92,7 @@ On the other hand, ``ConfiguredAssetFilesSystemDataConnector`` requires an expli
     my_messier_data/bbb/D-2.csv
     my_messier_data/ccc/D-3.csv
 
-In that case, this config...
+Then this config...
 
 .. code-block:: yaml
 
@@ -151,8 +155,8 @@ In that case, this config...
 Additional Notes
 ----------------
 
-    - Additional examples and configurations for ``ConfiguredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure a ConfiguredAssetFilesystemDataConnector <how_to_guides_how_to_configure_a_configuredassetfilesystemdataconnector>`
-    - Additional examples and configurations for ``InferredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure an InferredAssetFilesystemDataConnector <how_to_guides_how_to_configure_a_inferredassetfilesystemdataconnector>`
+    - Additional examples and configurations for ``ConfiguredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure a ConfiguredAssetDataConnector <how_to_guides_how_to_configure_a_configuredassetdataconnector>`
+    - Additional examples and configurations for ``InferredAssetFilesystemDataConnectors`` can be found here: :ref:`How to configure an InferredAssetDataConnector <how_to_guides_how_to_configure_a_inferredassetdataconnector>`
 
 .. discourse::
    :topic_identifier: 520

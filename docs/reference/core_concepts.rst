@@ -65,7 +65,7 @@ An **Expectation Suite** combines multiple Expectation Configurations into an ov
 Datasources
 =================
 
-A **Datasource** is the primary way that you configure data access in Great Expectations. A Datasource can be a simple metadata layer that adds information about a datase you provide to Great Expectations at runtime, or it can handle one or more connections to external datasources, including identifying available data assets and batches.
+A **Datasource** is the primary way that you configure data access in Great Expectations. A Datasource can be a simple metadata layer that adds information about a database you provide to Great Expectations at runtime, or it can handle one or more connections to external datasources, including identifying available data assets and batches.
 
 An **Execution Engine** is configured as part of a datasource. The Execution Engine provides the computing resources that will be used to actually perform validation. Great Expectations can take advantage of many different Execution Engines, such as Pandas, Spark, or SqlAlchemy, and can translate the same Expectations to validate data using different engines.
 
