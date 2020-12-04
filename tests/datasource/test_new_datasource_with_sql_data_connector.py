@@ -133,6 +133,7 @@ introspection:
             "table_partitioned_by_timestamp_column__B",
             "table_that_should_be_partitioned_by_random_hash__H",
             "table_with_fk_reference_from_F",
+            "view_of_table_A",
         ]
     }
 
@@ -164,6 +165,7 @@ introspection:
             "table_partitioned_by_timestamp_column__B__whole_table",
             "table_that_should_be_partitioned_by_random_hash__H__whole_table",
             "table_with_fk_reference_from_F__whole_table",
+            "view_of_table_A__whole_table",
         ]
     }
 
@@ -230,6 +232,7 @@ tables:
             "table_partitioned_by_date_column__A",
             "table_partitioned_by_foreign_key__F",
             "table_partitioned_by_incrementing_batch_id__E",
+            "view_of_table_A",
         ],
         "hourly": ["table_partitioned_by_timestamp_column__B",],
         "daily": ["table_partitioned_by_date_column__A__daily",],
@@ -350,6 +353,7 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
             "table_name": "table_with_fk_reference_from_F",
             "type": "table",
         },
+        {"schema_name": "main", "table_name": "view_of_table_A", "type": "view"},
     ]
 
     assert my_data_connector._introspect_db(schema_name="main") == [
@@ -403,6 +407,7 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
             "table_name": "table_with_fk_reference_from_F",
             "type": "table",
         },
+        {"schema_name": "main", "table_name": "view_of_table_A", "type": "view"},
     ]
 
     assert my_data_connector._introspect_db(schema_name="waffle") == []
@@ -461,9 +466,8 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
             "table_name": "table_with_fk_reference_from_F",
             "type": "table",
         },
+        {"schema_name": "main", "table_name": "view_of_table_A", "type": "view"},
     ]
-
-    # Need to test include_views, too.
 
 
 # Note: Abe 2020111: this test belongs with the data_connector tests, not here.
@@ -488,7 +492,7 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(
     # print(json.dumps(report_object, indent=4))
     assert report_object == {
         "class_name": "InferredAssetSqlDataConnector",
-        "data_asset_count": 10,
+        "data_asset_count": 11,
         "example_data_asset_names": [
             "prexif__table_containing_id_spacers_for_D__xiffus",
             "prexif__table_partitioned_by_date_column__A__xiffus",
@@ -530,6 +534,7 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(
         "prexif__table_partitioned_by_timestamp_column__B__xiffus",
         "prexif__table_that_should_be_partitioned_by_random_hash__H__xiffus",
         "prexif__table_with_fk_reference_from_F__xiffus",
+        "prexif__view_of_table_A__xiffus",
     ]
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
@@ -563,7 +568,7 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
     report_object = my_data_connector.self_check()
     assert report_object == {
         "class_name": "InferredAssetSqlDataConnector",
-        "data_asset_count": 10,
+        "data_asset_count": 11,
         "example_data_asset_names": [
             "main.table_containing_id_spacers_for_D__whole",
             "main.table_partitioned_by_date_column__A__whole",
@@ -605,6 +610,7 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
         "main.table_partitioned_by_timestamp_column__B__whole",
         "main.table_that_should_be_partitioned_by_random_hash__H__whole",
         "main.table_with_fk_reference_from_F__whole",
+        "main.view_of_table_A__whole",
     ]
 
     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
@@ -646,6 +652,7 @@ introspection:
             "table_containing_id_spacers_for_D",
             "table_partitioned_by_date_column__A",
             "table_with_fk_reference_from_F",
+            "view_of_table_A",
         ]
     }
 
