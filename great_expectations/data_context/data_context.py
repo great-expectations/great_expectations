@@ -2210,6 +2210,66 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiling_results["success"] = True
         return profiling_results
 
+    @staticmethod
+    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
+        if checkpoint is None:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
+            )
+        if "validation_operator_name" not in checkpoint:
+            checkpoint["validation_operator_name"] = "action_list_operator"
+
+        if "batches" not in checkpoint:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
+            )
+        batches = checkpoint["batches"]
+        if not isinstance(batches, list):
+            raise ge_exceptions.CheckpointError(
+                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
+            )
+
+        for batch in batches:
+            for required in ["expectation_suite_names", "batch_kwargs"]:
+                if required not in batch:
+                    raise ge_exceptions.CheckpointError(
+                        f"Items in `batches` must have a key `{required}`"
+                    )
+
+        return checkpoint
+
+    def list_checkpoints(self) -> List[str]:
+        """List checkpoints. (Experimental)"""
+        # TODO mark experimental
+        files = self._list_ymls_in_checkpoints_directory()
+        return [
+            os.path.basename(f)[:-4]
+            for f in files
+            if os.path.basename(f).endswith(".yml")
+        ]
+
+    def get_checkpoint(self, checkpoint_name: str) -> dict:
+        """Load a checkpoint. (Experimental)"""
+        # TODO mark experimental
+        yaml = YAML(typ="safe")
+        # TODO make a serializable class with a schema
+        checkpoint_path = os.path.join(
+            self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
+        )
+        try:
+            with open(checkpoint_path) as f:
+                checkpoint = yaml.load(f.read())
+                return self._validate_checkpoint(checkpoint, checkpoint_name)
+        except FileNotFoundError:
+            raise ge_exceptions.CheckpointNotFoundError(
+                f"Could not find checkpoint `{checkpoint_name}`."
+            )
+
+    def _list_ymls_in_checkpoints_directory(self):
+        checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
+        files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
+        return files
+
 
 class DataContext(BaseDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
@@ -2463,38 +2523,6 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def list_checkpoints(self) -> List[str]:
-        """List checkpoints. (Experimental)"""
-        # TODO mark experimental
-        files = self._list_ymls_in_checkpoints_directory()
-        return [
-            os.path.basename(f)[:-4]
-            for f in files
-            if os.path.basename(f).endswith(".yml")
-        ]
-
-    def get_checkpoint(self, checkpoint_name: str) -> dict:
-        """Load a checkpoint. (Experimental)"""
-        # TODO mark experimental
-        yaml = YAML(typ="safe")
-        # TODO make a serializable class with a schema
-        checkpoint_path = os.path.join(
-            self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
-        )
-        try:
-            with open(checkpoint_path) as f:
-                checkpoint = yaml.load(f.read())
-                return self._validate_checkpoint(checkpoint, checkpoint_name)
-        except FileNotFoundError:
-            raise ge_exceptions.CheckpointNotFoundError(
-                f"Could not find checkpoint `{checkpoint_name}`."
-            )
-
-    def _list_ymls_in_checkpoints_directory(self):
-        checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
-        files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
-        return files
-
     def _save_project_config(self):
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
@@ -2678,34 +2706,6 @@ class DataContext(BaseDataContext):
             ge_exceptions.InvalidDataContextConfigError,
         ) as e:
             logger.debug(e)
-
-    @staticmethod
-    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
-        if checkpoint is None:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
-            )
-        if "validation_operator_name" not in checkpoint:
-            checkpoint["validation_operator_name"] = "action_list_operator"
-
-        if "batches" not in checkpoint:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
-            )
-        batches = checkpoint["batches"]
-        if not isinstance(batches, list):
-            raise ge_exceptions.CheckpointError(
-                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
-            )
-
-        for batch in batches:
-            for required in ["expectation_suite_names", "batch_kwargs"]:
-                if required not in batch:
-                    raise ge_exceptions.CheckpointError(
-                        f"Items in `batches` must have a key `{required}`"
-                    )
-
-        return checkpoint
 
 
 class ExplorerDataContext(DataContext):
