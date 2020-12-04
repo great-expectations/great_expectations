@@ -1,4 +1,5 @@
 import abc
+import copy
 import enum
 import logging
 import uuid
@@ -716,15 +717,17 @@ class BaseStoreBackendDefaults(DictDot):
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         if validation_operators is None:
-            validation_operators = (
+            validation_operators = copy.deepcopy(
                 DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
             )
         self.validation_operators = validation_operators
         if stores is None:
-            stores = DataContextConfigDefaults.DEFAULT_STORES.value
+            stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
         self.stores = stores
         if data_docs_sites is None:
-            data_docs_sites = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
+            data_docs_sites = copy.deepcopy(
+                DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
+            )
         self.data_docs_sites = data_docs_sites
         self.data_docs_site_name = data_docs_site_name
 
