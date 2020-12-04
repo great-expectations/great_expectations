@@ -89,7 +89,7 @@ Steps
 
                 What is the url/connection string for the sqlalchemy connection?
                 (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
-                : mssql+pyodbc://<<username>>:<<password>>@<<host>>:<<port>>/<<database>>?driver=ODBC Driver 17 for SQL Server&charset=utf&autocommit=true
+                : mssql+pyodbc://YOUR_MSSQL_USERNAME:YOUR_MSSQL_PASSWORD@YOUR_MSSQL_HOST:YOUR_MSSQL_PORT/YOUR_MSSQL_DATABASE?driver=ODBC Driver 17 for SQL Server&charset=utf&autocommit=true
 
         #. **Save your new configuration**
 
@@ -145,7 +145,7 @@ Steps
 
         #.  **Create or copy a yaml config.**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as environment variables.  GE uses a ``connection_string`` to connect to MSSQL databases through sqlalchemy (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls).
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.  GE uses a ``connection_string`` to connect to MSSQL databases through sqlalchemy (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls).
 
                 ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use when connecting to data in an sql database. (More information on ``Datasources``
                 in GE 0.13 can found in :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`)
@@ -158,7 +158,7 @@ Steps
 
                     config = f"""
                     class_name: SimpleSqlalchemyDatasource
-                    connection_string: mssql+pyodbc://{user_name}:{password}@{host}:{port}/{database}?driver=ODBC Driver 17 for SQL Server&charset=utf&autocommit=true
+                    connection_string: mssql+pyodbc://YOUR_MSSQL_USERNAME:YOUR_MSSQL_PASSWORD@YOUR_MSSQL_HOST:YOUR_MSSQL_PORT/YOUR_MSSQL_DATABASE?driver=ODBC Driver 17 for SQL Server&charset=utf&autocommit=true
                     introspection:
                       whole_table:
                         data_asset_name_suffix: __whole_table

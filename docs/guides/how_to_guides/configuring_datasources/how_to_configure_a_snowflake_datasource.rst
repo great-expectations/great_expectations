@@ -220,7 +220,7 @@ Steps
 
         #.  **Create or copy a yaml config.**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials using username and password authentication.  Username, password and host are set as environment variables, and database and query are set as strings.
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials using username and password authentication.  Username, password, host, database and query are set as strings.
                 ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use in connecting data living in a sql database. More information on ``Datasources``
                 in GE 0.13 can found in :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
@@ -234,9 +234,9 @@ Steps
                         class_name: SimpleSqlalchemyDatasource
                         credentials:
                           drivername: snowflake
-                          username: {snowflake_username}
-                          password: {snowflake_pw}
-                          host: {snowflake_host}
+                          username: YOUR_SNOWFLAKE_USERNAME
+                          password: YOUR_SNOWFLAKE_PASSWORD
+                          host: YOUR_SNOWFLAKE_HOST
                           database: TEST
                           query:
                             schema: KAGGLE_MOVIE_DATASET
@@ -376,8 +376,8 @@ Additional Notes
             class_name: SimpleSqlalchemyDatasource
             credentials:
                 drivername: snowflake
-                username: {snowflake_username}
-                host: {snowflake_host}
+                username: YOUR_SNOWFLAKE_USERNAME
+                host: YOUR_SNOWFLAKE_HOST
                 database: TEST
                 connect_args:
                     authenticator: externalbrowser
@@ -404,10 +404,10 @@ Additional Notes
                 class_name: SimpleSqlalchemyDatasource
                 credentials:
                     drivername: snowflake
-                    username: {snowflake_username}
+                    username: YOUR_SNOWFLAKE_USERNAME
                     private_key_path: ~/.ssh/my_snowflake.p8
                     private_key_passphrase: mypass
-                    host: {snowflake_host}
+                    host: YOUR_SNOWFLAKE_HOST
                     database: TEST
                     query:
                         schema: KAGGLE_MOVIE_DATASET

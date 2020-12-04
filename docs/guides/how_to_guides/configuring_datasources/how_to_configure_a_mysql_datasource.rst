@@ -137,7 +137,7 @@ Steps
 
         #.  **Create or copy a yaml config.**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as environment variables.
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.
                 ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use in connecting data living in a sql database. More information on ``Datasources``
                 in GE 0.13 can found in :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
@@ -151,11 +151,11 @@ Steps
                         class_name: SimpleSqlalchemyDatasource
                         credentials:
                           drivername: mysql+pymysql
-                          host: {host}
-                          port: {port}
-                          username: {user_name}
-                          password: {password}
-                          database: {db_name}
+                          host: YOUR_MYSQL_HOST
+                          port: YOUR_MYSQL_PORT
+                          username: YOUR_MYSQL_USERNAME
+                          password: YOUR_MYSQL_PASSWORD
+                          database: YOUR_MYSQL_DB_NAME
                         introspection:
                           whole_table:
                             data_asset_name_suffix: __whole_table

@@ -154,7 +154,7 @@ Steps
 
         #. **Create or copy a yaml config.**
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as environment variables.
+            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as strings.
 
             **Note**: The ``ConfiguredAssetS3DataConnector`` used in this example is closely related to the ``InferreddAssetS3DataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
@@ -167,8 +167,8 @@ Steps
                         data_connectors:
                           my_data_connector:
                             class_name: ConfiguredAssetS3DataConnector
-                            bucket: {your_s3_bucket_name}
-                            prefix: {your_s3_prefix_name}
+                            bucket: YOUR_S3_BUCKET_NAME
+                            prefix: YOUR_S3_PREFIX_NAME
                             assets:
                               test_asset:
                                 pattern: (.+)\\.csv
