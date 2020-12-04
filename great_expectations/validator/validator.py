@@ -222,7 +222,7 @@ class Validator:
                         validator=self,
                         evaluation_parameters=self._expectation_suite.evaluation_parameters,
                         data_context=self._data_context,
-                        runtime_configuration=basic_runtime_configuration
+                        runtime_configuration=basic_runtime_configuration,
                     )
 
                 # If validate has set active_validation to true, then we do not save the config to avoid

@@ -63,11 +63,11 @@ def validator_with_titanic_1911_asset(titanic_pandas_multibatch_data_context_v3)
     batch_request = BatchRequest(
         datasource_name="titanic_multi_batch",
         data_connector_name="my_data_connector",
-        data_asset_name="Titanic_1911"
+        data_asset_name="Titanic_1911",
     )
     return titanic_pandas_multibatch_data_context_v3.get_validator(
-        batch_request=batch_request,
-        expectation_suite_name="titanic_1911_suite")
+        batch_request=batch_request, expectation_suite_name="titanic_1911_suite"
+    )
 
 
 def test_store_evaluation_parameter(data_asset):
@@ -93,18 +93,17 @@ def test_store_evaluation_parameter(data_asset):
 
 def test_store_evaluation_parameter_with_validator(validator_with_titanic_1911_asset):
     validator_with_titanic_1911_asset.set_evaluation_parameter("my_parameter", "value")
-    assert validator_with_titanic_1911_asset.get_evaluation_parameter("my_parameter") == "value"
+    assert (
+        validator_with_titanic_1911_asset.get_evaluation_parameter("my_parameter")
+        == "value"
+    )
 
     validator_with_titanic_1911_asset.set_evaluation_parameter(
         "my_second_parameter", [1, 2, "value", None, np.nan]
     )
-    assert validator_with_titanic_1911_asset.get_evaluation_parameter("my_second_parameter") == [
-        1,
-        2,
-        "value",
-        None,
-        np.nan,
-    ]
+    assert validator_with_titanic_1911_asset.get_evaluation_parameter(
+        "my_second_parameter"
+    ) == [1, 2, "value", None, np.nan,]
 
     with pytest.raises(TypeError):
         validator_with_titanic_1911_asset.set_evaluation_parameter(
@@ -188,7 +187,9 @@ def test_exploratory_parameter_substitution(single_expectation_custom_data_asset
     )
 
 
-def test_exploratory_parameter_substitution_with_validator(validator_with_titanic_1911_asset):
+def test_exploratory_parameter_substitution_with_validator(
+    validator_with_titanic_1911_asset,
+):
     # Establish our expectation using a parameter provided at runtime
 
     result = validator_with_titanic_1911_asset.expect_nothing(
@@ -344,7 +345,9 @@ def test_validation_parameters_returned(single_expectation_custom_data_asset):
     }
 
 
-def test_validation_parameters_returned_with_validator(validator_with_titanic_1911_asset):
+def test_validation_parameters_returned_with_validator(
+    validator_with_titanic_1911_asset,
+):
     validator_with_titanic_1911_asset.expect_nothing(
         expectation_argument={
             "$PARAMETER": "upstream_dag_key",

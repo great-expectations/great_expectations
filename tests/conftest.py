@@ -2216,7 +2216,9 @@ def titanic_pandas_multibatch_data_context_v3(tmp_path_factory):
     data_path = os.path.join(context_path, "../data/titanic")
     os.makedirs(os.path.join(data_path), exist_ok=True)
     shutil.copy(
-        file_relative_path(__file__, "./test_fixtures/great_expectations_v013_no_datasource.yml"),
+        file_relative_path(
+            __file__, "./test_fixtures/great_expectations_v013_no_datasource.yml"
+        ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(
@@ -2244,12 +2246,8 @@ def titanic_pandas_multibatch_data_context_v3(tmp_path_factory):
                         group_names:
                             - data_asset_name
             """
-    context.test_yaml_config(
-        name="titanic_multi_batch",
-        yaml_config=datasource_config
-    )
+    context.test_yaml_config(name="titanic_multi_batch", yaml_config=datasource_config)
     return context
-
 
 
 @pytest.fixture
