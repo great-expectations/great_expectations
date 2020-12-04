@@ -795,7 +795,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self.meta = meta
         self.success_on_last_run = success_on_last_run
 
-    def build_evaluation_parameters(
+    def process_evaluation_parameters(
         self, evaluation_parameters, interactive_evaluation=True, data_context=None
     ):
         if self._raw_kwargs is not None:

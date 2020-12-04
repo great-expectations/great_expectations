@@ -638,7 +638,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if configuration is None:
             configuration = self.configuration
 
-        configuration.build_evaluation_parameters(
+        configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
         )
         evr = validator.graph_validate(

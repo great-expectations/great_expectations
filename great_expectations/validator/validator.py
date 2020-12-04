@@ -1076,7 +1076,7 @@ class Validator:
             columns = {}
 
             for expectation in expectation_suite.expectations:
-                expectation.build_evaluation_parameters(
+                expectation.process_evaluation_parameters(
                     evaluation_parameters=runtime_evaluation_parameters,
                     interactive_evaluation=self.interactive_evaluation,
                     data_context=self._data_context,
