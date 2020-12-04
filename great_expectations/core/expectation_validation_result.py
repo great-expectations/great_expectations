@@ -58,7 +58,11 @@ class ExpectationValidationResult(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
-        self.exception_info = exception_info
+        self.exception_info = exception_info or {
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        }
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""

@@ -244,9 +244,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
             assert (
-                isinstance(configuration.kwargs["value_set"], (list, set))
+                isinstance(configuration.kwargs["value_set"], (list, set, dict))
                 or configuration.kwargs["value_set"] is None
             ), "value_set must be a list, set, or None"
+            if isinstance(configuration.kwargs["value_set"], dict):
+                assert (
+                    "$PARAMETER" in configuration.kwargs["value_set"]
+                ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
