@@ -121,13 +121,24 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 or configuration.kwargs.get("max_value") is not None
             ), "min_value and max_value cannot both be None"
             if configuration.kwargs.get("min_value"):
-                assert float(
-                    configuration.kwargs.get("min_value")
-                ).is_integer(), "min_value and max_value must be integers"
+                assert (
+                    isinstance(configuration.kwargs["min_value"], dict)
+                    or float(configuration.kwargs.get("min_value")).is_integer()
+                ), "min_value and max_value must be integers"
+                if isinstance(configuration.kwargs.get("min_value"), dict):
+                    assert "$PARAMETER" in configuration.kwargs.get(
+                        "min_value"
+                    ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key.'
+
             if configuration.kwargs.get("max_value"):
-                assert float(
-                    configuration.kwargs.get("max_value")
-                ).is_integer(), "min_value and max_value must be integers"
+                assert (
+                    isinstance(configuration.kwargs["max_value"], dict)
+                    or float(configuration.kwargs.get("max_value")).is_integer()
+                ), "min_value and max_value must be integers"
+                if isinstance(configuration.kwargs.get("max_value"), dict):
+                    assert "$PARAMETER" in configuration.kwargs.get(
+                        "max_value"
+                    ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
