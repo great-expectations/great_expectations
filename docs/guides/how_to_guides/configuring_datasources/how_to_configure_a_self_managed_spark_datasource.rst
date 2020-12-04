@@ -187,8 +187,8 @@ Additional Notes
                     module_name: great_expectations.datasource
                     class_name: SparkDFDatasource
                     spark_config:
-                spark.master: local[*]
-                spark.jars.packages: 'org.apache.hadoop:hadoop-aws:2.7.3'
+                      spark.master: local[*]
+                      spark.jars.packages: 'org.apache.hadoop:hadoop-aws:2.7.3'
 
         Full list of Spark configuration options is available here: [https://spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html)
 
