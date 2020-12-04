@@ -1,22 +1,21 @@
-.. _how_to_guides_how_to_configure_a_configuredassetfilesystemdataconnector:
+.. _how_to_guides_how_to_configure_a_configuredassetdataconnector:
 
-How to configure a ``ConfiguredAssetFilesystemDataConnector``
-=============================================================
+How to configure a ConfiguredAssetDataConnector
+===============================================
 
-This guide demonstrates how to configure a ``ConfiguredAssetFilesystemDataConnector``, and provides several examples you can use for configuration.
+This guide demonstrates how to configure a ConfiguredAssetDataConnector, and provides several examples you can use for configuration.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-
-  - Understand the basics of Datasources in 0.13 and later.
-  - Learned how to use ``test_yaml_config``
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+    - :ref:`Understand the basics of Datasources in 0.13 or later <reference__core_concepts__datasources>`
+    - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk,
-but also things like S3 object stores, etc:
+but also S3 object stores, etc:
 
-    - A ``ConfiguredAssetFilesSystemDataconnector`` requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
-    - An ``InferredAssetFileSystemDataConnector`` infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
+    - A ConfiguredAssetDataConnector requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
+    - An InferredAssetDataConnector infers ``data_asset_name`` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
 If you're not sure which one to use, please check out :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
@@ -31,23 +30,95 @@ All of the examples below assume you’re testing configuration using something 
     context = ge.DataContext()
 
     context.test_yaml_config("""
-    class_name: Datasource
-
-    execution_engine:
+    my_data_source:
+      class_name: Datasource
+      execution_engine:
         class_name: PandasExecutionEngine
-
-    data_connectors:
+      data_connectors:
         my_filesystem_data_connector:
-            {data_connector configuration goes here}
+          {data_connector configuration goes here}
     """)
 
 
 If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
+Choose a DataConnector
+----------------------
+
+ConfiguredAssetDataConnectors like  ``ConfiguredAssetFilesystemDataConnector`` and ``ConfiguredAssetS3DataConnector`` require DataAssets to be
+explicitly named. Each DataAsset can have their own regex ``pattern`` and ``group_names``, and if configured, will override any
+``pattern`` or ``group_names`` under ``default_regex``.
+
+Imagine you have the following files in ``my_directory/``:
+
+.. code-block:: bash
+
+    my_directory/alpha-1.csv
+    my_directory/alpha-2.csv
+    my_directory/alpha-3.csv
+
+
+We could create a DataAsset ``alpha`` that contains 3 data_references (``alpha-1.csv``, ``alpha-2.csv``, and ``alpha-3.csv``).
+In that case, the configuration would look like the following:
+
+.. code-block:: yaml
+
+    my_data_source:
+      class_name: Datasource
+      execution_engine:
+        class_name: PandasExecutionEngine
+      data_connectors:
+        my_filesystem_data_connector:
+          class_name: ConfiguredAssetFilesystemDataConnector
+          base_directory: my_directory/
+          default_regex:
+          assets:
+            alpha:
+              pattern: alpha-(.*)\.csv
+              group_names:
+                - index
+
+Notice that we have specified a pattern that captures the number after ``alpha-`` in the filename and assigns it to the ``group_name`` ``index``.
+
+The configuration would also work with a regex capturing entire filename (ie ``pattern: (.*)\\.csv``).  However, capturing the index on its own allows for ``partition_identifiers`` to be used to retrieve a specific partition of the DataAsset.
+
+Later on we could retrieve the data in ``alpha-2.csv`` of ``alpha`` as its own batch using ``context.get_batch()`` by specifying ``{"index": "2"}`` as the ``partition_identifier``.
+
+.. code-block:: python
+
+    my_batch = context.get_batch(
+        datasource_name="my_data_source",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="alpha",
+        partition_identifiers={"index": "2"}
+        )
+
+
+This ability to access specific partitions using ``partition_identifiers`` is very useful when validating DataAssets that span multiple files.
+For more information on ``batches`` and ``partition_identifiers``, please refer to the :ref:`Core Concepts document. <reference__core_concepts>`
+
+A corresponding configuration for ``ConfiguredAssetS3DataConnector`` would look similar but would require ``bucket`` and ``prefix`` values instead of ``base_directory``.
+
+.. code-block:: yaml
+
+    class_name: ConfiguredAssetS3DataConnector
+    bucket: MY_S3_BUCKET
+    prefix: MY_S3_BUCKET_PREFIX
+    default_regex:
+    assets:
+        alpha:
+          pattern: alpha-(.*)\.csv
+          group_names:
+            - index
+
+The following examples will show scenarios that ConfiguredAssetDataConnectors can help you analyze, using ``ConfiguredAssetFilesystemDataConnector``.
+
+**Note**: The examples will only only show the configuration for ``data_connectors`` for simplicity.
+
 Example 1: Basic Configuration for a single DataAsset
 -----------------------------------------------------
 
-For example, imagine you have the following files in the directory ``my_directory/``:
+Continuing the example above, imagine you have the following files in the directory ``my_directory/``:
 
 .. code-block::
 
@@ -62,8 +133,10 @@ Then this configuration...
     class_name: ConfiguredAssetFilesystemDataConnector
     base_directory: test/
     default_regex:
-        pattern: alpha-(.*)\\.csv
-        group_names:
+    assets:
+        alpha:
+          pattern: alpha-(.*)\.csv
+          group_names:
             - index
 
 ...will make available ``alpha`` as a single DataAsset with the following data_references:
@@ -100,11 +173,11 @@ Then this configuration...
     class_name: ConfiguredAssetFilesystemDataConnector
     base_directory: test/
     default_regex:
-        pattern: beta-(.*)\\.csv
-        group_names:
-            - index
     assets:
         alpha:
+          pattern: beta-(.*)\.csv
+          group_names:
+            - index
 
 ...will give you this output
 
@@ -126,7 +199,7 @@ Example 2: Basic configuration with more than one DataAsset
 
 Here’s a similar example, but this time two data_assets are mixed together in one folder.
 
-**Note**: For an equivalent configuration using ``InferredAssetFileSystemDataConnector``, please see Example 2 in :ref:`How to configure an InferredAssetFilesystemDataConnector <how_to_guides_how_to_configure_a_inferredassetfilesystemdataconnector>`
+**Note**: For an equivalent configuration using ``InferredAssetFileSystemDataConnector``, please see Example 2 in :ref:`How to configure an InferredAssetDataConnector <how_to_guides_how_to_configure_a_inferredassetdataconnector>`
 
 .. code-block::
 
@@ -143,22 +216,21 @@ Then this configuration...
 
     class_name: ConfiguredAssetFilesystemDataConnector
     base_directory: test_data/
-    default_regex:
     assets:
         alpha:
             group_names:
-                - data_asset_name
+                - name
                 - year
                 - month
                 - day
-            pattern: alpha-(\d{4})-(\d{2})-(\d{2}).csv
+            pattern: alpha-(\d{4})-(\d{2})-(\d{2})\.csv
         beta:
             group_names:
-                - data_asset_name
+                - name
                 - year
                 - month
                 - day
-            pattern: beta-(\d{4})-(\d{2})-(\d{2}).csv
+            pattern: beta-(\d{4})-(\d{2})-(\d{2})\.csv
 
 ...will now make ``alpha`` and ``beta`` both available a DataAssets, with the following data_references:
 
@@ -212,7 +284,7 @@ In the following example, files are placed folders that match the ``data_asset_n
             base_directory: A/
         B:
             base_directory: B/
-            pattern: (.*)-(.*)\\.txt
+            pattern: (.*)-(.*)\.txt
             group_names:
                 - part_1
                 - part_2
@@ -223,7 +295,7 @@ In the following example, files are placed folders that match the ``data_asset_n
             glob_directive: "*"
             base_directory: D/
     default_regex:
-        pattern: (.*)-(.*)\\.csv
+        pattern: (.*)-(.*)\.csv
         group_names:
             - part_1
             - part_2
@@ -284,7 +356,7 @@ The following configuration...
     class_name: ConfiguredAssetFilesystemDataConnector
     base_directory: my_base_directory/
     default_regex:
-        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+        pattern: ^(.+)-(\d{4})(\d{2})\.(csv|txt)$
         group_names:
             - data_asset_name
             - year_dir
