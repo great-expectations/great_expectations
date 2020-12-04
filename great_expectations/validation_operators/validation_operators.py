@@ -313,11 +313,17 @@ The ``run`` method returns a ValidationOperatorResult object:
         for item in assets_to_validate:
             run_result_obj = {}
             batch = self._build_batch_from_item(item)
+
+            if isinstance(batch, Validator):
+                batch_identifier = batch.active_batch_id
+            else:
+                batch_identifier = batch.batch_id
+
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
             validation_result_id = ValidationResultIdentifier(
-                batch_identifier=batch.batch_id,
+                batch_identifier=batch_identifier,
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
             )
@@ -372,10 +378,15 @@ The ``run`` method returns a ValidationOperatorResult object:
                 "Processing validation action with name {}".format(action["name"])
             )
 
+            if isinstance(batch, Validator):
+                batch_identifier = batch.active_batch_id
+            else:
+                batch_identifier = batch.batch_id
+
             validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
-                batch_identifier=batch.batch_id,
+                batch_identifier=batch_identifier,
             )
             try:
                 action_result = self.actions[action["name"]].run(
