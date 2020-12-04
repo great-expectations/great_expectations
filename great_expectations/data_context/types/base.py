@@ -821,7 +821,9 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
     """
 
     def __init__(
-        self, root_directory, plugins_directory=None,
+        self,
+        root_directory: Optional[str] = None,
+        plugins_directory: Optional[str] = None,
     ):
         # Initialize base defaults
         super().__init__()
@@ -831,15 +833,16 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
                 DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
             )
         self.plugins_directory = plugins_directory
-        self.stores[self.expectations_store_name]["store_backend"][
-            "root_directory"
-        ] = root_directory
-        self.stores[self.validations_store_name]["store_backend"][
-            "root_directory"
-        ] = root_directory
-        self.data_docs_sites[self.data_docs_site_name]["store_backend"][
-            "root_directory"
-        ] = root_directory
+        if root_directory is not None:
+            self.stores[self.expectations_store_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
+            self.stores[self.validations_store_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
+            self.data_docs_sites[self.data_docs_site_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
 
 
 class GCSStoreBackendDefaults(BaseStoreBackendDefaults):

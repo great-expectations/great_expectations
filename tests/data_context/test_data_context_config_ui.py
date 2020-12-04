@@ -323,6 +323,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     """
     What does this test and why?
     Ensure that a very simple DataContextConfig setup using FilesystemStoreBackendDefaults is created accurately
+    This test sets the root_dir parameter
     """
 
     test_root_directory = "test_root_dir"
@@ -359,6 +360,41 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     desired_config["data_docs_sites"]["local_site"]["store_backend"][
         "root_directory"
     ] = test_root_directory
+
+    data_context_config_schema = DataContextConfigSchema()
+    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert DataContext.validate_config(project_config=data_context_config)
+
+
+def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults_no_root_directory(
+    construct_data_context_config, default_pandas_datasource_config
+):
+    """
+    What does this test and why?
+    Ensure that a very simple DataContextConfig setup using FilesystemStoreBackendDefaults is created accurately
+    This test does not set the optional root_directory parameter
+    """
+
+    data_context_config = DataContextConfig(
+        datasources={
+            "my_pandas_datasource": LegacyDatasourceConfig(
+                class_name="PandasDatasource",
+                batch_kwargs_generators={
+                    "subdir_reader": {
+                        "class_name": "SubdirReaderBatchKwargsGenerator",
+                        "base_directory": "../data/",
+                    }
+                },
+            )
+        },
+        store_backend_defaults=FilesystemStoreBackendDefaults(),
+    )
+
+    # Create desired config
+    data_context_id = data_context_config.anonymous_usage_statistics.data_context_id
+    desired_config = construct_data_context_config(
+        data_context_id=data_context_id, datasources=default_pandas_datasource_config
+    )
 
     data_context_config_schema = DataContextConfigSchema()
     assert data_context_config_schema.dump(data_context_config) == desired_config

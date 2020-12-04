@@ -40,14 +40,14 @@ Follow the steps for creating an in-code Data Context in :ref:`How to instantiat
            "class_name": "ExpectationsStore",
            "store_backend": {
                "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "/dbfs/FileStore/expectations/",  # TODO: replace with the path to your Expectations Store on DBFS
+               "base_directory": "/dbfs/FileStore/path_to_your_expectations_store/",
            },
        },
        "validations_store": {
            "class_name": "ValidationsStore",
            "store_backend": {
                "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "/dbfs/FileStore/validations/",  # TODO: replace with the path to your Validations Store on DBFS
+               "base_directory": "/dbfs/FileStore/path_to_your_validations_store/",
            },
        },
        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
