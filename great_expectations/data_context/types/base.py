@@ -529,8 +529,8 @@ class DataContextConfigSchema(Schema):
     datasources = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(DatasourceConfigSchema),
-        required=True,
-        allow_none=False,
+        required=False,
+        allow_none=True,
     )
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
