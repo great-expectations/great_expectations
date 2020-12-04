@@ -45,8 +45,10 @@ If you’re not familiar with the ``test_yaml_config`` method, please check out:
 Choose a DataConnector
 ----------------------
 
-ConfiguredAssetDataConnectors like  ``ConfiguredAssetFilesystemDataConnector`` and ``ConfiguredAssetS3DataConnector``
-require the following information to be initialized
+ConfiguredAssetDataConnectors like  ``ConfiguredAssetFilesystemDataConnector`` and ``ConfiguredAssetS3DataConnector`` require DataAssets to be
+explicitly named. Each DataAsset can configure their own regex ``pattern`` and ``group_names``.
+
+**Note:** If ``pattern`` and ``group_names`` are configured at the DataAsset level they will override any ``pattern`` or ``group_names`` set under the ``default_regex``.
 
 Imagine you have the following files in ``my_directory/``:
 
@@ -58,18 +60,37 @@ Imagine you have the following files in ``my_directory/``:
 
 .. code-block:: yaml
 
-    class_name: ConfiguredAssetFilesystemDataConnector
-    base_directory: my_directory/
-    default_regex:
-    assets:
-        alpha:
-          pattern: alpha-(.*)\\.csv
-          group_names:
-            - index
+    my_data_source:
+      class_name: Datasource
+      execution_engine:
+        class_name: PandasExecutionEngine
+      data_connectors:
+        my_filesystem_data_connector:
+          class_name: ConfiguredAssetFilesystemDataConnector
+          base_directory: my_directory/
+          default_regex:
+          assets:
+            alpha:
+              pattern: alpha-(.*)\\.csv
+              group_names:
+                - index
 
-Notice that we have specified a pattern that captures the number after ``alpha`` and assigns it to the ``group_name`` ``index``. The same configuration would work
-with regex capturing entire filename (``pattern: (.*)\\.csv``) but capturing the index on its own allows for ``PartitionQuery`` to be used to retrieve a specific batch of the data_asset,
-For more information on ``Batches`` and ``PartitionQuery``, please see the following core concepts document.
+Notice that we have specified a pattern that captures the number after ``alpha`` and assigns it to the ``group_name`` ``index``. The configuration will make available ``alpha`` as a single DataAsset with 3 data_references ( ``alpha-1.csv``, ``alpha-2.csv`` and ``alpha-3.csv``)
+
+The same configuration would work with regex capturing entire filename (``pattern: (.*)\\.csv``). However,  capturing the index on its own allows for ``partition_identifiers`` to be used to retrieve a specific partition of the data_asset.
+
+The following example would retrieve ``alpha-2.csv`` of ``alpha`` as a batch:
+
+.. code-block:: python
+
+    my_batch = context.get_batch(
+        datasource_name="my_data_source",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="alpha",
+        partition_identifiers={"index": "2"}
+        )
+
+For more information on ``batches`` and ``partition_identifiers``, please see the following core concepts document.
 
 A corresponding configuration for ``ConfiguredAssetS3DataConnector`` would look similar but would require ``bucket`` and ``prefix`` values instead of ``base_directory``.
 
@@ -79,12 +100,11 @@ A corresponding configuration for ``ConfiguredAssetS3DataConnector`` would look 
     bucket: MY_S3_BUCKET
     prefix: MY_S3_BUCKET_PREFIX
     default_regex:
-        pattern: alpha-(.*)\\.csv
-        group_names:
-            - index
     assets:
         alpha:
-
+          pattern: alpha-(.*)\\.csv
+          group_names:
+            - index
 The following examples will show scenarios that ConfiguredAssetDataConnectors can help you analyze, using ``ConfiguredAssetFilesystemDataConnector`` as an example and only show the configuration under ``data_connectors`` for simplicity.
 
 Example 1: Basic Configuration for a single DataAsset
@@ -105,12 +125,11 @@ Then this configuration...
     class_name: ConfiguredAssetFilesystemDataConnector
     base_directory: test/
     default_regex:
-        pattern: alpha-(.*)\\.csv
-        group_names:
-            - index
     assets:
         alpha:
-
+          pattern: alpha-(.*)\\.csv
+          group_names:
+            - index
 ...will make available ``alpha`` as a single DataAsset with the following data_references:
 
 .. code-block:: bash
@@ -145,11 +164,11 @@ Then this configuration...
     class_name: ConfiguredAssetFilesystemDataConnector
     base_directory: test/
     default_regex:
-        pattern: beta-(.*)\\.csv
-        group_names:
-            - index
     assets:
         alpha:
+          pattern: beta-(.*)\\.csv
+          group_names:
+            - index
 
 ...will give you this output
 
@@ -188,7 +207,6 @@ Then this configuration...
 
     class_name: ConfiguredAssetFilesystemDataConnector
     base_directory: test_data/
-    default_regex:
     assets:
         alpha:
             group_names:
