@@ -131,8 +131,6 @@ class ExpectColumnValueRatioToBeBetween(TableExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
 
         # Ensuring basic configuration parameters are properly set
         try:
@@ -154,18 +152,32 @@ class ExpectColumnValueRatioToBeBetween(TableExpectation):
             assert (
                 min_val is not None or max_val is not None
             ), "min_value and max_value cannot both be None"
-            assert min_val is None or isinstance(
-                min_val, (float, int)
-            ), "Provided min threshold must be a number"
-            assert max_val is None or isinstance(
-                max_val, (float, int)
-            ), "Provided max threshold must be a number"
-            assert min_val is None or 0 <= min_val <= 1, (
-                "The minimum and maximum are ratios and thus must be between" "0 and 1"
-            )
-            assert max_val is None or 0 <= max_val <= 1, (
-                "The minimum and maximum are ratios and thus must be between" "0 and 1"
-            )
+
+            if isinstance(min_val, dict):
+                assert (
+                    "$PARAMETER" in min_val
+                ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key.'
+            else:
+                assert min_val is None or isinstance(
+                    min_val, (float, int)
+                ), "Provided min threshold must be a number"
+                assert min_val is None or 0 <= min_val <= 1, (
+                    "The minimum and maximum are ratios and thus must be between"
+                    "0 and 1"
+                )
+
+            if isinstance(max_val, dict):
+                assert (
+                    "$PARAMETER" in min_val
+                ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key.'
+            else:
+                assert max_val is None or isinstance(
+                    max_val, (float, int)
+                ), "Provided max threshold must be a number"
+                assert max_val is None or 0 <= max_val <= 1, (
+                    "The minimum and maximum are ratios and thus must be between"
+                    "0 and 1"
+                )
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
