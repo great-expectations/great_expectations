@@ -16,7 +16,7 @@ Steps
 
 #. **Instantiate a DataContext**
 
-    Create a new Jupyter Notebook, and an instantiate a DataContext by running the following lines:
+    Create a new Jupyter Notebook and istantiate a DataContext by running the following lines:
 
     .. code-block:: python
 
