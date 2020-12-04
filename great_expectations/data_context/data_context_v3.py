@@ -25,29 +25,6 @@ yaml.default_flow_style = False
 class DataContextV3(DataContext):
     """Class implementing the v3 spec for DataContext configs, plus API changes for the 0.13+ series."""
 
-    def get_config(self, mode="typed"):
-        config = super().get_config()
-
-        if mode == "typed":
-            return config
-
-        elif mode == "commented_map":
-            return config.commented_map
-
-        elif mode == "dict":
-            return config.to_dict()
-
-        elif mode == "yaml":
-            return config.to_yaml_str()
-
-        else:
-            raise ValueError(f"Unknown config mode {mode}")
-
-    @property
-    def config_variables(self):
-        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
-        return dict(self._load_config_variables_file())
-
     # TODO: <Alex>We need to standardize the signatures of methods in all subclasses of BaseDataContext</Alex>
     # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
     def add_datasource(self, datasource_name, datasource_config):

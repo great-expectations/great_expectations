@@ -742,6 +742,11 @@ class BaseDataContext:
             self._in_memory_instance_id = instance_id
         return instance_id
 
+    @property
+    def config_variables(self):
+        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
+        return dict(self._load_config_variables_file())
+
     #####
     #
     # Internal helper methods
@@ -1223,8 +1228,23 @@ class BaseDataContext:
         )
         return generator
 
-    def get_config(self):
-        return self._project_config
+    def get_config(self, mode="typed") -> Union[DataContextConfig, CommentedMap, dict, str]:
+        config: DataContextConfig = self._project_config
+
+        if mode == "typed":
+            return config
+
+        elif mode == "commented_map":
+            return config.commented_map
+
+        elif mode == "dict":
+            return config.to_json_dict()
+
+        elif mode == "yaml":
+            return config.to_yaml_str()
+
+        else:
+            raise ValueError(f"Unknown config mode {mode}")
 
     # TODO: deprecate
     def _build_datasource_from_config(self, name, config):

@@ -18,8 +18,15 @@ from great_expectations.marshmallow__shade import (
     post_load,
     validates_schema,
 )
-from great_expectations.types import DictDot
+from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
+# TODO: <Alex></Alex>
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    ensure_json_serializable,
+    nested_update,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -928,7 +935,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         }
 
 
-class DataContextConfig(DictDot):
+class DataContextConfig(SerializableDictDot):
     def __init__(
         self,
         config_version: Optional[float] = None,
@@ -1037,11 +1044,12 @@ class DataContextConfig(DictDot):
         """
         return object_to_yaml_str(self.get_schema_validated_updated_commented_map())
 
-    def to_dict(self) -> dict:
+    def to_json_dict(self) -> dict:
         """
-        :returns a dict containing the project configuration
+        :returns a JSON-serialiable dict containing the project configuration
         """
-        return dict(self.get_schema_validated_updated_commented_map())
+        commented_map: CommentedMap = self.get_schema_validated_updated_commented_map()
+        return convert_to_json_serializable(data=commented_map)
 
 
 dataContextConfigSchema = DataContextConfigSchema()
