@@ -256,6 +256,9 @@ class DatasourceConfigSchema(Schema):
 
     credentials = fields.Raw(allow_none=True)
     spark_context = fields.Raw(allow_none=True)
+    spark_config = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), allow_none=True
+    )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
