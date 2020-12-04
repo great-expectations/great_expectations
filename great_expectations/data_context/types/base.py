@@ -818,13 +818,15 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
     """
 
     def __init__(
-        self,
-        root_directory,
-        plugins_directory=DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value,
+        self, root_directory, plugins_directory=None,
     ):
         # Initialize base defaults
         super().__init__()
 
+        if plugins_directory is None:
+            plugins_directory = (
+                DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
+            )
         self.plugins_directory = plugins_directory
         self.stores[self.expectations_store_name]["store_backend"][
             "root_directory"
