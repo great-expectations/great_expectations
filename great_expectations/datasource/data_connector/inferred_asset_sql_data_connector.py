@@ -201,7 +201,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         inspector = sa.inspect(engine)
 
         selected_schema_name = schema_name
-
         tables = []
         for schema_name in inspector.get_schema_names():
             if (
@@ -230,21 +229,20 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
             # Note Abe 20201112: This logic is currently untested.
             if include_views:
-                # Note: this is not implemented for bigquery
-
-                for view_name in inspector.get_view_names(schema=schema_name):
-
-                    if (ignore_information_schemas_and_system_tables) and (
-                        table_name in system_tables
-                    ):
-                        continue
-
-                    tables.append(
-                        {
-                            "schema_name": schema_name,
-                            "table_name": view_name,
-                            "type": "view",
-                        }
-                    )
-
+                try:
+                    for view_name in inspector.get_view_names(schema=schema_name):
+                        if (ignore_information_schemas_and_system_tables) and (
+                            view_name in system_tables
+                        ):
+                            continue
+                        tables.append(
+                            {
+                                "schema_name": schema_name,
+                                "table_name": view_name,
+                                "type": "view",
+                            }
+                        )
+                except NotImplementedError:
+                    # Not implemented by bigquery dialect
+                    pass
         return tables
