@@ -9,6 +9,9 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
+
+# TODO: <Alex></Alex>
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -20,13 +23,6 @@ from great_expectations.marshmallow__shade import (
 )
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
-# TODO: <Alex></Alex>
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    ensure_json_serializable,
-    nested_update,
-)
-
 
 logger = logging.getLogger(__name__)
 

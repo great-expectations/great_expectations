@@ -1228,7 +1228,9 @@ class BaseDataContext:
         )
         return generator
 
-    def get_config(self, mode="typed") -> Union[DataContextConfig, CommentedMap, dict, str]:
+    def get_config(
+        self, mode="typed"
+    ) -> Union[DataContextConfig, CommentedMap, dict, str]:
         config: DataContextConfig = self._project_config
 
         if mode == "typed":
