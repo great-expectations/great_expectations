@@ -795,7 +795,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self.meta = meta
         self.success_on_last_run = success_on_last_run
 
-    def build_evaluation_parameters(
+    def process_evaluation_parameters(
         self, evaluation_parameters, interactive_evaluation=True, data_context=None
     ):
         if self._raw_kwargs is not None:
@@ -811,6 +811,15 @@ class ExpectationConfiguration(SerializableDictDot):
         self._kwargs = evaluation_args
         if len(substituted_parameters) > 0:
             self.meta["substituted_parameters"] = substituted_parameters
+
+    def get_raw_configuration(self):
+        # return configuration without substituted evaluation parameters
+        raw_config = deepcopy(self)
+        if raw_config._raw_kwargs is not None:
+            raw_config._kwargs = raw_config._raw_kwargs
+            raw_config._raw_kwargs = None
+
+        return raw_config
 
     def patch(self, op: str, path: str, value: Any) -> "ExpectationConfiguration":
         """
