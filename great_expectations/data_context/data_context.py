@@ -254,7 +254,9 @@ class BaseDataContext:
         self.runtime_environment = runtime_environment or {}
 
         # Init plugin support
-        if self.plugins_directory is not None:
+        if self.plugins_directory is not None and os.path.exists(
+            self.plugins_directory
+        ):
             sys.path.append(self.plugins_directory)
 
         # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
@@ -1020,20 +1022,6 @@ class BaseDataContext:
             **kwargs,
         )
         return batch_kwargs
-
-    # New get_batch (note: it returns the List of Batch objects, not a single Batch object).
-    def get_batch_list_from_new_style_datasource(
-        self, batch_request: dict
-    ) -> List[Batch]:
-        datasource_name: str = batch_request.get("datasource_name")
-        if not datasource_name:
-            raise ge_exceptions.DatasourceError(
-                message="Batch request must specify an datasource."
-            )
-
-        datasource: Datasource = self.datasources[datasource_name]
-        batch_request: BatchRequest = BatchRequest(**batch_request)
-        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     def get_batch(
         self,
