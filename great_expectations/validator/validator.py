@@ -179,7 +179,7 @@ class Validator:
             try:
                 expectation_impl = get_expectation_impl(name)
                 allowed_config_keys = expectation_impl.get_allowed_config_keys()
-                expectation_kwargs = kwargs
+                expectation_kwargs = recursively_convert_to_json_serializable(kwargs)
                 meta = None
                 # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
                 # positional arguments to expectation methods
@@ -208,6 +208,7 @@ class Validator:
                 configuration = ExpectationConfiguration(
                     expectation_type=name, kwargs=expectation_kwargs, meta=meta
                 )
+
                 # runtime_configuration = configuration.get_runtime_kwargs()
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
@@ -219,17 +220,19 @@ class Validator:
                 else:
                     validation_result = expectation.validate(
                         validator=self,
-                        runtime_configuration=basic_runtime_configuration,
+                        evaluation_parameters=self._expectation_suite.evaluation_parameters,
+                        data_context=self._data_context,
+                        runtime_configuration=basic_runtime_configuration
                     )
 
                 # If validate has set active_validation to true, then we do not save the config to avoid
                 # saving updating expectation configs to the same suite during validation runs
                 if self._active_validation is True:
-                    stored_config = configuration
+                    stored_config = configuration.get_raw_configuration()
                 else:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite.add_expectation(
-                        configuration
+                        configuration.get_raw_configuration()
                     )
 
                 # If there was no interactive evaluation, success will not have been computed.
