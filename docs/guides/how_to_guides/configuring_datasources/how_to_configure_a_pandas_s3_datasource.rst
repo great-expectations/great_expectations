@@ -133,7 +133,7 @@ Steps
 
         To add an S3-backed Pandas datasource do the following:
 
-        #. **Install the required modules**
+        #. **Install the required modules.**
 
             If you haven't already, install these modules for connecting to S3.
 
@@ -143,35 +143,37 @@ Steps
                 pip install fsspec
                 pip install s3fs
 
-        #. **Instantiate a DataContext**
+        #. **Instantiate a DataContext.**
+
+            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
 
             .. code-block:: python
 
                 import great_expectations as ge
                 context = ge.get_context()
 
-        #. **Create or copy a yaml config**
+        #. **Create or copy a yaml config.**
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as environment variables.
+            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as strings.
 
-            **Note**: The ``ConfiguredAssetS3DataConnector`` used in this example is closely related to the ``InferreddAssetS3DataConnector`` with some key differences. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+            **Note**: The ``ConfiguredAssetS3DataConnector`` used in this example is closely related to the ``InferreddAssetS3DataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
             .. code-block:: python
 
                 config = f"""
-                        class_name: DataSource
+                        class_name: Datasource
                         execution_engine:
-                            class_name: PandasExecutionEngine
+                          class_name: PandasExecutionEngine
                         data_connectors:
-                            my_data_connector:
-                                class_name: ConfiguredAssetS3DataConnector
-                                bucket: {bucket}
-                                prefix: {prefix}
-                                assets:
-                                  test_asset:
-                                    pattern: (.+)\\.csv
-                                    group_names:
-                                        - full_name
+                          my_data_connector:
+                            class_name: ConfiguredAssetS3DataConnector
+                            bucket: YOUR_S3_BUCKET_NAME
+                            prefix: YOUR_S3_PREFIX_NAME
+                            assets:
+                              test_asset:
+                                pattern: (.+)\\.csv
+                                group_names:
+                                  - full_name
                         """
 
             Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
@@ -182,7 +184,7 @@ Steps
 
                 context.test_yaml_config(
                     name="my_pandas_s3_datasource",
-                    yaml_config=my_config
+                    yaml_config=config
                 )
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
@@ -218,8 +220,6 @@ Steps
                 3           4  Allison, Mrs Hudson JC (Bessie Waldo Daniels)    1st  25.00  female         0        1
                 4           5                  Allison, Master Hudson Trevor    1st   0.92    male         1        0
 
-            **Note** : In the current example, the yaml config will only create a connector to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please copy-paste your yaml_config string into the data_sources section in your  ``great_expectations/great_expectations.yml`` config file.
-
             If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.  Whenever possible, test_yaml_config provides helpful warnings and error messages. It can't solve every problem, but it can solve many.
 
             .. code-block:: bash
@@ -228,6 +228,14 @@ Steps
 
                 raise error_class(parsed_response, operation_name)
                 botocore.exceptions.ClientError: An error occurred (AccessDenied) when calling the ListObjectsV2 operation: Access Denied
+
+        #. **Save the config.**
+
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
+            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_pandas_s3_datasource`` in our example).
+            Next, copy the yml snippet from Step 3 into the new entry.
+
+            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
 
 ----------------
 Additional Notes
