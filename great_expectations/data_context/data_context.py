@@ -2265,6 +2265,53 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 f"Could not find checkpoint `{checkpoint_name}`."
             )
 
+    def run_checkpoint(
+        self,
+        checkpoint_name: str,
+        run_id=None,
+        evaluation_parameters=None,
+        run_name=None,
+        run_time=None,
+        result_format=None,
+        **kwargs,
+    ):
+        """
+        Validate against a pre-defined checkpoint. (Experimental)
+        Args:
+            checkpoint_name: The name of a checkpoint defined via the CLI or by manually creating a yml file
+            run_name: The run_name for the validation; if None, a default value will be used
+            **kwargs: Additional kwargs to pass to the validation operator
+
+        Returns:
+            ValidationOperatorResult
+        """
+        # TODO mark experimental
+
+        if result_format is None:
+            result_format = {"result_format": "SUMMARY"}
+
+        checkpoint = self.get_checkpoint(checkpoint_name)
+
+        batches_to_validate = []
+        for batch in checkpoint["batches"]:
+            batch_kwargs = batch["batch_kwargs"]
+            for suite_name in batch["expectation_suite_names"]:
+                suite = self.get_expectation_suite(suite_name)
+                batch = self.get_batch(batch_kwargs, suite)
+                batches_to_validate.append(batch)
+
+        results = self.run_validation_operator(
+            checkpoint["validation_operator_name"],
+            assets_to_validate=batches_to_validate,
+            run_id=run_id,
+            evaluation_parameters=evaluation_parameters,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            **kwargs,
+        )
+        return results
+
     def _list_ymls_in_checkpoints_directory(self):
         checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
         files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
