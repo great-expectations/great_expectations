@@ -129,11 +129,11 @@ A corresponding configuration for ``InferredAssetS3DataConnector`` would look si
         my_filesystem_data_connector:
           class_name: InferredAssetS3DataConnector
           datasource_name: my_data_source
-          bucket: my_s3_bucket
-          prefix: my_s3_bucket_prefix
+          bucket: MY_S3_BUCKET
+          prefix: MY_S3_BUCKET_PREFIX
           default_regex:
             group_names:
-              - data_asset_name∂
+              - data_asset_name
               - year
               - month
               - day

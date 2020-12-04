@@ -45,17 +45,8 @@ If you’re not familiar with the ``test_yaml_config`` method, please check out:
 Choose a DataConnector
 ----------------------
 
-ConfiguredAssetDataConnectors like the ``ConfiguredAssetFilesystemDataConnector`` and ``ConfiguredAssetS3DataConnector``
-require the following information to be initialized:
-
-    1. name of data_connector as a ``str`` value
-    2. ``class_name`` of data_connector, such as ``ConfiguredAssetFilesystemDataConnector`` or ``ConfiguredAssetS3DataConnector``
-    3. ``datasource_name``, which name of associated ``Datasource`` as ``str`` value
-    4. ``assets`` that are named :
-
-
-
-The ``default_regex`` is used to take advantage of patterns that exist in the filename or folder structure.
+ConfiguredAssetDataConnectors like  ``ConfiguredAssetFilesystemDataConnector`` and ``ConfiguredAssetS3DataConnector``
+require the following information to be initialized
 
 Imagine you have the following files in ``my_directory/``:
 
@@ -65,85 +56,41 @@ Imagine you have the following files in ``my_directory/``:
     my_directory/alpha-2.csv
     my_directory/alpha-3.csv
 
-Then we can imagine 2 approaches to analyzing the data.
+.. code-block:: yaml
 
-The simplest approach would be to consider each file to be its own data_asset.  In that case, the configuration would look like the following:
+    class_name: ConfiguredAssetFilesystemDataConnector
+    base_directory: my_directory/
+    default_regex:
+    assets:
+        alpha:
+          pattern: alpha-(.*)\\.csv
+          group_names:
+            - index
+
+Notice that we have specified a pattern that captures the number after ``alpha`` and assigns it to the ``group_name`` ``index``. The same configuration would work
+with regex capturing entire filename (``pattern: (.*)\\.csv``) but capturing the index on its own allows for ``PartitionQuery`` to be used to retrieve a specific batch of the data_asset,
+For more information on ``Batches`` and ``PartitionQuery``, please see the following core concepts document.
+
+A corresponding configuration for ``ConfiguredAssetS3DataConnector`` would look similar but would require ``bucket`` and ``prefix`` values instead of ``base_directory``.
 
 .. code-block:: yaml
 
-    my_data_source:
-      class_name: Datasource
-      execution_engine:
-        class_name: PandasExecutionEngine
-      data_connectors:
-        my_filesystem_data_connector:
-          class_name: InferredAssetFilesystemDataConnector
-          datasource_name: my_data_source
-          base_directory: my_directory/
-          default_regex:
-            group_names:
-              - data_asset_name
-            pattern: (.*).csv
+    class_name: ConfiguredAssetS3DataConnector
+    bucket: MY_S3_BUCKET
+    prefix: MY_S3_BUCKET_PREFIX
+    default_regex:
+        pattern: alpha-(.*)\\.csv
+        group_names:
+            - index
+    assets:
+        alpha:
 
-Notice that the ``default_regex`` is configured to have one capture group in the pattern (``(.*)``) which captures the entire filename. That capture group is assigned to ``data_asset_name`` under ``group_names``.
-
-However, a closer look at the file names reveals a pattern that is common to the 3 files. Each have the field ``alpha`` in the name, and have date information following.
-
-These are the types of patterns that InferredAssetDataConnectors allow you to take advantage of. We can consider each file to be a ``batch`` of one ``data_asset`` named ``alpha``, which will allow you to..?
-
-Taking this into consideration, if we were to capture ``alpha`` as the ``data_asset_name`` and add capture groups for the ``year``, ``month`` and ``day`` fields, then our configuration would become:
-
-.. code-block:: yaml
-
-    my_data_source:
-      class_name: Datasource
-      execution_engine:
-        class_name: PandasExecutionEngine
-      data_connectors:
-        my_filesystem_data_connector:
-          class_name: InferredAssetFilesystemDataConnector
-          datasource_name: my_data_source
-          base_directory: my_directory/
-          default_regex:
-            group_names:
-              - data_asset_name
-              - year
-              - month
-              - day
-            pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv
-
-**Note** We have chosen to be more specific in the capture groups for the ``year`` ``month`` and ``day`` by specifying the integer value (using ``\d``) and the number of digits, but a simpler capture group like ``(.*)`` would also work.
-
-A corresponding configuration for ``InferredAssetS3DataConnector`` would look similar but would require ``bucket`` and ``prefix`` values instead of ``base_directory``.
-
-.. code-block:: yaml
-
-    my_data_source:
-      class_name: Datasource
-      execution_engine:
-        class_name: PandasExecutionEngine
-      data_connectors:
-        my_filesystem_data_connector:
-          class_name: InferredAssetS3DataConnector
-          datasource_name: my_data_source
-          bucket: my_s3_bucket
-          prefix: my_s3_bucket_prefix
-          default_regex:
-            group_names:
-              - data_asset_name∂
-              - year
-              - month
-              - day
-            pattern: (.*)-(\d{4})-(\d{2})-(\d{2}).csv
-
-The following examples will show scenarios that InferredAssetDataConnectors can help you analyze, using ``InferredAssetFilesystemDataConnector`` as an example and only show the configuration under ``data_connectors`` for simplicity.
-
-
+The following examples will show scenarios that ConfiguredAssetDataConnectors can help you analyze, using ``ConfiguredAssetFilesystemDataConnector`` as an example and only show the configuration under ``data_connectors`` for simplicity.
 
 Example 1: Basic Configuration for a single DataAsset
 -----------------------------------------------------
 
-For example, imagine you have the following files in the directory ``my_directory/``:
+Continuing the example above, imagine you have the following files in the directory ``my_directory/``:
 
 .. code-block::
 
@@ -224,7 +171,7 @@ Example 2: Basic configuration with more than one DataAsset
 
 Here’s a similar example, but this time two data_assets are mixed together in one folder.
 
-**Note**: For an equivalent configuration using ``InferredAssetFileSystemDataConnector``, please see Example 2 in :ref:`How to configure an InferredAssetFilesystemDataConnector <how_to_guides_how_to_configure_a_inferredassetfilesystemdataconnector>`
+**Note**: For an equivalent configuration using ``InferredAssetFileSystemDataConnector``, please see Example 2 in :ref:`How to configure an InferredAssetDataConnector <how_to_guides_how_to_configure_a_inferredassetdataconnector>`
 
 .. code-block::
 
@@ -245,14 +192,14 @@ Then this configuration...
     assets:
         alpha:
             group_names:
-                - data_asset_name
+                - name
                 - year
                 - month
                 - day
             pattern: alpha-(\d{4})-(\d{2})-(\d{2}).csv
         beta:
             group_names:
-                - data_asset_name
+                - name
                 - year
                 - month
                 - day
