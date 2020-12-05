@@ -1,3 +1,4 @@
+import abc
 import enum
 import logging
 import uuid
@@ -597,6 +598,7 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
+    DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
     DEFAULT_PLUGINS_DIRECTORY = "plugins/"
     DEFAULT_VALIDATION_OPERATORS = {
@@ -619,24 +621,26 @@ class DataContextConfigDefaults(enum.Enum):
         }
     }
     DEFAULT_STORES = {
-        "expectations_store": {
+        DEFAULT_EXPECTATIONS_STORE_NAME: {
             "class_name": "ExpectationsStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "expectations/",
             },
         },
-        "validations_store": {
+        DEFAULT_VALIDATIONS_STORE_NAME: {
             "class_name": "ValidationsStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/validations/",
             },
         },
-        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        DEFAULT_EVALUATION_PARAMETER_STORE_NAME: {
+            "class_name": "EvaluationParameterStore"
+        },
     }
     DEFAULT_DATA_DOCS_SITES = {
-        "local_site": {
+        DEFAULT_DATA_DOCS_SITE_NAME: {
             "class_name": "SiteBuilder",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
@@ -667,18 +671,30 @@ class BaseStoreBackendDefaults(DictDot):
         evaluation_parameter_store_name=(
             DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value
         ),
-        validation_operators=(
-            DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
+        data_docs_site_name=(
+            DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value
         ),
-        stores=DataContextConfigDefaults.DEFAULT_STORES.value,
-        data_docs_sites=DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value,
+        validation_operators=None,
+        stores=None,
+        data_docs_sites=None,
     ):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        if validation_operators is None:
+            validation_operators = deepcopy(
+                DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
+            )
         self.validation_operators = validation_operators
+        if stores is None:
+            stores = deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
         self.stores = stores
+        if data_docs_sites is None:
+            data_docs_sites = deepcopy(
+                DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
+            )
         self.data_docs_sites = data_docs_sites
+        self.data_docs_site_name = data_docs_site_name
 
 
 class S3StoreBackendDefaults(BaseStoreBackendDefaults):
@@ -765,17 +781,33 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
     """
     Default store configs for filesystem backends, with some accessible parameters
     Args:
+        root_directory: Absolute directory prepended to the base_directory for each store
         plugins_directory: Overrides default if supplied
     """
 
     def __init__(
         self,
-        plugins_directory=DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value,
+        root_directory: Optional[str] = None,
+        plugins_directory: Optional[str] = None,
     ):
         # Initialize base defaults
         super().__init__()
 
+        if plugins_directory is None:
+            plugins_directory = (
+                DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
+            )
         self.plugins_directory = plugins_directory
+        if root_directory is not None:
+            self.stores[self.expectations_store_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
+            self.stores[self.validations_store_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
+            self.data_docs_sites[self.data_docs_site_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
 
 
 class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
