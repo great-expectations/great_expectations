@@ -227,7 +227,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     }
                 )
 
-            # Note Abe 20201112: This logic is currently untested.
             if include_views:
                 try:
                     for view_name in inspector.get_view_names(schema=schema_name):
