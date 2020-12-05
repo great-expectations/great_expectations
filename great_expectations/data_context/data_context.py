@@ -48,11 +48,9 @@ from great_expectations.data_context.types.base import (  # TODO: deprecate
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     DatasourceConfig,
-    LegacyDatasourceConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
-    legacyDatasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -744,6 +742,11 @@ class BaseDataContext:
             self._in_memory_instance_id = instance_id
         return instance_id
 
+    @property
+    def config_variables(self):
+        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
+        return dict(self._load_config_variables_file())
+
     #####
     #
     # Internal helper methods
@@ -1186,7 +1189,7 @@ class BaseDataContext:
         else:
             config = kwargs
 
-        config = legacyDatasourceConfigSchema.load(config)
+        config = datasourceConfigSchema.load(config)
         self._project_config["datasources"][name] = config
 
         # We perform variable substitution in the datasource's config here before using the config
@@ -1225,14 +1228,31 @@ class BaseDataContext:
         )
         return generator
 
-    def get_config(self):
-        return self._project_config
+    def get_config(
+        self, mode="typed"
+    ) -> Union[DataContextConfig, CommentedMap, dict, str]:
+        config: DataContextConfig = self._project_config
+
+        if mode == "typed":
+            return config
+
+        elif mode == "commented_map":
+            return config.commented_map
+
+        elif mode == "dict":
+            return config.to_json_dict()
+
+        elif mode == "yaml":
+            return config.to_yaml_str()
+
+        else:
+            raise ValueError(f"Unknown config mode {mode}")
 
     # TODO: deprecate
     def _build_datasource_from_config(self, name, config):
         # We convert from the type back to a dictionary for purposes of instantiation
-        if isinstance(config, LegacyDatasourceConfig):
-            config = legacyDatasourceConfigSchema.dump(config)
+        if isinstance(config, DatasourceConfig):
+            config = datasourceConfigSchema.dump(config)
         config.update({"name": name})
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
@@ -1273,7 +1293,7 @@ class BaseDataContext:
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
-        datasource_config = legacyDatasourceConfigSchema.load(datasource_config)
+        datasource_config = datasourceConfigSchema.load(datasource_config)
         datasource = self._build_datasource_from_config(
             datasource_name, datasource_config
         )
@@ -1291,21 +1311,6 @@ class BaseDataContext:
         return keys
 
     # TODO: deprecate
-    def list_datasources(self):
-        """List currently-configured datasources on this context.
-
-        Returns:
-            List(dict): each dictionary includes "name", "class_name", and "module_name" keys
-        """
-        datasources = []
-        for (
-            key,
-            value,
-        ) in self._project_config_with_variables_substituted.datasources.items():
-            value["name"] = key
-            datasources.append(value)
-        return datasources
-
     def list_datasources(self):
         """List currently-configured datasources on this context.
 
