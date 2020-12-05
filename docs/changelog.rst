@@ -7,7 +7,7 @@ Changelog
 
 Develop
 -----------------
-
+* [BUGFIX] Misc bugfixes and improvements to code & documentation for new in-code data context API #2118
 
 0.13.1
 -----------------
