@@ -687,9 +687,7 @@ class BaseStoreBackendDefaults(DictDot):
             )
         self.validation_operators = validation_operators
         if stores is None:
-            stores = deepcopy(
-              DataContextConfigDefaults.DEFAULT_STORES.value
-            )
+            stores = deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
         self.stores = stores
         if data_docs_sites is None:
             data_docs_sites = deepcopy(
