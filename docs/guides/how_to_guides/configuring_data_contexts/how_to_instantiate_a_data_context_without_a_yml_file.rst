@@ -48,7 +48,7 @@ Steps
             store_backend_defaults=S3StoreBackendDefaults(default_bucket_name="my_default_bucket"),
         )
 
-    The following example shows a Data Context configuration with a Pandas datasource and local filesystem defaults for metadata stores. Note: imports are omitted in the following examples.
+    The following example shows a Data Context configuration with a Pandas datasource and local filesystem defaults for metadata stores. Note: imports are omitted in the following examples. Note: You may add an optional root_directory parameter to set the base location for the Store Backends.
 
     .. code-block:: python
 
@@ -64,10 +64,11 @@ Steps
                     },
                 )
             },
-            store_backend_defaults=FilesystemStoreBackendDefaults(),
+            store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="optional/absolute/path/for/stores"),
     )
 
     The following example shows a Data Context configuration with an SQLAlchemy datasource and two GCS buckets for metadata stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. ``default_bucket_name``, ``default_project_name`` sets the default value for all stores that are not specified individually.
+
     The resulting DataContextConfig from the following example creates an Expectations store and Data Docs using the ``my_default_bucket`` and ``my_default_project`` parameters since their bucket and project is not specified explicitly. The validations store is created using the explicitly specified ``my_validations_bucket`` and ``my_validations_project``. Further, the prefixes are set for the Expectations store and validations store, while data docs use the default ``data_docs`` prefix.
 
     .. code-block:: python

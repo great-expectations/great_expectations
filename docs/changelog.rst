@@ -7,6 +7,7 @@ Changelog
 
 Develop
 -----------------
+* [BUGFIX] Misc bugfixes and improvements to code & documentation for new in-code data context API #2118
 * [BUGFIX] When Introspecting a database, sql_data_connector will ignore view_names that are also system_tables
 * [DOCS] Updated explanation for ConfiguredAssetDataConnector and InferredAssetDataConnector
 

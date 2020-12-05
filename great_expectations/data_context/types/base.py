@@ -7,8 +7,12 @@ from typing import Dict, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
+
+# TODO: <Alex></Alex>
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -18,9 +22,8 @@ from great_expectations.marshmallow__shade import (
     post_load,
     validates_schema,
 )
-from great_expectations.types import DictDot
+from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
-from great_expectations.util import load_class
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +34,14 @@ MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
     "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
+
+
+def object_to_yaml_str(obj):
+    output_str: str
+    with StringIO() as string_stream:
+        yaml.dump(obj, string_stream)
+        output_str = string_stream.getvalue()
+    return output_str
 
 
 class AssetConfig(DictDot):
@@ -189,8 +200,8 @@ class ExecutionEngineConfigSchema(Schema):
 
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.execution_engine")
-    caching = fields.Boolean()
-    batch_spec_defaults = fields.Dict(allow_none=True)
+    caching = fields.Boolean(required=False, allow_none=True)
+    batch_spec_defaults = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -206,10 +217,13 @@ class DatasourceConfig(DictDot):
     def __init__(
         self,
         class_name=None,
-        module_name=None,
+        module_name: Optional[str] = "great_expectations.datasource",
         execution_engine=None,
         data_connectors=None,
+        data_asset_type=None,
+        batch_kwargs_generators=None,
         credentials=None,
+        boto3_options=None,
         reader_method=None,
         limit=None,
         **kwargs,
@@ -217,12 +231,35 @@ class DatasourceConfig(DictDot):
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
-        self.execution_engine = execution_engine
-        if data_connectors is None:
-            data_connectors = {}
-        self.data_connectors = data_connectors
+        if execution_engine is not None:
+            self.execution_engine = execution_engine
+        if data_connectors is not None and isinstance(data_connectors, dict):
+            self.data_connectors = data_connectors
+
+        # NOTE - AJB - 20201202: This should use the datasource class build_configuration method as in DataContext.add_datasource()
+        if data_asset_type is None:
+            if class_name == "PandasDatasource":
+                data_asset_type = {
+                    "class_name": "PandasDataset",
+                    "module_name": "great_expectations.dataset",
+                }
+            elif class_name == "SqlAlchemyDatasource":
+                data_asset_type = {
+                    "class_name": "SqlAlchemyDataset",
+                    "module_name": "great_expectations.dataset",
+                }
+            elif class_name == "SparkDFDatasource":
+                data_asset_type = {
+                    "class_name": "SparkDFDataset",
+                    "module_name": "great_expectations.dataset",
+                }
+        self.data_asset_type = data_asset_type
+        if batch_kwargs_generators is not None:
+            self.batch_kwargs_generators = batch_kwargs_generators
         if credentials is not None:
             self.credentials = credentials
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
         if reader_method is not None:
             self.reader_method = reader_method
         if limit is not None:
@@ -245,84 +282,42 @@ class DatasourceConfigSchema(Schema):
 
     class_name = fields.String(missing="Datasource")
     module_name = fields.String(missing="great_expectations.datasource")
-    execution_engine = fields.Nested(ExecutionEngineConfigSchema)
 
+    execution_engine = fields.Nested(
+        ExecutionEngineConfigSchema, required=False, allow_none=True
+    )
     data_connectors = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(DataConnectorConfigSchema),
-        required=True,
-        allow_none=False,
+        required=False,
+        allow_none=True,
     )
 
-    credentials = fields.Raw(allow_none=True)
-    spark_context = fields.Raw(allow_none=True)
+    data_asset_type = fields.Nested(ClassConfigSchema)
+    boto3_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+
+    # TODO: Update to generator-specific
+    # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
+    batch_kwargs_generators = fields.Dict(
+        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
+    )
+    credentials = fields.Raw(required=False, allow_none=True)
+    spark_context = fields.Raw(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
-        pass
+        if "generators" in data:
+            raise ge_exceptions.InvalidConfigError(
+                "Your current configuration uses the 'generators' key in a datasource, but in version 0.10 of "
+                "GE, that key is renamed to 'batch_kwargs_generators'. Please update your config to continue."
+            )
 
     # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
         return DatasourceConfig(**data)
-
-
-class LegacyDatasourceConfig(DictDot):
-    def __init__(
-        self,
-        class_name,
-        module_name: Optional[str] = "great_expectations.datasource",
-        data_asset_type=None,
-        batch_kwargs_generators=None,
-        credentials=None,
-        boto3_options=None,
-        reader_method=None,
-        limit=None,
-        **kwargs,
-    ):
-        # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
-        self._class_name = class_name
-        self._module_name = module_name
-
-        # NOTE - AJB - 20201202: This should use the datasource class build_configuration method as in DataContext.add_datasource()
-        if data_asset_type is None:
-            if class_name == "PandasDatasource":
-                data_asset_type = {
-                    "class_name": "PandasDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-            elif class_name == "SqlAlchemyDatasource":
-                data_asset_type = {
-                    "class_name": "SqlAlchemyDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-            elif class_name == "SparkDFDatasource":
-                data_asset_type = {
-                    "class_name": "SparkDFDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-        self.data_asset_type = data_asset_type
-
-        if batch_kwargs_generators is not None:
-            self.batch_kwargs_generators = batch_kwargs_generators
-        if credentials is not None:
-            self.credentials = credentials
-        if reader_method is not None:
-            self.reader_method = reader_method
-        if limit is not None:
-            self.limit = limit
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
-
-    @property
-    def class_name(self):
-        return self._class_name
-
-    @property
-    def module_name(self):
-        return self._module_name
 
 
 class AnonymizedUsageStatisticsConfig(DictDot):
@@ -402,36 +397,6 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
         if "_explicit_url" in data:
             del data["_explicit_url"]
         return data
-
-
-class LegacyDatasourceConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
-    class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.datasource")
-    data_asset_type = fields.Nested(ClassConfigSchema)
-    boto3_options = fields.Dict(keys=fields.Str(), values=fields.Str(), allow_none=True)
-    # TODO: Update to generator-specific
-    # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
-    batch_kwargs_generators = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), allow_none=True
-    )
-    credentials = fields.Raw(allow_none=True)
-    spark_context = fields.Raw(allow_none=True)
-
-    @validates_schema
-    def validate_schema(self, data, **kwargs):
-        if "generators" in data:
-            raise ge_exceptions.InvalidConfigError(
-                "Your current configuration uses the 'generators' key in a datasource, but in version 0.10 of "
-                "GE, that key is renamed to 'batch_kwargs_generators'. Please update your config to continue."
-            )
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_datasource_config(self, data, **kwargs):
-        return LegacyDatasourceConfig(**data)
 
 
 class NotebookTemplateConfig(DictDot):
@@ -564,7 +529,8 @@ class DataContextConfigSchema(Schema):
     # TODO: <Alex>Proper Schema enforcement for the new Datasource must be implemented.</Alex>
     datasources = fields.Dict(
         keys=fields.Str(),
-        values=fields.Nested(LegacyDatasourceConfigSchema),
+        values=fields.Nested(DatasourceConfigSchema),
+        required=False,
         allow_none=True,
     )
     expectations_store_name = fields.Str()
@@ -632,6 +598,7 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
+    DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
     DEFAULT_PLUGINS_DIRECTORY = "plugins/"
     DEFAULT_VALIDATION_OPERATORS = {
@@ -654,24 +621,26 @@ class DataContextConfigDefaults(enum.Enum):
         }
     }
     DEFAULT_STORES = {
-        "expectations_store": {
+        DEFAULT_EXPECTATIONS_STORE_NAME: {
             "class_name": "ExpectationsStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "expectations/",
             },
         },
-        "validations_store": {
+        DEFAULT_VALIDATIONS_STORE_NAME: {
             "class_name": "ValidationsStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/validations/",
             },
         },
-        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        DEFAULT_EVALUATION_PARAMETER_STORE_NAME: {
+            "class_name": "EvaluationParameterStore"
+        },
     }
     DEFAULT_DATA_DOCS_SITES = {
-        "local_site": {
+        DEFAULT_DATA_DOCS_SITE_NAME: {
             "class_name": "SiteBuilder",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
@@ -702,18 +671,30 @@ class BaseStoreBackendDefaults(DictDot):
         evaluation_parameter_store_name=(
             DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value
         ),
-        validation_operators=(
-            DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
+        data_docs_site_name=(
+            DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value
         ),
-        stores=DataContextConfigDefaults.DEFAULT_STORES.value,
-        data_docs_sites=DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value,
+        validation_operators=None,
+        stores=None,
+        data_docs_sites=None,
     ):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        if validation_operators is None:
+            validation_operators = deepcopy(
+                DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
+            )
         self.validation_operators = validation_operators
+        if stores is None:
+            stores = deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
         self.stores = stores
+        if data_docs_sites is None:
+            data_docs_sites = deepcopy(
+                DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
+            )
         self.data_docs_sites = data_docs_sites
+        self.data_docs_site_name = data_docs_site_name
 
 
 class S3StoreBackendDefaults(BaseStoreBackendDefaults):
@@ -800,17 +781,33 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
     """
     Default store configs for filesystem backends, with some accessible parameters
     Args:
+        root_directory: Absolute directory prepended to the base_directory for each store
         plugins_directory: Overrides default if supplied
     """
 
     def __init__(
         self,
-        plugins_directory=DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value,
+        root_directory: Optional[str] = None,
+        plugins_directory: Optional[str] = None,
     ):
         # Initialize base defaults
         super().__init__()
 
+        if plugins_directory is None:
+            plugins_directory = (
+                DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
+            )
         self.plugins_directory = plugins_directory
+        if root_directory is not None:
+            self.stores[self.expectations_store_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
+            self.stores[self.validations_store_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
+            self.data_docs_sites[self.data_docs_site_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
 
 
 class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
@@ -966,7 +963,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         }
 
 
-class DataContextConfig(DictDot):
+class DataContextConfig(SerializableDictDot):
     def __init__(
         self,
         config_version: Optional[float] = None,
@@ -1058,14 +1055,32 @@ class DataContextConfig(DictDot):
             )
             raise
 
-    def to_yaml(self, outfile):
-        commented_map = deepcopy(self.commented_map)
+    def get_schema_validated_updated_commented_map(self) -> CommentedMap:
+        commented_map: CommentedMap = deepcopy(self.commented_map)
         commented_map.update(dataContextConfigSchema.dump(self))
-        yaml.dump(commented_map, outfile)
+        return commented_map
+
+    def to_yaml(self, outfile):
+        """
+        :returns None (but writes a YAML file containing the project configuration)
+        """
+        yaml.dump(self.get_schema_validated_updated_commented_map(), outfile)
+
+    def to_yaml_str(self) -> str:
+        """
+        :returns a YAML string containing the project configuration
+        """
+        return object_to_yaml_str(self.get_schema_validated_updated_commented_map())
+
+    def to_json_dict(self) -> dict:
+        """
+        :returns a JSON-serialiable dict containing the project configuration
+        """
+        commented_map: CommentedMap = self.get_schema_validated_updated_commented_map()
+        return convert_to_json_serializable(data=commented_map)
 
 
 dataContextConfigSchema = DataContextConfigSchema()
-legacyDatasourceConfigSchema = LegacyDatasourceConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
 assetConfigSchema = AssetConfigSchema()
