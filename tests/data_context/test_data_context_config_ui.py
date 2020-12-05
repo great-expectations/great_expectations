@@ -330,7 +330,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
 
     data_context_config = DataContextConfig(
         datasources={
-            "my_pandas_datasource": LegacyDatasourceConfig(
+            "my_pandas_datasource": DatasourceConfig(
                 class_name="PandasDatasource",
                 batch_kwargs_generators={
                     "subdir_reader": {

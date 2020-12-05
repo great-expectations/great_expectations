@@ -14,7 +14,7 @@ Steps
 
 1. Create a DataContextConfig
 
-    The DataContextConfig holds all of the associated configuration parameters to build a DataContext. There are defaults set for you to minimize configuration in typical cases, but please note that every parameter is configurable and all defaults are overridable. Also note that LegacyDatasourceConfig also has defaults which can be overridden.
+    The DataContextConfig holds all of the associated configuration parameters to build a DataContext. There are defaults set for you to minimize configuration in typical cases, but please note that every parameter is configurable and all defaults are overridable. Also note that DatasourceConfig also has defaults which can be overridden.
 
     Here we will show a few examples of common configurations, using the ``store_backend_defaults`` parameter. Note that you can continue with the existing API sans defaults by omitting this parameter, and you can override all of the parameters as shown in the last example. Note that a parameter set in ``DataContextConfig`` will override a parameter set in ``store_backend_defaults`` if both are used.
 
@@ -33,7 +33,7 @@ Steps
 
         data_context_config = DataContextConfig(
             datasources={
-                "my_sqlalchemy_datasource": LegacyDatasourceConfig(
+                "my_sqlalchemy_datasource": DatasourceConfig(
                     class_name="SqlAlchemyDatasource",
                     credentials={
                         "drivername": "custom_drivername",
@@ -54,7 +54,7 @@ Steps
 
         data_context_config = DataContextConfig(
             datasources={
-                "my_pandas_datasource": LegacyDatasourceConfig(
+                "my_pandas_datasource": DatasourceConfig(
                     class_name="PandasDatasource",
                     batch_kwargs_generators={
                         "subdir_reader": {
@@ -75,7 +75,7 @@ Steps
 
         data_context_config = DataContextConfig(
             datasources={
-                "my_sqlalchemy_datasource": LegacyDatasourceConfig(
+                "my_sqlalchemy_datasource": DatasourceConfig(
                     class_name="SqlAlchemyDatasource",
                     credentials={
                         "drivername": "custom_drivername",
