@@ -1,8 +1,8 @@
 import pytest
 
 from great_expectations.data_context.types.base import (
-    LegacyDatasourceConfig,
-    LegacyDatasourceConfigSchema,
+    DatasourceConfig,
+    DatasourceConfigSchema,
 )
 from tests.data_context.test_data_context_config_ui import (
     default_pandas_datasource_config,
@@ -34,7 +34,7 @@ def default_sql_alchemy_datasource_config():
 
 def test_PandasDatasource_config(default_pandas_datasource_config):
 
-    datasource_config = LegacyDatasourceConfig(
+    datasource_config = DatasourceConfig(
         class_name="PandasDatasource",
         batch_kwargs_generators={
             "subdir_reader": {
@@ -46,13 +46,13 @@ def test_PandasDatasource_config(default_pandas_datasource_config):
 
     desired_config = default_pandas_datasource_config["my_pandas_datasource"]
 
-    datasource_config_schema = LegacyDatasourceConfigSchema()
+    datasource_config_schema = DatasourceConfigSchema()
     assert datasource_config_schema.dump(datasource_config) == desired_config
 
 
 def test_SqlAlchemyDatasource_config(default_sql_alchemy_datasource_config):
 
-    datasource_config = LegacyDatasourceConfig(
+    datasource_config = DatasourceConfig(
         class_name="SqlAlchemyDatasource",
         credentials={
             "drivername": "custom_drivername",
@@ -66,17 +66,17 @@ def test_SqlAlchemyDatasource_config(default_sql_alchemy_datasource_config):
 
     desired_config = default_sql_alchemy_datasource_config["my_sql_alchemy_datasource"]
 
-    datasource_config_schema = LegacyDatasourceConfigSchema()
+    datasource_config_schema = DatasourceConfigSchema()
     assert datasource_config_schema.dump(datasource_config) == desired_config
 
 
 def test_SparkDatasource_config(default_spark_datasource_config):
 
-    datasource_config = LegacyDatasourceConfig(
+    datasource_config = DatasourceConfig(
         class_name="SparkDFDatasource", batch_kwargs_generators={},
     )
 
     desired_config = default_spark_datasource_config["my_spark_datasource"]
 
-    datasource_config_schema = LegacyDatasourceConfigSchema()
+    datasource_config_schema = DatasourceConfigSchema()
     assert datasource_config_schema.dump(datasource_config) == desired_config
