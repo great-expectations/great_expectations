@@ -1,17 +1,14 @@
-import copy
 import logging
 import os
 import traceback
-from typing import Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 from ruamel.yaml import YAML
-from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.data_context.data_context import DataContext
-from great_expectations.data_context.types.base import dataContextConfigSchema
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
@@ -27,40 +24,6 @@ yaml.default_flow_style = False
 
 class DataContextV3(DataContext):
     """Class implementing the v3 spec for DataContext configs, plus API changes for the 0.13+ series."""
-
-    def get_config(self, mode="typed"):
-        config = super().get_config()
-
-        if mode == "typed":
-            return config
-
-        elif mode == "commented_map":
-            return config.commented_map
-
-        elif mode == "dict":
-            return dict(config.commented_map)
-
-        elif mode == "yaml":
-            commented_map = copy.deepcopy(config.commented_map)
-            commented_map.update(dataContextConfigSchema.dump(config))
-
-            stream = StringIO()
-            yaml.dump(commented_map, stream)
-            yaml_string = stream.getvalue()
-
-            # print(commented_map)
-            # print(commented_map.__dict__)
-            # print(str(commented_map))
-            return yaml_string
-            # config.commented_map.update(dataContextConfigSchema.dump(self))
-
-        else:
-            raise ValueError(f"Unknown config mode {mode}")
-
-    @property
-    def config_variables(self):
-        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
-        return dict(self._load_config_variables_file())
 
     # TODO: <Alex>We need to standardize the signatures of methods in all subclasses of BaseDataContext</Alex>
     # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
@@ -265,6 +228,7 @@ class DataContextV3(DataContext):
         data_asset_name: str = None,
         *,
         batch_request: BatchRequest = None,
+        batch_data: Any = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
         limit: int = None,
@@ -287,6 +251,7 @@ class DataContextV3(DataContext):
             data_asset_name
 
             batch_request
+            batch_data
             partition_request
             partition_identifiers
 
@@ -320,6 +285,7 @@ class DataContextV3(DataContext):
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             batch_request=batch_request,
+            batch_data=batch_data,
             partition_request=partition_request,
             partition_identifiers=partition_identifiers,
             limit=limit,
@@ -346,6 +312,7 @@ class DataContextV3(DataContext):
         data_asset_name: str = None,
         *,
         batch_request: BatchRequest = None,
+        batch_data: Any = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
         limit: int = None,
@@ -368,6 +335,7 @@ class DataContextV3(DataContext):
             data_asset_name
 
             batch_request
+            batch_data
             partition_request
             partition_identifiers
 
@@ -413,7 +381,6 @@ class DataContextV3(DataContext):
                 batch_request=batch_request
             )
         else:
-            partition_request: PartitionRequest
             if partition_request is None:
                 if partition_identifiers is None:
                     partition_identifiers = kwargs
@@ -459,6 +426,7 @@ class DataContextV3(DataContext):
                 datasource_name=datasource_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
+                batch_data=batch_data,
                 partition_request=partition_request,
                 batch_spec_passthrough=batch_spec_passthrough,
             )
@@ -473,6 +441,7 @@ class DataContextV3(DataContext):
         data_asset_name: str = None,
         *,
         batch_request: BatchRequest = None,
+        batch_data: Any = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
         limit: int = None,
@@ -516,6 +485,7 @@ class DataContextV3(DataContext):
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             batch_request=batch_request,
+            batch_data=batch_data,
             partition_request=partition_request,
             partition_identifiers=partition_identifiers,
             limit=limit,
