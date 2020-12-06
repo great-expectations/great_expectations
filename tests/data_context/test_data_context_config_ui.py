@@ -1,3 +1,4 @@
+import copy
 from typing import Dict, Optional
 
 import pytest
@@ -41,10 +42,21 @@ def construct_data_context_config():
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         plugins_directory: Optional[str] = None,
-        stores: Dict = DataContextConfigDefaults.DEFAULT_STORES.value,
-        validation_operators=DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value,
-        data_docs_sites: Dict = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value,
+        stores: Optional[Dict] = None,
+        validation_operators: Optional[Dict] = None,
+        data_docs_sites: Optional[Dict] = None,
     ):
+        if stores is None:
+            stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
+        if validation_operators is None:
+            validation_operators = copy.deepcopy(
+                DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
+            )
+        if data_docs_sites is None:
+            data_docs_sites = copy.deepcopy(
+                DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
+            )
+
         return {
             "config_version": config_version,
             "datasources": datasources,
@@ -311,6 +323,56 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     """
     What does this test and why?
     Ensure that a very simple DataContextConfig setup using FilesystemStoreBackendDefaults is created accurately
+    This test sets the root_dir parameter
+    """
+
+    test_root_directory = "test_root_dir"
+
+    data_context_config = DataContextConfig(
+        datasources={
+            "my_pandas_datasource": DatasourceConfig(
+                class_name="PandasDatasource",
+                batch_kwargs_generators={
+                    "subdir_reader": {
+                        "class_name": "SubdirReaderBatchKwargsGenerator",
+                        "base_directory": "../data/",
+                    }
+                },
+            )
+        },
+        store_backend_defaults=FilesystemStoreBackendDefaults(
+            root_directory=test_root_directory
+        ),
+    )
+
+    # Create desired config
+    data_context_id = data_context_config.anonymous_usage_statistics.data_context_id
+    desired_config = construct_data_context_config(
+        data_context_id=data_context_id, datasources=default_pandas_datasource_config
+    )
+    # Add root_directory to stores and data_docs
+    desired_config["stores"][desired_config["expectations_store_name"]][
+        "store_backend"
+    ]["root_directory"] = test_root_directory
+    desired_config["stores"][desired_config["validations_store_name"]]["store_backend"][
+        "root_directory"
+    ] = test_root_directory
+    desired_config["data_docs_sites"]["local_site"]["store_backend"][
+        "root_directory"
+    ] = test_root_directory
+
+    data_context_config_schema = DataContextConfigSchema()
+    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert DataContext.validate_config(project_config=data_context_config)
+
+
+def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults_no_root_directory(
+    construct_data_context_config, default_pandas_datasource_config
+):
+    """
+    What does this test and why?
+    Ensure that a very simple DataContextConfig setup using FilesystemStoreBackendDefaults is created accurately
+    This test does not set the optional root_directory parameter
     """
 
     data_context_config = DataContextConfig(
