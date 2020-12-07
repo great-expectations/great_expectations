@@ -88,13 +88,12 @@ class_name: Datasource
 execution_engine:
     class_name: SparkDFExecutionEngine
     spark_config:
-        spark_context:
-            spark.master: local[*]
-            spark.executor.memory: 6g
-            spark.driver.memory: 6g
-            spark.ui.showConsoleProgress: false
-            spark.sql.shuffle.partitions: 2
-            spark.default.parallelism: 4
+        spark.master: local[*]
+        spark.executor.memory: 6g
+        spark.driver.memory: 6g
+        spark.ui.showConsoleProgress: false
+        spark.sql.shuffle.partitions: 2
+        spark.default.parallelism: 4
 data_connectors:
     test_runtime_data_connector:
         module_name: great_expectations.datasource.data_connector
@@ -233,14 +232,12 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
             "class_name": "SparkDFExecutionEngine",
             "persist": True,
             "spark_config": {
-                "spark_context": {
-                    "spark.master": "local[*]",
-                    "spark.executor.memory": "6g",
-                    "spark.driver.memory": "6g",
-                    "spark.ui.showConsoleProgress": False,
-                    "spark.sql.shuffle.partitions": 2,
-                    "spark.default.parallelism": 4,
-                }
+                "spark.master": "local[*]",
+                "spark.executor.memory": "6g",
+                "spark.driver.memory": "6g",
+                "spark.ui.showConsoleProgress": False,
+                "spark.sql.shuffle.partitions": 2,
+                "spark.default.parallelism": 4,
             },
         },
         "data_connectors": {
