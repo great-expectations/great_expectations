@@ -345,37 +345,15 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             }
         )
 
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
+    def _validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
-        quantile_vals = metric_vals.get("column.quantile_values")
-        quantile_ranges = self.get_success_kwargs(configuration).get("quantile_ranges")
+        quantile_vals = metrics.get("column.quantile_values")
+        quantile_ranges = configuration.kwargs.get("quantile_ranges")
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]
 
