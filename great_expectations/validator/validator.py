@@ -199,11 +199,13 @@ class Validator:
                         )
 
                 # this is used so that exceptions are caught appropriately when they occur in expectation config
-                basic_runtime_configuration = {
+                runtime_configuration = self.get_default_expectation_arguments()
+                passed_runtime_configuration = {
                     k: v
                     for k, v in kwargs.items()
                     if k in ("result_format", "include_config", "catch_exceptions")
                 }
+                runtime_configuration.update(passed_runtime_configuration)
 
                 configuration = ExpectationConfiguration(
                     expectation_type=name, kwargs=expectation_kwargs, meta=meta
@@ -222,7 +224,7 @@ class Validator:
                         validator=self,
                         evaluation_parameters=self._expectation_suite.evaluation_parameters,
                         data_context=self._data_context,
-                        runtime_configuration=basic_runtime_configuration,
+                        runtime_configuration=runtime_configuration,
                     )
 
                 # If validate has set active_validation to true, then we do not save the config to avoid
@@ -246,7 +248,7 @@ class Validator:
                     )
 
             except Exception as err:
-                if basic_runtime_configuration.get("catch_exceptions"):
+                if runtime_configuration.get("catch_exceptions"):
                     raised_exception = True
                     exception_traceback = traceback.format_exc()
                     exception_message = "{}: {}".format(type(err).__name__, str(err))
