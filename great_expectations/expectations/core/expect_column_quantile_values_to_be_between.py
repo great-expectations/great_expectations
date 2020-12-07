@@ -5,7 +5,7 @@ import numpy as np
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import TableExpectation, ColumnExpectation
 from great_expectations.expectations.registry import extract_metrics
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
@@ -18,7 +18,7 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
+class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     """Expect specific provided column quantiles to be between provided minimum and maximum values.
 
            ``quantile_ranges`` must be a dictionary with two keys:
@@ -116,7 +116,7 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
 
            """
 
-    metric_dependencies = ("column.quantiles",)
+    metric_dependencies = ("column.quantile_values",)
     success_keys = (
         "quantile_ranges",
         "allow_relative_error",
@@ -393,7 +393,7 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
                 "result_format", self.default_kwarg_values.get("result_format")
             )
 
-        quantile_vals = metric_vals.get("column.quantiles")
+        quantile_vals = metric_vals.get("column.quantile_values")
         quantile_ranges = self.get_success_kwargs(configuration).get("quantile_ranges")
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]
