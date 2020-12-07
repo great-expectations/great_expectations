@@ -15,5 +15,5 @@ class DictDot:
 
 
 class SerializableDictDot(DictDot):
-    def to_json_dict(self):
+    def to_json_dict(self) -> dict:
         raise NotImplementedError
