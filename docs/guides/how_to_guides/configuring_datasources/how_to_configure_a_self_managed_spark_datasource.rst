@@ -222,8 +222,7 @@ Additional Notes
                 execution_engine:
                   class_name: SparkDFExecutionEngine
                   spark_config:
-                    spark_context:
-                      spark.master: local[*]
+                    spark.master: local[*]
                 data_connectors:
                   simple_filesystem_data_connector:
                     class_name: InferredAssetFilesystemDataConnector
