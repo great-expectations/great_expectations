@@ -21,7 +21,7 @@ from great_expectations.cli.util import (
     cli_message_dict,
     verify_library_dependent_modules,
 )
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DatasourceConfigSchema
 from great_expectations.datasource import (
@@ -39,7 +39,7 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import BridgeValidator
 
 logger = logging.getLogger(__name__)
 
@@ -1324,7 +1324,7 @@ Enter an SQL query
             else:
                 batch_kwargs = {"query": query, "datasource": datasource_name}
                 batch_kwargs.update(temp_table_kwargs)
-                Validator(
+                BridgeValidator(
                     batch=datasource.get_batch(batch_kwargs),
                     expectation_suite=ExpectationSuite("throwaway"),
                 ).get_dataset()

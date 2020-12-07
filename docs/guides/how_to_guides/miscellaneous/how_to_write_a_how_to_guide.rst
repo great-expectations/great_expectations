@@ -109,6 +109,30 @@ Indentation, bolding, and code blocks
 - All of these styles are modeled in the this .rst file.
 
 
+Using tabs to differentiate guides for different APIs
+#####################################################
+
+During the process of writing documentation for Great Expectations 0.13, there rose a need to differentiate between documentation for GE up to 0.12.x, and GE 0.13 and beyond.
+
+The use of ``content-tabs`` allows for both documentation to co-exist in the same how-to-doc.
+
+The following code snippet shows how two tabs (``tab0`` and ``tab1``) can be created with the associated ``title`` and content. For more information on ``content-tabs``, please refer to the following link : `https://sphinxcontrib-contentui.readthedocs.io/en/latest/tabs.html <https://sphinxcontrib-contentui.readthedocs.io/en/latest/tabs.html>`_
+
+    .. code-block:: rst
+
+        .. content-tabs::
+
+            .. tab-container:: tab0
+                :title: Show Docs for Stable API (up to 0.12.x)
+
+                # Content for Stable API #
+
+            .. tab-container:: tab1
+                :title: Show Docs for Experimental API (0.13)
+
+                # Content for Experimental API #
+
+
 Additional Resources
 --------------------
 

@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 from dateutil.parser import parse
 
-from great_expectations.core import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
@@ -16,7 +15,9 @@ from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
+from great_expectations.validator.validator import Validator
 
+from ..core.run_identifier import RunIdentifier
 from .util import send_slack_notification
 
 logger = logging.getLogger(__name__)
@@ -260,7 +261,7 @@ The ``run`` method returns a ValidationOperatorResult object:
             A batch of data
 
         """
-        if not isinstance(item, DataAsset):
+        if not isinstance(item, (DataAsset, Validator)):
             if not (
                 isinstance(item, tuple)
                 and len(item) == 2
@@ -312,11 +313,17 @@ The ``run`` method returns a ValidationOperatorResult object:
         for item in assets_to_validate:
             run_result_obj = {}
             batch = self._build_batch_from_item(item)
+
+            if isinstance(batch, Validator):
+                batch_identifier = batch.active_batch_id
+            else:
+                batch_identifier = batch.batch_id
+
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
             validation_result_id = ValidationResultIdentifier(
-                batch_identifier=batch.batch_id,
+                batch_identifier=batch_identifier,
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
             )
@@ -371,10 +378,15 @@ The ``run`` method returns a ValidationOperatorResult object:
                 "Processing validation action with name {}".format(action["name"])
             )
 
+            if isinstance(batch, Validator):
+                batch_identifier = batch.active_batch_id
+            else:
+                batch_identifier = batch.batch_id
+
             validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
-                batch_identifier=batch.batch_id,
+                batch_identifier=batch_identifier,
             )
             try:
                 action_result = self.actions[action["name"]].run(

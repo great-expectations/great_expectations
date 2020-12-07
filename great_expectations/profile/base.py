@@ -7,9 +7,11 @@ from typing import Any
 
 from dateutil.parser import parse
 
-from great_expectations.core import ExpectationSuite, RunIdentifier
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.validator.validator import Validator
 
+from ..core.expectation_suite import ExpectationSuite
+from ..core.run_identifier import RunIdentifier
 from ..data_asset import DataAsset
 from ..dataset import Dataset
 
@@ -152,7 +154,7 @@ class DataAssetProfiler:
 class DatasetProfiler(DataAssetProfiler):
     @classmethod
     def validate(cls, dataset):
-        return isinstance(dataset, Dataset)
+        return isinstance(dataset, (Dataset, Validator))
 
     @classmethod
     def add_expectation_meta(cls, expectation):

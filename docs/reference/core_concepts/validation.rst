@@ -7,7 +7,7 @@ Validation
 Once you've constructed and stored Expectations, you can use them to validate new data. Validation generates a report
 that details any specific deviations from expected values.
 
-We recommend using :ref:`data_context` to manage expectation suites and coordinate validation across runs.
+We recommend using a :ref:`data_context` to manage expectation suites and coordinate validation across runs.
 
 ******************
 Validation Results
@@ -115,9 +115,9 @@ If you would like to review the raw validation results in JSON format, the defau
 Note that by default, Data Docs will only compile Validation Results located in this directory.
 
 
-********************
-Validation Operators
-********************
+*************************************************
+Checkpoints (also known as Validation Operators)
+*************************************************
 
 The example above demonstrates how to validate one batch of data against one expectation suite. The `validate` method returns a dictionary of validation results. This is sufficient when exploring your data and getting to know Great Expectations.
 When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
@@ -149,5 +149,3 @@ Useful deployment patterns include:
 
 For certain deployment patterns, it may be useful to parameterize expectations, and supply evaluation parameters at \
 validation time. See :ref:`evaluation_parameters` for more information.
-
-

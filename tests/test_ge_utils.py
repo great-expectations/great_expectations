@@ -1,3 +1,4 @@
+import copy
 import os
 
 import pytest
@@ -5,7 +6,11 @@ import pytest
 import great_expectations as ge
 from great_expectations.core.util import nested_update
 from great_expectations.dataset.util import check_sql_engine_dialect
-from great_expectations.util import lint_code
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    lint_code,
+)
 
 
 def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
@@ -242,3 +247,82 @@ def test_linter_changes_dirty_code():
 def test_linter_leaves_clean_code():
     code = "foo = [1, 2, 3]\n"
     assert lint_code(code) == "foo = [1, 2, 3]\n"
+
+
+def test_get_currently_executing_function_call_arguments(a=None, *args, **kwargs):
+    if a is None:
+        test_get_currently_executing_function_call_arguments(0, 1, 2, 3, b=5)
+    else:
+        assert a == 0
+        assert args == (1, 2, 3)
+        assert kwargs == {"b": 5}
+        params = get_currently_executing_function_call_arguments(
+            **{
+                "additional_param_0": "xyz_0",
+                "additional_param_1": "xyz_1",
+                "additional_param_2": "xyz_2",
+            }
+        )
+        assert params["a"] == 0
+        assert params["args"] == (1, 2, 3)
+        assert params["b"] == 5
+        assert params["additional_param_0"] == "xyz_0"
+        assert params["additional_param_1"] == "xyz_1"
+        assert params["additional_param_2"] == "xyz_2"
+
+
+def test_filter_properties_dict():
+    source_dict: dict = {
+        "a": 0,
+        "b": None,
+        "c": "xyz_0",
+        "d": 1,
+        "e": 9.8e1,
+    }
+
+    d0_begin: dict = copy.deepcopy(source_dict)
+    with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
+        d0_end: dict = filter_properties_dict(
+            properties=d0_begin, keep_fields=["c"], delete_fields=["a", "e"],
+        )
+    d0_end: dict = filter_properties_dict(properties=d0_begin,)
+    d0_end_expected = copy.deepcopy(d0_begin)
+    d0_end_expected.pop("b")
+    assert d0_end == d0_end_expected
+
+    d1_begin: dict = copy.deepcopy(source_dict)
+    d1_end: dict = filter_properties_dict(
+        properties=d1_begin, clean_empty=False,
+    )
+    d1_end_expected = copy.deepcopy(d1_begin)
+    assert d1_end == d1_end_expected
+
+    d2_begin: dict = copy.deepcopy(source_dict)
+    d2_end: dict = filter_properties_dict(
+        properties=d2_begin, keep_fields=["b"],
+    )
+    d2_end_expected = {"b": None}
+    assert d2_end == d2_end_expected
+
+    d3_begin: dict = copy.deepcopy(source_dict)
+    d3_end: dict = filter_properties_dict(
+        properties=d3_begin, keep_fields=["a", "e"],
+    )
+    d3_end_expected = {"a": 0, "e": 9.8e1}
+    assert d3_end == d3_end_expected
+
+    d4_begin: dict = copy.deepcopy(source_dict)
+    d4_end: dict = filter_properties_dict(
+        properties=d4_begin, delete_fields=["a", "e"],
+    )
+    d4_end_expected = {"c": "xyz_0", "d": 1}
+    assert d4_end == d4_end_expected
+
+    d5_begin: dict = copy.deepcopy(source_dict)
+    filter_properties_dict(
+        properties=d5_begin, delete_fields=["a", "e"], inplace=True,
+    )
+    d5_end = copy.deepcopy(d5_begin)
+    d5_end_expected = {"c": "xyz_0", "d": 1}
+    assert d5_end == d5_end_expected
