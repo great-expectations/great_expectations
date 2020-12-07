@@ -5,7 +5,10 @@ import numpy as np
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import TableExpectation, ColumnExpectation
+from great_expectations.expectations.expectation import (
+    ColumnExpectation,
+    TableExpectation,
+)
 from great_expectations.expectations.registry import extract_metrics
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
@@ -139,7 +142,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             assert (
                 "quantile_ranges" in configuration.kwargs
             ), "quantile ranges must be provided"
-            assert isinstance(configuration.kwargs["quantile_ranges"], dict), "quantile_ranges should be a dictionary"
+            assert isinstance(
+                configuration.kwargs["quantile_ranges"], dict
+            ), "quantile_ranges should be a dictionary"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -355,7 +360,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             configuration, execution_engine, runtime_configuration
         )
         # column.quantile_values expects a "quantiles" key
-        all_dependencies["metrics"]["column.quantile_values"].metric_value_kwargs["quantiles"] = configuration.kwargs["quantile_ranges"]["quantiles"]
+        all_dependencies["metrics"]["column.quantile_values"].metric_value_kwargs[
+            "quantiles"
+        ] = configuration.kwargs["quantile_ranges"]["quantiles"]
         return all_dependencies
 
     def _validate(
