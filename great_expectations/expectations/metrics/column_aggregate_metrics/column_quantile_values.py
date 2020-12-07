@@ -44,13 +44,12 @@ logger = logging.getLogger(__name__)
 
 class ColumnQuantileValues(ColumnMetricProvider):
     metric_name = "column.quantile_values"
-    value_keys = ("quantiles", "allow_relative_error")
+    value_keys = ("quantile_ranges", "allow_relative_error")
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, quantiles, **kwargs):
+    def _pandas(cls, column, quantile_ranges, **kwargs):
         """Quantile Function"""
-
-        return column.quantile(quantiles, interpolation="nearest").tolist()
+        return column.quantile(quantile_ranges["quantiles"], interpolation="nearest").tolist()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
@@ -72,7 +71,8 @@ class ColumnQuantileValues(ColumnMetricProvider):
         column = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
         dialect = sqlalchemy_engine.dialect
-        quantiles = metric_value_kwargs["quantiles"]
+        quantile_ranges = metric_value_kwargs["quantile_ranges"]
+        quantiles = quantile_ranges["quantiles"]
         allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
         if dialect.name.lower() == "mssql":
             return _get_column_quantiles_mssql(
@@ -122,7 +122,8 @@ class ColumnQuantileValues(ColumnMetricProvider):
             metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
         allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
-        quantiles = metric_value_kwargs["quantiles"]
+        quantile_ranges = metric_value_kwargs["quantile_ranges"]
+        quantiles = quantile_ranges["quantiles"]
         column = accessor_domain_kwargs["column"]
         if allow_relative_error is False:
             allow_relative_error = 0.0
