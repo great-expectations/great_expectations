@@ -345,6 +345,19 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             }
         )
 
+    def get_validation_dependencies(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        all_dependencies = super().get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )
+        # column.quantile_values expects a "quantiles" key
+        all_dependencies["metrics"]["column.quantile_values"].metric_value_kwargs["quantiles"] = configuration.kwargs["quantile_ranges"]["quantiles"]
+        return all_dependencies
+
     def _validate(
         self,
         configuration: ExpectationConfiguration,
