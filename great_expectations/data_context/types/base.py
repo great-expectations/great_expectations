@@ -195,6 +195,7 @@ class ExecutionEngineConfig(DictDot):
         caching=None,
         batch_spec_defaults=None,
         connection_string=None,
+        spark_config=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -205,6 +206,8 @@ class ExecutionEngineConfig(DictDot):
             self._batch_spec_defaults = batch_spec_defaults
         if connection_string is not None:
             self.connection_string = connection_string
+        if spark_config is not None:
+            self.spark_config = spark_config
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -227,14 +230,30 @@ class ExecutionEngineConfigSchema(Schema):
 
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.execution_engine")
+    connection_string = fields.String(required=False, allow_none=True)
+    spark_config = fields.Raw(required=False, allow_none=True)
     caching = fields.Boolean(required=False, allow_none=True)
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
 
-    connection_string = fields.String(required=False, allow_none=True)
-
     @validates_schema
     def validate_schema(self, data, **kwargs):
-        pass
+        if (
+            "connection_string" in data
+            and data["class_name"] != "SqlAlchemyExecutionEngine"
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses the "connection_string" key in an execution engine, but only 
+SqlAlchemyExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
+configuration to continue.
+                """
+            )
+        if "spark_config" in data and data["class_name"] != "SparkDFExecutionEngine":
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses the "spark_config" key in an execution engine, but only 
+SparkDFExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
+configuration to continue.
+                """
+            )
 
     # noinspection PyUnusedLocal
     @post_load
@@ -346,14 +365,27 @@ class DatasourceConfigSchema(Schema):
     credentials = fields.Raw(required=False, allow_none=True)
     introspection = fields.Dict(required=False, allow_none=True)
     tables = fields.Dict(required=False, allow_none=True)
-    spark_config = fields.Raw(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "generators" in data:
             raise ge_exceptions.InvalidConfigError(
-                "Your current configuration uses the 'generators' key in a datasource, but in version 0.10 of "
-                "GE, that key is renamed to 'batch_kwargs_generators'. Please update your config to continue."
+                'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '
+                'GE, that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
+            )
+        if (
+            "connection_string" in data
+            or "credentials" in data
+            or "introspection" in data
+            or "tables" in data
+        ) and data["class_name"] not in [
+            "SqlAlchemyDatasource",
+            "SimpleSqlalchemyDatasource",
+        ]:
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data source, that are required only by an
+sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
+                """
             )
 
     # noinspection PyUnusedLocal

@@ -1147,6 +1147,23 @@ class BaseDataContext:
             datasource (Datasource)
         """
         logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
+        return self.add_and_initialize_datasource(
+            name=name, initialize=initialize, **kwargs
+        )
+
+    def add_and_initialize_datasource(
+        self, name, initialize=True, **kwargs
+    ) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
+        """Add a new datasource to the data context, with configuration provided as kwargs.
+        Args:
+            name: the name for the new datasource to add
+            initialize: if False, add the datasource to the config, but do not
+                initialize it, for example if a user needs to debug database connectivity.
+            kwargs (keyword arguments): the configuration for the new datasource
+
+        Returns:
+            datasource (Datasource)
+        """
         module_name = kwargs.get("module_name", "great_expectations.datasource")
         verify_dynamic_loading_support(module_name=module_name)
         class_name = kwargs.get("class_name")
@@ -1274,8 +1291,9 @@ class BaseDataContext:
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
-        return self.add_datasource(
-            datasource_name=datasource_name, initialize=True, **datasource_config
+        config: dict = datasourceConfigSchema.dump(datasource_config)
+        return self.add_and_initialize_datasource(
+            name=datasource_name, initialize=True, **config
         )
 
     def list_expectation_suites(self):
