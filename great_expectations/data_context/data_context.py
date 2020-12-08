@@ -858,26 +858,26 @@ class BaseDataContext:
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self, name):
+    def delete_datasource(self, datasource_name):
         """Delete a data source
         Args:
-            name: The name of the datasource to delete.
+            datasource_name: The name of the datasource to delete.
 
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
-        if name is None:
+        if datasource_name is None:
             raise ValueError("Datasource names must be a datasource name")
         else:
-            datasource = self.get_datasource(datasource_name=name)
+            datasource = self.get_datasource(datasource_name=datasource_name)
             if datasource:
                 # remove key until we have a delete method on project_config
                 # self._project_config_with_variables_substituted.datasources[
                 # datasource_name].remove()
-                del self._project_config["datasources"][name]
-                del self._cached_datasources[name]
+                del self._project_config["datasources"][datasource_name]
+                del self._cached_datasources[datasource_name]
             else:
-                raise ValueError("Datasource {} not found".format(name))
+                raise ValueError("Datasource {} not found".format(datasource_name))
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None

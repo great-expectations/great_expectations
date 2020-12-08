@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -8,7 +8,6 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
     BatchRequest,
-    PartitionRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
@@ -18,7 +17,7 @@ from great_expectations.execution_engine import ExecutionEngine
 logger = logging.getLogger(__name__)
 
 
-class BaseDatasource(object):
+class BaseDatasource:
     """
     An Datasource is the glue between an ExecutionEngine and a DataConnector.
     """
