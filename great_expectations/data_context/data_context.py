@@ -1147,23 +1147,7 @@ class BaseDataContext:
             datasource (Datasource)
         """
         logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
-        return self.add_and_initialize_datasource(
-            name=name, initialize=initialize, **kwargs
-        )
 
-    def add_and_initialize_datasource(
-        self, name, initialize=True, **kwargs
-    ) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
-        """Add a new datasource to the data context, with configuration provided as kwargs.
-        Args:
-            name: the name for the new datasource to add
-            initialize: if False, add the datasource to the config, but do not
-                initialize it, for example if a user needs to debug database connectivity.
-            kwargs (keyword arguments): the configuration for the new datasource
-
-        Returns:
-            datasource (Datasource)
-        """
         module_name = kwargs.get("module_name", "great_expectations.datasource")
         verify_dynamic_loading_support(module_name=module_name)
         class_name = kwargs.get("class_name")
@@ -1171,34 +1155,55 @@ class BaseDataContext:
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
+        config: dict
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
         else:
             config = kwargs
 
-        config = datasourceConfigSchema.load(config)
-        self._project_config["datasources"][name] = config
+        datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+            CommentedMap(**config)
+        )
+        self._project_config["datasources"][name] = datasource_config
 
-        # We perform variable substitution in the datasource's config here before using the config
-        # to instantiate the datasource object. Variable substitution is a service that the data
-        # context provides. Datasources should not see unsubstituted variables in their config.
+        config = dict(datasourceConfigSchema.dump(datasource_config))
+        config.update({"name": name})
+
+        datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
         if initialize:
             try:
-                datasource: Optional[
-                    Dict[str, Union[LegacyDatasource, BaseDatasource]]
-                ] = self._build_datasource_from_config(
-                    name,
-                    self._project_config_with_variables_substituted.datasources[name],
-                )
+                datasource = self._instantiate_datasource_from_config(**config,)
                 self._cached_datasources[name] = datasource
-            except Exception as e:
+            except ge_exceptions.DatasourceInitializationError as e:
+                # Do not keep configuration that could not be instantiated.
                 del self._project_config["datasources"][name]
-                raise ge_exceptions.DatasourceInitializationError(
-                    datasource_name=name, message=str(e)
-                )
+                raise e
         else:
             datasource = None
 
+        return datasource
+
+    def _instantiate_datasource_from_config(
+        self, **kwargs
+    ) -> Union[LegacyDatasource, BaseDatasource]:
+        """Instantiate a new datasource to the data context, with configuration provided as kwargs.
+        Args:
+            kwargs (keyword arguments): the configuration for the new datasource
+
+        Returns:
+            datasource (Datasource)
+        """
+        # We perform variable substitution in the datasource's config here before using the config
+        # to instantiate the datasource object. Variable substitution is a service that the data
+        # context provides. Datasources should not see unsubstituted variables in their config.
+        try:
+            datasource: Union[
+                LegacyDatasource, BaseDatasource
+            ] = self._build_datasource_from_config(**kwargs,)
+        except Exception as e:
+            raise ge_exceptions.DatasourceInitializationError(
+                datasource_name=name, message=str(e)
+            )
         return datasource
 
     # TODO: deprecate
@@ -1244,13 +1249,10 @@ class BaseDataContext:
         else:
             raise ValueError(f"Unknown config mode {mode}")
 
-    def _build_datasource_from_config(
-        self, name, config: Union[dict, DatasourceConfig]
-    ):
+    def _build_datasource_from_config(self, config: Union[dict, DatasourceConfig]):
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DatasourceConfig):
             config = datasourceConfigSchema.dump(config)
-        config.update({"name": name})
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,
@@ -1282,7 +1284,7 @@ class BaseDataContext:
             datasource_name
             in self._project_config_with_variables_substituted.datasources
         ):
-            datasource_config = copy.deepcopy(
+            datasource_config: DatasourceConfig = copy.deepcopy(
                 self._project_config_with_variables_substituted.datasources[
                     datasource_name
                 ]
@@ -1291,10 +1293,15 @@ class BaseDataContext:
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
-        config: dict = datasourceConfigSchema.dump(datasource_config)
-        return self.add_and_initialize_datasource(
-            name=datasource_name, initialize=True, **config
-        )
+
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        config.update({"name": datasource_name})
+
+        datasource: Optional[
+            Union[LegacyDatasource, BaseDatasource]
+        ] = self._instantiate_datasource_from_config(**config,)
+        self._cached_datasources[datasource_name] = datasource
+        return datasource
 
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""

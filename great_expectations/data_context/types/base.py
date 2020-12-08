@@ -215,6 +215,9 @@ class DataConnectorConfigSchema(Schema):
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
+        # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
+        if data["class_name"][0] == "$":
+            return
         if ("default_regex" in data) and not (
             data["class_name"]
             in [
@@ -223,7 +226,6 @@ class DataConnectorConfigSchema(Schema):
                 "InferredAssetS3DataConnector",
                 "ConfiguredAssetS3DataConnector",
             ]
-            or data["class_name"][0] == "$"
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by a
@@ -237,7 +239,6 @@ configuration to continue.
                 "InferredAssetFilesystemDataConnector",
                 "ConfiguredAssetFilesystemDataConnector",
             ]
-            or data["class_name"][0] == "$"
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by a
@@ -253,7 +254,6 @@ configuration to continue.
         ) and not (
             data["class_name"]
             in ["InferredAssetS3DataConnector", "ConfiguredAssetS3DataConnector",]
-            or data["class_name"][0] == "$"
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by an
@@ -275,7 +275,6 @@ continue.
         ) and not (
             data["class_name"]
             in ["InferredAssetSqlDataConnector", "ConfiguredAssetSqlDataConnector",]
-            or data["class_name"][0] == "$"
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by an
@@ -346,9 +345,11 @@ class ExecutionEngineConfigSchema(Schema):
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
+        # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
+        if data["class_name"][0] == "$":
+            return
         if "connection_string" in data and not (
             data["class_name"] == "SqlAlchemyExecutionEngine"
-            or data["class_name"][0] == "$"
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses the "connection_string" key in an execution engine, but only 
@@ -358,7 +359,6 @@ configuration to continue.
             )
         if "spark_config" in data and not (
             data["class_name"] == "SparkDFExecutionEngine"
-            or data["class_name"][0] == "$"
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses the "spark_config" key in an execution engine, but only 
@@ -479,6 +479,9 @@ class DatasourceConfigSchema(Schema):
                 'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '
                 'GE, that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
             )
+        # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
+        if data["class_name"][0] == "$":
+            return
         if (
             "connection_string" in data
             or "credentials" in data
@@ -487,7 +490,6 @@ class DatasourceConfigSchema(Schema):
         ) and not (
             data["class_name"]
             in ["SqlAlchemyDatasource", "SimpleSqlalchemyDatasource",]
-            or data["class_name"][0] == "$"
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data source, that are required only by a
