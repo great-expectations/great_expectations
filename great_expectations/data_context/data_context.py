@@ -2570,14 +2570,6 @@ class DataContext(BaseDataContext):
 
         return new_datasource
 
-    # TODO: <Alex></Alex>
-    # def delete_datasource(self, name, **kwargs):
-    #     logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
-    #
-    #     delete_datasource = super().delete_datasource(name, **kwargs)
-    #     self._save_project_config()
-    #
-    #     return delete_datasource
     def delete_datasource(self, name):
         logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
 

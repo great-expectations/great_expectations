@@ -13,8 +13,6 @@ from great_expectations.data_context.util import (
     substitute_all_config_variables,
 )
 from great_expectations.datasource.new_datasource import Datasource
-# TODO: <Alex></Alex>
-# from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -25,75 +23,6 @@ yaml.default_flow_style = False
 
 class DataContextV3(DataContext):
     """Class implementing the v3 spec for DataContext configs, plus API changes for the 0.13+ series."""
-
-    # TODO: <Alex></Alex>
-    # # TODO: <Alex>We need to standardize the signatures of methods in all subclasses of BaseDataContext</Alex>
-    # # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
-    # def add_datasource(self, datasource_name, datasource_config):
-    #     logger.debug(
-    #         "Starting DataContext.add_datasource for datasource %s" % datasource_name
-    #     )
-    #
-    #     new_datasource = self._build_and_add_datasource(
-    #         datasource_name, datasource_config
-    #     )
-    #     self._save_project_config()
-    #
-    #     return new_datasource
-    #
-    # TODO: <Alex></Alex>
-    # # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
-    # def _build_and_add_datasource(self, datasource_name, datasource_config):
-    #     """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
-    #
-    #     Args:
-    #         datasource_name (str): a key for the new Datasource in in self._datasources
-    #         datasource_config (dict): a config for the Datasource to add
-    #
-    #     Returns:
-    #         datasource (Datasource)
-    #     """
-    #
-    #     new_datasource = self._build_datasource_from_config(
-    #         datasource_name, datasource_config,
-    #     )
-    #     self._project_config["datasources"][datasource_name] = datasource_config
-    #     return new_datasource
-    #
-    # TODO: <Alex></Alex>
-    # # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
-    # def _build_datasource_from_config(self, name: str, config: dict,) -> BaseDatasource:
-    #     module_name: str = "great_expectations.datasource"
-    #     runtime_environment: dict = {
-    #         "name": name,
-    #         "data_context_root_directory": self.root_directory,
-    #     }
-    #     new_datasource: BaseDatasource = instantiate_class_from_config(
-    #         config=config,
-    #         runtime_environment=runtime_environment,
-    #         config_defaults={"module_name": module_name},
-    #     )
-    #
-    #     if not new_datasource:
-    #         raise ge_exceptions.ClassInstantiationError(
-    #             module_name=module_name,
-    #             package_name=None,
-    #             class_name=config["class_name"],
-    #         )
-    #
-    #     if not isinstance(new_datasource, BaseDatasource):
-    #         raise TypeError(
-    #             f"Newly instantiated component {name} is not an instance of BaseDatasource. Please check class_name in the config."
-    #         )
-    #
-    #     self._cached_datasources[name] = new_datasource
-    #     return new_datasource
-
-    # TODO: <Alex></Alex>
-    # @property
-    # def datasources(self):
-    #     """A single holder for all Datasources in this context"""
-    #     return self._cached_datasources
 
     def test_yaml_config(
         self,
