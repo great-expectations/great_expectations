@@ -26,7 +26,8 @@ class ColumnMean(ColumnMetricProvider):
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, **kwargs):
         """SqlAlchemy Mean Implementation"""
-        return sa.func.avg(column)
+        # column * 1.0 needed for correct calculation of avg in MSSQL
+        return sa.func.avg(column * 1.0)
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _table, _column_name, **kwargs):
