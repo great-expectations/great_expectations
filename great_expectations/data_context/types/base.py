@@ -10,8 +10,6 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-
-# TODO: <Alex></Alex>
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -566,7 +564,6 @@ class DataContextConfigSchema(Schema):
         validate=lambda x: 0 < x < 100,
         error_messages={"invalid": "config version must " "be a number."},
     )
-    # TODO: <Alex>Proper Schema enforcement for the new Datasource must be implemented.</Alex>
     datasources = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(DatasourceConfigSchema),
