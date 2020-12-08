@@ -130,6 +130,7 @@ class DataConnectorConfig(DictDot):
         glob_directive=None,
         default_regex=None,
         runtime_keys=None,
+        boto3_options=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -144,6 +145,8 @@ class DataConnectorConfig(DictDot):
             self.default_regex = default_regex
         if runtime_keys is not None:
             self.runtime_keys = runtime_keys
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -176,6 +179,9 @@ class DataConnectorConfigSchema(Schema):
     runtime_keys = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
+    boto3_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -196,6 +202,7 @@ class ExecutionEngineConfig(DictDot):
         batch_spec_defaults=None,
         connection_string=None,
         spark_config=None,
+        boto3_options=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -208,6 +215,8 @@ class ExecutionEngineConfig(DictDot):
             self.connection_string = connection_string
         if spark_config is not None:
             self.spark_config = spark_config
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -232,14 +241,17 @@ class ExecutionEngineConfigSchema(Schema):
     module_name = fields.String(missing="great_expectations.execution_engine")
     connection_string = fields.String(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
+    boto3_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
     caching = fields.Boolean(required=False, allow_none=True)
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
-        if (
-            "connection_string" in data
-            and data["class_name"] != "SqlAlchemyExecutionEngine"
+        if "connection_string" in data and not (
+            data["class_name"] == "SqlAlchemyExecutionEngine"
+            or data["class_name"][0] == "$"
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses the "connection_string" key in an execution engine, but only 
@@ -247,7 +259,10 @@ SqlAlchemyExecutionEngine requires this attribute (your execution engine is "{da
 configuration to continue.
                 """
             )
-        if "spark_config" in data and data["class_name"] != "SparkDFExecutionEngine":
+        if "spark_config" in data and not (
+            data["class_name"] == "SparkDFExecutionEngine"
+            or data["class_name"][0] == "$"
+        ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses the "spark_config" key in an execution engine, but only 
 SparkDFExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
@@ -274,7 +289,6 @@ class DatasourceConfig(DictDot):
         credentials=None,
         introspection=None,
         tables=None,
-        boto3_options=None,
         reader_method=None,
         limit=None,
         **kwargs,
@@ -316,8 +330,6 @@ class DatasourceConfig(DictDot):
             self.introspection = introspection
         if tables is not None:
             self.tables = tables
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
         if reader_method is not None:
             self.reader_method = reader_method
         if limit is not None:
@@ -352,9 +364,6 @@ class DatasourceConfigSchema(Schema):
     )
 
     data_asset_type = fields.Nested(ClassConfigSchema, required=False, allow_none=True)
-    boto3_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
 
     # TODO: Update to generator-specific
     # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
@@ -378,10 +387,11 @@ class DatasourceConfigSchema(Schema):
             or "credentials" in data
             or "introspection" in data
             or "tables" in data
-        ) and data["class_name"] not in [
-            "SqlAlchemyDatasource",
-            "SimpleSqlalchemyDatasource",
-        ]:
+        ) and not (
+            data["class_name"]
+            in ["SqlAlchemyDatasource", "SimpleSqlalchemyDatasource",]
+            or data["class_name"][0] == "$"
+        ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data source, that are required only by an
 sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
