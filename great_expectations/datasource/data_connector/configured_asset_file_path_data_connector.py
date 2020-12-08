@@ -16,17 +16,26 @@ logger = logging.getLogger(__name__)
 
 class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     """
-        DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
+        DataConnectors produce identifying information called "batch_spec" that ExecutionEngines
         can use to get individual batches of data. They add flexibility in how to obtain data
         such as with time-based partitioning, downsampling, or other techniques appropriate
         for the Datasource.
 
         The ConfiguredAssetFilePathDataConnector is one of two classes (InferredAssetFilePathDataConnector being the
-        other one) designed for connecting to filesystem-like data. This includes files on disk, but also things
+        other) designed for connecting to filesystem-like data. This includes files on disk, but also things
         like S3 object stores, etc:
 
         A ConfiguredAssetFilesSystemDataconnector requires an explicit listing of each DataAsset you want to connect to.
         This allows more fine-tuning, but also requires more setup.
+
+        *Note*: ConfiguredAssetFilePathDataConnector is not meant to be used on its own, but extended.
+
+        The ConfiguredAssetFilePathDataConnector can be extended to connect to filesystem or s3 by inherting the methods
+        from this class, and implementing the following 2 functions:
+
+        <WILL> Add descriptions for these methods.
+            1.  _get_data_reference_list_for_asset which ???
+            2.  _get_full_file_path_for_asset which ???
     """
 
     def __init__(
@@ -38,6 +47,18 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
     ):
+        """
+
+        __init__ ConfiguredAssetFilePathDataConnector. All subclasses of ConfiguredAssetFilePathDataConnector will need:
+
+        Args:
+            name (str): name of ConfiguredAssetFilePathDataConnector
+            datasource_name (str): Name of datasource that this DataConnector is connected to <WILL> see if this description is correct
+            assets (dict): configured assets as a dictionary. These can each have their own regex and sorters.
+            execution_engine (ExecutionEngine): Execution Engine object to actually read the dat.
+            default_regex (dict): Optional dict the filter and organize the data_references.
+            sorters (list): Optional list if you want to sort the data_references
+        """
         logger.debug(f'Constructing ConfiguredAssetFilePathDataConnector "{name}".')
         super().__init__(
             name=name,
@@ -58,6 +79,14 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return self._assets
 
     def _build_assets_from_config(self, config: Dict[str, dict]):
+        """
+            called by __init__ to build assets from config. This function does the looping through all the c
+            assets in the config, and calls another internal method _build_asset_from_config to actually
+            instantiate the class.
+
+        Args:
+            config (Dict[str, dict]): dict with string as key and nested dict as value.
+        """
         for name, asset_config in config.items():
             if asset_config is None:
                 asset_config = {}
@@ -67,7 +96,19 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             self.assets[name] = new_asset
 
     def _build_asset_from_config(self, name: str, config: dict):
-        """Build an Asset using the provided configuration and return the newly-built Asset."""
+        """
+            Build an Asset using the provided configuration and return the newly-built Asset.
+            Will call utility function instantiate_class_from_config() to do the initialization
+
+        Args:
+            name (str): name of configured asset
+
+            config(dict): dict containing actual configuration
+
+        Returns:
+            Asset: Asset object that we have built from config
+
+        """
         runtime_environment: dict = {"name": name, "data_connector": self}
         asset: Asset = instantiate_class_from_config(
             config=config,
@@ -93,8 +134,9 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         """
         return list(self.assets.keys())
 
-    def _refresh_data_references_cache(self,):
+    def _refresh_data_references_cache(self):
         """
+
         """
         # Map data_references to batch_definitions
         self._data_references_cache = {}

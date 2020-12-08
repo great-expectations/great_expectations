@@ -28,6 +28,9 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
 
         A ConfiguredAssetFilesSystemDataconnector requires an explicit listing of each DataAsset you want to connect to.
         This allows more fine-tuning, but also requires more setup.
+
+
+
     """
 
     def __init__(
