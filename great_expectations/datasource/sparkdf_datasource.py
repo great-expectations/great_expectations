@@ -271,8 +271,8 @@ class SparkDFDatasource(LegacyDatasource):
             ]
 
         try:
-            if reader_method.lower() == "delta":
-                return reader.format("delta").load
+            if reader_method.lower() in ["delta", "avro"]:
+                return reader.format(reader_method.lower()).load
 
             return getattr(reader, reader_method)
         except AttributeError:
