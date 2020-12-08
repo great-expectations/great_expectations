@@ -92,12 +92,20 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         )
         other_table_name = configuration.kwargs.get("other_table_name")
         # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
-        table_row_count_metric_config_other = deepcopy(dependencies["metrics"]["table.row_count"])
-        table_row_count_metric_config_other.metric_domain_kwargs["table"] = other_table_name
+        table_row_count_metric_config_other = deepcopy(
+            dependencies["metrics"]["table.row_count"]
+        )
+        table_row_count_metric_config_other.metric_domain_kwargs[
+            "table"
+        ] = other_table_name
         # rename original "table.row_count" metric to "table.row_count.self"
-        dependencies["metrics"]["table.row_count.self"] = dependencies["metrics"].pop("table.row_count")
+        dependencies["metrics"]["table.row_count.self"] = dependencies["metrics"].pop(
+            "table.row_count"
+        )
         # add a new metric dependency named "table.row_count.other" with modified metric config
-        dependencies["metrics"]["table.row_count.other"] = table_row_count_metric_config_other
+        dependencies["metrics"][
+            "table.row_count.other"
+        ] = table_row_count_metric_config_other
 
         return dependencies
 
@@ -116,7 +124,7 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
             "result": {
                 "observed_value": {
                     "self": table_row_count_self,
-                    "other": table_row_count_other
+                    "other": table_row_count_other,
                 }
             },
         }
