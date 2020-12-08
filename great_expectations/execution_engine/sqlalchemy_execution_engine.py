@@ -603,6 +603,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
+            # TODO: Add logic to handle record_set_name once implemented
+            # (i.e. multiple record sets (tables) in one batch
             if domain_kwargs["table"] != data_object.selectable.name:
                 selectable = sa.Table(
                     domain_kwargs["table"],
