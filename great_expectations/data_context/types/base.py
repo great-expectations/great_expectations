@@ -254,6 +254,7 @@ class DatasourceConfig(DictDot):
         connection_string=None,
         credentials=None,
         introspection=None,
+        tables=None,
         boto3_options=None,
         reader_method=None,
         limit=None,
@@ -294,6 +295,8 @@ class DatasourceConfig(DictDot):
             self.credentials = credentials
         if introspection is not None:
             self.introspection = introspection
+        if tables is not None:
+            self.tables = tables
         if boto3_options is not None:
             self.boto3_options = boto3_options
         if reader_method is not None:
@@ -342,6 +345,7 @@ class DatasourceConfigSchema(Schema):
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
     introspection = fields.Dict(required=False, allow_none=True)
+    tables = fields.Dict(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
 
     @validates_schema
