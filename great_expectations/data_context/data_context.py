@@ -1171,7 +1171,9 @@ class BaseDataContext:
         datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
         if initialize:
             try:
-                datasource = self._instantiate_datasource_from_config(config=config)
+                datasource = self._instantiate_datasource_from_config(
+                    name=name, config=config
+                )
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
@@ -1183,7 +1185,7 @@ class BaseDataContext:
         return datasource
 
     def _instantiate_datasource_from_config(
-        self, config: dict
+        self, name: str, config: dict
     ) -> Union[LegacyDatasource, BaseDatasource]:
         """Instantiate a new datasource to the data context, with configuration provided as kwargs.
         Args:
@@ -1198,10 +1200,10 @@ class BaseDataContext:
         try:
             datasource: Union[
                 LegacyDatasource, BaseDatasource
-            ] = self._build_datasource_from_config(config=config)
+            ] = self._build_datasource_from_config(name=name, config=config)
         except Exception as e:
             raise ge_exceptions.DatasourceInitializationError(
-                datasource_name=config["name"], message=str(e)
+                datasource_name=name, message=str(e)
             )
         return datasource
 
@@ -1248,10 +1250,13 @@ class BaseDataContext:
         else:
             raise ValueError(f"Unknown config mode {mode}")
 
-    def _build_datasource_from_config(self, config: Union[dict, DatasourceConfig]):
+    def _build_datasource_from_config(
+        self, name: str, config: Union[dict, DatasourceConfig]
+    ):
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DatasourceConfig):
             config = datasourceConfigSchema.dump(config)
+        config.update({"name": name})
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,
@@ -1297,7 +1302,9 @@ class BaseDataContext:
 
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = self._instantiate_datasource_from_config(config=config)
+        ] = self._instantiate_datasource_from_config(
+            name=datasource_name, config=config
+        )
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
