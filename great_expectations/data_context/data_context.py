@@ -1227,7 +1227,9 @@ class BaseDataContext:
         else:
             raise ValueError(f"Unknown config mode {mode}")
 
-    def _build_datasource_from_config(self, name, config):
+    def _build_datasource_from_config(
+        self, name, config: Union[dict, DatasourceConfig]
+    ):
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DatasourceConfig):
             config = datasourceConfigSchema.dump(config)
@@ -1248,7 +1250,7 @@ class BaseDataContext:
 
     def get_datasource(
         self, datasource_name: str = "default"
-    ) -> Union[LegacyDatasource, BaseDatasource]:
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Get the named datasource
 
         Args:
@@ -1272,12 +1274,9 @@ class BaseDataContext:
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
-        datasource_config = datasourceConfigSchema.load(datasource_config)
-        datasource = self._build_datasource_from_config(
-            datasource_name, datasource_config
+        return self.add_datasource(
+            datasource_name=datasource_name, initialize=True, **datasource_config
         )
-        self._cached_datasources[datasource_name] = datasource
-        return datasource
 
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""
