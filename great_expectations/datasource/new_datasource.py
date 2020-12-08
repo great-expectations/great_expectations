@@ -13,11 +13,12 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
 from great_expectations.datasource.types import PathBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
 
-class BaseDatasource:
+class BaseDatasource(object):
     """
     An Datasource is the glue between an ExecutionEngine and a DataConnector.
     """
@@ -42,15 +43,19 @@ class BaseDatasource:
 
         self._data_context_root_directory = data_context_root_directory
 
-        self._execution_engine = instantiate_class_from_config(
-            config=execution_engine,
-            runtime_environment={},
-            config_defaults={"module_name": "great_expectations.execution_engine"},
-        )
-
-        self._datasource_config = {
-            "execution_engine": execution_engine,
-        }
+        try:
+            self._execution_engine = instantiate_class_from_config(
+                config=execution_engine,
+                runtime_environment={},
+                config_defaults={"module_name": "great_expectations.execution_engine"},
+            )
+            self._datasource_config = {
+                "execution_engine": execution_engine,
+            }
+        except Exception as e:
+            raise ge_exceptions.ExecutionEngineError(
+                message=str(e)
+            )
 
         self._data_connectors = {}
 
@@ -294,11 +299,11 @@ class BaseDatasource:
         return self._execution_engine
 
     @property
-    def data_connectors(self):
+    def data_connectors(self) -> dict:
         return self._data_connectors
 
     @property
-    def config(self):
+    def config(self) -> dict:
         return copy.deepcopy(self._datasource_config)
 
 
@@ -336,9 +341,8 @@ class Datasource(BaseDatasource):
         if data_connectors is None:
             data_connectors = {}
         self._data_connectors = data_connectors
+        self._datasource_config.update({"data_connectors": copy.deepcopy(data_connectors)})
         self._init_data_connectors(data_connector_configs=data_connectors)
-
-        self._datasource_config.update({"data_connectors": data_connectors})
 
     def _init_data_connectors(
         self, data_connector_configs: Dict[str, Dict[str, Any]],

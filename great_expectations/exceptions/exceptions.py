@@ -118,10 +118,6 @@ class StoreConfigurationError(DataContextError):
     pass
 
 
-class DatasourceConfigurationError(DataContextError):
-    pass
-
-
 class InvalidExpectationKwargsError(GreatExpectationsError):
     pass
 
@@ -282,12 +278,20 @@ class BatchSpecError(DataContextError):
         super().__init__(self.message)
 
 
-class DatasourceInitializationError(GreatExpectationsError):
+class DatasourceError(DataContextError):
     def __init__(self, datasource_name, message):
         self.message = "Cannot initialize datasource {}, error: {}".format(
             datasource_name, message,
         )
         super().__init__(self.message)
+
+
+class DatasourceConfigurationError(DatasourceError):
+    pass
+
+
+class DatasourceInitializationError(DatasourceError):
+    pass
 
 
 class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
@@ -296,12 +300,6 @@ class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
 
 class InvalidConfigValueTypeError(DataContextError):
     pass
-
-
-class DatasourceError(DataContextError):
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
 
 
 class DataConnectorError(DataContextError):
