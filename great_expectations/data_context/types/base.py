@@ -130,6 +130,10 @@ class DataConnectorConfig(DictDot):
         glob_directive=None,
         default_regex=None,
         runtime_keys=None,
+        bucket=None,
+        prefix=None,
+        delimiter=None,
+        max_keys=None,
         boto3_options=None,
         **kwargs,
     ):
@@ -145,6 +149,14 @@ class DataConnectorConfig(DictDot):
             self.default_regex = default_regex
         if runtime_keys is not None:
             self.runtime_keys = runtime_keys
+        if bucket is not None:
+            self.bucket = bucket
+        if prefix is not None:
+            self.prefix = prefix
+        if delimiter is not None:
+            self.delimiter = delimiter
+        if max_keys is not None:
+            self.max_keys = max_keys
         if boto3_options is not None:
             self.boto3_options = boto3_options
         for k, v in kwargs.items():
@@ -179,13 +191,98 @@ class DataConnectorConfigSchema(Schema):
     runtime_keys = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
+    bucket = fields.String(required=False, allow_none=True)
+    prefix = fields.String(required=False, allow_none=True)
+    delimiter = fields.String(required=False, allow_none=True)
+    max_keys = fields.Integer(required=False, allow_none=True)
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+    data_asset_name_prefix = fields.String(required=False, allow_none=True)
+    data_asset_name_suffix = fields.String(required=False, allow_none=True)
+    include_schema_name = fields.Boolean(required=False, allow_none=True)
+    splitter_method = fields.String(required=False, allow_none=True)
+    splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    sampling_method = fields.String(required=False, allow_none=True)
+    sampling_kwargs = fields.Dict(required=False, allow_none=True)
+    excluded_tables = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+    included_tables = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+    skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
-        pass
+        if ("default_regex" in data) and not (
+            data["class_name"]
+            in [
+                "InferredAssetFilesystemDataConnector",
+                "ConfiguredAssetFilesystemDataConnector",
+                "InferredAssetS3DataConnector",
+                "ConfiguredAssetS3DataConnector",
+            ]
+            or data["class_name"][0] == "$"
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector, that are required only by a
+subclass of the FilePathDataConnector class (your data conntector is "{data['class_name']}").  Please update your
+configuration to continue.
+                """
+            )
+        if ("glob_directive" in data) and not (
+            data["class_name"]
+            in [
+                "InferredAssetFilesystemDataConnector",
+                "ConfiguredAssetFilesystemDataConnector",
+            ]
+            or data["class_name"][0] == "$"
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector, that are required only by a
+filesystem type of the data connector (your data conntector is "{data['class_name']}").  Please update your
+configuration to continue.
+                """
+            )
+        if (
+            "bucket" in data
+            or "prefix" in data
+            or "delimiter" in data
+            or "max_keys" in data
+        ) and not (
+            data["class_name"]
+            in ["InferredAssetS3DataConnector", "ConfiguredAssetS3DataConnector",]
+            or data["class_name"][0] == "$"
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
+S3 type of the data connector (your data conntector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+        if (
+            "data_asset_name_prefix" in data
+            or "data_asset_name_suffix" in data
+            or "include_schema_name" in data
+            or "splitter_method" in data
+            or "splitter_kwargs" in data
+            or "sampling_method" in data
+            or "sampling_kwargs" in data
+            or "excluded_tables" in data
+            or "included_tables" in data
+            or "skip_inapplicable_tables" in data
+        ) and not (
+            data["class_name"]
+            in ["InferredAssetSqlDataConnector", "ConfiguredAssetSqlDataConnector",]
+            or data["class_name"][0] == "$"
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
+SQL type of the data connector (your data conntector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
 
     # noinspection PyUnusedLocal
     @post_load
@@ -393,7 +490,7 @@ class DatasourceConfigSchema(Schema):
             or data["class_name"][0] == "$"
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data source, that are required only by an
+                f"""Your current configuration uses one or more keys in a data source, that are required only by a
 sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
                 """
             )
