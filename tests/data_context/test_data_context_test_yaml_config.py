@@ -5,10 +5,10 @@ import tempfile
 
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import create_files_in_directory
-import great_expectations.exceptions as ge_exceptions
 
 
 def test_empty_store(empty_data_context_v3):
@@ -182,7 +182,10 @@ data_connectors:
 """
 
     datasource = empty_data_context_v3.test_yaml_config(yaml_config=second_config)
-    assert "NOT_A_REAL_KEY" not in datasource.config["data_connectors"]["my_filesystem_data_connector"]
+    assert (
+        "NOT_A_REAL_KEY"
+        not in datasource.config["data_connectors"]["my_filesystem_data_connector"]
+    )
 
 
 def test_config_variables_in_test_yaml_config(empty_data_context_v3, sa):

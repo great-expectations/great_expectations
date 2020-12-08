@@ -2,6 +2,7 @@ import copy
 import logging
 from typing import Any, Callable, Dict, List, Optional, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -13,7 +14,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
 from great_expectations.datasource.types import PathBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
-import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +53,7 @@ class BaseDatasource(object):
                 "execution_engine": execution_engine,
             }
         except Exception as e:
-            raise ge_exceptions.ExecutionEngineError(
-                message=str(e)
-            )
+            raise ge_exceptions.ExecutionEngineError(message=str(e))
 
         self._data_connectors = {}
 
@@ -341,7 +339,9 @@ class Datasource(BaseDatasource):
         if data_connectors is None:
             data_connectors = {}
         self._data_connectors = data_connectors
-        self._datasource_config.update({"data_connectors": copy.deepcopy(data_connectors)})
+        self._datasource_config.update(
+            {"data_connectors": copy.deepcopy(data_connectors)}
+        )
         self._init_data_connectors(data_connector_configs=data_connectors)
 
     def _init_data_connectors(

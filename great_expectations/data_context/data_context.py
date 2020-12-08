@@ -1133,7 +1133,9 @@ class BaseDataContext:
         event_name="data_context.add_datasource",
         args_payload_fn=add_datasource_usage_statistics,
     )
-    def add_datasource(self, name, initialize=True, **kwargs) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
+    def add_datasource(
+        self, name, initialize=True, **kwargs
+    ) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name: the name for the new datasource to add
@@ -1165,15 +1167,17 @@ class BaseDataContext:
         # context provides. Datasources should not see unsubstituted variables in their config.
         if initialize:
             try:
-                datasource: Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]] = self._build_datasource_from_config(
-                    name, self._project_config_with_variables_substituted.datasources[name]
+                datasource: Optional[
+                    Dict[str, Union[LegacyDatasource, BaseDatasource]]
+                ] = self._build_datasource_from_config(
+                    name,
+                    self._project_config_with_variables_substituted.datasources[name],
                 )
                 self._cached_datasources[name] = datasource
             except Exception as e:
                 del self._project_config["datasources"][name]
                 raise ge_exceptions.DatasourceInitializationError(
-                    datasource_name=name,
-                    message=str(e)
+                    datasource_name=name, message=str(e)
                 )
         else:
             datasource = None
@@ -1242,7 +1246,9 @@ class BaseDataContext:
             )
         return datasource
 
-    def get_datasource(self, datasource_name: str = "default") -> Union[LegacyDatasource, BaseDatasource]:
+    def get_datasource(
+        self, datasource_name: str = "default"
+    ) -> Union[LegacyDatasource, BaseDatasource]:
         """Get the named datasource
 
         Args:
@@ -2562,10 +2568,14 @@ class DataContext(BaseDataContext):
         self._save_project_config()
         return new_store
 
-    def add_datasource(self, name, **kwargs) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
+    def add_datasource(
+        self, name, **kwargs
+    ) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
         logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
 
-        new_datasource: Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]] = super().add_datasource(name=name, **kwargs)
+        new_datasource: Optional[
+            Dict[str, Union[LegacyDatasource, BaseDatasource]]
+        ] = super().add_datasource(name=name, **kwargs)
         self._save_project_config()
 
         return new_datasource

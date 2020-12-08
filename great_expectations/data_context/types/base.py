@@ -59,7 +59,9 @@ class AssetConfigSchema(Schema):
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
     pattern = fields.String(required=False, allow_none=True)
-    group_names = fields.List(cls_or_instance=fields.Str(), required=False, allow_none=True)
+    group_names = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -173,7 +175,9 @@ class DataConnectorConfigSchema(Schema):
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
     default_regex = fields.Dict(required=False, allow_none=True)
-    runtime_keys = fields.List(cls_or_instance=fields.Str(), required=False, allow_none=True)
+    runtime_keys = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
