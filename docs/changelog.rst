@@ -5,11 +5,19 @@ Changelog
 #########
 
 
-Develop
+0.13.2
 -----------------
+* [ENHANCEMENT] Support avro format in Spark datasource (thanks @ryanaustincarlson!) #2122
+* [ENHANCEMENT] Made improvements to the backend for expect_column_quantile_values_to_be_between #2127
+* [ENHANCEMENT] Robust Representation in Configuration of Both Legacy and New Datasource
+* [ENHANCEMENT] Continuing 0.13 clean-up and improvements
+* [BUGFIX] Fix spark configuration not getting passed to the SparkSession builder (thanks @EricSteg!) #2124
 * [BUGFIX] Misc bugfixes and improvements to code & documentation for new in-code data context API #2118
 * [BUGFIX] When Introspecting a database, sql_data_connector will ignore view_names that are also system_tables
+* [BUGFIX] Made improvements for code & documentation for in-code data context
+* [BUGFIX] Fixed bug where TSQL mean on `int` columns returned incorrect result
 * [DOCS] Updated explanation for ConfiguredAssetDataConnector and InferredAssetDataConnector
+* [DOCS] General 0.13 docs improvements
 
 0.13.1
 -----------------
