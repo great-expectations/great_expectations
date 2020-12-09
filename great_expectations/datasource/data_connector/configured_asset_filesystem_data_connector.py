@@ -71,7 +71,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         return str(Path(base_directory).joinpath(path))
 
     @property
-    def base_directory(self):
+    def base_directory(self) -> str:
         return normalize_directory_path(
             dir_path=self._base_directory,
             root_directory_path=self.data_context_root_directory,
