@@ -10,8 +10,6 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-
-# TODO: <Alex></Alex>
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -55,6 +53,13 @@ class AssetConfig(DictDot):
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
+
+    base_directory = fields.String(required=False, allow_none=True)
+    glob_directive = fields.String(required=False, allow_none=True)
+    pattern = fields.String(required=False, allow_none=True)
+    group_names = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -117,18 +122,45 @@ class SorterConfigSchema(Schema):
 
 class DataConnectorConfig(DictDot):
     def __init__(
-        self, class_name, module_name=None, assets=None, **kwargs,
+        self,
+        class_name,
+        module_name=None,
+        assets=None,
+        base_directory=None,
+        glob_directive=None,
+        default_regex=None,
+        runtime_keys=None,
+        bucket=None,
+        prefix=None,
+        delimiter=None,
+        max_keys=None,
+        boto3_options=None,
+        **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
         if assets is not None:
-            self._assets = assets
+            self.assets = assets
+        if base_directory is not None:
+            self.base_directory = base_directory
+        if glob_directive is not None:
+            self.glob_directive = glob_directive
+        if default_regex is not None:
+            self.default_regex = default_regex
+        if runtime_keys is not None:
+            self.runtime_keys = runtime_keys
+        if bucket is not None:
+            self.bucket = bucket
+        if prefix is not None:
+            self.prefix = prefix
+        if delimiter is not None:
+            self.delimiter = delimiter
+        if max_keys is not None:
+            self.max_keys = max_keys
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
         for k, v in kwargs.items():
             setattr(self, k, v)
-
-    @property
-    def assets(self):
-        return self._assets
 
     @property
     def class_name(self):
@@ -148,14 +180,108 @@ class DataConnectorConfigSchema(Schema):
 
     assets = fields.Dict(
         keys=fields.Str(),
-        values=fields.Nested(AssetConfigSchema),
+        values=fields.Nested(AssetConfigSchema, required=False, allow_none=True),
         required=False,
         allow_none=True,
     )
 
+    base_directory = fields.String(required=False, allow_none=True)
+    glob_directive = fields.String(required=False, allow_none=True)
+    default_regex = fields.Dict(required=False, allow_none=True)
+    runtime_keys = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+    bucket = fields.String(required=False, allow_none=True)
+    prefix = fields.String(required=False, allow_none=True)
+    delimiter = fields.String(required=False, allow_none=True)
+    max_keys = fields.Integer(required=False, allow_none=True)
+    boto3_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    data_asset_name_prefix = fields.String(required=False, allow_none=True)
+    data_asset_name_suffix = fields.String(required=False, allow_none=True)
+    include_schema_name = fields.Boolean(required=False, allow_none=True)
+    splitter_method = fields.String(required=False, allow_none=True)
+    splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    sampling_method = fields.String(required=False, allow_none=True)
+    sampling_kwargs = fields.Dict(required=False, allow_none=True)
+    excluded_tables = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+    included_tables = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+    skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
+
     @validates_schema
     def validate_schema(self, data, **kwargs):
-        pass
+        # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
+        if data["class_name"][0] == "$":
+            return
+        if ("default_regex" in data) and not (
+            data["class_name"]
+            in [
+                "InferredAssetFilesystemDataConnector",
+                "ConfiguredAssetFilesystemDataConnector",
+                "InferredAssetS3DataConnector",
+                "ConfiguredAssetS3DataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector, that are required only by a
+subclass of the FilePathDataConnector class (your data conntector is "{data['class_name']}").  Please update your
+configuration to continue.
+                """
+            )
+        if ("glob_directive" in data) and not (
+            data["class_name"]
+            in [
+                "InferredAssetFilesystemDataConnector",
+                "ConfiguredAssetFilesystemDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector, that are required only by a
+filesystem type of the data connector (your data conntector is "{data['class_name']}").  Please update your
+configuration to continue.
+                """
+            )
+        if (
+            "bucket" in data
+            or "prefix" in data
+            or "delimiter" in data
+            or "max_keys" in data
+        ) and not (
+            data["class_name"]
+            in ["InferredAssetS3DataConnector", "ConfiguredAssetS3DataConnector",]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
+S3 type of the data connector (your data conntector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+        if (
+            "data_asset_name_prefix" in data
+            or "data_asset_name_suffix" in data
+            or "include_schema_name" in data
+            or "splitter_method" in data
+            or "splitter_kwargs" in data
+            or "sampling_method" in data
+            or "sampling_kwargs" in data
+            or "excluded_tables" in data
+            or "included_tables" in data
+            or "skip_inapplicable_tables" in data
+        ) and not (
+            data["class_name"]
+            in ["InferredAssetSqlDataConnector", "ConfiguredAssetSqlDataConnector",]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
+SQL type of the data connector (your data conntector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
 
     # noinspection PyUnusedLocal
     @post_load
@@ -170,6 +296,9 @@ class ExecutionEngineConfig(DictDot):
         module_name=None,
         caching=None,
         batch_spec_defaults=None,
+        connection_string=None,
+        spark_config=None,
+        boto3_options=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -178,6 +307,12 @@ class ExecutionEngineConfig(DictDot):
             self.caching = caching
         if batch_spec_defaults is not None:
             self._batch_spec_defaults = batch_spec_defaults
+        if connection_string is not None:
+            self.connection_string = connection_string
+        if spark_config is not None:
+            self.spark_config = spark_config
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -200,12 +335,37 @@ class ExecutionEngineConfigSchema(Schema):
 
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.execution_engine")
+    connection_string = fields.String(required=False, allow_none=True)
+    spark_config = fields.Raw(required=False, allow_none=True)
+    boto3_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
     caching = fields.Boolean(required=False, allow_none=True)
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
-        pass
+        # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
+        if data["class_name"][0] == "$":
+            return
+        if "connection_string" in data and not (
+            data["class_name"] == "SqlAlchemyExecutionEngine"
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses the "connection_string" key in an execution engine, but only 
+SqlAlchemyExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
+configuration to continue.
+                """
+            )
+        if "spark_config" in data and not (
+            data["class_name"] == "SparkDFExecutionEngine"
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses the "spark_config" key in an execution engine, but only 
+SparkDFExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
+configuration to continue.
+                """
+            )
 
     # noinspection PyUnusedLocal
     @post_load
@@ -222,8 +382,10 @@ class DatasourceConfig(DictDot):
         data_connectors=None,
         data_asset_type=None,
         batch_kwargs_generators=None,
+        connection_string=None,
         credentials=None,
-        boto3_options=None,
+        introspection=None,
+        tables=None,
         reader_method=None,
         limit=None,
         **kwargs,
@@ -253,13 +415,18 @@ class DatasourceConfig(DictDot):
                     "class_name": "SparkDFDataset",
                     "module_name": "great_expectations.dataset",
                 }
-        self.data_asset_type = data_asset_type
+        if data_asset_type is not None:
+            self.data_asset_type = data_asset_type
         if batch_kwargs_generators is not None:
             self.batch_kwargs_generators = batch_kwargs_generators
+        if connection_string is not None:
+            self.connection_string = connection_string
         if credentials is not None:
             self.credentials = credentials
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
+        if introspection is not None:
+            self.introspection = introspection
+        if tables is not None:
+            self.tables = tables
         if reader_method is not None:
             self.reader_method = reader_method
         if limit is not None:
@@ -293,25 +460,41 @@ class DatasourceConfigSchema(Schema):
         allow_none=True,
     )
 
-    data_asset_type = fields.Nested(ClassConfigSchema)
-    boto3_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
+    data_asset_type = fields.Nested(ClassConfigSchema, required=False, allow_none=True)
 
     # TODO: Update to generator-specific
     # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
     batch_kwargs_generators = fields.Dict(
         keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
     )
+    connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
-    spark_config = fields.Raw(required=False, allow_none=True)
+    introspection = fields.Dict(required=False, allow_none=True)
+    tables = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "generators" in data:
             raise ge_exceptions.InvalidConfigError(
-                "Your current configuration uses the 'generators' key in a datasource, but in version 0.10 of "
-                "GE, that key is renamed to 'batch_kwargs_generators'. Please update your config to continue."
+                'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '
+                'GE, that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
+            )
+        # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
+        if data["class_name"][0] == "$":
+            return
+        if (
+            "connection_string" in data
+            or "credentials" in data
+            or "introspection" in data
+            or "tables" in data
+        ) and not (
+            data["class_name"]
+            in ["SqlAlchemyDatasource", "SimpleSqlalchemyDatasource",]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data source, that are required only by a
+sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
+                """
             )
 
     # noinspection PyUnusedLocal
@@ -526,7 +709,6 @@ class DataContextConfigSchema(Schema):
         validate=lambda x: 0 < x < 100,
         error_messages={"invalid": "config version must " "be a number."},
     )
-    # TODO: <Alex>Proper Schema enforcement for the new Datasource must be implemented.</Alex>
     datasources = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(DatasourceConfigSchema),
