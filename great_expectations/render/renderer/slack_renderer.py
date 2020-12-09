@@ -140,11 +140,12 @@ class SlackRenderer(Renderer):
         return None
 
     def _get_report_element(self, docs_link):
+        report_element = None
         if docs_link is None:
-            logger.warn("No docs link found. Skipping data docs link in slack message.")
-            return
-
-        if "file://" in docs_link:
+            logger.warning(
+                "No docs link found. Skipping data docs link in Slack message."
+            )
+        elif "file://" in docs_link:
             # handle special case since Slack does not render these links
             report_element = {
                 "type": "section",
