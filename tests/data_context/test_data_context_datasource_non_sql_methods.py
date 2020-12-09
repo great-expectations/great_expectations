@@ -7,7 +7,6 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.new_datasource import Datasource
 
 from ..test_utils import create_files_in_directory
 
@@ -58,7 +57,7 @@ data_connectors:
     )
 
     context.add_datasource(
-        "my_datasource", config,
+        "my_datasource", **config,
     )
 
     batch_request: Union[dict, BatchRequest] = {
@@ -139,7 +138,7 @@ data_connectors:
     )
 
     context.add_datasource(
-        "my_datasource", config,
+        "my_datasource", **config,
     )
 
     batch_request: Union[dict, BatchRequest] = {
