@@ -67,7 +67,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             if asset.base_directory:
                 base_directory = normalize_directory_path(
                     dir_path=asset.base_directory,
-                    root_directory_path=self.data_context_root_directory,
+                    root_directory_path=base_directory,
                 )
         return str(Path(base_directory).joinpath(path))
 
