@@ -388,6 +388,7 @@ class DataContextV3(DataContext):
         data_connector_name: str = None,
         data_asset_name: str = None,
         *,
+        batch: Batch = None,
         batch_request: BatchRequest = None,
         batch_data: Any = None,
         partition_request: Union[PartitionRequest, dict] = None,
@@ -428,24 +429,25 @@ class DataContextV3(DataContext):
                 expectation_suite_name=create_expectation_suite_with_name
             )
 
-        batch = self.get_batch(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            batch_request=batch_request,
-            batch_data=batch_data,
-            partition_request=partition_request,
-            partition_identifiers=partition_identifiers,
-            limit=limit,
-            index=index,
-            custom_filter_function=custom_filter_function,
-            batch_spec_passthrough=batch_spec_passthrough,
-            sampling_method=sampling_method,
-            sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
-            **kwargs,
-        )
+        if batch is None:
+            batch = self.get_batch(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                batch_request=batch_request,
+                batch_data=batch_data,
+                partition_request=partition_request,
+                partition_identifiers=partition_identifiers,
+                limit=limit,
+                index=index,
+                custom_filter_function=custom_filter_function,
+                batch_spec_passthrough=batch_spec_passthrough,
+                sampling_method=sampling_method,
+                sampling_kwargs=sampling_kwargs,
+                splitter_method=splitter_method,
+                splitter_kwargs=splitter_kwargs,
+                **kwargs,
+            )
 
         batch_definition = batch.batch_definition
         execution_engine = self.datasources[
