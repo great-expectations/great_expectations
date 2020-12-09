@@ -42,7 +42,7 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
-from great_expectations.data_context.types.base import (  # TODO: deprecate
+from great_expectations.data_context.types.base import (
     CURRENT_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
@@ -64,7 +64,7 @@ from great_expectations.data_context.util import (
     substitute_config_variable,
 )
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import LegacyDatasource  # TODO: deprecate
+from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
@@ -278,7 +278,7 @@ class BaseDataContext:
         )
 
         # Store cached datasources but don't init them
-        self._cached_datasources = {}  # TODO: deprecate
+        self._cached_datasources = {}
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
@@ -705,17 +705,8 @@ class BaseDataContext:
         """A single holder for all Stores in this context"""
         return self._stores
 
-    # TODO: deprecate
     @property
-    def datasources(self):
-        """A single holder for all Datasources in this context"""
-        return {
-            datasource: self.get_datasource(datasource)
-            for datasource in self._project_config_with_variables_substituted.datasources
-        }
-
-    @property
-    def datasources(self) -> Dict[str, Datasource]:
+    def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         """A single holder for all Datasources in this context"""
         return {
             datasource: self.get_datasource(datasource_name=datasource)
@@ -867,8 +858,7 @@ class BaseDataContext:
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    # TODO: deprecate
-    def delete_datasource(self, datasource_name=None):
+    def delete_datasource(self, datasource_name: str):
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
@@ -879,34 +869,12 @@ class BaseDataContext:
         if datasource_name is None:
             raise ValueError("Datasource names must be a datasource name")
         else:
-            datasource = self.get_datasource(datasource_name)
-            if datasource:
-                # delete datasources project config
-                del self._project_config_with_variables_substituted.datasources[
-                    datasource_name
-                ]
-                del self._project_config.datasources[datasource_name]
-                del self._cached_datasources[datasource_name]
-            else:
-                raise ValueError("Datasource {} not found".format(datasource_name))
-
-    def delete_datasource(self, datasource_name=None):
-        """Delete a data source
-        Args:
-            datasource_name: The name of the datasource to delete.
-
-        Raises:
-            ValueError: If the datasource name isn't provided or cannot be found.
-        """
-        if datasource_name is None:
-            raise ValueError("Datasource names must be a datasource name")
-        else:
-            datasource = self.get_datasource(datasource_name)
+            datasource = self.get_datasource(datasource_name=datasource_name)
             if datasource:
                 # remove key until we have a delete method on project_config
                 # self._project_config_with_variables_substituted.datasources[
                 # datasource_name].remove()
-                # del self._project_config["datasources"][datasource_name]
+                del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError("Datasource {} not found".format(datasource_name))
@@ -1165,7 +1133,9 @@ class BaseDataContext:
         event_name="data_context.add_datasource",
         args_payload_fn=add_datasource_usage_statistics,
     )
-    def add_datasource(self, name, initialize=True, **kwargs):
+    def add_datasource(
+        self, name, initialize=True, **kwargs
+    ) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name: the name for the new datasource to add
@@ -1177,6 +1147,7 @@ class BaseDataContext:
             datasource (Datasource)
         """
         logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
+
         module_name = kwargs.get("module_name", "great_expectations.datasource")
         verify_dynamic_loading_support(module_name=module_name)
         class_name = kwargs.get("class_name")
@@ -1184,25 +1155,59 @@ class BaseDataContext:
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
+        config: dict
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
         else:
             config = kwargs
 
-        config = datasourceConfigSchema.load(config)
-        self._project_config["datasources"][name] = config
+        datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+            CommentedMap(**config)
+        )
+        self._project_config["datasources"][name] = datasource_config
 
-        # We perform variable substitution in the datasource's config here before using the config
-        # to instantiate the datasource object. Variable substitution is a service that the data
-        # context provides. Datasources should not see unsubstituted variables in their config.
+        datasource_config = self._project_config_with_variables_substituted.datasources[
+            name
+        ]
+        config = dict(datasourceConfigSchema.dump(datasource_config))
+
+        datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
         if initialize:
-            datasource = self._build_datasource_from_config(
-                name, self._project_config_with_variables_substituted.datasources[name]
-            )
-            self._cached_datasources[name] = datasource
+            try:
+                datasource = self._instantiate_datasource_from_config(
+                    name=name, config=config
+                )
+                self._cached_datasources[name] = datasource
+            except ge_exceptions.DatasourceInitializationError as e:
+                # Do not keep configuration that could not be instantiated.
+                del self._project_config["datasources"][name]
+                raise e
         else:
             datasource = None
 
+        return datasource
+
+    def _instantiate_datasource_from_config(
+        self, name: str, config: dict
+    ) -> Union[LegacyDatasource, BaseDatasource]:
+        """Instantiate a new datasource to the data context, with configuration provided as kwargs.
+        Args:
+            kwargs (keyword arguments): the configuration for the new datasource
+
+        Returns:
+            datasource (Datasource)
+        """
+        # We perform variable substitution in the datasource's config here before using the config
+        # to instantiate the datasource object. Variable substitution is a service that the data
+        # context provides. Datasources should not see unsubstituted variables in their config.
+        try:
+            datasource: Union[
+                LegacyDatasource, BaseDatasource
+            ] = self._build_datasource_from_config(name=name, config=config)
+        except Exception as e:
+            raise ge_exceptions.DatasourceInitializationError(
+                datasource_name=name, message=str(e)
+            )
         return datasource
 
     # TODO: deprecate
@@ -1248,12 +1253,19 @@ class BaseDataContext:
         else:
             raise ValueError(f"Unknown config mode {mode}")
 
-    # TODO: deprecate
-    def _build_datasource_from_config(self, name, config):
+    def _build_datasource_from_config(
+        self, name: str, config: Union[dict, DatasourceConfig]
+    ):
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DatasourceConfig):
             config = datasourceConfigSchema.dump(config)
         config.update({"name": name})
+        # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
+        if config["class_name"] in [
+            "BaseDatasource",
+            "Datasource",
+        ]:
+            config.update({"data_context_root_directory": self.root_directory})
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,
@@ -1268,8 +1280,9 @@ class BaseDataContext:
             )
         return datasource
 
-    # TODO: deprecate
-    def get_datasource(self, datasource_name: str = "default") -> LegacyDatasource:
+    def get_datasource(
+        self, datasource_name: str = "default"
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Get the named datasource
 
         Args:
@@ -1284,7 +1297,7 @@ class BaseDataContext:
             datasource_name
             in self._project_config_with_variables_substituted.datasources
         ):
-            datasource_config = copy.deepcopy(
+            datasource_config: DatasourceConfig = copy.deepcopy(
                 self._project_config_with_variables_substituted.datasources[
                     datasource_name
                 ]
@@ -1293,9 +1306,13 @@ class BaseDataContext:
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
-        datasource_config = datasourceConfigSchema.load(datasource_config)
-        datasource = self._build_datasource_from_config(
-            datasource_name, datasource_config
+
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+
+        datasource: Optional[
+            Union[LegacyDatasource, BaseDatasource]
+        ] = self._instantiate_datasource_from_config(
+            name=datasource_name, config=config
         )
         self._cached_datasources[datasource_name] = datasource
         return datasource
@@ -1310,7 +1327,6 @@ class BaseDataContext:
             )
         return keys
 
-    # TODO: deprecate
     def list_datasources(self):
         """List currently-configured datasources on this context.
 
@@ -2590,21 +2606,23 @@ class DataContext(BaseDataContext):
         self._save_project_config()
         return new_store
 
-    def add_datasource(self, name, **kwargs):
+    def add_datasource(
+        self, name, **kwargs
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
 
-        new_datasource = super().add_datasource(name, **kwargs)
+        new_datasource: Optional[
+            Union[LegacyDatasource, BaseDatasource]
+        ] = super().add_datasource(name=name, **kwargs)
         self._save_project_config()
 
         return new_datasource
 
-    def delete_datasource(self, name, **kwargs):
+    def delete_datasource(self, name: str):
         logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
 
-        delete_datasource = super().delete_datasource(name, **kwargs)
+        super().delete_datasource(datasource_name=name)
         self._save_project_config()
-
-        return delete_datasource
 
     @classmethod
     def find_context_root_dir(cls):

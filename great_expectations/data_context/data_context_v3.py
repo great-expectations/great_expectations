@@ -1,19 +1,23 @@
 import logging
 import os
 import traceback
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union, cast
 
 from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
-from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context import (
+    DataContext,
+    datasourceConfigSchema,
+)
+from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
 )
-from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -24,71 +28,6 @@ yaml.default_flow_style = False
 
 class DataContextV3(DataContext):
     """Class implementing the v3 spec for DataContext configs, plus API changes for the 0.13+ series."""
-
-    # TODO: <Alex>We need to standardize the signatures of methods in all subclasses of BaseDataContext</Alex>
-    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
-    def add_datasource(self, datasource_name, datasource_config):
-        logger.debug(
-            "Starting DataContext.add_datasource for datasource %s" % datasource_name
-        )
-
-        new_datasource = self._build_and_add_datasource(
-            datasource_name, datasource_config
-        )
-        self._save_project_config()
-
-        return new_datasource
-
-    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
-    def _build_and_add_datasource(self, datasource_name, datasource_config):
-        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
-
-        Args:
-            datasource_name (str): a key for the new Datasource in in self._datasources
-            datasource_config (dict): a config for the Datasource to add
-
-        Returns:
-            datasource (Datasource)
-        """
-
-        new_datasource = self._build_datasource_from_config(
-            datasource_name, datasource_config,
-        )
-        self._project_config["datasources"][datasource_name] = datasource_config
-        return new_datasource
-
-    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
-    def _build_datasource_from_config(self, name: str, config: dict,) -> BaseDatasource:
-        module_name: str = "great_expectations.datasource"
-        runtime_environment: dict = {
-            "name": name,
-            "data_context_root_directory": self.root_directory,
-        }
-        new_datasource: BaseDatasource = instantiate_class_from_config(
-            config=config,
-            runtime_environment=runtime_environment,
-            config_defaults={"module_name": module_name},
-        )
-
-        if not new_datasource:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=config["class_name"],
-            )
-
-        if not isinstance(new_datasource, BaseDatasource):
-            raise TypeError(
-                f"Newly instantiated component {name} is not an instance of BaseDatasource. Please check class_name in the config."
-            )
-
-        self._cached_datasources[name] = new_datasource
-        return new_datasource
-
-    @property
-    def datasources(self):
-        """A single holder for all Datasources in this context"""
-        return self._cached_datasources
 
     def test_yaml_config(
         self,
@@ -188,9 +127,18 @@ class DataContextV3(DataContext):
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
                 datasource_name = name or "my_temp_datasource"
-                instantiated_class = self._build_datasource_from_config(
-                    datasource_name, config,
+                datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+                    CommentedMap(**config)
                 )
+                self._project_config["datasources"][datasource_name] = datasource_config
+                datasource_config = self._project_config_with_variables_substituted.datasources[
+                    datasource_name
+                ]
+                config = dict(datasourceConfigSchema.dump(datasource_config))
+                instantiated_class = self._instantiate_datasource_from_config(
+                    name=datasource_name, config=config
+                )
+                self._cached_datasources[datasource_name] = instantiated_class
 
             else:
                 print(
@@ -373,7 +321,7 @@ class DataContextV3(DataContext):
         else:
             datasource_name = datasource_name
 
-        datasource: Datasource = self.datasources[datasource_name]
+        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
 
         if batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified

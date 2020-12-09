@@ -1603,7 +1603,7 @@ data_connectors:
 
     config = yaml.load(yaml_config)
     context.add_datasource(
-        "my_directory_datasource", config,
+        "my_directory_datasource", **config,
     )
 
     my_validator = context.get_validator(
@@ -1649,7 +1649,7 @@ data_connectors:
 
     config = yaml.load(yaml_config)
     context.add_datasource(
-        "my_directory_datasource", config,
+        "my_directory_datasource", **config,
     )
 
     my_validator = context.get_validator(
