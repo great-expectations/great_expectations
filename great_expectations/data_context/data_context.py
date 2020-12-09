@@ -858,7 +858,7 @@ class BaseDataContext:
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self, datasource_name):
+    def delete_datasource(self, datasource_name: str):
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
@@ -1166,6 +1166,9 @@ class BaseDataContext:
         )
         self._project_config["datasources"][name] = datasource_config
 
+        datasource_config = self._project_config_with_variables_substituted.datasources[
+            name
+        ]
         config = dict(datasourceConfigSchema.dump(datasource_config))
 
         datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
@@ -2599,20 +2602,20 @@ class DataContext(BaseDataContext):
 
     def add_datasource(
         self, name, **kwargs
-    ) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
 
         new_datasource: Optional[
-            Dict[str, Union[LegacyDatasource, BaseDatasource]]
+            Union[LegacyDatasource, BaseDatasource]
         ] = super().add_datasource(name=name, **kwargs)
         self._save_project_config()
 
         return new_datasource
 
-    def delete_datasource(self, name):
+    def delete_datasource(self, name: str):
         logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
 
-        super().delete_datasource(name=name)
+        super().delete_datasource(datasource_name=name)
         self._save_project_config()
 
     @classmethod
