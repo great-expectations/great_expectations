@@ -122,8 +122,8 @@ class DataContextV3(DataContext):
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
                 datasource_name = name or "my_temp_datasource"
-                instantiated_class = self.add_datasource(
-                    name=datasource_name, **config,
+                instantiated_class = self._instantiate_datasource_from_config(
+                    name=datasource_name, config=config
                 )
 
             else:
