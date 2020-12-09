@@ -5,9 +5,9 @@ import tempfile
 
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import PluginClassNotFoundError
 from tests.test_utils import create_files_in_directory
 
 
@@ -147,11 +147,11 @@ execution_engine:
     class_name: NOT_A_REAL_CLASS_NAME
 """
 
-    with pytest.raises(PluginClassNotFoundError) as excinfo:
+    with pytest.raises(ge_exceptions.DatasourceInitializationError) as excinfo:
         empty_data_context_v3.test_yaml_config(yaml_config=first_config)
-    # print(excinfo.value.message)
-    # shortened_message_len = len(excinfo.value.message)
-    # print("="*80)
+        # print(excinfo.value.message)
+        # shortened_message_len = len(excinfo.value.message)
+        # print("="*80)
 
     # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
     # Note: a more thorough test could also verify that the traceback is indeed short.
@@ -181,11 +181,10 @@ data_connectors:
         NOT_A_REAL_KEY: nothing
 """
 
-    with pytest.raises(TypeError) as excinfo:
-        empty_data_context_v3.test_yaml_config(yaml_config=second_config,)
-
-    empty_data_context_v3.test_yaml_config(
-        yaml_config=second_config, shorten_tracebacks=True
+    datasource = empty_data_context_v3.test_yaml_config(yaml_config=second_config)
+    assert (
+        "NOT_A_REAL_KEY"
+        not in datasource.config["data_connectors"]["my_filesystem_data_connector"]
     )
 
 
