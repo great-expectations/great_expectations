@@ -27,18 +27,19 @@ All of the examples below assume you’re testing configuration using something 
 .. code-block:: python
 
     import great_expectations as ge
-    context = ge.DataContext()
-
-    context.test_yaml_config("""
-    my_data_source:
+    context = ge.get_context()
+    config = f"""
       class_name: Datasource
       execution_engine:
         class_name: PandasExecutionEngine
       data_connectors:
         my_filesystem_data_connector:
           {data_connector configuration goes here}
-    """)
-
+    """
+    context.test_yaml_config(
+        name="my_pandas_datasource",
+        yaml_config=config
+    )
 
 If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
