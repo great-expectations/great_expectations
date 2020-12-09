@@ -4,10 +4,15 @@ import traceback
 from typing import Any, Callable, List, Optional, Union, cast
 
 from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
-from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context import (
+    DataContext,
+    datasourceConfigSchema,
+)
+from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
@@ -122,9 +127,18 @@ class DataContextV3(DataContext):
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
                 datasource_name = name or "my_temp_datasource"
+                datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+                    CommentedMap(**config)
+                )
+                self._project_config["datasources"][datasource_name] = datasource_config
+                datasource_config = self._project_config_with_variables_substituted.datasources[
+                    datasource_name
+                ]
+                config = dict(datasourceConfigSchema.dump(datasource_config))
                 instantiated_class = self._instantiate_datasource_from_config(
                     name=datasource_name, config=config
                 )
+                self._cached_datasources[datasource_name] = instantiated_class
 
             else:
                 print(
