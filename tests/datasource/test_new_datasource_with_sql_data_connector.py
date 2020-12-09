@@ -5,6 +5,7 @@ import random
 import pytest
 from ruamel.yaml import YAML
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -847,7 +848,8 @@ introspection:
         ]
     }
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ge_exceptions.DatasourceInitializationError):
+        # noinspection PyUnusedLocal
         my_sql_datasource = context.test_yaml_config(
             f"""
 class_name: SimpleSqlalchemyDatasource
