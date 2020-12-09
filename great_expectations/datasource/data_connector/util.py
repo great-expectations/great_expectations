@@ -225,7 +225,7 @@ def normalize_directory_path(
     if Path(dir_path).is_absolute() or root_directory_path is None:
         return dir_path
     else:
-        return Path(root_directory_path).joinpath(dir_path)
+        return str(Path(root_directory_path).joinpath(dir_path))
 
 
 def get_filesystem_one_level_directory_glob_path_list(
