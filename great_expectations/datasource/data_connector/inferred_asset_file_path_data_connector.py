@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 class InferredAssetFilePathDataConnector(FilePathDataConnector):
     """
-
         DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
         can use to get individual batches of data. They add flexibility in how to obtain data
         such as with time-based partitioning, downsampling, or other techniques appropriate
@@ -23,7 +22,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
         InferredAssetFilePathDataConnector is a base class operates on file paths and determine
         the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names.
-
     """
 
     def __init__(
@@ -67,7 +65,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         return len(self._data_references_cache)
 
     def get_unmatched_data_references(self) -> List[str]:
-        """ returns number of data_references in data_reference cache or throws an error"""
+        """ returns number of unmatched in data_references in cache or throws an error"""
         if self._data_references_cache is None:
             raise ValueError(
                 '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
@@ -76,7 +74,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         return [k for k, v in self._data_references_cache.items() if v is None]
 
     def get_available_data_asset_names(self) -> List[str]:
-        """ returns number of data_references in data_reference cache or throws an error"""
+        """ returns a list of all data_asset_names in data_reference cache or throws an error"""
         if self._data_references_cache is None:
             self._refresh_data_references_cache()
 
