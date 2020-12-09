@@ -38,11 +38,13 @@ class DataConnector:
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         """
-            base class for DataConnectors
+        Base class for DataConnectors
+
         Args:
             name (str): required name for data_connector
             datasource_name (str): required name for dataasource
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
+
         """
         self._name = name
         self._datasource_name = datasource_name
@@ -95,6 +97,7 @@ class DataConnector:
     def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
         """
         Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
+
         Args:
             batch_definition (BatchDefinition): required batch_definition parameter for retrieval
         Returns:
@@ -170,7 +173,7 @@ class DataConnector:
 
     def self_check(self, pretty_print=True, max_examples=3):
         """
-        checks the configuration of the current data_conenctor object by doing the following :
+        Checks the configuration of the current data_conenctor object by doing the following :
 
         1. refresh or create data_reference_cache
         2. print batch_definition_count and example_data_references for each data_asset_names
@@ -321,6 +324,7 @@ class DataConnector:
 
         Args:
             batch_request (BatchRequest): batch_request to validate
+
         """
         if not (
             batch_request.datasource_name is None

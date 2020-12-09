@@ -16,21 +16,21 @@ logger = logging.getLogger(__name__)
 
 class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     """
-        The ConfiguredAssetFilePathDataConnector is one of two classes (InferredAssetFilePathDataConnector being the
-        other) designed for connecting to filesystem-like data. This includes files on disk, but also things
-        like S3 object stores, etc:
+    The ConfiguredAssetFilePathDataConnector is one of two classes (InferredAssetFilePathDataConnector being the
+    other) designed for connecting to filesystem-like data. This includes files on disk, but also things
+    like S3 object stores, etc:
 
-        A ConfiguredAssetFilesSystemDataconnector requires an explicit listing of each DataAsset you want to connect to.
-        This allows more fine-tuning, but also requires more setup.
+    A ConfiguredAssetFilesSystemDataconnector requires an explicit listing of each DataAsset you want to connect to.
+    This allows more fine-tuning, but also requires more setup.
 
-        *Note*: ConfiguredAssetFilePathDataConnector is not meant to be used on its own, but extended.
+    *Note*: ConfiguredAssetFilePathDataConnector is not meant to be used on its own, but extended.
 
-        The ConfiguredAssetFilePathDataConnector can be extended to connect to filesystem or s3 by inherting the methods
-        from this class, and implementing the following 2 functions:
+    The ConfiguredAssetFilePathDataConnector can be extended to connect to filesystem or s3 by inherting the methods
+    from this class, and implementing the following 2 functions:
 
-        <WILL> Add descriptions for these methods.
-            1.  _get_data_reference_list_for_asset which ???
-            2.  _get_full_file_path_for_asset which ???
+    1.  _get_data_reference_list_for_asset()
+    2.  _get_full_file_path_for_asset()
+
     """
 
     def __init__(
@@ -43,8 +43,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         sorters: Optional[list] = None,
     ):
         """
-
-        __init__ ConfiguredAssetFilePathDataConnector. All subclasses of ConfiguredAssetFilePathDataConnector will need:
 
         Args:
             name (str): name of ConfiguredAssetFilePathDataConnector
@@ -75,9 +73,9 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def _build_assets_from_config(self, config: Dict[str, dict]):
         """
-            called by __init__ to build assets from config. This function does the looping through all the c
-            assets in the config, and calls another internal method _build_asset_from_config to actually
-            instantiate the class.
+        called by __init__ to build assets from config. This function does the looping through all the c
+        assets in the config, and calls another internal method _build_asset_from_config to actually
+        instantiate the class.
 
         Args:
             config (Dict[str, dict]): dict with string as key and nested dict as value.
@@ -92,8 +90,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def _build_asset_from_config(self, name: str, config: dict):
         """
-            Build an Asset using the provided configuration and return the newly-built Asset.
-            Will call utility function instantiate_class_from_config() to do the initialization
+        Build an Asset using the provided configuration and return the newly-built Asset.
+        Will call utility function instantiate_class_from_config() to do the initialization
 
         Args:
             name (str): name of configured asset

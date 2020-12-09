@@ -11,17 +11,17 @@ logger = logging.getLogger(__name__)
 
 class InferredAssetFilePathDataConnector(FilePathDataConnector):
     """
-        DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
-        can use to get individual batches of data. They add flexibility in how to obtain data
-        such as with time-based partitioning, downsampling, or other techniques appropriate
-        for the Datasource.
+    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
+    can use to get individual batches of data. They add flexibility in how to obtain data
+    such as with time-based partitioning, downsampling, or other techniques appropriate
+    for the Datasource.
 
-        The InferredAssetFilePathDataConnector is one of two classes (ConfiguredAssetFilePathDataConnector being the
-        other one) designed for connecting to filesystem-like data. This includes files on disk, but also things
-        like S3 object stores, etc:
+    The InferredAssetFilePathDataConnector is one of two classes (ConfiguredAssetFilePathDataConnector being the
+    other one) designed for connecting to filesystem-like data. This includes files on disk, but also things
+    like S3 object stores, etc:
 
-        InferredAssetFilePathDataConnector is a base class operates on file paths and determine
-        the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names.
+    InferredAssetFilePathDataConnector is a base class operates on file paths and determine
+    the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names.
     """
 
     def __init__(

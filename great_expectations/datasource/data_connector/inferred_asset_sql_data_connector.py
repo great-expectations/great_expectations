@@ -12,7 +12,8 @@ except ImportError:
 
 
 class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
-    """A DataConnector that infers data_asset names by introspecting a SQL database
+    """
+    A DataConnector that infers data_asset names by introspecting a SQL database
 
     Args:
         name (str): The name of this DataConnector

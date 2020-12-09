@@ -20,7 +20,7 @@ except ImportError:
 
 class ConfiguredAssetSqlDataConnector(DataConnector):
     """
-        A DataConnector that requires explicit listing of Sql tables you want to connect to.
+    A DataConnector that requires explicit listing of Sql tables you want to connect to.
 
     Args:
         name (str): The name of this DataConnector

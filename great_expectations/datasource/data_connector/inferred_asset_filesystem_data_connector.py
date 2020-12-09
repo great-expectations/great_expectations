@@ -41,7 +41,8 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
-        """List objects in the underlying data store to create a list of data_references.
+        """
+        List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
         """
