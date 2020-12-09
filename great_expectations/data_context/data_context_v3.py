@@ -138,9 +138,7 @@ class DataContextV3(DataContext):
                 instantiated_class = self._instantiate_datasource_from_config(
                     name=datasource_name, config=config
                 )
-                instantiated_class.data_context_root_directory = self.root_directory
-                if issubclass(type(instantiated_class), Datasource):
-                    self._cached_datasources[datasource_name] = instantiated_class
+                self._cached_datasources[datasource_name] = instantiated_class
 
             else:
                 print(
