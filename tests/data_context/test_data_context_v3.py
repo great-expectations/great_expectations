@@ -246,3 +246,28 @@ data_connectors:
 
     df_data = my_batch.data
     assert df_data.shape == (120, 10)
+
+
+def test__get_data_context_version(empty_data_context_v3):
+    context = empty_data_context_v3
+
+    assert not context._get_data_context_version()
+
+    yaml_config = f"""
+class_name: Datasource
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    general_runtime_data_connector:
+      module_name: great_expectations.datasource.data_connector
+      class_name: RuntimeDataConnector
+      runtime_keys:
+      - run_id
+"""
+    my_datasource = context.test_yaml_config(
+        name="my_datasource", yaml_config=yaml_config,
+    )
+
+    assert context._get_data_context_version() == "v3"

@@ -13,7 +13,7 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
@@ -21,7 +21,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -245,10 +245,11 @@ class BaseDataContext:
             )
         self._project_config = project_config
         self._apply_global_config_overrides()
+
         if context_root_dir is not None:
-            self._context_root_directory = os.path.abspath(context_root_dir)
-        else:
-            self._context_root_directory = context_root_dir
+            context_root_dir = os.path.abspath(context_root_dir)
+        self._context_root_directory = context_root_dir
+
         self.runtime_environment = runtime_environment or {}
 
         # Init plugin support
@@ -295,6 +296,8 @@ class BaseDataContext:
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
+
+        self._data_context_version = None
 
     def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
@@ -994,7 +997,7 @@ class BaseDataContext:
         )
         return batch_kwargs
 
-    def get_batch(
+    def _get_batch_v2(
         self,
         batch_kwargs: Union[dict, BatchKwargs],
         expectation_suite_name: Union[str, ExpectationSuite],
@@ -1122,6 +1125,331 @@ class BaseDataContext:
                 result_format=result_format,
                 **kwargs,
             )
+
+    def _get_data_context_version(self) -> Optional[str]:
+        if self._data_context_version is not None:
+            return self._data_context_version
+        datasource_configs: List[Dict[str, dict]] = self.list_datasources()
+        if not datasource_configs:
+            return None
+        for datasource_config in datasource_configs:
+            if "execution_engine" in datasource_config:
+                self._data_context_version = "v3"
+                return self._data_context_version
+        self._data_context_version = "v2"
+        return self._data_context_version
+
+    def get_batch(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        *,
+        batch_request: BatchRequest = None,
+        batch_data: Any = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
+        index=None,
+        custom_filter_function: Callable = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        # The four parameters below are exclusively for the Legacy get_batch() method.
+        batch_kwargs: Optional[Union[dict, BatchKwargs]] = None,
+        expectation_suite_name: Optional[Union[str, ExpectationSuite]] = None,
+        data_asset_type: Optional[str] = None,
+        batch_parameters: Optional[dict] = None,
+        # The four parameters above are exclusively for the Legacy get_batch() method.
+        **kwargs,
+    ) -> Union[Batch, DataAsset]:
+        """Get exactly one batch, based on a variety of flexible input types.
+
+        Args:
+            batch_request
+
+            datasource_name
+            data_connector_name
+            data_asset_name
+
+            batch_request
+            batch_data
+            partition_request
+            partition_identifiers
+
+            limit
+            index
+            custom_filter_function
+
+            batch_spec_passthrough
+
+            sampling_method
+            sampling_kwargs
+
+            splitter_method
+            splitter_kwargs
+
+            batch_kwargs: for the Legacy (V2) implementation
+            expectation_suite_name: for the Legacy (V2) implementation
+            data_asset_type: for the Legacy (V2) implementation
+            batch_parameters: for the Legacy (V2) implementation
+
+            **kwargs
+
+        Returns:
+            (Batch) The requested batch
+
+        `get_batch` is the main user-facing API for getting batches.
+        In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
+        Instead, this method is intended to help the user pick the right parameters
+
+        This method attempts to return exactly one batch.
+        If 0 or more than 1 batches would be returned, it raises an error.
+        """
+
+        if self._get_data_context_version() == "v2":
+            return self._get_batch_v2(
+                batch_kwargs=batch_kwargs,
+                expectation_suite_name=expectation_suite_name,
+                data_asset_type=data_asset_type,
+                batch_parameters=batch_parameters,
+            )
+
+        batch_list: List[Batch] = self.get_batch_list(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            partition_request=partition_request,
+            partition_identifiers=partition_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            batch_spec_passthrough=batch_spec_passthrough,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            **kwargs,
+        )
+        # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
+        if len(batch_list) != 1:
+            raise ValueError(
+                f"Got {len(batch_list)} batches instead of a single batch."
+            )
+        return batch_list[0]
+
+    def get_batch_list(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        *,
+        batch_request: BatchRequest = None,
+        batch_data: Any = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
+        index=None,
+        custom_filter_function: Callable = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        **kwargs,
+    ) -> List[Batch]:
+        """Get the list of zero or more batches, based on a variety of flexible input types.
+
+        Args:
+            batch_request
+
+            datasource_name
+            data_connector_name
+            data_asset_name
+
+            batch_request
+            batch_data
+            partition_request
+            partition_identifiers
+
+            limit
+            index
+            custom_filter_function
+
+            sampling_method
+            sampling_kwargs
+
+            splitter_method
+            splitter_kwargs
+
+            batch_spec_passthrough
+
+            **kwargs
+
+        Returns:
+            (Batch) The requested batch
+
+        `get_batch` is the main user-facing API for getting batches.
+        In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
+        Instead, this method is intended to help the user pick the right parameters
+
+        This method attempts to return any number of batches, including an empty list.
+        """
+
+        datasource_name: str
+        if batch_request:
+            if not isinstance(batch_request, BatchRequest):
+                raise TypeError(
+                    f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
+                )
+            datasource_name = batch_request.datasource_name
+        else:
+            datasource_name = datasource_name
+
+        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+
+        if batch_request:
+            # TODO: Raise a warning if any parameters besides batch_requests are specified
+            return datasource.get_batch_list_from_batch_request(
+                batch_request=batch_request
+            )
+        else:
+            if partition_request is None:
+                if partition_identifiers is None:
+                    partition_identifiers = kwargs
+                else:
+                    # Raise a warning if kwargs exist
+                    pass
+
+                # Currently, the implementation of splitting and sampling is inconsistent between the
+                # Datasource and SimpleSqlalchemyDatasource classes.  The former communicates these
+                # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
+                # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
+                # SimpleSqlalchemyDatasource uses "PartitionRequest" to relay the splitting and sampling
+                # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
+                # of partitions is implemented using the PartitionQuery class, it will not recognized the keys
+                # representing the splitting and sampling directives and raise an exception.  Additional work is needed
+                # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
+                partition_request_params: dict = {
+                    "partition_identifiers": partition_identifiers,
+                    "limit": limit,
+                    "index": index,
+                    "custom_filter_function": custom_filter_function,
+                }
+                if sampling_method is not None:
+                    sampling_params: dict = {
+                        "sampling_method": sampling_method,
+                    }
+                    if sampling_kwargs is not None:
+                        sampling_params["sampling_kwargs"] = sampling_kwargs
+                    partition_request_params.update(sampling_params)
+                if splitter_method is not None:
+                    splitter_params: dict = {
+                        "splitter_method": splitter_method,
+                    }
+                    if splitter_kwargs is not None:
+                        splitter_params["splitter_kwargs"] = splitter_kwargs
+                    partition_request_params.update(splitter_params)
+                partition_request = PartitionRequest(partition_request_params)
+            else:
+                # Raise a warning if partition_identifiers or kwargs exist
+                partition_request = PartitionRequest(partition_request)
+
+            batch_request: BatchRequest = BatchRequest(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                batch_data=batch_data,
+                partition_request=partition_request,
+                batch_spec_passthrough=batch_spec_passthrough,
+            )
+            return datasource.get_batch_list_from_batch_request(
+                batch_request=batch_request
+            )
+
+    def get_validator(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        *,
+        batch_request: BatchRequest = None,
+        batch_data: Any = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
+        index=None,
+        custom_filter_function: Callable = None,
+        expectation_suite_name: str = None,
+        expectation_suite: ExpectationSuite = None,
+        create_expectation_suite_with_name: str = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        **kwargs,
+    ) -> Validator:
+        if (
+            sum(
+                bool(x)
+                for x in [
+                    expectation_suite is not None,
+                    expectation_suite_name is not None,
+                    create_expectation_suite_with_name is not None,
+                ]
+            )
+            != 1
+        ):
+            raise ValueError(
+                "Exactly one of expectation_suite_name, expectation_suite, or create_expectation_suite_with_name must be specified"
+            )
+
+        if expectation_suite_name is not None:
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)
+
+        if create_expectation_suite_with_name is not None:
+            expectation_suite = self.create_expectation_suite(
+                expectation_suite_name=create_expectation_suite_with_name
+            )
+
+        batch = self.get_batch(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            partition_request=partition_request,
+            partition_identifiers=partition_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            batch_spec_passthrough=batch_spec_passthrough,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            **kwargs,
+        )
+
+        batch_definition = batch.batch_definition
+        execution_engine = self.datasources[
+            batch_definition.datasource_name
+        ].execution_engine
+
+        validator = Validator(
+            execution_engine=execution_engine,
+            interactive_evaluation=True,
+            expectation_suite=expectation_suite,
+            data_context=self,
+            batches=[batch],
+        )
+
+        return validator
 
     def list_validation_operator_names(self):
         if not self.validation_operators:
