@@ -1,8 +1,8 @@
 import logging
+import uuid
 from pathlib import Path
 from typing import Dict, Tuple
 from urllib.parse import urlparse
-import uuid
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -76,6 +76,7 @@ class DatabaseStoreBackend(StoreBackend):
             raise ge_exceptions.InvalidConfigError(
                 "Credentials, url, connection_string, or an engine are required for a DatabaseStoreBackend."
             )
+        # <WILL> Add an additional check here?
 
         meta = MetaData(schema=self._schema_name)
         self.key_columns = key_columns
