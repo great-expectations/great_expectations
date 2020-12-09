@@ -176,3 +176,73 @@ data_connectors:
     )
     df_data = df_data[df_data["belongs_in_split"]]
     assert df_data.drop("belongs_in_split", axis=1).shape == (4, 10)
+
+
+def test_relative_data_connector_default_and_relative_asset_base_directory_paths(
+    empty_data_context_v3, test_df, tmp_path_factory
+):
+    context = empty_data_context_v3
+
+    create_files_in_directory(
+        directory=context.root_directory,
+        file_name_list=[
+            "test_dir_0/A/B/C/logfile_0.csv",
+            "test_dir_0/A/B/C/bigfile_1.csv",
+            "test_dir_0/A/filename2.csv",
+            "test_dir_0/A/filename3.csv",
+        ],
+        file_content_fn=lambda: test_df.to_csv(header=True, index=False),
+    )
+
+    yaml_config = f"""
+class_name: Datasource
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        class_name: ConfiguredAssetFilesystemDataConnector
+        base_directory: test_dir_0/A
+        glob_directive: "*"
+        default_regex:
+            pattern: (.+)\\.csv
+            group_names:
+            - name
+
+        assets:
+            A:
+                base_directory: B/C
+                glob_directive: "log*.csv"
+                pattern: (.+)_(\\d+)\\.csv
+                group_names:
+                - name
+                - number
+"""
+    my_datasource = context.test_yaml_config(
+        name="my_directory_datasource", yaml_config=yaml_config,
+    )
+    assert (
+        my_datasource.data_connectors["my_filesystem_data_connector"].base_directory
+        == f"{context.root_directory}/test_dir_0/A"
+    )
+    assert (
+        my_datasource.data_connectors[
+            "my_filesystem_data_connector"
+        ]._get_full_file_path_for_asset(
+            path="bigfile_1.csv",
+            asset=my_datasource.data_connectors["my_filesystem_data_connector"].assets[
+                "A"
+            ],
+        )
+        == f"{context.root_directory}/test_dir_0/A/B/C/bigfile_1.csv"
+    )
+
+    my_batch = context.get_batch(
+        datasource_name="my_directory_datasource",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="A",
+    )
+
+    df_data = my_batch.data
+    assert df_data.shape == (120, 10)
