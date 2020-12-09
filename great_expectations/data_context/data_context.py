@@ -1259,9 +1259,7 @@ class BaseDataContext:
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DatasourceConfig):
             config = datasourceConfigSchema.dump(config)
-        config.update(
-            {"name": name, "data_context_root_directory": self.root_directory,}
-        )
+        config.update({"name": name})
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,

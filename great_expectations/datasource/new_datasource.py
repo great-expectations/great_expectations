@@ -303,6 +303,14 @@ class BaseDatasource:
     def config(self) -> dict:
         return copy.deepcopy(self._datasource_config)
 
+    @property
+    def data_context_root_directory(self) -> str:
+        return self._data_context_root_directory
+
+    @data_context_root_directory.setter
+    def data_context_root_directory(self, data_context_root_directory: str):
+        self._data_context_root_directory = data_context_root_directory
+
 
 class Datasource(BaseDatasource):
     """
