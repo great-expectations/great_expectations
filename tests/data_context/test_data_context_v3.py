@@ -181,14 +181,10 @@ data_connectors:
 def test_relative_data_connector_default_and_relative_asset_base_directory_paths(
     empty_data_context_v3, test_df, tmp_path_factory
 ):
-    base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_relative_data_connector_default_and_relative_asset_base_directory_paths"
-        )
-    )
+    context = empty_data_context_v3
 
     create_files_in_directory(
-        directory=base_directory,
+        directory=context.root_directory,
         file_name_list=[
             "test_dir_0/A/B/C/logfile_0.csv",
             "test_dir_0/A/B/C/bigfile_1.csv",
@@ -197,8 +193,6 @@ def test_relative_data_connector_default_and_relative_asset_base_directory_paths
         ],
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
-
-    context = empty_data_context_v3
 
     yaml_config = f"""
 class_name: Datasource
@@ -243,3 +237,12 @@ data_connectors:
         )
         == f"{context.root_directory}/test_dir_0/A/B/C/bigfile_1.csv"
     )
+
+    my_batch = context.get_batch(
+        datasource_name="my_directory_datasource",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="A",
+    )
+
+    df_data = my_batch.data
+    assert df_data.shape == (120, 10)
