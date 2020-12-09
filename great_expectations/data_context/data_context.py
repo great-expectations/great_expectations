@@ -1260,6 +1260,12 @@ class BaseDataContext:
         if isinstance(config, DatasourceConfig):
             config = datasourceConfigSchema.dump(config)
         config.update({"name": name})
+        # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
+        if config["class_name"] in [
+            "BaseDatasource",
+            "Datasource",
+        ]:
+            config.update({"data_context_root_directory": self.root_directory})
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,
