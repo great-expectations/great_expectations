@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class FilePathDataConnector(DataConnector):
     """
-    Base-class for DAta connectors that are designed for connecting to filesystem-like data, which can include
+    Base-class for Data connectors that are designed for connecting to filesystem-like data, which can include
     files on disk, but also S3 and GCS.
     """
 
@@ -90,11 +90,12 @@ class FilePathDataConnector(DataConnector):
         self, batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         """
-        Retrieve batch definitions and that match batch_request.
+        Retrieve batch_definitions and that match batch_request.
 
-        if batch_request also has a partition_query, then select batch_definitions that match partition_query.
+        First retrieves all batch_definitions that match batch_request
+            - if batch_request also has a partition_query, then select batch_definitions that match partition_query.
+            - if data_connector has sorters configured, then sort the batch_definition list before returning
 
-        if data_connectors have sorters configured, then sort the batch_definition list before returning
         Args:
             batch_request (BatchRequest): BatchRequest to process
 
@@ -134,14 +135,15 @@ class FilePathDataConnector(DataConnector):
             return batch_definition_list
 
     def _sort_batch_definition_list(
-        self, batch_definition_list
+        self, batch_definition_list: List[BatchDefinition]
     ) -> List[BatchDefinition]:
         """
-            use
+            Use configured sorters to sort batch_definition
         Args:
-            batch_definition_list ():
+            batch_definition_list (list): list of batch_definitions to sort
 
         Returns:
+            sorted list of batch_definitions
 
         """
         sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))

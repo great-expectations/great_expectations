@@ -95,10 +95,8 @@ class DataConnector:
     def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
         """
         Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
-
         Args:
             batch_definition (BatchDefinition): required batch_definition parameter for retrieval
-
         Returns:
             BatchSpec object built from BatchDefinition
 
@@ -195,7 +193,6 @@ class DataConnector:
             print()
 
         asset_names = self.get_available_data_asset_names()
-        # <WILL> : do these need to be sorted using sorter? Sorters currently act on BatchDefinitions, and this returns a list of strings
         asset_names.sort()
         len_asset_names = len(asset_names)
 

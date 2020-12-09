@@ -16,11 +16,6 @@ logger = logging.getLogger(__name__)
 
 class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     """
-        DataConnectors produce identifying information called "batch_spec" that ExecutionEngines
-        can use to get individual batches of data. They add flexibility in how to obtain data
-        such as with time-based partitioning, downsampling, or other techniques appropriate
-        for the Datasource.
-
         The ConfiguredAssetFilePathDataConnector is one of two classes (InferredAssetFilePathDataConnector being the
         other) designed for connecting to filesystem-like data. This includes files on disk, but also things
         like S3 object stores, etc:
@@ -127,7 +122,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return asset
 
     def get_available_data_asset_names(self) -> List[str]:
-        """Return the list of asset names known by this data connector.
+        """
+        Return the list of asset names known by this data connector.
 
         Returns:
             A list of available names
@@ -135,9 +131,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return list(self.assets.keys())
 
     def _refresh_data_references_cache(self):
-        """
 
-        """
         # Map data_references to batch_definitions
         self._data_references_cache = {}
 
