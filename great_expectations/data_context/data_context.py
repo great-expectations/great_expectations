@@ -36,22 +36,21 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # TODO:
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.store import TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
-from great_expectations.data_context.types.base import (  # TODO: deprecate
+from great_expectations.data_context.types.base import (
     CURRENT_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     DatasourceConfig,
-    LegacyDatasourceConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
-    legacyDatasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -65,7 +64,7 @@ from great_expectations.data_context.util import (
     substitute_config_variable,
 )
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import LegacyDatasource  # TODO: deprecate
+from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
@@ -253,24 +252,33 @@ class BaseDataContext:
         self.runtime_environment = runtime_environment or {}
 
         # Init plugin support
-        if self.plugins_directory is not None:
+        if self.plugins_directory is not None and os.path.exists(
+            self.plugins_directory
+        ):
             sys.path.append(self.plugins_directory)
 
         # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
         self._in_memory_instance_id = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
-        self._initialize_usage_statistics(project_config.anonymous_usage_statistics)
-
-        # Store cached datasources but don't init them
-        self._cached_datasources = {}  # TODO: deprecate
-
-        # Store cached datasources but don't init them
-        self._cached_datasources = {}
 
         # Init stores
         self._stores = dict()
         self._init_stores(self._project_config_with_variables_substituted.stores)
+
+        # Init data_context_id
+        self._data_context_id = self._construct_data_context_id()
+
+        # Override the project_config data_context_id if an expectations_store was already set up
+        self._project_config.anonymous_usage_statistics.data_context_id = (
+            self._data_context_id
+        )
+        self._initialize_usage_statistics(
+            self._project_config.anonymous_usage_statistics
+        )
+
+        # Store cached datasources but don't init them
+        self._cached_datasources = {}
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
@@ -291,10 +299,32 @@ class BaseDataContext:
     def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
         try:
+            # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+            # the expectations_store doesnt yet exist by:
+            # adding the data_context_id from the project_config
+            # to the store_config under the key manually_initialize_store_backend_id
+            if (store_name == self.expectations_store_name) and store_config.get(
+                "store_backend"
+            ):
+                store_config["store_backend"].update(
+                    {
+                        "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                    }
+                )
+
+            # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+            if (
+                store_name not in [store["name"] for store in self.list_active_stores()]
+                and store_config.get("store_backend") is not None
+            ):
+                store_config["store_backend"].update(
+                    {"suppress_store_backend_id": True}
+                )
+
             new_store = instantiate_class_from_config(
                 config=store_config,
                 runtime_environment={"root_directory": self.root_directory,},
-                config_defaults={"module_name": module_name},
+                config_defaults={"module_name": module_name, "store_name": store_name},
             )
         except ge_exceptions.DataContextError as e:
             new_store = None
@@ -426,6 +456,28 @@ class BaseDataContext:
                 pass
         return False
 
+    def _construct_data_context_id(self) -> str:
+        """
+        Choose the id of the currently-configured expectations store, if available and a persistent store.
+        If not, it should choose the id stored in DataContextConfig.
+        Returns:
+            UUID to use as the data_context_id
+        """
+
+        # Choose the id of the currently-configured expectations store, if it is a persistent store
+        expectations_store = self._stores[
+            self._project_config_with_variables_substituted.expectations_store_name
+        ]
+        if isinstance(expectations_store.store_backend, TupleStoreBackend):
+            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
+            return expectations_store.store_backend_id_warnings_suppressed
+
+        # Otherwise choose the id stored in the project_config
+        else:
+            return (
+                self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+            )
+
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
     ):
@@ -437,7 +489,7 @@ class BaseDataContext:
 
         self._usage_statistics_handler = UsageStatisticsHandler(
             data_context=self,
-            data_context_id=usage_statistics_config.data_context_id,
+            data_context_id=self._data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
@@ -653,17 +705,8 @@ class BaseDataContext:
         """A single holder for all Stores in this context"""
         return self._stores
 
-    # TODO: deprecate
     @property
-    def datasources(self):
-        """A single holder for all Datasources in this context"""
-        return {
-            datasource: self.get_datasource(datasource)
-            for datasource in self._project_config_with_variables_substituted.datasources
-        }
-
-    @property
-    def datasources(self) -> Dict[str, Datasource]:
+    def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         """A single holder for all Datasources in this context"""
         return {
             datasource: self.get_datasource(datasource_name=datasource)
@@ -689,6 +732,11 @@ class BaseDataContext:
             instance_id = str(uuid.uuid4())
             self._in_memory_instance_id = instance_id
         return instance_id
+
+    @property
+    def config_variables(self):
+        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
+        return dict(self._load_config_variables_file())
 
     #####
     #
@@ -810,8 +858,7 @@ class BaseDataContext:
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    # TODO: deprecate
-    def delete_datasource(self, datasource_name=None):
+    def delete_datasource(self, datasource_name: str):
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
@@ -822,34 +869,12 @@ class BaseDataContext:
         if datasource_name is None:
             raise ValueError("Datasource names must be a datasource name")
         else:
-            datasource = self.get_datasource(datasource_name)
-            if datasource:
-                # delete datasources project config
-                del self._project_config_with_variables_substituted.datasources[
-                    datasource_name
-                ]
-                del self._project_config.datasources[datasource_name]
-                del self._cached_datasources[datasource_name]
-            else:
-                raise ValueError("Datasource {} not found".format(datasource_name))
-
-    def delete_datasource(self, datasource_name=None):
-        """Delete a data source
-        Args:
-            datasource_name: The name of the datasource to delete.
-
-        Raises:
-            ValueError: If the datasource name isn't provided or cannot be found.
-        """
-        if datasource_name is None:
-            raise ValueError("Datasource names must be a datasource name")
-        else:
-            datasource = self.get_datasource(datasource_name)
+            datasource = self.get_datasource(datasource_name=datasource_name)
             if datasource:
                 # remove key until we have a delete method on project_config
                 # self._project_config_with_variables_substituted.datasources[
                 # datasource_name].remove()
-                # del self._project_config["datasources"][datasource_name]
+                del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError("Datasource {} not found".format(datasource_name))
@@ -969,20 +994,6 @@ class BaseDataContext:
         )
         return batch_kwargs
 
-    # New get_batch (note: it returns the List of Batch objects, not a single Batch object).
-    def get_batch_list_from_new_style_datasource(
-        self, batch_request: dict
-    ) -> List[Batch]:
-        datasource_name: str = batch_request.get("datasource_name")
-        if not datasource_name:
-            raise ge_exceptions.DatasourceError(
-                message="Batch request must specify an datasource."
-            )
-
-        datasource: Datasource = self.datasources[datasource_name]
-        batch_request: BatchRequest = BatchRequest(**batch_request)
-        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
-
     def get_batch(
         self,
         batch_kwargs: Union[dict, BatchKwargs],
@@ -990,17 +1001,17 @@ class BaseDataContext:
         data_asset_type=None,
         batch_parameters=None,
     ) -> DataAsset:
-        """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If	
-        batch_parameters are included, they will be available as attributes of the batch.	
-        Args:	
-            batch_kwargs: the batch_kwargs to use; must include a datasource key	
-            expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get	
-            data_asset_type: the type of data_asset to build, with associated expectation implementations. This can	
-                generally be inferred from the datasource.	
-            batch_parameters: optional parameters to store as the reference description of the batch. They should	
-                reflect parameters that would provide the passed BatchKwargs.	
-        Returns:	
-            DataAsset	
+        """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
+        batch_parameters are included, they will be available as attributes of the batch.
+        Args:
+            batch_kwargs: the batch_kwargs to use; must include a datasource key
+            expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get
+            data_asset_type: the type of data_asset to build, with associated expectation implementations. This can
+                generally be inferred from the datasource.
+            batch_parameters: optional parameters to store as the reference description of the batch. They should
+                reflect parameters that would provide the passed BatchKwargs.
+        Returns:
+            DataAsset
         """
         if isinstance(batch_kwargs, dict):
             batch_kwargs = BatchKwargs(batch_kwargs)
@@ -1122,7 +1133,9 @@ class BaseDataContext:
         event_name="data_context.add_datasource",
         args_payload_fn=add_datasource_usage_statistics,
     )
-    def add_datasource(self, name, initialize=True, **kwargs):
+    def add_datasource(
+        self, name, initialize=True, **kwargs
+    ) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name: the name for the new datasource to add
@@ -1134,6 +1147,7 @@ class BaseDataContext:
             datasource (Datasource)
         """
         logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
+
         module_name = kwargs.get("module_name", "great_expectations.datasource")
         verify_dynamic_loading_support(module_name=module_name)
         class_name = kwargs.get("class_name")
@@ -1141,25 +1155,59 @@ class BaseDataContext:
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
+        config: dict
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
         else:
             config = kwargs
 
-        config = legacyDatasourceConfigSchema.load(config)
-        self._project_config["datasources"][name] = config
+        datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+            CommentedMap(**config)
+        )
+        self._project_config["datasources"][name] = datasource_config
 
-        # We perform variable substitution in the datasource's config here before using the config
-        # to instantiate the datasource object. Variable substitution is a service that the data
-        # context provides. Datasources should not see unsubstituted variables in their config.
+        datasource_config = self._project_config_with_variables_substituted.datasources[
+            name
+        ]
+        config = dict(datasourceConfigSchema.dump(datasource_config))
+
+        datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
         if initialize:
-            datasource = self._build_datasource_from_config(
-                name, self._project_config_with_variables_substituted.datasources[name]
-            )
-            self._cached_datasources[name] = datasource
+            try:
+                datasource = self._instantiate_datasource_from_config(
+                    name=name, config=config
+                )
+                self._cached_datasources[name] = datasource
+            except ge_exceptions.DatasourceInitializationError as e:
+                # Do not keep configuration that could not be instantiated.
+                del self._project_config["datasources"][name]
+                raise e
         else:
             datasource = None
 
+        return datasource
+
+    def _instantiate_datasource_from_config(
+        self, name: str, config: dict
+    ) -> Union[LegacyDatasource, BaseDatasource]:
+        """Instantiate a new datasource to the data context, with configuration provided as kwargs.
+        Args:
+            kwargs (keyword arguments): the configuration for the new datasource
+
+        Returns:
+            datasource (Datasource)
+        """
+        # We perform variable substitution in the datasource's config here before using the config
+        # to instantiate the datasource object. Variable substitution is a service that the data
+        # context provides. Datasources should not see unsubstituted variables in their config.
+        try:
+            datasource: Union[
+                LegacyDatasource, BaseDatasource
+            ] = self._build_datasource_from_config(name=name, config=config)
+        except Exception as e:
+            raise ge_exceptions.DatasourceInitializationError(
+                datasource_name=name, message=str(e)
+            )
         return datasource
 
     # TODO: deprecate
@@ -1185,15 +1233,39 @@ class BaseDataContext:
         )
         return generator
 
-    def get_config(self):
-        return self._project_config
+    def get_config(
+        self, mode="typed"
+    ) -> Union[DataContextConfig, CommentedMap, dict, str]:
+        config: DataContextConfig = self._project_config
 
-    # TODO: deprecate
-    def _build_datasource_from_config(self, name, config):
+        if mode == "typed":
+            return config
+
+        elif mode == "commented_map":
+            return config.commented_map
+
+        elif mode == "dict":
+            return config.to_json_dict()
+
+        elif mode == "yaml":
+            return config.to_yaml_str()
+
+        else:
+            raise ValueError(f"Unknown config mode {mode}")
+
+    def _build_datasource_from_config(
+        self, name: str, config: Union[dict, DatasourceConfig]
+    ):
         # We convert from the type back to a dictionary for purposes of instantiation
-        if isinstance(config, LegacyDatasourceConfig):
-            config = legacyDatasourceConfigSchema.dump(config)
+        if isinstance(config, DatasourceConfig):
+            config = datasourceConfigSchema.dump(config)
         config.update({"name": name})
+        # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
+        if config["class_name"] in [
+            "BaseDatasource",
+            "Datasource",
+        ]:
+            config.update({"data_context_root_directory": self.root_directory})
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,
@@ -1208,8 +1280,9 @@ class BaseDataContext:
             )
         return datasource
 
-    # TODO: deprecate
-    def get_datasource(self, datasource_name: str = "default") -> LegacyDatasource:
+    def get_datasource(
+        self, datasource_name: str = "default"
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Get the named datasource
 
         Args:
@@ -1224,7 +1297,7 @@ class BaseDataContext:
             datasource_name
             in self._project_config_with_variables_substituted.datasources
         ):
-            datasource_config = copy.deepcopy(
+            datasource_config: DatasourceConfig = copy.deepcopy(
                 self._project_config_with_variables_substituted.datasources[
                     datasource_name
                 ]
@@ -1233,9 +1306,13 @@ class BaseDataContext:
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
-        datasource_config = legacyDatasourceConfigSchema.load(datasource_config)
-        datasource = self._build_datasource_from_config(
-            datasource_name, datasource_config
+
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+
+        datasource: Optional[
+            Union[LegacyDatasource, BaseDatasource]
+        ] = self._instantiate_datasource_from_config(
+            name=datasource_name, config=config
         )
         self._cached_datasources[datasource_name] = datasource
         return datasource
@@ -1249,22 +1326,6 @@ class BaseDataContext:
                 "Unable to find configured store: %s" % str(e)
             )
         return keys
-
-    # TODO: deprecate
-    def list_datasources(self):
-        """List currently-configured datasources on this context.
-
-        Returns:
-            List(dict): each dictionary includes "name", "class_name", and "module_name" keys
-        """
-        datasources = []
-        for (
-            key,
-            value,
-        ) in self._project_config_with_variables_substituted.datasources.items():
-            value["name"] = key
-            datasources.append(value)
-        return datasources
 
     def list_datasources(self):
         """List currently-configured datasources on this context.
@@ -1292,6 +1353,22 @@ class BaseDataContext:
             value["name"] = name
             stores.append(value)
         return stores
+
+    def list_active_stores(self):
+        """
+        List active Stores on this context. Active stores are identified by setting the following parameters:
+            expectations_store_name,
+            validations_store_name,
+            evaluation_parameter_store_name
+        """
+        active_store_names = [
+            self.expectations_store_name,
+            self.validations_store_name,
+            self.evaluation_parameter_store_name,
+        ]
+        return [
+            store for store in self.list_stores() if store["name"] in active_store_names
+        ]
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
@@ -2154,6 +2231,113 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiling_results["success"] = True
         return profiling_results
 
+    @staticmethod
+    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
+        if checkpoint is None:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
+            )
+        if "validation_operator_name" not in checkpoint:
+            checkpoint["validation_operator_name"] = "action_list_operator"
+
+        if "batches" not in checkpoint:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
+            )
+        batches = checkpoint["batches"]
+        if not isinstance(batches, list):
+            raise ge_exceptions.CheckpointError(
+                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
+            )
+
+        for batch in batches:
+            for required in ["expectation_suite_names", "batch_kwargs"]:
+                if required not in batch:
+                    raise ge_exceptions.CheckpointError(
+                        f"Items in `batches` must have a key `{required}`"
+                    )
+
+        return checkpoint
+
+    def list_checkpoints(self) -> List[str]:
+        """List checkpoints. (Experimental)"""
+        # TODO mark experimental
+        files = self._list_ymls_in_checkpoints_directory()
+        return [
+            os.path.basename(f)[:-4]
+            for f in files
+            if os.path.basename(f).endswith(".yml")
+        ]
+
+    def get_checkpoint(self, checkpoint_name: str) -> dict:
+        """Load a checkpoint. (Experimental)"""
+        # TODO mark experimental
+        yaml = YAML(typ="safe")
+        # TODO make a serializable class with a schema
+        checkpoint_path = os.path.join(
+            self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
+        )
+        try:
+            with open(checkpoint_path) as f:
+                checkpoint = yaml.load(f.read())
+                return self._validate_checkpoint(checkpoint, checkpoint_name)
+        except FileNotFoundError:
+            raise ge_exceptions.CheckpointNotFoundError(
+                f"Could not find checkpoint `{checkpoint_name}`."
+            )
+
+    def run_checkpoint(
+        self,
+        checkpoint_name: str,
+        run_id=None,
+        evaluation_parameters=None,
+        run_name=None,
+        run_time=None,
+        result_format=None,
+        **kwargs,
+    ):
+        """
+        Validate against a pre-defined checkpoint. (Experimental)
+        Args:
+            checkpoint_name: The name of a checkpoint defined via the CLI or by manually creating a yml file
+            run_name: The run_name for the validation; if None, a default value will be used
+            **kwargs: Additional kwargs to pass to the validation operator
+
+        Returns:
+            ValidationOperatorResult
+        """
+        # TODO mark experimental
+
+        if result_format is None:
+            result_format = {"result_format": "SUMMARY"}
+
+        checkpoint = self.get_checkpoint(checkpoint_name)
+
+        batches_to_validate = []
+        for batch in checkpoint["batches"]:
+            batch_kwargs = batch["batch_kwargs"]
+            for suite_name in batch["expectation_suite_names"]:
+                suite = self.get_expectation_suite(suite_name)
+                batch = self.get_batch(batch_kwargs, suite)
+                batches_to_validate.append(batch)
+
+        results = self.run_validation_operator(
+            checkpoint["validation_operator_name"],
+            assets_to_validate=batches_to_validate,
+            run_id=run_id,
+            evaluation_parameters=evaluation_parameters,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            **kwargs,
+        )
+        return results
+
+    def _list_ymls_in_checkpoints_directory(self):
+        checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
+        files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
+        return files
+
 
 class DataContext(BaseDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
@@ -2407,38 +2591,6 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def list_checkpoints(self) -> List[str]:
-        """List checkpoints. (Experimental)"""
-        # TODO mark experimental
-        files = self._list_ymls_in_checkpoints_directory()
-        return [
-            os.path.basename(f)[:-4]
-            for f in files
-            if os.path.basename(f).endswith(".yml")
-        ]
-
-    def get_checkpoint(self, checkpoint_name: str) -> dict:
-        """Load a checkpoint. (Experimental)"""
-        # TODO mark experimental
-        yaml = YAML(typ="safe")
-        # TODO make a serializable class with a schema
-        checkpoint_path = os.path.join(
-            self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
-        )
-        try:
-            with open(checkpoint_path) as f:
-                checkpoint = yaml.load(f.read())
-                return self._validate_checkpoint(checkpoint, checkpoint_name)
-        except FileNotFoundError:
-            raise ge_exceptions.CheckpointNotFoundError(
-                f"Could not find checkpoint `{checkpoint_name}`."
-            )
-
-    def _list_ymls_in_checkpoints_directory(self):
-        checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
-        files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
-        return files
-
     def _save_project_config(self):
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
@@ -2454,21 +2606,23 @@ class DataContext(BaseDataContext):
         self._save_project_config()
         return new_store
 
-    def add_datasource(self, name, **kwargs):
+    def add_datasource(
+        self, name, **kwargs
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
 
-        new_datasource = super().add_datasource(name, **kwargs)
+        new_datasource: Optional[
+            Union[LegacyDatasource, BaseDatasource]
+        ] = super().add_datasource(name=name, **kwargs)
         self._save_project_config()
 
         return new_datasource
 
-    def delete_datasource(self, name, **kwargs):
+    def delete_datasource(self, name: str):
         logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
 
-        delete_datasource = super().delete_datasource(name, **kwargs)
+        super().delete_datasource(datasource_name=name)
         self._save_project_config()
-
-        return delete_datasource
 
     @classmethod
     def find_context_root_dir(cls):
@@ -2622,34 +2776,6 @@ class DataContext(BaseDataContext):
             ge_exceptions.InvalidDataContextConfigError,
         ) as e:
             logger.debug(e)
-
-    @staticmethod
-    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
-        if checkpoint is None:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
-            )
-        if "validation_operator_name" not in checkpoint:
-            checkpoint["validation_operator_name"] = "action_list_operator"
-
-        if "batches" not in checkpoint:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
-            )
-        batches = checkpoint["batches"]
-        if not isinstance(batches, list):
-            raise ge_exceptions.CheckpointError(
-                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
-            )
-
-        for batch in batches:
-            for required in ["expectation_suite_names", "batch_kwargs"]:
-                if required not in batch:
-                    raise ge_exceptions.CheckpointError(
-                        f"Items in `batches` must have a key `{required}`"
-                    )
-
-        return checkpoint
 
 
 class ExplorerDataContext(DataContext):

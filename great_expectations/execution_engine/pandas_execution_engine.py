@@ -82,16 +82,22 @@ Notes:
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
-        boto3_options: dict = None
-        if boto3_options is None:
-            boto3_options = {}
+        boto3_options: dict = kwargs.get("boto3_options", {})
 
         # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
         try:
             self._s3 = boto3.client("s3", **boto3_options)
         except (TypeError, AttributeError):
             self._s3 = None
+
         super().__init__(*args, **kwargs)
+
+        self._config.update(
+            {
+                "discard_subset_failing_expectations": self.discard_subset_failing_expectations,
+                "boto3_options": boto3_options,
+            }
+        )
 
     def configure_validator(self, validator):
         super().configure_validator(validator)

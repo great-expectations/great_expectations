@@ -1,27 +1,23 @@
-import copy
 import logging
 import os
 import traceback
-from typing import Callable, Optional, Union
+from typing import Any, Callable, List, Optional, Union, cast
 
-from ruamel.yaml import YAML, YAMLError
-from ruamel.yaml.compat import StringIO
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import (
-    Batch,
-    BatchDefinition,
-    BatchRequest,
-    PartitionRequest,
+from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
+from great_expectations.data_context.data_context import (
+    DataContext,
+    datasourceConfigSchema,
 )
-from great_expectations.data_context.data_context import DataContext
-from great_expectations.data_context.types.base import dataContextConfigSchema
+from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
 )
-from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -32,105 +28,6 @@ yaml.default_flow_style = False
 
 class DataContextV3(DataContext):
     """Class implementing the v3 spec for DataContext configs, plus API changes for the 0.13+ series."""
-
-    def get_config(self, mode="typed"):
-        config = super().get_config()
-
-        if mode == "typed":
-            return config
-
-        elif mode == "commented_map":
-            return config.commented_map
-
-        elif mode == "dict":
-            return dict(config.commented_map)
-
-        elif mode == "yaml":
-            commented_map = copy.deepcopy(config.commented_map)
-            commented_map.update(dataContextConfigSchema.dump(config))
-
-            stream = StringIO()
-            yaml.dump(commented_map, stream)
-            yaml_string = stream.getvalue()
-
-            # print(commented_map)
-            # print(commented_map.__dict__)
-            # print(str(commented_map))
-            return yaml_string
-            # config.commented_map.update(dataContextConfigSchema.dump(self))
-
-        else:
-            raise ValueError(f"Unknown config mode {mode}")
-
-    @property
-    def config_variables(self):
-        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
-        return dict(self._load_config_variables_file())
-
-    # TODO: <Alex>We need to standardize the signatures of methods in all subclasses of BaseDataContext</Alex>
-    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
-    def add_datasource(self, datasource_name, datasource_config):
-        logger.debug(
-            "Starting DataContext.add_datasource for datasource %s" % datasource_name
-        )
-
-        new_datasource = self._build_and_add_datasource(
-            datasource_name, datasource_config
-        )
-        self._save_project_config()
-
-        return new_datasource
-
-    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
-    def _build_and_add_datasource(self, datasource_name, datasource_config):
-        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
-
-        Args:
-            datasource_name (str): a key for the new Datasource in in self._datasources
-            datasource_config (dict): a config for the Datasource to add
-
-        Returns:
-            datasource (Datasource)
-        """
-
-        new_datasource = self._build_datasource_from_config(
-            datasource_name, datasource_config,
-        )
-        self._project_config["datasources"][datasource_name] = datasource_config
-        return new_datasource
-
-    # TODO: <Alex>Placing this method here avoids conflict with those in DataContext, handling LegacyDatasource</Alex>
-    def _build_datasource_from_config(self, name: str, config: dict,) -> BaseDatasource:
-        module_name: str = "great_expectations.datasource"
-        runtime_environment: dict = {
-            "name": name,
-            "data_context_root_directory": self.root_directory,
-        }
-        new_datasource: BaseDatasource = instantiate_class_from_config(
-            config=config,
-            runtime_environment=runtime_environment,
-            config_defaults={"module_name": module_name},
-        )
-
-        if not new_datasource:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=config["class_name"],
-            )
-
-        if not isinstance(new_datasource, BaseDatasource):
-            raise TypeError(
-                f"Newly instantiated component {name} is not an instance of BaseDatasource. Please check class_name in the config."
-            )
-
-        self._cached_datasources[name] = new_datasource
-        return new_datasource
-
-    @property
-    def datasources(self):
-        """A single holder for all Datasources in this context"""
-        return self._cached_datasources
 
     def test_yaml_config(
         self,
@@ -230,9 +127,18 @@ class DataContextV3(DataContext):
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
                 datasource_name = name or "my_temp_datasource"
-                instantiated_class = self._build_datasource_from_config(
-                    datasource_name, config,
+                datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+                    CommentedMap(**config)
                 )
+                self._project_config["datasources"][datasource_name] = datasource_config
+                datasource_config = self._project_config_with_variables_substituted.datasources[
+                    datasource_name
+                ]
+                config = dict(datasourceConfigSchema.dump(datasource_config))
+                instantiated_class = self._instantiate_datasource_from_config(
+                    name=datasource_name, config=config
+                )
+                self._cached_datasources[datasource_name] = instantiated_class
 
             else:
                 print(
@@ -270,6 +176,7 @@ class DataContextV3(DataContext):
         data_asset_name: str = None,
         *,
         batch_request: BatchRequest = None,
+        batch_data: Any = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
         limit: int = None,
@@ -292,6 +199,7 @@ class DataContextV3(DataContext):
             data_asset_name
 
             batch_request
+            batch_data
             partition_request
             partition_identifiers
 
@@ -316,10 +224,94 @@ class DataContextV3(DataContext):
         In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
         Instead, this method is intended to help the user pick the right parameters
 
-        This method attempts returns exactly one batch.
-        If 0 or more than batches would be returned, it raises an error.
+        This method attempts to return exactly one batch.
+        If 0 or more than 1 batches would be returned, it raises an error.
         """
 
+        batch_list: List[Batch] = self.get_batch_list(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            partition_request=partition_request,
+            partition_identifiers=partition_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            batch_spec_passthrough=batch_spec_passthrough,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            **kwargs,
+        )
+        # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
+        if len(batch_list) != 1:
+            raise ValueError(
+                f"Got {len(batch_list)} batches instead of a single batch."
+            )
+        return batch_list[0]
+
+    def get_batch_list(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        *,
+        batch_request: BatchRequest = None,
+        batch_data: Any = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
+        index=None,
+        custom_filter_function: Callable = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        **kwargs,
+    ) -> List[Batch]:
+        """Get the list of zero or more batches, based on a variety of flexible input types.
+
+        Args:
+            batch_request
+
+            datasource_name
+            data_connector_name
+            data_asset_name
+
+            batch_request
+            batch_data
+            partition_request
+            partition_identifiers
+
+            limit
+            index
+            custom_filter_function
+
+            sampling_method
+            sampling_kwargs
+
+            splitter_method
+            splitter_kwargs
+
+            batch_spec_passthrough
+
+            **kwargs
+
+        Returns:
+            (Batch) The requested batch
+
+        `get_batch` is the main user-facing API for getting batches.
+        In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
+        Instead, this method is intended to help the user pick the right parameters
+
+        This method attempts to return any number of batches, including an empty list.
+        """
+
+        datasource_name: str
         if batch_request:
             if not isinstance(batch_request, BatchRequest):
                 raise TypeError(
@@ -329,15 +321,14 @@ class DataContextV3(DataContext):
         else:
             datasource_name = datasource_name
 
-        datasource = self.datasources[datasource_name]
+        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
 
         if batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
-            return datasource.get_single_batch_from_batch_request(
+            return datasource.get_batch_list_from_batch_request(
                 batch_request=batch_request
             )
         else:
-            partition_request: PartitionRequest
             if partition_request is None:
                 if partition_identifiers is None:
                     partition_identifiers = kwargs
@@ -383,10 +374,11 @@ class DataContextV3(DataContext):
                 datasource_name=datasource_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
+                batch_data=batch_data,
                 partition_request=partition_request,
                 batch_spec_passthrough=batch_spec_passthrough,
             )
-            return datasource.get_single_batch_from_batch_request(
+            return datasource.get_batch_list_from_batch_request(
                 batch_request=batch_request
             )
 
@@ -397,6 +389,7 @@ class DataContextV3(DataContext):
         data_asset_name: str = None,
         *,
         batch_request: BatchRequest = None,
+        batch_data: Any = None,
         partition_request: Union[PartitionRequest, dict] = None,
         partition_identifiers: dict = None,
         limit: int = None,
@@ -440,6 +433,7 @@ class DataContextV3(DataContext):
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             batch_request=batch_request,
+            batch_data=batch_data,
             partition_request=partition_request,
             partition_identifiers=partition_identifiers,
             limit=limit,

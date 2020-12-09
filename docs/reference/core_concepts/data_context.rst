@@ -28,8 +28,8 @@ Here's a typical example:
 
 .. code-block:: python
 
-    my_config = """
-    class_name: ExecutionEnvironment
+    config = """
+    class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine
     data_connectors:
@@ -45,7 +45,7 @@ Here's a typical example:
 
     """
     my_context.test_yaml_config(
-        config=my_config
+        config=config
     )
     > Returns some helpful output here
 

@@ -78,6 +78,7 @@ class Validator:
         self._data_context = data_context
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
+        self._validator_config = {}
 
         if batches is None:
             batches = tuple()
@@ -96,6 +97,12 @@ class Validator:
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
         )
+        self._default_expectation_args = {
+            "include_config": True,
+            "catch_exceptions": False,
+            "result_format": "BASIC",
+        }
+        self._validator_config = {}
 
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
@@ -172,7 +179,7 @@ class Validator:
             try:
                 expectation_impl = get_expectation_impl(name)
                 allowed_config_keys = expectation_impl.get_allowed_config_keys()
-                expectation_kwargs = kwargs
+                expectation_kwargs = recursively_convert_to_json_serializable(kwargs)
                 meta = None
                 # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
                 # positional arguments to expectation methods
@@ -201,22 +208,31 @@ class Validator:
                 configuration = ExpectationConfiguration(
                     expectation_type=name, kwargs=expectation_kwargs, meta=meta
                 )
+
                 # runtime_configuration = configuration.get_runtime_kwargs()
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
-                validation_result = expectation.validate(
-                    validator=self, runtime_configuration=basic_runtime_configuration
-                )
+                if not self.interactive_evaluation and not self._active_validation:
+                    validation_result = ExpectationValidationResult(
+                        expectation_config=copy.deepcopy(expectation.configuration)
+                    )
+                else:
+                    validation_result = expectation.validate(
+                        validator=self,
+                        evaluation_parameters=self._expectation_suite.evaluation_parameters,
+                        data_context=self._data_context,
+                        runtime_configuration=basic_runtime_configuration,
+                    )
 
                 # If validate has set active_validation to true, then we do not save the config to avoid
                 # saving updating expectation configs to the same suite during validation runs
                 if self._active_validation is True:
-                    stored_config = configuration
+                    stored_config = configuration.get_raw_configuration()
                 else:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite.add_expectation(
-                        configuration
+                        configuration.get_raw_configuration()
                     )
 
                 # If there was no interactive evaluation, success will not have been computed.
@@ -583,7 +599,7 @@ class Validator:
 
     def get_config_value(self, key):
         """Getter for config value"""
-        return self._validator_config[key]
+        return self._validator_config.get(key)
 
     @property
     def batches(self):
@@ -654,12 +670,12 @@ class Validator:
         See also:
             set_default_expectation_arguments
         """
-        return self.execution_engine.default_expectation_args
+        return self._default_expectation_args
 
     @property
     def default_expectation_args(self):
         """A getter for default Expectation arguments"""
-        return self.execution_engine.default_expectation_args
+        return self._default_expectation_args
 
     def set_default_expectation_argument(self, argument, value):
         """
@@ -675,9 +691,8 @@ class Validator:
         See also:
             get_default_expectation_arguments
         """
-        # !!! Maybe add a validation check here?
 
-        self.default_expectation_args[argument] = value
+        self._default_expectation_args[argument] = value
 
     def get_expectations_config(
         self,
@@ -1061,7 +1076,7 @@ class Validator:
             columns = {}
 
             for expectation in expectation_suite.expectations:
-                expectation.build_evaluation_parameters(
+                expectation.process_evaluation_parameters(
                     evaluation_parameters=runtime_evaluation_parameters,
                     interactive_evaluation=self.interactive_evaluation,
                     data_context=self._data_context,

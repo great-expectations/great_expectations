@@ -29,9 +29,17 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         forbidden_substrings=None,
         platform_specific_separator=True,
         fixed_length_key=False,
+        suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
         base_public_path=None,
+        store_name=None,
     ):
-        super().__init__(fixed_length_key=fixed_length_key)
+        super().__init__(
+            fixed_length_key=fixed_length_key,
+            suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
+            store_name=store_name,
+        )
         if forbidden_substrings is None:
             forbidden_substrings = ["/", "\\"]
         self.forbidden_substrings = forbidden_substrings
@@ -86,6 +94,14 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         # NOTE: This method uses a hard-coded forward slash as a separator,
         # and then replaces that with a platform-specific separator if requested (the default)
         self._validate_key(key)
+        # Handle store_backend_id separately
+        if key == self.STORE_BACKEND_ID_KEY:
+            filepath = f"{self.filepath_prefix or ''}{'/' if self.filepath_prefix else ''}{key[0]}"
+            return (
+                filepath
+                if not self.platform_specific_separator
+                else os.path.normpath(filepath)
+            )
         if self.filepath_template:
             converted_string = self.filepath_template.format(*list(key))
         else:
@@ -101,6 +117,8 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         return converted_string
 
     def _convert_filepath_to_key(self, filepath):
+        if filepath == self.STORE_BACKEND_ID_KEY[0]:
+            return self.STORE_BACKEND_ID_KEY
         if self.platform_specific_separator:
             filepath = os.path.normpath(filepath)
 
@@ -204,7 +222,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         platform_specific_separator=True,
         root_directory=None,
         fixed_length_key=False,
+        suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
         base_public_path=None,
+        store_name=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -213,7 +234,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
+            suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             base_public_path=base_public_path,
+            store_name=store_name,
         )
         if os.path.isabs(base_directory):
             self.full_base_directory = base_directory
@@ -232,6 +256,9 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 self.full_base_directory = os.path.join(root_directory, base_directory)
 
         os.makedirs(str(os.path.dirname(self.full_base_directory)), exist_ok=True)
+        # Initialize with store_backend_id if not part of an HTMLSiteStore
+        if not self._suppress_store_backend_id:
+            _ = self.store_backend_id
 
     def _get(self, key):
         contents = ""
@@ -382,8 +409,11 @@ class TupleS3StoreBackend(TupleStoreBackend):
         forbidden_substrings=None,
         platform_specific_separator=False,
         fixed_length_key=False,
+        suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
         base_public_path=None,
         endpoint_url=None,
+        store_name=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -392,7 +422,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
+            suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             base_public_path=base_public_path,
+            store_name=store_name,
         )
         self.bucket = bucket
         if prefix:
@@ -404,6 +437,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
             prefix = prefix.strip("/")
         self.prefix = prefix
         self.endpoint_url = endpoint_url
+        # Initialize with store_backend_id if not part of an HTMLSiteStore
+        if not self._suppress_store_backend_id:
+            _ = self.store_backend_id
 
     def _build_s3_object_key(self, key):
         if self.platform_specific_separator:
@@ -431,7 +467,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         try:
             s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
-        except s3.exceptions.NoSuchKey:
+        except (s3.exceptions.NoSuchKey, s3.exceptions.NoSuchBucket):
             raise InvalidKeyError(
                 f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {str(s3_object_key)}"
             )
@@ -632,8 +668,11 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         forbidden_substrings=None,
         platform_specific_separator=False,
         fixed_length_key=False,
+        suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
         public_urls=True,
         base_public_path=None,
+        store_name=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -642,12 +681,18 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
+            suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             base_public_path=base_public_path,
+            store_name=store_name,
         )
         self.bucket = bucket
         self.prefix = prefix
         self.project = project
         self._public_urls = public_urls
+        # Initialize with store_backend_id if not part of an HTMLSiteStore
+        if not self._suppress_store_backend_id:
+            _ = self.store_backend_id
 
     def _build_gcs_object_key(self, key):
         if self.platform_specific_separator:

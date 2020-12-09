@@ -704,6 +704,173 @@ def test_foxtrot(tmp_path_factory):
     assert len(my_batch_definition_list) == 3
 
 
+def test_relative_asset_base_directory_path(tmp_path_factory):
+    base_directory = str(
+        tmp_path_factory.mktemp("test_relative_asset_base_directory_path")
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "test_dir_0/A/B/C/logfile_0.csv",
+            "test_dir_0/A/B/C/bigfile_1.csv",
+            "test_dir_0/A/filename2.csv",
+            "test_dir_0/A/filename3.csv",
+        ],
+    )
+
+    my_data_connector_yaml = yaml.load(
+        f"""
+            module_name: great_expectations.datasource.data_connector
+            class_name: ConfiguredAssetFilesystemDataConnector
+            base_directory: {base_directory}/test_dir_0/A
+            glob_directive: "*"
+            default_regex:
+              pattern: (.+)\\.csv
+              group_names:
+              - name
+
+            assets:
+              A:
+                base_directory: B/C
+                glob_directive: "log*.csv"
+                pattern: (.+)_(\\d+)\\.csv
+                group_names:
+                - name
+                - number
+        """,
+    )
+
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "my_configured_asset_filesystem_data_connector",
+            "datasource_name": "BASE",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+    my_data_connector.data_context_root_directory = base_directory
+
+    assert (
+        my_data_connector._get_full_file_path_for_asset(
+            path="bigfile_1.csv", asset=my_data_connector.assets["A"]
+        )
+        == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
+    )
+    self_check_report = my_data_connector.self_check()
+    assert self_check_report == {
+        "class_name": "ConfiguredAssetFilesystemDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": ["A"],
+        "data_assets": {
+            "A": {
+                "batch_definition_count": 1,
+                "example_data_references": ["logfile_0.csv"],
+            }
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": [],
+        "example_data_reference": {},
+    }
+
+    my_batch_definition_list: List[BatchDefinition]
+    my_batch_definition: BatchDefinition
+    my_batch_request = BatchRequest(
+        datasource_name="BASE",
+        data_connector_name="my_configured_asset_filesystem_data_connector",
+        data_asset_name="A",
+        partition_request=None,
+    )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
+    )
+    assert len(my_batch_definition_list) == 1
+
+
+def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_factory):
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_relative_default_and_relative_asset_base_directory_paths"
+        )
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "test_dir_0/A/B/C/logfile_0.csv",
+            "test_dir_0/A/B/C/bigfile_1.csv",
+            "test_dir_0/A/filename2.csv",
+            "test_dir_0/A/filename3.csv",
+        ],
+    )
+
+    my_data_connector_yaml = yaml.load(
+        f"""
+            module_name: great_expectations.datasource.data_connector
+            class_name: ConfiguredAssetFilesystemDataConnector
+            base_directory: test_dir_0/A
+            glob_directive: "*"
+            default_regex:
+              pattern: (.+)\\.csv
+              group_names:
+              - name
+
+            assets:
+              A:
+                base_directory: B/C
+                glob_directive: "log*.csv"
+                pattern: (.+)_(\\d+)\\.csv
+                group_names:
+                - name
+                - number
+        """,
+    )
+
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "my_configured_asset_filesystem_data_connector",
+            "datasource_name": "BASE",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+    my_data_connector.data_context_root_directory = base_directory
+
+    assert my_data_connector.base_directory == f"{base_directory}/test_dir_0/A"
+    assert (
+        my_data_connector._get_full_file_path_for_asset(
+            path="bigfile_1.csv", asset=my_data_connector.assets["A"]
+        )
+        == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
+    )
+    self_check_report = my_data_connector.self_check()
+    assert self_check_report == {
+        "class_name": "ConfiguredAssetFilesystemDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": ["A"],
+        "data_assets": {
+            "A": {
+                "batch_definition_count": 1,
+                "example_data_references": ["logfile_0.csv"],
+            }
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": [],
+        "example_data_reference": {},
+    }
+
+    my_batch_definition_list: List[BatchDefinition]
+    my_batch_definition: BatchDefinition
+    my_batch_request = BatchRequest(
+        datasource_name="BASE",
+        data_connector_name="my_configured_asset_filesystem_data_connector",
+        data_asset_name="A",
+        partition_request=None,
+    )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
+    )
+    assert len(my_batch_definition_list) == 1
+
+
 def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(
     tmp_path_factory,
 ):

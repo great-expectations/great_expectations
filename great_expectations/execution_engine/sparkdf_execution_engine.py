@@ -169,6 +169,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         super().__init__(*args, **kwargs)
 
+        self._config.update(
+            {"persist": self._persist, "spark_config": self._spark_config,}
+        )
+
     @property
     def dataframe(self):
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""

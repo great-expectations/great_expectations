@@ -1,6 +1,5 @@
 .. _how_to_guides__configuring_datasources__how_to_configure_a_mysql_datasource:
 
-
 #######################################
 How to configure a MySQL Datasource
 #######################################
@@ -111,13 +110,13 @@ Steps
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-            - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+            - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
             - Obtained database credentials for MySql, including username, password, hostname, and database.
 
         To add a MySql datasource, do the following:
 
-        #. **Install the required modules**
+        #. **Install the required modules.**
 
             If you have not already done so, install required modules for connecting to MySql.
 
@@ -126,37 +125,39 @@ Steps
                 pip install sqlalchemy
                 pip install PyMySQL
 
-        #. **Instantiate a DataContext**
+        #. **Instantiate a DataContext.**
+
+            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
 
             .. code-block:: python
 
                 import great_expectations as ge
                 context = ge.get_context()
 
-        #.  **Create or copy a yaml config**
+        #.  **Create or copy a yaml config.**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as environment variables.
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.
                 ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use in connecting data living in a sql database. More information on ``Datasources``
                 in GE 0.13 can found in :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
                 This example also uses ``introspection`` to configure the datasource, where each table in the database is associated with its own ``data_asset``.  A deeper explanation on the different modes of building ``data_asset`` from data (``introspective`` / ``inferred`` vs ``configured``) can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
-                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
                 .. code-block:: python
 
                     config = f"""
                         class_name: SimpleSqlalchemyDatasource
                         credentials:
-                            drivername: mysql+pymysql
-                            host: {host}
-                            port: {port}
-                            username: {user_name}
-                            password: {password}
-                            database: {db_name}
+                          drivername: mysql+pymysql
+                          host: YOUR_MYSQL_HOST
+                          port: YOUR_MYSQL_PORT
+                          username: YOUR_MYSQL_USERNAME
+                          password: YOUR_MYSQL_PASSWORD
+                          database: YOUR_MYSQL_DB_NAME
                         introspection:
-                            whole_table:
-                                data_asset_name_suffix: __whole_table
+                          whole_table:
+                            data_asset_name_suffix: __whole_table
                         """
 
 
@@ -166,7 +167,7 @@ Steps
 
                 context.test_yaml_config(
                     name="mysql_datasource",
-                    yaml_config=my_config
+                    yaml_config=config
                 )
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
@@ -202,9 +203,16 @@ Steps
                 3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance\r
                 4        5  Father of the Bride Part II (1995)                                       Comedy\r
 
-             This means all has went well and you can proceed with exploring the data sets in your new MySql datasource.
+             This means all has went well and you can proceed with exploring data in your new MySql datasource.
 
-            **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
+        #. **Save the config.**
+
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
+            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``mysql_datasource`` in our example).
+            Next, copy the yml snippet from Step 3 into the new entry.
+
+            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+
 
 Additional notes
 ----------------

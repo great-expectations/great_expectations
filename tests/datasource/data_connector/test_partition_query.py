@@ -88,7 +88,7 @@ def test_partition_request_non_recognized_param(
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # Test 1: non valid_partition_identifiers_limit
-    with pytest.raises(ge_exceptions.PartitionerError):
+    with pytest.raises(ge_exceptions.PartitionQueryError):
         sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="test_environment",
@@ -99,7 +99,7 @@ def test_partition_request_non_recognized_param(
         )
 
     # Test 2: Unrecognized custom_filter is not a function
-    with pytest.raises(ge_exceptions.PartitionerError):
+    with pytest.raises(ge_exceptions.PartitionQueryError):
         sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="test_environment",
@@ -110,7 +110,7 @@ def test_partition_request_non_recognized_param(
         )
 
     # Test 3: partition_definitions is not dict
-    with pytest.raises(ge_exceptions.PartitionerError):
+    with pytest.raises(ge_exceptions.PartitionQueryError):
         sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="test_environment",
@@ -156,7 +156,7 @@ def test_partition_request_limit(create_files_and_instantiate_data_connector):
     assert len(sorted_batch_definition_list) == 3
 
     # illegal limit
-    with pytest.raises(ge_exceptions.PartitionerError):
+    with pytest.raises(ge_exceptions.PartitionQueryError):
         sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="test_environment",
@@ -171,7 +171,7 @@ def test_partition_request_illegal_index_and_limit_combination(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
-    with pytest.raises(ge_exceptions.PartitionerError):
+    with pytest.raises(ge_exceptions.PartitionQueryError):
         sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="test_environment",

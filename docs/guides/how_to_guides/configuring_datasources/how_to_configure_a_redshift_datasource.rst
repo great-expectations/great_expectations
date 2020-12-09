@@ -149,12 +149,12 @@ Steps
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-            - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+            - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add a Redshift datasource, do the following:
 
-        #. **Install the required modules**
+        #. **Install the required modules.**
 
             If you haven't already, install these modules for connecting to Redshift.
 
@@ -167,35 +167,38 @@ Steps
                 # or if on macOS:
                 pip install psycopg2-binary
 
-        #. **Instantiate a DataContext**
+        #. **Instantiate a DataContext.**
+
+            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
 
             .. code-block:: python
 
                 import great_expectations as ge
                 context = ge.get_context()
 
-        #. **Create or copy a yaml config**
+        #. **Create or copy a yaml config.**
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials.  Username and  password are set as environment variables, and host, port, and database are set as strings.
+            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials.  Username, password, host, port, and database are set as strings.
 
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
             .. code-block:: python
 
-                my_config = f"""
-                class_name: SimpleSqlalchemyDatasource
-                credentials:
+                config = f"""
+                my_datasource_name:
+                  class_name: SimpleSqlalchemyDatasource
+                  credentials:
                     drivername: postgresql+psycopg2
-                    username: ${my_username}
-                    password: ${my_password}
+                    username: YOUR_REDSHIFT_USERNAME
+                    password: YOUR_REDSHIFT_PASSWORD
                     host: my-datawarehouse-name.abcde1qrstuw.us-east-1.redshift.amazonaws.com
                     port: 5439
                     database: dev
                     query:
-                        sslmode: prefer
+                      sslmode: prefer
                 introspection:
-                    whole_table:
-                        data_asset_name_suffix: __whole_table
+                  whole_table:
+                    data_asset_name_suffix: __whole_table
                 """
 
         #. **Run context.test_yaml_config.**
@@ -204,7 +207,7 @@ Steps
 
                 context.test_yaml_config(
                     name="my_redshift_datasource",
-                    yaml_config=my_config
+                    yaml_config=config
                 )
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
@@ -214,7 +217,7 @@ Steps
             .. code-block:: bash
 
                 Attempting to instantiate class from config...
-                Instantiating as a ExecutionEnvironment, since class_name is SimpleSqlalchemyDatasource
+                Instantiating as a Datasource, since class_name is SimpleSqlalchemyDatasource
                 Successfully instantiated SimpleSqlalchemyDatasource
 
                 Execution engine: SqlAlchemyExecutionEngine
@@ -250,11 +253,14 @@ Steps
                 psycopg2.OperationalError: FATAL:  password authentication failed for user "my_username"
                 FATAL:  password authentication failed for user "my_username"
 
-            **Note**: In the current example, the yaml configuration will only create a connection to the Datasource for the current session. After you exit python, the Datasource and configuration will be gone.
-
         #. **Save the config.**
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup by copying it into the ``datasources`` section of your ``great_expectations/great_expectations.yml`` file.
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
+            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_redshift_datasource`` in our example).
+            Next, copy the yml snippet from Step 3 into the new entry.
+
+            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+
 
 ----------------
 Additional Notes

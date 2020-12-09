@@ -30,7 +30,7 @@ Steps
 
     By default, query results will be returned as a list. If instead you need a scalar for your expectation, you can specify the return_type
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
       my_query_store:
         class_name: SqlAlchemyQueryStore

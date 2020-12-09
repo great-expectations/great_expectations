@@ -422,4 +422,4 @@ class Batch(DictDot):
         return json.dumps(json_dict, indent=2)
 
     def head(self):
-        return self._batch_data.head()
+        return self._data.head()

@@ -113,12 +113,14 @@ Steps
             - Installed the pyspark package (``pip install pyspark``).
             - Setup ``SPARK_HOME`` and ``JAVA_HOME`` variables for runtime environment.
             - :ref:`Set up a working deployment of Great Expectations. <tutorials__getting_started>`
-            - :ref:`Understand the basics of ExecutionEnvironments. <execution_environments>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config. <how_configure_data_context_using_test_yaml_config>`
+            - :ref:`Understand the basics of Datasources. <reference__core_concepts__datasources>`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add a Pandas filesystem datasource, do the following:
 
-        #. **Instantiate a DataContext**
+        #. **Instantiate a DataContext.**
+
+            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
 
             .. code-block:: python
 
@@ -126,7 +128,7 @@ Steps
                 context = ge.get_context()
 
 
-        #. **List files in your directory**
+        #. **List files in your directory.**
 
             Use a utility like ``tree`` on the command line or ``glob`` to list files, so that you can see how paths and filenames are formatted. Our example will use the following 3 files in the ``test_directory/`` folder.
 
@@ -136,36 +138,35 @@ Steps
                 test_directory/alex_20201212_300.csv
                 test_directory/will_20201008_100.csv
 
-        #.  **Create or copy a yaml config**
+        #.  **Create or copy a yaml config.**
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetFilesystemDataConnector`` and ``SparkDFExecutionEngine``.
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``Datasource``, with a ``ConfiguredAssetFilesystemDataConnector`` and ``SparkDFExecutionEngine``.
 
-    The config also defines ``TestAsset``, which has ``name``, ``timestamp`` and ``size`` as ``group_names``, which are informative fields of the filename that are extracted by the regex ``pattern``.
+                The config also defines ``TestAsset``, which has ``name``, ``timestamp`` and ``size`` as ``group_names``, which are informative fields of the filename that are extracted by the regex ``pattern``.
 
-            **Note**: The ``ConfiguredAssetFilesystemDataConnector`` used in this example is closely related to the ``InferredAssetFilesystemDataConnector`` with some key differences. More information can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+                **Note**: The ``ConfiguredAssetFilesystemDataConnector`` used in this example is closely related to the ``InferredAssetFilesystemDataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
-            .. code-block:: python
+                .. code-block:: python
 
-                base_directory = "test_directory/"
-
-                config = f"""
-                class_name: DataSource
-                execution_engine:
-                    class_name: SparkDFExecutionEngine
-                data_connectors:
-                    my_data_connector:
+                    config = f"""
+                    class_name: Datasource
+                    execution_engine:
+                      class_name: SparkDFExecutionEngine
+                    data_connectors:
+                      my_data_connector:
                         class_name: ConfiguredAssetFilesystemDataConnector
-                        base_directory: {base_directory}
+                        base_directory: test_directory/
                         glob_directive: "*.csv"
                         assets:
-                            TestAsset:
-                                pattern: (.+)_(\\d+)_(\\d+)\\.csv
-                                group_names:
-                                    - name
-                                    - timestamp
-                                    - size
+                          TestAsset:
+                            pattern: (.+)_(\\d+)_(\\d+)\\.csv
+                            group_names:
+                              - name
+                              - timestamp
+                              - size
+                    """
 
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+                Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         #. **Run context.test_yaml_config.**
 
@@ -173,7 +174,7 @@ Steps
 
                 context.test_yaml_config(
                     name="my_sparkdf_datasource",
-                    yaml_config=my_config
+                    yaml_config=config
                 )
 
 
@@ -184,9 +185,9 @@ Steps
             .. code-block:: bash
 
                 Attempting to instantiate class from config...
-                Instantiating as a ExecutionEnvironment, since class_name is ExecutionEnvironment
+                Instantiating as a Datasource, since class_name is Datasource
                 Instantiating class from config without an explicit class_name is dangerous. Consider adding an explicit class_name for None
-                    Successfully instantiated ExecutionEnvironment
+                    Successfully instantiated Datasource
 
                 Execution engine: SparkDFExecutionEngine
                 Data connectors:
@@ -209,10 +210,15 @@ Steps
                 3     3            Allison, Mr Hudson Joshua Creighton     1st   30    male         0        0
                 4     4  Allison, Mrs Hudson JC (Bessie Waldo Daniels)     1st   25  female         0        1
 
-            This means all has gone well and you can proceed with exploring the data sets in your new filesystem-backed Pandas data source.
+            This means all has gone well and you can proceed with exploring data with your new filesystem-backed Pandas data source.
 
-            **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
+        #. **Save the config.**
 
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
+            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_sparkdf_datasource`` in our example).
+            Next, copy the yml snippet from Step 3 into the new entry.
+
+            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
 
 ----------------
 Additional Notes

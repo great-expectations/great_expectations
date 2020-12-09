@@ -19,7 +19,11 @@ from great_expectations.exceptions import (
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
-from great_expectations.util import import_library_module
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    import_library_module,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -118,7 +122,7 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
-class SqlAlchemyBatchData:
+class SqlAlchemyBatchData(object):
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
 
@@ -337,7 +341,6 @@ class SqlAlchemyBatchData:
             sa.select([sa.func.count()]).select_from(self._selectable)
         )
         rows = result_object.fetchall()
-        print(rows)
 
         return rows[0][0]
 
@@ -457,6 +460,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 },
                 success=True,
             )
+
+        # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values,
+        # and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            **{"class_name": self.__class__.__name__}
+        )
+        filter_properties_dict(
+            properties=self._config, inplace=True,
+        )
 
     @property
     def credentials(self):

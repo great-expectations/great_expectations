@@ -194,12 +194,12 @@ Steps
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-            - :ref:`Understand the basics of ExecutionEnvironments <execution_environments>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_configure_data_context_using_test_yaml_config>`
+            - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
+            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add a Snowflake datasource, do the following:
 
-        #. **Install the required modules**
+        #. **Install the required modules.**
 
             If you haven't already, install these modules for connecting to Snowflake.
 
@@ -209,39 +209,40 @@ Steps
                 pip install snowflake-connector-python
                 pip install snowflake-sqlalchemy
 
-        #. **Instantiate a DataContext**
+        #. **Instantiate a DataContext.**
+
+            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
 
             .. code-block:: python
 
                 import great_expectations as ge
                 context = ge.get_context()
 
-        #.  **Create or copy a yaml config**
+        #.  **Create or copy a yaml config.**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials using username and password authentication.  Username, password and host are set as environment variables, and database and query are set as strings.
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials using username and password authentication.  Username, password, host, database and query are set as strings.
                 ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use in connecting data living in a sql database. More information on ``Datasources``
                 in GE 0.13 can found in :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
                 This example also uses ``introspection`` to configure the datasource, where each table in the database is associated with its own ``data_asset``.  A deeper explanation on the different modes of building ``data_asset`` from data (``introspective`` / ``inferred`` vs ``configured``) can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
-                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_configure_data_context_using_test_yaml_config>`. Examples of yaml configurations for Key pair and SSO authentication can be found in the **Additional Notes** section below.
+                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`. Examples of yaml configurations for Key pair and SSO authentication can be found in the **Additional Notes** section below.
 
                 .. code-block:: python
 
                     config = f"""
                         class_name: SimpleSqlalchemyDatasource
                         credentials:
-                            drivername: snowflake
-                            username: ${snowflake_username}
-                            password: ${snowflake_pw}
-                            host: ${snowflake_host}
-                            database: TEST
-                            query:
-                                schema: KAGGLE_MOVIE_DATASET
-                         
+                          drivername: snowflake
+                          username: YOUR_SNOWFLAKE_USERNAME
+                          password: YOUR_SNOWFLAKE_PASSWORD
+                          host: YOUR_SNOWFLAKE_HOST
+                          database: TEST
+                          query:
+                            schema: KAGGLE_MOVIE_DATASET
                         introspection:
-                            whole_table:
-                                data_asset_name_suffix: __whole_table
+                          whole_table:
+                            data_asset_name_suffix: __whole_table
                         """
 
         #. **Run context.test_yaml_config.**
@@ -250,7 +251,7 @@ Steps
 
                 context.test_yaml_config(
                     name="my_snowflake_datasource",
-                    yaml_config=my_config
+                    yaml_config=config
                 )
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
@@ -261,7 +262,7 @@ Steps
 
                 Attempting to instantiate class from config...
                 Instantiating as a DataSource, since class_name is SimpleSqlalchemyDatasource
-                Successfully instantiated StreamlinedSqlExecutionEnvironment
+                Successfully instantiated SimpleSqlalchemyDatasource
 
                 Execution engine: SqlAlchemyExecutionEngine
                 Data connectors:
@@ -286,9 +287,15 @@ Steps
                 3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance
                 4        5  Father of the Bride Part II (1995)                                       Comedy
 
-            This means all has went well and you can proceed with exploring the data sets in your new Snowflake datasource.
+            This means all has went well and you can proceed with exploring data with your new Snowflake datasource.
 
-            **Note** : In the current example, the yaml config will only create a connection to the datasource for the current session. After you exit python, the datasource and configuration will be gone.  To make the datasource and configuration persistent, please add information to  ``great_expectations.yml`` in your ``great_expectations/`` directory.
+        #. **Save the config.**
+
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
+            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_snowflake_datasource`` in our example).
+            Next, copy the yml snippet from Step 3 into the new entry.
+
+            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
 
 ----------------
 Additional Notes
@@ -369,8 +376,8 @@ Additional Notes
             class_name: SimpleSqlalchemyDatasource
             credentials:
                 drivername: snowflake
-                username: ${snowflake_username}
-                host: ${snowflake_host}
+                username: YOUR_SNOWFLAKE_USERNAME
+                host: YOUR_SNOWFLAKE_HOST
                 database: TEST
                 connect_args:
                     authenticator: externalbrowser
@@ -397,10 +404,10 @@ Additional Notes
                 class_name: SimpleSqlalchemyDatasource
                 credentials:
                     drivername: snowflake
-                    username: ${snowflake_username}
+                    username: YOUR_SNOWFLAKE_USERNAME
                     private_key_path: ~/.ssh/my_snowflake.p8
                     private_key_passphrase: mypass
-                    host: ${snowflake_host}
+                    host: YOUR_SNOWFLAKE_HOST
                     database: TEST
                     query:
                         schema: KAGGLE_MOVIE_DATASET
