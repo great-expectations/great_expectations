@@ -161,7 +161,7 @@ This guide will help you create Expectations that span multiple :ref:`Batches <r
             .. code-block:: python
 
                 import great_expectations as ge
-                context = ge.DataContextV3()
+                context = ge.DataContext()
 
         #. **Instantiate two Validators, one for each Data Asset**
 
