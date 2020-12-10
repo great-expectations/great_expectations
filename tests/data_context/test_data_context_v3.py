@@ -252,7 +252,7 @@ def test__get_data_context_version(empty_data_context_v3, titanic_data_context):
     context = empty_data_context_v3
 
     assert not context._get_data_context_version("some_datasource_name", **{})
-    assert not context._get_data_context_version(pos_arg="some_datasource_name", **{})
+    assert not context._get_data_context_version(arg1="some_datasource_name", **{})
 
     yaml_config = f"""
 class_name: Datasource
@@ -273,9 +273,7 @@ data_connectors:
     )
 
     assert context._get_data_context_version("some_datasource_name", **{}) == "v3"
-    assert (
-        context._get_data_context_version(pos_arg="some_datasource_name", **{}) == "v3"
-    )
+    assert context._get_data_context_version(arg1="some_datasource_name", **{}) == "v3"
 
     context = titanic_data_context
     root_dir = context.root_directory
@@ -283,7 +281,7 @@ data_connectors:
         "datasource": "mydatasource",
         "path": f"{root_dir}/../data/Titanic.csv",
     }
-    assert context._get_data_context_version(pos_arg=batch_kwargs) == "v2"
+    assert context._get_data_context_version(arg1=batch_kwargs) == "v2"
     assert context._get_data_context_version(batch_kwargs) == "v2"
     assert (
         context._get_data_context_version(
