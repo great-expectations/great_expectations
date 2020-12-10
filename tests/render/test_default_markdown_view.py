@@ -45,7 +45,7 @@ def validation_operator_result():
 # def validation_operator_result_with_evaluation_parameter():
 #     fixture_filename = os.path.join(
 #         os.path.dirname(__file__),
-#         "fixtures/ValidationResultsPageRenderer_render_with_evaluation_parameters.json",
+#         "fixtures/simple_validate_results_with_evaluation_parameters.json",
 #     )
 #     with open(fixture_filename) as infile:
 #         validation_operator_result = json.load(infile, object_pairs_hook=OrderedDict)
