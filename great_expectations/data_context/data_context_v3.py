@@ -77,7 +77,7 @@ class DataContextV3(DataContext):
         if pretty_print:
             print("Attempting to instantiate class from config...")
 
-        if not return_mode in ["instantiated_class", "report_object"]:
+        if return_mode not in ["instantiated_class", "report_object"]:
             raise ValueError(f"Unknown return_mode: {return_mode}.")
 
         substituted_config_variables = substitute_all_config_variables(
