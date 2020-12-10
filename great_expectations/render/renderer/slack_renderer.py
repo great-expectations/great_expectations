@@ -153,17 +153,15 @@ class SlackRenderer(Renderer):
                             "text": f"*DataDocs* can be found here: <{docs_link}|{docs_link}>",
                         },
                     }
-            except:
+            except Exception as e:
                 logger.warning(
                     f"""SlackRenderer had a problem with generating the docs link.
-                        link used to generate the docs link is: {docs_link} and is of type: {type(docs_link)}
-                    """
+                    link used to generate the docs link is: {docs_link} and is of type: {type(docs_link)}.
+                    Error: {e}"""
                 )
                 return
-
         else:
             logger.warning(
                 "No docs link found. Skipping data docs link in Slack message."
             )
-
         return report_element
