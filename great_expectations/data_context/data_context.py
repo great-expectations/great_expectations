@@ -1099,9 +1099,8 @@ class BaseDataContext:
         Returns:
             (Batch) The requested batch
 
-        `get_batch` is the main user-facing API for getting batches.
-        In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
-        Instead, this method is intended to help the user pick the right parameters
+        This method does not require typed or nested inputs.
+        Instead, it is intended to help the user pick the right parameters.
 
         This method attempts to return exactly one batch.
         If 0 or more than 1 batches would be returned, it raises an error.
@@ -1204,23 +1203,66 @@ class BaseDataContext:
                 **kwargs,
             )
 
-    def _get_data_context_version(self) -> Optional[str]:
+    def _get_data_context_version(self, pos_arg, **kwargs) -> Optional[str]:
+        """
+        pos_arg: positional argument (candidate to be the "batch_kwargs" value for V2)
+        **kwargs: variable arguments (candidate to contain "batch_kwargs" key and value for V2)
+
+        Returns None if no datasources have been configured.
+        Returns "v2" if the datasource is an instance of the LegacyDatasource class; returns "v3" otherwise.
+        """
+
         if not self.datasources:
             return None
-        for name, datasource in self.datasources.items():
-            if isinstance(datasource, BaseDatasource):
-                return "v3"
-        return "v2"
+        api_version: str = "v3"
+        if "batch_kwargs" in kwargs:
+            batch_kwargs = kwargs.get("batch_kwargs", None)
+        else:
+            batch_kwargs = pos_arg
+        if isinstance(batch_kwargs, dict):
+            datasource_name: str = batch_kwargs.get("datasource")
+            if datasource_name is not None:
+                datasource: Union[
+                    LegacyDatasource, BaseDatasource
+                ] = self.get_datasource(datasource_name=datasource_name)
+                if isinstance(datasource, LegacyDatasource):
+                    api_version = "v2"
+        return api_version
 
     def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
     ) -> Union[Batch, DataAsset]:
-        if self._get_data_context_version() == "v2":
+        """Get exactly one batch, based on a variety of flexible input types.
+        The method `get_batch` is the main user-facing method for getting batches; it supports both the new (V3) and the
+        Legacy (V2) Datasource schemas.  The version-specific implementations are contained in "_get_batch_v2()" and
+        "_get_batch_v3()", respectively, both of which are in the present module.
+
+        For the V3 API parameters, please refer to the signature and parameter description of method "_get_batch_v3()".
+        For the Legacy usage, please refer to the signature and parameter description of the method "_get_batch_v2()".
+
+        Args:
+            arg1: the first positional argument (can take on various types)
+            arg2: the second positional argument (can take on various types)
+            arg3: the third positional argument (can take on various types)
+
+            **kwargs: variable arguments
+
+        Returns:
+            Batch (V3) or DataAsset (V2) -- the requested batch
+
+        Processing Steps:
+        1. Determine the version (possible values are "v3" or "v2").
+        2. Convert the positional arguments to the appropriate named arguments, based on the version.
+        3. Package the remaining arguments as variable keyword arguments (applies only to V3).
+        4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
+        """
+
+        if self._get_data_context_version(pos_arg=arg1, **kwargs) == "v2":
             if "batch_kwargs" in kwargs:
                 batch_kwargs = kwargs.get("batch_kwargs", None)
             else:
                 batch_kwargs = arg1
-            if not isinstance(batch_kwargs, (dict, BatchKwargs)):
+            if not isinstance(batch_kwargs, dict):
                 raise ge_exceptions.BatchKwargsError(
                     "The BatchKwargs argument passed to load_batch must be a BatchKwargs object or dictionary."
                 )
@@ -1288,6 +1330,7 @@ ExpectationSuiteIdentifier or string.
         **kwargs,
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
+        This method applies only to the new (V3) Datasource schema.
 
         Args:
             batch_request
@@ -1419,6 +1462,10 @@ ExpectationSuiteIdentifier or string.
         splitter_kwargs: dict = None,
         **kwargs,
     ) -> Validator:
+        """
+        This method applies only to the new (V3) Datasource schema.
+        """
+
         if (
             sum(
                 bool(x)
@@ -1442,23 +1489,26 @@ ExpectationSuiteIdentifier or string.
                 expectation_suite_name=create_expectation_suite_with_name
             )
 
-        batch = self.get_batch(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            batch_request=batch_request,
-            batch_data=batch_data,
-            partition_request=partition_request,
-            partition_identifiers=partition_identifiers,
-            limit=limit,
-            index=index,
-            custom_filter_function=custom_filter_function,
-            batch_spec_passthrough=batch_spec_passthrough,
-            sampling_method=sampling_method,
-            sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
-            **kwargs,
+        batch: Batch = cast(
+            Batch,
+            self.get_batch(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                batch_request=batch_request,
+                batch_data=batch_data,
+                partition_request=partition_request,
+                partition_identifiers=partition_identifiers,
+                limit=limit,
+                index=index,
+                custom_filter_function=custom_filter_function,
+                batch_spec_passthrough=batch_spec_passthrough,
+                sampling_method=sampling_method,
+                sampling_kwargs=sampling_kwargs,
+                splitter_method=splitter_method,
+                splitter_kwargs=splitter_kwargs,
+                **kwargs,
+            ),
         )
 
         batch_definition = batch.batch_definition
