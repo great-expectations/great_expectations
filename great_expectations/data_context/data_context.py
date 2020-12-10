@@ -1308,22 +1308,10 @@ class BaseDataContext:
             batch_kwargs = kwargs.get("batch_kwargs", None)
         else:
             batch_kwargs = arg1
-        if not isinstance(batch_kwargs, dict):
-            raise ge_exceptions.BatchKwargsError(
-                "The BatchKwargs argument passed to load_batch must be a BatchKwargs object or dictionary."
-            )
         if "expectation_suite_name" in kwargs:
             expectation_suite_name = kwargs.get("expectation_suite_name", None)
         else:
             expectation_suite_name = arg2
-        if not isinstance(
-            expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, str),
-        ):
-            raise ge_exceptions.DataContextError(
-                """The expectation_suite_name argument passed to load_batch must be an ExpectationSuite,
-ExpectationSuiteIdentifier or string.
-                """
-            )
         if "data_asset_type" in kwargs:
             data_asset_type = kwargs.get("data_asset_type", None)
         else:
