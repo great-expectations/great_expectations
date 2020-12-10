@@ -68,10 +68,7 @@ from great_expectations.datasource.new_datasource import BaseDatasource, Datasou
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.util import (
-    get_currently_executing_function_call_arguments,
-    verify_dynamic_loading_support,
-)
+from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -1218,9 +1215,6 @@ class BaseDataContext:
     def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
     ) -> Union[Batch, DataAsset]:
-        # Gather the call arguments of the present function.
-        call_agrs: dict = get_currently_executing_function_call_arguments()
-
         if self._get_data_context_version() == "v2":
             if "batch_kwargs" in kwargs:
                 batch_kwargs = kwargs.pop("batch_kwargs", None)
