@@ -120,7 +120,6 @@ class ValidationResultsPageRenderer(Renderer):
             columns[column].append(evr)
 
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
-
         overview_content_blocks = [
             self._render_validation_header(validation_results),
             self._render_validation_statistics(validation_results=validation_results),
@@ -129,6 +128,10 @@ class ValidationResultsPageRenderer(Renderer):
         collapse_content_blocks = [
             self._render_validation_info(validation_results=validation_results)
         ]
+
+        # if validation_results.evaluation_parameters:
+        #     print("HI WILL THIS IS WHERE I THINK WE SHOULD BE ")
+        #     print(validation_results.evaluation_parameters)
 
         if validation_results.meta.get("batch_markers"):
             collapse_content_blocks.append(
@@ -237,6 +240,25 @@ class ValidationResultsPageRenderer(Renderer):
             page_title += " / " + str(run_name)
         page_title += " / " + str(run_time)
 
+        print("\n\n\n\n")
+        print(
+            RenderedDocumentContent(
+                **{
+                    "renderer_type": "ValidationResultsPageRenderer",
+                    "page_title": page_title,
+                    "batch_kwargs": batch_kwargs
+                    if "batch_kwargs" in validation_results.meta
+                    else None,
+                    "batch_spec": batch_kwargs
+                    if "batch_spec" in validation_results.meta
+                    else None,
+                    "expectation_suite_name": expectation_suite_name,
+                    "sections": sections,
+                    "utm_medium": "validation-results-page",
+                }
+            )
+        )
+
         return RenderedDocumentContent(
             **{
                 "renderer_type": "ValidationResultsPageRenderer",
@@ -281,6 +303,11 @@ class ValidationResultsPageRenderer(Renderer):
             html_success_icon = (
                 '<i class="fas fa-times text-danger" aria-hidden="true"></i>'
             )
+
+        if validation_results.evaluation_parameters:
+            print("YOOOO FINALLY NARROWED IT DOWN")
+            print(validation_results.evaluation_parameters)
+
         return RenderedHeaderContent(
             **{
                 "content_block_type": "header",

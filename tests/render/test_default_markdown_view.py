@@ -40,6 +40,28 @@ def validation_operator_result():
         return validation_operator_result
 
 
+#
+# @pytest.fixture()
+# def validation_operator_result_with_evaluation_parameter():
+#     fixture_filename = os.path.join(
+#         os.path.dirname(__file__),
+#         "fixtures/ValidationResultsPageRenderer_render_with_evaluation_parameters.json",
+#     )
+#     with open(fixture_filename) as infile:
+#         validation_operator_result = json.load(infile, object_pairs_hook=OrderedDict)
+#         run_results = validation_operator_result["run_results"]
+#
+#
+#         for k, validation_result in run_results.items():
+#             validation_result[
+#                 "validation_result"
+#             ] = ExpectationSuiteValidationResultSchema().load(
+#                 validation_result["validation_result"]
+#             )
+#         return validation_operator_result
+#
+
+
 def test_render_section_page():
     section = RenderedSectionContent(
         **{
@@ -90,6 +112,35 @@ def test_render_section_page():
     )
 
 
+#
+# def test_snapshot_render_section_page_with_eval_parameters(validation_operator_result_with_evaluation_parameter):
+#     """
+#     Make sure appropriate markdown rendering is done for fixture. It will need to have evaluation parameters replaced
+#
+#     Args:
+#         validation_operator_result_with_evaluation_parameter: test fixture
+#
+#     Returns: None
+#
+#     """
+#     validation_operator_result = ValidationOperatorResult(**validation_operator_result_with_evaluation_parameter)
+#
+#     validation_results_page_renderer = ValidationResultsPageRenderer(
+#         run_info_at_end=True
+#     )
+#
+#     rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
+#         validation_operator_result=validation_operator_result
+#     )
+#
+#     md_str_list = DefaultMarkdownPageView().render(rendered_document_content_list)
+#
+#     md_str = " ".join(md_str_list)
+#
+#     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
+#     print(md_str)
+
+
 def test_snapshot_render_section_page_with_fixture_data(validation_operator_result):
     """
     Make sure the appropriate markdown rendering is done for the applied fixture.
@@ -99,7 +150,6 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
     Returns: None
 
     """
-
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
     validation_results_page_renderer = ValidationResultsPageRenderer(
@@ -115,8 +165,6 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
     md_str = " ".join(md_str_list)
 
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
-
-    print(md_str)
 
     assert (
         md_str

@@ -480,8 +480,15 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         content_blocks = []
         remaining_evrs, content_block = self._render_header(validation_results)
         content_blocks.append(content_block)
+
+        print("first content block")
+        print(content_blocks)
+
         remaining_evrs, content_block = self._render_table(remaining_evrs)
         content_blocks.append(content_block)
+
+        print("second content block")
+        print(content_blocks)
 
         return RenderedSectionContent(
             **{"section_name": column, "content_blocks": content_blocks}
