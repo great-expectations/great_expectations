@@ -1415,7 +1415,7 @@ class BaseDataContext:
                 # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
                 # SimpleSqlalchemyDatasource uses "PartitionRequest" to relay the splitting and sampling
                 # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
-                # of partitions is implemented using the PartitionQuery class, it will not recognized the keys
+                # of partitions is implemented using the PartitionQuery class, it will not recognize the keys
                 # representing the splitting and sampling directives and raise an exception.  Additional work is needed
                 # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
                 partition_request_params: dict = {
