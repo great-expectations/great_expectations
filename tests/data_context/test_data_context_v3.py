@@ -2,7 +2,9 @@ import datetime
 
 import pytest
 
+from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.validator.validator import Validator
 from tests.test_utils import create_files_in_directory
 
 
@@ -246,3 +248,89 @@ data_connectors:
 
     df_data = my_batch.data
     assert df_data.shape == (120, 10)
+
+
+def test__get_data_context_version(empty_data_context_v3, titanic_data_context):
+    context = empty_data_context_v3
+
+    assert not context._get_data_context_version("some_datasource_name", **{})
+    assert not context._get_data_context_version(arg1="some_datasource_name", **{})
+
+    yaml_config = f"""
+class_name: Datasource
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    general_runtime_data_connector:
+      module_name: great_expectations.datasource.data_connector
+      class_name: RuntimeDataConnector
+      runtime_keys:
+      - run_id
+"""
+    # noinspection PyUnusedLocal
+    my_datasource = context.test_yaml_config(
+        name="some_datasource_name", yaml_config=yaml_config,
+    )
+
+    assert context._get_data_context_version("some_datasource_name", **{}) == "v3"
+    assert context._get_data_context_version(arg1="some_datasource_name", **{}) == "v3"
+
+    context = titanic_data_context
+    root_dir = context.root_directory
+    batch_kwargs = {
+        "datasource": "mydatasource",
+        "path": f"{root_dir}/../data/Titanic.csv",
+    }
+    assert context._get_data_context_version(arg1=batch_kwargs) == "v2"
+    assert context._get_data_context_version(batch_kwargs) == "v2"
+    assert (
+        context._get_data_context_version(
+            "some_value", **{"batch_kwargs": batch_kwargs}
+        )
+        == "v2"
+    )
+
+
+def test_in_memory_data_context_configuration(
+    titanic_pandas_multibatch_data_context_v3,
+):
+    project_config_dict: dict = titanic_pandas_multibatch_data_context_v3.get_config(
+        mode="dict"
+    )
+    project_config_dict["plugins_directory"] = None
+    project_config_dict["validation_operators"] = {
+        "action_list_operator": {
+            "class_name": "ActionListValidationOperator",
+            "action_list": [
+                {
+                    "name": "store_validation_result",
+                    "action": {"class_name": "StoreValidationResultAction"},
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {"class_name": "StoreEvaluationParametersAction"},
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": {"class_name": "UpdateDataDocsAction"},
+                },
+            ],
+        }
+    }
+    project_config: DataContextConfig = DataContextConfig(**project_config_dict)
+    data_context = BaseDataContext(
+        project_config=project_config,
+        context_root_dir=titanic_pandas_multibatch_data_context_v3.root_directory,
+    )
+
+    my_validator: Validator = data_context.get_validator(
+        datasource_name="titanic_multi_batch",
+        data_connector_name="my_data_connector",
+        data_asset_name="Titanic_1912",
+        create_expectation_suite_with_name="my_test_titanic_expectation_suite",
+    )
+
+    assert my_validator.expect_table_row_count_to_equal(1313)["success"]
+    assert my_validator.expect_table_column_count_to_equal(7)["success"]
