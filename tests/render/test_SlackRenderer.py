@@ -1,11 +1,7 @@
-# from freezegun import freeze_time
-import pytest
-
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.render.renderer import SlackRenderer
-from tests.test_utils import modify_locale
 
 
 def test_SlackRenderer_validation_results_with_datadocs():
@@ -134,3 +130,15 @@ def test_SlackRenderer_validation_results_with_datadocs():
     }
 
     assert rendered_output == expected_output
+
+
+def test_SlackRenderer_get_report_element():
+    slack_renderer = SlackRenderer()
+
+    # these should all be caught
+    assert slack_renderer._get_report_element(docs_link=None) is None
+    assert slack_renderer._get_report_element(docs_link=1) is None
+    assert slack_renderer._get_report_element(docs_link=slack_renderer) is None
+
+    # this should work
+    assert slack_renderer._get_report_element(docs_link="i_should_work") is not None
