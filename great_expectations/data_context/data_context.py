@@ -1217,7 +1217,7 @@ class BaseDataContext:
     ) -> Union[Batch, DataAsset]:
         if self._get_data_context_version() == "v2":
             if "batch_kwargs" in kwargs:
-                batch_kwargs = kwargs.pop("batch_kwargs", None)
+                batch_kwargs = kwargs.get("batch_kwargs", None)
             else:
                 batch_kwargs = arg1
             if not isinstance(batch_kwargs, (dict, BatchKwargs)):
@@ -1225,7 +1225,7 @@ class BaseDataContext:
                     "The BatchKwargs argument passed to load_batch must be a BatchKwargs object or dictionary."
                 )
             if "expectation_suite_name" in kwargs:
-                expectation_suite_name = kwargs.pop("expectation_suite_name", None)
+                expectation_suite_name = kwargs.get("expectation_suite_name", None)
             else:
                 expectation_suite_name = arg2
             if not isinstance(
@@ -1238,7 +1238,7 @@ ExpectationSuiteIdentifier or string.
                     """
                 )
             if "data_asset_type" in kwargs:
-                data_asset_type = kwargs.pop("data_asset_type", None)
+                data_asset_type = kwargs.get("data_asset_type", None)
             else:
                 data_asset_type = arg3
             batch_parameters = kwargs.get("batch_parameters")
