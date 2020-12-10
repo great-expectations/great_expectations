@@ -2,7 +2,9 @@ import datetime
 
 import pytest
 
+from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.validator.validator import Validator
 from tests.test_utils import create_files_in_directory
 
 
@@ -289,3 +291,46 @@ data_connectors:
         )
         == "v2"
     )
+
+
+def test_in_memory_data_context_configuration(
+    titanic_pandas_multibatch_data_context_v3,
+):
+    project_config_dict: dict = titanic_pandas_multibatch_data_context_v3.get_config(
+        mode="dict"
+    )
+    project_config_dict["plugins_directory"] = None
+    project_config_dict["validation_operators"] = {
+        "action_list_operator": {
+            "class_name": "ActionListValidationOperator",
+            "action_list": [
+                {
+                    "name": "store_validation_result",
+                    "action": {"class_name": "StoreValidationResultAction"},
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {"class_name": "StoreEvaluationParametersAction"},
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": {"class_name": "UpdateDataDocsAction"},
+                },
+            ],
+        }
+    }
+    project_config: DataContextConfig = DataContextConfig(**project_config_dict)
+    data_context = BaseDataContext(
+        project_config=project_config,
+        context_root_dir=titanic_pandas_multibatch_data_context_v3.root_directory,
+    )
+
+    my_validator: Validator = data_context.get_validator(
+        datasource_name="titanic_multi_batch",
+        data_connector_name="my_data_connector",
+        data_asset_name="Titanic_1912",
+        create_expectation_suite_with_name="my_test_titanic_expectation_suite",
+    )
+
+    assert my_validator.expect_table_row_count_to_equal(1313)["success"]
+    assert my_validator.expect_table_column_count_to_equal(7)["success"]
