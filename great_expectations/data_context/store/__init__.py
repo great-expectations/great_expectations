@@ -5,6 +5,7 @@ from .expectations_store import ExpectationsStore
 from .html_site_store import HtmlSiteStore
 from .metric_store import EvaluationParameterStore, MetricStore
 from .query_store import SqlAlchemyQueryStore
+from .checkpoint_store import CheckpointStore
 from .store import Store
 from .store_backend import InMemoryStoreBackend, StoreBackend
 from .tuple_store_backend import (
@@ -21,6 +22,7 @@ for module_name, package_name in [
     (".expectations_store", "great_expectations.data_context.store"),
     (".html_site_store", "great_expectations.data_context.store"),
     (".metric_store", "great_expectations.data_context.store"),
+    (".checkpoint_store", "great_expectations.data_context.store"),
     (".store_backend", "great_expectations.data_context.store"),
     (".tuple_store_backend", "great_expectations.data_context.store"),
     (".database_store_backend", "great_expectations.data_context.store"),

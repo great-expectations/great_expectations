@@ -17,5 +17,5 @@ batches:
       path: /path/to/npi.csv
       datasource: files_datasource
       reader_method: read_csv
-    expectation_suite_names: # one or more suites may validate against a single batch
+    expectation_suite_names:
       - my_suite

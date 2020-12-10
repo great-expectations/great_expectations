@@ -25,8 +25,8 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.datasource import LegacyDatasource
-from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
+from great_expectations.datasource import Datasource
+from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError, InvalidKeyError
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
 
@@ -339,13 +339,16 @@ def exit_with_failure_message_and_stats(
 
 
 def load_checkpoint(
-    context: DataContext, checkpoint_name: str, usage_event: str
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+    return_config: bool=True,
 ) -> dict:
     """Load a checkpoint or raise helpful errors."""
     try:
-        checkpoint_config = context.get_checkpoint(checkpoint_name)
+        checkpoint_config = context.get_checkpoint(checkpoint_name, return_config=return_config)
         return checkpoint_config
-    except CheckpointNotFoundError as e:
+    except InvalidKeyError as e:
         exit_with_failure_message_and_stats(
             context,
             usage_event,
@@ -358,9 +361,7 @@ def load_checkpoint(
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
-def select_datasource(
-    context: DataContext, datasource_name: str = None
-) -> LegacyDatasource:
+def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
     data_source = None

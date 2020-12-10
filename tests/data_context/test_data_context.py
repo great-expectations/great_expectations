@@ -31,7 +31,7 @@ from great_expectations.exceptions import (
     CheckpointError,
     CheckpointNotFoundError,
     ConfigNotFoundError,
-    DataContextError,
+    DataContextError, InvalidKeyError,
 )
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -1426,7 +1426,7 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
-    with pytest.raises(CheckpointNotFoundError):
+    with pytest.raises(InvalidKeyError):
         context.get_checkpoint("not_a_checkpoint")
 
 

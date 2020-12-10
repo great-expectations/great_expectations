@@ -18,6 +18,7 @@ def titanic_checkpoint(titanic_data_context_stats_enabled, titanic_expectation_s
         titanic_data_context_stats_enabled.root_directory, "..", "data", "Titanic.csv"
     )
     return {
+        "validation_operator_name" : "action_list_operator",
         "batches": [
             {
                 "batch_kwargs": {
@@ -250,7 +251,7 @@ batches:
     assert (
         """datasource: mydatasource
       data_asset_name: Titanic
-    expectation_suite_names: # one or more suites may validate against a single batch
+    expectation_suite_names:
       - Titanic.warning
 """
         in obs_file
@@ -364,7 +365,8 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run fake_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli, f"checkpoint run fake_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -401,7 +403,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     stdout = result.stdout
     assert result.exit_code == 1
 
-    assert "Could not find a suite named `suite_one`" in stdout
+    assert "expectation_suite suite_one not found" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -453,15 +455,17 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     stdout = result.stdout
     assert result.exit_code == 1
 
-    assert "There was a problem loading a batch:" in stdout
-    assert (
-        "{'path': '/totally/not/a/file.csv', 'datasource': 'mydatasource', 'reader_method': 'read_csv'}"
-        in stdout
-    )
-    assert (
-        "Please verify these batch kwargs in the checkpoint file: `great_expectations/checkpoints/bad_batch.yml`"
-        in stdout
-    )
+    # Note: Abe : 2020/09: This was a better error message, but it should live in DataContext.get_batch, not a random CLI method.
+    # assert "There was a problem loading a batch:" in stdout
+    # assert (
+    #     "{'path': '/totally/not/a/file.csv', 'datasource': 'mydatasource', 'reader_method': 'read_csv'}"
+    #     in stdout
+    # )
+    # assert (
+    #     "Please verify these batch kwargs in checkpoint bad_batch`"
+    #     in stdout
+    # )
+    assert "No such file or directory" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -519,7 +523,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         in stdout
     )
     assert (
-        "Please add at least one suite to your checkpoint file: great_expectations/checkpoints/bad_batch.yml"
+        "Please add at least one suite to checkpoint bad_batch"
         in stdout
     )
 
@@ -608,31 +612,7 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert result.exit_code == 0
     assert "Validation succeeded!" in stdout
 
-    # Check to make sure data docs are built
-    assert os.path.isfile(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "index.html")
-    )
-    assert os.path.isfile(
-        os.path.join(
-            root_dir,
-            "uncommitted",
-            "data_docs",
-            "local_site",
-            "expectations",
-            "Titanic",
-            "warning.html",
-        )
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "validations")
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "expectations")
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "static")
-    )
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 4
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
         {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -640,13 +620,10 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert usage_emits[1][0][0]["event"] == "data_asset.validate"
     assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
+    assert usage_emits[2][0][0]["event"] == "data_context.run_validation_operator"
     assert usage_emits[2][0][0]["success"] is True
 
-    assert usage_emits[3][0][0]["event"] == "data_context.run_validation_operator"
-    assert usage_emits[3][0][0]["success"] is True
-
-    assert usage_emits[4] == mock.call(
+    assert usage_emits[3] == mock.call(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
@@ -677,32 +654,7 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert result.exit_code == 1
     assert "Validation failed!" in stdout
 
-    # Check to make sure data docs are built
-    assert os.path.isfile(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "index.html")
-    )
-    assert os.path.isfile(
-        os.path.join(
-            root_dir,
-            "uncommitted",
-            "data_docs",
-            "local_site",
-            "expectations",
-            "Titanic",
-            "warning.html",
-        )
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "validations")
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "expectations")
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "static")
-    )
-
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 4
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
         {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -710,13 +662,10 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert usage_emits[1][0][0]["event"] == "data_asset.validate"
     assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
+    assert usage_emits[2][0][0]["event"] == "data_context.run_validation_operator"
     assert usage_emits[2][0][0]["success"] is True
 
-    assert usage_emits[3][0][0]["event"] == "data_context.run_validation_operator"
-    assert usage_emits[3][0][0]["success"] is True
-
-    assert usage_emits[4] == mock.call(
+    assert usage_emits[3] == mock.call(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
@@ -891,6 +840,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
 
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
+
     assert status == 0
     assert output == "Validation succeeded!"
 

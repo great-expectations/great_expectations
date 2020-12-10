@@ -71,6 +71,8 @@ from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.core.data_context_key import StringKey
+from great_expectations.data_context.store import CheckpointStore
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -2231,113 +2233,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiling_results["success"] = True
         return profiling_results
 
-    @staticmethod
-    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
-        if checkpoint is None:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
-            )
-        if "validation_operator_name" not in checkpoint:
-            checkpoint["validation_operator_name"] = "action_list_operator"
-
-        if "batches" not in checkpoint:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
-            )
-        batches = checkpoint["batches"]
-        if not isinstance(batches, list):
-            raise ge_exceptions.CheckpointError(
-                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
-            )
-
-        for batch in batches:
-            for required in ["expectation_suite_names", "batch_kwargs"]:
-                if required not in batch:
-                    raise ge_exceptions.CheckpointError(
-                        f"Items in `batches` must have a key `{required}`"
-                    )
-
-        return checkpoint
-
-    def list_checkpoints(self) -> List[str]:
-        """List checkpoints. (Experimental)"""
-        # TODO mark experimental
-        files = self._list_ymls_in_checkpoints_directory()
-        return [
-            os.path.basename(f)[:-4]
-            for f in files
-            if os.path.basename(f).endswith(".yml")
-        ]
-
-    def get_checkpoint(self, checkpoint_name: str) -> dict:
-        """Load a checkpoint. (Experimental)"""
-        # TODO mark experimental
-        yaml = YAML(typ="safe")
-        # TODO make a serializable class with a schema
-        checkpoint_path = os.path.join(
-            self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
-        )
-        try:
-            with open(checkpoint_path) as f:
-                checkpoint = yaml.load(f.read())
-                return self._validate_checkpoint(checkpoint, checkpoint_name)
-        except FileNotFoundError:
-            raise ge_exceptions.CheckpointNotFoundError(
-                f"Could not find checkpoint `{checkpoint_name}`."
-            )
-
-    def run_checkpoint(
-        self,
-        checkpoint_name: str,
-        run_id=None,
-        evaluation_parameters=None,
-        run_name=None,
-        run_time=None,
-        result_format=None,
-        **kwargs,
-    ):
-        """
-        Validate against a pre-defined checkpoint. (Experimental)
-        Args:
-            checkpoint_name: The name of a checkpoint defined via the CLI or by manually creating a yml file
-            run_name: The run_name for the validation; if None, a default value will be used
-            **kwargs: Additional kwargs to pass to the validation operator
-
-        Returns:
-            ValidationOperatorResult
-        """
-        # TODO mark experimental
-
-        if result_format is None:
-            result_format = {"result_format": "SUMMARY"}
-
-        checkpoint = self.get_checkpoint(checkpoint_name)
-
-        batches_to_validate = []
-        for batch in checkpoint["batches"]:
-            batch_kwargs = batch["batch_kwargs"]
-            for suite_name in batch["expectation_suite_names"]:
-                suite = self.get_expectation_suite(suite_name)
-                batch = self.get_batch(batch_kwargs, suite)
-                batches_to_validate.append(batch)
-
-        results = self.run_validation_operator(
-            checkpoint["validation_operator_name"],
-            assets_to_validate=batches_to_validate,
-            run_id=run_id,
-            evaluation_parameters=evaluation_parameters,
-            run_name=run_name,
-            run_time=run_time,
-            result_format=result_format,
-            **kwargs,
-        )
-        return results
-
-    def _list_ymls_in_checkpoints_directory(self):
-        checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
-        files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
-        return files
-
 
 class DataContext(BaseDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
@@ -2559,6 +2454,17 @@ class DataContext(BaseDataContext):
         ):
             self._save_project_config()
 
+        self.checkpoint_store = CheckpointStore(
+            store_backend = {
+                "module_name" : "great_expectations.data_context.store",
+                "class_name" : "TupleFilesystemStoreBackend",
+                "filepath_suffix" : ".yml",
+                "base_directory" : os.path.join(self.root_directory, self.CHECKPOINTS_DIR),
+            }
+        )
+
+
+
     def _load_project_config(self):
         """
         Reads the project configuration from the project configuration file.
@@ -2590,6 +2496,109 @@ class DataContext(BaseDataContext):
         except ge_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
+
+    def create_checkpoint(self,
+        checkpoint_name: str,
+        checkpoint_config: dict,
+    ):
+        self._validate_checkpoint_config(
+            checkpoint_config,
+            checkpoint_name,
+        )
+
+        checkpoint_config["class_name"] = "Checkpoint"
+
+        template = self._load_checkpoint_yml_template()
+        checkpoint_config["template"] = template
+
+        new_checkpoint = instantiate_class_from_config(
+            config=checkpoint_config,
+            runtime_environment={
+                "data_context": self,
+                "name": StringKey(checkpoint_name),
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint",
+            },
+        )
+
+        self.checkpoint_store.set(
+            StringKey(checkpoint_name),
+            new_checkpoint,
+        )
+
+        return new_checkpoint
+
+    def get_checkpoint(self, checkpoint_name: str, return_config: bool=True):
+        """Load a checkpoint. (Experimental)"""
+
+        checkpoint_config = self.checkpoint_store.get(
+            StringKey(checkpoint_name)
+        )
+        self._validate_checkpoint_config(
+            checkpoint_config,
+            checkpoint_name,
+        )
+
+        if return_config:
+            return checkpoint_config
+
+        checkpoint_config["class_name"] = "Checkpoint"
+
+        checkpoint = instantiate_class_from_config(
+            config=checkpoint_config,
+            runtime_environment={
+                "data_context": self,
+                "name": checkpoint_name,
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint",
+            },
+        )
+
+        return checkpoint
+
+    def list_checkpoints(self) -> List[str]:
+        """List checkpoints. (Experimental)"""
+        return [x._key for x in self.checkpoint_store.list_keys()]
+
+    def _load_checkpoint_yml_template(self) -> dict:
+        template_file = file_relative_path(
+            __file__, os.path.join("checkpoint_template.yml")
+        )
+        with open(template_file, "r") as f:
+            template = yaml.load(f)
+        return template
+
+
+    @staticmethod
+    def _validate_checkpoint_config(checkpoint_config: dict, checkpoint_name: str) -> dict:
+        if checkpoint_config is None:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
+            )
+
+        if "validation_operator_name" not in checkpoint_config:
+            checkpoint_config["validation_operator_name"] = "action_list_operator"
+
+        if "batches" not in checkpoint_config:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
+            )
+        batches = checkpoint_config["batches"]
+        if not isinstance(batches, list):
+            raise ge_exceptions.CheckpointError(
+                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
+            )
+
+        for batch in batches:
+            for required in ["expectation_suite_names", "batch_kwargs"]:
+                if required not in batch:
+                    raise ge_exceptions.CheckpointError(
+                        f"Items in `batches` must have a key `{required}`"
+                    )
+
+        return checkpoint_config
 
     def _save_project_config(self):
         """Save the current project to disk."""
