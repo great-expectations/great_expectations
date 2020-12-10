@@ -155,15 +155,16 @@ Once configured, you can get a ``Validator`` from the ``DataContext`` as follows
 
 .. code-block:: python
 
-    my_validator = my_context.get_validator(
-        execution_engine_name="my_execution_engine",
-            data_connector_name="my_data_connector",
+    my_validator = context.get_validator(
+        datasource_name="my_data_source",
+        data_connector_name="my_filesystem_data_connector",
         data_asset_name="alpha",
-        partition_request={
-            index="2"
-        }
-    )
+        partition_identifiers={
+            "index": "2"
+        },
+        expectation_suite_name="my_expectation_suite" # the suite with this name must exist by the time of this call
 
+    )
 
 But what if the regex does not match any files in the directory?
 
