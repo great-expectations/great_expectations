@@ -136,9 +136,9 @@ def test_SlackRenderer_get_report_element():
     slack_renderer = SlackRenderer()
 
     # these should all be caught
-    assert slack_renderer._get_report_element(docs_link=None) == None
-    assert slack_renderer._get_report_element(docs_link=1) == None
-    assert slack_renderer._get_report_element(docs_link=slack_renderer) == None
+    assert slack_renderer._get_report_element(docs_link=None) is None
+    assert slack_renderer._get_report_element(docs_link=1) is None
+    assert slack_renderer._get_report_element(docs_link=slack_renderer) is None
 
     # this should work
     assert slack_renderer._get_report_element(docs_link="i_should_work") is not None
