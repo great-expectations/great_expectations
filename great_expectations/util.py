@@ -853,6 +853,5 @@ def is_float(value: Any) -> bool:
 
 
 def get_context():
-    from great_expectations.data_context.data_context_v3 import DataContextV3
-
-    return DataContextV3()
+    from great_expectations.data_context.data_context import DataContext
+    return DataContext()

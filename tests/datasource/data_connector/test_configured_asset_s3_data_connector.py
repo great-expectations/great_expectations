@@ -88,8 +88,8 @@ def test_basic_instantiation():
 
 
 @mock_s3
-def test_instantiation_from_a_config(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_instantiation_from_a_config(empty_data_context):
+    context = empty_data_context
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -147,8 +147,8 @@ def test_instantiation_from_a_config(empty_data_context_v3):
 
 
 @mock_s3
-def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context):
+    context = empty_data_context
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
