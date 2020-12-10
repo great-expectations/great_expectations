@@ -1203,30 +1203,57 @@ class BaseDataContext:
                 **kwargs,
             )
 
-    def _get_data_context_version(self, pos_arg, **kwargs) -> Optional[str]:
+    def _get_data_context_version(self, arg1: Any, **kwargs) -> Optional[str]:
         """
-        pos_arg: positional argument (candidate to be the "batch_kwargs" value for V2)
-        **kwargs: variable arguments (candidate to contain "batch_kwargs" key and value for V2)
+        arg1: the first positional argument (can take on various types)
 
-        Returns None if no datasources have been configured.
-        Returns "v2" if the datasource is an instance of the LegacyDatasource class; returns "v3" otherwise.
+        **kwargs: variable arguments
+
+        Returns None if no datasources have been configured (or if there is an exception while getting the datasource).
+        Returns "v3" if the datasource is a subclass of the BaseDatasource class.
+        Returns "v2" if the datasource is an instance of the LegacyDatasource class.
         """
 
         if not self.datasources:
             return None
-        api_version: str = "v3"
-        if "batch_kwargs" in kwargs:
-            batch_kwargs = kwargs.get("batch_kwargs", None)
+
+        if {
+            "datasource_name",
+            "data_connector_name",
+            "data_asset_name",
+            "batch_request",
+            "batch_data",
+        }.intersection(set(kwargs.keys())):
+            return "v3"
+
+        api_version: Optional[str] = None
+        datasource_name: Any
+        if "datasource_name" in kwargs:
+            datasource_name = kwargs.pop("datasource_name", None)
         else:
-            batch_kwargs = pos_arg
-        if isinstance(batch_kwargs, dict):
-            datasource_name: str = batch_kwargs.get("datasource")
-            if datasource_name is not None:
-                datasource: Union[
-                    LegacyDatasource, BaseDatasource
-                ] = self.get_datasource(datasource_name=datasource_name)
-                if isinstance(datasource, LegacyDatasource):
-                    api_version = "v2"
+            datasource_name = arg1
+        try:
+            datasource: Union[LegacyDatasource, BaseDatasource] = self.get_datasource(
+                datasource_name=datasource_name
+            )
+            if issubclass(type(datasource), BaseDatasource):
+                api_version = "v3"
+        except (ValueError, TypeError):
+            if "batch_kwargs" in kwargs:
+                batch_kwargs = kwargs.get("batch_kwargs", None)
+            else:
+                batch_kwargs = arg1
+            if isinstance(batch_kwargs, dict):
+                datasource_name = batch_kwargs.get("datasource")
+                if datasource_name is not None:
+                    try:
+                        datasource: Union[
+                            LegacyDatasource, BaseDatasource
+                        ] = self.get_datasource(datasource_name=datasource_name)
+                        if isinstance(datasource, LegacyDatasource):
+                            api_version = "v2"
+                    except (ValueError, TypeError):
+                        pass
         return api_version
 
     def get_batch(
@@ -1257,56 +1284,56 @@ class BaseDataContext:
         4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
         """
 
-        if self._get_data_context_version(pos_arg=arg1, **kwargs) == "v2":
-            if "batch_kwargs" in kwargs:
-                batch_kwargs = kwargs.get("batch_kwargs", None)
+        api_version: Optional[str] = self._get_data_context_version(arg1=arg1, **kwargs)
+        if api_version == "v3":
+            if "datasource_name" in kwargs:
+                datasource_name = kwargs.pop("datasource_name", None)
             else:
-                batch_kwargs = arg1
-            if not isinstance(batch_kwargs, dict):
-                raise ge_exceptions.BatchKwargsError(
-                    "The BatchKwargs argument passed to load_batch must be a BatchKwargs object or dictionary."
-                )
-            if "expectation_suite_name" in kwargs:
-                expectation_suite_name = kwargs.get("expectation_suite_name", None)
+                datasource_name = arg1
+            if "data_connector_name" in kwargs:
+                data_connector_name = kwargs.pop("data_connector_name", None)
             else:
-                expectation_suite_name = arg2
-            if not isinstance(
-                expectation_suite_name,
-                (ExpectationSuite, ExpectationSuiteIdentifier, str),
-            ):
-                raise ge_exceptions.DataContextError(
-                    """The expectation_suite_name argument passed to load_batch must be an ExpectationSuite,
-ExpectationSuiteIdentifier or string.
-                    """
-                )
-            if "data_asset_type" in kwargs:
-                data_asset_type = kwargs.get("data_asset_type", None)
+                data_connector_name = arg2
+            if "data_asset_name" in kwargs:
+                data_asset_name = kwargs.pop("data_asset_name", None)
             else:
-                data_asset_type = arg3
-            batch_parameters = kwargs.get("batch_parameters")
-            return self._get_batch_v2(
-                batch_kwargs=batch_kwargs,
-                expectation_suite_name=expectation_suite_name,
-                data_asset_type=data_asset_type,
-                batch_parameters=batch_parameters,
+                data_asset_name = arg3
+            return self._get_batch_v3(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                **kwargs,
             )
-        if "datasource_name" in kwargs:
-            datasource_name = kwargs.pop("datasource_name", None)
+        if "batch_kwargs" in kwargs:
+            batch_kwargs = kwargs.get("batch_kwargs", None)
         else:
-            datasource_name = arg1
-        if "data_connector_name" in kwargs:
-            data_connector_name = kwargs.pop("data_connector_name", None)
+            batch_kwargs = arg1
+        if not isinstance(batch_kwargs, dict):
+            raise ge_exceptions.BatchKwargsError(
+                "The BatchKwargs argument passed to load_batch must be a BatchKwargs object or dictionary."
+            )
+        if "expectation_suite_name" in kwargs:
+            expectation_suite_name = kwargs.get("expectation_suite_name", None)
         else:
-            data_connector_name = arg2
-        if "data_asset_name" in kwargs:
-            data_asset_name = kwargs.pop("data_asset_name", None)
+            expectation_suite_name = arg2
+        if not isinstance(
+            expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, str),
+        ):
+            raise ge_exceptions.DataContextError(
+                """The expectation_suite_name argument passed to load_batch must be an ExpectationSuite,
+ExpectationSuiteIdentifier or string.
+                """
+            )
+        if "data_asset_type" in kwargs:
+            data_asset_type = kwargs.get("data_asset_type", None)
         else:
-            data_asset_name = arg3
-        return self._get_batch_v3(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            **kwargs,
+            data_asset_type = arg3
+        batch_parameters = kwargs.get("batch_parameters")
+        return self._get_batch_v2(
+            batch_kwargs=batch_kwargs,
+            expectation_suite_name=expectation_suite_name,
+            data_asset_type=data_asset_type,
+            batch_parameters=batch_parameters,
         )
 
     def get_batch_list(
