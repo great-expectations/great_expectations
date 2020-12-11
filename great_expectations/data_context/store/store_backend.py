@@ -54,7 +54,7 @@ class StoreBackend(metaclass=ABCMeta):
     def store_name(self):
         return self._store_name
 
-    def _construct_store_backend_id(self, suppress_warning: bool = False) -> str:
+    def _construct_store_backend_id(self, suppress_warning: bool = False) -> Optional[str]:
         """
         Create a store_backend_id if one does not exist, and return it if it exists
         If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id
@@ -71,7 +71,7 @@ class StoreBackend(metaclass=ABCMeta):
                 logger.warning(
                     f"You are attempting to access the store_backend_id of a store or store_backend named {self.store_name} that has been explicitly suppressed."
                 )
-            return
+            return None
         try:
             try:
                 return self.get(key=self.STORE_BACKEND_ID_KEY).replace(
