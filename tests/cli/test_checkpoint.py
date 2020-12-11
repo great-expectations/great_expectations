@@ -620,7 +620,7 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert usage_emits[1][0][0]["event"] == "data_asset.validate"
     assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[2][0][0]["event"] == "data_context..build_data_docs"
     assert usage_emits[2][0][0]["success"] is True
 
     assert usage_emits[3] == mock.call(
@@ -662,7 +662,7 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert usage_emits[1][0][0]["event"] == "data_asset.validate"
     assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
     assert usage_emits[2][0][0]["success"] is True
 
     assert usage_emits[3] == mock.call(
