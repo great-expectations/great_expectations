@@ -2518,7 +2518,7 @@ class DataContext(BaseDataContext):
                 "name": StringKey(checkpoint_name),
             },
             config_defaults={
-                "module_name": "great_expectations.checkpoint",
+                "module_name": "great_expectations.checkpoint.checkpoint",
             },
         )
 
@@ -2552,7 +2552,7 @@ class DataContext(BaseDataContext):
                 "name": checkpoint_name,
             },
             config_defaults={
-                "module_name": "great_expectations.checkpoint",
+                "module_name": "great_expectations.checkpoint.checkpoint",
             },
         )
 
