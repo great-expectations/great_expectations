@@ -4,6 +4,7 @@ import os
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.data_context_key import StringKey
+from great_expectations.exceptions import InvalidKeyError
 
 from great_expectations.util import gen_directory_tree_str
 
@@ -35,7 +36,7 @@ def test_checkpoint_store(empty_data_context):
 
     assert len(checkpoint_store.list_keys()) == 1
 
-    with pytest.raises(KeyError):
+    with pytest.raises(InvalidKeyError):
         assert checkpoint_store.get(
             StringKey("nonexistent_checkpoint")
         )
@@ -76,6 +77,7 @@ def test_checkpoint_store_with_filesystem_backend(empty_data_context):
     assert (
             file_tree
             == """checkpoints/
+    .ge_store_backend_id
     my_checkpoint.yml
 """)
 

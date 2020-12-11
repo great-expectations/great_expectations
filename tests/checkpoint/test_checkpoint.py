@@ -56,7 +56,7 @@ def test_newstyle_checkpoint(filesystem_csv_data_context):
         },
         config=yaml.load("""
 class_name: NewStyleCheckpoint
-module_name: great_expectations.checkpoint
+module_name: great_expectations.checkpoint.checkpoint
 validation_operator_name: testing
 
 validators:
