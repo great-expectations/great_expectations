@@ -55,6 +55,7 @@ class DatabaseStoreBackend(StoreBackend):
                 "DatabaseStoreBackend requires use of a fixed-length-key"
             )
 
+        self._schema_name = credentials.pop("schema", None)
         self._credentials = credentials
         self._connection_string = connection_string
         self._url = url
