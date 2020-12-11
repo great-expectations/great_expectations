@@ -42,9 +42,14 @@ class DatabaseStoreBackend(StoreBackend):
         connection_string=None,
         engine=None,
         store_name=None,
+        suppress_store_backend_id=False,
         **kwargs,
     ):
-        super().__init__(fixed_length_key=fixed_length_key, store_name=store_name)
+        super().__init__(
+            fixed_length_key=fixed_length_key,
+            suppress_store_backend_id=suppress_store_backend_id,
+            store_name=store_name,
+        )
         if not sa:
             raise ge_exceptions.DataContextError(
                 "ModuleNotFoundError: No module named 'sqlalchemy'"
@@ -55,7 +60,7 @@ class DatabaseStoreBackend(StoreBackend):
                 "DatabaseStoreBackend requires use of a fixed-length-key"
             )
 
-        self._schema_name = credentials.pop("schema", None)
+        self._schema_name = None
         self._credentials = credentials
         self._connection_string = connection_string
         self._url = url
@@ -78,7 +83,6 @@ class DatabaseStoreBackend(StoreBackend):
             raise ge_exceptions.InvalidConfigError(
                 "Credentials, url, connection_string, or an engine are required for a DatabaseStoreBackend."
             )
-        # <WILL> Add an additional check here?
 
         meta = MetaData(schema=self._schema_name)
         self.key_columns = key_columns
@@ -143,6 +147,7 @@ class DatabaseStoreBackend(StoreBackend):
         # Update credentials with anything passed during connection time
         drivername = credentials.pop("drivername")
         create_engine_kwargs = kwargs
+        self._schema_name = credentials.pop("schema", None)
         connect_args = credentials.pop("connect_args", None)
         if connect_args:
             create_engine_kwargs["connect_args"] = connect_args
