@@ -612,7 +612,7 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert result.exit_code == 0
     assert "Validation succeeded!" in stdout
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
         {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -654,7 +654,7 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert result.exit_code == 1
     assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
         {"event_payload": {}, "event": "data_context.__init__", "success": True}
