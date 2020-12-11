@@ -142,7 +142,6 @@ class DatabaseStoreBackend(StoreBackend):
         """
         # Update credentials with anything passed during connection time
         drivername = credentials.pop("drivername")
-        self._schema_name = credentials.pop("schema_name", None)
         create_engine_kwargs = kwargs
         connect_args = credentials.pop("connect_args", None)
         if connect_args:
