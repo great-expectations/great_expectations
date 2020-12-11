@@ -104,7 +104,7 @@ def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backend
     assert "Integrity error" in str(exc.value)
 
 
-def test_database_store_backend_url_instantiaion(caplog, sa, test_backends):
+def test_database_store_backend_url_instantiation(caplog, sa, test_backends):
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
 

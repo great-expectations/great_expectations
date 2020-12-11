@@ -41,9 +41,10 @@ class DatabaseStoreBackend(StoreBackend):
         url=None,
         connection_string=None,
         engine=None,
+        store_name=None,
         **kwargs,
     ):
-        super().__init__(fixed_length_key=fixed_length_key)
+        super().__init__(fixed_length_key=fixed_length_key, store_name=store_name)
         if not sa:
             raise ge_exceptions.DataContextError(
                 "ModuleNotFoundError: No module named 'sqlalchemy'"
