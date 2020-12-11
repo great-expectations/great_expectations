@@ -78,7 +78,6 @@ class DatabaseStoreBackend(StoreBackend):
             raise ge_exceptions.InvalidConfigError(
                 "Credentials, url, connection_string, or an engine are required for a DatabaseStoreBackend."
             )
-        # <WILL> Add an additional check here?
 
         meta = MetaData(schema=self._schema_name)
         self.key_columns = key_columns
