@@ -465,7 +465,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     #     "Please verify these batch kwargs in checkpoint bad_batch`"
     #     in stdout
     # )
-    assert "No such file or directory" in stdout
+    assert "does not exist" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -519,7 +519,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         in stdout
     )
     assert (
-        "Batch: {'path': '/totally/not/a/file.csv', 'datasource': 'mydatasource', 'reader_method': 'read_csv'}"
+        'Batch: {"path": "/totally/not/a/file.csv", "datasource": "mydatasource", "reader_method": "read_csv"}'
         in stdout
     )
     assert (
