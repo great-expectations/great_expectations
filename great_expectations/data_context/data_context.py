@@ -2506,7 +2506,7 @@ class DataContext(BaseDataContext):
             checkpoint_name,
         )
 
-        checkpoint_config["class_name"] = "Checkpoint"
+        checkpoint_config["class_name"] = "LegacyCheckpoint"
 
         template = self._load_checkpoint_yml_template()
         checkpoint_config["template"] = template
@@ -2543,7 +2543,7 @@ class DataContext(BaseDataContext):
         if return_config:
             return checkpoint_config
 
-        checkpoint_config["class_name"] = "Checkpoint"
+        checkpoint_config["class_name"] = "LegacyCheckpoint"
 
         checkpoint = instantiate_class_from_config(
             config=checkpoint_config,
@@ -2575,7 +2575,7 @@ class DataContext(BaseDataContext):
     def _validate_checkpoint_config(checkpoint_config: dict, checkpoint_name: str) -> dict:
         if checkpoint_config is None:
             raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
+                f"LegacyCheckpoint `{checkpoint_name}` has no contents. Please fix this."
             )
 
         if "validation_operator_name" not in checkpoint_config:
@@ -2583,7 +2583,7 @@ class DataContext(BaseDataContext):
 
         if "batches" not in checkpoint_config:
             raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
+                f"LegacyCheckpoint `{checkpoint_name}` is missing required key: `batches`."
             )
         batches = checkpoint_config["batches"]
         if not isinstance(batches, list):

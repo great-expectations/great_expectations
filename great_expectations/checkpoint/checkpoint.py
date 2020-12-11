@@ -11,7 +11,7 @@ from great_expectations.data_context.util import (
 )
 
 
-class Checkpoint(object):
+class LegacyCheckpoint(object):
     def __init__(self,
         data_context,
         name,
@@ -68,7 +68,7 @@ class Checkpoint(object):
             return output_str
 
         else:
-            raise ValueError(f"Unknown format {format} in Checkpoint.get_config.")
+            raise ValueError(f"Unknown format {format} in LegacyCheckpoint.get_config.")
 
     def _get_batches_to_validate(self, batches):
         batches_to_validate = []
@@ -92,7 +92,7 @@ class Checkpoint(object):
         return batches_to_validate
 
 
-class NewStyleCheckpoint(object):
+class Checkpoint(object):
     def __init__(self,
         data_context: DataContext,
         name: str,

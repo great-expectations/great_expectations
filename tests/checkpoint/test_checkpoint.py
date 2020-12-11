@@ -1,8 +1,8 @@
 import pytest
 
 from great_expectations.checkpoint.checkpoint import (
+    LegacyCheckpoint,
     Checkpoint,
-    NewStyleCheckpoint,
 )
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import (
@@ -20,7 +20,7 @@ def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(files
         "reader_method": "read_csv",
     }
 
-    checkpoint = Checkpoint(
+    checkpoint = LegacyCheckpoint(
         data_context=filesystem_csv_data_context,
         name="my_checkpoint",
         validation_operator_name="action_list_operator",
@@ -59,7 +59,7 @@ def test_newstyle_checkpoint(filesystem_csv_data_context_v3):
 #             "name": "my_new_style_checkpoint",
 #         },
 #         config=yaml.load("""
-# class_name: NewStyleCheckpoint
+# class_name: Checkpoint
 # module_name: great_expectations.checkpoint.checkpoint
 # validation_operator_name: testing
 #

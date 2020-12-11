@@ -2,7 +2,7 @@ import pytest
 import os
 
 from great_expectations.data_context.store import CheckpointStore
-from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.checkpoint.checkpoint import LegacyCheckpoint
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.exceptions import InvalidKeyError
 
@@ -22,7 +22,7 @@ def test_checkpoint_store(empty_data_context):
 
     assert len(checkpoint_store.list_keys()) == 0
 
-    my_checkpoint = Checkpoint(
+    my_checkpoint = LegacyCheckpoint(
         empty_data_context,
         "my_checkpoint",
         [],
@@ -61,7 +61,7 @@ def test_checkpoint_store_with_filesystem_backend(empty_data_context):
         store_backend=store_backend_config
     )
 
-    my_checkpoint = Checkpoint(
+    my_checkpoint = LegacyCheckpoint(
         empty_data_context,
         "my_checkpoint",
         [],
