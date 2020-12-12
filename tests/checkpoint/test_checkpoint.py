@@ -1,4 +1,11 @@
+import os
 import pytest
+from copy import deepcopy
+
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
+
+import logging
 
 from great_expectations.checkpoint.checkpoint import (
     LegacyCheckpoint,
@@ -8,7 +15,26 @@ from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import (
     instantiate_class_from_config
 )
-from great_expectations.exceptions import DataContextError
+from great_expectations.marshmallow__shade import (
+    INCLUDE,
+    Schema,
+    ValidationError,
+    fields,
+    post_dump,
+    post_load,
+    validates_schema,
+)
+from great_expectations.data_context.types.base import (
+    BaseConfig,
+    save_checkpoint_config_to_filesystem,
+    load_checkpoint_config_from_filesystem,
+    delete_checkpoint_config_from_filesystem,
+)
+import great_expectations.exceptions as ge_exceptions
+
+yaml = YAML()
+
+logger = logging.getLogger(__name__)
 
 
 def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(filesystem_csv_data_context):
@@ -33,7 +59,7 @@ def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(files
     )
 
     with pytest.raises(
-        DataContextError, match=r"expectation_suite .* not found"
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
         checkpoint.run()
 
@@ -72,3 +98,78 @@ def test_newstyle_checkpoint(filesystem_csv_data_context_v3):
 # """))
 #
 #     my_new_style_checkpoint.run()
+
+
+def test_checkpoint_v3_configuration_store(tmp_path_factory):
+    class CheckpointConfig(BaseConfig):
+        def __init__(
+            self,
+            some_param_0: str = None,
+            some_param_1: int = None,
+            commented_map: CommentedMap = None,
+        ):
+            if some_param_0 is None:
+                some_param_0 = "param_value_0"
+            self.some_param_0 = some_param_0
+            if some_param_1 is None:
+                some_param_1 = 169
+            self.some_param_1 = some_param_1
+
+            super().__init__(commented_map=commented_map)
+
+        @classmethod
+        def from_commented_map(cls, commented_map: CommentedMap) -> BaseConfig:
+            try:
+                config: dict = CheckpointConfigSchema().load(commented_map)
+                return cls(commented_map=commented_map, **config)
+            except ValidationError:
+                logger.error(
+                    "Encountered errors during loading checkpoint config. See ValidationError for more details."
+                )
+                raise
+
+        def get_schema_validated_updated_commented_map(self) -> CommentedMap:
+            commented_map: CommentedMap = deepcopy(self.commented_map)
+            commented_map.update(CheckpointConfigSchema.dump(self))
+            return commented_map
+
+    class CheckpointConfigSchema(Schema):
+        class Meta:
+            unknown = INCLUDE
+
+        some_param_0 = fields.String()
+        some_param_1 = fields.Integer()
+
+        @validates_schema
+        def validate_schema(self, data, **kwargs):
+            pass
+
+        # noinspection PyUnusedLocal
+        @post_load
+        def make_checkpoint_config(self, data, **kwargs):
+            return CheckpointConfig(**data)
+
+    base_directory: str = str(
+        tmp_path_factory.mktemp(
+            "test_checkpoint_v3_configuration_store"
+        )
+    )
+
+    checkpoint_config: CheckpointConfig
+    store_name: str
+
+    checkpoint_config = CheckpointConfig(
+        some_param_0="test_str_0",
+        some_param_1=65
+    )
+    store_name = "test_checkpoint_config_0"
+    save_checkpoint_config_to_filesystem(
+        store_name=store_name,
+        base_directory=base_directory,
+        checkpoint_config=checkpoint_config,
+    )
+
+    stored_checkpoint_file_name: str = os.path.join(base_directory, "test_checkpoint_config_0.yml")
+    with open(stored_checkpoint_file_name, "r") as f:
+        config: dict = yaml.load(f)
+        print(f'[ALEX_TEST] CONFIG: {config}')

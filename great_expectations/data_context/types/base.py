@@ -27,9 +27,9 @@ from great_expectations.data_context.store.util import (
     build_tuple_filesystem_store_backend,
 )
 
-logger = logging.getLogger(__name__)
-
 yaml = YAML()
+
+logger = logging.getLogger(__name__)
 
 CURRENT_CONFIG_VERSION = 2
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
@@ -85,7 +85,7 @@ class BaseConfig(SerializableDictDot):
         return convert_to_json_serializable(data=commented_map)
 
 
-# TODO: <Alex></Alex>
+# TODO: <Alex>ALEX</Alex>
 class CheckpointConfig(BaseConfig):
     def __init__(
         self, some_param: str = None, commented_map: CommentedMap = None,
@@ -122,6 +122,9 @@ class CheckpointConfig(BaseConfig):
 
 
 class CheckpointConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
     some_param = fields.String()
 
     @validates_schema
