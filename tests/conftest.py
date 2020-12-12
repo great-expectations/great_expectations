@@ -2684,8 +2684,8 @@ def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
 
 
 @pytest.fixture()
-def filesystem_csv_data_context_v3(empty_data_context_v3, filesystem_csv_2):
-    empty_data_context_v3.add_datasource(
+def filesystem_csv_data_context_v2(empty_data_context, filesystem_csv_2):
+    empty_data_context.add_datasource(
         "rad_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
@@ -2696,7 +2696,7 @@ def filesystem_csv_data_context_v3(empty_data_context_v3, filesystem_csv_2):
             }
         },
     )
-    return empty_data_context_v3
+    return empty_data_context
 
 
 @pytest.fixture

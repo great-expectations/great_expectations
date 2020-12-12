@@ -179,6 +179,12 @@ def test_checkpoint_v3_configuration_store(tmp_path_factory):
         checkpoint_config=checkpoint_config_0,
     )
 
+    dir_tree: str = gen_directory_tree_str(startpath=base_directory)
+    assert dir_tree == """
+checkpoints/
+    .ge_store_backend_id
+    test_checkpoint_config_0.yml
+    """
     assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 1
 
     stored_checkpoint_file_name_0: str = os.path.join(base_directory, f"{store_name_0}.yml")

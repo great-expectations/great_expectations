@@ -54,16 +54,17 @@ def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(files
     assert len(filesystem_csv_data_context.validations_store.list_keys()) == 1
 
 
-def test_newstyle_checkpoint(filesystem_csv_data_context_v3):
+# TODO: <Alex>ALEX -- this does not look like new style -- the datasources in the data_context are still Legacy style.</Alex>
+def test_newstyle_checkpoint(filesystem_csv_data_context_v2):
     import yaml
 
-    filesystem_csv_data_context_v3.create_expectation_suite(
+    filesystem_csv_data_context_v2.create_expectation_suite(
         expectation_suite_name="IDs_mapping.warning"
     )
 
 #     my_new_style_checkpoint = instantiate_class_from_config(
 #         runtime_environment={
-#             "data_context": filesystem_csv_data_context_v3,
+#             "data_context": filesystem_csv_data_context_v2,
 #             "name": "my_new_style_checkpoint",
 #         },
 #         config=yaml.load("""
