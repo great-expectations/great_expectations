@@ -38,6 +38,7 @@ yaml = YAML()
 logger = logging.getLogger(__name__)
 
 
+# TODO: <Alex>ALEX -- this test can now be deleted, except for preserving/modifying tests that raise errors.</Alex>
 def test_checkpoint_store(empty_data_context):
     checkpoint_store = CheckpointStore()
 
@@ -75,6 +76,7 @@ def test_checkpoint_store(empty_data_context):
     ) == {'batches': [], 'validation_operator_name': 'my_validation_operator'}
 
 
+# TODO: <Alex>ALEX -- this test can now be deleted.</Alex>
 def test_checkpoint_store_with_filesystem_backend(empty_data_context):
     base_directory = os.path.join(empty_data_context.root_directory, "checkpoints")
     print(base_directory)
