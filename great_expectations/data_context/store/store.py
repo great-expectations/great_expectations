@@ -153,3 +153,7 @@ class Store:
         NotImplementedError(
             f"The test method is not implemented for Store class {self.__class__.__name__}."
         )
+
+    @property
+    def config(self) -> dict:
+        raise NotImplementedError

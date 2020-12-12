@@ -4,6 +4,10 @@ from abc import ABCMeta, abstractmethod
 from typing import Optional
 
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -184,6 +188,10 @@ class StoreBackend(metaclass=ABCMeta):
 
         return False
 
+    @property
+    def config(self) -> dict:
+        raise NotImplementedError
+
 
 class InMemoryStoreBackend(StoreBackend):
     """Uses an in-memory dictionary as a store backend.
@@ -209,6 +217,15 @@ class InMemoryStoreBackend(StoreBackend):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{
+                "class_name": self.__class__.__name__,
+            }
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
+
     def _get(self, key):
         try:
             return self._store[key]
@@ -230,3 +247,7 @@ class InMemoryStoreBackend(StoreBackend):
 
     def remove_key(self, key):
         del self._store[key]
+
+    @property
+    def config(self) -> dict:
+        return self._config

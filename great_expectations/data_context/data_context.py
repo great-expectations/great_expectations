@@ -61,6 +61,7 @@ from great_expectations.data_context.util import (
     load_class,
     substitute_all_config_variables,
     substitute_config_variable,
+    build_store_from_config,
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -299,45 +300,35 @@ class BaseDataContext:
 
     def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
-        try:
-            # Set expectations_store.store_backend_id to the data_context_id from the project_config if
-            # the expectations_store doesnt yet exist by:
-            # adding the data_context_id from the project_config
-            # to the store_config under the key manually_initialize_store_backend_id
-            if (store_name == self.expectations_store_name) and store_config.get(
-                "store_backend"
-            ):
-                store_config["store_backend"].update(
-                    {
-                        "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-                    }
-                )
+        # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+        # the expectations_store doesnt yet exist by:
+        # adding the data_context_id from the project_config
+        # to the store_config under the key manually_initialize_store_backend_id
+        if (store_name == self.expectations_store_name) and store_config.get(
+            "store_backend"
+        ):
+            store_config["store_backend"].update(
+                {
+                    "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                }
+            )
 
-            # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
-            if (
-                store_name not in [store["name"] for store in self.list_active_stores()]
-                and store_config.get("store_backend") is not None
-            ):
-                store_config["store_backend"].update(
-                    {"suppress_store_backend_id": True}
-                )
+        # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+        if (
+            store_name not in [store["name"] for store in self.list_active_stores()]
+            and store_config.get("store_backend") is not None
+        ):
+            store_config["store_backend"].update(
+                {"suppress_store_backend_id": True}
+            )
 
-            new_store = instantiate_class_from_config(
-                config=store_config,
-                runtime_environment={"root_directory": self.root_directory,},
-                config_defaults={"module_name": module_name, "store_name": store_name},
-            )
-        except ge_exceptions.DataContextError as e:
-            new_store = None
-            logger.critical(
-                f"While attempting to instantiate the store named {store_name} an error occurred: {e}"
-            )
-        if not new_store:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=store_config["class_name"],
-            )
+        new_store = build_store_from_config(
+            store_config=store_config,
+            module_name=module_name,
+            runtime_environment={
+                "root_directory": self.root_directory,
+            },
+        )
         self._stores[store_name] = new_store
         return new_store
 
@@ -2872,16 +2863,15 @@ class DataContext(BaseDataContext):
         ):
             self._save_project_config()
 
+        # TODO: <Alex>ALEX</Alex>
         self.checkpoint_store = CheckpointStore(
-            store_backend = {
-                "module_name" : "great_expectations.data_context.store",
-                "class_name" : "TupleFilesystemStoreBackend",
-                "filepath_suffix" : ".yml",
-                "base_directory" : os.path.join(self.root_directory, self.CHECKPOINTS_DIR),
+            store_backend={
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "TupleFilesystemStoreBackend",
+                "filepath_suffix": ".yml",
+                "base_directory": os.path.join(self.root_directory, self.CHECKPOINTS_DIR),
             }
         )
-
-
 
     def _load_project_config(self):
         """

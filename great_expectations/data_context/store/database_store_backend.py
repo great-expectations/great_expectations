@@ -6,6 +6,10 @@ from urllib.parse import urlparse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
 
 try:
     import sqlalchemy as sa
@@ -120,6 +124,15 @@ class DatabaseStoreBackend(StoreBackend):
         # Initialize with store_backend_id
         self._store_backend_id = None
         self._store_backend_id = self.store_backend_id
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{
+                "class_name": self.__class__.__name__,
+            }
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     @property
     def store_backend_id(self) -> str:
@@ -329,5 +342,9 @@ class DatabaseStoreBackend(StoreBackend):
             raise ge_exceptions.StoreBackendError(
                 f"Unable to delete key: got sqlalchemy error {str(e)}"
             )
+
+    @property
+    def config(self) -> dict:
+        return self._config
 
     _move = None

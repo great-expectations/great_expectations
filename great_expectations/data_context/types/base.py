@@ -3,7 +3,7 @@ import enum
 import logging
 import uuid
 from copy import deepcopy
-from typing import Dict, Optional, Union
+from typing import Dict, Union, Optional
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -22,6 +22,10 @@ from great_expectations.marshmallow__shade import (
 )
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
+from great_expectations.data_context.store.util import (
+    build_configuration_store,
+    build_tuple_filesystem_store_backend,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +44,94 @@ def object_to_yaml_str(obj):
         yaml.dump(obj, string_stream)
         output_str = string_stream.getvalue()
     return output_str
+
+
+class BaseConfig(SerializableDictDot):
+    def __init__(
+        self, commented_map: CommentedMap = None,
+    ):
+        if commented_map is None:
+            commented_map = CommentedMap()
+        self._commented_map = commented_map
+
+    @classmethod
+    def from_commented_map(cls, commented_map: CommentedMap):
+        raise NotImplementedError
+
+    @property
+    def commented_map(self) -> CommentedMap:
+        return self._commented_map
+
+    def get_schema_validated_updated_commented_map(self) -> CommentedMap:
+        raise NotImplementedError
+
+    def to_yaml(self, outfile):
+        """
+        :returns None (but writes a YAML file containing the project configuration)
+        """
+        yaml.dump(self.get_schema_validated_updated_commented_map(), outfile)
+
+    def to_yaml_str(self) -> str:
+        """
+        :returns a YAML string containing the project configuration
+        """
+        return object_to_yaml_str(self.get_schema_validated_updated_commented_map())
+
+    def to_json_dict(self) -> dict:
+        """
+        :returns a JSON-serialiable dict containing the project configuration
+        """
+        commented_map: CommentedMap = self.get_schema_validated_updated_commented_map()
+        return convert_to_json_serializable(data=commented_map)
+
+
+# TODO: <Alex></Alex>
+class CheckpointConfig(BaseConfig):
+    def __init__(
+        self, some_param: str = None, commented_map: CommentedMap = None,
+    ):
+        if some_param is None:
+            some_param = "alex_test_0"
+        self._some_param = some_param
+
+        super().__init__(commented_map=commented_map)
+
+    @property
+    def some_param(self) -> str:
+        return self._some_param
+
+    @some_param.setter
+    def some_param(self, some_param: str):
+        self._some_param = some_param
+
+    @classmethod
+    def from_commented_map(cls, commented_map: CommentedMap) -> BaseConfig:
+        try:
+            config: dict = checkpointConfigSchema.load(commented_map)
+            return cls(commented_map=commented_map, **config)
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading checkpoint config. See ValidationError for more details."
+            )
+            raise
+
+    def get_schema_validated_updated_commented_map(self) -> CommentedMap:
+        commented_map: CommentedMap = deepcopy(self.commented_map)
+        commented_map.update(checkpointConfigSchema.dump(self))
+        return commented_map
+
+
+class CheckpointConfigSchema(Schema):
+    some_param = fields.String()
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_checkpoint_config(self, data, **kwargs):
+        return CheckpointConfig(**data)
 
 
 class AssetConfig(DictDot):
@@ -1145,7 +1237,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         }
 
 
-class DataContextConfig(SerializableDictDot):
+class DataContextConfig(BaseConfig):
     def __init__(
         self,
         config_version: Optional[float] = None,
@@ -1190,9 +1282,6 @@ class DataContextConfig(SerializableDictDot):
             if data_docs_sites is None:
                 data_docs_sites = store_backend_defaults.data_docs_sites
 
-        if commented_map is None:
-            commented_map = CommentedMap()
-        self._commented_map = commented_map
         self._config_version = config_version
         if datasources is None:
             datasources = {}
@@ -1218,18 +1307,16 @@ class DataContextConfig(SerializableDictDot):
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
 
-    @property
-    def commented_map(self):
-        return self._commented_map
+        super().__init__(commented_map=commented_map)
 
     @property
     def config_version(self):
         return self._config_version
 
     @classmethod
-    def from_commented_map(cls, commented_map):
+    def from_commented_map(cls, commented_map: CommentedMap) -> BaseConfig:
         try:
-            config = dataContextConfigSchema.load(commented_map)
+            config: dict = dataContextConfigSchema.load(commented_map)
             return cls(commented_map=commented_map, **config)
         except ValidationError:
             logger.error(
@@ -1242,24 +1329,60 @@ class DataContextConfig(SerializableDictDot):
         commented_map.update(dataContextConfigSchema.dump(self))
         return commented_map
 
-    def to_yaml(self, outfile):
-        """
-        :returns None (but writes a YAML file containing the project configuration)
-        """
-        yaml.dump(self.get_schema_validated_updated_commented_map(), outfile)
 
-    def to_yaml_str(self) -> str:
-        """
-        :returns a YAML string containing the project configuration
-        """
-        return object_to_yaml_str(self.get_schema_validated_updated_commented_map())
+def persist_checkpoint_config_filesystem(
+    checkpoint_config: CheckpointConfig,
+    store_name: str,
+    base_directory: str,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
+    checkpoint_config_store = build_configuration_store(
+        configuration_class=CheckpointConfig,
+        store_name=store_name,
+        store_backend=store_backend_obj,
+    )
+    checkpoint_config = CheckpointConfig(some_param=some_arg)
+    checkpoint_config_store.save_configuration(configuration=checkpoint_config)
 
-    def to_json_dict(self) -> dict:
-        """
-        :returns a JSON-serialiable dict containing the project configuration
-        """
-        commented_map: CommentedMap = self.get_schema_validated_updated_commented_map()
-        return convert_to_json_serializable(data=commented_map)
+
+def load_checkpoint_config_from_filesystem(
+    store_name: str,
+    base_directory: str,
+) -> CheckpointConfig:
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
+    checkpoint_config_store = build_configuration_store(
+        configuration_class=CheckpointConfig,
+        store_name=store_name,
+        store_backend=store_backend_obj,
+    )
+
+    checkpoint_config: Optional[CheckpointConfig]
+    try:
+        # noinspection PyTypeChecker
+        checkpoint_config = checkpoint_config_store.load_configuration()
+        return checkpoint_config
+    except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidBaseConfigError) as exc:
+        logger.error(exc.messages)
+        raise ge_exceptions.InvalidCheckpointConfigError(
+            "Error while processing DataContextConfig.",
+            exc
+        )
+
+
+def delete_checkpoint_config_from_filesystem(
+    store_name: str,
+    base_directory: str,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
+    checkpoint_config_store = build_configuration_store(
+        configuration_class=CheckpointConfig,
+        store_name=store_name,
+        store_backend=store_backend_obj,
+    )
+    checkpoint_config_store.delete_configuration()
 
 
 dataContextConfigSchema = DataContextConfigSchema()
@@ -1269,3 +1392,4 @@ assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
+checkpointConfigSchema = CheckpointConfigSchema()
