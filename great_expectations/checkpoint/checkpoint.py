@@ -40,8 +40,8 @@ class LegacyCheckpoint(object):
 
     def get_config(self, format="dict"):
         config = {
-            "validation_operator_name" : self.validation_operator_name,
-            "batches" : self.batches,
+            "validation_operator_name": self.validation_operator_name,
+            "batches": self.batches,
         }
 
         if format == "dict":
