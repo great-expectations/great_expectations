@@ -44,8 +44,6 @@ class ConfigurationStore(Store):
     ):
         self._configuration_class = configuration_class
 
-        self._store_name = store_name
-
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -66,7 +64,7 @@ class ConfigurationStore(Store):
                 )
 
         super().__init__(
-            store_backend=store_backend, runtime_environment=runtime_environment
+            store_backend=store_backend, runtime_environment=runtime_environment, store_name=store_name
         )
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
@@ -153,10 +151,6 @@ Set the property "overwrite_existing" to True in order to overwrite the previous
     @overwrite_existing.setter
     def overwrite_existing(self, overwrite_existing: bool):
         self._overwrite_existing = overwrite_existing
-
-    @property
-    def store_name(self):
-        return self._store_name
 
     @property
     def config(self) -> dict:

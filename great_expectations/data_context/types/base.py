@@ -20,6 +20,7 @@ from great_expectations.marshmallow__shade import (
     post_load,
     validates_schema,
 )
+from great_expectations.data_context.util import substitute_config_variable
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.data_context.store.util import (
@@ -44,6 +45,36 @@ def object_to_yaml_str(obj):
         yaml.dump(obj, string_stream)
         output_str = string_stream.getvalue()
     return output_str
+
+
+def substitute_all_config_variables(
+    data, replace_variables_dict, dollar_sign_escape_string: str = r"\$"
+):
+    """
+    Substitute all config variables of the form ${SOME_VARIABLE} in a dictionary-like
+    config object for their values.
+
+    The method traverses the dictionary recursively.
+
+    :param data:
+    :param replace_variables_dict:
+    :return: a dictionary with all the variables replaced with their values
+    """
+    if isinstance(data, DataContextConfig):
+        data = DataContextConfigSchema().dump(data)
+
+    if isinstance(data, dict) or isinstance(data, OrderedDict):
+        return {
+            k: substitute_all_config_variables(v, replace_variables_dict)
+            for k, v in data.items()
+        }
+    elif isinstance(data, list):
+        return [
+            substitute_all_config_variables(v, replace_variables_dict) for v in data
+        ]
+    return substitute_config_variable(
+        data, replace_variables_dict, dollar_sign_escape_string
+    )
 
 
 class BaseConfig(SerializableDictDot):
@@ -121,6 +152,7 @@ class CheckpointConfig(BaseConfig):
         return commented_map
 
 
+# TODO: <Alex>ALEX</Alex>
 class CheckpointConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
@@ -130,11 +162,6 @@ class CheckpointConfigSchema(Schema):
     @validates_schema
     def validate_schema(self, data, **kwargs):
         pass
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_checkpoint_config(self, data, **kwargs):
-        return CheckpointConfig(**data)
 
 
 class AssetConfig(DictDot):
@@ -1348,6 +1375,7 @@ def save_checkpoint_config_to_filesystem(
         configuration_class=CheckpointConfig,
         store_name=store_name,
         store_backend=store_backend_obj,
+        overwrite_existing=True,
     )
     checkpoint_config_store.save_configuration(configuration=checkpoint_config)
 

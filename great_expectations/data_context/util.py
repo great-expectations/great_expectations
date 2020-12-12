@@ -5,10 +5,6 @@ import os
 import re
 from collections import OrderedDict
 
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    DataContextConfigSchema,
-)
 from great_expectations.util import load_class, verify_dynamic_loading_support
 import great_expectations.exceptions as ge_exceptions
 
@@ -184,36 +180,6 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
 
     # 2. Replace the "$"'s that had been escaped
     return template_str.replace(dollar_sign_escape_string, "$")
-
-
-def substitute_all_config_variables(
-    data, replace_variables_dict, dollar_sign_escape_string: str = r"\$"
-):
-    """
-    Substitute all config variables of the form ${SOME_VARIABLE} in a dictionary-like
-    config object for their values.
-
-    The method traverses the dictionary recursively.
-
-    :param data:
-    :param replace_variables_dict:
-    :return: a dictionary with all the variables replaced with their values
-    """
-    if isinstance(data, DataContextConfig):
-        data = DataContextConfigSchema().dump(data)
-
-    if isinstance(data, dict) or isinstance(data, OrderedDict):
-        return {
-            k: substitute_all_config_variables(v, replace_variables_dict)
-            for k, v in data.items()
-        }
-    elif isinstance(data, list):
-        return [
-            substitute_all_config_variables(v, replace_variables_dict) for v in data
-        ]
-    return substitute_config_variable(
-        data, replace_variables_dict, dollar_sign_escape_string
-    )
 
 
 def file_relative_path(dunderfile, relative_path):

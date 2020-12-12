@@ -1,6 +1,7 @@
 import os
 import pytest
 from copy import deepcopy
+from pathlib import Path
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -31,6 +32,7 @@ from great_expectations.data_context.types.base import (
     delete_checkpoint_config_from_filesystem,
 )
 import great_expectations.exceptions as ge_exceptions
+import great_expectations as ge
 
 yaml = YAML()
 
@@ -130,7 +132,7 @@ def test_checkpoint_v3_configuration_store(tmp_path_factory):
 
         def get_schema_validated_updated_commented_map(self) -> CommentedMap:
             commented_map: CommentedMap = deepcopy(self.commented_map)
-            commented_map.update(CheckpointConfigSchema.dump(self))
+            commented_map.update(CheckpointConfigSchema().dump(self))
             return commented_map
 
     class CheckpointConfigSchema(Schema):
@@ -144,10 +146,8 @@ def test_checkpoint_v3_configuration_store(tmp_path_factory):
         def validate_schema(self, data, **kwargs):
             pass
 
-        # noinspection PyUnusedLocal
-        @post_load
-        def make_checkpoint_config(self, data, **kwargs):
-            return CheckpointConfig(**data)
+    ge.data_context.types.base.CheckpointConfig = CheckpointConfig
+    ge.data_context.types.base.CheckpointConfigSchema = CheckpointConfigSchema
 
     base_directory: str = str(
         tmp_path_factory.mktemp(
@@ -155,21 +155,74 @@ def test_checkpoint_v3_configuration_store(tmp_path_factory):
         )
     )
 
-    checkpoint_config: CheckpointConfig
-    store_name: str
-
-    checkpoint_config = CheckpointConfig(
+    checkpoint_config_0: CheckpointConfig = CheckpointConfig(
         some_param_0="test_str_0",
         some_param_1=65
     )
-    store_name = "test_checkpoint_config_0"
+    store_name_0: str = "test_checkpoint_config_0"
     save_checkpoint_config_to_filesystem(
-        store_name=store_name,
+        store_name=store_name_0,
         base_directory=base_directory,
-        checkpoint_config=checkpoint_config,
+        checkpoint_config=checkpoint_config_0,
     )
 
-    stored_checkpoint_file_name: str = os.path.join(base_directory, "test_checkpoint_config_0.yml")
-    with open(stored_checkpoint_file_name, "r") as f:
-        config: dict = yaml.load(f)
-        print(f'[ALEX_TEST] CONFIG: {config}')
+    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 1
+
+    stored_checkpoint_file_name_0: str = os.path.join(base_directory, f"{store_name_0}.yml")
+    with open(stored_checkpoint_file_name_0, "r") as f:
+        config: CommentedMap = yaml.load(f)
+        expected_config: CommentedMap = CommentedMap(
+            {
+                "some_param_0": "test_str_0",
+                "some_param_1": 65
+            }
+        )
+        assert config == expected_config
+
+    loaded_config: CheckpointConfig = load_checkpoint_config_from_filesystem(
+        store_name=store_name_0,
+        base_directory=base_directory,
+    )
+    assert loaded_config.to_json_dict() == checkpoint_config_0.to_json_dict()
+
+    checkpoint_config_1: CheckpointConfig = CheckpointConfig(
+        some_param_0="test_str_1",
+        some_param_1=26
+    )
+    store_name_1: str = "test_checkpoint_config_1"
+    save_checkpoint_config_to_filesystem(
+        store_name=store_name_1,
+        base_directory=base_directory,
+        checkpoint_config=checkpoint_config_1,
+    )
+
+    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 2
+
+    stored_checkpoint_file_name_1: str = os.path.join(base_directory, f"{store_name_1}.yml")
+    with open(stored_checkpoint_file_name_1, "r") as f:
+        config: CommentedMap = yaml.load(f)
+        expected_config: CommentedMap = CommentedMap(
+            {
+                "some_param_0": "test_str_1",
+                "some_param_1": 26
+            }
+        )
+        assert config == expected_config
+
+    loaded_config: CheckpointConfig = load_checkpoint_config_from_filesystem(
+        store_name=store_name_1,
+        base_directory=base_directory,
+    )
+    assert loaded_config.to_json_dict() == checkpoint_config_1.to_json_dict()
+
+    delete_checkpoint_config_from_filesystem(
+        store_name=store_name_0,
+        base_directory=base_directory,
+    )
+    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 1
+
+    delete_checkpoint_config_from_filesystem(
+        store_name=store_name_1,
+        base_directory=base_directory,
+    )
+    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 0

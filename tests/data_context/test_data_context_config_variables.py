@@ -6,12 +6,12 @@ from ruamel.yaml import YAML, YAMLError
 
 import great_expectations as ge
 from great_expectations.data_context.types.base import (
+    substitute_all_config_variables,
     DataContextConfig,
     DataContextConfigSchema,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
-    substitute_all_config_variables,
     substitute_config_variable,
 )
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError

@@ -8,6 +8,7 @@ import logging
 import os
 import shutil
 import sys
+import traceback
 import uuid
 import warnings
 import webbrowser
@@ -42,6 +43,7 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
+    substitute_all_config_variables,
     CURRENT_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
@@ -59,7 +61,6 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
     load_class,
-    substitute_all_config_variables,
     substitute_config_variable,
     build_store_from_config,
 )
@@ -71,7 +72,8 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.core.data_context_key import StringKey
-from great_expectations.data_context.store import CheckpointStore
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.data_context.store import CheckpointStore
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -1407,7 +1409,7 @@ class BaseDataContext:
                 # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
                 # SimpleSqlalchemyDatasource uses "PartitionRequest" to relay the splitting and sampling
                 # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
-                # of partitions is implemented using the PartitionQuery class, it will not recognized the keys
+                # of partitions is implemented using the PartitionQuery class, it will not recognize the keys
                 # representing the splitting and sampling directives and raise an exception.  Additional work is needed
                 # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
                 partition_request_params: dict = {
@@ -1572,16 +1574,21 @@ class BaseDataContext:
         else:
             config = kwargs
 
+        return self._instantiate_datasource_from_config_and_update_project_config(
+            name=name, config=config, initialize=initialize,
+        )
+
+    def _instantiate_datasource_from_config_and_update_project_config(
+        self, name: str, config: dict, initialize: bool = True
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
         self._project_config["datasources"][name] = datasource_config
-
         datasource_config = self._project_config_with_variables_substituted.datasources[
             name
         ]
-        config = dict(datasourceConfigSchema.dump(datasource_config))
-
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
         datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
         if initialize:
             try:
@@ -1595,7 +1602,6 @@ class BaseDataContext:
                 raise e
         else:
             datasource = None
-
         return datasource
 
     def _instantiate_datasource_from_config(
@@ -2641,6 +2647,243 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         profiling_results["success"] = True
         return profiling_results
+
+    @staticmethod
+    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
+        if checkpoint is None:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
+            )
+        if "validation_operator_name" not in checkpoint:
+            checkpoint["validation_operator_name"] = "action_list_operator"
+
+        if "batches" not in checkpoint:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
+            )
+        batches = checkpoint["batches"]
+        if not isinstance(batches, list):
+            raise ge_exceptions.CheckpointError(
+                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
+            )
+
+        for batch in batches:
+            for required in ["expectation_suite_names", "batch_kwargs"]:
+                if required not in batch:
+                    raise ge_exceptions.CheckpointError(
+                        f"Items in `batches` must have a key `{required}`"
+                    )
+
+        return checkpoint
+
+    def list_checkpoints(self) -> List[str]:
+        """List checkpoints. (Experimental)"""
+        # TODO mark experimental
+        files = self._list_ymls_in_checkpoints_directory()
+        return [
+            os.path.basename(f)[:-4]
+            for f in files
+            if os.path.basename(f).endswith(".yml")
+        ]
+
+    def get_checkpoint(self, checkpoint_name: str) -> dict:
+        """Load a checkpoint. (Experimental)"""
+        # TODO mark experimental
+        yaml = YAML(typ="safe")
+        # TODO make a serializable class with a schema
+        checkpoint_path = os.path.join(
+            self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
+        )
+        try:
+            with open(checkpoint_path) as f:
+                checkpoint = yaml.load(f.read())
+                return self._validate_checkpoint(checkpoint, checkpoint_name)
+        except FileNotFoundError:
+            raise ge_exceptions.CheckpointNotFoundError(
+                f"Could not find checkpoint `{checkpoint_name}`."
+            )
+
+    def run_checkpoint(
+        self,
+        checkpoint_name: str,
+        run_id=None,
+        evaluation_parameters=None,
+        run_name=None,
+        run_time=None,
+        result_format=None,
+        **kwargs,
+    ):
+        """
+        Validate against a pre-defined checkpoint. (Experimental)
+        Args:
+            checkpoint_name: The name of a checkpoint defined via the CLI or by manually creating a yml file
+            run_name: The run_name for the validation; if None, a default value will be used
+            **kwargs: Additional kwargs to pass to the validation operator
+
+        Returns:
+            ValidationOperatorResult
+        """
+        # TODO mark experimental
+
+        if result_format is None:
+            result_format = {"result_format": "SUMMARY"}
+
+        checkpoint = self.get_checkpoint(checkpoint_name)
+
+        batches_to_validate = []
+        for batch in checkpoint["batches"]:
+            batch_kwargs = batch["batch_kwargs"]
+            for suite_name in batch["expectation_suite_names"]:
+                suite = self.get_expectation_suite(suite_name)
+                batch = self.get_batch(batch_kwargs, suite)
+                batches_to_validate.append(batch)
+
+        results = self.run_validation_operator(
+            checkpoint["validation_operator_name"],
+            assets_to_validate=batches_to_validate,
+            run_id=run_id,
+            evaluation_parameters=evaluation_parameters,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            **kwargs,
+        )
+        return results
+
+    def _list_ymls_in_checkpoints_directory(self):
+        checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
+        files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
+        return files
+
+    def test_yaml_config(
+        self,
+        yaml_config: str,
+        name=None,
+        pretty_print=True,
+        return_mode="instantiated_class",
+        shorten_tracebacks=False,
+    ):
+        """ Convenience method for testing yaml configs
+
+        test_yaml_config is a convenience method for configuring the moving
+        parts of a Great Expectations deployment. It allows you to quickly
+        test out configs for system components, especially Datasources,
+        Checkpoints, and Stores.
+
+        For many deployments of Great Expectations, these components (plus
+        Expectations) are the only ones you'll need.
+
+        test_yaml_config is mainly intended for use within notebooks and tests.
+
+        Parameters
+        ----------
+        yaml_config : str
+            A string containing the yaml config to be tested
+
+        name: str
+            (Optional) A string containing the name of the component to instantiate
+
+        pretty_print : bool
+            Determines whether to print human-readable output
+
+        return_mode : str
+            Determines what type of object test_yaml_config will return
+            Valid modes are "instantiated_class" and "report_object"
+
+        shorten_tracebacks : bool
+            If true, catch any errors during instantiation and print only the
+            last element of the traceback stack. This can be helpful for
+            rapid iteration on configs in a notebook, because it can remove
+            the need to scroll up and down a lot.
+
+        Returns
+        -------
+        The instantiated component (e.g. a Datasource)
+        OR
+        a json object containing metadata from the component's self_check method
+
+        The returned object is determined by return_mode.
+        """
+        if pretty_print:
+            print("Attempting to instantiate class from config...")
+
+        if return_mode not in ["instantiated_class", "report_object"]:
+            raise ValueError(f"Unknown return_mode: {return_mode}.")
+
+        substituted_config_variables = substitute_all_config_variables(
+            self.config_variables, dict(os.environ),
+        )
+
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
+        config_str_with_substituted_variables = substitute_all_config_variables(
+            yaml_config, substitutions,
+        )
+
+        config = yaml.load(config_str_with_substituted_variables)
+
+        if "class_name" in config:
+            class_name = config["class_name"]
+        else:
+            class_name = None
+
+        try:
+            if class_name in [
+                "ExpectationsStore",
+                "ValidationsStore",
+                "HtmlSiteStore",
+                "EvaluationParameterStore",
+                "MetricStore",
+                "SqlAlchemyQueryStore",
+            ]:
+                print(f"\tInstantiating as a Store, since class_name is {class_name}")
+                instantiated_class = self._build_store_from_config(
+                    "my_temp_store", config
+                )
+
+            elif class_name in [
+                "Datasource",
+                "SimpleSqlalchemyDatasource",
+            ]:
+                print(
+                    f"\tInstantiating as a Datasource, since class_name is {class_name}"
+                )
+                datasource_name = name or "my_temp_datasource"
+                instantiated_class = self._instantiate_datasource_from_config_and_update_project_config(
+                    name=datasource_name, config=config, initialize=True,
+                )
+
+            else:
+                print(
+                    "\tNo matching class found. Attempting to instantiate class from the raw config..."
+                )
+                instantiated_class = instantiate_class_from_config(
+                    config, runtime_environment={}, config_defaults={}
+                )
+
+            if pretty_print:
+                print(
+                    f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}"
+                )
+                print()
+
+            report_object = instantiated_class.self_check(pretty_print)
+
+            if return_mode == "instantiated_class":
+                return instantiated_class
+
+            elif return_mode == "report_object":
+                return report_object
+
+        except Exception as e:
+            if shorten_tracebacks:
+                traceback.print_exc(limit=1)
+            else:
+                raise e
 
 
 class DataContext(BaseDataContext):
