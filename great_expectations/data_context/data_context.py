@@ -72,8 +72,7 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.core.data_context_key import StringKey
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.data_context.store import CheckpointStore
+from great_expectations.data_context.store import CheckpointStore
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -3106,7 +3105,6 @@ class DataContext(BaseDataContext):
         ):
             self._save_project_config()
 
-        # TODO: <Alex>ALEX</Alex>
         self.checkpoint_store = CheckpointStore(
             store_backend={
                 "module_name": "great_expectations.data_context.store",
