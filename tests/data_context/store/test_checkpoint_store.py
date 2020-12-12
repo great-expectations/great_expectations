@@ -162,11 +162,11 @@ def test_checkpoint_v3_configuration_store(tmp_path_factory):
     ge.data_context.types.base.CheckpointConfig = CheckpointConfig
     ge.data_context.types.base.CheckpointConfigSchema = CheckpointConfigSchema
 
-    base_directory: str = str(
-        tmp_path_factory.mktemp(
-            "test_checkpoint_v3_configuration_store"
-        )
+    root_directory_path: str = "test_checkpoint_v3_configuration_store"
+    root_directory: str = str(
+        tmp_path_factory.mktemp(root_directory_path)
     )
+    base_directory: str = os.path.join(root_directory, "checkpoints")
 
     checkpoint_config_0: CheckpointConfig = CheckpointConfig(
         some_param_0="test_str_0",
@@ -180,11 +180,10 @@ def test_checkpoint_v3_configuration_store(tmp_path_factory):
     )
 
     dir_tree: str = gen_directory_tree_str(startpath=base_directory)
-    assert dir_tree == """
-checkpoints/
+    assert dir_tree == """checkpoints/
     .ge_store_backend_id
     test_checkpoint_config_0.yml
-    """
+"""
     assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 1
 
     stored_checkpoint_file_name_0: str = os.path.join(base_directory, f"{store_name_0}.yml")
@@ -215,6 +214,12 @@ checkpoints/
         checkpoint_config=checkpoint_config_1,
     )
 
+    dir_tree: str = gen_directory_tree_str(startpath=base_directory)
+    assert dir_tree == """checkpoints/
+    .ge_store_backend_id
+    test_checkpoint_config_0.yml
+    test_checkpoint_config_1.yml
+"""
     assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 2
 
     stored_checkpoint_file_name_1: str = os.path.join(base_directory, f"{store_name_1}.yml")
