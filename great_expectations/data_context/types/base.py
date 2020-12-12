@@ -91,7 +91,7 @@ class CheckpointConfig(BaseConfig):
         self, some_param: str = None, commented_map: CommentedMap = None,
     ):
         if some_param is None:
-            some_param = "alex_test_0"
+            some_param = "alex_test_param_name_0"
         self._some_param = some_param
 
         super().__init__(commented_map=commented_map)
@@ -1330,19 +1330,22 @@ class DataContextConfig(BaseConfig):
         return commented_map
 
 
-def persist_checkpoint_config_filesystem(
-    checkpoint_config: CheckpointConfig,
+# TODO: <Alex>ALEX</Alex>
+# checkpoint_config = CheckpointConfig(some_param="alex_test_param_value_0")
+def save_checkpoint_config_to_filesystem(
     store_name: str,
     base_directory: str,
+    checkpoint_config: CheckpointConfig,
 ):
-    store_config: dict = {"base_directory": base_directory}
+    store_config: dict = {
+        "base_directory": base_directory
+    }
     store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
     checkpoint_config_store = build_configuration_store(
         configuration_class=CheckpointConfig,
         store_name=store_name,
         store_backend=store_backend_obj,
     )
-    checkpoint_config = CheckpointConfig(some_param=some_arg)
     checkpoint_config_store.save_configuration(configuration=checkpoint_config)
 
 
@@ -1350,7 +1353,9 @@ def load_checkpoint_config_from_filesystem(
     store_name: str,
     base_directory: str,
 ) -> CheckpointConfig:
-    store_config: dict = {"base_directory": base_directory}
+    store_config: dict = {
+        "base_directory": base_directory
+    }
     store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
     checkpoint_config_store = build_configuration_store(
         configuration_class=CheckpointConfig,
@@ -1375,7 +1380,9 @@ def delete_checkpoint_config_from_filesystem(
     store_name: str,
     base_directory: str,
 ):
-    store_config: dict = {"base_directory": base_directory}
+    store_config: dict = {
+        "base_directory": base_directory
+    }
     store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
     checkpoint_config_store = build_configuration_store(
         configuration_class=CheckpointConfig,
