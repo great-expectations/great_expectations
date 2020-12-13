@@ -1,23 +1,21 @@
-import os
-from ruamel.yaml import YAML, YAMLError
-from io import StringIO
 import json
+import os
+from io import StringIO
 
-from great_expectations.data_context import (
-    DataContext,
-)
-from great_expectations.data_context.util import (
-    file_relative_path,
-)
+from ruamel.yaml import YAML, YAMLError
+
+from great_expectations.data_context import DataContext
+from great_expectations.data_context.util import file_relative_path
 
 
 class LegacyCheckpoint(object):
-    def __init__(self,
+    def __init__(
+        self,
         data_context,
         name,
         batches,
         validation_operator_name="action_list_operator",
-        template={}
+        template={},
     ):
         self.data_context = data_context
         self.name = name
@@ -32,8 +30,7 @@ class LegacyCheckpoint(object):
         batches_to_validate = self._get_batches_to_validate(self.batches)
 
         results = self.data_context.run_validation_operator(
-            self.validation_operator_name,
-            assets_to_validate=batches_to_validate,
+            self.validation_operator_name, assets_to_validate=batches_to_validate,
         )
 
         return results
@@ -48,13 +45,15 @@ class LegacyCheckpoint(object):
             return config
 
         elif format == "yaml":
-            self.template["validation_operator_name"] = config["validation_operator_name"]
+            self.template["validation_operator_name"] = config[
+                "validation_operator_name"
+            ]
 
             if not "batches" in self.template:
                 self.template["batches"] = []
 
             for i, batch in enumerate(config["batches"]):
-                #NOTE Abe 2020/10/03: This approach could end up with comments attaching to the wrong batches.
+                # NOTE Abe 2020/10/03: This approach could end up with comments attaching to the wrong batches.
                 self.template["batches"][i] = config["batches"][i]
 
             yaml = YAML()
@@ -78,10 +77,12 @@ class LegacyCheckpoint(object):
             suites = batch["expectation_suite_names"]
 
             if not suites:
-                raise Exception(f"""A batch has no suites associated with it. At least one suite is required.
+                raise Exception(
+                    f"""A batch has no suites associated with it. At least one suite is required.
     - Batch: {json.dumps(batch_kwargs)}
     - Please add at least one suite to checkpoint {self.name}
-""")
+"""
+                )
 
             for suite_name in batch["expectation_suite_names"]:
                 suite = self.data_context.get_expectation_suite(suite_name)
@@ -93,7 +94,8 @@ class LegacyCheckpoint(object):
 
 
 class Checkpoint(object):
-    def __init__(self,
+    def __init__(
+        self,
         data_context: DataContext,
         name: str,
         validation_operator_name: str,
@@ -109,8 +111,7 @@ class Checkpoint(object):
         validators = self._get_validators_to_validate(self._validators)
 
         results = self.data_context.run_validation_operator(
-            self.validation_operator_name,
-            assets_to_validate=validators,
+            self.validation_operator_name, assets_to_validate=validators,
         )
 
         return results
@@ -120,8 +121,6 @@ class Checkpoint(object):
 
         for validator_config in validator_config_list:
             print(validator_config)
-            validators.append(
-                self._data_context.get_validator(**validator_config)
-            )
+            validators.append(self._data_context.get_validator(**validator_config))
 
         return validators

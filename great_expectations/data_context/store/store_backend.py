@@ -58,7 +58,9 @@ class StoreBackend(metaclass=ABCMeta):
     def store_name(self):
         return self._store_name
 
-    def _construct_store_backend_id(self, suppress_warning: bool = False) -> Optional[str]:
+    def _construct_store_backend_id(
+        self, suppress_warning: bool = False
+    ) -> Optional[str]:
         """
         Create a store_backend_id if one does not exist, and return it if it exists
         If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id
@@ -220,9 +222,7 @@ class InMemoryStoreBackend(StoreBackend):
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
         self._config = get_currently_executing_function_call_arguments(
-            include_module_name=True, **{
-                "class_name": self.__class__.__name__,
-            }
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
         )
         filter_properties_dict(properties=self._config, inplace=True)
 

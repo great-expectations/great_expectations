@@ -3,7 +3,7 @@ import enum
 import logging
 import uuid
 from copy import deepcopy
-from typing import Dict, Union, Optional
+from typing import Dict, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -1275,9 +1275,7 @@ class DataContextConfig(BaseConfig):
                     store_backend_defaults.evaluation_parameter_store_name
                 )
             if checkpoint_store_name is None:
-                checkpoint_store_name = (
-                    store_backend_defaults.checkpoint_store_name
-                )
+                checkpoint_store_name = store_backend_defaults.checkpoint_store_name
             if validation_operators is None:
                 validation_operators = store_backend_defaults.validation_operators
             if data_docs_sites is None:

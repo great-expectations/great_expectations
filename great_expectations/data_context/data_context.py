@@ -22,6 +22,7 @@ from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
+from great_expectations.core.data_context_key import StringKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -36,7 +37,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # TODO:
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import TupleStoreBackend
+from great_expectations.data_context.store import CheckpointStore, TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -57,12 +58,12 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
+    build_store_from_config,
     file_relative_path,
     instantiate_class_from_config,
     load_class,
     substitute_all_config_variables,
     substitute_config_variable,
-    build_store_from_config,
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -71,8 +72,6 @@ from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
-from great_expectations.core.data_context_key import StringKey
-from great_expectations.data_context.store import CheckpointStore
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -319,16 +318,12 @@ class BaseDataContext:
             store_name not in [store["name"] for store in self.list_active_stores()]
             and store_config.get("store_backend") is not None
         ):
-            store_config["store_backend"].update(
-                {"suppress_store_backend_id": True}
-            )
+            store_config["store_backend"].update({"suppress_store_backend_id": True})
 
         new_store = build_store_from_config(
             store_config=store_config,
             module_name=module_name,
-            runtime_environment={
-                "root_directory": self.root_directory,
-            },
+            runtime_environment={"root_directory": self.root_directory,},
         )
         self._stores[store_name] = new_store
         return new_store
@@ -3110,7 +3105,9 @@ class DataContext(BaseDataContext):
                 "module_name": "great_expectations.data_context.store",
                 "class_name": "TupleFilesystemStoreBackend",
                 "filepath_suffix": ".yml",
-                "base_directory": os.path.join(self.root_directory, self.CHECKPOINTS_DIR),
+                "base_directory": os.path.join(
+                    self.root_directory, self.CHECKPOINTS_DIR
+                ),
             }
         )
 
@@ -3146,13 +3143,11 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def create_checkpoint(self,
-        checkpoint_name: str,
-        checkpoint_config: dict,
+    def create_checkpoint(
+        self, checkpoint_name: str, checkpoint_config: dict,
     ):
         self._validate_checkpoint_config(
-            checkpoint_config,
-            checkpoint_name,
+            checkpoint_config, checkpoint_name,
         )
 
         checkpoint_config["class_name"] = "LegacyCheckpoint"
@@ -3172,21 +3167,17 @@ class DataContext(BaseDataContext):
         )
 
         self.checkpoint_store.set(
-            StringKey(checkpoint_name),
-            new_checkpoint,
+            StringKey(checkpoint_name), new_checkpoint,
         )
 
         return new_checkpoint
 
-    def get_checkpoint(self, checkpoint_name: str, return_config: bool=True):
+    def get_checkpoint(self, checkpoint_name: str, return_config: bool = True):
         """Load a checkpoint. (Experimental)"""
 
-        checkpoint_config = self.checkpoint_store.get(
-            StringKey(checkpoint_name)
-        )
+        checkpoint_config = self.checkpoint_store.get(StringKey(checkpoint_name))
         self._validate_checkpoint_config(
-            checkpoint_config,
-            checkpoint_name,
+            checkpoint_config, checkpoint_name,
         )
 
         if return_config:
@@ -3196,10 +3187,7 @@ class DataContext(BaseDataContext):
 
         checkpoint = instantiate_class_from_config(
             config=checkpoint_config,
-            runtime_environment={
-                "data_context": self,
-                "name": checkpoint_name,
-            },
+            runtime_environment={"data_context": self, "name": checkpoint_name,},
             config_defaults={
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
@@ -3219,9 +3207,10 @@ class DataContext(BaseDataContext):
             template = yaml.load(f)
         return template
 
-
     @staticmethod
-    def _validate_checkpoint_config(checkpoint_config: dict, checkpoint_name: str) -> dict:
+    def _validate_checkpoint_config(
+        checkpoint_config: dict, checkpoint_name: str
+    ) -> dict:
         if checkpoint_config is None:
             raise ge_exceptions.CheckpointError(
                 f"LegacyCheckpoint `{checkpoint_name}` has no contents. Please fix this."

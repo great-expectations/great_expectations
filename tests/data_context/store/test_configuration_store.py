@@ -1,10 +1,12 @@
 import os
 from copy import deepcopy
 from pathlib import Path
-from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap
+
 # TODO: <Alex>ALEX</Alex>
 import pytest
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
+
 try:
     from unittest import mock
 except ImportError:
@@ -12,6 +14,14 @@ except ImportError:
 
 import logging
 
+# TODO: <Alex>ALEX</Alex>
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.data_context.store.util import (
+    delete_config_from_filesystem,
+    load_config_from_filesystem,
+    save_config_to_filesystem,
+)
+from great_expectations.data_context.types.base import BaseConfig
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -19,15 +29,7 @@ from great_expectations.marshmallow__shade import (
     fields,
     validates_schema,
 )
-from great_expectations.data_context.types.base import BaseConfig
-from great_expectations.data_context.store.util import (
-    save_config_to_filesystem,
-    load_config_from_filesystem,
-    delete_config_from_filesystem,
-)
 from great_expectations.util import gen_directory_tree_str
-# TODO: <Alex>ALEX</Alex>
-import great_expectations.exceptions as ge_exceptions
 
 yaml = YAML()
 
@@ -79,15 +81,10 @@ def test_v3_configuration_store(tmp_path_factory):
             pass
 
     root_directory_path: str = "test_v3_configuration_store"
-    root_directory: str = str(
-        tmp_path_factory.mktemp(root_directory_path)
-    )
+    root_directory: str = str(tmp_path_factory.mktemp(root_directory_path))
     base_directory: str = os.path.join(root_directory, "some_store_config_dir")
 
-    config_0: SampleConfig = SampleConfig(
-        some_param_0="test_str_0",
-        some_param_1=65
-    )
+    config_0: SampleConfig = SampleConfig(some_param_0="test_str_0", some_param_1=65)
     store_name_0: str = "test_config_0"
     save_config_to_filesystem(
         configuration_class=SampleConfig,
@@ -97,20 +94,29 @@ def test_v3_configuration_store(tmp_path_factory):
     )
 
     dir_tree: str = gen_directory_tree_str(startpath=base_directory)
-    assert dir_tree == """some_store_config_dir/
+    assert (
+        dir_tree
+        == """some_store_config_dir/
     .ge_store_backend_id
     test_config_0.yml
 """
-    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 1
+    )
+    assert (
+        len(
+            [
+                path
+                for path in Path(base_directory).iterdir()
+                if str(path).find(".ge_store_backend_id") == (-1)
+            ]
+        )
+        == 1
+    )
 
     stored_file_name_0: str = os.path.join(base_directory, f"{store_name_0}.yml")
     with open(stored_file_name_0, "r") as f:
         config: CommentedMap = yaml.load(f)
         expected_config: CommentedMap = CommentedMap(
-            {
-                "some_param_0": "test_str_0",
-                "some_param_1": 65
-            }
+            {"some_param_0": "test_str_0", "some_param_1": 65}
         )
         assert config == expected_config
 
@@ -121,10 +127,7 @@ def test_v3_configuration_store(tmp_path_factory):
     )
     assert loaded_config.to_json_dict() == config_0.to_json_dict()
 
-    config_1: SampleConfig = SampleConfig(
-        some_param_0="test_str_1",
-        some_param_1=26
-    )
+    config_1: SampleConfig = SampleConfig(some_param_0="test_str_1", some_param_1=26)
     store_name_1: str = "test_config_1"
     save_config_to_filesystem(
         configuration_class=SampleConfig,
@@ -134,21 +137,30 @@ def test_v3_configuration_store(tmp_path_factory):
     )
 
     dir_tree: str = gen_directory_tree_str(startpath=base_directory)
-    assert dir_tree == """some_store_config_dir/
+    assert (
+        dir_tree
+        == """some_store_config_dir/
     .ge_store_backend_id
     test_config_0.yml
     test_config_1.yml
 """
-    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 2
+    )
+    assert (
+        len(
+            [
+                path
+                for path in Path(base_directory).iterdir()
+                if str(path).find(".ge_store_backend_id") == (-1)
+            ]
+        )
+        == 2
+    )
 
     stored_file_name_1: str = os.path.join(base_directory, f"{store_name_1}.yml")
     with open(stored_file_name_1, "r") as f:
         config: CommentedMap = yaml.load(f)
         expected_config: CommentedMap = CommentedMap(
-            {
-                "some_param_0": "test_str_1",
-                "some_param_1": 26
-            }
+            {"some_param_0": "test_str_1", "some_param_1": 26}
         )
         assert config == expected_config
 
@@ -164,11 +176,29 @@ def test_v3_configuration_store(tmp_path_factory):
         store_name=store_name_0,
         base_directory=base_directory,
     )
-    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 1
+    assert (
+        len(
+            [
+                path
+                for path in Path(base_directory).iterdir()
+                if str(path).find(".ge_store_backend_id") == (-1)
+            ]
+        )
+        == 1
+    )
 
     delete_config_from_filesystem(
         configuration_class=SampleConfig,
         store_name=store_name_1,
         base_directory=base_directory,
     )
-    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 0
+    assert (
+        len(
+            [
+                path
+                for path in Path(base_directory).iterdir()
+                if str(path).find(".ge_store_backend_id") == (-1)
+            ]
+        )
+        == 0
+    )

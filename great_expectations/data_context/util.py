@@ -5,12 +5,12 @@ import os
 import re
 from collections import OrderedDict
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
 )
 from great_expectations.util import load_class, verify_dynamic_loading_support
-import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 

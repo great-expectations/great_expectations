@@ -18,7 +18,7 @@ def titanic_checkpoint(titanic_data_context_stats_enabled, titanic_expectation_s
         titanic_data_context_stats_enabled.root_directory, "..", "data", "Titanic.csv"
     )
     return {
-        "validation_operator_name" : "action_list_operator",
+        "validation_operator_name": "action_list_operator",
         "batches": [
             {
                 "batch_kwargs": {
@@ -365,8 +365,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run fake_checkpoint -d {root_dir}",
-        catch_exceptions=False,
+        cli, f"checkpoint run fake_checkpoint -d {root_dir}", catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -522,10 +521,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         'Batch: {"path": "/totally/not/a/file.csv", "datasource": "mydatasource", "reader_method": "read_csv"}'
         in stdout
     )
-    assert (
-        "Please add at least one suite to checkpoint bad_batch"
-        in stdout
-    )
+    assert "Please add at least one suite to checkpoint bad_batch" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [

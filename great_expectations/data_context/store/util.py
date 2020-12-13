@@ -1,14 +1,10 @@
+import logging
 from typing import Any, Optional, cast
 
-import logging
-
-from great_expectations.data_context.types.base import (
-    BaseConfig,
-    CheckpointConfig,
-)
-from great_expectations.data_context.store import StoreBackend
-from great_expectations.data_context.util import build_store_from_config
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.data_context.store import StoreBackend
+from great_expectations.data_context.types.base import BaseConfig, CheckpointConfig
+from great_expectations.data_context.util import build_store_from_config
 
 logger = logging.getLogger(__name__)
 
@@ -106,14 +102,9 @@ def build_configuration_store(
 
 
 def save_config_to_filesystem(
-    configuration_class: Any,
-    store_name: str,
-    base_directory: str,
-    config: BaseConfig,
+    configuration_class: Any, store_name: str, base_directory: str, config: BaseConfig,
 ):
-    store_config: dict = {
-        "base_directory": base_directory
-    }
+    store_config: dict = {"base_directory": base_directory}
     store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
     config_store = build_configuration_store(
         configuration_class=configuration_class,
@@ -125,13 +116,9 @@ def save_config_to_filesystem(
 
 
 def load_config_from_filesystem(
-    configuration_class: Any,
-    store_name: str,
-    base_directory: str,
+    configuration_class: Any, store_name: str, base_directory: str,
 ) -> BaseConfig:
-    store_config: dict = {
-        "base_directory": base_directory
-    }
+    store_config: dict = {"base_directory": base_directory}
     store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
     config_store = build_configuration_store(
         configuration_class=configuration_class,
@@ -145,22 +132,20 @@ def load_config_from_filesystem(
         # noinspection PyTypeChecker
         config = config_store.load_configuration()
         return config
-    except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidBaseConfigError) as exc:
+    except (
+        ge_exceptions.ConfigNotFoundError,
+        ge_exceptions.InvalidBaseConfigError,
+    ) as exc:
         logger.error(exc.messages)
         raise ge_exceptions.InvalidBaseConfigError(
-            "Error while processing DataContextConfig.",
-            exc
+            "Error while processing DataContextConfig.", exc
         )
 
 
 def delete_config_from_filesystem(
-    configuration_class: Any,
-    store_name: str,
-    base_directory: str,
+    configuration_class: Any, store_name: str, base_directory: str,
 ):
-    store_config: dict = {
-        "base_directory": base_directory
-    }
+    store_config: dict = {"base_directory": base_directory}
     store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
     config_store = build_configuration_store(
         configuration_class=configuration_class,
@@ -172,21 +157,18 @@ def delete_config_from_filesystem(
 
 
 def save_checkpoint_config_to_filesystem(
-    store_name: str,
-    base_directory: str,
-    checkpoint_config: CheckpointConfig,
+    store_name: str, base_directory: str, checkpoint_config: CheckpointConfig,
 ):
     save_config_to_filesystem(
         configuration_class=CheckpointConfig,
         store_name=store_name,
         base_directory=base_directory,
-        config=checkpoint_config
+        config=checkpoint_config,
     )
 
 
 def load_checkpoint_config_from_filesystem(
-    store_name: str,
-    base_directory: str,
+    store_name: str, base_directory: str,
 ) -> CheckpointConfig:
     try:
         checkpoint_config: CheckpointConfig = cast(
@@ -195,20 +177,18 @@ def load_checkpoint_config_from_filesystem(
                 configuration_class=CheckpointConfig,
                 store_name=store_name,
                 base_directory=base_directory,
-            )
+            ),
         )
         return checkpoint_config
     except ge_exceptions.InvalidBaseConfigError as exc:
         logger.error(exc.messages)
         raise ge_exceptions.InvalidCheckpointConfigError(
-            "Error while processing DataContextConfig.",
-            exc
+            "Error while processing DataContextConfig.", exc
         )
 
 
 def delete_checkpoint_config_from_filesystem(
-    store_name: str,
-    base_directory: str,
+    store_name: str, base_directory: str,
 ):
     delete_config_from_filesystem(
         configuration_class=CheckpointConfig,
