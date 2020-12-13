@@ -1297,7 +1297,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         catch_exceptions=None,
         meta=None,
     ):
-        # column value is not matched by any regex in regex_list 
+        # column value is not matched by any regex in regex_list
         return column.withColumn("__success", ~(column[0].rlike("|".join(regex_list))))
 
     @DocInherit
