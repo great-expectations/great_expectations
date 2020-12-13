@@ -43,7 +43,6 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
-    substitute_all_config_variables,
     CURRENT_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
@@ -61,6 +60,7 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
     load_class,
+    substitute_all_config_variables,
     substitute_config_variable,
     build_store_from_config,
 )

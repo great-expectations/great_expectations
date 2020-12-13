@@ -20,14 +20,8 @@ from great_expectations.marshmallow__shade import (
     post_load,
     validates_schema,
 )
-from great_expectations.data_context.util import substitute_config_variable
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.data_context.store.util import (
-#     build_configuration_store,
-#     build_tuple_filesystem_store_backend,
-# )
 
 yaml = YAML()
 
@@ -46,36 +40,6 @@ def object_to_yaml_str(obj):
         yaml.dump(obj, string_stream)
         output_str = string_stream.getvalue()
     return output_str
-
-
-def substitute_all_config_variables(
-    data, replace_variables_dict, dollar_sign_escape_string: str = r"\$"
-):
-    """
-    Substitute all config variables of the form ${SOME_VARIABLE} in a dictionary-like
-    config object for their values.
-
-    The method traverses the dictionary recursively.
-
-    :param data:
-    :param replace_variables_dict:
-    :return: a dictionary with all the variables replaced with their values
-    """
-    if isinstance(data, DataContextConfig):
-        data = DataContextConfigSchema().dump(data)
-
-    if isinstance(data, dict) or isinstance(data, OrderedDict):
-        return {
-            k: substitute_all_config_variables(v, replace_variables_dict)
-            for k, v in data.items()
-        }
-    elif isinstance(data, list):
-        return [
-            substitute_all_config_variables(v, replace_variables_dict) for v in data
-        ]
-    return substitute_config_variable(
-        data, replace_variables_dict, dollar_sign_escape_string
-    )
 
 
 class BaseConfig(SerializableDictDot):
