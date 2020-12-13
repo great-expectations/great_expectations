@@ -14,7 +14,10 @@ from .tuple_store_backend import (  # isort:skip
 from .database_store_backend import DatabaseStoreBackend  # isort:skip
 from .configuration_store import ConfigurationStore  # isort:skip
 from .checkpoint_store import CheckpointStore  # isort:skip
-from .metric_store import EvaluationParameterStore, MetricStore
+from .metric_store import (  # isort:skip
+    EvaluationParameterStore,
+    MetricStore,
+)
 from .expectations_store import ExpectationsStore  # isort:skip
 from .validations_store import ValidationsStore  # isort:skip
 from .query_store import SqlAlchemyQueryStore  # isort:skip
