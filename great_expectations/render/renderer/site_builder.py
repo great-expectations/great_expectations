@@ -879,8 +879,6 @@ class DefaultSiteIndexBuilder:
 
         try:
             rendered_content = self.renderer_class.render(index_links_dict)
-            raise Exception("BBBBB")
-
             viewable_content = self.view_class.render(
                 rendered_content,
                 data_context_id=self.data_context_id,
