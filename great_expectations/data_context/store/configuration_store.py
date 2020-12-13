@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Union
+from typing import Union, Any, cast
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -36,13 +36,18 @@ class ConfigurationStore(Store):
 
     def __init__(
         self,
-        configuration_class: BaseConfig,
+        configuration_class: Any,
         store_name: str,
         store_backend: dict = None,
         overwrite_existing: bool = False,
         runtime_environment: dict = None,
     ):
-        self._configuration_class = configuration_class
+        if not issubclass(configuration_class, BaseConfig):
+            raise ge_exceptions.DataContextError(
+                "Invalid configuration: A configuration_class needs to inherit from the BaseConfig class."
+            )
+
+        self._configuration_class = cast(BaseConfig, configuration_class)
 
         if store_backend is not None:
             store_backend_module_name = store_backend.get(

@@ -1,12 +1,5 @@
 from great_expectations.util import verify_dynamic_loading_support
 
-from .configuration_store import ConfigurationStore
-from .database_store_backend import DatabaseStoreBackend
-from .expectations_store import ExpectationsStore
-from .html_site_store import HtmlSiteStore
-from .metric_store import EvaluationParameterStore, MetricStore
-from .query_store import SqlAlchemyQueryStore
-from .checkpoint_store import CheckpointStore
 from .store import Store
 from .store_backend import InMemoryStoreBackend, StoreBackend
 from .tuple_store_backend import (
@@ -15,7 +8,14 @@ from .tuple_store_backend import (
     TupleS3StoreBackend,
     TupleStoreBackend,
 )
+from .database_store_backend import DatabaseStoreBackend
+from .expectations_store import ExpectationsStore
 from .validations_store import ValidationsStore
+from .query_store import SqlAlchemyQueryStore
+from .metric_store import EvaluationParameterStore, MetricStore
+from .html_site_store import HtmlSiteStore
+from .configuration_store import ConfigurationStore
+from .checkpoint_store import CheckpointStore
 
 for module_name, package_name in [
     (".store", "great_expectations.data_context.store"),

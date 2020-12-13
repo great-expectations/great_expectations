@@ -23,10 +23,11 @@ from great_expectations.marshmallow__shade import (
 from great_expectations.data_context.util import substitute_config_variable
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
-from great_expectations.data_context.store.util import (
-    build_configuration_store,
-    build_tuple_filesystem_store_backend,
-)
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.data_context.store.util import (
+#     build_configuration_store,
+#     build_tuple_filesystem_store_backend,
+# )
 
 yaml = YAML()
 
@@ -840,6 +841,7 @@ class DataContextConfigSchema(Schema):
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
+    checkpoint_store_name = fields.Str()
     plugins_directory = fields.Str(allow_none=True)
     validation_operators = fields.Dict(keys=fields.Str(), values=fields.Dict())
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
@@ -1280,6 +1282,7 @@ class DataContextConfig(BaseConfig):
         expectations_store_name: Optional[str] = None,
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
+        checkpoint_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
         validation_operators=None,
         stores: Optional[Dict] = None,
@@ -1287,8 +1290,8 @@ class DataContextConfig(BaseConfig):
         notebooks=None,
         config_variables_file_path: Optional[str] = None,
         anonymous_usage_statistics=None,
-        commented_map=None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
+        commented_map=None,
     ):
         # Set defaults
         if config_version is None:
@@ -1307,6 +1310,10 @@ class DataContextConfig(BaseConfig):
                 evaluation_parameter_store_name = (
                     store_backend_defaults.evaluation_parameter_store_name
                 )
+            if checkpoint_store_name is None:
+                checkpoint_store_name = (
+                    store_backend_defaults.checkpoint_store_name
+                )
             if validation_operators is None:
                 validation_operators = store_backend_defaults.validation_operators
             if data_docs_sites is None:
@@ -1319,6 +1326,7 @@ class DataContextConfig(BaseConfig):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.checkpoint_store_name = checkpoint_store_name
         self.plugins_directory = plugins_directory
         if not isinstance(validation_operators, dict):
             raise ValueError(
@@ -1358,69 +1366,6 @@ class DataContextConfig(BaseConfig):
         commented_map: CommentedMap = deepcopy(self.commented_map)
         commented_map.update(dataContextConfigSchema.dump(self))
         return commented_map
-
-
-# TODO: <Alex>ALEX</Alex>
-# checkpoint_config = CheckpointConfig(some_param="alex_test_param_value_0")
-def save_checkpoint_config_to_filesystem(
-    store_name: str,
-    base_directory: str,
-    checkpoint_config: CheckpointConfig,
-):
-    store_config: dict = {
-        "base_directory": base_directory
-    }
-    store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
-    checkpoint_config_store = build_configuration_store(
-        configuration_class=CheckpointConfig,
-        store_name=store_name,
-        store_backend=store_backend_obj,
-        overwrite_existing=True,
-    )
-    checkpoint_config_store.save_configuration(configuration=checkpoint_config)
-
-
-def load_checkpoint_config_from_filesystem(
-    store_name: str,
-    base_directory: str,
-) -> CheckpointConfig:
-    store_config: dict = {
-        "base_directory": base_directory
-    }
-    store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
-    checkpoint_config_store = build_configuration_store(
-        configuration_class=CheckpointConfig,
-        store_name=store_name,
-        store_backend=store_backend_obj,
-    )
-
-    checkpoint_config: Optional[CheckpointConfig]
-    try:
-        # noinspection PyTypeChecker
-        checkpoint_config = checkpoint_config_store.load_configuration()
-        return checkpoint_config
-    except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidBaseConfigError) as exc:
-        logger.error(exc.messages)
-        raise ge_exceptions.InvalidCheckpointConfigError(
-            "Error while processing DataContextConfig.",
-            exc
-        )
-
-
-def delete_checkpoint_config_from_filesystem(
-    store_name: str,
-    base_directory: str,
-):
-    store_config: dict = {
-        "base_directory": base_directory
-    }
-    store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
-    checkpoint_config_store = build_configuration_store(
-        configuration_class=CheckpointConfig,
-        store_name=store_name,
-        store_backend=store_backend_obj,
-    )
-    checkpoint_config_store.delete_configuration()
 
 
 dataContextConfigSchema = DataContextConfigSchema()
