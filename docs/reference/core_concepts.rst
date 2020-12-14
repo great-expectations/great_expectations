@@ -24,7 +24,7 @@ It all starts with ``Expectations``. An Expectation is how we communicate the wa
 
 When you're deploying Great Expectations, you'll use a ``Checkpoint`` to run a validation, testing wheher data meets expecations, and potentially performing other actions like building and saving a Data Docs site, sending a notification, or signaling a pipeline runner.
 
-Great Expectations makes it possible to maintain state about data pipelines using ``Stores``. A Store is a generalized way of keeping Great Expectations objects, like Expectation Suites, Validation Resuls, Metrics, or even Data Docs sites. Stores, and other configuration, is managed using a ``Data Context``. The Data Context configuration is usually stored as a yaml file or declared in your pipeline directly, and you should commit the configuration to version control to share it with your team.
+Great Expectations makes it possible to maintain state about data pipelines using ``Stores``. A Store is a generalized way of keeping Great Expectations objects, like Expectation Suites, Validation Results, Metrics, or even Data Docs sites. Stores, and other configuration, is managed using a ``Data Context``. The Data Context configuration is usually stored as a yaml file or declared in your pipeline directly, and you should commit the configuration to version control to share it with your team.
 
 
 ************************************************
