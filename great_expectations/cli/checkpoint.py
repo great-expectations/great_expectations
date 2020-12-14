@@ -190,11 +190,13 @@ def checkpoint_new(checkpoint, suite, directory, datasource):
     _ = context.create_checkpoint(
         checkpoint,
         {
-            "validation_operator_name" : "action_list_operator",
-            "batches" : [{
-                "batch_kwargs" : dict(batch_kwargs),
-                "expectation_suite_names" : [suite.expectation_suite_name]
-            }],
+            "validation_operator_name": "action_list_operator",
+            "batches": [
+                {
+                    "batch_kwargs": dict(batch_kwargs),
+                    "expectation_suite_names": [suite.expectation_suite_name],
+                }
+            ],
         },
     )
 
@@ -214,6 +216,7 @@ def _verify_checkpoint_does_not_exist(
             usage_event,
             f"A checkpoint named `{checkpoint}` already exists. Please choose a new name.",
         )
+
 
 @checkpoint.command(name="list")
 @click.option(
@@ -258,10 +261,7 @@ def checkpoint_run(checkpoint, directory):
     usage_event = "cli.checkpoint.run"
 
     checkpoint = toolkit.load_checkpoint(
-        context,
-        checkpoint,
-        usage_event,
-        return_config=False,
+        context, checkpoint, usage_event, return_config=False,
     )
 
     try:

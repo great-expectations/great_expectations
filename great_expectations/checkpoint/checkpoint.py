@@ -1,14 +1,11 @@
-import os
-from ruamel.yaml import YAML, YAMLError
-from io import StringIO
 import json
+import os
+from io import StringIO
 
-from great_expectations.data_context import (
-    DataContext,
-)
-from great_expectations.data_context.util import (
-    file_relative_path,
-)
+from ruamel.yaml import YAML, YAMLError
+
+from great_expectations.data_context import DataContext
+from great_expectations.data_context.util import file_relative_path
 
 
 class LegacyCheckpoint(object):
@@ -95,7 +92,7 @@ class LegacyCheckpoint(object):
 class Checkpoint(object):
     def __init__(self,
         data_context: DataContext,
-        name: str,
+        name: str,git
         validation_operator_name: str,
         validators: list,
     ):

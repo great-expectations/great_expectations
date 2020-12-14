@@ -3,7 +3,7 @@ import enum
 import logging
 import uuid
 from copy import deepcopy
-from typing import Dict, Optional, Union, List
+from typing import Dict, List, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -1270,21 +1270,21 @@ class DataContextConfig(SerializableDictDot):
 
 class CheckpointConfig(SerializableDictDot):
     def __init__(
-            self,
-            name: str,
-            config_version: Optional[int] = None,
-            template: Optional[str] = None,
-            module_name: Optional[str] = None,
-            class_name: Optional[str] = None,
-            run_name_template: Optional[str] = None,
-            expectation_suite_name: Optional[str] = None,
-            batch_request: Optional[BatchRequest] = None,
-            action_list: Optional[List[dict]] = None,
-            evaluation_parameters: Optional[dict] = None,
-            runtime_configuration: Optional[dict] = None,
-            validations: Optional[List[dict]] = None,
-            profilers: Optional[List[dict]] = None,
-            commented_map: Optional[CommentedMap] = None,
+        self,
+        name: str,
+        config_version: Optional[int] = None,
+        template: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[BatchRequest] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        commented_map: Optional[CommentedMap] = None,
     ):
         self._name = name
         if config_version is None:
@@ -1388,9 +1388,21 @@ class CheckpointConfig(SerializableDictDot):
 class CheckpointConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
-        fields = ("name", "config_version", "template", "module_name", "class_name", "run_name_template",
-                  "expectation_suite_name", "batch_request", "action_list", "evaluation_parameters",
-                  "runtime_configuration", "validations", "profilers")
+        fields = (
+            "name",
+            "config_version",
+            "template",
+            "module_name",
+            "class_name",
+            "run_name_template",
+            "expectation_suite_name",
+            "batch_request",
+            "action_list",
+            "evaluation_parameters",
+            "runtime_configuration",
+            "validations",
+            "profilers",
+        )
         ordered = True
 
     name = fields.String(required=True)
@@ -1404,18 +1416,11 @@ class CheckpointConfigSchema(Schema):
     run_name_template = fields.String(allow_none=True)
     expectation_suite_name = fields.String(allow_none=True)
     batch_request = fields.Dict(allow_none=True)
-    action_list = fields.List(
-        cls_or_instance=fields.Dict(),
-        allow_none=True
-    )
+    action_list = fields.List(cls_or_instance=fields.Dict(), allow_none=True)
     evaluation_parameters = fields.Dict(allow_none=True)
     runtime_configuration = fields.Dict(allow_none=True)
-    validations = fields.List(
-        cls_or_instance=fields.Dict()
-    )
-    profilers = fields.List(
-        cls_or_instance=fields.Dict()
-    )
+    validations = fields.List(cls_or_instance=fields.Dict())
+    profilers = fields.List(cls_or_instance=fields.Dict())
 
 
 class CheckpointValidationConfig(DictDot):
