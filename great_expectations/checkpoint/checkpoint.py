@@ -90,11 +90,12 @@ class LegacyCheckpoint(object):
 
 
 class Checkpoint(object):
-    def __init__(self,
-        data_context: DataContext,
-        name: str,
-        validation_operator_name: str,
-        validators: list,
+    def __init__(
+            self,
+            data_context: DataContext,
+            name: str,
+            validation_operator_name: str,
+            validators: list,
     ):
         self._data_context = data_context
         self._name = name
