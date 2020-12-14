@@ -11,8 +11,8 @@ from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import create_files_in_directory
 
 
-def test_empty_store(empty_data_context_v3):
-    my_expectation_store = empty_data_context_v3.test_yaml_config(
+def test_empty_store(empty_data_context):
+    my_expectation_store = empty_data_context.test_yaml_config(
         yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -26,10 +26,10 @@ store_backend:
     # assert False
 
 
-def test_config_with_yaml_error(empty_data_context_v3):
+def test_config_with_yaml_error(empty_data_context):
 
     with pytest.raises(Exception):
-        my_expectation_store = empty_data_context_v3.test_yaml_config(
+        my_expectation_store = empty_data_context.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -41,14 +41,14 @@ EGREGIOUS FORMATTING ERROR
         )
 
 
-def test_filesystem_store(empty_data_context_v3):
+def test_filesystem_store(empty_data_context):
     tmp_dir = str(tempfile.mkdtemp())
     with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:
         f_.write("\n")
     with open(os.path.join(tmp_dir, "expectations_A2.json"), "w") as f_:
         f_.write("\n")
 
-    my_expectation_store = empty_data_context_v3.test_yaml_config(
+    my_expectation_store = empty_data_context.test_yaml_config(
         yaml_config=f"""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -61,8 +61,8 @@ store_backend:
     )
 
 
-def test_empty_store2(empty_data_context_v3):
-    empty_data_context_v3.test_yaml_config(
+def test_empty_store2(empty_data_context):
+    empty_data_context.test_yaml_config(
         yaml_config="""
 class_name: ValidationsStore
 store_backend:
@@ -73,7 +73,7 @@ store_backend:
     )
 
 
-def test_datasource_config(empty_data_context_v3):
+def test_datasource_config(empty_data_context):
     temp_dir = str(tempfile.mkdtemp())
     create_files_in_directory(
         directory=temp_dir,
@@ -92,7 +92,7 @@ def test_datasource_config(empty_data_context_v3):
     )
     print(temp_dir)
 
-    return_obj = empty_data_context_v3.test_yaml_config(
+    return_obj = empty_data_context.test_yaml_config(
         yaml_config=f"""
 class_name: Datasource
 
@@ -138,7 +138,7 @@ data_connectors:
     }
 
 
-def test_error_states(empty_data_context_v3):
+def test_error_states(empty_data_context):
 
     first_config = """
 class_name: Datasource
@@ -148,14 +148,14 @@ execution_engine:
 """
 
     with pytest.raises(ge_exceptions.DatasourceInitializationError) as excinfo:
-        empty_data_context_v3.test_yaml_config(yaml_config=first_config)
+        empty_data_context.test_yaml_config(yaml_config=first_config)
         # print(excinfo.value.message)
         # shortened_message_len = len(excinfo.value.message)
         # print("="*80)
 
     # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
     # Note: a more thorough test could also verify that the traceback is indeed short.
-    empty_data_context_v3.test_yaml_config(
+    empty_data_context.test_yaml_config(
         yaml_config=first_config, shorten_tracebacks=True,
     )
 
@@ -181,15 +181,15 @@ data_connectors:
         NOT_A_REAL_KEY: nothing
 """
 
-    datasource = empty_data_context_v3.test_yaml_config(yaml_config=second_config)
+    datasource = empty_data_context.test_yaml_config(yaml_config=second_config)
     assert (
         "NOT_A_REAL_KEY"
         not in datasource.config["data_connectors"]["my_filesystem_data_connector"]
     )
 
 
-def test_config_variables_in_test_yaml_config(empty_data_context_v3, sa):
-    context = empty_data_context_v3
+def test_config_variables_in_test_yaml_config(empty_data_context, sa):
+    context = empty_data_context
 
     db_file = file_relative_path(
         __file__,
@@ -233,10 +233,10 @@ introspection:
 
 
 def test_golden_path_sql_datasource_configuration(
-    sa, empty_data_context_v3, test_connectable_postgresql_db
+    sa, empty_data_context, test_connectable_postgresql_db
 ):
     """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
-    context = empty_data_context_v3
+    context = empty_data_context
 
     os.chdir(context.root_directory)
 
@@ -297,7 +297,7 @@ introspection:
 
 
 def test_golden_path_inferred_asset_pandas_datasource_configuration(
-    empty_data_context_v3, test_df, tmp_path_factory
+    empty_data_context, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -325,7 +325,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context_v3
+    context = empty_data_context
 
     os.chdir(context.root_directory)
     import great_expectations as ge
@@ -424,7 +424,7 @@ data_connectors:
 
 
 def test_golden_path_configured_asset_pandas_datasource_configuration(
-    empty_data_context_v3, test_df, tmp_path_factory
+    empty_data_context, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -454,7 +454,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context_v3
+    context = empty_data_context
 
     os.chdir(context.root_directory)
     import great_expectations as ge
