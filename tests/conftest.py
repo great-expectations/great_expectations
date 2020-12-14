@@ -2193,16 +2193,6 @@ def empty_data_context(tmp_path_factory):
 
 
 @pytest.fixture
-def empty_data_context_v3(tmp_path_factory):
-    project_path = str(tmp_path_factory.mktemp("empty_data_context_v3"))
-    context = ge.data_context.DataContextV3.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
-    return context
-
-
-@pytest.fixture
 def titanic_pandas_multibatch_data_context_v3(tmp_path_factory):
     """
     Based on titanic_data_context, but with 2 identical batches of
@@ -2210,7 +2200,7 @@ def titanic_pandas_multibatch_data_context_v3(tmp_path_factory):
     :param tmp_path_factory:
     :return:
     """
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context_v3"))
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path = os.path.join(context_path, "../data/titanic")
@@ -2229,7 +2219,7 @@ def titanic_pandas_multibatch_data_context_v3(tmp_path_factory):
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
         str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")),
     )
-    context = ge.data_context.DataContextV3(context_path)
+    context = ge.data_context.DataContext(context_path)
 
     datasource_config = f"""
             class_name: Datasource
@@ -3107,8 +3097,8 @@ SELECT EXISTS (
 
 
 @pytest.fixture
-def data_context_with_sql_datasource_for_testing_get_batch(sa, empty_data_context_v3):
-    context = empty_data_context_v3
+def data_context_with_sql_datasource_for_testing_get_batch(sa, empty_data_context):
+    context = empty_data_context
 
     db_file = file_relative_path(
         __file__, "test_sets/test_cases_for_sql_data_connector.db",
