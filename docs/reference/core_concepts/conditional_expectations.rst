@@ -14,8 +14,8 @@ Today, conditional Expectations are available only for the Pandas but not for th
 For Pandas, the :code:`row_condition` argument should be a boolean
 expression string, which can be passed to :code:`pandas.DataFrame.query()` before Expectation Validation (see `pandas docs <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_).
 
-Optionally, the :code:`condition_parser` argument can be provided, which defines the syntax of conditions. Since the feature is **experimental** and only available for Pandas,
-this argument will be set to *"pandas"* by default, thus, demanding the appropriate syntax. Other engines might be implemented in future.
+Additionally, the :code:`condition_parser` argument must be provided, which defines the syntax of conditions.
+Since the feature is **experimental** and only available for Pandas this argument must be set to *"pandas"* by default, thus, demanding the appropriate syntax. Other engines might be implemented in future.
 
 The feature can be used, e.g., to test if different encodings of identical pieces of information are consistent with each other:
 
