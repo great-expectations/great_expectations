@@ -1273,30 +1273,34 @@ class CheckpointConfig(SerializableDictDot):
             self,
             name: str,
             config_version: Optional[int] = None,
-            validations: Optional[list] = None,
-            module_name: Optional[str] = "great_expectations.checkpoint",
-            class_name: Optional[str] = "Checkpoint",
+            template: Optional[str] = None,
+            module_name: Optional[str] = None,
+            class_name: Optional[str] = None,
             run_name_template: Optional[str] = None,
-            batch_request: Optional[BatchRequest] = None,
             expectation_suite_name: Optional[str] = None,
+            batch_request: Optional[BatchRequest] = None,
             action_list: Optional[List[dict]] = None,
             evaluation_parameters: Optional[dict] = None,
             runtime_configuration: Optional[dict] = None,
-            commented_map: Optional[CommentedMap] = None
+            validations: Optional[List[dict]] = None,
+            profilers: Optional[List[dict]] = None,
+            commented_map: Optional[CommentedMap] = None,
     ):
+        self._name = name
         if config_version is None:
             config_version = CheckpointConfigDefaults.DEFAULT_CONFIG_VERSION.value
-        self._name = name
         self._config_version = config_version
-        self._validations = validations or []
-        self._module_name = module_name
-        self._class_name = class_name
+        self._template = template
+        self._module_name = module_name or "great_expectations.checkpoint"
+        self._class_name = class_name or "Checkpoint"
         self._run_name_template = run_name_template
-        self._batch_request = batch_request
         self._expectation_suite_name = expectation_suite_name
+        self._batch_request = batch_request
         self._action_list = action_list
         self._evaluation_parameters = evaluation_parameters
         self._runtime_configuration = runtime_configuration
+        self._validations = validations or []
+        self._profilers = profilers or []
         self._commented_map = commented_map or CommentedMap()
 
     @classmethod
@@ -1341,6 +1345,10 @@ class CheckpointConfig(SerializableDictDot):
         return self._validations
 
     @property
+    def profilers(self):
+        return self._profilers
+
+    @property
     def module_name(self):
         return self._module_name
 
@@ -1378,25 +1386,36 @@ class CheckpointConfig(SerializableDictDot):
 
 
 class CheckpointConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+        fields = ("name", "config_version", "template", "module_name", "class_name", "run_name_template",
+                  "expectation_suite_name", "batch_request", "action_list", "evaluation_parameters",
+                  "runtime_configuration", "validations", "profilers")
+        ordered = True
+
+    name = fields.String(required=True)
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,
         error_messages={"invalid": "config version must " "be a number."},
     )
-    name = fields.String(required=True)
-    validations = fields.List(
-        cls_or_instance=fields.Dict()
-    )
+    template = fields.String(allow_none=True)
     module_name = fields.String(missing="great_expectations.checkpoint")
     class_name = fields.String(missing="Checkpoint")
     run_name_template = fields.String(allow_none=True)
-    batch_request = fields.Dict(allow_none=True)
     expectation_suite_name = fields.String(allow_none=True)
+    batch_request = fields.Dict(allow_none=True)
     action_list = fields.List(
         cls_or_instance=fields.Dict(),
         allow_none=True
     )
     evaluation_parameters = fields.Dict(allow_none=True)
     runtime_configuration = fields.Dict(allow_none=True)
+    validations = fields.List(
+        cls_or_instance=fields.Dict()
+    )
+    profilers = fields.List(
+        cls_or_instance=fields.Dict()
+    )
 
 
 class CheckpointValidationConfig(DictDot):
