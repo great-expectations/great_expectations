@@ -92,7 +92,7 @@ class LegacyCheckpoint(object):
 class Checkpoint(object):
     def __init__(self,
         data_context: DataContext,
-        name: str,git
+        name: str,
         validation_operator_name: str,
         validators: list,
     ):
