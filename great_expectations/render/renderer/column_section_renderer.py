@@ -122,7 +122,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 """
                 exception_traceback = traceback.format_exc()
                 exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
-                logger.error(exception_message, e, exc_info=True)
+                logger.error(exception_message)
 
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
