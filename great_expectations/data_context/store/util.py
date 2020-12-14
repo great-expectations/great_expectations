@@ -119,8 +119,10 @@ def save_config_to_filesystem(
     configuration_class: Any, store_name: str, base_directory: str, config: BaseConfig,
 ):
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
-    config_store = build_configuration_store(
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    config_store: ConfigurationStore = build_configuration_store(
         configuration_class=configuration_class,
         store_name=store_name,
         store_backend=store_backend_obj,
@@ -133,8 +135,10 @@ def load_config_from_filesystem(
     configuration_class: Any, store_name: str, base_directory: str,
 ) -> BaseConfig:
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
-    config_store = build_configuration_store(
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    config_store: ConfigurationStore = build_configuration_store(
         configuration_class=configuration_class,
         store_name=store_name,
         store_backend=store_backend_obj,
@@ -160,8 +164,10 @@ def delete_config_from_filesystem(
     configuration_class: Any, store_name: str, base_directory: str,
 ):
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
-    config_store = build_configuration_store(
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    config_store: ConfigurationStore = build_configuration_store(
         configuration_class=configuration_class,
         store_name=store_name,
         store_backend=store_backend_obj,
