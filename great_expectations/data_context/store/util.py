@@ -1,8 +1,8 @@
 import logging
-from typing import Any, Optional, cast
+from typing import Any, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.store import StoreBackend
+from great_expectations.data_context.store import ConfigurationStore, StoreBackend
 from great_expectations.data_context.types.base import BaseConfig, CheckpointConfig
 from great_expectations.data_context.util import build_store_from_config
 
@@ -15,10 +15,12 @@ def build_in_memory_store_backend(
     **kwargs,
 ):
     logger.debug("Starting data_context/store/util.py#build_in_memory_store_backend")
-    store_config: dict = {"module_name": module_name, "class_name": class_name}
-    store_config.update(**kwargs)
+    backend_store_config: dict = {"module_name": module_name, "class_name": class_name}
+    backend_store_config.update(**kwargs)
     return build_store_from_config(
-        store_config=store_config, module_name=module_name, runtime_environment=None,
+        store_config=backend_store_config,
+        module_name=module_name,
+        runtime_environment=None,
     )
 
 
@@ -33,14 +35,16 @@ def build_tuple_filesystem_store_backend(
         f"""Starting data_context/store/util.py#build_tuple_filesystem_store_backend using base_directory:
 "{base_directory}"""
     )
-    store_config: dict = {
+    backend_store_config: dict = {
         "module_name": module_name,
         "class_name": class_name,
         "base_directory": base_directory,
     }
-    store_config.update(**kwargs)
+    backend_store_config.update(**kwargs)
     return build_store_from_config(
-        store_config=store_config, module_name=module_name, runtime_environment=None,
+        store_config=backend_store_config,
+        module_name=module_name,
+        runtime_environment=None,
     )
 
 
@@ -55,21 +59,23 @@ def build_tuple_s3_store_backend(
         f"""Starting data_context/store/util.py#build_tuple_s3_store_backend using bucket: {bucket}
         """
     )
-    store_config: dict = {
+    backend_store_config: dict = {
         "module_name": module_name,
         "class_name": class_name,
         "bucket": bucket,
     }
-    store_config.update(**kwargs)
+    backend_store_config.update(**kwargs)
     return build_store_from_config(
-        store_config=store_config, module_name=module_name, runtime_environment=None,
+        store_config=backend_store_config,
+        module_name=module_name,
+        runtime_environment=None,
     )
 
 
 def build_configuration_store(
     configuration_class: Any,
     store_name: str,
-    store_backend,
+    store_backend: Union[StoreBackend, dict],
     *,
     module_name: str = "great_expectations.data_context.store",
     class_name: str = "ConfigurationStore",
@@ -79,12 +85,19 @@ def build_configuration_store(
     logger.debug(
         f"Starting data_context/store/util.py#build_configuration_store for store_name {store_name}"
     )
+
+    if not issubclass(configuration_class, BaseConfig):
+        raise ge_exceptions.DataContextError(
+            "Invalid configuration: A configuration_class needs to inherit from the BaseConfig class."
+        )
+
     if store_backend is not None and issubclass(type(store_backend), StoreBackend):
         store_backend = store_backend.config
     elif not isinstance(store_backend, dict):
         raise ge_exceptions.DataContextError(
             "Invalid configuration: A store_backend needs to be a dictionary or inherit from the StoreBackend class."
         )
+    store_backend.update(**kwargs)
     store_config: dict = {
         "configuration_class": configuration_class,
         "store_name": store_name,
@@ -93,9 +106,8 @@ def build_configuration_store(
         "overwrite_existing": overwrite_existing,
         "store_backend": store_backend,
     }
-    store_config.update(**kwargs)
     # noinspection PyTypeChecker
-    configuration_store = build_store_from_config(
+    configuration_store: ConfigurationStore = build_store_from_config(
         store_config=store_config, module_name=module_name, runtime_environment=None,
     )
     return configuration_store
