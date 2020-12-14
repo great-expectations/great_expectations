@@ -10,6 +10,7 @@ Develop
 * [BUGFIX] Fixed a bug in the error printing logic in several exception handling blocks in the Data Docs rendering. This will make it easier for users to submit error messages in case of an error in rendering.
 * [ENHANCEMENT] Improved exception handling in the Slack notifications rendering logic
 * [DOCS] Miscellaneous doc improvements
+* [DOCS] Update cloud composer workflow to use GCSStoreBackendDefaults
 
 
 0.13.2
