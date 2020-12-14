@@ -15,10 +15,10 @@ def build_in_memory_store_backend(
     **kwargs,
 ) -> StoreBackend:
     logger.debug("Starting data_context/store/util.py#build_in_memory_store_backend")
-    backend_store_config: dict = {"module_name": module_name, "class_name": class_name}
-    backend_store_config.update(**kwargs)
+    store_backend_config: dict = {"module_name": module_name, "class_name": class_name}
+    store_backend_config.update(**kwargs)
     return build_store_from_config(
-        store_config=backend_store_config,
+        store_config=store_backend_config,
         module_name=module_name,
         runtime_environment=None,
     )
@@ -35,14 +35,14 @@ def build_tuple_filesystem_store_backend(
         f"""Starting data_context/store/util.py#build_tuple_filesystem_store_backend using base_directory:
 "{base_directory}"""
     )
-    backend_store_config: dict = {
+    store_backend_config: dict = {
         "module_name": module_name,
         "class_name": class_name,
         "base_directory": base_directory,
     }
-    backend_store_config.update(**kwargs)
+    store_backend_config.update(**kwargs)
     return build_store_from_config(
-        store_config=backend_store_config,
+        store_config=store_backend_config,
         module_name=module_name,
         runtime_environment=None,
     )
@@ -59,14 +59,14 @@ def build_tuple_s3_store_backend(
         f"""Starting data_context/store/util.py#build_tuple_s3_store_backend using bucket: {bucket}
         """
     )
-    backend_store_config: dict = {
+    store_backend_config: dict = {
         "module_name": module_name,
         "class_name": class_name,
         "bucket": bucket,
     }
-    backend_store_config.update(**kwargs)
+    store_backend_config.update(**kwargs)
     return build_store_from_config(
-        store_config=backend_store_config,
+        store_config=store_backend_config,
         module_name=module_name,
         runtime_environment=None,
     )
@@ -108,48 +108,38 @@ def build_configuration_store(
         "overwrite_existing": overwrite_existing,
         "store_backend": store_backend,
     }
-    # noinspection PyTypeChecker
     configuration_store: ConfigurationStore = build_store_from_config(
         store_config=store_config, module_name=module_name, runtime_environment=None,
     )
     return configuration_store
 
 
-def save_config_to_filesystem(
-    configuration_class: Any, store_name: str, base_directory: str, config: BaseConfig,
+def save_config_to_store_backend(
+    configuration_class: Any,
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    config: BaseConfig,
 ):
-    store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
     config_store: ConfigurationStore = build_configuration_store(
         configuration_class=configuration_class,
         store_name=store_name,
-        store_backend=store_backend_obj,
+        store_backend=store_backend,
         overwrite_existing=True,
     )
     config_store.save_configuration(configuration=config)
 
 
-def load_config_from_filesystem(
-    configuration_class: Any, store_name: str, base_directory: str,
-) -> BaseConfig:
-    store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+def load_config_from_store_backend(
+    configuration_class: Any, store_name: str, store_backend: Union[StoreBackend, dict],
+) -> Optional[BaseConfig]:
     config_store: ConfigurationStore = build_configuration_store(
         configuration_class=configuration_class,
         store_name=store_name,
-        store_backend=store_backend_obj,
+        store_backend=store_backend,
         overwrite_existing=False,
     )
-
-    config: Optional[configuration_class]
     try:
-        # noinspection PyTypeChecker
-        config = config_store.load_configuration()
-        return config
+        return config_store.load_configuration()
     except (
         ge_exceptions.ConfigNotFoundError,
         ge_exceptions.InvalidBaseConfigError,
@@ -160,6 +150,47 @@ def load_config_from_filesystem(
         )
 
 
+def delete_config_from_store_backend(
+    configuration_class: Any, store_name: str, store_backend: Union[StoreBackend, dict],
+):
+    config_store: ConfigurationStore = build_configuration_store(
+        configuration_class=configuration_class,
+        store_name=store_name,
+        store_backend=store_backend,
+        overwrite_existing=True,
+    )
+    config_store.delete_configuration()
+
+
+def save_config_to_filesystem(
+    configuration_class: Any, store_name: str, base_directory: str, config: BaseConfig,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    save_config_to_store_backend(
+        configuration_class=configuration_class,
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        config=config,
+    )
+
+
+def load_config_from_filesystem(
+    configuration_class: Any, store_name: str, base_directory: str,
+) -> Optional[BaseConfig]:
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    return load_config_from_store_backend(
+        configuration_class=configuration_class,
+        store_name=store_name,
+        store_backend=store_backend_obj,
+    )
+
+
 def delete_config_from_filesystem(
     configuration_class: Any, store_name: str, base_directory: str,
 ):
@@ -167,13 +198,11 @@ def delete_config_from_filesystem(
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
         **store_config
     )
-    config_store: ConfigurationStore = build_configuration_store(
+    delete_config_from_store_backend(
         configuration_class=configuration_class,
         store_name=store_name,
         store_backend=store_backend_obj,
-        overwrite_existing=True,
     )
-    config_store.delete_configuration()
 
 
 def save_checkpoint_config_to_filesystem(
