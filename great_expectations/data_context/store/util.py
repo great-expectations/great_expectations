@@ -97,7 +97,9 @@ def build_configuration_store(
         raise ge_exceptions.DataContextError(
             "Invalid configuration: A store_backend needs to be a dictionary or inherit from the StoreBackend class."
         )
+
     store_backend.update(**kwargs)
+
     store_config: dict = {
         "configuration_class": configuration_class,
         "store_name": store_name,
