@@ -645,4 +645,6 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
            2. It is often helpful to generate examples showing the functionality of your Expectation, which helps verify the Expectation works as intended.
            3. If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the ``tests/test_definitions/name_of_your_expectation`` directory.
 
+        7. **Optional:** Implement :ref:`Custom Data Docs Renderers <how_to_guides__configuring_data_docs__how_to_create_renderers_for_custom_expectations>`
+
         We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference (Link to core concepts).

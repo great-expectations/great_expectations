@@ -2193,12 +2193,50 @@ def empty_data_context(tmp_path_factory):
 
 
 @pytest.fixture
-def empty_data_context_v3(tmp_path_factory):
-    project_path = str(tmp_path_factory.mktemp("empty_data_context_v3"))
-    context = ge.data_context.DataContextV3.create(project_path)
+def titanic_pandas_multibatch_data_context_v3(tmp_path_factory):
+    """
+    Based on titanic_data_context, but with 2 identical batches of
+    data asset "titanic", with a PandasExecutionEngine
+    :param tmp_path_factory:
+    :return:
+    """
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path = os.path.join(context_path, "../data/titanic")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__, "./test_fixtures/great_expectations_v013_no_datasource.yml"
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "../data/titanic/Titanic_1911.csv")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")),
+    )
+    context = ge.data_context.DataContext(context_path)
+
+    datasource_config = f"""
+            class_name: Datasource
+
+            execution_engine:
+                class_name: PandasExecutionEngine
+
+            data_connectors:
+                my_data_connector:
+                    class_name: InferredAssetFilesystemDataConnector
+                    base_directory: {data_path}
+                    default_regex:
+                        pattern: (.*)\\.csv
+                        group_names:
+                            - data_asset_name
+            """
+    context.test_yaml_config(name="titanic_multi_batch", yaml_config=datasource_config)
     return context
 
 
@@ -3043,8 +3081,8 @@ SELECT EXISTS (
 
 
 @pytest.fixture
-def data_context_with_sql_datasource_for_testing_get_batch(empty_data_context_v3,):
-    context = empty_data_context_v3
+def data_context_with_sql_datasource_for_testing_get_batch(sa, empty_data_context):
+    context = empty_data_context
 
     db_file = file_relative_path(
         __file__, "test_sets/test_cases_for_sql_data_connector.db",
@@ -3080,7 +3118,7 @@ introspection:
     )
 
     try:
-        context.add_datasource("my_sqlite_db", config)
+        context.add_datasource("my_sqlite_db", **config)
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 

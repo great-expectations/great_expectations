@@ -59,7 +59,9 @@ class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
 
 
 class InvalidDataContextConfigError(GreatExpectationsValidationError):
-    pass
+    def __init__(self, message, validation_error, field_name=None):
+        super().__init__(message=message, validation_error=validation_error)
+        self.field_name = field_name
 
 
 class InvalidBatchKwargsError(GreatExpectationsError):
@@ -276,12 +278,20 @@ class BatchSpecError(DataContextError):
         super().__init__(self.message)
 
 
-class DatasourceInitializationError(GreatExpectationsError):
+class DatasourceError(DataContextError):
     def __init__(self, datasource_name, message):
         self.message = "Cannot initialize datasource {}, error: {}".format(
             datasource_name, message,
         )
         super().__init__(self.message)
+
+
+class DatasourceConfigurationError(DatasourceError):
+    pass
+
+
+class DatasourceInitializationError(DatasourceError):
+    pass
 
 
 class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
@@ -290,12 +300,6 @@ class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
 
 class InvalidConfigValueTypeError(DataContextError):
     pass
-
-
-class DatasourceError(DataContextError):
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
 
 
 class DataConnectorError(DataContextError):

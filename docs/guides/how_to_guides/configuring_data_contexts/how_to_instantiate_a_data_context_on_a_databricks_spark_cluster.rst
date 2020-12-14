@@ -16,7 +16,7 @@ Steps
 
 This how-to-guide assumes that you are using a Databricks Notebook, and using the Databricks File Store (DBFS) as the Metadata Store and DataDocs store. The `DBFS is a file store <https://docs.databricks.com/data/databricks-file-system.html>`_ that is native to Databricks clusters and Notebooks. Files on DBFS can be written and read as if they were on a local filesystem, just by `adding the /dbfs/ prefix to the path <https://docs.databricks.com/data/databricks-file-system.html#local-file-apis>`_. For information on how to configure Databricks for filesystems on Azure and AWS, please see the associated documentation in the Additional Notes section below.
 
-#. **Install Great Expectations on your Databricks Spark cluster.**
+1. **Install Great Expectations on your Databricks Spark cluster.**
 
    Copy this code snippet into a cell in your Databricks Spark notebook and run it:
 
@@ -25,100 +25,55 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
       dbutils.library.installPyPI("great_expectations")
 
 
-#. **Configure a Data Context in Memory.**
+2. **Configure a Data Context in code.**
 
-The following snippet shows Python code that instantiates and configures a Data Context in memory. Copy this snippet into a cell in your Databricks Spark notebook, replace the ``TODO`` stubs with paths to your stores, and run.
+Follow the steps for creating an in-code Data Context in :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>` using the FilesystemStoreBackendDefaults or configuring stores as in the code block below.
 
 .. note::
-   If you are using DBFS for your stores, make sure to prepend your ``base_directory`` with ``/dbfs/`` as in the examples below to make sure you are writing to DBFS and not the Spark driver node filesystem.
+   If you are using DBFS for your stores, make sure to set the ``root_directory`` of FilesystemStoreBackendDefaults to ``/dbfs/`` or ``/dbfs/FileStore/`` to make sure you are writing to DBFS and not the Spark driver node filesystem. If you have mounted another file store (e.g. s3 bucket) to use instead of DBFS, you can use that path here instead.
 
 .. code-block:: python
    :linenos:
 
-   import great_expectations.exceptions as ge_exceptions
    from great_expectations.data_context.types.base import DataContextConfig
    from great_expectations.data_context import BaseDataContext
 
-   project_config = DataContextConfig(
-       config_version=2,
-       plugins_directory=None,
-       config_variables_file_path=None,
+   data_context_config = DataContextConfig(
+      datasources={<set_your_datasources_here>},
+      store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="/dbfs/FileStore/"),
+   )
+   context = BaseDataContext(project_config=data_context_config)
 
-       datasources={
-           "my_spark_datasource": {
-               "data_asset_type": {
-                   "class_name": "SparkDFDataset",
-                   "module_name": "great_expectations.dataset",
-               },
-               "class_name": "SparkDFDatasource",
-               "module_name": "great_expectations.datasource",
-               "batch_kwargs_generators": {},
-           }
+You can have more fine-grained control over where your stores are located by passing the ``stores`` parameter to DataContextConfig as in the following example.
+
+.. code-block:: python
+   :linenos:
+
+   data_context_config = DataContextConfig(
+      datasources={<set_your_datasources_here>},
+      stores={
+          "expectations_store": {
+              "class_name": "ExpectationsStore",
+              "store_backend": {
+                  "class_name": "TupleFilesystemStoreBackend",
+                  "base_directory": "/dbfs/FileStore/path_to_your_expectations_store/",
+              },
+          },
+          "validations_store": {
+              "class_name": "ValidationsStore",
+              "store_backend": {
+                  "class_name": "TupleFilesystemStoreBackend",
+                  "base_directory": "/dbfs/FileStore/path_to_your_validations_store/",
+              },
+          },
+          "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
        },
-       stores={
-       "expectations_store": {
-           "class_name": "ExpectationsStore",
-           "store_backend": {
-               "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "/dbfs/FileStore/expectations/",  # TODO: replace with the path to your Expectations Store on DBFS
-           },
-       },
-       "validations_store": {
-           "class_name": "ValidationsStore",
-           "store_backend": {
-               "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "/dbfs/FileStore/validations/",  # TODO: replace with the path to your Validations Store on DBFS
-           },
-       },
-       "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-    },
-    expectations_store_name="expectations_store",
-    validations_store_name="validations_store",
-    evaluation_parameter_store_name="evaluation_parameter_store",
-    data_docs_sites={
-       "local_site": {
-           "class_name": "SiteBuilder",
-           "store_backend": {
-               "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "/dbfs/FileStore/docs/",  # TODO: replace with the path to your DataDocs Store on DBFS
-           },
-           "site_index_builder": {
-               "class_name": "DefaultSiteIndexBuilder",
-               "show_cta_footer": True,
-           },
-       }
-    },
-    validation_operators={
-       "action_list_operator": {
-           "class_name": "ActionListValidationOperator",
-           "action_list": [
-               {
-                   "name": "store_validation_result",
-                   "action": {"class_name": "StoreValidationResultAction"},
-               },
-               {
-                   "name": "store_evaluation_params",
-                   "action": {"class_name": "StoreEvaluationParametersAction"},
-               },
-               {
-                   "name": "update_data_docs",
-                   "action": {"class_name": "UpdateDataDocsAction"},
-               },
-           ],
-       }
-    },
-    anonymous_usage_statistics={
-     "enabled": True
-    }
-    )
+      store_backend_defaults=FilesystemStoreBackendDefaults(),
+   )
 
-   context = BaseDataContext(project_config=project_config)
+3. **Test your configuration.**
 
-#. **Test your configuration.**
-
-   Execute the cell with the snippet above.
-
-   Then copy this code snippet into a cell in your Databricks Spark notebook, run it and verify that no error is displayed:
+   After you have created your Data Context, copy this code snippet into a cell in your Databricks Spark notebook, run it and verify that no error is displayed:
 
    .. code-block:: python
 

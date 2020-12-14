@@ -36,6 +36,7 @@ except ImportError:
 try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.engine.url import URL
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
@@ -460,15 +461,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 success=True,
             )
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values,
+        # and set the instance "_config" variable equal to the resulting dictionary.
         self._config = get_currently_executing_function_call_arguments(
             **{"class_name": self.__class__.__name__}
         )
         filter_properties_dict(
-            properties=self._config,
-            delete_fields=["connection_string", "kwargs"],
-            inplace=True,
+            properties=self._config, inplace=True,
         )
 
     @property
@@ -515,7 +514,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _get_sqlalchemy_key_pair_auth_url(
         self, drivername: str, credentials: dict
-    ) -> Tuple[str, dict]:
+    ) -> Tuple["sa.engine.url.URL", Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.

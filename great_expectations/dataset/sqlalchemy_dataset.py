@@ -741,8 +741,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return series
 
     def get_column_mean(self, column):
+        # column * 1.0 needed for correct calculation of avg in MSSQL
         return self.engine.execute(
-            sa.select([sa.func.avg(sa.column(column))]).select_from(self._table)
+            sa.select([sa.func.avg(sa.column(column) * 1.0)]).select_from(self._table)
         ).scalar()
 
     def get_column_unique_count(self, column):

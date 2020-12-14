@@ -1,10 +1,11 @@
 import os
 import shutil
+from typing import List, Union
 
 import pandas as pd
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.data_context.util import file_relative_path
 
 from ..test_utils import create_files_in_directory
@@ -13,9 +14,9 @@ yaml = YAML()
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_inferred_assets(
-    empty_data_context_v3, tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
-    context = empty_data_context_v3
+    context = empty_data_context
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -56,28 +57,26 @@ data_connectors:
     )
 
     context.add_datasource(
-        "my_datasource", config,
+        "my_datasource", **config,
     )
 
-    batch_list = context.get_batch_list_from_new_style_datasource(
-        {
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_data_connector",
-            "data_asset_name": "path",
-            "partition_request": {
-                "partition_identifiers": {
-                    # "data_asset_name": "path",
-                    "letter": "A",
-                    "number": "101",
-                }
-            },
-        }
-    )
+    batch_request: Union[dict, BatchRequest] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_data_connector",
+        "data_asset_name": "path",
+        "partition_request": {
+            "partition_identifiers": {
+                # "data_asset_name": "path",
+                "letter": "A",
+                "number": "101",
+            }
+        },
+    }
+    batch_list: List[Batch] = context.get_batch_list(**batch_request)
 
     assert len(batch_list) == 1
 
     batch: Batch = batch_list[0]
-
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "path"
     assert batch.batch_definition["partition_definition"] == {
@@ -89,9 +88,9 @@ data_connectors:
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets(
-    empty_data_context_v3, tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
-    context = empty_data_context_v3
+    context = empty_data_context
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -139,28 +138,26 @@ data_connectors:
     )
 
     context.add_datasource(
-        "my_datasource", config,
+        "my_datasource", **config,
     )
 
-    batch_list = context.get_batch_list_from_new_style_datasource(
-        {
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_data_connector",
-            "data_asset_name": "Titanic",
-            "partition_request": {
-                "partition_identifiers": {
-                    "name": "Titanic",
-                    "timestamp": "19120414",
-                    "size": "1313",
-                }
-            },
-        }
-    )
+    batch_request: Union[dict, BatchRequest] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_data_connector",
+        "data_asset_name": "Titanic",
+        "partition_request": {
+            "partition_identifiers": {
+                "name": "Titanic",
+                "timestamp": "19120414",
+                "size": "1313",
+            }
+        },
+    }
+    batch_list: List[Batch] = context.get_batch_list(**batch_request)
 
     assert len(batch_list) == 1
 
     batch: Batch = batch_list[0]
-
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "Titanic"
     assert batch.batch_definition["partition_definition"] == {
