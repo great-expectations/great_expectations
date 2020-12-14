@@ -43,7 +43,7 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
-    CURRENT_CONFIG_VERSION,
+    CURRENT_GE_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
@@ -2683,10 +2683,10 @@ class DataContext(BaseDataContext):
                         config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
                     ),
                 )
-            elif config_version > CURRENT_CONFIG_VERSION:
+            elif config_version > CURRENT_GE_CONFIG_VERSION:
                 raise ge_exceptions.UnsupportedConfigVersionError(
                     "Invalid config version ({}).\n    The maximum valid version is {}.".format(
-                        config_version, CURRENT_CONFIG_VERSION
+                        config_version, CURRENT_GE_CONFIG_VERSION
                     ),
                 )
 
