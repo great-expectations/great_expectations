@@ -13,7 +13,7 @@ def build_in_memory_store_backend(
     module_name: str = "great_expectations.data_context.store",
     class_name: str = "InMemoryStoreBackend",
     **kwargs,
-):
+) -> StoreBackend:
     logger.debug("Starting data_context/store/util.py#build_in_memory_store_backend")
     backend_store_config: dict = {"module_name": module_name, "class_name": class_name}
     backend_store_config.update(**kwargs)
@@ -30,7 +30,7 @@ def build_tuple_filesystem_store_backend(
     module_name: str = "great_expectations.data_context.store",
     class_name: str = "TupleFilesystemStoreBackend",
     **kwargs,
-):
+) -> StoreBackend:
     logger.debug(
         f"""Starting data_context/store/util.py#build_tuple_filesystem_store_backend using base_directory:
 "{base_directory}"""
@@ -54,7 +54,7 @@ def build_tuple_s3_store_backend(
     module_name: str = "great_expectations.data_context.store",
     class_name: str = "TupleS3StoreBackend",
     **kwargs,
-):
+) -> StoreBackend:
     logger.debug(
         f"""Starting data_context/store/util.py#build_tuple_s3_store_backend using bucket: {bucket}
         """
@@ -81,7 +81,7 @@ def build_configuration_store(
     class_name: str = "ConfigurationStore",
     overwrite_existing: bool = False,
     **kwargs,
-):
+) -> ConfigurationStore:
     logger.debug(
         f"Starting data_context/store/util.py#build_configuration_store for store_name {store_name}"
     )
