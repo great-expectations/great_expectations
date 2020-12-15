@@ -172,6 +172,107 @@ def delete_config_from_store_backend(
     config_store.remove_key(key=key)
 
 
+def save_checkpoint_config_to_store_backend(
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    checkpoint_name: str,
+    checkpoint_configuration: CheckpointConfig,
+):
+    save_config_to_store_backend(
+        configuration_class=CheckpointConfig,
+        store_name=store_name,
+        store_backend=store_backend,
+        configuration_key=checkpoint_name,
+        configuration=checkpoint_configuration,
+    )
+
+
+def load_checkpoint_config_from_store_backend(
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    checkpoint_name: str,
+) -> CheckpointConfig:
+    try:
+        checkpoint_config: CheckpointConfig = cast(
+            CheckpointConfig,
+            load_config_from_store_backend(
+                configuration_class=CheckpointConfig,
+                store_name=store_name,
+                store_backend=store_backend,
+                configuration_key=checkpoint_name,
+            ),
+        )
+        return checkpoint_config
+    except ge_exceptions.InvalidBaseYamlConfigError as exc:
+        logger.error(exc.messages)
+        raise ge_exceptions.InvalidCheckpointConfigError(
+            "Error while processing DataContextConfig.", exc
+        )
+
+
+def delete_checkpoint_config_from_store_backend(
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    checkpoint_name: str,
+):
+    delete_config_from_store_backend(
+        configuration_class=CheckpointConfig,
+        store_name=store_name,
+        store_backend=store_backend,
+        configuration_key=checkpoint_name,
+    )
+
+
+def save_checkpoint_config_to_filesystem(
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
+    checkpoint_configuration: CheckpointConfig,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    save_checkpoint_config_to_store_backend(
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        checkpoint_name=checkpoint_name,
+        checkpoint_configuration=checkpoint_configuration,
+    )
+
+
+def load_checkpoint_config_from_filesystem(
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
+) -> CheckpointConfig:
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    return load_checkpoint_config_from_store_backend(
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        checkpoint_name=checkpoint_name,
+    )
+
+
+def delete_checkpoint_config_from_filesystem(
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    delete_checkpoint_config_from_store_backend(
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        checkpoint_name=checkpoint_name,
+    )
+
+
 def save_config_to_filesystem(
     configuration_class: Any,
     store_name: str,
@@ -225,51 +326,4 @@ def delete_config_from_filesystem(
         store_name=store_name,
         store_backend=store_backend_obj,
         configuration_key=configuration_key,
-    )
-
-
-def save_checkpoint_config_to_filesystem(
-    store_name: str,
-    base_directory: str,
-    checkpoint_name: str,
-    checkpoint_configuration: CheckpointConfig,
-):
-    save_config_to_filesystem(
-        configuration_class=CheckpointConfig,
-        store_name=store_name,
-        base_directory=base_directory,
-        configuration_key=checkpoint_name,
-        configuration=checkpoint_configuration,
-    )
-
-
-def load_checkpoint_config_from_filesystem(
-    store_name: str, base_directory: str, checkpoint_name: str,
-) -> CheckpointConfig:
-    try:
-        checkpoint_config: CheckpointConfig = cast(
-            CheckpointConfig,
-            load_config_from_filesystem(
-                configuration_class=CheckpointConfig,
-                store_name=store_name,
-                base_directory=base_directory,
-                configuration_key=checkpoint_name,
-            ),
-        )
-        return checkpoint_config
-    except ge_exceptions.InvalidBaseYamlConfigError as exc:
-        logger.error(exc.messages)
-        raise ge_exceptions.InvalidCheckpointConfigError(
-            "Error while processing DataContextConfig.", exc
-        )
-
-
-def delete_checkpoint_config_from_filesystem(
-    store_name: str, base_directory: str, checkpoint_name: str,
-):
-    delete_config_from_filesystem(
-        configuration_class=CheckpointConfig,
-        store_name=store_name,
-        base_directory=base_directory,
-        configuration_key=checkpoint_name,
     )
