@@ -22,6 +22,7 @@ from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
+from great_expectations.core.data_context_key import StringKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -36,14 +37,14 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # TODO:
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import TupleStoreBackend
+from great_expectations.data_context.store import CheckpointStore, TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
-    CURRENT_CONFIG_VERSION,
+    CURRENT_GE_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
@@ -70,8 +71,6 @@ from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
-from great_expectations.core.data_context_key import StringKey
-from great_expectations.data_context.store import CheckpointStore
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -2656,6 +2655,136 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiling_results["success"] = True
         return profiling_results
 
+    def test_yaml_config(
+        self,
+        yaml_config: str,
+        name=None,
+        pretty_print=True,
+        return_mode="instantiated_class",
+        shorten_tracebacks=False,
+    ):
+        """ Convenience method for testing yaml configs
+
+        test_yaml_config is a convenience method for configuring the moving
+        parts of a Great Expectations deployment. It allows you to quickly
+        test out configs for system components, especially Datasources,
+        Checkpoints, and Stores.
+
+        For many deployments of Great Expectations, these components (plus
+        Expectations) are the only ones you'll need.
+
+        test_yaml_config is mainly intended for use within notebooks and tests.
+
+        Parameters
+        ----------
+        yaml_config : str
+            A string containing the yaml config to be tested
+
+        name: str
+            (Optional) A string containing the name of the component to instantiate
+
+        pretty_print : bool
+            Determines whether to print human-readable output
+
+        return_mode : str
+            Determines what type of object test_yaml_config will return
+            Valid modes are "instantiated_class" and "report_object"
+
+        shorten_tracebacks : bool
+            If true, catch any errors during instantiation and print only the
+            last element of the traceback stack. This can be helpful for
+            rapid iteration on configs in a notebook, because it can remove
+            the need to scroll up and down a lot.
+
+        Returns
+        -------
+        The instantiated component (e.g. a Datasource)
+        OR
+        a json object containing metadata from the component's self_check method
+
+        The returned object is determined by return_mode.
+        """
+        if pretty_print:
+            print("Attempting to instantiate class from config...")
+
+        if return_mode not in ["instantiated_class", "report_object"]:
+            raise ValueError(f"Unknown return_mode: {return_mode}.")
+
+        substituted_config_variables = substitute_all_config_variables(
+            self.config_variables, dict(os.environ),
+        )
+
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
+        config_str_with_substituted_variables = substitute_all_config_variables(
+            yaml_config, substitutions,
+        )
+
+        config = yaml.load(config_str_with_substituted_variables)
+
+        if "class_name" in config:
+            class_name = config["class_name"]
+        else:
+            class_name = None
+
+        try:
+            if class_name in [
+                "ExpectationsStore",
+                "ValidationsStore",
+                "HtmlSiteStore",
+                "EvaluationParameterStore",
+                "MetricStore",
+                "SqlAlchemyQueryStore",
+            ]:
+                print(f"\tInstantiating as a Store, since class_name is {class_name}")
+                instantiated_class = self._build_store_from_config(
+                    "my_temp_store", config
+                )
+
+            elif class_name in [
+                "Datasource",
+                "SimpleSqlalchemyDatasource",
+            ]:
+                print(
+                    f"\tInstantiating as a Datasource, since class_name is {class_name}"
+                )
+                datasource_name = name or "my_temp_datasource"
+                instantiated_class = self._instantiate_datasource_from_config_and_update_project_config(
+                    name=datasource_name, config=config, initialize=True,
+                )
+
+            else:
+                print(
+                    "\tNo matching class found. Attempting to instantiate class from the raw config..."
+                )
+                instantiated_class = instantiate_class_from_config(
+                    config, runtime_environment={}, config_defaults={}
+                )
+
+            if pretty_print:
+                print(
+                    f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}"
+                )
+                print()
+
+            report_object = instantiated_class.self_check(pretty_print)
+
+            if return_mode == "instantiated_class":
+                return instantiated_class
+
+            elif return_mode == "report_object":
+                return report_object
+
+        except Exception as e:
+            if shorten_tracebacks:
+                traceback.print_exc(limit=1)
+            else:
+                raise e
+
 
 class DataContext(BaseDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
@@ -2878,15 +3007,15 @@ class DataContext(BaseDataContext):
             self._save_project_config()
 
         self.checkpoint_store = CheckpointStore(
-            store_backend = {
-                "module_name" : "great_expectations.data_context.store",
-                "class_name" : "TupleFilesystemStoreBackend",
-                "filepath_suffix" : ".yml",
-                "base_directory" : os.path.join(self.root_directory, self.CHECKPOINTS_DIR),
+            store_backend={
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "TupleFilesystemStoreBackend",
+                "filepath_suffix": ".yml",
+                "base_directory": os.path.join(
+                    self.root_directory, self.CHECKPOINTS_DIR
+                ),
             }
         )
-
-
 
     def _load_project_config(self):
         """
@@ -2920,13 +3049,11 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def create_checkpoint(self,
-        checkpoint_name: str,
-        checkpoint_config: dict,
+    def create_checkpoint(
+        self, checkpoint_name: str, checkpoint_config: dict,
     ):
         self._validate_checkpoint_config(
-            checkpoint_config,
-            checkpoint_name,
+            checkpoint_config, checkpoint_name,
         )
 
         checkpoint_config["class_name"] = "LegacyCheckpoint"
@@ -2946,21 +3073,17 @@ class DataContext(BaseDataContext):
         )
 
         self.checkpoint_store.set(
-            StringKey(checkpoint_name),
-            new_checkpoint,
+            StringKey(checkpoint_name), new_checkpoint,
         )
 
         return new_checkpoint
 
-    def get_checkpoint(self, checkpoint_name: str, return_config: bool=True):
+    def get_checkpoint(self, checkpoint_name: str, return_config: bool = True):
         """Load a checkpoint. (Experimental)"""
 
-        checkpoint_config = self.checkpoint_store.get(
-            StringKey(checkpoint_name)
-        )
+        checkpoint_config = self.checkpoint_store.get(StringKey(checkpoint_name))
         self._validate_checkpoint_config(
-            checkpoint_config,
-            checkpoint_name,
+            checkpoint_config, checkpoint_name,
         )
 
         if return_config:
@@ -2970,10 +3093,7 @@ class DataContext(BaseDataContext):
 
         checkpoint = instantiate_class_from_config(
             config=checkpoint_config,
-            runtime_environment={
-                "data_context": self,
-                "name": checkpoint_name,
-            },
+            runtime_environment={"data_context": self, "name": checkpoint_name,},
             config_defaults={
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
@@ -2987,15 +3107,16 @@ class DataContext(BaseDataContext):
 
     def _load_checkpoint_yml_template(self) -> dict:
         template_file = file_relative_path(
-            __file__, os.path.join("checkpoint_template.yml")
+            __file__, os.path.join("legacy_checkpoint_template.yml")
         )
         with open(template_file, "r") as f:
             template = yaml.load(f)
         return template
 
-
     @staticmethod
-    def _validate_checkpoint_config(checkpoint_config: dict, checkpoint_name: str) -> dict:
+    def _validate_checkpoint_config(
+        checkpoint_config: dict, checkpoint_name: str
+    ) -> dict:
         if checkpoint_config is None:
             raise ge_exceptions.CheckpointError(
                 f"LegacyCheckpoint `{checkpoint_name}` has no contents. Please fix this."
@@ -3106,10 +3227,10 @@ class DataContext(BaseDataContext):
                         config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
                     ),
                 )
-            elif config_version > CURRENT_CONFIG_VERSION:
+            elif config_version > CURRENT_GE_CONFIG_VERSION:
                 raise ge_exceptions.UnsupportedConfigVersionError(
                     "Invalid config version ({}).\n    The maximum valid version is {}.".format(
-                        config_version, CURRENT_CONFIG_VERSION
+                        config_version, CURRENT_GE_CONFIG_VERSION
                     ),
                 )
 

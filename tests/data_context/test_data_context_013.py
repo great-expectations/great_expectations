@@ -294,9 +294,9 @@ data_connectors:
 
 
 def test_in_memory_data_context_configuration(
-    titanic_pandas_multibatch_data_context_v3,
+    titanic_pandas_multibatch_data_context_with_013_datasource,
 ):
-    project_config_dict: dict = titanic_pandas_multibatch_data_context_v3.get_config(
+    project_config_dict: dict = titanic_pandas_multibatch_data_context_with_013_datasource.get_config(
         mode="dict"
     )
     project_config_dict["plugins_directory"] = None
@@ -322,7 +322,7 @@ def test_in_memory_data_context_configuration(
     project_config: DataContextConfig = DataContextConfig(**project_config_dict)
     data_context = BaseDataContext(
         project_config=project_config,
-        context_root_dir=titanic_pandas_multibatch_data_context_v3.root_directory,
+        context_root_dir=titanic_pandas_multibatch_data_context_with_013_datasource.root_directory,
     )
 
     my_validator: Validator = data_context.get_validator(

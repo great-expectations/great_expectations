@@ -26,7 +26,11 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.datasource import Datasource
-from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError, InvalidKeyError
+from great_expectations.exceptions import (
+    CheckpointError,
+    CheckpointNotFoundError,
+    InvalidKeyError,
+)
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
 
@@ -342,11 +346,13 @@ def load_checkpoint(
     context: DataContext,
     checkpoint_name: str,
     usage_event: str,
-    return_config: bool=True,
+    return_config: bool = True,
 ) -> dict:
     """Load a checkpoint or raise helpful errors."""
     try:
-        checkpoint_config = context.get_checkpoint(checkpoint_name, return_config=return_config)
+        checkpoint_config = context.get_checkpoint(
+            checkpoint_name, return_config=return_config
+        )
         return checkpoint_config
     except InvalidKeyError as e:
         exit_with_failure_message_and_stats(
