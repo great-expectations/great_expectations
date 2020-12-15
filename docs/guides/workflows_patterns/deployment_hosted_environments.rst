@@ -23,7 +23,7 @@ Step 1: Configure your Data Context
 
 The following guide gives an overview of creating an in-code Data Context including defaults to help you more quickly set one up for common configurations:
 
-- :ref:`how_to_instantiate_a_data_context_without_a_yml_file`
+- :ref:`how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file`
 
 The following guides will contain examples for each environment we have tested out:
 
