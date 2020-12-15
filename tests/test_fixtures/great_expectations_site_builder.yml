@@ -91,3 +91,17 @@ validation_operators:
       #     renderer:
       #       module_name: great_expectations.render.renderer.slack_renderer
       #       class_name: SlackRenderer
+  action_list_operator:
+    class_name: ActionListValidationOperator
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+          target_store_name: validations_store
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+          target_store_name: evaluation_parameter_store
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction

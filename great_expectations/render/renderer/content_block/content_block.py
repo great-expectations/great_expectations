@@ -75,12 +75,21 @@ diagnose and repair the underlying issue.  Detailed information follows:
                                 runtime_configuration=runtime_configuration,
                                 **kwargs,
                             )
+
                         else:
                             result = content_block_fn(
                                 configuration=obj_,
                                 runtime_configuration=runtime_configuration,
                                 **kwargs,
                             )
+
+                        print("n~~~~~~~~~")
+                        # print(content_block_fn)
+                        print(result)
+                        print(result)
+
+                        # print("\n\n\n~~~~~~~~~")
+
                     except Exception as e:
                         exception_traceback = traceback.format_exc()
                         exception_message = (
@@ -156,6 +165,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     blocks += result
 
             if len(blocks) > 0:
+                print("yes I go this far... we have more than one block")
                 rendered_component_type_init_kwargs = {
                     cls._content_block_type: blocks,
                     "styling": cls._get_content_block_styling(),

@@ -70,6 +70,13 @@ class ValidationResultsPageRenderer(Renderer):
         Returns:
             List[RenderedDocumentContent]
         """
+        # list_to_return = []
+        # for validation_result in validation_operator_result.list_validation_results():
+        #     print("YOOOO FINALLY NARROWED IT DOWN : OUTER LOOP")
+        #     if validation_result.evaluation_parameters:
+        #         print("YOOOO FINALLY NARROWED IT DOWN : INNNER LOOP")
+        #         print(validation_result.evaluation_parameters)
+        #     list_to_return.append(self.render(validation_result))
         return [
             self.render(validation_result)
             for validation_result in validation_operator_result.list_validation_results()
@@ -128,10 +135,6 @@ class ValidationResultsPageRenderer(Renderer):
         collapse_content_blocks = [
             self._render_validation_info(validation_results=validation_results)
         ]
-
-        # if validation_results.evaluation_parameters:
-        #     print("HI WILL THIS IS WHERE I THINK WE SHOULD BE ")
-        #     print(validation_results.evaluation_parameters)
 
         if validation_results.meta.get("batch_markers"):
             collapse_content_blocks.append(
@@ -240,24 +243,24 @@ class ValidationResultsPageRenderer(Renderer):
             page_title += " / " + str(run_name)
         page_title += " / " + str(run_time)
 
-        print("\n\n\n\n")
-        print(
-            RenderedDocumentContent(
-                **{
-                    "renderer_type": "ValidationResultsPageRenderer",
-                    "page_title": page_title,
-                    "batch_kwargs": batch_kwargs
-                    if "batch_kwargs" in validation_results.meta
-                    else None,
-                    "batch_spec": batch_kwargs
-                    if "batch_spec" in validation_results.meta
-                    else None,
-                    "expectation_suite_name": expectation_suite_name,
-                    "sections": sections,
-                    "utm_medium": "validation-results-page",
-                }
-            )
-        )
+        # print("\n\n\n\n")
+        # print(
+        #     RenderedDocumentContent(
+        #         **{
+        #             "renderer_type": "ValidationResultsPageRenderer",
+        #             "page_title": page_title,
+        #             "batch_kwargs": batch_kwargs
+        #             if "batch_kwargs" in validation_results.meta
+        #             else None,
+        #             "batch_spec": batch_kwargs
+        #             if "batch_spec" in validation_results.meta
+        #             else None,
+        #             "expectation_suite_name": expectation_suite_name,
+        #             "sections": sections,
+        #             "utm_medium": "validation-results-page",
+        #         }
+        #     )
+        # )
 
         return RenderedDocumentContent(
             **{
@@ -303,10 +306,6 @@ class ValidationResultsPageRenderer(Renderer):
             html_success_icon = (
                 '<i class="fas fa-times text-danger" aria-hidden="true"></i>'
             )
-
-        if validation_results.evaluation_parameters:
-            print("YOOOO FINALLY NARROWED IT DOWN")
-            print(validation_results.evaluation_parameters)
 
         return RenderedHeaderContent(
             **{
@@ -410,7 +409,6 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_nested_table_from_dict(cls, input_dict, header=None, sub_table=False):
         table_rows = []
-
         for kwarg, value in input_dict.items():
             if not isinstance(value, (dict, OrderedDict)):
                 table_row = [

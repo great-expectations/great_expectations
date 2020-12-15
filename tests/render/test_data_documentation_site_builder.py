@@ -90,6 +90,89 @@ def assert_how_to_buttons(
                         assert how_to_element not in page
 
 
+@freeze_time("12/13/2020 13:42:41")
+def test_configuration_driven_site_builder_test(
+    site_builder_data_context_with_html_store_random_only,
+):
+
+    context = site_builder_data_context_with_html_store_random_only
+
+    # context.add_validation_operator(
+    #     "validate_and_store",
+    #     {
+    #         "class_name": "ActionListValidationOperator",
+    #         "action_list": [
+    #             {
+    #                 "name": "store_validation_result",
+    #                 "action": {
+    #                     "class_name": "StoreValidationResultAction",
+    #                     "target_store_name": "validations_store",
+    #                 },
+    #             },
+    #             {
+    #                 "name": "extract_and_store_eval_parameters",
+    #                 "action": {
+    #                     "class_name": "StoreEvaluationParametersAction",
+    #                     "target_store_name": "evaluation_parameter_store",
+    #                 },
+    #             },
+    #         ],
+    #     },
+    # )
+    #
+
+    datasource_name = "mydatasource"
+    data_asset_name = "f1"
+    generator_name = "subdir_reader"
+
+    batch_kwargs = context.build_batch_kwargs(
+        datasource=datasource_name,
+        batch_kwargs_generator=generator_name,
+        data_asset_name=data_asset_name,
+    )
+
+    expectation_suite_name = "integer_test.warning"
+    suite = context.create_expectation_suite(
+        expectation_suite_name, overwrite_existing=True
+    )
+    suite.expectations = []
+
+    batch = context.get_batch(batch_kwargs, suite)
+    # batch.head()
+
+    # added expectations from notebook
+    batch.expect_table_row_count_to_be_between(
+        max_value={
+            "$PARAMETER": "upstream_row_count",
+            "$PARAMETER.upstream_row_count": 10000,
+        },
+        min_value=1,
+    )
+    batch.expect_table_column_count_to_equal(value=2)
+    batch.expect_table_columns_to_match_ordered_list(column_list=["index", "foo"])
+
+    # column
+    batch.expect_column_values_to_not_be_null(column="index")
+    batch.expect_column_min_to_be_between(column="index", max_value=1, min_value=-1)
+    batch.expect_column_max_to_be_between(column="index", max_value=4, min_value=2)
+    batch.expect_column_mean_to_be_between(column="index", max_value=2.5, min_value=0.5)
+    batch.expect_column_median_to_be_between(
+        column="index", max_value=2.5, min_value=0.5
+    )
+
+    run_id = RunIdentifier(run_name="test_run_id_12345")
+    results = context.run_validation_operator(
+        "action_list_operator",
+        assets_to_validate=[batch],
+        evaluation_parameters={"upstream_row_count": 999},
+    )
+    context.build_data_docs()
+    validation_result_identifier = results.list_validation_result_identifiers()[0]
+    context.open_data_docs(validation_result_identifier)
+    # print(results)
+    print("hello will")
+
+
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
 def test_configuration_driven_site_builder(

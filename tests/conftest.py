@@ -2417,6 +2417,65 @@ def empty_sqlite_db(sa):
 
 
 @pytest.fixture
+@freeze_time("12/13/2020 13:42:41")
+def site_builder_data_context_with_html_store_random_only(
+    tmp_path_factory, filesystem_csv_5
+):
+    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    project_dir = os.path.join(base_dir, "project_path")
+    os.mkdir(project_dir)
+
+    os.makedirs(os.path.join(project_dir, "data/integer_test"))
+    shutil.copy(
+        os.path.join(filesystem_csv_5, "f1.csv"),
+        str(os.path.join(project_dir, "data/integer_test/f1.csv")),
+    )
+
+    ge.data_context.DataContext.create(project_dir)
+    shutil.copy(
+        file_relative_path(
+            __file__, "./test_fixtures/great_expectations_site_builder.yml"
+        ),
+        str(os.path.join(project_dir, "great_expectations", "great_expectations.yml")),
+    )
+    context = ge.data_context.DataContext(
+        context_root_dir=os.path.join(project_dir, "great_expectations")
+    )
+
+    # context.add_datasource(
+    #     "titanic",
+    #     class_name="PandasDatasource",
+    #     batch_kwargs_generators={
+    #         "subdir_reader": {
+    #             "class_name": "SubdirReaderBatchKwargsGenerator",
+    #             "base_directory": os.path.join(project_dir, "data/titanic/"),
+    #         }
+    #     },
+    # )
+    context.add_datasource(
+        "mydatasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": os.path.join(project_dir, "data/integer_test/"),
+            }
+        },
+    )
+
+    # context.profile_datasource("titanic")
+    # context.profile_datasource("random")
+    # context.profile_datasource(context.list_datasources()[0]["name"])
+    #
+    # context._project_config.anonymous_usage_statistics = {
+    #     "enabled": True,
+    #     "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c",
+    # }
+    #
+    return context
+
+
+@pytest.fixture
 @freeze_time("09/26/2019 13:42:41")
 def site_builder_data_context_with_html_store_titanic_random(
     tmp_path_factory, filesystem_csv_3
@@ -2748,6 +2807,17 @@ def filesystem_csv_4(tmp_path_factory):
     toy_dataset = PandasDataset({"x": [1, 2, 3], "y": [1, 2, 3],})
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
 
+    return base_dir
+
+
+@pytest.fixture()
+def filesystem_csv_5(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp("test_files")
+    base_dir = str(base_dir)
+
+    # Put a file in the directory
+    toy_dataset = PandasDataset({"index": [1, 2, 3, 4], "foo": [1, 1, 2, 1]})
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
     return base_dir
 
 

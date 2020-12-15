@@ -469,9 +469,11 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         return validation_results, new_block
 
     def _render_table(self, validation_results):
+        # print("this is the right place for me to be will")
         new_block = self._table_renderer.render(
             validation_results, include_column_name=False
         )
+        # print(new_block)
 
         return [], new_block
 
@@ -481,8 +483,18 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         remaining_evrs, content_block = self._render_header(validation_results)
         content_blocks.append(content_block)
 
+        # list_to_return = []
+        # print("YOOOO FINALLY NARROWED IT DOWN : OUTER LOOP")
+        # print(validation_results)
+        # if validation_results.evaluation_parameters:
+        #    print("YOOOO FINALLY NARROWED IT DOWN : INNNER LOOP")
+        #    print(validation_results.evaluation_parameters)
+
         remaining_evrs, content_block = self._render_table(remaining_evrs)
         content_blocks.append(content_block)
+
+        # print(content_block)
+
         return RenderedSectionContent(
             **{"section_name": column, "content_blocks": content_blocks}
         )
