@@ -9,7 +9,7 @@
       "categorical_fixed": ["A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C"]
     },
     "tests" : [{
-      "title": "positive___norm_0_1_auto_partition",
+      "title": "positive_norm_0_1_auto_partition",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -24,7 +24,7 @@
       }
     },
     {
-      "title": "positive___norm_0_1_uniform_partition",
+      "title": "positive_norm_0_1_uniform_partition",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -39,7 +39,7 @@
       }
     },
     {
-      "title": "positive___norm_0_1_ntile_partition",
+      "title": "positive_norm_0_1_ntile_partition",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -54,7 +54,7 @@
       }
     },
     {
-      "title": "positive___norm_0_1_kde_partition",
+      "title": "positive_norm_0_1_kde_partition",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -69,7 +69,7 @@
       }
     },
     {
-      "title": "negative___norm_0_1_auto_partition__norm_1_1_column",
+      "title": "negative_norm_0_1_auto_partition_norm_1_1_column",
       "exact_match_out": false,
       "in": {
         "column": "norm_1_1",
@@ -84,7 +84,7 @@
       }
     },
     {
-      "title": "negative___norm_0_1_uniform_partition__norm_1_1_column",
+      "title": "negative_norm_0_1_uniform_partition_norm_1_1_column",
       "exact_match_out": false,
       "in": {
         "column": "norm_1_1",
@@ -99,7 +99,7 @@
       }
     },
     {
-      "title": "negative___norm_0_1_ntile_partition__norm_1_1_column",
+      "title": "negative_norm_0_1_ntile_partition_norm_1_1_column",
       "exact_match_out": false,
       "in": {
         "column": "norm_1_1",
@@ -114,7 +114,7 @@
       }
     },
     {
-      "title": "negative___norm_0_1_kde_partition__norm_1_1_column",
+      "title": "negative_norm_0_1_kde_partition_norm_1_1_column",
       "exact_match_out": false,
       "in": {
         "column": "norm_1_1",
@@ -129,7 +129,7 @@
       }
     },
     {
-      "title": "positive___bimodal_auto_partition",
+      "title": "positive_bimodal_auto_partition",
       "exact_match_out": false,
       "in": {
         "column": "bimodal",
@@ -144,7 +144,7 @@
       }
     },
     {
-      "title": "positive___bimodal_kde_partition",
+      "title": "positive_bimodal_kde_partition",
       "exact_match_out": false,
       "in": {
         "column": "bimodal",
@@ -159,7 +159,7 @@
       }
     },
     {
-      "title": "negative___norm_0_1_auto_partition__bimodal_column",
+      "title": "negative_norm_0_1_auto_partition_bimodal_column",
       "exact_match_out": false,
       "in": {
         "column": "bimodal",
@@ -174,7 +174,7 @@
       }
     },
     {
-      "title": "negative___norm_0_1_uniform_partition__bimodal_column",
+      "title": "negative_norm_0_1_uniform_partition_bimodal_column",
       "exact_match_out": false,
       "in": {
         "column": "bimodal",
@@ -189,7 +189,7 @@
       }
     },
     {
-      "title": "negative___norm_0_1_uniform_partition___detail",
+      "title": "negative_norm_0_1_uniform_partition_detail",
       "exact_match_out": false,
       "in": {
         "column": "bimodal",
@@ -376,7 +376,7 @@
       }
     },
     {
-      "title": "bad_partition___infinite_endpoints___raise_error",
+      "title": "bad_partition_infinite_endpoints_raise_error",
       "_notes": "this test relies on using python json deserialization of the string Infinity; eventually this structure will be deprecated in favor of tail_weights",
       "exact_match_out": false,
       "in": {
@@ -392,7 +392,7 @@
       }
     },
     {
-      "title": "bad_partition___tail_weights___raise_error",
+      "title": "bad_partition_tail_weights_raise_error",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -408,7 +408,7 @@
       }
     },
     {
-      "title": "bad_partition___categorical___raise_error",
+      "title": "bad_partition_categorical_raise_error",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",

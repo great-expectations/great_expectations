@@ -32,7 +32,7 @@
         }
       },
       {
-        "title": "negative_test___wrong_format",
+        "title": "negative_test_wrong_format",
         "exact_match_out" : false,
         "in":{
           "column": "a",
@@ -44,7 +44,7 @@
         }
       },
       {
-        "title": "positive_test_w___nulls",
+        "title": "positive_test_w_nulls",
         "exact_match_out" : false,
         "in":{
           "column": "b",
@@ -56,7 +56,7 @@
         }
       },
       {
-        "title": "positive_test_w___mostly",
+        "title": "positive_test_w_mostly",
         "exact_match_out" : false,
         "in":{
           "column": "c",
@@ -81,7 +81,7 @@
         }
       },
       {
-        "title": "negative_test___out_of_bounds_value_for_month",
+        "title": "negative_test_out_of_bounds_value_for_month",
         "exact_match_out" : false,
         "in":{
           "column": "a",
@@ -93,7 +93,7 @@
         }
       },
       {
-        "title": "negative_test___iso8601",
+        "title": "negative_test_iso8601",
         "exact_match_out" : false,
         "in":{
           "column": "f",
@@ -129,7 +129,7 @@
         }
       },
       {
-        "title": "negative_test___input_already_datetimes",
+        "title": "negative_test_input_already_datetimes",
         "exact_match_out" : false,
         "suppress_test_for": ["pandas"],
         "in":{
