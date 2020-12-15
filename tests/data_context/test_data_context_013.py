@@ -294,7 +294,7 @@ data_connectors:
 
 
 def test_in_memory_data_context_configuration(
-        titanic_pandas_multibatch_data_context_with_013_datasource,
+    titanic_pandas_multibatch_data_context_with_013_datasource,
 ):
     project_config_dict: dict = titanic_pandas_multibatch_data_context_with_013_datasource.get_config(
         mode="dict"
