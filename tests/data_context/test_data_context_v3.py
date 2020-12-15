@@ -8,8 +8,8 @@ from great_expectations.validator.validator import Validator
 from tests.test_utils import create_files_in_directory
 
 
-def test_get_config(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_get_config(empty_data_context):
+    context = empty_data_context
 
     # We can call get_config in several different modes
     assert type(context.get_config()) == DataContextConfig
@@ -38,14 +38,14 @@ def test_get_config(empty_data_context_v3):
     }
 
 
-def test_config_variables(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_config_variables(empty_data_context):
+    context = empty_data_context
     assert type(context.config_variables) == dict
     assert set(context.config_variables.keys()) == {"instance_id"}
 
 
-def test_get_batch_of_pipeline_batch_data(empty_data_context_v3, test_df):
-    context = empty_data_context_v3
+def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
+    context = empty_data_context
 
     yaml_config = f"""
         class_name: Datasource
@@ -83,7 +83,7 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context_v3, test_df):
 
 
 def test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas_execution_engine(
-    empty_data_context_v3, test_df, tmp_path_factory
+    empty_data_context, test_df, tmp_path_factory
 ):
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -97,7 +97,7 @@ def test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context_v3
+    context = empty_data_context
 
     yaml_config = f"""
 class_name: Datasource
@@ -181,9 +181,9 @@ data_connectors:
 
 
 def test_relative_data_connector_default_and_relative_asset_base_directory_paths(
-    empty_data_context_v3, test_df, tmp_path_factory
+    empty_data_context, test_df, tmp_path_factory
 ):
-    context = empty_data_context_v3
+    context = empty_data_context
 
     create_files_in_directory(
         directory=context.root_directory,
@@ -250,8 +250,8 @@ data_connectors:
     assert df_data.shape == (120, 10)
 
 
-def test__get_data_context_version(empty_data_context_v3, titanic_data_context):
-    context = empty_data_context_v3
+def test__get_data_context_version(empty_data_context, titanic_data_context):
+    context = empty_data_context
 
     assert not context._get_data_context_version("some_datasource_name", **{})
     assert not context._get_data_context_version(arg1="some_datasource_name", **{})

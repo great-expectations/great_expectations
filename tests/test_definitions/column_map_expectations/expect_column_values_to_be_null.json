@@ -20,7 +20,7 @@
       },
       "tests": [
         {
-          "title": "basic_positive_case__basic_result_format",
+          "title": "basic_positive_case_basic_result_format",
           "exact_match_out": true,
           "in": {
             "column": "all_null",
@@ -36,7 +36,7 @@
             }
           }
         },{
-          "title": "negative__no_missing_values",
+          "title": "negative_no_missing_values",
           "exact_match_out": false,
           "in": {
             "column": "no_null"
@@ -47,7 +47,7 @@
             "unexpected_index_list": [0, 1, 2, 3]
           }
         },{
-          "title": "positive__mostly",
+          "title": "positive_mostly",
           "exact_match_out": false,
           "in": {
             "column": "three_null",
@@ -59,7 +59,7 @@
             "unexpected_index_list": [3]
           }
         },{
-          "title": "negative__mostly",
+          "title": "negative_mostly",
           "exact_match_out": false,
           "in": {
             "column": "three_null",
@@ -84,7 +84,7 @@
           }
         },
         {
-          "title": "negative_case_with_75percent_non_null_values__no_mostly",
+          "title": "negative_case_with_75percent_non_null_values_no_mostly",
           "exact_match_out": false,
           "in": {
             "column": "one_null"

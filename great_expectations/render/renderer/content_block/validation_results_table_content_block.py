@@ -124,7 +124,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message, e, exc_info=True)
+                logger.error(exception_message)
             try:
                 unexpected_table_renderer = get_renderer_impl(
                     object_name=expectation_type,
@@ -141,7 +141,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message, e, exc_info=True)
+                logger.error(exception_message)
             try:
                 observed_value_renderer = get_renderer_impl(
                     object_name=expectation_type,
@@ -158,7 +158,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message, e, exc_info=True)
+                logger.error(exception_message)
 
             # If the expectation has some unexpected values...:
             if unexpected_statement:
