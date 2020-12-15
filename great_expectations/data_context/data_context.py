@@ -3107,7 +3107,7 @@ class DataContext(BaseDataContext):
 
     def _load_checkpoint_yml_template(self) -> dict:
         template_file = file_relative_path(
-            __file__, os.path.join("checkpoint_template.yml")
+            __file__, os.path.join("legacy_checkpoint_template.yml")
         )
         with open(template_file, "r") as f:
             template = yaml.load(f)
