@@ -92,10 +92,10 @@ def assert_how_to_buttons(
 
 @freeze_time("12/13/2020 13:42:41")
 def test_configuration_driven_site_builder_test(
-    site_builder_data_context_with_html_store_random_only,
+    site_builder_data_context_with_html_store_with_evaluation_parameters,
 ):
 
-    context = site_builder_data_context_with_html_store_random_only
+    context = site_builder_data_context_with_html_store_with_evaluation_parameters
 
     # context.add_validation_operator(
     #     "validate_and_store",
@@ -166,6 +166,7 @@ def test_configuration_driven_site_builder_test(
         assets_to_validate=[batch],
         evaluation_parameters={"upstream_row_count": 999},
     )
+
     context.build_data_docs()
     validation_result_identifier = results.list_validation_result_identifiers()[0]
     context.open_data_docs(validation_result_identifier)

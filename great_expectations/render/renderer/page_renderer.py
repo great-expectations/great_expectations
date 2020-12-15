@@ -76,7 +76,11 @@ class ValidationResultsPageRenderer(Renderer):
         ]
 
     # TODO: deprecate dual batch api support in 0.14
-    def render(self, validation_results: ExpectationSuiteValidationResult):
+    def render(
+        self,
+        validation_results: ExpectationSuiteValidationResult,
+        evaluation_params=None,
+    ):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
@@ -195,15 +199,18 @@ class ValidationResultsPageRenderer(Renderer):
         if "Table-Level Expectations" in columns:
             sections += [
                 self._column_section_renderer.render(
-                    validation_results=columns["Table-Level Expectations"]
+                    validation_results=columns["Table-Level Expectations"],
+                    evaluation_params=validation_results.evaluation_parameters,
                 )
             ]
 
         sections += [
-            self._column_section_renderer.render(validation_results=columns[column],)
+            self._column_section_renderer.render(
+                validation_results=columns[column],
+                evaluation_params=validation_results.evaluation_parameters,
+            )
             for column in ordered_columns
         ]
-
         if self.run_info_at_end:
             sections += [
                 RenderedSectionContent(
