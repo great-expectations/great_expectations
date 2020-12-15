@@ -37,6 +37,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # TODO:
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
+
 # TODO: <Alex>ALEX</Alex>
 # from great_expectations.data_context.store import CheckpointStore, TupleStoreBackend
 from great_expectations.data_context.store import TupleStoreBackend

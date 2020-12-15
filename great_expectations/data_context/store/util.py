@@ -4,7 +4,9 @@ from typing import Any, Union, cast
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import ConfigurationStore, StoreBackend
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
-from great_expectations.data_context.types.resource_identifiers import ConfigurationIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+)
 from great_expectations.data_context.util import build_store_from_config
 
 logger = logging.getLogger(__name__)
@@ -242,9 +244,7 @@ def save_checkpoint_config_to_filesystem(
 
 
 def load_checkpoint_config_from_filesystem(
-    store_name: str,
-    base_directory: str,
-    checkpoint_name: str,
+    store_name: str, base_directory: str, checkpoint_name: str,
 ) -> CheckpointConfig:
     try:
         checkpoint_config: CheckpointConfig = cast(
@@ -265,9 +265,7 @@ def load_checkpoint_config_from_filesystem(
 
 
 def delete_checkpoint_config_from_filesystem(
-    store_name: str,
-    base_directory: str,
-    checkpoint_name: str,
+    store_name: str, base_directory: str, checkpoint_name: str,
 ):
     delete_config_from_filesystem(
         configuration_class=CheckpointConfig,

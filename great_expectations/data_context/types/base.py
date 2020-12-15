@@ -3,7 +3,7 @@ import enum
 import logging
 import uuid
 from copy import deepcopy
-from typing import Dict, List, Any, Union, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
