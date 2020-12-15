@@ -460,7 +460,7 @@ def test_inaccessible_active_bucket_warning_messages(caplog):
     """
     What does this test do and why?
 
-    Trying to create a data context with unreachable ACTIVE stores should show an warning message once per store
+    Trying to create a data context with unreachable ACTIVE stores should show a warning message once per store
     e.g. Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store
     Active stores are those named in:
     "expectations_store_name", "validations_store_name", "evaluation_parameter_store_name"
@@ -505,6 +505,7 @@ def test_inaccessible_active_bucket_warning_messages(caplog):
         stores=stores,
     )
     _ = BaseDataContext(project_config=in_code_data_context_project_config)
+    print(f'\n[ALEX_TEST] CAPLOG: {caplog.messages} ; TYPE: {str(type(caplog.messages))}')
     assert (
         caplog.messages.count(
             "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store"
