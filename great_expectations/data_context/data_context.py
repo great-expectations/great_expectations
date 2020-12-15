@@ -301,7 +301,6 @@ class BaseDataContext:
         self._evaluation_parameter_dependencies = {}
 
     def _build_store_from_config(self, store_name, store_config):
-        print(f'\n[ALEX_TEST] STORE_NAME: {store_name} ; STORE_CONFIG: {store_config}')
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
         # the expectations_store doesnt yet exist by:
@@ -324,6 +323,7 @@ class BaseDataContext:
                 store_config["store_backend"].update({"suppress_store_backend_id": True})
 
         new_store = build_store_from_config(
+            store_name=store_name,
             store_config=store_config,
             module_name=module_name,
             runtime_environment={"root_directory": self.root_directory,},

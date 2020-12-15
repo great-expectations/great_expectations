@@ -94,6 +94,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
 
 
 def build_store_from_config(
+    store_name: str,
     store_config: dict = None,
     module_name: str = "great_expectations.data_context.store",
     runtime_environment: dict = None,
@@ -102,7 +103,10 @@ def build_store_from_config(
         return None
 
     try:
-        config_defaults: dict = {"module_name": module_name}
+        config_defaults: dict = {
+            "store_name": store_name,
+            "module_name": module_name,
+        }
         new_store = instantiate_class_from_config(
             config=store_config,
             runtime_environment=runtime_environment,
@@ -112,7 +116,8 @@ def build_store_from_config(
         new_store = None
         logger.critical(f"Error {e} occurred while attempting to instantiate a store.")
     if not new_store:
-        class_name: str = store_config.get("class_name")
+        # class_name: str = store_config.get("class_name")
+        class_name: str = store_config["class_name"]
         raise ge_exceptions.ClassInstantiationError(
             module_name=module_name, package_name=None, class_name=class_name,
         )
