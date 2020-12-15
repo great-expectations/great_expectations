@@ -21,11 +21,16 @@ Step 1: Configure your Data Context
 - Stores to save Expectations and validation results
 - Data Docs hosting
 
+The following guide gives an overview of creating an in-code Data Context including defaults to help you more quickly set one up for common configurations:
+
+- :ref:`how_to_instantiate_a_data_context_without_a_yml_file`
+
 The following guides will contain examples for each environment we have tested out:
 
 - :ref:`how_to_instantiate_a_data_context_on_an_emr_spark_cluster`
 - :ref:`how_to_instantiate_a_data_context_on_a_databricks_spark_cluster`
 - :ref:`deployment_google_cloud_composer`
+- :ref:`deployment_astronomer`
 
 
 Step 2: Create Expectation Suites and add Expectations
