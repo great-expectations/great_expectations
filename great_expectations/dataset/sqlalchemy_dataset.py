@@ -1186,7 +1186,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ###
 
         if self.sql_engine_dialect.name.lower() == "bigquery":
-            stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
+            stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
