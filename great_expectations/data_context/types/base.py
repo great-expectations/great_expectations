@@ -3,7 +3,7 @@ import enum
 import logging
 import uuid
 from copy import deepcopy
-from typing import Dict, Optional, Union
+from typing import Dict, Any, Union, Optional
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -43,48 +43,93 @@ def object_to_yaml_str(obj):
 
 
 class BaseConfig(SerializableDictDot):
-    def __init__(
-        self, commented_map: CommentedMap = None,
-    ):
+    @classmethod
+    def from_commented_map(cls, commented_map: CommentedMap):
+        try:
+            config: dict = cls.get_schema_instance().load(commented_map)
+            return cls.get_config_class()(commented_map=commented_map, **config)
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading checkpoint config. See ValidationError for more details."
+            )
+            raise
+
+    @classmethod
+    def get_schema_instance(cls) -> Schema:
+        if not issubclass(cls.get_schema_class(), Schema):
+            raise ge_exceptions.InvalidConfigError(
+                "Invalid type: A configuration schema class needs to inherit from the Marshmallow Schema class."
+            )
+        if not issubclass(cls.get_config_class(), BaseConfig):
+            raise ge_exceptions.InvalidConfigError(
+                "Invalid type: A configuration class needs to inherit from the BaseConfig class."
+            )
+        if hasattr(cls.get_config_class(), "schema_instance"):
+            schema_instance: Schema = cls.get_config_class().schema_instance
+            if schema_instance is None:
+                cls.get_config_class().schema_instance = (cls.get_schema_class())()
+            else:
+                return schema_instance
+        else:
+            cls.get_config_class().schema_instance = (cls.get_schema_class())()
+            return cls.get_config_class().schema_instance
+
+    @classmethod
+    def get_config_class(cls):
+        raise NotImplementedError
+
+    @classmethod
+    def get_schema_class(cls):
+        raise NotImplementedError
+
+    def __init__(self, commented_map: CommentedMap = None, **kwargs):
         if commented_map is None:
             commented_map = CommentedMap()
         self._commented_map = commented_map
 
-    @classmethod
-    def from_commented_map(cls, commented_map: CommentedMap):
-        raise NotImplementedError
+    def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
+        commented_map: CommentedMap = deepcopy(self.commented_map)
+        commented_map.update(self.get_schema_instance().dump(self))
+        return commented_map
 
     @property
     def commented_map(self) -> CommentedMap:
         return self._commented_map
 
-    def get_schema_validated_updated_commented_map(self) -> CommentedMap:
-        raise NotImplementedError
-
     def to_yaml(self, outfile):
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
-        yaml.dump(self.get_schema_validated_updated_commented_map(), outfile)
+        yaml.dump(self._get_schema_validated_updated_commented_map(), outfile)
 
     def to_yaml_str(self) -> str:
         """
         :returns a YAML string containing the project configuration
         """
-        return object_to_yaml_str(self.get_schema_validated_updated_commented_map())
+        return object_to_yaml_str(self._get_schema_validated_updated_commented_map())
 
     def to_json_dict(self) -> dict:
         """
         :returns a JSON-serialiable dict containing the project configuration
         """
-        commented_map: CommentedMap = self.get_schema_validated_updated_commented_map()
+        commented_map: CommentedMap = self._get_schema_validated_updated_commented_map()
         return convert_to_json_serializable(data=commented_map)
 
 
 # TODO: <Alex>ALEX</Alex>
 class CheckpointConfig(BaseConfig):
+    @classmethod
+    def get_config_class(cls):
+        return CheckpointConfig
+
+    @classmethod
+    def get_schema_class(cls):
+        return CheckpointConfigSchema
+
     def __init__(
-        self, some_param: str = None, commented_map: CommentedMap = None,
+        self,
+        commented_map: CommentedMap = None,
+        some_param: str = None,
     ):
         if some_param is None:
             some_param = "alex_test_param_name_0"
@@ -99,22 +144,6 @@ class CheckpointConfig(BaseConfig):
     @some_param.setter
     def some_param(self, some_param: str):
         self._some_param = some_param
-
-    @classmethod
-    def from_commented_map(cls, commented_map: CommentedMap) -> BaseConfig:
-        try:
-            config: dict = checkpointConfigSchema.load(commented_map)
-            return cls(commented_map=commented_map, **config)
-        except ValidationError:
-            logger.error(
-                "Encountered errors during loading checkpoint config. See ValidationError for more details."
-            )
-            raise
-
-    def get_schema_validated_updated_commented_map(self) -> CommentedMap:
-        commented_map: CommentedMap = deepcopy(self.commented_map)
-        commented_map.update(checkpointConfigSchema.dump(self))
-        return commented_map
 
 
 # TODO: <Alex>ALEX</Alex>
@@ -1313,23 +1342,8 @@ class DataContextConfig(BaseConfig):
     def config_version(self):
         return self._config_version
 
-    @classmethod
-    def from_commented_map(cls, commented_map: CommentedMap) -> BaseConfig:
-        try:
-            config: dict = dataContextConfigSchema.load(commented_map)
-            return cls(commented_map=commented_map, **config)
-        except ValidationError:
-            logger.error(
-                "Encountered errors during loading data context config. See ValidationError for more details."
-            )
-            raise
 
-    def get_schema_validated_updated_commented_map(self) -> CommentedMap:
-        commented_map: CommentedMap = deepcopy(self.commented_map)
-        commented_map.update(dataContextConfigSchema.dump(self))
-        return commented_map
-
-
+# TODO: <Alex>ALEX</Alex>
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
@@ -1337,4 +1351,5 @@ assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
-checkpointConfigSchema = CheckpointConfigSchema()
+# TODO: <Alex>ALEX</Alex>
+# checkpointConfigSchema = CheckpointConfigSchema()

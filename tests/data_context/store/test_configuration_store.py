@@ -1,5 +1,4 @@
 import os
-from copy import deepcopy
 from pathlib import Path
 
 # TODO: <Alex>ALEX</Alex>
@@ -38,6 +37,14 @@ logger = logging.getLogger(__name__)
 
 def test_v3_configuration_store(tmp_path_factory):
     class SampleConfig(BaseConfig):
+        @classmethod
+        def get_config_class(cls):
+            return SampleConfig
+
+        @classmethod
+        def get_schema_class(cls):
+            return SampleConfigSchema
+
         def __init__(
             self,
             some_param_0: str = None,
@@ -52,22 +59,6 @@ def test_v3_configuration_store(tmp_path_factory):
             self.some_param_1 = some_param_1
 
             super().__init__(commented_map=commented_map)
-
-        @classmethod
-        def from_commented_map(cls, commented_map: CommentedMap) -> BaseConfig:
-            try:
-                config: dict = SampleConfigSchema().load(commented_map)
-                return cls(commented_map=commented_map, **config)
-            except ValidationError:
-                logger.error(
-                    "Encountered errors during loading config. See ValidationError for more details."
-                )
-                raise
-
-        def get_schema_validated_updated_commented_map(self) -> CommentedMap:
-            commented_map: CommentedMap = deepcopy(self.commented_map)
-            commented_map.update(SampleConfigSchema().dump(self))
-            return commented_map
 
     class SampleConfigSchema(Schema):
         class Meta:

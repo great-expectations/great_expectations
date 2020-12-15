@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Any, Union, cast
+from typing import Any, Optional, cast
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -91,15 +91,7 @@ class ConfigurationStore(Store):
             key: ConfigurationIdentifier = ConfigurationIdentifier(
                 configuration_name=self.store_name
             )
-            config_yaml: str = self.get(key)
-            config_commented_map_from_yaml: CommentedMap = yaml.load(config_yaml)
-            try:
-                return self.configuration_class.from_commented_map(
-                    config_commented_map_from_yaml
-                )
-            except ge_exceptions.InvalidBaseConfigError:
-                # Just to be explicit about what we intended to catch
-                raise
+            return self.get(key)
         except ge_exceptions.InvalidKeyError:
             raise ge_exceptions.ConfigNotFoundError()
 
@@ -123,21 +115,20 @@ Set the property "overwrite_existing" to True in order to overwrite the previous
         if do_store:
             self._store_configuration(configuration=configuration)
 
-    def _retrieve_configuration(self) -> Union[BaseConfig, None]:
-        configuration: Union[BaseConfig, None]
+    def _retrieve_configuration(self) -> Optional[BaseConfig]:
+        configuration: Optional[BaseConfig]
         try:
             configuration = self.load_configuration()
         except ge_exceptions.ConfigNotFoundError:
             configuration = None
         return configuration
 
-    def _store_configuration(self, configuration: BaseConfig,) -> None:
+    def _store_configuration(self, configuration: BaseConfig,):
         config: BaseConfig = copy.deepcopy(configuration)
-        config_yaml: str = config.to_yaml_str()
         key: ConfigurationIdentifier = ConfigurationIdentifier(
             configuration_name=self.store_name
         )
-        self.set(key, config_yaml)
+        self.set(key, config)
 
     def delete_configuration(self):
         key: ConfigurationIdentifier = ConfigurationIdentifier(
@@ -147,6 +138,20 @@ Set the property "overwrite_existing" to True in order to overwrite the previous
 
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
+
+    def serialize(self, key, value):
+        # return self.configuration_class.get_schema_instance().dump(value)
+        return value.to_yaml_str()
+
+    def deserialize(self, key, value):
+        config_commented_map_from_yaml: CommentedMap = yaml.load(value)
+        try:
+            return self.configuration_class.from_commented_map(
+                config_commented_map_from_yaml
+            )
+        except ge_exceptions.InvalidBaseConfigError:
+            # Just to be explicit about what we intended to catch
+            raise
 
     @property
     def configuration_class(self) -> BaseConfig:
