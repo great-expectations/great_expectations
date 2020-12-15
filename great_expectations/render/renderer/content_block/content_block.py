@@ -87,7 +87,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             data_docs_exception_message
                             + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                         )
-                        logger.error(exception_message, e, exc_info=True)
+                        logger.error(exception_message)
 
                         if isinstance(obj_, ExpectationValidationResult):
                             content_block_fn = cls._get_content_block_fn(
@@ -201,7 +201,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         data_docs_exception_message
                         + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                     )
-                    logger.error(exception_message, e, exc_info=True)
+                    logger.error(exception_message)
 
                     if isinstance(render_object, ExpectationValidationResult):
                         content_block_fn = cls._get_content_block_fn(

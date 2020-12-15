@@ -20,7 +20,7 @@
       },
       "tests": [
         {
-          "title": "basic_positive_case__complete_result_format",
+          "title": "basic_positive_case_complete_result_format",
           "exact_match_out": true,
           "in": {
             "column": "no_null",
@@ -36,7 +36,7 @@
             }
           }
         },{
-          "title": "negative__all_missing_values",
+          "title": "negative_all_missing_values",
           "exact_match_out": false,
           "in": {
             "column": "all_null",
@@ -48,7 +48,7 @@
             "unexpected_index_list": [0,1, 2, 3]
           }
         },{
-          "title": "positive__mostly",
+          "title": "positive_mostly",
           "exact_match_out": false,
           "in": {
             "column": "one_null",
@@ -61,7 +61,7 @@
             "unexpected_index_list": [2]
           }
         },{
-          "title": "negative__no_mostly__one_missing",
+          "title": "negative_no_mostly_one_missing",
           "exact_match_out": false,
           "in": {
             "column": "one_null",
@@ -73,7 +73,7 @@
             "unexpected_index_list": [2]
           }
         },{
-          "title": "negative__mostly",
+          "title": "negative_mostly",
           "exact_match_out": false,
           "in": {
             "column": "one_null",
@@ -98,7 +98,7 @@
           }
         },
         {
-          "title": "negative_case_with_75percent_null_values__no_mostly",
+          "title": "negative_case_with_75percent_null_values_no_mostly",
           "exact_match_out": false,
           "in": {
             "column": "three_null"

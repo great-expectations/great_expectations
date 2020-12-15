@@ -72,8 +72,8 @@ def test_basic_instantiation(tmp_path_factory):
         )
 
 
-def test_instantiation_from_a_config(empty_data_context_v3, tmp_path_factory):
-    context = empty_data_context_v3
+def test_instantiation_from_a_config(empty_data_context, tmp_path_factory):
+    context = empty_data_context
 
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
@@ -123,9 +123,9 @@ assets:
 
 
 def test_instantiation_from_a_config_regex_does_not_match_paths(
-    empty_data_context_v3, tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
-    context = empty_data_context_v3
+    context = empty_data_context
 
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(

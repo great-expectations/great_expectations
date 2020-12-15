@@ -31,7 +31,8 @@ from great_expectations.exceptions import (
     CheckpointError,
     CheckpointNotFoundError,
     ConfigNotFoundError,
-    DataContextError, InvalidKeyError,
+    DataContextError,
+    InvalidKeyError,
 )
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -1572,9 +1573,9 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
 
 
 def test_get_validator_with_instantiated_expectation_suite(
-    empty_data_context_v3, tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
-    context = empty_data_context_v3
+    context = empty_data_context
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -1620,9 +1621,9 @@ data_connectors:
 
 
 def test_get_validator_with_attach_expectation_suite(
-    empty_data_context_v3, tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
-    context = empty_data_context_v3
+    context = empty_data_context
 
     base_directory = str(
         tmp_path_factory.mktemp("test_get_validator_with_attach_expectation_suite")

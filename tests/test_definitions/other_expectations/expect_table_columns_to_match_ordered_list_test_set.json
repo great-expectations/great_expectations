@@ -42,7 +42,7 @@
         "success":false
       }
     },{
-      "title": "negative_test_columns_are_right__but_ordering_wrong",
+      "title": "negative_test_columns_are_right_but_ordering_wrong",
       "exact_match_out": false,
       "in":{
         "column_list": ["c3", "c2", "c1"]
