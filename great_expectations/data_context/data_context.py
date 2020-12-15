@@ -46,7 +46,7 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
-    CURRENT_CONFIG_VERSION,
+    CURRENT_GE_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
@@ -2645,6 +2645,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiling_results["success"] = True
         return profiling_results
 
+    # TODO: <Alex>ALEX</Alex>
     @staticmethod
     def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
         if checkpoint is None:
@@ -2673,6 +2674,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         return checkpoint
 
+    # TODO: <Alex>ALEX</Alex>
     def list_checkpoints(self) -> List[str]:
         """List checkpoints. (Experimental)"""
         # TODO mark experimental
@@ -2700,6 +2702,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 f"Could not find checkpoint `{checkpoint_name}`."
             )
 
+    # TODO: <Alex>ALEX</Alex>
     def run_checkpoint(
         self,
         checkpoint_name: str,
@@ -2747,6 +2750,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
         return results
 
+    # TODO: <Alex>ALEX</Alex>
     def _list_ymls_in_checkpoints_directory(self):
         checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
         files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
@@ -3208,7 +3212,7 @@ class DataContext(BaseDataContext):
 
     def _load_checkpoint_yml_template(self) -> dict:
         template_file = file_relative_path(
-            __file__, os.path.join("checkpoint_template.yml")
+            __file__, os.path.join("legacy_checkpoint_template.yml")
         )
         with open(template_file, "r") as f:
             template = yaml.load(f)
@@ -3328,10 +3332,10 @@ class DataContext(BaseDataContext):
                         config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
                     ),
                 )
-            elif config_version > CURRENT_CONFIG_VERSION:
+            elif config_version > CURRENT_GE_CONFIG_VERSION:
                 raise ge_exceptions.UnsupportedConfigVersionError(
                     "Invalid config version ({}).\n    The maximum valid version is {}.".format(
-                        config_version, CURRENT_CONFIG_VERSION
+                        config_version, CURRENT_GE_CONFIG_VERSION
                     ),
                 )
 

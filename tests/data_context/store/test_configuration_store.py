@@ -39,7 +39,7 @@ def test_v3_configuration_store(tmp_path_factory):
     class SampleConfig(BaseConfig):
         @classmethod
         def get_config_class(cls):
-            return SampleConfig
+            return cls  # SampleConfig
 
         @classmethod
         def get_schema_class(cls):

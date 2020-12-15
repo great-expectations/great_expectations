@@ -50,30 +50,9 @@ def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(
 
 
 # TODO: <Alex>ALEX -- this does not look like new style -- the datasources in the data_context are still Legacy style.</Alex>
-def test_newstyle_checkpoint(filesystem_csv_data_context_v2):
+def test_newstyle_checkpoint(filesystem_csv_data_context):
     import yaml
 
-    filesystem_csv_data_context_v2.create_expectation_suite(
+    filesystem_csv_data_context.create_expectation_suite(
         expectation_suite_name="IDs_mapping.warning"
     )
-
-
-#     my_new_style_checkpoint = instantiate_class_from_config(
-#         runtime_environment={
-#             "data_context": filesystem_csv_data_context_v2,
-#             "name": "my_new_style_checkpoint",
-#         },
-#         config=yaml.load("""
-# class_name: Checkpoint
-# module_name: great_expectations.checkpoint.checkpoint
-# validation_operator_name: testing
-#
-# validators:
-#   - batch_definition:
-#         datasource_name: rad_datasource
-#         data_connector: subdir_reader
-#         data_asset_name: f1
-#     expectation_suite_name: IDs_mapping.warning
-# """))
-#
-#     my_new_style_checkpoint.run()
