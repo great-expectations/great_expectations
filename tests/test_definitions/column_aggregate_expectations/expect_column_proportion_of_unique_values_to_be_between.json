@@ -48,7 +48,7 @@
         }
       },
       {
-        "title": "null_max__duplicate_and_null_values",
+        "title": "null_max_duplicate_and_null_values",
         "exact_match_out": false,
         "in": {
           "column": "dist4",

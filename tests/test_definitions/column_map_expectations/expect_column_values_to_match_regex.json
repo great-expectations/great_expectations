@@ -17,7 +17,7 @@
     },
     "tests": [
     {
-      "title": "negative_test__insufficient_mostly_and_one_non_matching_value",
+      "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -32,7 +32,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title": "positive_test__exact_mostly_w___one_non_matching_value",
+      "title": "positive_test_exact_mostly_w_one_non_matching_value",
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -62,7 +62,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title": "positive_test__sufficient_mostly_w___one_non_matching_value",
+      "title": "positive_test_sufficient_mostly_w_one_non_matching_value",
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -77,7 +77,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title": "negative_test__one_missing_value_and_insufficent_mostly",
+      "title": "negative_test_one_missing_value_and_insufficent_mostly",
       "exact_match_out" : false,
       "in": {
         "column": "b",
@@ -92,7 +92,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title": "positive_test__one_missing_value_and_exact_mostly",
+      "title": "positive_test_one_missing_value_and_exact_mostly",
       "exact_match_out" : false,
       "in": {
         "column": "b",
@@ -107,7 +107,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title": "positive_test__one_missing_value_and_sufficent_mostly",
+      "title": "positive_test_one_missing_value_and_sufficent_mostly",
       "exact_match_out" : false,
       "in": {
         "column": "b",
@@ -122,7 +122,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title": "positive_test___all_missing_values",
+      "title": "positive_test_all_missing_values",
       "exact_match_out" : false,
       "in": {
         "column": "c",
@@ -136,7 +136,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title": "positive_test___all_missing_values__mostly",
+      "title": "positive_test_all_missing_values_mostly",
       "exact_match_out" : false,
       "in": {
         "column": "c",
@@ -151,7 +151,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title": "positive_test__empty_regex",
+      "title": "positive_test_empty_regex",
       "exact_match_out" : false,
       "in": {
         "column": "b",
@@ -165,7 +165,7 @@
       "suppress_test_for": ["sqlite", "mysql", "mssql"]
     },
     {
-      "title": "positive_test__more_complicated_regex",
+      "title": "positive_test_more_complicated_regex",
       "exact_match_out" : false,
       "in": {
         "column": "b",
@@ -179,7 +179,7 @@
       "suppress_test_for": ["sqlite", "mssql"]
     },
     {
-      "title": "positive_test__match_characters_not_at_the_beginning_of_string",
+      "title": "positive_test_match_characters_not_at_the_beginning_of_string",
       "exact_match_out" : false,
       "in": {
         "column": "a",

@@ -137,7 +137,7 @@
         },
         {
           "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
-          "title": "negative__sqlite_integer_is_not_varchar",
+          "title": "negative_sqlite_integer_is_not_varchar",
           "exact_match_out": false,
           "in":
           {

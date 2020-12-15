@@ -59,7 +59,7 @@
         "empty_column": []
       },
       "tests": [{
-        "title": "test_empty_column__should_be_vacuously_true",
+        "title": "test_empty_column_should_be_vacuously_true",
         "exact_match_out": false,
         "in": {
           "column": "empty_column",
