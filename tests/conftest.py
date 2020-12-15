@@ -2193,7 +2193,7 @@ def empty_data_context(tmp_path_factory):
 
 
 @pytest.fixture
-def titanic_pandas_multibatch_data_context_v3(tmp_path_factory):
+def titanic_pandas_multibatch_data_context_with_013_datasource(tmp_path_factory):
     """
     Based on titanic_data_context, but with 2 identical batches of
     data asset "titanic", with a PandasExecutionEngine
@@ -2681,22 +2681,6 @@ def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
         },
     )
     return empty_data_context
-
-
-@pytest.fixture()
-def filesystem_csv_data_context_v3(empty_data_context_v3, filesystem_csv_2):
-    empty_data_context_v3.add_datasource(
-        "rad_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_2),
-            }
-        },
-    )
-    return empty_data_context_v3
 
 
 @pytest.fixture

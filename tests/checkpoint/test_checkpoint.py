@@ -40,10 +40,10 @@ def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     assert len(filesystem_csv_data_context.validations_store.list_keys()) == 1
 
 
-def test_newstyle_checkpoint(filesystem_csv_data_context_v3):
+def test_newstyle_checkpoint(filesystem_csv_data_context):
     import yaml
 
-    filesystem_csv_data_context_v3.create_expectation_suite(
+    filesystem_csv_data_context.create_expectation_suite(
         expectation_suite_name="IDs_mapping.warning"
     )
 
