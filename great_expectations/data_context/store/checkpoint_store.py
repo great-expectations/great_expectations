@@ -15,11 +15,13 @@ class CheckpointStore(ConfigurationStore):
         self,
         store_name: str,
         store_backend: dict = None,
+        overwrite_existing: bool = False,
         runtime_environment: dict = None,
     ):
         super().__init__(
             configuration_class=CheckpointConfig,
             store_name=store_name,
             store_backend=store_backend,
+            overwrite_existing=overwrite_existing,
             runtime_environment=runtime_environment,
         )
