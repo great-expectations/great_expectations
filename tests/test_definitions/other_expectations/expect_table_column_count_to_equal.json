@@ -51,7 +51,7 @@
           }
         },
         {
-          "title": "basic_negative_case___upper_error",
+          "title": "basic_negative_case_upper_error",
           "exact_match_out": false,
           "in": [
             5
@@ -62,7 +62,7 @@
           }
         },
         {
-          "title": "basic_negative_case___lower_error",
+          "title": "basic_negative_case_lower_error",
           "exact_match_out": false,
           "in": [
             0
@@ -73,7 +73,7 @@
           }
         },
         {
-          "title": "basic_negative_case___kwargs_args",
+          "title": "basic_negative_case_kwargs_args",
           "exact_match_out": false,
           "in": {
             "value": 3
