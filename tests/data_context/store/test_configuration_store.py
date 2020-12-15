@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-# TODO: <Alex>ALEX</Alex>
 import pytest
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -13,7 +12,6 @@ except ImportError:
 
 import logging
 
-# TODO: <Alex>ALEX</Alex>
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
@@ -77,6 +75,16 @@ def test_v3_configuration_store(tmp_path_factory):
     config_0: SampleConfig = SampleConfig(some_param_0="test_str_0", some_param_1=65)
     store_name_0: str = "test_config_store_0"
     configuration_name_0: str = "test_config_name_0"
+
+    with pytest.raises(ge_exceptions.DataContextError):
+        save_config_to_filesystem(
+            configuration_class=object,
+            store_name=store_name_0,
+            base_directory=base_directory,
+            configuration_key=configuration_name_0,
+            configuration=config_0,
+        )
+
     save_config_to_filesystem(
         configuration_class=SampleConfig,
         store_name=store_name_0,
@@ -113,6 +121,23 @@ def test_v3_configuration_store(tmp_path_factory):
             {"some_param_0": "test_str_0", "some_param_1": 65}
         )
         assert config == expected_config
+
+    with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
+        loaded_config: BaseYamlConfig = load_config_from_filesystem(
+            configuration_class=SampleConfig,
+            store_name=store_name_0,
+            base_directory="unknown_base_directory",
+            configuration_key=configuration_name_0,
+        )
+    with pytest.raises(ge_exceptions.InvalidKeyError):
+        # noinspection PyUnusedLocal
+        loaded_config: BaseYamlConfig = load_config_from_filesystem(
+            configuration_class=SampleConfig,
+            store_name=store_name_0,
+            base_directory=base_directory,
+            configuration_key="unknown_configuration",
+        )
 
     loaded_config: BaseYamlConfig = load_config_from_filesystem(
         configuration_class=SampleConfig,
