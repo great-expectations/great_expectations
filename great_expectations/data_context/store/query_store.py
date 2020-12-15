@@ -4,6 +4,10 @@ from string import Template
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
 
 try:
     import sqlalchemy
@@ -80,6 +84,13 @@ class SqlAlchemyQueryStore(Store):
             options = URL(drivername, **credentials)
             self.engine = create_engine(options)
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
+
     def _convert_key(self, key):
         if isinstance(key, str):
             return StringKey(key)
@@ -117,3 +128,7 @@ class SqlAlchemyQueryStore(Store):
         if return_type == "scalar":
             [res] = res
         return res
+
+    @property
+    def config(self) -> dict:
+        return self._config

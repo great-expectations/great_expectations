@@ -1,12 +1,13 @@
 import copy
 import locale
+import logging
 import os
 import random
 import string
 import threading
 import uuid
 from functools import wraps
-from typing import List, Union
+from typing import Any, List
 
 import numpy as np
 import pandas as pd
@@ -21,6 +22,17 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
 )
 from great_expectations.core.batch import Batch
+from great_expectations.data_context.store import StoreBackend
+from great_expectations.data_context.store.util import (
+    delete_checkpoint_config_from_store_backend,
+    delete_config_from_store_backend,
+    load_checkpoint_config_from_store_backend,
+    load_config_from_store_backend,
+    save_checkpoint_config_to_store_backend,
+    save_config_to_store_backend,
+)
+from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
+from great_expectations.data_context.util import build_store_from_config
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
@@ -40,6 +52,8 @@ expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
 expectationConfigurationSchema = ExpectationConfigurationSchema()
 expectationSuiteSchema = ExpectationSuiteSchema()
+
+logger = logging.getLogger(__name__)
 
 try:
     from sqlalchemy import create_engine
@@ -1425,3 +1439,168 @@ def validate_uuid4(uuid_string: str) -> bool:
     # valid uuid4. This is bad for validation purposes.
 
     return val.hex == uuid_string.replace("-", "")
+
+
+def build_in_memory_store_backend(
+    module_name: str = "great_expectations.data_context.store",
+    class_name: str = "InMemoryStoreBackend",
+    **kwargs,
+) -> StoreBackend:
+    logger.debug("Starting data_context/store/util.py#build_in_memory_store_backend")
+    store_backend_config: dict = {"module_name": module_name, "class_name": class_name}
+    store_backend_config.update(**kwargs)
+    return build_store_from_config(
+        store_config=store_backend_config,
+        module_name=module_name,
+        runtime_environment=None,
+    )
+
+
+def build_tuple_filesystem_store_backend(
+    base_directory: str,
+    *,
+    module_name: str = "great_expectations.data_context.store",
+    class_name: str = "TupleFilesystemStoreBackend",
+    **kwargs,
+) -> StoreBackend:
+    logger.debug(
+        f"""Starting data_context/store/util.py#build_tuple_filesystem_store_backend using base_directory:
+"{base_directory}"""
+    )
+    store_backend_config: dict = {
+        "module_name": module_name,
+        "class_name": class_name,
+        "base_directory": base_directory,
+    }
+    store_backend_config.update(**kwargs)
+    return build_store_from_config(
+        store_config=store_backend_config,
+        module_name=module_name,
+        runtime_environment=None,
+    )
+
+
+def build_tuple_s3_store_backend(
+    bucket: str,
+    *,
+    module_name: str = "great_expectations.data_context.store",
+    class_name: str = "TupleS3StoreBackend",
+    **kwargs,
+) -> StoreBackend:
+    logger.debug(
+        f"""Starting data_context/store/util.py#build_tuple_s3_store_backend using bucket: {bucket}
+        """
+    )
+    store_backend_config: dict = {
+        "module_name": module_name,
+        "class_name": class_name,
+        "bucket": bucket,
+    }
+    store_backend_config.update(**kwargs)
+    return build_store_from_config(
+        store_config=store_backend_config,
+        module_name=module_name,
+        runtime_environment=None,
+    )
+
+
+def save_checkpoint_config_to_filesystem(
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
+    checkpoint_configuration: CheckpointConfig,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    save_checkpoint_config_to_store_backend(
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        checkpoint_name=checkpoint_name,
+        checkpoint_configuration=checkpoint_configuration,
+    )
+
+
+def load_checkpoint_config_from_filesystem(
+    store_name: str, base_directory: str, checkpoint_name: str,
+) -> CheckpointConfig:
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    return load_checkpoint_config_from_store_backend(
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        checkpoint_name=checkpoint_name,
+    )
+
+
+def delete_checkpoint_config_from_filesystem(
+    store_name: str, base_directory: str, checkpoint_name: str,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    delete_checkpoint_config_from_store_backend(
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        checkpoint_name=checkpoint_name,
+    )
+
+
+def save_config_to_filesystem(
+    configuration_class: Any,
+    store_name: str,
+    base_directory: str,
+    configuration_key: str,
+    configuration: BaseYamlConfig,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    save_config_to_store_backend(
+        configuration_class=configuration_class,
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        configuration_key=configuration_key,
+        configuration=configuration,
+    )
+
+
+def load_config_from_filesystem(
+    configuration_class: Any,
+    store_name: str,
+    base_directory: str,
+    configuration_key: str,
+) -> BaseYamlConfig:
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    return load_config_from_store_backend(
+        configuration_class=configuration_class,
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        configuration_key=configuration_key,
+    )
+
+
+def delete_config_from_filesystem(
+    configuration_class: Any,
+    store_name: str,
+    base_directory: str,
+    configuration_key: str,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    delete_config_from_store_backend(
+        configuration_class=configuration_class,
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        configuration_key=configuration_key,
+    )

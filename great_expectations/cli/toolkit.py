@@ -350,10 +350,10 @@ def load_checkpoint(
 ) -> dict:
     """Load a checkpoint or raise helpful errors."""
     try:
-        checkpoint = context.get_checkpoint(
+        checkpoint_config = context.get_checkpoint(
             checkpoint_name, return_config=return_config
         )
-        return checkpoint
+        return checkpoint_config
     except InvalidKeyError as e:
         exit_with_failure_message_and_stats(
             context,

@@ -1,20 +1,27 @@
-from ruamel.yaml import YAML
+import logging
 
-from great_expectations.core.data_context_key import StringKey
-from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.store import ConfigurationStore
+from great_expectations.data_context.types.base import CheckpointConfig
+
+logger = logging.getLogger(__name__)
 
 
-class CheckpointStore(Store):
+class CheckpointStore(ConfigurationStore):
     """
-A CheckpointStore manages Checkpoints for the DataContext.
+    A CheckpointStore manages Checkpoints for the DataContext.
     """
 
-    _key_class = StringKey
-
-    def serialize(self, key, value):
-        # return yaml.dump(value.get_config())
-        return value.get_config(format="yaml")
-
-    def deserialize(self, key, value):
-        yaml = YAML()
-        return yaml.load(value)
+    def __init__(
+        self,
+        store_name: str,
+        store_backend: dict = None,
+        overwrite_existing: bool = False,
+        runtime_environment: dict = None,
+    ):
+        super().__init__(
+            configuration_class=CheckpointConfig,
+            store_name=store_name,
+            store_backend=store_backend,
+            overwrite_existing=overwrite_existing,
+            runtime_environment=runtime_environment,
+        )
