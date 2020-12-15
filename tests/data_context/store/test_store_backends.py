@@ -942,6 +942,8 @@ def test_TupleS3StoreBackend_list_over_1000_keys():
     assert my_store.get((f"AAA_{num_keys_to_add-1}",)) == f"aaa_{num_keys_to_add-1}"
 
     # Without pagination only list max_keys_in_a_single_call
+    # This is belt and suspenders to make sure mocking s3 list_objects_v2 implements
+    # the same limit as the actual s3 api
     assert (
         len(
             boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)["Contents"]
