@@ -37,19 +37,21 @@ Running validation using the ``GreatExpectationsOperator``
 
 The ``GreatExpectationsOperator`` in the `Great Expectations Airflow Provider package <https://github.com/great-expectations/airflow-provider-great-expectations>`_ is a convenient way to invoke validation with Great Expectations in an Airflow DAG. See the `example DAG in the examples folder <https://github.com/great-expectations/airflow-provider-great-expectations/blob/main/great_expectations_provider/examples/example_great_expectations_dag.py>`_ for several methods to use the operator.
 
-#. Ensure that the ``great_expectations`` directory that defines your Data Context is accessible by your DAG. Typically, it will be located in the same project as your DAG, but you can point the operator at any location.
+1. Ensure that the ``great_expectations`` directory that defines your Data Context is accessible by your DAG. Typically, it will be located in the same project as your DAG, but you can point the operator at any location.
 
-#. Install Great Expectations and the Great Expectations provider in your environment
+2. Install Great Expectations and the Great Expectations provider in your environment
 
 .. code-block:: bash
+
     pip install great_expectations airflow-provider-great-expectations
 
-#. Import the operator in your DAG file
+3. Import the operator in your DAG file
 
 .. code-block:: python
+
     from great_expectations_provider.operators.great_expectations import GreatExpectationsOperator
 
-#. Create a task using the ``GreatExpectationsOperator``
+4. Create a task using the ``GreatExpectationsOperator``
 
 The ``GreatExpectationsOperator`` supports multiple ways of invoking validation with Great Expectations: a) using an expectation suite name and batch_kwargs, b) using a list of expectation suite names and batch_kwargs (using the ``assets_to_validate`` parameter), c) using a checkpoint. This means that the parameters depend on how you would like to invoke Great Expectations validation. As a simple example, assuming you have a single Expectation Suite “my_suite” and a simple batch of data, such as a database table called “my_table”, you can use the following parameters:
 
