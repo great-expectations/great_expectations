@@ -15,20 +15,19 @@ import logging
 
 # TODO: <Alex>ALEX</Alex>
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.store.util import (
-    delete_config_from_filesystem,
-    load_config_from_filesystem,
-    save_config_to_filesystem,
-)
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
-    ValidationError,
     fields,
     validates_schema,
 )
 from great_expectations.util import gen_directory_tree_str
+from tests.test_utils import (
+    delete_config_from_filesystem,
+    load_config_from_filesystem,
+    save_config_to_filesystem,
+)
 
 yaml = YAML()
 
