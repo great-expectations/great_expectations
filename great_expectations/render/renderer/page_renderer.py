@@ -70,13 +70,6 @@ class ValidationResultsPageRenderer(Renderer):
         Returns:
             List[RenderedDocumentContent]
         """
-        # list_to_return = []
-        # for validation_result in validation_operator_result.list_validation_results():
-        #     print("YOOOO FINALLY NARROWED IT DOWN : OUTER LOOP")
-        #     if validation_result.evaluation_parameters:
-        #         print("YOOOO FINALLY NARROWED IT DOWN : INNNER LOOP")
-        #         print(validation_result.evaluation_parameters)
-        #     list_to_return.append(self.render(validation_result))
         return [
             self.render(validation_result)
             for validation_result in validation_operator_result.list_validation_results()
@@ -242,25 +235,6 @@ class ValidationResultsPageRenderer(Renderer):
         if include_run_name:
             page_title += " / " + str(run_name)
         page_title += " / " + str(run_time)
-
-        # print("\n\n\n\n")
-        # print(
-        #     RenderedDocumentContent(
-        #         **{
-        #             "renderer_type": "ValidationResultsPageRenderer",
-        #             "page_title": page_title,
-        #             "batch_kwargs": batch_kwargs
-        #             if "batch_kwargs" in validation_results.meta
-        #             else None,
-        #             "batch_spec": batch_kwargs
-        #             if "batch_spec" in validation_results.meta
-        #             else None,
-        #             "expectation_suite_name": expectation_suite_name,
-        #             "sections": sections,
-        #             "utm_medium": "validation-results-page",
-        #         }
-        #     )
-        # )
 
         return RenderedDocumentContent(
             **{

@@ -80,21 +80,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             expectation_string_cell = expectation_string_fn(
                 configuration=expectation, runtime_configuration=runtime_configuration
             )
-
-            # print(expectation)
-            # print(runtime_configuration)
-
-            # print("HIIIIIIIIII THIS IS THE EXPECTATION")
-            # <WILL> THIS WOULD HAVE BEEN GREAT, but is too early
-            # print(expectation_string_cell.to_json_dict())
-
+            # <WILL> 20201215 - Draft PR contains this FAKE VALUE message as an intermediate step to replacing it with evaluation parameter values
             fake_value = "-----THIS IS FAKE VALUE----"
-            # print("hello will")
             string_template = expectation_string_cell[0].string_template
-            #
-            # print(string_template["template"])
-            # print(string_template["params"])
-            #
             for key, value in string_template["params"].items():
                 if isinstance(value, dict):
                     if value.get("$PARAMETER") is not None:
@@ -103,25 +91,6 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                         string_template["template"] = string_template[
                             "template"
                         ].replace(f"""${key}""", fake_value)
-
-            # for expectation_string in expectation_string_cell:
-            #    string_template = expectation_string.string_template
-            # print(string_template)
-            # loop through parameters
-            #    template = string_template.template
-            #    param = string_template.param
-            #    print("~~~~~~~~~~~~~~~~~~~~")
-            #    print(template, param)
-
-            # for k, v in string_template["params"]:
-            #    print("key")
-            #    print(k)
-
-            # if anything has $PARAM, then we have to do a different one?
-            # see if this works :
-            #
-            # let's do the hack first
-            # expectation_string_cell
 
             status_icon_renderer = get_renderer_impl(
                 object_name=expectation_type,
@@ -196,10 +165,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 expectation_string_cell += unexpected_statement
             if unexpected_table:
                 expectation_string_cell.append(unexpected_table)
-
-            # print("by the end it's this")
-            # print(expectation_string_cell)
-
             if len(expectation_string_cell) > 1:
                 return [status_cell + [expectation_string_cell] + observed_value]
             else:
