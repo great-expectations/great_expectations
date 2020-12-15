@@ -1368,7 +1368,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             expectation_type="expect_column_min_to_be_between",
             kwargs={
                 "column": "live",
-                "min_value": {"$PARAMETER": "upstream_row_count"},
+                "min_value": None,
                 "max_value": None,
                 "result_format": "SUMMARY",
             },
@@ -1376,10 +1376,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         ),
     )
     result = ValidationResultsTableContentBlockRenderer.render([evr]).to_json_dict()
-
-    print("\n\n\n\n\n\n\n")
-    print(result)
-    print("\n\n\n\n\n\n\n")
 
     # Note: A better approach to testing would separate out styling into a separate test.
     assert result == {
