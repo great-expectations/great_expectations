@@ -76,12 +76,14 @@ def test_v3_configuration_store(tmp_path_factory):
     base_directory: str = os.path.join(root_directory, "some_store_config_dir")
 
     config_0: SampleConfig = SampleConfig(some_param_0="test_str_0", some_param_1=65)
-    store_name_0: str = "test_config_0"
+    store_name_0: str = "test_config_store_0"
+    configuration_name_0: str = "test_config_name_0"
     save_config_to_filesystem(
         configuration_class=SampleConfig,
         store_name=store_name_0,
         base_directory=base_directory,
-        config=config_0,
+        configuration_key=configuration_name_0,
+        configuration=config_0,
     )
 
     dir_tree: str = gen_directory_tree_str(startpath=base_directory)
@@ -89,7 +91,7 @@ def test_v3_configuration_store(tmp_path_factory):
         dir_tree
         == """some_store_config_dir/
     .ge_store_backend_id
-    test_config_0.yml
+    test_config_name_0.yml
 """
     )
     assert (
@@ -103,7 +105,7 @@ def test_v3_configuration_store(tmp_path_factory):
         == 1
     )
 
-    stored_file_name_0: str = os.path.join(base_directory, f"{store_name_0}.yml")
+    stored_file_name_0: str = os.path.join(base_directory, f"{configuration_name_0}.yml")
     with open(stored_file_name_0, "r") as f:
         config: CommentedMap = yaml.load(f)
         expected_config: CommentedMap = CommentedMap(
@@ -115,16 +117,19 @@ def test_v3_configuration_store(tmp_path_factory):
         configuration_class=SampleConfig,
         store_name=store_name_0,
         base_directory=base_directory,
+        configuration_key=configuration_name_0,
     )
     assert loaded_config.to_json_dict() == config_0.to_json_dict()
 
     config_1: SampleConfig = SampleConfig(some_param_0="test_str_1", some_param_1=26)
-    store_name_1: str = "test_config_1"
+    store_name_1: str = "test_config_store_1"
+    configuration_name_1: str = "test_config_name_1"
     save_config_to_filesystem(
         configuration_class=SampleConfig,
         store_name=store_name_1,
         base_directory=base_directory,
-        config=config_1,
+        configuration_key=configuration_name_1,
+        configuration=config_1,
     )
 
     dir_tree: str = gen_directory_tree_str(startpath=base_directory)
@@ -132,8 +137,8 @@ def test_v3_configuration_store(tmp_path_factory):
         dir_tree
         == """some_store_config_dir/
     .ge_store_backend_id
-    test_config_0.yml
-    test_config_1.yml
+    test_config_name_0.yml
+    test_config_name_1.yml
 """
     )
     assert (
@@ -147,7 +152,7 @@ def test_v3_configuration_store(tmp_path_factory):
         == 2
     )
 
-    stored_file_name_1: str = os.path.join(base_directory, f"{store_name_1}.yml")
+    stored_file_name_1: str = os.path.join(base_directory, f"{configuration_name_1}.yml")
     with open(stored_file_name_1, "r") as f:
         config: CommentedMap = yaml.load(f)
         expected_config: CommentedMap = CommentedMap(
@@ -159,6 +164,7 @@ def test_v3_configuration_store(tmp_path_factory):
         configuration_class=SampleConfig,
         store_name=store_name_1,
         base_directory=base_directory,
+        configuration_key=configuration_name_1,
     )
     assert loaded_config.to_json_dict() == config_1.to_json_dict()
 
@@ -166,6 +172,7 @@ def test_v3_configuration_store(tmp_path_factory):
         configuration_class=SampleConfig,
         store_name=store_name_0,
         base_directory=base_directory,
+        configuration_key=configuration_name_0,
     )
     assert (
         len(
@@ -182,6 +189,7 @@ def test_v3_configuration_store(tmp_path_factory):
         configuration_class=SampleConfig,
         store_name=store_name_1,
         base_directory=base_directory,
+        configuration_key=configuration_name_1,
     )
     assert (
         len(

@@ -8,7 +8,6 @@ import great_expectations as ge
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
-    substitute_all_config_variables,
 )
 from great_expectations.data_context.util import (
     file_relative_path,

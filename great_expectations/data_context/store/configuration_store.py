@@ -84,63 +84,10 @@ class ConfigurationStore(Store):
 
         self._overwrite_existing = overwrite_existing
 
-    def load_configuration(self) -> BaseConfig:
-        logger.debug("Starting ConfigurationStore.load_configuration")
-
-        try:
-            key: ConfigurationIdentifier = ConfigurationIdentifier(
-                configuration_name=self.store_name
-            )
-            return self.get(key)
-        except ge_exceptions.InvalidKeyError:
-            raise ge_exceptions.ConfigNotFoundError()
-
-    def save_configuration(self, configuration: BaseConfig) -> None:
-        logger.debug("Starting ConfigurationStore.save_configuration")
-
-        # noinspection PyUnusedLocal
-        do_store: bool = False
-        if self.overwrite_existing:
-            do_store = True
-        else:
-            if self._retrieve_configuration() is None:
-                do_store = True
-            else:
-                raise ge_exceptions.InvalidBaseConfigError(
-                    f"""Configuration named "{self.store_name}" already exists.
-Set the property "overwrite_existing" to True in order to overwrite the previously saved configuration.
-                    """
-                )
-
-        if do_store:
-            self._store_configuration(configuration=configuration)
-
-    def _retrieve_configuration(self) -> Optional[BaseConfig]:
-        configuration: Optional[BaseConfig]
-        try:
-            configuration = self.load_configuration()
-        except ge_exceptions.ConfigNotFoundError:
-            configuration = None
-        return configuration
-
-    def _store_configuration(self, configuration: BaseConfig,):
-        config: BaseConfig = copy.deepcopy(configuration)
-        key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_name=self.store_name
-        )
-        self.set(key, config)
-
-    def delete_configuration(self):
-        key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_name=self.store_name
-        )
-        self.remove_key(key)
-
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
-        # return self.configuration_class.get_schema_instance().dump(value)
         return value.to_yaml_str()
 
     def deserialize(self, key, value):

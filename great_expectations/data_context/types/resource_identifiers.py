@@ -279,23 +279,23 @@ class SiteSectionIdentifier(DataContextKey):
 
 
 class ConfigurationIdentifier(DataContextKey):
-    def __init__(self, configuration_name: str):
+    def __init__(self, configuration_key: str):
         super().__init__()
-        if not isinstance(configuration_name, str):
+        if not isinstance(configuration_key, str):
             raise InvalidDataContextKeyError(
-                f"configuration_name must be a string, not {type(configuration_name).__name__}"
+                f"configuration_key must be a string, not {type(configuration_key).__name__}"
             )
-        self._configuration_name = configuration_name
+        self._configuration_key = configuration_key
 
     @property
-    def configuration_name(self):
-        return self._configuration_name
+    def configuration_key(self):
+        return self._configuration_key
 
     def to_tuple(self):
-        return tuple(self.configuration_name.split("."))
+        return tuple(self.configuration_key.split("."))
 
     def to_fixed_length_tuple(self):
-        return self.configuration_name
+        return self.configuration_key
 
     @classmethod
     def from_tuple(cls, tuple_):
@@ -303,14 +303,14 @@ class ConfigurationIdentifier(DataContextKey):
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
-        return cls(configuration_name=tuple_[0])
+        return cls(configuration_key=tuple_[0])
 
     def __repr__(self):
-        return self.__class__.__name__ + "::" + self._configuration_name
+        return self.__class__.__name__ + "::" + self._configuration_key
 
 
 class ConfigurationIdentifierSchema(Schema):
-    configuration_name = fields.Str()
+    configuration_key = fields.Str()
 
     # noinspection PyUnusedLocal
     @post_load

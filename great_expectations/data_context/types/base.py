@@ -50,7 +50,7 @@ class BaseConfig(SerializableDictDot):
             return cls.get_config_class()(commented_map=commented_map, **config)
         except ValidationError:
             logger.error(
-                "Encountered errors during loading checkpoint config. See ValidationError for more details."
+                "Encountered errors during loading config.  See ValidationError for more details."
             )
             raise
 
@@ -834,7 +834,8 @@ class DataContextConfigSchema(Schema):
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
-    checkpoint_store_name = fields.Str()
+    # TODO: <Alex>ALEX</Alex>
+    # checkpoint_store_name = fields.Str()
     plugins_directory = fields.Str(allow_none=True)
     validation_operators = fields.Dict(keys=fields.Str(), values=fields.Dict())
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
@@ -1263,6 +1264,14 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
 
 
 class DataContextConfig(BaseConfig):
+    @classmethod
+    def get_config_class(cls):
+        return DataContextConfig
+
+    @classmethod
+    def get_schema_class(cls):
+        return DataContextConfigSchema
+
     def __init__(
         self,
         config_version: Optional[float] = None,
@@ -1275,7 +1284,8 @@ class DataContextConfig(BaseConfig):
         expectations_store_name: Optional[str] = None,
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
-        checkpoint_store_name: Optional[str] = None,
+        # TODO: <Alex>ALEX</Alex>
+        # checkpoint_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
         validation_operators=None,
         stores: Optional[Dict] = None,
@@ -1303,8 +1313,9 @@ class DataContextConfig(BaseConfig):
                 evaluation_parameter_store_name = (
                     store_backend_defaults.evaluation_parameter_store_name
                 )
-            if checkpoint_store_name is None:
-                checkpoint_store_name = store_backend_defaults.checkpoint_store_name
+            # TODO: <Alex>ALEX</Alex>
+            # if checkpoint_store_name is None:
+            #     checkpoint_store_name = store_backend_defaults.checkpoint_store_name
             if validation_operators is None:
                 validation_operators = store_backend_defaults.validation_operators
             if data_docs_sites is None:
@@ -1317,7 +1328,8 @@ class DataContextConfig(BaseConfig):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        self.checkpoint_store_name = checkpoint_store_name
+        # TODO: <Alex>ALEX</Alex>
+        # self.checkpoint_store_name = checkpoint_store_name
         self.plugins_directory = plugins_directory
         if not isinstance(validation_operators, dict):
             raise ValueError(

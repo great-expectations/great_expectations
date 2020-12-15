@@ -37,7 +37,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # TODO:
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import CheckpointStore, TupleStoreBackend
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.data_context.store import CheckpointStore, TupleStoreBackend
+from great_expectations.data_context.store import TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -3100,16 +3102,17 @@ class DataContext(BaseDataContext):
         ):
             self._save_project_config()
 
-        self.checkpoint_store = CheckpointStore(
-            store_backend={
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "TupleFilesystemStoreBackend",
-                "filepath_suffix": ".yml",
-                "base_directory": os.path.join(
-                    self.root_directory, self.CHECKPOINTS_DIR
-                ),
-            }
-        )
+        # TODO: <Alex>ALEX</Alex>
+        # self.checkpoint_store = CheckpointStore(
+        #     store_backend={
+        #         "module_name": "great_expectations.data_context.store",
+        #         "class_name": "TupleFilesystemStoreBackend",
+        #         "filepath_suffix": ".yml",
+        #         "base_directory": os.path.join(
+        #             self.root_directory, self.CHECKPOINTS_DIR
+        #         ),
+        #     }
+        # )
 
     def _load_project_config(self):
         """
@@ -3166,38 +3169,41 @@ class DataContext(BaseDataContext):
             },
         )
 
-        self.checkpoint_store.set(
-            StringKey(checkpoint_name), new_checkpoint,
-        )
+        # TODO: <Alex>ALEX</Alex>
+        # self.checkpoint_store.set(
+        #     StringKey(checkpoint_name), new_checkpoint,
+        # )
 
         return new_checkpoint
 
-    def get_checkpoint(self, checkpoint_name: str, return_config: bool = True):
-        """Load a checkpoint. (Experimental)"""
+    # TODO: <Alex>ALEX</Alex>
+    # def get_checkpoint(self, checkpoint_name: str, return_config: bool = True):
+    #     """Load a checkpoint. (Experimental)"""
+    #
+    #     checkpoint_config = self.checkpoint_store.get(StringKey(checkpoint_name))
+    #     self._validate_checkpoint_config(
+    #         checkpoint_config, checkpoint_name,
+    #     )
+    #
+    #     if return_config:
+    #         return checkpoint_config
+    #
+    #     checkpoint_config["class_name"] = "LegacyCheckpoint"
+    #
+    #     checkpoint = instantiate_class_from_config(
+    #         config=checkpoint_config,
+    #         runtime_environment={"data_context": self, "name": checkpoint_name,},
+    #         config_defaults={
+    #             "module_name": "great_expectations.checkpoint.checkpoint",
+    #         },
+    #     )
+    #
+    #     return checkpoint
 
-        checkpoint_config = self.checkpoint_store.get(StringKey(checkpoint_name))
-        self._validate_checkpoint_config(
-            checkpoint_config, checkpoint_name,
-        )
-
-        if return_config:
-            return checkpoint_config
-
-        checkpoint_config["class_name"] = "LegacyCheckpoint"
-
-        checkpoint = instantiate_class_from_config(
-            config=checkpoint_config,
-            runtime_environment={"data_context": self, "name": checkpoint_name,},
-            config_defaults={
-                "module_name": "great_expectations.checkpoint.checkpoint",
-            },
-        )
-
-        return checkpoint
-
-    def list_checkpoints(self) -> List[str]:
-        """List checkpoints. (Experimental)"""
-        return [x._key for x in self.checkpoint_store.list_keys()]
+    # TODO: <Alex>ALEX</Alex>
+    # def list_checkpoints(self) -> List[str]:
+    #     """List checkpoints. (Experimental)"""
+    #     return [x._key for x in self.checkpoint_store.list_keys()]
 
     def _load_checkpoint_yml_template(self) -> dict:
         template_file = file_relative_path(

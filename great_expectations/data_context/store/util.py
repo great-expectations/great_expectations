@@ -1,9 +1,10 @@
 import logging
-from typing import Any, Optional, Union, cast
+from typing import Any, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import ConfigurationStore, StoreBackend
 from great_expectations.data_context.types.base import BaseConfig, CheckpointConfig
+from great_expectations.data_context.types.resource_identifiers import ConfigurationIdentifier
 from great_expectations.data_context.util import build_store_from_config
 
 logger = logging.getLogger(__name__)
@@ -118,7 +119,8 @@ def save_config_to_store_backend(
     configuration_class: Any,
     store_name: str,
     store_backend: Union[StoreBackend, dict],
-    config: BaseConfig,
+    configuration_key: str,
+    configuration: BaseConfig,
 ):
     config_store: ConfigurationStore = build_configuration_store(
         configuration_class=configuration_class,
@@ -126,32 +128,35 @@ def save_config_to_store_backend(
         store_backend=store_backend,
         overwrite_existing=True,
     )
-    config_store.save_configuration(configuration=config)
+    key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=configuration_key,
+    )
+    config_store.set(key=key, value=configuration)
 
 
 def load_config_from_store_backend(
-    configuration_class: Any, store_name: str, store_backend: Union[StoreBackend, dict],
-) -> Optional[BaseConfig]:
+    configuration_class: Any,
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    configuration_key: str,
+) -> BaseConfig:
     config_store: ConfigurationStore = build_configuration_store(
         configuration_class=configuration_class,
         store_name=store_name,
         store_backend=store_backend,
         overwrite_existing=False,
     )
-    try:
-        return config_store.load_configuration()
-    except (
-        ge_exceptions.ConfigNotFoundError,
-        ge_exceptions.InvalidBaseConfigError,
-    ) as exc:
-        logger.error(exc.messages)
-        raise ge_exceptions.InvalidBaseConfigError(
-            "Error while processing DataContextConfig.", exc
-        )
+    key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=configuration_key,
+    )
+    return config_store.get(key=key)
 
 
 def delete_config_from_store_backend(
-    configuration_class: Any, store_name: str, store_backend: Union[StoreBackend, dict],
+    configuration_class: Any,
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    configuration_key: str,
 ):
     config_store: ConfigurationStore = build_configuration_store(
         configuration_class=configuration_class,
@@ -159,11 +164,18 @@ def delete_config_from_store_backend(
         store_backend=store_backend,
         overwrite_existing=True,
     )
-    config_store.delete_configuration()
+    key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=configuration_key,
+    )
+    config_store.remove_key(key=key)
 
 
 def save_config_to_filesystem(
-    configuration_class: Any, store_name: str, base_directory: str, config: BaseConfig,
+    configuration_class: Any,
+    store_name: str,
+    base_directory: str,
+    configuration_key: str,
+    configuration: BaseConfig,
 ):
     store_config: dict = {"base_directory": base_directory}
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
@@ -173,13 +185,17 @@ def save_config_to_filesystem(
         configuration_class=configuration_class,
         store_name=store_name,
         store_backend=store_backend_obj,
-        config=config,
+        configuration_key=configuration_key,
+        configuration=configuration,
     )
 
 
 def load_config_from_filesystem(
-    configuration_class: Any, store_name: str, base_directory: str,
-) -> Optional[BaseConfig]:
+    configuration_class: Any,
+    store_name: str,
+    base_directory: str,
+    configuration_key: str,
+) -> BaseConfig:
     store_config: dict = {"base_directory": base_directory}
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
         **store_config
@@ -188,11 +204,15 @@ def load_config_from_filesystem(
         configuration_class=configuration_class,
         store_name=store_name,
         store_backend=store_backend_obj,
+        configuration_key=configuration_key,
     )
 
 
 def delete_config_from_filesystem(
-    configuration_class: Any, store_name: str, base_directory: str,
+    configuration_class: Any,
+    store_name: str,
+    base_directory: str,
+    configuration_key: str,
 ):
     store_config: dict = {"base_directory": base_directory}
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
@@ -202,22 +222,29 @@ def delete_config_from_filesystem(
         configuration_class=configuration_class,
         store_name=store_name,
         store_backend=store_backend_obj,
+        configuration_key=configuration_key,
     )
 
 
 def save_checkpoint_config_to_filesystem(
-    store_name: str, base_directory: str, checkpoint_config: CheckpointConfig,
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
+    checkpoint_configuration: CheckpointConfig,
 ):
     save_config_to_filesystem(
         configuration_class=CheckpointConfig,
         store_name=store_name,
         base_directory=base_directory,
-        config=checkpoint_config,
+        configuration_key=checkpoint_name,
+        configuration=checkpoint_configuration,
     )
 
 
 def load_checkpoint_config_from_filesystem(
-    store_name: str, base_directory: str,
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
 ) -> CheckpointConfig:
     try:
         checkpoint_config: CheckpointConfig = cast(
@@ -226,6 +253,7 @@ def load_checkpoint_config_from_filesystem(
                 configuration_class=CheckpointConfig,
                 store_name=store_name,
                 base_directory=base_directory,
+                configuration_key=checkpoint_name,
             ),
         )
         return checkpoint_config
@@ -237,10 +265,13 @@ def load_checkpoint_config_from_filesystem(
 
 
 def delete_checkpoint_config_from_filesystem(
-    store_name: str, base_directory: str,
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
 ):
     delete_config_from_filesystem(
         configuration_class=CheckpointConfig,
         store_name=store_name,
         base_directory=base_directory,
+        configuration_key=checkpoint_name,
     )
