@@ -94,7 +94,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
 
 
 def build_store_from_config(
-    store_name: str,
+    store_name: str = None,
     store_config: dict = None,
     module_name: str = "great_expectations.data_context.store",
     runtime_environment: dict = None,
