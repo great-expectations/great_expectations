@@ -8,6 +8,10 @@ from abc import ABCMeta
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -203,6 +207,10 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 )
             )
 
+    @property
+    def config(self) -> dict:
+        return self._config
+
 
 class TupleFilesystemStoreBackend(TupleStoreBackend):
     """Uses a local filepath as a store.
@@ -259,6 +267,13 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def _get(self, key):
         contents = ""
@@ -389,6 +404,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             os.path.join(self.full_base_directory, self._convert_key_to_filepath(key))
         )
 
+    @property
+    def config(self) -> dict:
+        return self._config
+
 
 class TupleS3StoreBackend(TupleStoreBackend):
     """
@@ -440,6 +459,13 @@ class TupleS3StoreBackend(TupleStoreBackend):
         # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def _build_s3_object_key(self, key):
         if self.platform_specific_separator:
@@ -646,6 +672,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
         all_keys = self.list_keys()
         return key in all_keys
 
+    @property
+    def config(self) -> dict:
+        return self._config
+
 
 class TupleGCSStoreBackend(TupleStoreBackend):
     """
@@ -693,6 +723,13 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def _build_gcs_object_key(self, key):
         if self.platform_specific_separator:
@@ -840,3 +877,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def _has_key(self, key):
         all_keys = self.list_keys()
         return key in all_keys
+
+    @property
+    def config(self) -> dict:
+        return self._config

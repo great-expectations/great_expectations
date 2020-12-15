@@ -1,0 +1,117 @@
+import copy
+import logging
+from typing import Any, Optional, cast
+
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
+
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
+from great_expectations.data_context.types.base import BaseYamlConfig
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+)
+from great_expectations.data_context.util import load_class
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    verify_dynamic_loading_support,
+)
+
+yaml = YAML()
+
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
+
+logger = logging.getLogger(__name__)
+
+
+class ConfigurationStore(Store):
+
+    """
+    Configuration Store provides a way to store any Marshmallow Schema compatible Configuration (using the YAML format).
+    """
+
+    _key_class = ConfigurationIdentifier
+
+    def __init__(
+        self,
+        configuration_class: Any,
+        store_name: str,
+        store_backend: dict = None,
+        overwrite_existing: bool = False,
+        runtime_environment: dict = None,
+    ):
+        if not issubclass(configuration_class, BaseYamlConfig):
+            raise ge_exceptions.DataContextError(
+                "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
+            )
+
+        self._configuration_class = cast(BaseYamlConfig, configuration_class)
+
+        if store_backend is not None:
+            store_backend_module_name = store_backend.get(
+                "module_name", "great_expectations.data_context.store"
+            )
+            store_backend_class_name = store_backend.get(
+                "class_name", "InMemoryStoreBackend"
+            )
+            verify_dynamic_loading_support(module_name=store_backend_module_name)
+            store_backend_class = load_class(
+                store_backend_class_name, store_backend_module_name
+            )
+
+            # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
+            if issubclass(store_backend_class, TupleStoreBackend):
+                # Provide defaults for this common case
+                store_backend["filepath_suffix"] = store_backend.get(
+                    "filepath_suffix", ".yml"
+                )
+
+        super().__init__(
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+            store_name=store_name,
+        )
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
+
+        self._overwrite_existing = overwrite_existing
+
+    def remove_key(self, key):
+        return self.store_backend.remove_key(key)
+
+    def serialize(self, key, value):
+        return value.to_yaml_str()
+
+    def deserialize(self, key, value):
+        config_commented_map_from_yaml: CommentedMap = yaml.load(value)
+        try:
+            return self.configuration_class.from_commented_map(
+                config_commented_map_from_yaml
+            )
+        except ge_exceptions.InvalidBaseYamlConfigError:
+            # Just to be explicit about what we intended to catch
+            raise
+
+    @property
+    def configuration_class(self) -> BaseYamlConfig:
+        return self._configuration_class
+
+    @property
+    def overwrite_existing(self) -> bool:
+        return self._overwrite_existing
+
+    @overwrite_existing.setter
+    def overwrite_existing(self, overwrite_existing: bool):
+        self._overwrite_existing = overwrite_existing
+
+    @property
+    def config(self) -> dict:
+        return self._config
