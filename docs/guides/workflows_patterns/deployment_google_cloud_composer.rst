@@ -44,9 +44,6 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
     .. code-block:: python
 
         project_config = DataContextConfig(
-            config_version=2,
-            plugins_directory=None,
-            config_variables_file_path=None,
             datasources={
                 "my_pandas_datasource": { # This is an example for a Pandas Datasource
                     "data_asset_type": {
@@ -71,68 +68,10 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
                     },
                 }
             },
-            stores={
-                "expectations_GCS_store": {
-                    "class_name": "ExpectationsStore",
-                    "store_backend": {
-                        "class_name": "TupleGCSStoreBackend",
-                        "project": "REPLACE ME",  # TODO: replace with your value
-                        "bucket": "REPLACE ME",  # TODO: replace with your value
-                        "prefix": "REPLACE ME",  # TODO: replace with your value
-                    },
-                },
-                "validations_GCS_store": {
-                    "class_name": "ValidationsStore",
-                    "store_backend": {
-                        "class_name": "TupleGCSStoreBackend",
-                        "project": "REPLACE ME",  # TODO: replace with your value
-                        "bucket": "REPLACE ME",  # TODO: replace with your value
-                        "prefix": "REPLACE ME",  # TODO: replace with your value
-                    },
-                },
-                "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-            },
-            expectations_store_name="expectations_GCS_store",
-            validations_store_name="validations_GCS_store",
-            evaluation_parameter_store_name="evaluation_parameter_store",
-            data_docs_sites={
-                "gs_site": {
-                    "class_name": "SiteBuilder",
-                    "store_backend": {
-                        "class_name": "TupleGCSStoreBackend",
-                        "project": "REPLACE ME",  # TODO: replace with your value
-                        "bucket": "REPLACE ME",  # TODO: replace with your value
-                        "prefix": "REPLACE ME",  # TODO: replace with your value
-                    },
-                    "site_index_builder": {
-                        "class_name": "DefaultSiteIndexBuilder",
-                        "show_cta_footer": True,
-                    },
-                    "show_how_to_buttons": True,
-                }
-            },
-            validation_operators={
-                "action_list_operator": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [
-                        {
-                            "name": "store_validation_result",
-                            "action": {"class_name": "StoreValidationResultAction"},
-                        },
-                        {
-                            "name": "store_evaluation_params",
-                            "action": {"class_name": "StoreEvaluationParametersAction"},
-                        },
-                        {
-                            "name": "update_data_docs",
-                            "action": {"class_name": "UpdateDataDocsAction"},
-                        },
-                    ],
-                }
-            },
-            anonymous_usage_statistics={
-              "enabled": True
-            }
+            store_backend_defaults=GCSStoreBackendDefaults(
+                default_bucket_name="my_bucket_name",  # TODO: replace with your value
+                default_project_name="my_project_name",  # TODO: replace with your value
+            )
         )
 
         context = BaseDataContext(project_config=project_config)
