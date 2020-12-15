@@ -187,6 +187,10 @@ Steps
 
 3. Use this BaseDataContext instance as your DataContext
 
+    If you are using Airflow, you may wish to pass this Data Context to your GreatExpectationsOperator as a parameter. See the following guide for more details:
+
+    - :ref:`deployment_airflow`
+
 
 Additional resources
 --------------------
