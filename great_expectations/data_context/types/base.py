@@ -1319,7 +1319,7 @@ class DataContextConfig(BaseConfig):
         return self._config_version
 
 
-class CheckpointConfig(SerializableDictDot):
+class CheckpointConfig(BaseConfig):
     @classmethod
     def get_config_class(cls):
         return cls  # CheckpointConfig
