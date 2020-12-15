@@ -39,7 +39,7 @@
       }
     },
     {
-      "title": "positive_beta_distribution__params_is_a_dict",
+      "title": "positive_beta_distribution_params_is_a_dict",
       "exact_match_out": false,
       "in": {
         "column": "beta",
@@ -53,7 +53,7 @@
       }
     },
     {
-      "title": "positive_beta_distribution__params_is_a_tuple",
+      "title": "positive_beta_distribution_params_is_a_tuple",
       "exact_match_out": false,
       "in": {
         "column": "beta",
@@ -67,7 +67,7 @@
       }
     },
     {
-      "title": "negative_beta_distribution__params_is_a_dict",
+      "title": "negative_beta_distribution_params_is_a_dict",
       "exact_match_out": false,
       "in": {
         "column": "beta",
@@ -81,7 +81,7 @@
       }
     },
     {
-      "title": "negative_beta_distribution__params_is_a_tuple",
+      "title": "negative_beta_distribution_params_is_a_tuple",
       "exact_match_out": false,
       "in": {
         "column": "beta",
@@ -95,7 +95,7 @@
       }
     },
     {
-      "title": "positive_gamma_distribution__params_is_a_dict",
+      "title": "positive_gamma_distribution_params_is_a_dict",
       "exact_match_out": false,
       "in": {
         "column": "gamma",
@@ -109,7 +109,7 @@
       }
     },
     {
-      "title": "positive_gamma_distribution__params_is_a_tuple",
+      "title": "positive_gamma_distribution_params_is_a_tuple",
       "exact_match_out": false,
       "in": {
         "column": "gamma",
@@ -123,7 +123,7 @@
       }
     },
     {
-      "title": "negative_gamma_distribution__params_is_a_dict",
+      "title": "negative_gamma_distribution_params_is_a_dict",
       "exact_match_out": false,
       "in": {
         "column": "gamma",
@@ -137,7 +137,7 @@
       }
     },
     {
-      "title": "negative_gamma_distribution__params_is_a_tuple",
+      "title": "negative_gamma_distribution_params_is_a_tuple",
       "exact_match_out": false,
       "in": {
         "column": "gamma",
@@ -151,7 +151,7 @@
       }
     },
     {
-      "title": "positive_uniform_distribution__params_is_a_dict",
+      "title": "positive_uniform_distribution_params_is_a_dict",
       "exact_match_out": false,
       "in": {
         "column": "uniform",
@@ -165,7 +165,7 @@
       }
     },
     {
-      "title": "positive_uniform_distribution__params_is_a_tuple",
+      "title": "positive_uniform_distribution_params_is_a_tuple",
       "exact_match_out": false,
       "in": {
         "column": "uniform",
@@ -179,7 +179,7 @@
       }
     },
     {
-      "title": "negative_uniform_distribution__params_is_a_dict",
+      "title": "negative_uniform_distribution_params_is_a_dict",
       "exact_match_out": false,
       "in": {
         "column": "uniform",
@@ -193,7 +193,7 @@
       }
     },
     {
-      "title": "negative_uniform_distribution__params_is_a_tuple",
+      "title": "negative_uniform_distribution_params_is_a_tuple",
       "exact_match_out": false,
       "in": {
         "column": "uniform",
@@ -207,7 +207,7 @@
       }
     },
     {
-      "title": "positive_chi2__params_is_a_dict",
+      "title": "positive_chi2_params_is_a_dict",
       "exact_match_out": false,
       "in": {
         "column": "chi2",
@@ -221,7 +221,7 @@
       }
     },
     {
-      "title": "positive_chi2__params_is_a_tuple",
+      "title": "positive_chi2_params_is_a_tuple",
       "exact_match_out": false,
       "in": {
         "column": "chi2",
@@ -235,7 +235,7 @@
       }
     },
     {
-      "title": "negative_chi2__params_is_a_dict",
+      "title": "negative_chi2_params_is_a_dict",
       "exact_match_out": false,
       "in": {
         "column": "chi2",
@@ -249,7 +249,7 @@
       }
     },
     {
-      "title": "negative_chi2__params_is_a_tuple",
+      "title": "negative_chi2_params_is_a_tuple",
       "exact_match_out": false,
       "in": {
         "column": "chi2",
@@ -263,7 +263,7 @@
       }
     },
     {
-      "title": "positive_expon_distribution__params_is_a_dict",
+      "title": "positive_expon_distribution_params_is_a_dict",
       "exact_match_out": false,
       "in": {
         "column": "exponential",
@@ -277,7 +277,7 @@
       }
     },
     {
-      "title": "positive_expon_distribution__params_is_a_tuple",
+      "title": "positive_expon_distribution_params_is_a_tuple",
       "exact_match_out": false,
       "in": {
         "column": "exponential",
@@ -291,7 +291,7 @@
       }
     },
     {
-      "title": "negative_expon_distribution__params_is_a_dict",
+      "title": "negative_expon_distribution_params_is_a_dict",
       "exact_match_out": false,
       "in": {
         "column": "exponential",
@@ -305,7 +305,7 @@
       }
     },
     {
-      "title": "negative_expon_distribution__params_is_a_tuple",
+      "title": "negative_expon_distribution_params_is_a_tuple",
       "exact_match_out": false,
       "in": {
         "column": "exponential",

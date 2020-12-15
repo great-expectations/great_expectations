@@ -37,7 +37,7 @@
       }
     },
     {
-      "title": "categorical_fixed_alternate_partition_object__exact_match",
+      "title": "categorical_fixed_alternate_partition_object_exact_match",
       "exact_match_out": true,
       "in": {
         "column": "categorical_fixed",
@@ -75,7 +75,7 @@
     },
     "tests": [
       {
-        "title": "categorical_fixed_alternate__new_categorical_vals__no_holdout",
+        "title": "categorical_fixed_alternate_new_categorical_vals_no_holdout",
         "exact_match_out": false,
         "in": {
           "column": "categorical_list",
@@ -90,7 +90,7 @@
         }
       },
       {
-        "title": "categorical_fixed_alternate__new_categorical_vals__holdout",
+        "title": "categorical_fixed_alternate_new_categorical_vals_holdout",
         "exact_match_out": false,
         "in": {
           "column": "categorical_list",
@@ -113,7 +113,7 @@
     },
     "tests": [
       {
-        "title": "categorical_fixed__missing_categorical_vals__no_holdout",
+        "title": "categorical_fixed_missing_categorical_vals_no_holdout",
         "exact_match_out": false,
         "in": {
           "column": "categorical_list",

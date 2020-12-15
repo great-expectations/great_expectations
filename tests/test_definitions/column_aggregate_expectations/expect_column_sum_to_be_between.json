@@ -66,7 +66,7 @@
         "observed_value": 30
       }
     },{
-      "title": "test_case_with_result_format__summary",
+      "title": "test_case_with_result_format_summary",
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -79,7 +79,7 @@
         "observed_value": 30
       }
     },{
-      "title": "test_case_with_only_a_lower_bound__and_a_missing_value",
+      "title": "test_case_with_only_a_lower_bound_and_a_missing_value",
       "exact_match_out" : false,
       "in": {
         "column": "x",
