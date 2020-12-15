@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import pytest
@@ -70,7 +69,7 @@ def test_v3_configuration_store(tmp_path_factory):
 
     root_directory_path: str = "test_v3_configuration_store"
     root_directory: str = str(tmp_path_factory.mktemp(root_directory_path))
-    base_directory: str = os.path.join(root_directory, "some_store_config_dir")
+    base_directory: str = str(Path(root_directory) / "some_store_config_dir")
 
     config_0: SampleConfig = SampleConfig(some_param_0="test_str_0", some_param_1=65)
     store_name_0: str = "test_config_store_0"
@@ -112,9 +111,7 @@ def test_v3_configuration_store(tmp_path_factory):
         == 1
     )
 
-    stored_file_name_0: str = os.path.join(
-        base_directory, f"{configuration_name_0}.yml"
-    )
+    stored_file_name_0: str = Path(base_directory) / f"{configuration_name_0}.yml"
     with open(stored_file_name_0, "r") as f:
         config: CommentedMap = yaml.load(f)
         expected_config: CommentedMap = CommentedMap(
@@ -178,9 +175,7 @@ def test_v3_configuration_store(tmp_path_factory):
         == 2
     )
 
-    stored_file_name_1: str = os.path.join(
-        base_directory, f"{configuration_name_1}.yml"
-    )
+    stored_file_name_1: str = Path(base_directory) / f"{configuration_name_1}.yml"
     with open(stored_file_name_1, "r") as f:
         config: CommentedMap = yaml.load(f)
         expected_config: CommentedMap = CommentedMap(
