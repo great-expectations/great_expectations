@@ -1385,6 +1385,27 @@ class CheckpointConfig(SerializableDictDot):
         return self._commented_map
 
 
+# class SimpleCheckpointConfig(CheckpointConfig):
+#     def __init__(
+#             self,
+#             name: str,
+#             config_version: Optional[int] = None,
+#             template: Optional[str] = None,
+#             module_name: Optional[str] = None,
+#             class_name: Optional[str] = None,
+#             run_name_template: Optional[str] = None,
+#             expectation_suite_name: Optional[str] = None,
+#             batch_request: Optional[BatchRequest] = None,
+#             action_list: Optional[List[dict]] = None,
+#             evaluation_parameters: Optional[dict] = None,
+#             runtime_configuration: Optional[dict] = None,
+#             validations: Optional[List[dict]] = None,
+#             profilers: Optional[List[dict]] = None,
+#             commented_map: Optional[CommentedMap] = None,
+#     ):
+#         pass
+
+
 class CheckpointConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
