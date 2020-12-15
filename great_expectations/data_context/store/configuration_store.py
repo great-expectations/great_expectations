@@ -8,7 +8,7 @@ from ruamel.yaml.comments import CommentedMap
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
-from great_expectations.data_context.types.base import BaseConfig
+from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
@@ -43,12 +43,12 @@ class ConfigurationStore(Store):
         overwrite_existing: bool = False,
         runtime_environment: dict = None,
     ):
-        if not issubclass(configuration_class, BaseConfig):
+        if not issubclass(configuration_class, BaseYamlConfig):
             raise ge_exceptions.DataContextError(
-                "Invalid configuration: A configuration_class needs to inherit from the BaseConfig class."
+                "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
             )
 
-        self._configuration_class = cast(BaseConfig, configuration_class)
+        self._configuration_class = cast(BaseYamlConfig, configuration_class)
 
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
@@ -96,12 +96,12 @@ class ConfigurationStore(Store):
             return self.configuration_class.from_commented_map(
                 config_commented_map_from_yaml
             )
-        except ge_exceptions.InvalidBaseConfigError:
+        except ge_exceptions.InvalidBaseYamlConfigError:
             # Just to be explicit about what we intended to catch
             raise
 
     @property
-    def configuration_class(self) -> BaseConfig:
+    def configuration_class(self) -> BaseYamlConfig:
         return self._configuration_class
 
     @property

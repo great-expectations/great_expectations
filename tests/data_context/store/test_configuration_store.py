@@ -20,7 +20,7 @@ from great_expectations.data_context.store.util import (
     load_config_from_filesystem,
     save_config_to_filesystem,
 )
-from great_expectations.data_context.types.base import BaseConfig
+from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 def test_v3_configuration_store(tmp_path_factory):
-    class SampleConfig(BaseConfig):
+    class SampleConfig(BaseYamlConfig):
         @classmethod
         def get_config_class(cls):
             return cls  # SampleConfig
@@ -113,7 +113,7 @@ def test_v3_configuration_store(tmp_path_factory):
         )
         assert config == expected_config
 
-    loaded_config: BaseConfig = load_config_from_filesystem(
+    loaded_config: BaseYamlConfig = load_config_from_filesystem(
         configuration_class=SampleConfig,
         store_name=store_name_0,
         base_directory=base_directory,
@@ -160,7 +160,7 @@ def test_v3_configuration_store(tmp_path_factory):
         )
         assert config == expected_config
 
-    loaded_config: BaseConfig = load_config_from_filesystem(
+    loaded_config: BaseYamlConfig = load_config_from_filesystem(
         configuration_class=SampleConfig,
         store_name=store_name_1,
         base_directory=base_directory,

@@ -44,27 +44,21 @@ def object_to_yaml_str(obj):
     return output_str
 
 
-class BaseConfig(SerializableDictDot):
-    @classmethod
-    def from_commented_map(cls, commented_map: CommentedMap):
-        try:
-            config: dict = cls.get_schema_instance().load(commented_map)
-            return cls.get_config_class()(commented_map=commented_map, **config)
-        except ValidationError:
-            logger.error(
-                "Encountered errors during loading config.  See ValidationError for more details."
-            )
-            raise
+class BaseYamlConfig(SerializableDictDot):
+    def __init__(self, commented_map: CommentedMap = None, **kwargs):
+        if commented_map is None:
+            commented_map = CommentedMap()
+        self._commented_map = commented_map
 
     @classmethod
-    def get_schema_instance(cls) -> Schema:
+    def _get_schema_instance(cls) -> Schema:
         if not issubclass(cls.get_schema_class(), Schema):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration schema class needs to inherit from the Marshmallow Schema class."
             )
-        if not issubclass(cls.get_config_class(), BaseConfig):
+        if not issubclass(cls.get_config_class(), BaseYamlConfig):
             raise ge_exceptions.InvalidConfigError(
-                "Invalid type: A configuration class needs to inherit from the BaseConfig class."
+                "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."
             )
         if hasattr(cls.get_config_class(), "schema_instance"):
             schema_instance: Schema = cls.get_config_class().schema_instance
@@ -77,26 +71,20 @@ class BaseConfig(SerializableDictDot):
             return cls.get_config_class().schema_instance
 
     @classmethod
-    def get_config_class(cls):
-        raise NotImplementedError
-
-    @classmethod
-    def get_schema_class(cls):
-        raise NotImplementedError
-
-    def __init__(self, commented_map: CommentedMap = None, **kwargs):
-        if commented_map is None:
-            commented_map = CommentedMap()
-        self._commented_map = commented_map
+    def from_commented_map(cls, commented_map: CommentedMap):
+        try:
+            config: dict = cls._get_schema_instance().load(commented_map)
+            return cls.get_config_class()(commented_map=commented_map, **config)
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading config.  See ValidationError for more details."
+            )
+            raise
 
     def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
         commented_map: CommentedMap = deepcopy(self.commented_map)
-        commented_map.update(self.get_schema_instance().dump(self))
+        commented_map.update(self._get_schema_instance().dump(self))
         return commented_map
-
-    @property
-    def commented_map(self) -> CommentedMap:
-        return self._commented_map
 
     def to_yaml(self, outfile):
         """
@@ -116,6 +104,18 @@ class BaseConfig(SerializableDictDot):
         """
         commented_map: CommentedMap = self._get_schema_validated_updated_commented_map()
         return convert_to_json_serializable(data=commented_map)
+
+    @property
+    def commented_map(self) -> CommentedMap:
+        return self._commented_map
+
+    @classmethod
+    def get_config_class(cls):
+        raise NotImplementedError
+
+    @classmethod
+    def get_schema_class(cls):
+        raise NotImplementedError
 
 
 class AssetConfig(DictDot):
@@ -1227,15 +1227,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         }
 
 
-class DataContextConfig(BaseConfig):
-    @classmethod
-    def get_config_class(cls):
-        return cls  # DataContextConfig
-
-    @classmethod
-    def get_schema_class(cls):
-        return DataContextConfigSchema
-
+class DataContextConfig(BaseYamlConfig):
     def __init__(
         self,
         config_version: Optional[float] = None,
@@ -1258,7 +1250,7 @@ class DataContextConfig(BaseConfig):
         config_variables_file_path: Optional[str] = None,
         anonymous_usage_statistics=None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
-        commented_map=None,
+        commented_map: Optional[CommentedMap] = None,
     ):
         # Set defaults
         if config_version is None:
@@ -1314,20 +1306,20 @@ class DataContextConfig(BaseConfig):
 
         super().__init__(commented_map=commented_map)
 
+    @classmethod
+    def get_config_class(cls):
+        return cls  # DataContextConfig
+
+    @classmethod
+    def get_schema_class(cls):
+        return DataContextConfigSchema
+
     @property
     def config_version(self):
         return self._config_version
 
 
-class CheckpointConfig(BaseConfig):
-    @classmethod
-    def get_config_class(cls):
-        return cls  # CheckpointConfig
-
-    @classmethod
-    def get_schema_class(cls):
-        return CheckpointConfigSchema
-
+class CheckpointConfig(BaseYamlConfig):
     def __init__(
         self,
         name: str,
@@ -1360,36 +1352,16 @@ class CheckpointConfig(BaseConfig):
         self._runtime_configuration = runtime_configuration
         self._validations = validations or []
         self._profilers = profilers or []
-        self._commented_map = commented_map or CommentedMap()
+
+        super().__init__(commented_map=commented_map)
 
     @classmethod
-    def from_commented_map(cls, commented_map: CommentedMap):
-        try:
-            config = checkpointConfigSchema.load(commented_map)
-            return cls(commented_map=commented_map, **config)
-        except ValidationError:
-            logger.error(
-                "Encountered errors during loading checkpoint config. See ValidationError for more details."
-            )
-            raise
+    def get_config_class(cls):
+        return cls  # CheckpointConfig
 
-    def get_schema_validated_updated_commented_map(self) -> CommentedMap:
-        commented_map: CommentedMap = deepcopy(self.commented_map)
-        commented_map.update(checkpointConfigSchema.dump(self))
-        return commented_map
-
-    def to_yaml_str(self) -> str:
-        """
-        :returns a YAML string containing the project configuration
-        """
-        return object_to_yaml_str(self.get_schema_validated_updated_commented_map())
-
-    def to_json_dict(self) -> dict:
-        """
-        :returns a JSON-serialiable dict containing the project configuration
-        """
-        commented_map: CommentedMap = self.get_schema_validated_updated_commented_map()
-        return convert_to_json_serializable(data=commented_map)
+    @classmethod
+    def get_schema_class(cls):
+        return CheckpointConfigSchema
 
     @property
     def name(self):
@@ -1438,10 +1410,6 @@ class CheckpointConfig(BaseConfig):
     @property
     def runtime_configuration(self):
         return self._runtime_configuration
-
-    @property
-    def commented_map(self):
-        return self._commented_map
 
 
 class CheckpointConfigSchema(Schema):

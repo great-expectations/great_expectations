@@ -3,7 +3,7 @@ from typing import Any, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import ConfigurationStore, StoreBackend
-from great_expectations.data_context.types.base import BaseConfig, CheckpointConfig
+from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import ConfigurationIdentifier
 from great_expectations.data_context.util import build_store_from_config
 
@@ -87,9 +87,9 @@ def build_configuration_store(
         f"Starting data_context/store/util.py#build_configuration_store for store_name {store_name}"
     )
 
-    if not issubclass(configuration_class, BaseConfig):
+    if not issubclass(configuration_class, BaseYamlConfig):
         raise ge_exceptions.DataContextError(
-            "Invalid configuration: A configuration_class needs to inherit from the BaseConfig class."
+            "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
         )
 
     if store_backend is not None and issubclass(type(store_backend), StoreBackend):
@@ -120,7 +120,7 @@ def save_config_to_store_backend(
     store_name: str,
     store_backend: Union[StoreBackend, dict],
     configuration_key: str,
-    configuration: BaseConfig,
+    configuration: BaseYamlConfig,
 ):
     config_store: ConfigurationStore = build_configuration_store(
         configuration_class=configuration_class,
@@ -139,7 +139,7 @@ def load_config_from_store_backend(
     store_name: str,
     store_backend: Union[StoreBackend, dict],
     configuration_key: str,
-) -> BaseConfig:
+) -> BaseYamlConfig:
     config_store: ConfigurationStore = build_configuration_store(
         configuration_class=configuration_class,
         store_name=store_name,
@@ -175,7 +175,7 @@ def save_config_to_filesystem(
     store_name: str,
     base_directory: str,
     configuration_key: str,
-    configuration: BaseConfig,
+    configuration: BaseYamlConfig,
 ):
     store_config: dict = {"base_directory": base_directory}
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
@@ -195,7 +195,7 @@ def load_config_from_filesystem(
     store_name: str,
     base_directory: str,
     configuration_key: str,
-) -> BaseConfig:
+) -> BaseYamlConfig:
     store_config: dict = {"base_directory": base_directory}
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
         **store_config
@@ -257,7 +257,7 @@ def load_checkpoint_config_from_filesystem(
             ),
         )
         return checkpoint_config
-    except ge_exceptions.InvalidBaseConfigError as exc:
+    except ge_exceptions.InvalidBaseYamlConfigError as exc:
         logger.error(exc.messages)
         raise ge_exceptions.InvalidCheckpointConfigError(
             "Error while processing DataContextConfig.", exc

@@ -58,17 +58,17 @@ class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
     pass
 
 
-class InvalidBaseConfigError(GreatExpectationsValidationError):
+class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
     def __init__(self, message, validation_error, field_name=None):
         super().__init__(message=message, validation_error=validation_error)
         self.field_name = field_name
 
 
-class InvalidDataContextConfigError(InvalidBaseConfigError):
+class InvalidDataContextConfigError(InvalidBaseYamlConfigError):
     pass
 
 
-class InvalidCheckpointConfigError(InvalidBaseConfigError):
+class InvalidCheckpointConfigError(InvalidBaseYamlConfigError):
     pass
 
 
