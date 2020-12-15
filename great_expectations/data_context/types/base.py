@@ -1230,7 +1230,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
 class DataContextConfig(BaseConfig):
     @classmethod
     def get_config_class(cls):
-        return DataContextConfig
+        return cls  # DataContextConfig
 
     @classmethod
     def get_schema_class(cls):
