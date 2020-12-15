@@ -32,7 +32,8 @@ Batches
 
 The main goal of Data Connectors is to provide useful guarantees about *Batches*, for example ensuring that they cover data from non-overlapping date ranges. A **Batch** is a combination of data and metadata.
 
-    .. image:: /images/batch_what_is_a_batch.png
+    .. image:: https://lucid.app/publicSegments/view/55d15740-289a-44c2-9735-400fed0d6610/image.png
+
 
 The ``Datasource`` is responsible for orchestrating the building of a Batch, using the following components:
 
