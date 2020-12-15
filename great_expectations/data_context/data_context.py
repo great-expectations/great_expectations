@@ -315,12 +315,12 @@ class BaseDataContext:
                 }
             )
 
-            # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
-            if (
-                store_name not in [store["name"] for store in self.list_active_stores()]
-                and store_config.get("store_backend") is not None
-            ):
-                store_config["store_backend"].update({"suppress_store_backend_id": True})
+        # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+        if (
+            store_name not in [store["name"] for store in self.list_active_stores()]
+            and store_config.get("store_backend") is not None
+        ):
+            store_config["store_backend"].update({"suppress_store_backend_id": True})
 
         new_store = build_store_from_config(
             store_name=store_name,
