@@ -34,50 +34,6 @@ def titanic_expectations():
         )
 
 
-# @pytest.fixture(scope="module")
-# def simple_validation_results_with_evaluation_parameters():
-#     with open(
-#         file_relative_path(
-#             __file__,
-#             "../test_sets/simple_validate_results_with_evaluation_parameters.json",
-#         ),
-#     ) as infile:
-#         return expectationSuiteValidationResultSchema.load(json.load(infile))
-
-
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
-def test_render_validation_results_with_eval(
-    simple_validation_results_with_evaluation_parameters,
-):
-    # Group EVRs by column
-    evrs = {}
-    for evr in simple_validation_results_with_evaluation_parameters.results:
-        try:
-            column = evr.expectation_config.kwargs["column"]
-            if column not in evrs:
-                evrs[column] = []
-            evrs[column].append(evr)
-        except KeyError:
-            pass
-
-    for column in evrs.keys():
-        with open(
-            file_relative_path(
-                __file__,
-                "./output/test_render_validation_results_with_Eval" + column + ".json",
-            ),
-            "w",
-        ) as outfile:
-            json.dump(
-                ProfilingResultsColumnSectionRenderer()
-                .render(evrs[column])
-                .to_json_dict(),
-                outfile,
-                indent=2,
-            )
-
-
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
 def test_render_profiling_results_column_section_renderer(titanic_validation_results):
