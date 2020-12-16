@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
     """
-    Extension of ConfiguredAssetS3DataConnector.
+    Extension of ConfiguredAssetFilePathDataConnector used to connect to S3
 
     DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
     can use to get individual batches of data. They add flexibility in how to obtain data
@@ -27,7 +27,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
     for the Datasource.
 
     The ConfiguredAssetS3DataConnector is one of two classes (InferredAssetS3DataConnector being the
-    other one) designed for connecting to data on S3..
+    other one) designed for connecting to data on S3.
 
     A ConfiguredAssetS3DataConnector requires an explicit listing of each DataAsset you want to connect to.
     This allows more fine-tuning, but also requires more setup.
@@ -51,7 +51,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         ConfiguredAssetDataConnector for connecting to S3.
 
         Args:
-            name (str): required name for data_connector
+            name (str): required name for DataConnector
             datasource_name (str): required name for datasource
             bucket (str): bucket for S3
             assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
@@ -61,7 +61,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             prefix (str): S3 prefix
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
-            boto3_options (dict): additional optional boto3 options
+            boto3_options (dict): optional boto3 options
         """
         logger.debug(f'Constructing ConfiguredAssetS3DataConnector "{name}".')
 

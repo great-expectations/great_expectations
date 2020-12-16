@@ -17,18 +17,13 @@ logger = logging.getLogger(__name__)
 
 class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnector):
     """
-    Extension of ConfiguredAssetFilePathDataConnector
+    Extension of ConfiguredAssetFilePathDataConnector used to connect to Filesystem
 
-    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
-    can use to get individual batches of data. They add flexibility in how to obtain data
-    such as with time-based partitioning, downsampling, or other techniques appropriate
-    for the Datasource.
-
-    The ConfiguredAssetFilePathDataConnector is one of two classes (InferredAssetFilePathDataConnector being the
+    The ConfiguredAssetFilesystemDataConnector is one of two classes (InferredAssetFilesystemDataConnector being the
     other one) designed for connecting to filesystem-like data, more specifically files on disk. It connects to assets
     defined by the `assets` configuration.
 
-    A ConfiguredAssetFilesSystemDataconnector requires an explicit listing of each DataAsset you want to connect to.
+    A ConfiguredAssetFilesystemDataConnector requires an explicit listing of each DataAsset you want to connect to.
     This allows more fine-tuning, but also requires more setup.
     """
 
@@ -48,10 +43,10 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         and sorters for filtering and sorting data_references. It takes in configured `assets` as a dictionary.
 
         Args:
-            name (str): name of ConfiguredAssetFilePathDataConnector
+            name (str): name of ConfiguredAssetFilesystemDataConnector
             datasource_name (str): Name of datasource that this DataConnector is connected to
             assets (dict): configured assets as a dictionary. These can each have their own regex and sorters
-            execution_engine (ExecutionEngine): Execution Engine object to actually read the data
+            execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
             default_regex (dict): Optional dict the filter and organize the data_references.
             glob_directive (str): glob for selecting files in directory (defaults to *)
             sorters (list): Optional list if you want to sort the data_references

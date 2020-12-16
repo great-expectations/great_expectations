@@ -20,7 +20,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     other) designed for connecting to filesystem-like data. This includes files on disk, but also things
     like S3 object stores, etc:
 
-    A ConfiguredAssetFilesSystemDataConnector requires an explicit listing of each DataAsset you want to connect to.
+    A ConfiguredAssetFilePathDataConnector requires an explicit listing of each DataAsset you want to connect to.
     This allows more fine-tuning, but also requires more setup.
 
     *Note*: ConfiguredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently
@@ -39,8 +39,9 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         sorters: Optional[list] = None,
     ):
         """
-        Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
-        and sorters for filtering and sorting data_references. It takes in configured `assets` as a dictionary.
+        Base class for DataConnectors that connect to filesystem-like data by taking in
+        configured `assets` as a dictionary. This class supports the configuration of default_regex and
+        sorters for filtering and sorting data_references.
 
         Args:
             name (str): name of ConfiguredAssetFilePathDataConnector
@@ -98,7 +99,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def get_available_data_asset_names(self) -> List[str]:
         """
-        Return the list of asset names known by this data connector.
+        Return the list of asset names known by this DataConnector.
 
         Returns:
             A list of available names
@@ -130,7 +131,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     ) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
-
         This method is used to refresh the cache.
         """
         asset: Optional[Asset] = self._get_asset(data_asset_name=data_asset_name)
@@ -139,11 +139,11 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def get_data_reference_list_count(self) -> int:
         """
-        Returns the list of data_references known by this data connector by looping over all data_asset_names in
+        Returns the list of data_references known by this DataConnector by looping over all data_asset_names in
         _data_references_cache
 
         Returns:
-            number of data_references known by this data connector.
+            number of data_references known by this DataConnector.
         """
         if self._data_references_cache is None:
             raise ValueError(
@@ -165,7 +165,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         and returning data_reference that do not have an associated data_asset.
 
         Returns:
-            list of data_references that are unnmatched by configuration.
+            list of data_references that are not matched by configuration.
         """
         if self._data_references_cache is None:
             raise ValueError(

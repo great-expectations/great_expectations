@@ -52,7 +52,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self, name, config,
     ):
         """
-        Add data_asset to data_connector using data_asset name as key, and data_asset configuration as value.
+        Add data_asset to DataConnector using data_asset name as key, and data_asset configuration as value.
         """
         self._data_assets[name] = config
 
@@ -115,7 +115,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         and returning data_reference that do not have an associated data_asset.
 
         Returns:
-            list of data_references that are unnmatched by configuration.
+            list of data_references that are not matched by configuration.
         """
         if self._data_references_cache is None:
             raise ValueError(
@@ -197,7 +197,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _split_on_whole_table(
         self, table_name: str,
     ):
-        """'Split' by returning the whole table
+        """
+        'Split' by returning the whole table
 
         Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
         """

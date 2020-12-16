@@ -16,16 +16,14 @@ logger = logging.getLogger(__name__)
 
 class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
     """
-    Extension of InferredAssetFilePathDataConnector
-
-    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
-    can use to get individual batches of data. They add flexibility in how to obtain data
-    such as with time-based partitioning, downsampling, or other techniques appropriate
-    for the Datasource.
+    Extension of InferredAssetFilePathDataConnector used to connect to filesystem
 
     The InferredAssetFilesystemDataConnector is one of two classes (ConfiguredAssetFilesystemDataConnector being the
     other one) designed for connecting to filesystem-like data, more specifically files on disk. It connects to assets
     inferred from directory and file name by default_regex and glob_directive.
+
+    InferredAssetFilesystemDataConnector that operates on file paths and determines
+    the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
 
     """
 
@@ -44,10 +42,10 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
        and sorters for filtering and sorting data_references.
 
        Args:
-           name (str): name of ConfiguredAssetFilePathDataConnector
+           name (str): name of InferredAssetFilesystemDataConnector
            datasource_name (str): Name of datasource that this DataConnector is connected to
            base_directory(str): base_directory for DataConnector to begin reading files
-           execution_engine (ExecutionEngine): Execution Engine object to actually read the data
+           execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
            default_regex (dict): Optional dict the filter and organize the data_references.
            sorters (list): Optional list if you want to sort the data_references
        """

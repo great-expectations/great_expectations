@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class FilePathDataConnector(DataConnector):
     """
-    Base-class for Data connectors that are designed for connecting to filesystem-like data, which can include
+    Base-class for DataConnector that are designed for connecting to filesystem-like data, which can include
     files on disk, but also S3 and GCS.
 
     *Note*: FilePathDataConnector is not meant to be used on its own, but extended. Currently
@@ -44,7 +44,7 @@ class FilePathDataConnector(DataConnector):
         and sorters for filtering and sorting data_references.
 
         Args:
-            name (str): name of ConfiguredAssetFilePathDataConnector
+            name (str): name of FilePathDataConnector
             datasource_name (str): Name of datasource that this DataConnector is connected to
             execution_engine (ExecutionEngine): Execution Engine object to actually read the data
             default_regex (dict): Optional dict the filter and organize the data_references.
@@ -152,7 +152,8 @@ class FilePathDataConnector(DataConnector):
         self, batch_definition_list: List[BatchDefinition]
     ) -> List[BatchDefinition]:
         """
-            Use configured sorters to sort batch_definition
+        Use configured sorters to sort batch_definition
+
         Args:
             batch_definition_list (list): list of batch_definitions to sort
 

@@ -11,17 +11,16 @@ logger = logging.getLogger(__name__)
 
 class InferredAssetFilePathDataConnector(FilePathDataConnector):
     """
-    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
-    can use to get individual batches of data. They add flexibility in how to obtain data
-    such as with time-based partitioning, downsampling, or other techniques appropriate
-    for the Datasource.
-
     The InferredAssetFilePathDataConnector is one of two classes (ConfiguredAssetFilePathDataConnector being the
     other one) designed for connecting to filesystem-like data. This includes files on disk, but also things
     like S3 object stores, etc:
 
-    InferredAssetFilePathDataConnector is a base class operates on file paths and determine
-    the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names.
+    InferredAssetFilePathDataConnector is a base class that operates on file paths and determine
+    the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
+
+    *Note*: InferredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently
+    InferredAssetFilesystemDataConnector and InferredAssetS3DataConnector are subclasses of
+    InferredAssetFilePathDataConnector.
     """
 
     def __init__(
@@ -39,7 +38,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Args:
             name (str): name of ConfiguredAssetFilePathDataConnector
             datasource_name (str): Name of datasource that this DataConnector is connected to
-            execution_engine (ExecutionEngine): Execution Engine object to actually read the data
+            execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
             default_regex (dict): Optional dict the filter and organize the data_references.
             sorters (list): Optional list if you want to sort the data_references
         """
@@ -68,11 +67,11 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
     def get_data_reference_list_count(self) -> int:
         """
-        Returns the list of data_references known by this data connector by looping over all data_asset_names in
+        Returns the list of data_references known by this DataConnector by looping over all data_asset_names in
         _data_references_cache
 
         Returns:
-            number of data_references known by this data connector.
+            number of data_references known by this DataConnector
         """
         if self._data_references_cache is None:
             raise ValueError(
@@ -84,10 +83,10 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
     def get_unmatched_data_references(self) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
-        and returning data_reference that do not have an associated data_asset.
+        and returning data_references that do not have an associated data_asset.
 
         Returns:
-            list of data_references that are unnmatched by configuration.
+            list of data_references that are not matched by configuration.
         """
         if self._data_references_cache is None:
             raise ValueError(
@@ -98,7 +97,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
     def get_available_data_asset_names(self) -> List[str]:
         """
-        Return the list of asset names known by this data connector.
+        Return the list of asset names known by this DataConnector
 
         Returns:
             A list of available names

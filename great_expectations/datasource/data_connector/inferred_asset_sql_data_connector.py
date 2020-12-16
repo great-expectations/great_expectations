@@ -34,7 +34,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         introspection_directives: Dict = None,
     ):
         """
-        InferredAssetDataConnector for connecting to data on Sql.
+        InferredAssetDataConnector for connecting to data on a SQL database
 
         Args:
             name (str): The name of this DataConnector

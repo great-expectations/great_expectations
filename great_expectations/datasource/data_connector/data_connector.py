@@ -41,8 +41,8 @@ class DataConnector:
         Base class for DataConnectors
 
         Args:
-            name (str): required name for data_connector
-            datasource_name (str): required name for dataasource
+            name (str): required name for DataConnector
+            datasource_name (str): required name for datasource
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
 
         """
@@ -173,7 +173,7 @@ class DataConnector:
 
     def self_check(self, pretty_print=True, max_examples=3):
         """
-        Checks the configuration of the current data_conenctor object by doing the following :
+        Checks the configuration of the current DataConnector by doing the following :
 
         1. refresh or create data_reference_cache
         2. print batch_definition_count and example_data_references for each data_asset_names
@@ -319,8 +319,8 @@ class DataConnector:
     def _validate_batch_request(self, batch_request: BatchRequest):
         """
         Validate batch_request by checking:
-        1. if configured datasource_name matches batch_request's datasource_name
-        2. if current data_connector_name matches batch_request's data_connector_name
+            1. if configured datasource_name matches batch_request's datasource_name
+            2. if current data_connector_name matches batch_request's data_connector_name
 
         Args:
             batch_request (BatchRequest): batch_request to validate
