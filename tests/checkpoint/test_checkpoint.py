@@ -26,13 +26,17 @@ def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(
         "reader_method": "read_csv",
     }
 
+    checkpoint_config_dict = {
+        "validation_operator_name": "action_list_operator",
+        "batches": [
+            {"batch_kwargs": batch_kwargs, "expectation_suite_names": ["my_suite"]}
+        ],
+    }
+
     checkpoint = LegacyCheckpoint(
         data_context=filesystem_csv_data_context,
         name="my_checkpoint",
-        validation_operator_name="action_list_operator",
-        batches=[
-            {"batch_kwargs": batch_kwargs, "expectation_suite_names": ["my_suite"]}
-        ],
+        checkpoint_config=checkpoint_config_dict,
     )
 
     with pytest.raises(

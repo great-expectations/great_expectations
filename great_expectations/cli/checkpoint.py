@@ -171,40 +171,46 @@ datasources paired with one or more Expectation Suites each.
     default=None,
     help="The project's great_expectations directory.",
 )
+@click.option("--legacy/--non-legacy", default=True)
 @mark.cli_as_experimental
-def checkpoint_new(checkpoint, suite, directory, datasource):
+def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
     """Create a new checkpoint for easy deployments. (Experimental)"""
-    suite_name = suite
-    usage_event = "cli.checkpoint.new"
-    context = toolkit.load_data_context_with_error_handling(directory)
-    _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
-    suite: ExpectationSuite = toolkit.load_expectation_suite(
-        context, suite_name, usage_event
-    )
-    datasource = toolkit.select_datasource(context, datasource_name=datasource)
-    if datasource is None:
-        send_usage_message(context, usage_event, success=False)
-        sys.exit(1)
-    _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
+    if legacy:
+        suite_name = suite
+        usage_event = "cli.checkpoint.new"
+        context = toolkit.load_data_context_with_error_handling(directory)
+        _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
+        suite: ExpectationSuite = toolkit.load_expectation_suite(
+            context, suite_name, usage_event
+        )
+        datasource = toolkit.select_datasource(context, datasource_name=datasource)
+        if datasource is None:
+            send_usage_message(context, usage_event, success=False)
+            sys.exit(1)
+        _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
 
-    _ = context.create_checkpoint(
-        checkpoint,
-        {
-            "validation_operator_name": "action_list_operator",
-            "batches": [
-                {
-                    "batch_kwargs": dict(batch_kwargs),
-                    "expectation_suite_names": [suite.expectation_suite_name],
-                }
-            ],
-        },
-    )
+        _ = context.create_checkpoint(
+            checkpoint,
+            {
+                "class_name": "LegacyCheckpoint",
+                "validation_operator_name": "action_list_operator",
+                "batches": [
+                    {
+                        "batch_kwargs": dict(batch_kwargs),
+                        "expectation_suite_names": [suite.expectation_suite_name],
+                    }
+                ],
+            },
+        )
 
-    cli_message(
-        f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
-  - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
-    )
-    send_usage_message(context, usage_event, success=True)
+        cli_message(
+            f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
+      - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
+        )
+        send_usage_message(context, usage_event, success=True)
+    # TODO: <Rob>Rob</Rob> Add flow for new style checkpoints
+    else:
+        pass
 
 
 def _verify_checkpoint_does_not_exist(

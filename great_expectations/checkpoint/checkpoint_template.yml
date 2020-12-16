@@ -1,0 +1,23 @@
+# This checkpoint was created by the command `great_expectations checkpoint new`.
+#
+# A checkpoint is a list of one or more batch requests paired with one or more
+# Expectation Suites and a configurable Validation Operator.
+#
+# It can be run with the `great_expectations checkpoint run` command.
+# You can edit this file to add batch requests and expectation suites.
+#
+# For more details please see
+# https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
+
+name: my_fancy_checkpoint
+validations: []
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
