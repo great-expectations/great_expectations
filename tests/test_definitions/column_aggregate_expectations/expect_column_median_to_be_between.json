@@ -31,7 +31,7 @@
       },
       "tests": [
         {
-          "title": "positive_test__min_equal___max",
+          "title": "positive_test_min_equal_max",
           "exact_match_out": false,
           "in": {
             "column": "a",
@@ -44,7 +44,7 @@
           }
         },
         {
-          "title": "positive_test__null_min",
+          "title": "positive_test_null_min",
           "exact_match_out": false,
           "in": {
             "column": "a",
@@ -57,7 +57,7 @@
           }
         },
         {
-          "title": "positive_test__null_max",
+          "title": "positive_test_null_max",
           "exact_match_out": false,
           "in": {
             "column": "a",
@@ -70,7 +70,7 @@
           }
         },
         {
-          "title": "negative_test__min_equal___max",
+          "title": "negative_test_min_equal_max",
           "exact_match_out": false,
           "in": {
             "column": "b",
@@ -83,7 +83,7 @@
           }
         },
         {
-          "title": "negative_test__null_min",
+          "title": "negative_test_null_min",
           "exact_match_out": false,
           "in": {
             "column": "b",
@@ -96,7 +96,7 @@
           }
         },
         {
-          "title": "negative_test__null_max",
+          "title": "negative_test_null_max",
           "exact_match_out": false,
           "in": {
             "column": "b",
@@ -109,7 +109,7 @@
           }
         },
         {
-          "title": "positive_test__missing_value_in_column__exact_min_and_max",
+          "title": "positive_test_missing_value_in_column_exact_min_and_max",
           "exact_match_out": false,
           "in": {
             "column": "c",
@@ -123,7 +123,7 @@
           }
         },
         {
-          "title": "negative_test__missing_value_in_column__complete_result_format",
+          "title": "negative_test_missing_value_in_column_complete_result_format",
           "exact_match_out": true,
           "in": {
             "column": "c",
@@ -165,7 +165,7 @@
         }
       },
       "tests": [{
-        "title": "test_empty_column__should_be_false_no_observed_value_with_which_to_compare",
+        "title": "test_empty_column_should_be_false_no_observed_value_with_which_to_compare",
         "exact_match_out": false,
         "in": {
           "column": "empty_column",
