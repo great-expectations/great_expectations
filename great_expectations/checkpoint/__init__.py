@@ -1,1 +1,1 @@
-from .checkpoint import LegacyCheckpoint, Checkpoint
+from .checkpoint import Checkpoint, LegacyCheckpoint

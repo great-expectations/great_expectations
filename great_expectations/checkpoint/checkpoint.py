@@ -6,7 +6,10 @@ from typing import Union
 from ruamel.yaml import YAML, YAMLError
 
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.types.base import LegacyCheckpointConfig, legacyCheckpointConfigSchema
+from great_expectations.data_context.types.base import (
+    LegacyCheckpointConfig,
+    legacyCheckpointConfigSchema,
+)
 from great_expectations.exceptions import CheckpointError
 
 
@@ -21,9 +24,11 @@ class LegacyCheckpoint(object):
         self._name = name
 
         if not isinstance(checkpoint_config, (LegacyCheckpointConfig, dict)):
-            raise CheckpointError(f"Invalid checkpoint_config type - must be LegacyCheckpointConfig or "
-                                  f"dict, "
-                                  f"instead got {type(checkpoint_config)}")
+            raise CheckpointError(
+                f"Invalid checkpoint_config type - must be LegacyCheckpointConfig or "
+                f"dict, "
+                f"instead got {type(checkpoint_config)}"
+            )
         elif isinstance(checkpoint_config, dict):
             checkpoint_config = legacyCheckpointConfigSchema.load(checkpoint_config)
         self._checkpoint_config = checkpoint_config

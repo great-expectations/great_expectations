@@ -1322,17 +1322,19 @@ class DataContextConfig(BaseYamlConfig):
 
 class LegacyCheckpointConfig(BaseYamlConfig):
     def __init__(
-            self,
-            module_name: Optional[str] = None,
-            class_name: Optional[str] = None,
-            validation_operator_name: Optional[str] = None,
-            batches: Optional[list] = None,
-            commented_map: Optional[CommentedMap] = None
+        self,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[list] = None,
+        commented_map: Optional[CommentedMap] = None,
     ):
         super().__init__(commented_map=commented_map)
         self._module_name = module_name or "great_expectations.checkpoint"
         self._class_name = class_name or "LegacyCheckpointConfig"
-        self._validation_operator_name = validation_operator_name or "action_list_operator"
+        self._validation_operator_name = (
+            validation_operator_name or "action_list_operator"
+        )
         self._batches = batches or []
 
     @property
@@ -1367,9 +1369,11 @@ class LegacyCheckpointConfigSchema(Schema):
     class_name = fields.Str()
     module_name = fields.Str()
     validation_operator_name = fields.Str()
-    batches = fields.List(fields.Dict(
-        keys=fields.Str(validate=OneOf(["batch_kwargs", "expectation_suite_names"]))
-    ))
+    batches = fields.List(
+        fields.Dict(
+            keys=fields.Str(validate=OneOf(["batch_kwargs", "expectation_suite_names"]))
+        )
+    )
 
     @post_load
     def make_legacy_checkpoint_config(self, data, **kwargs):

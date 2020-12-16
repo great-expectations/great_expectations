@@ -53,8 +53,10 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
+    checkpointConfigSchema,
     dataContextConfigSchema,
-    datasourceConfigSchema, legacyCheckpointConfigSchema, checkpointConfigSchema,
+    datasourceConfigSchema,
+    legacyCheckpointConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -3166,7 +3168,7 @@ class DataContext(BaseDataContext):
         new_checkpoint = instantiate_class_from_config(
             config={
                 "checkpoint_config": config_obj,
-                "class_name": config_obj.class_name
+                "class_name": config_obj.class_name,
             },
             runtime_environment={
                 "data_context": self,
@@ -3218,9 +3220,7 @@ class DataContext(BaseDataContext):
             template_filename = "legacy_checkpoint_template.yml"
         else:
             template_filename = "checkpoint_template.yml"
-        template_file = file_relative_path(
-            __file__, os.path.join(template_filename)
-        )
+        template_file = file_relative_path(__file__, os.path.join(template_filename))
         with open(template_file, "r") as f:
             template = yaml.load(f)
         return template

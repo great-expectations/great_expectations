@@ -36,7 +36,7 @@ def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     checkpoint = LegacyCheckpoint(
         data_context=filesystem_csv_data_context,
         name="my_checkpoint",
-        checkpoint_config=checkpoint_config_dict
+        checkpoint_config=checkpoint_config_dict,
     )
 
     with pytest.raises(
