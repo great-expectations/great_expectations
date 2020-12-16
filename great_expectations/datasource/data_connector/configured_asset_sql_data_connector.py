@@ -107,6 +107,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return column_names
 
     def get_available_data_asset_names(self):
+        """
+        Return the list of asset names known by this DataConnector.
+
+        Returns:
+            A list of available names
+        """
         return list(self.data_assets.keys())
 
     def get_unmatched_data_references(self) -> List[str]:
