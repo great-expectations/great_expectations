@@ -2,7 +2,11 @@ import logging
 from typing import Any, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.store import ConfigurationStore, StoreBackend
+from great_expectations.data_context.store import (
+    CheckpointStore,
+    ConfigurationStore,
+    StoreBackend,
+)
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -52,6 +56,22 @@ def build_configuration_store(
         store_config=store_config, module_name=module_name, runtime_environment=None,
     )
     return configuration_store
+
+
+def build_checkpoint_store_using_store_backend(
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    overwrite_existing: bool = False,
+) -> CheckpointStore:
+    return cast(
+        CheckpointStore,
+        build_configuration_store(
+            configuration_class=CheckpointConfig,
+            store_name=store_name,
+            store_backend=store_backend,
+            overwrite_existing=overwrite_existing,
+        ),
+    )
 
 
 def save_config_to_store_backend(
@@ -115,29 +135,26 @@ def save_checkpoint_config_to_store_backend(
     checkpoint_name: str,
     checkpoint_configuration: CheckpointConfig,
 ):
-    save_config_to_store_backend(
-        configuration_class=CheckpointConfig,
-        store_name=store_name,
-        store_backend=store_backend,
-        configuration_key=checkpoint_name,
-        configuration=checkpoint_configuration,
+    config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
+        store_name=store_name, store_backend=store_backend, overwrite_existing=True,
     )
+    key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=checkpoint_name,
+    )
+    config_store.set(key=key, value=checkpoint_configuration)
 
 
 def load_checkpoint_config_from_store_backend(
     store_name: str, store_backend: Union[StoreBackend, dict], checkpoint_name: str,
 ) -> CheckpointConfig:
+    config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
+        store_name=store_name, store_backend=store_backend,
+    )
+    key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=checkpoint_name,
+    )
     try:
-        checkpoint_config: CheckpointConfig = cast(
-            CheckpointConfig,
-            load_config_from_store_backend(
-                configuration_class=CheckpointConfig,
-                store_name=store_name,
-                store_backend=store_backend,
-                configuration_key=checkpoint_name,
-            ),
-        )
-        return checkpoint_config
+        return config_store.get(key=key)
     except ge_exceptions.InvalidBaseYamlConfigError as exc:
         logger.error(exc.messages)
         raise ge_exceptions.InvalidCheckpointConfigError(
@@ -148,9 +165,10 @@ def load_checkpoint_config_from_store_backend(
 def delete_checkpoint_config_from_store_backend(
     store_name: str, store_backend: Union[StoreBackend, dict], checkpoint_name: str,
 ):
-    delete_config_from_store_backend(
-        configuration_class=CheckpointConfig,
-        store_name=store_name,
-        store_backend=store_backend,
+    config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
+        store_name=store_name, store_backend=store_backend,
+    )
+    key: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=checkpoint_name,
     )
+    config_store.remove_key(key=key)
