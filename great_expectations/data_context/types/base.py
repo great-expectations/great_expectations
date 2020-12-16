@@ -1355,11 +1355,11 @@ class LegacyCheckpointConfig(BaseYamlConfig):
 
     @classmethod
     def get_config_class(cls):
-        raise cls  # LegacyCheckpointConfig
+        return cls  # LegacyCheckpointConfig
 
     @classmethod
     def get_schema_class(cls):
-        raise LegacyCheckpointConfigSchema
+        return LegacyCheckpointConfigSchema
 
 
 class LegacyCheckpointConfigSchema(Schema):
