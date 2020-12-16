@@ -38,8 +38,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # TODO:
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.data_context.store import CheckpointStore, TupleStoreBackend
 from great_expectations.data_context.store import TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
@@ -706,8 +704,20 @@ class BaseDataContext:
         }
 
     @property
+    def checkpoint_store_name(self):
+        return self._project_config_with_variables_substituted.checkpoint_store_name
+
+    @property
+    def checkpoint_store(self):
+        return self.stores[self.checkpoint_store_name]
+
+    @property
     def expectations_store_name(self):
         return self._project_config_with_variables_substituted.expectations_store_name
+
+    @property
+    def expectations_store(self):
+        return self.stores[self.expectations_store_name]
 
     @property
     def data_context_id(self):
@@ -1735,7 +1745,7 @@ class BaseDataContext:
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""
         try:
-            keys = self.stores[self.expectations_store_name].list_keys()
+            keys = self.expectations_store.list_keys()
         except KeyError as e:
             raise ge_exceptions.InvalidConfigError(
                 "Unable to find configured store: %s" % str(e)
@@ -1774,12 +1784,14 @@ class BaseDataContext:
         List active Stores on this context. Active stores are identified by setting the following parameters:
             expectations_store_name,
             validations_store_name,
-            evaluation_parameter_store_name
+            evaluation_parameter_store_name,
+            checkpoint_store_name
         """
         active_store_names = [
             self.expectations_store_name,
             self.validations_store_name,
             self.evaluation_parameter_store_name,
+            self.checkpoint_store_name,
         ]
         return [
             store for store in self.list_stores() if store["name"] in active_store_names
@@ -1821,7 +1833,7 @@ class BaseDataContext:
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
         if (
-            self._stores[self.expectations_store_name].has_key(key)
+            self.expectations_store.has_key(key)
             and not overwrite_existing
         ):
             raise ge_exceptions.DataContextError(
@@ -1831,7 +1843,7 @@ class BaseDataContext:
                 )
             )
         else:
-            self._stores[self.expectations_store_name].set(key, expectation_suite)
+            self.expectations_store.set(key, expectation_suite)
 
         return expectation_suite
 
@@ -1845,12 +1857,12 @@ class BaseDataContext:
             True for Success and False for Failure.
         """
         key = ExpectationSuiteIdentifier(expectation_suite_name)
-        if not self._stores[self.expectations_store_name].has_key(key):
+        if not self.expectations_store.has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
             )
         else:
-            self._stores[self.expectations_store_name].remove_key(key)
+            self.expectations_store.remove_key(key)
             return True
 
     def get_expectation_suite(self, expectation_suite_name):
@@ -1864,8 +1876,8 @@ class BaseDataContext:
         """
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
-        if self.stores[self.expectations_store_name].has_key(key):
-            return self.stores[self.expectations_store_name].get(key)
+        if self.expectations_store.has_key(key):
+            return self.expectations_store.get(key)
         else:
             raise ge_exceptions.DataContextError(
                 "expectation_suite %s not found" % expectation_suite_name
@@ -1904,7 +1916,7 @@ class BaseDataContext:
                 expectation_suite_name=expectation_suite_name
             )
 
-        self.stores[self.expectations_store_name].set(key, expectation_suite)
+        self.expectations_store.set(key, expectation_suite)
         self._evaluation_parameter_dependencies_compiled = False
 
     def _store_metrics(self, requested_metrics, validation_results, target_store_name):
@@ -2015,8 +2027,8 @@ class BaseDataContext:
 
     def _compile_evaluation_parameter_dependencies(self):
         self._evaluation_parameter_dependencies = {}
-        for key in self.stores[self.expectations_store_name].list_keys():
-            expectation_suite = self.stores[self.expectations_store_name].get(key)
+        for key in self.expectations_store.list_keys():
+            expectation_suite = self.expectations_store.get(key)
             if not expectation_suite:
                 continue
 
@@ -2686,22 +2698,23 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             if os.path.basename(f).endswith(".yml")
         ]
 
-    def get_checkpoint(self, checkpoint_name: str) -> dict:
-        """Load a checkpoint. (Experimental)"""
-        # TODO mark experimental
-        yaml = YAML(typ="safe")
-        # TODO make a serializable class with a schema
-        checkpoint_path = os.path.join(
-            self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
-        )
-        try:
-            with open(checkpoint_path) as f:
-                checkpoint = yaml.load(f.read())
-                return self._validate_checkpoint(checkpoint, checkpoint_name)
-        except FileNotFoundError:
-            raise ge_exceptions.CheckpointNotFoundError(
-                f"Could not find checkpoint `{checkpoint_name}`."
-            )
+    # TODO: <Alex>ALEX</Alex>
+    # def get_checkpoint(self, checkpoint_name: str) -> dict:
+    #     """Load a checkpoint. (Experimental)"""
+    #     # TODO mark experimental
+    #     yaml = YAML(typ="safe")
+    #     # TODO make a serializable class with a schema
+    #     checkpoint_path = os.path.join(
+    #         self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
+    #     )
+    #     try:
+    #         with open(checkpoint_path) as f:
+    #             checkpoint = yaml.load(f.read())
+    #             return self._validate_checkpoint(checkpoint, checkpoint_name)
+    #     except FileNotFoundError:
+    #         raise ge_exceptions.CheckpointNotFoundError(
+    #             f"Could not find checkpoint `{checkpoint_name}`."
+    #         )
 
     # TODO: <Alex>ALEX</Alex>
     def run_checkpoint(
@@ -3108,18 +3121,6 @@ class DataContext(BaseDataContext):
         ):
             self._save_project_config()
 
-        # TODO: <Alex>ALEX</Alex>
-        # self.checkpoint_store = CheckpointStore(
-        #     store_backend={
-        #         "module_name": "great_expectations.data_context.store",
-        #         "class_name": "TupleFilesystemStoreBackend",
-        #         "filepath_suffix": ".yml",
-        #         "base_directory": os.path.join(
-        #             self.root_directory, self.CHECKPOINTS_DIR
-        #         ),
-        #     }
-        # )
-
     def _load_project_config(self):
         """
         Reads the project configuration from the project configuration file.
@@ -3152,6 +3153,7 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
+    # TODO: <Alex>ALEX</Alex>
     def create_checkpoint(
         self, checkpoint_name: str, checkpoint_config: dict,
     ):
@@ -3207,10 +3209,10 @@ class DataContext(BaseDataContext):
     #     return checkpoint
 
     # TODO: <Alex>ALEX</Alex>
-    # def list_checkpoints(self) -> List[str]:
-    #     """List checkpoints. (Experimental)"""
-    #     return [x._key for x in self.checkpoint_store.list_keys()]
+    def list_checkpoints(self) -> List[str]:
+        return [x.configuration_key for x in self.checkpoint_store.list_keys()]
 
+    # TODO: <Alex>ALEX</Alex>
     def _load_checkpoint_yml_template(self) -> dict:
         template_file = file_relative_path(
             __file__, os.path.join("legacy_checkpoint_template.yml")

@@ -32,6 +32,7 @@ def test_get_config(empty_data_context):
         "expectations_store_name",
         "validations_store_name",
         "evaluation_parameter_store_name",
+        "checkpoint_store_name",
         "data_docs_sites",
         "anonymous_usage_statistics",
         "notebooks",
