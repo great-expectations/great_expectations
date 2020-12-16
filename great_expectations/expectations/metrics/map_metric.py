@@ -1370,6 +1370,12 @@ class MapMetricProvider(MetricProvider):
                     base_metric_value_kwargs,
                 )
 
+        try:
+            _ = get_metric_provider(metric_name + ".map")
+            dependencies["metric_map_fn"] = MetricConfiguration(metric_name + ".map", metric.metric_domain_kwargs, metric.metric_value_kwargs)
+        except MetricProviderError:
+            pass
+
         return dependencies
 
 
