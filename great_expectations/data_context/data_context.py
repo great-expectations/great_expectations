@@ -1,4 +1,3 @@
-from great_expectations.data_context.types.base import CheckpointConfig
 import configparser
 import copy
 import datetime
@@ -39,8 +38,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # TODO:
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.data_context.store import CheckpointStore, TupleStoreBackend
 from great_expectations.data_context.store import TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
@@ -60,7 +57,6 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
-    ConfigurationIdentifier,
 )
 from great_expectations.data_context.util import (
     build_store_from_config,
