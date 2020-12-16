@@ -51,12 +51,14 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
+    checkpointConfigSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
+    legacyCheckpointConfigSchema, CheckpointConfig, LegacyCheckpointConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
+    ValidationResultIdentifier, ConfigurationIdentifier,
 )
 from great_expectations.data_context.util import (
     build_store_from_config,
@@ -2659,64 +2661,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return profiling_results
 
     # TODO: <Alex>ALEX</Alex>
-    @staticmethod
-    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
-        if checkpoint is None:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
-            )
-        if "validation_operator_name" not in checkpoint:
-            checkpoint["validation_operator_name"] = "action_list_operator"
-
-        if "batches" not in checkpoint:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
-            )
-        batches = checkpoint["batches"]
-        if not isinstance(batches, list):
-            raise ge_exceptions.CheckpointError(
-                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
-            )
-
-        for batch in batches:
-            for required in ["expectation_suite_names", "batch_kwargs"]:
-                if required not in batch:
-                    raise ge_exceptions.CheckpointError(
-                        f"Items in `batches` must have a key `{required}`"
-                    )
-
-        return checkpoint
-
-    # TODO: <Alex>ALEX</Alex>
-    def list_checkpoints(self) -> List[str]:
-        """List checkpoints. (Experimental)"""
-        # TODO mark experimental
-        files = self._list_ymls_in_checkpoints_directory()
-        return [
-            os.path.basename(f)[:-4]
-            for f in files
-            if os.path.basename(f).endswith(".yml")
-        ]
-
-    # TODO: <Alex>ALEX</Alex>
-    # def get_checkpoint(self, checkpoint_name: str) -> dict:
-    #     """Load a checkpoint. (Experimental)"""
-    #     # TODO mark experimental
-    #     yaml = YAML(typ="safe")
-    #     # TODO make a serializable class with a schema
-    #     checkpoint_path = os.path.join(
-    #         self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
-    #     )
-    #     try:
-    #         with open(checkpoint_path) as f:
-    #             checkpoint = yaml.load(f.read())
-    #             return self._validate_checkpoint(checkpoint, checkpoint_name)
-    #     except FileNotFoundError:
-    #         raise ge_exceptions.CheckpointNotFoundError(
-    #             f"Could not find checkpoint `{checkpoint_name}`."
-    #         )
-
-    # TODO: <Alex>ALEX</Alex>
     def run_checkpoint(
         self,
         checkpoint_name: str,
@@ -2763,12 +2707,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
         return results
-
-    # TODO: <Alex>ALEX</Alex>
-    def _list_ymls_in_checkpoints_directory(self):
-        checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
-        files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
-        return files
 
     def test_yaml_config(
         self,
@@ -3153,21 +3091,22 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    # TODO: <Alex>ALEX</Alex>
     def create_checkpoint(
         self, checkpoint_name: str, checkpoint_config: dict,
     ):
-        self._validate_checkpoint_config(
-            checkpoint_config, checkpoint_name,
-        )
+        commented_map = self._load_checkpoint_yml_template(checkpoint_config)
+        commented_map.update(checkpoint_config)
 
-        checkpoint_config["class_name"] = "LegacyCheckpoint"
-
-        template = self._load_checkpoint_yml_template()
-        checkpoint_config["template"] = template
+        if checkpoint_config.get("class_name") == "LegacyCheckpoint":
+            config_obj = LegacyCheckpointConfig.from_commented_map(commented_map)
+        else:
+            config_obj = CheckpointConfig.from_commented_map(commented_map)
 
         new_checkpoint = instantiate_class_from_config(
-            config=checkpoint_config,
+            config={
+                "checkpoint_config": config_obj,
+                "class_name": config_obj.class_name,
+            },
             runtime_environment={
                 "data_context": self,
                 "name": StringKey(checkpoint_name),
@@ -3178,79 +3117,54 @@ class DataContext(BaseDataContext):
         )
 
         # TODO: <Alex>ALEX</Alex>
-        # self.checkpoint_store.set(
-        #     StringKey(checkpoint_name), new_checkpoint,
-        # )
+        self.checkpoint_store.set(
+            ConfigurationIdentifier(checkpoint_name), config_obj,
+        )
 
         return new_checkpoint
 
     # TODO: <Alex>ALEX</Alex>
-    # def get_checkpoint(self, checkpoint_name: str, return_config: bool = True):
-    #     """Load a checkpoint. (Experimental)"""
-    #
-    #     checkpoint_config = self.checkpoint_store.get(StringKey(checkpoint_name))
-    #     self._validate_checkpoint_config(
-    #         checkpoint_config, checkpoint_name,
-    #     )
-    #
-    #     if return_config:
-    #         return checkpoint_config
-    #
-    #     checkpoint_config["class_name"] = "LegacyCheckpoint"
-    #
-    #     checkpoint = instantiate_class_from_config(
-    #         config=checkpoint_config,
-    #         runtime_environment={"data_context": self, "name": checkpoint_name,},
-    #         config_defaults={
-    #             "module_name": "great_expectations.checkpoint.checkpoint",
-    #         },
-    #     )
-    #
-    #     return checkpoint
+    def get_checkpoint(self, checkpoint_name: str, return_config: bool = True):
+        """Load a checkpoint. (Experimental)"""
+
+        commented_map = self.checkpoint_store.get(ConfigurationIdentifier(checkpoint_name))
+        if "config_version" in commented_map:
+            checkpoint_config = CheckpointConfig.from_commented_map(commented_map)
+        else:
+            checkpoint_config = LegacyCheckpointConfig.from_commented_map(commented_map)
+
+        if return_config:
+            return checkpoint_config
+
+        checkpoint_config["class_name"] = "LegacyCheckpoint"
+
+        checkpoint = instantiate_class_from_config(
+            config={
+                "checkpoint_config": checkpoint_config,
+                "class_name": "Checkpoint" if isinstance(checkpoint_config, CheckpointConfig) else "LegacyCheckpoint"
+            },
+            runtime_environment={"data_context": self, "name": checkpoint_name,},
+            config_defaults={
+                "module_name": "great_expectations.checkpoint",
+            },
+        )
+
+        return checkpoint
 
     # TODO: <Alex>ALEX</Alex>
     def list_checkpoints(self) -> List[str]:
         return [x.configuration_key for x in self.checkpoint_store.list_keys()]
 
     # TODO: <Alex>ALEX</Alex>
-    def _load_checkpoint_yml_template(self) -> dict:
-        template_file = file_relative_path(
-            __file__, os.path.join("legacy_checkpoint_template.yml")
-        )
+    def _load_checkpoint_yml_template(self, checkpoint_config) -> CommentedMap:
+        if checkpoint_config.get("class_name") == "LegacyCheckpoint":
+            template_filename = "legacy_checkpoint_template.yml"
+        else:
+            template_filename = "checkpoint_template.yml"
+        template_file = file_relative_path(__file__, os.path.join(template_filename))
         with open(template_file, "r") as f:
             template = yaml.load(f)
         return template
-
-    @staticmethod
-    def _validate_checkpoint_config(
-        checkpoint_config: dict, checkpoint_name: str
-    ) -> dict:
-        if checkpoint_config is None:
-            raise ge_exceptions.CheckpointError(
-                f"LegacyCheckpoint `{checkpoint_name}` has no contents. Please fix this."
-            )
-
-        if "validation_operator_name" not in checkpoint_config:
-            checkpoint_config["validation_operator_name"] = "action_list_operator"
-
-        if "batches" not in checkpoint_config:
-            raise ge_exceptions.CheckpointError(
-                f"LegacyCheckpoint `{checkpoint_name}` is missing required key: `batches`."
-            )
-        batches = checkpoint_config["batches"]
-        if not isinstance(batches, list):
-            raise ge_exceptions.CheckpointError(
-                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
-            )
-
-        for batch in batches:
-            for required in ["expectation_suite_names", "batch_kwargs"]:
-                if required not in batch:
-                    raise ge_exceptions.CheckpointError(
-                        f"Items in `batches` must have a key `{required}`"
-                    )
-
-        return checkpoint_config
 
     def _save_project_config(self):
         """Save the current project to disk."""

@@ -21,10 +21,12 @@ from great_expectations.marshmallow__shade import (
     post_load,
     validates_schema,
 )
+from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
 
 yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
 
 logger = logging.getLogger(__name__)
 
@@ -1319,6 +1321,62 @@ class DataContextConfig(BaseYamlConfig):
         return self._config_version
 
 
+class LegacyCheckpointConfig(BaseYamlConfig):
+    def __init__(
+        self,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[list] = None,
+        commented_map: Optional[CommentedMap] = None,
+    ):
+        super().__init__(commented_map=commented_map)
+        self._module_name = module_name or "great_expectations.checkpoint"
+        self._class_name = class_name or "LegacyCheckpointConfig"
+        self._validation_operator_name = (
+            validation_operator_name or "action_list_operator"
+        )
+        self._batches = batches or []
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def validation_operator_name(self):
+        return self._validation_operator_name
+
+    @property
+    def batches(self):
+        return self._batches
+
+    @classmethod
+    def get_config_class(cls):
+        return cls  # LegacyCheckpointConfig
+
+    @classmethod
+    def get_schema_class(cls):
+        return LegacyCheckpointConfigSchema
+
+
+class LegacyCheckpointConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.Str()
+    module_name = fields.Str()
+    validation_operator_name = fields.Str()
+    batches = fields.List(
+        fields.Dict(
+            keys=fields.Str(validate=OneOf(["batch_kwargs", "expectation_suite_names"]))
+        )
+    )
+
+
 class CheckpointConfig(BaseYamlConfig):
     def __init__(
         self,
@@ -1458,6 +1516,27 @@ class CheckpointValidationConfigSchema(Schema):
     pass
 
 
+# class SimpleCheckpointConfig(CheckpointConfig):
+#     def __init__(
+#             self,
+#             name: str,
+#             config_version: Optional[int] = None,
+#             template: Optional[str] = None,
+#             module_name: Optional[str] = None,
+#             class_name: Optional[str] = None,
+#             run_name_template: Optional[str] = None,
+#             expectation_suite_name: Optional[str] = None,
+#             batch_request: Optional[BatchRequest] = None,
+#             action_list: Optional[List[dict]] = None,
+#             evaluation_parameters: Optional[dict] = None,
+#             runtime_configuration: Optional[dict] = None,
+#             validations: Optional[List[dict]] = None,
+#             profilers: Optional[List[dict]] = None,
+#             commented_map: Optional[CommentedMap] = None,
+#     ):
+#         pass
+
+
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
@@ -1466,3 +1545,4 @@ sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
+legacyCheckpointConfigSchema = LegacyCheckpointConfigSchema()
