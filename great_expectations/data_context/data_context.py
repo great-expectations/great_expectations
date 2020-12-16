@@ -3132,7 +3132,7 @@ class DataContext(BaseDataContext):
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
             with open(path_to_yml) as data:
-                config_dict = yaml.load(data)
+                config_commented_map_from_yaml = yaml.load(data)
 
         except YAMLError as err:
             raise ge_exceptions.InvalidConfigurationYamlError(
@@ -3148,7 +3148,7 @@ class DataContext(BaseDataContext):
             raise ge_exceptions.ConfigNotFoundError()
 
         try:
-            return DataContextConfig.from_commented_map(config_dict)
+            return DataContextConfig.from_commented_map(commented_map=config_commented_map_from_yaml)
         except ge_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
@@ -3314,9 +3314,9 @@ class DataContext(BaseDataContext):
             return
 
         with open(yml_path) as f:
-            config_dict = yaml.load(f)
+            config_commented_map_from_yaml = yaml.load(f)
 
-        config_version = config_dict.get("config_version")
+        config_version = config_commented_map_from_yaml.get("config_version")
         return float(config_version) if config_version else None
 
     @classmethod
@@ -3347,11 +3347,11 @@ class DataContext(BaseDataContext):
             return False
 
         with open(yml_path) as f:
-            config_dict = yaml.load(f)
-            config_dict["config_version"] = config_version
+            config_commented_map_from_yaml = yaml.load(f)
+            config_commented_map_from_yaml["config_version"] = config_version
 
         with open(yml_path, "w") as f:
-            yaml.dump(config_dict, f)
+            yaml.dump(config_commented_map_from_yaml, f)
 
         return True
 

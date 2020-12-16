@@ -211,20 +211,20 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     )
     path_to_yml = file_relative_path(__file__, path_to_yml)
     with open(path_to_yml) as data:
-        config_dict = yaml.load(data)
-    expected_config = DataContextConfig.from_commented_map(config_dict)
-    expected_config_dict = dataContextConfigSchema.dump(expected_config)
-    expected_config_dict.pop("anonymous_usage_statistics")
+        config_commented_map_from_yaml = yaml.load(data)
+    expected_config = DataContextConfig.from_commented_map(config_commented_map_from_yaml)
+    expected_config_commented_map = dataContextConfigSchema.dump(expected_config)
+    expected_config_commented_map.pop("anonymous_usage_statistics")
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
     context = ge.data_context.DataContext(context_path)
     context._save_project_config()
-    context_config_dict = dataContextConfigSchema.dump(
+    context_config_commented_map = dataContextConfigSchema.dump(
         ge.data_context.DataContext(context_path)._project_config
     )
-    context_config_dict.pop("anonymous_usage_statistics")
+    context_config_commented_map.pop("anonymous_usage_statistics")
 
-    assert context_config_dict == expected_config_dict
+    assert context_config_commented_map == expected_config_commented_map
 
 
 def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypatch):
