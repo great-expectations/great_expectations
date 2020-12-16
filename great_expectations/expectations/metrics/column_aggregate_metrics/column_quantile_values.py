@@ -32,7 +32,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
-    column_aggregate_partial,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
@@ -92,6 +91,23 @@ class ColumnQuantileValues(ColumnMetricProvider):
             return _get_column_quantiles_mysql(
                 column=column,
                 quantiles=quantiles,
+                selectable=selectable,
+                sqlalchemy_engine=sqlalchemy_engine,
+            )
+        elif dialect.name.lower() == "snowflake":
+            # NOTE: 20201216 - JPC - snowflake has a representation/precision limitation
+            # in its percentile_disc implementation that causes an error when we do
+            # not round. It is unclear to me *how* the call to round affects the behavior --
+            # the binary representation should be identical before and after, and I do
+            # not observe a type difference. However, the issue is replicable in the
+            # snowflake console and directly observable in side-by-side comparisons with
+            # and without the call to round()
+            quantiles = [round(x, 10) for x in quantiles]
+            return _get_column_quantiles_generic_sqlalchemy(
+                column=column,
+                quantiles=quantiles,
+                allow_relative_error=allow_relative_error,
+                dialect=dialect,
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
             )

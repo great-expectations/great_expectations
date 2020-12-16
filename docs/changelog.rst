@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+[ENHANCEMENT] Improve support for quantile calculations in Snowflake
 
 0.13.3
 -----------------
