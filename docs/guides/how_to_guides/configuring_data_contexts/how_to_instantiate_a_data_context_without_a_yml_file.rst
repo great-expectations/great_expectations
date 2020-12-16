@@ -9,6 +9,10 @@ This guide will help you instantiate a Data Context without a yml file, aka conf
 
     - :ref:`Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration<tutorials__getting_started>`.
 
+.. note::
+
+    See also our companion video for this guide: `Data Contexts In Code <https://youtu.be/4VMOYpjHNhM>`_.
+
 Steps
 -----
 
