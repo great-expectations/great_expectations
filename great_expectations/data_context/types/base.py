@@ -1375,10 +1375,6 @@ class LegacyCheckpointConfigSchema(Schema):
         )
     )
 
-    @post_load
-    def make_legacy_checkpoint_config(self, data, **kwargs):
-        return LegacyCheckpointConfig(**data)
-
 
 class CheckpointConfig(BaseYamlConfig):
     def __init__(
@@ -1509,10 +1505,6 @@ class CheckpointConfigSchema(Schema):
     runtime_configuration = fields.Dict(allow_none=True)
     validations = fields.List(cls_or_instance=fields.Dict())
     profilers = fields.List(cls_or_instance=fields.Dict())
-
-    @post_load
-    def make_checkpoint_config(self, data, **kwargs):
-        return CheckpointConfig(**data)
 
 
 class CheckpointValidationConfig(DictDot):
