@@ -1,29 +1,52 @@
 import json
 import os
 from io import StringIO
+from typing import Union
 
 from ruamel.yaml import YAML, YAMLError
 
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.util import file_relative_path
+from great_expectations.data_context.types.base import LegacyCheckpointConfig, legacyCheckpointConfigSchema
+from great_expectations.exceptions import CheckpointError
 
 
 class LegacyCheckpoint(object):
     def __init__(
         self,
-        data_context,
-        name,
-        batches,
-        validation_operator_name="action_list_operator",
-        template={},
+        data_context: DataContext,
+        name: str,
+        checkpoint_config: Union[LegacyCheckpointConfig, dict],
     ):
-        self.data_context = data_context
-        self.name = name
+        self._data_context = data_context
+        self._name = name
 
-        self.validation_operator_name = validation_operator_name
-        self.batches = batches
+        if not isinstance(checkpoint_config, (LegacyCheckpointConfig, dict)):
+            raise CheckpointError(f"Invalid checkpoint_config type - must be LegacyCheckpointConfig or "
+                                  f"dict, "
+                                  f"instead got {type(checkpoint_config)}")
+        elif isinstance(checkpoint_config, dict):
+            checkpoint_config = legacyCheckpointConfigSchema.load(checkpoint_config)
+        self._checkpoint_config = checkpoint_config
 
-        self.template = template
+    @property
+    def data_context(self):
+        return self._data_context
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def checkpoint_config(self):
+        return self._checkpoint_config
+
+    @property
+    def validation_operator_name(self):
+        return self.checkpoint_config.validation_operator_name
+
+    @property
+    def batches(self):
+        return self.checkpoint_config.batches
 
     def run(self):
 
@@ -36,35 +59,11 @@ class LegacyCheckpoint(object):
         return results
 
     def get_config(self, format="dict"):
-        config = {
-            "validation_operator_name": self.validation_operator_name,
-            "batches": self.batches,
-        }
-
         if format == "dict":
-            return config
+            return self.checkpoint_config.to_json_dict()
 
         elif format == "yaml":
-            self.template["validation_operator_name"] = config[
-                "validation_operator_name"
-            ]
-
-            if not "batches" in self.template:
-                self.template["batches"] = []
-
-            for i, batch in enumerate(config["batches"]):
-                # NOTE Abe 2020/10/03: This approach could end up with comments attaching to the wrong batches.
-                self.template["batches"][i] = config["batches"][i]
-
-            yaml = YAML()
-            yaml.indent(mapping=2, sequence=4, offset=2)
-
-            string_stream = StringIO()
-            yaml.dump(self.template, string_stream)
-            output_str = string_stream.getvalue()
-            string_stream.close()
-
-            return output_str
+            return self.checkpoint_config.to_yaml_str()
 
         else:
             raise ValueError(f"Unknown format {format} in LegacyCheckpoint.get_config.")
