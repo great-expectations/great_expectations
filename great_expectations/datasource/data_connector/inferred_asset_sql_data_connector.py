@@ -14,24 +14,6 @@ except ImportError:
 class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
     """
     A DataConnector that infers data_asset names by introspecting a SQL database
-
-    Args:
-        name (str): The name of this DataConnector
-        datasource_name (str): The name of the Datasource that contains it
-        execution_engine (ExecutionEngine): An ExecutionEngine
-        data_asset_name_prefix (str): An optional prefix to prepend to inferred data_asset_names
-        data_asset_name_suffix (str): An optional suffix to append to inferred data_asset_names
-        include_schema_name (bool): Should the data_asset_name include the schema as a prefix?
-        splitter_method (str): A method to split the target table into multiple Batches
-        splitter_kwargs (dict): Keyword arguments to pass to splitter_method
-        sampling_method (str): A method to downsample within a target Batch
-        sampling_kwargs (dict): Keyword arguments to pass to sampling_method
-        excluded_tables (List): A list of tables to ignore when inferring data asset_names
-        included_tables (List): If not None, only include tables in this list when inferring data asset_names
-        skip_inapplicable_tables (bool):
-            If True, tables that can't be successfully queried using sampling and splitter methods are excluded from inferred data_asset_names.
-            If False, the class will throw an error during initialization if any such tables are encountered.
-        introspection_directives (Dict): Arguments passed to the introspection method to guide introspection
     """
 
     def __init__(
@@ -51,6 +33,27 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         skip_inapplicable_tables: bool = True,
         introspection_directives: Dict = None,
     ):
+        """
+        InferredAssetDataConnector for connecting to data on Sql.
+
+        Args:
+            name (str): The name of this DataConnector
+            datasource_name (str): The name of the Datasource that contains it
+            execution_engine (ExecutionEngine): An ExecutionEngine
+            data_asset_name_prefix (str): An optional prefix to prepend to inferred data_asset_names
+            data_asset_name_suffix (str): An optional suffix to append to inferred data_asset_names
+            include_schema_name (bool): Should the data_asset_name include the schema as a prefix?
+            splitter_method (str): A method to split the target table into multiple Batches
+            splitter_kwargs (dict): Keyword arguments to pass to splitter_method
+            sampling_method (str): A method to downsample within a target Batch
+            sampling_kwargs (dict): Keyword arguments to pass to sampling_method
+            excluded_tables (List): A list of tables to ignore when inferring data asset_names
+            included_tables (List): If not None, only include tables in this list when inferring data asset_names
+            skip_inapplicable_tables (bool):
+                If True, tables that can't be successfully queried using sampling and splitter methods are excluded from inferred data_asset_names.
+                If False, the class will throw an error during initialization if any such tables are encountered.
+            introspection_directives (Dict): Arguments passed to the introspection method to guide introspection
+        """
         self._data_asset_name_prefix = data_asset_name_prefix
         self._data_asset_name_suffix = data_asset_name_suffix
         self._include_schema_name = include_schema_name

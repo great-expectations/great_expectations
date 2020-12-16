@@ -32,6 +32,17 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
     ):
+        """
+        Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
+        and sorters for filtering and sorting data_references.
+
+        Args:
+            name (str): name of ConfiguredAssetFilePathDataConnector
+            datasource_name (str): Name of datasource that this DataConnector is connected to
+            execution_engine (ExecutionEngine): Execution Engine object to actually read the data
+            default_regex (dict): Optional dict the filter and organize the data_references.
+            sorters (list): Optional list if you want to sort the data_references
+        """
         logger.debug(f'Constructing InferredAssetFilePathDataConnector "{name}".')
 
         super().__init__(
@@ -56,7 +67,13 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
     def get_data_reference_list_count(self) -> int:
-        """ returns number of data_references in data_reference cache or throws an error """
+        """
+        Returns the list of data_references known by this data connector by looping over all data_asset_names in
+        _data_references_cache
+
+        Returns:
+            number of data_references known by this data connector.
+        """
         if self._data_references_cache is None:
             raise ValueError(
                 f"data references cache for {self.__class__.__name__} {self.name} has not yet been populated."
@@ -65,7 +82,13 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         return len(self._data_references_cache)
 
     def get_unmatched_data_references(self) -> List[str]:
-        """ returns number of unmatched in data_references in cache or throws an error"""
+        """
+        Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
+        and returning data_reference that do not have an associated data_asset.
+
+        Returns:
+            list of data_references that are unnmatched by configuration.
+        """
         if self._data_references_cache is None:
             raise ValueError(
                 '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
@@ -74,7 +97,12 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         return [k for k, v in self._data_references_cache.items() if v is None]
 
     def get_available_data_asset_names(self) -> List[str]:
-        """ returns a list of all data_asset_names in data_reference cache or throws an error"""
+        """
+        Return the list of asset names known by this data connector.
+
+        Returns:
+            A list of available names
+        """
         if self._data_references_cache is None:
             self._refresh_data_references_cache()
 

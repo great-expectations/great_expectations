@@ -51,6 +51,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def add_data_asset(
         self, name, config,
     ):
+        """
+        Add data_asset to data_connector using data_asset name as key, and data_asset configuration as value.
+        """
         self._data_assets[name] = config
 
     def _get_partition_definition_list_from_data_asset_config(
@@ -107,6 +110,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return list(self.data_assets.keys())
 
     def get_unmatched_data_references(self) -> List[str]:
+        """
+        Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
+        and returning data_reference that do not have an associated data_asset.
+
+        Returns:
+            list of data_references that are unnmatched by configuration.
+        """
         if self._data_references_cache is None:
             raise ValueError(
                 "_data_references_cache is None. Have you called _refresh_data_references_cache yet?"
@@ -160,6 +170,18 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         ]
 
     def build_batch_spec(self, batch_definition: BatchDefinition):
+        """
+        Build BatchSpec from batch_definition with the following components:
+            1. data_asset_name from batch_definition
+            2. partition_definition from batch_definition
+            3. data_asset from data_connector
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
         data_asset_name = batch_definition.data_asset_name
         batch_spec = BatchSpec(
             {
@@ -168,7 +190,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 **self.data_assets[data_asset_name],
             }
         )
-
         return batch_spec
 
     ### Splitter methods for listing partitions ###

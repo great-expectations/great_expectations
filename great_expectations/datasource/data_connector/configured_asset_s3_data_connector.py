@@ -47,6 +47,22 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         max_keys: int = 1000,
         boto3_options: dict = None,
     ):
+        """
+        ConfiguredAssetDataConnector for connecting to S3.
+
+        Args:
+            name (str): required name for data_connector
+            datasource_name (str): required name for datasource
+            bucket (str): bucket for S3
+            assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
+            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
+            default_regex (dict): optional regex configuration for filtering data_references
+            sorters (list): optional list of sorters for sorting data_references
+            prefix (str): S3 prefix
+            delimiter (str): S3 delimiter
+            max_keys (int): S3 max_keys (default is 1000)
+            boto3_options (dict): additional optional boto3 options
+        """
         logger.debug(f'Constructing ConfiguredAssetS3DataConnector "{name}".')
 
         super().__init__(

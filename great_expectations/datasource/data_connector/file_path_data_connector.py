@@ -25,6 +25,10 @@ class FilePathDataConnector(DataConnector):
     """
     Base-class for Data connectors that are designed for connecting to filesystem-like data, which can include
     files on disk, but also S3 and GCS.
+
+    *Note*: FilePathDataConnector is not meant to be used on its own, but extended. Currently
+    ConfiguredAssetFilePathDataConnector and InferredAssetFilePathDataConnector are subclasses of
+    FilePathDataConnector.
     """
 
     def __init__(
@@ -35,6 +39,17 @@ class FilePathDataConnector(DataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
     ):
+        """
+        Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
+        and sorters for filtering and sorting data_references.
+
+        Args:
+            name (str): name of ConfiguredAssetFilePathDataConnector
+            datasource_name (str): Name of datasource that this DataConnector is connected to
+            execution_engine (ExecutionEngine): Execution Engine object to actually read the data
+            default_regex (dict): Optional dict the filter and organize the data_references.
+            sorters (list): Optional list if you want to sort the data_references
+        """
         logger.debug(f'Constructing FilePathDataConnector "{name}".')
 
         super().__init__(
@@ -94,13 +109,12 @@ class FilePathDataConnector(DataConnector):
 
         First retrieves all batch_definitions that match batch_request
             - if batch_request also has a partition_query, then select batch_definitions that match partition_query.
-            - if data_connector has sorters configured, then sort the batch_definition list before returning
+            - if data_connector has sorters configured, then sort the batch_definition list before returning.
 
         Args:
             batch_request (BatchRequest): BatchRequest to process
 
         Returns:
-
             A list of BatchDefinition objects that match BatchRequest
 
         """
@@ -182,6 +196,15 @@ class FilePathDataConnector(DataConnector):
         )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
         batch_spec = super().build_batch_spec(batch_definition=batch_definition)
         return PathBatchSpec(batch_spec)
 
