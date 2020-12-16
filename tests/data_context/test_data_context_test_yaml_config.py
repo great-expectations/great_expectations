@@ -139,8 +139,7 @@ data_connectors:
 
 
 def test_error_states(empty_data_context):
-
-    first_config = """
+    first_config: str = """
 class_name: Datasource
 
 execution_engine:

@@ -795,8 +795,7 @@ class DataContextConfigSchema(Schema):
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
-    # TODO: <Alex>ALEX</Alex>
-    # checkpoint_store_name = fields.Str()
+    checkpoint_store_name = fields.Str()
     plugins_directory = fields.Str(allow_none=True)
     validation_operators = fields.Dict(keys=fields.Str(), values=fields.Dict())
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
@@ -859,6 +858,7 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
+    DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
     DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
     DEFAULT_PLUGINS_DIRECTORY = "plugins/"
@@ -899,6 +899,13 @@ class DataContextConfigDefaults(enum.Enum):
         DEFAULT_EVALUATION_PARAMETER_STORE_NAME: {
             "class_name": "EvaluationParameterStore"
         },
+        DEFAULT_CHECKPOINT_STORE_NAME: {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": "checkpoints/",
+            },
+        },
     }
     DEFAULT_DATA_DOCS_SITES = {
         DEFAULT_DATA_DOCS_SITE_NAME: {
@@ -930,22 +937,18 @@ class BaseStoreBackendDefaults(DictDot):
     def __init__(
         self,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
-        validations_store_name=(
-            DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value
-        ),
-        evaluation_parameter_store_name=(
-            DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value
-        ),
-        data_docs_site_name=(
-            DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value
-        ),
-        validation_operators=None,
-        stores=None,
-        data_docs_sites=None,
+        validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
+        evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
+        data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
+        validation_operators: dict = None,
+        stores: dict = None,
+        data_docs_sites: dict = None,
     ):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.checkpoint_store_name = checkpoint_store_name
         if validation_operators is None:
             validation_operators = deepcopy(
                 DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
@@ -1241,8 +1244,7 @@ class DataContextConfig(BaseYamlConfig):
         expectations_store_name: Optional[str] = None,
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
-        # TODO: <Alex>ALEX</Alex>
-        # checkpoint_store_name: Optional[str] = None,
+        checkpoint_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
         validation_operators=None,
         stores: Optional[Dict] = None,
@@ -1270,9 +1272,8 @@ class DataContextConfig(BaseYamlConfig):
                 evaluation_parameter_store_name = (
                     store_backend_defaults.evaluation_parameter_store_name
                 )
-            # TODO: <Alex>ALEX</Alex>
-            # if checkpoint_store_name is None:
-            #     checkpoint_store_name = store_backend_defaults.checkpoint_store_name
+            if checkpoint_store_name is None:
+                checkpoint_store_name = store_backend_defaults.checkpoint_store_name
             if validation_operators is None:
                 validation_operators = store_backend_defaults.validation_operators
             if data_docs_sites is None:
@@ -1285,8 +1286,7 @@ class DataContextConfig(BaseYamlConfig):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        # TODO: <Alex>ALEX</Alex>
-        # self.checkpoint_store_name = checkpoint_store_name
+        self.checkpoint_store_name = checkpoint_store_name
         self.plugins_directory = plugins_directory
         if not isinstance(validation_operators, dict):
             raise ValueError(
@@ -1390,7 +1390,7 @@ class CheckpointConfig(BaseYamlConfig):
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[BatchRequest] = None,
+        batch_request: Optional[Union[dict, BatchRequest]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
