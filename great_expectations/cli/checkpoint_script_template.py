@@ -33,9 +33,9 @@ checkpoint = context.get_checkpoint("{0}")
 
 # load batches of data
 batches_to_validate = []
-for batch in checkpoint["batches"]:
+for batch in checkpoint.batches:
     batch_kwargs = batch["batch_kwargs"]
-    for suite_name in batch["expectation_suite_names"]:
+    for suite_name in batch.expectation_suite_names:
         suite = context.get_expectation_suite(suite_name)
         batch = context.get_batch(batch_kwargs, suite)
         batches_to_validate.append(batch)
