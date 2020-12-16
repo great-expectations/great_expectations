@@ -20,7 +20,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
     Extension of ConfiguredAssetFilePathDataConnector used to connect to Filesystem
 
     The ConfiguredAssetFilesystemDataConnector is one of two classes (InferredAssetFilesystemDataConnector being the
-    other one) designed for connecting to filesystem-like data, more specifically files on disk. It connects to assets
+    other one) designed for connecting to data on a filesystem. It connects to assets
     defined by the `assets` configuration.
 
     A ConfiguredAssetFilesystemDataConnector requires an explicit listing of each DataAsset you want to connect to.
@@ -39,7 +39,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         sorters: Optional[list] = None,
     ):
         """
-        Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
+        Base class for DataConnectors that connect to data on a filesystem. This class supports the configuration of default_regex
         and sorters for filtering and sorting data_references. It takes in configured `assets` as a dictionary.
 
         Args:

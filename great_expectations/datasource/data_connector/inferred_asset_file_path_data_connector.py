@@ -15,7 +15,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
     other one) designed for connecting to filesystem-like data. This includes files on disk, but also things
     like S3 object stores, etc:
 
-    InferredAssetFilePathDataConnector is a base class that operates on file paths and determine
+    InferredAssetFilePathDataConnector is a base class that operates on file paths and determines
     the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
 
     *Note*: InferredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently

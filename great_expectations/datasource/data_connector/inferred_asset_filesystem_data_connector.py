@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
     """
-    Extension of InferredAssetFilePathDataConnector used to connect to filesystem
+    Extension of InferredAssetFilePathDataConnector used to connect to data on a filesystem.
 
     The InferredAssetFilesystemDataConnector is one of two classes (ConfiguredAssetFilesystemDataConnector being the
-    other one) designed for connecting to filesystem-like data, more specifically files on disk. It connects to assets
+    other one) designed for connecting to data on a filesystem. It connects to assets
     inferred from directory and file name by default_regex and glob_directive.
 
     InferredAssetFilesystemDataConnector that operates on file paths and determines
