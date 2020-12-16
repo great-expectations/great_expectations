@@ -9,7 +9,7 @@ This guide will help you extend the Great Expectations execution layer to work o
 
    This guide is a working checklist. We improve it each time we add support for a new SQL dialect, but it still has rough edges. And adding support for a new database will probably never be a cookie-cutter operation.
 
-   If you're interested in extending Great Expectations in this way, please reach out on `Slack <https://join.slack.com/t/greatexpectationstalk/shared_invite/zt-jp597jdc-v1lhqS3CQlZ9Dm2jl28QXQ>`__ in the ``#contributors-contributing`` channel, and we'll work with you to get there.
+   If you're interested in extending Great Expectations in this way, please reach out on `Slack <greatexpectations.io/slack>`__ in the ``#contributors-contributing`` channel, and we'll work with you to get there.
 
 Steps
 -----
