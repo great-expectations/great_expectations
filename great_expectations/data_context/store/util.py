@@ -2,7 +2,11 @@ import logging
 from typing import Any, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.store import ConfigurationStore, CheckpointStore, StoreBackend
+from great_expectations.data_context.store import (
+    CheckpointStore,
+    ConfigurationStore,
+    StoreBackend,
+)
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -66,7 +70,7 @@ def build_checkpoint_store_using_store_backend(
             store_name=store_name,
             store_backend=store_backend,
             overwrite_existing=overwrite_existing,
-        )
+        ),
     )
 
 
@@ -132,9 +136,7 @@ def save_checkpoint_config_to_store_backend(
     checkpoint_configuration: CheckpointConfig,
 ):
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend,
-        overwrite_existing=True,
+        store_name=store_name, store_backend=store_backend, overwrite_existing=True,
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=checkpoint_name,
@@ -146,8 +148,7 @@ def load_checkpoint_config_from_store_backend(
     store_name: str, store_backend: Union[StoreBackend, dict], checkpoint_name: str,
 ) -> CheckpointConfig:
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend,
+        store_name=store_name, store_backend=store_backend,
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=checkpoint_name,
@@ -165,8 +166,7 @@ def delete_checkpoint_config_from_store_backend(
     store_name: str, store_backend: Union[StoreBackend, dict], checkpoint_name: str,
 ):
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend,
+        store_name=store_name, store_backend=store_backend,
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=checkpoint_name,

@@ -79,9 +79,9 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
 
 4. Create a DAG with Validations
 
-    To create a DAG to run Validations with Great Expectations, follow the instructions for :ref:`Running a Validation using a PythonOperator <workflows_patterns__deployment_airflow__running-a-validation-using-a-pythonoperator>`. Note that we will use the Data Context instantiated in the previous step in place of reading from the filesystem as in the linked example.
+    To create a DAG to run Validations with Great Expectations, follow the instructions for :ref:`Deploying Great Expectations with Airflow <deployment_airflow>`.
 
-    You can raise an ``AirflowException`` if your Validation fails (as in the example here: :ref:`Running a Validation using a PythonOperator <workflows_patterns__deployment_airflow__running-a-validation-using-a-pythonoperator>`) which will show in logs and the UI as in the image below:
+    You can raise an ``AirflowException`` if your Validation fails (as in the example in the: :ref:`Running a Validation using a PythonOperator <deployment_airflow>` section) which will show in logs and the UI as in the image below:
 
 .. image:: dag_airflow_example.png
     :width: 800

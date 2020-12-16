@@ -22,7 +22,7 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
 )
 from great_expectations.core.batch import Batch
-from great_expectations.data_context.store import StoreBackend, CheckpointStore
+from great_expectations.data_context.store import CheckpointStore, StoreBackend
 from great_expectations.data_context.store.util import (
     build_checkpoint_store_using_store_backend,
     delete_checkpoint_config_from_store_backend,
@@ -1506,9 +1506,7 @@ def build_tuple_s3_store_backend(
 
 
 def build_checkpoint_store_using_filesystem(
-    store_name: str,
-    base_directory: str,
-    overwrite_existing: bool = False,
+    store_name: str, base_directory: str, overwrite_existing: bool = False,
 ) -> CheckpointStore:
     store_config: dict = {"base_directory": base_directory}
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
