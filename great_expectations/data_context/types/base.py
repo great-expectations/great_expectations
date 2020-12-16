@@ -26,6 +26,7 @@ from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
 
 yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
 
 logger = logging.getLogger(__name__)
 
