@@ -31,6 +31,21 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         max_keys: int = 1000,
         boto3_options: dict = None,
     ):
+        """
+       InferredAssetS3DataConnector for connecting to S3.
+
+       Args:
+          name (str): required name for data_connector
+          datasource_name (str): required name for datasource
+          bucket (str): bucket for S3
+          execution_engine (ExecutionEngine): optional reference to ExecutionEngine
+          default_regex (dict): optional regex configuration for filtering data_references
+          sorters (list): optional list of sorters for sorting data_references
+          prefix (str): S3 prefix
+          delimiter (str): S3 delimiter
+          max_keys (int): S3 max_keys (default is 1000)
+          boto3_options (dict): additional optional boto3 options
+      """
         logger.debug(f'Constructing InferredAssetS3DataConnector "{name}".')
 
         super().__init__(
@@ -59,7 +74,8 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
-        """List objects in the underlying data store to create a list of data_references.
+        """
+        List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
         """
