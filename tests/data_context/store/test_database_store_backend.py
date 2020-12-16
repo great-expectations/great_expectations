@@ -104,6 +104,39 @@ def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backend
     assert "Integrity error" in str(exc.value)
 
 
+def test_database_store_backend_url_instantiation(caplog, sa, test_backends):
+    if "postgresql" not in test_backends:
+        pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
+
+    store_backend = DatabaseStoreBackend(
+        url="postgresql://postgres@localhost/test_ci",
+        table_name="test_database_store_backend_url_key",
+        key_columns=["k1"],
+    )
+
+    # existing key
+    key = ("1",)
+    assert "postgresql://test_ci/1" == store_backend.get_url_for_key(key)
+
+    # non-existing key : should still work
+    key = ("not_here",)
+    assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
+
+    store_backend = DatabaseStoreBackend(
+        table_name="test_database_store_backend_url_key",
+        key_columns=["k1"],
+        connection_string="postgresql://postgres@localhost/test_ci",
+    )
+
+    # existing key
+    key = ("1",)
+    assert "postgresql://test_ci/1" == store_backend.get_url_for_key(key)
+
+    # non-existing key : should still work
+    key = ("not_here",)
+    assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
+
+
 def test_database_store_backend_id_initialization(caplog, sa, test_backends):
     """
     What does this test and why?
