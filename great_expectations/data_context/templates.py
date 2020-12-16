@@ -78,21 +78,22 @@ CONFIG_VARIABLES_TEMPLATE = (
 # and remove the inserted final two spaces.
 EXPECTATIONS_STORE_STRING = yaml.dump(
     {
-        "expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
-            "expectations_store"
-        ]
+        "expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value["expectations_store"]
     }
 ).replace("\n", "\n  ")[:-2]
 VALIDATIONS_STORE_STRING = yaml.dump(
     {
-        "validations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
-            "validations_store"
-        ]
+        "validations_store": DataContextConfigDefaults.DEFAULT_STORES.value["validations_store"]
     }
 ).replace("\n", "\n  ")[:-2]
 EVALUATION_PARAMETER_STORE_STRING = yaml.dump(
     DataContextConfigDefaults.DEFAULT_STORES.value["evaluation_parameter_store"]
 ).replace("\n", "")
+CHECKPOINT_STORE_STRING = yaml.dump(
+    {
+        "checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value["checkpoint_store"]
+    }
+).replace("\n", "\n  ")[:-2]
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = (
     CONFIG_VARIABLES_INTRO
@@ -147,10 +148,12 @@ stores:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
     {EVALUATION_PARAMETER_STORE_STRING}
+  {CHECKPOINT_STORE_STRING}
 
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store
+checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These
