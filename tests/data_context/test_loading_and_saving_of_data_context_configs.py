@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.exceptions import ClassInstantiationError
+import great_expectations.exceptions as ge_exceptions
 
 
 def read_config_from_file(config_filename):
@@ -25,23 +25,23 @@ def test_add_store_immediately_adds_to_config(empty_data_context):
     assert "my_new_store" in read_config_from_file(config_filename)
 
 
-def test_add_datasource(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_add_datasource(empty_data_context):
+    context = empty_data_context
     config_filename = context.root_directory + "/great_expectations.yml"
 
     # Config can't be instantiated
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         context.add_datasource(
-            "my_new_datasource", {"some": "broken", "config": "yikes",}
+            "my_new_datasource", **{"some": "broken", "config": "yikes",}
         )
     assert "my_new_datasource" not in context.datasources
     assert "my_new_datasource" not in read_config_from_file(config_filename)
 
     # Config doesn't instantiate an Datasource
-    with pytest.raises(TypeError):
+    with pytest.raises(ge_exceptions.DatasourceInitializationError):
         context.add_datasource(
             "my_new_datasource",
-            {
+            **{
                 "module_name": "great_expectations.data_context.store",
                 "class_name": "ExpectationsStore",
             },
@@ -52,7 +52,7 @@ def test_add_datasource(empty_data_context_v3):
     # Config successfully instantiates an Datasource
     context.add_datasource(
         "my_new_datasource",
-        {
+        **{
             "class_name": "Datasource",
             "execution_engine": {"class_name": "PandasExecutionEngine"},
             "data_connectors": {

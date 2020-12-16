@@ -9,7 +9,7 @@
       "equal_length_string":["a", "b", "c", "d", "e"]
     },
     "tests": [{
-      "title": "positive_test__string__one_character_length",
+      "title": "positive_test_string_one_character_length",
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_string",
@@ -21,7 +21,7 @@
         "unexpected_list": []
       }
     },{
-      "title": "negative_test__string__value_is_1_too_high",
+      "title": "negative_test_string_value_is_1_too_high",
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_string",
@@ -33,7 +33,7 @@
         "unexpected_list": ["a", "b", "c", "d", "e"]
       }
     },{
-      "title": "positive_test_with_missing_value_in_column__mostly",
+      "title": "positive_test_with_missing_value_in_column_mostly",
       "exact_match_out" : false,
       "in":{
         "column": "s3",
@@ -46,7 +46,7 @@
         "unexpected_list": ["collected", "casual"]
       }
     },{
-      "title": "negative__one_length_too_small",
+      "title": "negative_one_length_too_small",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -58,7 +58,7 @@
         "unexpected_list": ["sexy"]
       }
     },{
-      "title": "positive__one_length_too_small__mostly",
+      "title": "positive_one_length_too_small_mostly",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -71,7 +71,7 @@
         "unexpected_list": ["sexy"]
       }
     },{
-      "title": "positive_test__integer__length____1_postgres",
+      "title": "positive_test_integer_length_1_postgres",
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_integer",

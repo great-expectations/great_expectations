@@ -1,7 +1,9 @@
 import logging
+import uuid
 from abc import ABCMeta, abstractmethod
+from typing import Optional
 
-from great_expectations.exceptions import StoreBackendError, StoreError
+from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +20,89 @@ class StoreBackend(metaclass=ABCMeta):
     """
 
     IGNORED_FILES = [".ipynb_checkpoints"]
+    STORE_BACKEND_ID_KEY = (".ge_store_backend_id",)
+    STORE_BACKEND_ID_PREFIX = "store_backend_id = "
+    STORE_BACKEND_INVALID_CONFIGURATION_ID = "00000000-0000-0000-0000-00000000e003"
 
-    def __init__(self, fixed_length_key=False):
+    def __init__(
+        self,
+        fixed_length_key=False,
+        suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
+        store_name="no_store_name",
+    ):
+        """
+        Initialize a StoreBackend
+        Args:
+            fixed_length_key:
+            suppress_store_backend_id: skip construction of a StoreBackend.store_backend_id
+            manually_initialize_store_backend_id: UUID as a string to use if the store_backend_id is not already set
+            store_name: store name given in the DataContextConfig (via either in-code or yaml configuration)
+        """
         self._fixed_length_key = fixed_length_key
+        self._suppress_store_backend_id = suppress_store_backend_id
+        self._manually_initialize_store_backend_id = (
+            manually_initialize_store_backend_id
+        )
+        self._store_name = store_name
 
     @property
     def fixed_length_key(self):
         return self._fixed_length_key
+
+    @property
+    def store_name(self):
+        return self._store_name
+
+    def _construct_store_backend_id(self, suppress_warning: bool = False) -> str:
+        """
+        Create a store_backend_id if one does not exist, and return it if it exists
+        If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id
+        and there is not already an existing store_backend_id then the store_backend_id
+        from param manually_initialize_store_backend_id is used to create it.
+        Args:
+            suppress_warning: boolean flag for whether warnings are logged
+
+        Returns:
+            store_backend_id which is a UUID(version=4)
+        """
+        if self._suppress_store_backend_id:
+            if not suppress_warning:
+                logger.warning(
+                    f"You are attempting to access the store_backend_id of a store or store_backend named {self.store_name} that has been explicitly suppressed."
+                )
+            return
+        try:
+            try:
+                return self.get(key=self.STORE_BACKEND_ID_KEY).replace(
+                    self.STORE_BACKEND_ID_PREFIX, ""
+                )
+            except InvalidKeyError:
+                store_id = (
+                    self._manually_initialize_store_backend_id
+                    if self._manually_initialize_store_backend_id
+                    else str(uuid.uuid4())
+                )
+                self.set(
+                    key=self.STORE_BACKEND_ID_KEY,
+                    value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}",
+                )
+                return store_id
+        except Exception:
+            if not suppress_warning:
+                logger.warning(
+                    f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}"
+                )
+            return self.STORE_BACKEND_INVALID_CONFIGURATION_ID
+
+    # NOTE: AJB20201130 This store_backend_id and store_backend_id_warnings_suppressed was implemented to remove multiple warnings in DataContext.__init__ but this can be done more cleanly by more carefully going thorugh initialization order in DataContext
+    @property
+    def store_backend_id(self):
+        return self._construct_store_backend_id(suppress_warning=False)
+
+    @property
+    def store_backend_id_warnings_suppressed(self):
+        return self._construct_store_backend_id(suppress_warning=True)
 
     def get(self, key, **kwargs):
         self._validate_key(key)
@@ -112,12 +190,30 @@ class InMemoryStoreBackend(StoreBackend):
     """
 
     # noinspection PyUnusedLocal
-    def __init__(self, runtime_environment=None, fixed_length_key=False):
-        super().__init__(fixed_length_key=fixed_length_key)
+    def __init__(
+        self,
+        runtime_environment=None,
+        fixed_length_key=False,
+        suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
+        store_name=None,
+    ):
+        super().__init__(
+            fixed_length_key=fixed_length_key,
+            suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
+            store_name=store_name,
+        )
         self._store = {}
+        # Initialize with store_backend_id if not part of an HTMLSiteStore
+        if not self._suppress_store_backend_id:
+            _ = self.store_backend_id
 
     def _get(self, key):
-        return self._store[key]
+        try:
+            return self._store[key]
+        except KeyError as e:
+            raise InvalidKeyError(f"{str(e)}")
 
     def _set(self, key, value, **kwargs):
         self._store[key] = value

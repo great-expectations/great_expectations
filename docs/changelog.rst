@@ -4,15 +4,53 @@
 Changelog
 #########
 
-
 Develop
 -----------------
 * [FEATURE] Add conditional expectations for SQLAlchemy backend
-* [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file
-* [ENHANCEMENT] More detailed information in Datasource.self_check() diagnostic (concerning ExecutionEngine objects)
-* [BUGFIX] Corrected handling of boto3_options by PandasExecutionEngine
-* [DOCS] Fixed a typo in the HOWTO guide for adding a self-managed Spark datasource
 
+
+0.13.3
+-----------------
+* [ENHANCEMENT] Updated the BigQuery Integration to create a view instead of a table (thanks @alessandrolacorte!) #2082.
+* [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file
+* [ENHANCEMENT] Add support for connection_string and url in configuring DatabaseStoreBackend, bringing parity to other SQL-based objects. In the rare case of user code that instantiates a DatabaseStoreBackend without using the Great Expectations config architecture, users should ensure they are providing kwargs to init, because the init signature order has changed.
+* [ENHANCEMENT] Improved exception handling in the Slack notifications rendering logic
+* [ENHANCEMENT] Uniform configuration support for both 0.13 and 0.12 versions of the Datasource class
+* [ENHANCEMENT] A single `DataContext.get_batch()` method supports both 0.13 and 0.12 style call arguments
+* [ENHANCEMENT] Initializing DataContext in-code is now available in both 0.13 and 0.12 versions
+* [BUGFIX] Fixed a bug in the error printing logic in several exception handling blocks in the Data Docs rendering. This will make it easier for users to submit error messages in case of an error in rendering.
+* [DOCS] Miscellaneous doc improvements
+* [DOCS] Update cloud composer workflow to use GCSStoreBackendDefaults
+
+0.13.2
+-----------------
+* [ENHANCEMENT] Support avro format in Spark datasource (thanks @ryanaustincarlson!) #2122
+* [ENHANCEMENT] Made improvements to the backend for expect_column_quantile_values_to_be_between #2127
+* [ENHANCEMENT] Robust Representation in Configuration of Both Legacy and New Datasource
+* [ENHANCEMENT] Continuing 0.13 clean-up and improvements
+* [BUGFIX] Fix spark configuration not getting passed to the SparkSession builder (thanks @EricSteg!) #2124
+* [BUGFIX] Misc bugfixes and improvements to code & documentation for new in-code data context API #2118
+* [BUGFIX] When Introspecting a database, sql_data_connector will ignore view_names that are also system_tables
+* [BUGFIX] Made improvements for code & documentation for in-code data context
+* [BUGFIX] Fixed bug where TSQL mean on `int` columns returned incorrect result
+* [DOCS] Updated explanation for ConfiguredAssetDataConnector and InferredAssetDataConnector
+* [DOCS] General 0.13 docs improvements
+
+0.13.1
+-----------------
+* [ENHANCEMENT] Improved data docs performance by ~30x for large projects and ~4x for smaller projects by changing instantiation of Jinja environment #2100
+* [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file #2058 (thanks @GTLangseth!)
+* [ENHANCEMENT] More detailed information in Datasource.self_check() diagnostic (concerning ExecutionEngine objects)
+* [ENHANCEMENT] Improve UI for in-code data contexts #2068
+* [ENHANCEMENT] Add a store_backend_id property to StoreBackend #2030, #2075
+* [ENHANCEMENT] Use an existing expectation_store.store_backend_id to initialize an in-code DataContext #2046, #2075
+* [BUGFIX] Corrected handling of boto3_options by PandasExecutionEngine
+* [BUGFIX] New Expectation via CLI / SQL Query no longer throws TypeError
+* [BUGFIX] Implement validator.default_expectations_arguments
+* [DOCS] Fix doc create and editing expectations #2105 (thanks @Lee-W!)
+* [DOCS] Updated documentation on 0.13 classes
+* [DOCS] Fixed a typo in the HOWTO guide for adding a self-managed Spark datasource
+* [DOCS] Updated documentation for new UI for in-code data contexts
 
 0.13.0
 -----------------

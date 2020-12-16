@@ -10,6 +10,7 @@ from gc import get_referrers
 from inspect import (
     ArgInfo,
     BoundArguments,
+    Parameter,
     Signature,
     currentframe,
     getargvalues,
@@ -104,11 +105,27 @@ def get_currently_executing_function_call_arguments(
     ][0]
     cur_mod = getmodule(cur_func_obj)
     sig: Signature = signature(cur_func_obj)
-    params: dict = {k: argvs.locals[k] for k in sig.parameters.keys()}
+    params: dict = {}
+    var_positional: dict = {}
+    var_keyword: dict = {}
+    for key, param in sig.parameters.items():
+        val: Any = argvs.locals[key]
+        params[key] = val
+        if param.kind == Parameter.VAR_POSITIONAL:
+            var_positional[key] = val
+        elif param.kind == Parameter.VAR_KEYWORD:
+            var_keyword[key] = val
     bound_args: BoundArguments = sig.bind(**params)
     call_args: OrderedDict = bound_args.arguments
 
     call_args_dict: dict = dict(call_args)
+
+    for key, value in var_positional.items():
+        call_args_dict[key] = value
+
+    for key, value in var_keyword.items():
+        call_args_dict.pop(key)
+        call_args_dict.update(value)
 
     if include_module_name:
         call_args_dict.update({"module_name": cur_mod.__name__})
@@ -836,6 +853,6 @@ def is_float(value: Any) -> bool:
 
 
 def get_context():
-    from great_expectations.data_context.data_context_v3 import DataContextV3
+    from great_expectations.data_context.data_context import DataContext
 
-    return DataContextV3()
+    return DataContext()

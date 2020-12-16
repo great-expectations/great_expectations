@@ -16,7 +16,7 @@
       }
     },
     "tests": [{
-      "title": "positive_test__exact_min_and_max",
+      "title": "positive_test_exact_min_and_max",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -29,7 +29,7 @@
         "unexpected_list": []
       }
     },{
-      "title": "negative_test__matching_min___max_too_small",
+      "title": "negative_test_matching_min_max_too_small",
       "exact_match_out" : false,
       "in":{
         "column": "s2",
@@ -42,7 +42,7 @@
         "unexpected_list": ["collected"]
       }
     },{
-      "title": "negative_test__matching_max___min_too_large",
+      "title": "negative_test_matching_max_min_too_large",
       "exact_match_out" : false,
       "in":{
         "column": "s2",
@@ -144,7 +144,7 @@
         "traceback_substring": "min_value and max_value cannot both be None"
       }
     },{
-      "title": "test_error_handling__values_are_integers",
+      "title": "test_error_handling_values_are_integers",
       "exact_match_out" : false,
       "in":{
         "column": "s4",

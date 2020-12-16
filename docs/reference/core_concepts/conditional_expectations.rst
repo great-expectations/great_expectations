@@ -14,8 +14,8 @@ Today, conditional Expectations are available only for the Pandas and SQLAlchemy
 For Pandas, the :code:`row_condition` argument should be a boolean
 expression string, which can be passed to :code:`pandas.DataFrame.query()` before Expectation Validation (see `pandas docs <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_).
 
-Optionally, the :code:`condition_parser` argument can be provided for pandas datasets, which defines the syntax of conditions. Since the feature is **experimental** and only available for Pandas,
-this argument will be set to *"pandas"* by default, thus, demanding the appropriate syntax. Other engines might be implemented in future.
+Additionally, the :code:`condition_parser` argument must be provided, which defines the syntax of conditions.
+Since the feature is **experimental** and only available for Pandas this argument must be set to *"pandas"* by default, thus, demanding the appropriate syntax. Other engines might be implemented in future.
 
 For SQLAlchemy the :code:`row_condition` argument should be a valid SQL string. It will be added to the where clause of
 the query when validation expectations. The :code:`condition_parser` argument must be `raw_sql`.

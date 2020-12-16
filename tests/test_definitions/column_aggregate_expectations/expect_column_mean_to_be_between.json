@@ -3,7 +3,7 @@
   "datasets": [{
       "data": {
         "x": [2.0, 5.0],
-        "y": [5, 5],
+        "y": [1, 2],
         "z": [0, 10],
         "n": [0, null],
         "b": [true, false]
@@ -55,12 +55,12 @@
           "exact_match_out": false,
           "in": {
             "column": "y",
-            "min_value": 5,
-            "max_value": 5
+            "min_value": 1.5,
+            "max_value": 1.5
           },
           "out": {
             "success": true,
-            "observed_value": 5
+            "observed_value": 1.5
           }
         },
         {
@@ -73,7 +73,7 @@
           },
           "out": {
             "success": false,
-            "observed_value": 5
+            "observed_value": 1.5
           }
         },
         {
@@ -154,7 +154,7 @@
           }
         },
         {
-          "title": "coerced_types_true__false_values",
+          "title": "coerced_types_true_false_values",
           "exact_match_out": false,
           "in": {
             "column": "b",
@@ -169,7 +169,7 @@
           "_comment": "postgresql, mssql, and spark will not allow coercing the boolean type to an average"
         },
         {
-          "title": "coerced_types_true__false_and_null",
+          "title": "coerced_types_true_false_and_null",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -217,7 +217,7 @@
         }
       },
       "tests": [{
-        "title": "test_empty_column__should_be_false_no_observed_value_with_which_to_compare",
+        "title": "test_empty_column_should_be_false_no_observed_value_with_which_to_compare",
         "exact_match_out": false,
         "in": {
           "column": "empty_column",

@@ -33,7 +33,7 @@
         "success": true
       }
     },{
-      "title": "positive_test_with_nulls_and_ignore_row_if__either_value_is_missing",
+      "title": "positive_test_with_nulls_and_ignore_row_if_either_value_is_missing",
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
