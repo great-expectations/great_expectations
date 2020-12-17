@@ -26,6 +26,7 @@ plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
 expectations_store_name: expectations_store
 validations_store_name: validations_store
+checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
   local_site:
@@ -50,6 +51,11 @@ stores:
   validations_store:
     class_name: ValidationsStore
 
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: checkpoints/
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
   default:
