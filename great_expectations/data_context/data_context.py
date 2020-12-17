@@ -1,5 +1,6 @@
 import configparser
 import copy
+import itertools
 import datetime
 import errno
 import glob
@@ -22,13 +23,12 @@ from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
-from great_expectations.core.data_context_key import StringKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.usage_statistics.usage_statistics import (  # TODO: deprecate
+from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
     run_validation_operator_usage_statistics,
@@ -43,8 +43,6 @@ from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
-    LEGACY_CHECKPOINT_VERSION_012_TEMPLATE,
-    CHECKPOINT_VERSION_013_TEMPLATE,
 )
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
@@ -56,14 +54,14 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
     CheckpointConfig,
-    # TODO: <Alex>ALEX</Alex>
-    # LegacyCheckpointConfig,
+    CheckpointConfigDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
     ConfigurationIdentifier,
 )
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.data_context.util import (
     build_store_from_config,
     file_relative_path,
@@ -1555,7 +1553,6 @@ class BaseDataContext:
             return []
         return list(self.validation_operators.keys())
 
-    # TODO: deprecate
     @usage_statistics_enabled_method(
         event_name="data_context.add_datasource",
         args_payload_fn=add_datasource_usage_statistics,
@@ -1641,7 +1638,6 @@ class BaseDataContext:
             )
         return datasource
 
-    # TODO: deprecate
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):
@@ -2664,7 +2660,96 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiling_results["success"] = True
         return profiling_results
 
-    # TODO: <Alex>ALEX</Alex>
+    def create_checkpoint(
+        self,
+        checkpoint_name: str,
+        checkpoint_config: Union[dict, CheckpointConfig],
+    ) -> Checkpoint:
+        if isinstance(checkpoint_config, dict):
+            checkpoint_config = CheckpointConfig(**checkpoint_config)
+
+        new_checkpoint: Checkpoint = instantiate_class_from_config(
+            config={
+                "checkpoint_config": checkpoint_config,
+                "class_name": checkpoint_config.class_name,
+            },
+            runtime_environment={
+                "data_context": self,
+                "name": checkpoint_name,
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint.checkpoint",
+            },
+        )
+
+        key: ConfigurationIdentifier = ConfigurationIdentifier(
+            configuration_key=checkpoint_name,
+        )
+        self.checkpoint_store.set(key=key, value=config)
+
+        return new_checkpoint
+
+    def get_checkpoint(
+        self,
+        checkpoint_name: str,
+        return_config: bool = True
+    ) -> Union[CheckpointConfig, Checkpoint]:
+        key: ConfigurationIdentifier = ConfigurationIdentifier(
+            configuration_key=checkpoint_name,
+        )
+        try:
+            checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
+        except ValidationError as exc:
+            raise ge_exceptions.InvalidCheckpointConfigError(
+                message="Invalid checkpoint configuration", validation_error=exc
+            )
+
+        if checkpoint_config.config_version == CheckpointConfigDefaults.DEFAULT_CONFIG_VERSION.value:
+            if not (
+                "batches" in checkpoint_config.to_json_dict()
+                and (
+                    len(checkpoint_config.to_json_dict()["batches"]) == 0
+                    or {
+                        "batch_kwargs",
+                        "expectation_suite_names",
+                    }.issubset(
+                        set(
+                            list(
+                                itertools.chain.from_iterable(
+                                    [item.keys() for item in checkpoint_config.to_json_dict()["batches"]]
+                                )
+                            )
+                        )
+                    )
+                )
+            ):
+                raise ge_exceptions.CheckpointError(
+                    message="Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments."
+                )
+
+        if return_config:
+            return checkpoint_config
+
+        checkpoint: Checkpoint = instantiate_class_from_config(
+            config={
+                "checkpoint_config": checkpoint_config,
+                "class_name": checkpoint_config.class_name,
+            },
+            runtime_environment={
+                "data_context": self,
+                "name": checkpoint_name,
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint",
+            },
+        )
+
+        return checkpoint
+
+    def list_checkpoints(self) -> List[str]:
+        return [x.configuration_key for x in self.checkpoint_store.list_keys()]
+
+    # TODO: <Alex>ALEX/Rob</Alex>
     def run_checkpoint(
         self,
         checkpoint_name: str,
@@ -2690,7 +2775,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if result_format is None:
             result_format = {"result_format": "SUMMARY"}
 
-        checkpoint = self.get_checkpoint(checkpoint_name)
+        checkpoint: Checkpoint = self.get_checkpoint(
+            checkpoint_name=checkpoint_name,
+            return_config=True,
+        )
 
         batches_to_validate = []
         for batch in checkpoint["batches"]:
@@ -3094,85 +3182,6 @@ class DataContext(BaseDataContext):
         except ge_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
-
-    def create_checkpoint(
-        self, checkpoint_name: str, checkpoint_config: dict,
-    ):
-        commented_map = self._load_checkpoint_yml_template(checkpoint_config)
-        commented_map.update(checkpoint_config)
-
-        if checkpoint_config.get("class_name") == "LegacyCheckpoint":
-            # TODO: <Alex>ALEX</Alex>
-            # config_obj = LegacyCheckpointConfig.from_commented_map(commented_map)
-            config_obj = CheckpointConfig.from_commented_map(commented_map)
-        else:
-            config_obj = CheckpointConfig.from_commented_map(commented_map)
-
-        new_checkpoint = instantiate_class_from_config(
-            config={
-                "checkpoint_config": config_obj,
-                "class_name": config_obj.class_name,
-            },
-            runtime_environment={
-                "data_context": self,
-                "name": StringKey(checkpoint_name),
-            },
-            config_defaults={
-                "module_name": "great_expectations.checkpoint.checkpoint",
-            },
-        )
-
-        # TODO: <Alex>ALEX</Alex>
-        self.checkpoint_store.set(
-            ConfigurationIdentifier(checkpoint_name), config_obj,
-        )
-
-        return new_checkpoint
-
-    # TODO: <Alex>ALEX</Alex>
-    def get_checkpoint(self, checkpoint_name: str, return_config: bool = True):
-        """Load a checkpoint. (Experimental)"""
-
-        commented_map = self.checkpoint_store.get(ConfigurationIdentifier(checkpoint_name))
-        if "config_version" in commented_map:
-            checkpoint_config = CheckpointConfig.from_commented_map(commented_map)
-        else:
-            # TODO: <Alex>ALEX</Alex>
-            # checkpoint_config = LegacyCheckpointConfig.from_commented_map(commented_map)
-            checkpoint_config = CheckpointConfig.from_commented_map(commented_map)
-
-        if return_config:
-            return checkpoint_config
-
-        checkpoint_config["class_name"] = "LegacyCheckpoint"
-
-        checkpoint = instantiate_class_from_config(
-            config={
-                "checkpoint_config": checkpoint_config,
-                "class_name": "Checkpoint" if isinstance(checkpoint_config, CheckpointConfig) else "LegacyCheckpoint"
-            },
-            runtime_environment={"data_context": self, "name": checkpoint_name,},
-            config_defaults={
-                "module_name": "great_expectations.checkpoint",
-            },
-        )
-
-        return checkpoint
-
-    # TODO: <Alex>ALEX</Alex>
-    def list_checkpoints(self) -> List[str]:
-        return [x.configuration_key for x in self.checkpoint_store.list_keys()]
-
-    # TODO: <Alex>ALEX</Alex>
-    def _load_checkpoint_yml_template(self, checkpoint_config) -> CommentedMap:
-        if checkpoint_config.get("class_name") == "LegacyCheckpoint":
-            template_filename = "legacy_checkpoint_template.yml"
-        else:
-            template_filename = "checkpoint_template.yml"
-        template_file = file_relative_path(__file__, os.path.join(template_filename))
-        with open(template_file, "r") as f:
-            template = yaml.load(f)
-        return template
 
     def _save_project_config(self):
         """Save the current project to disk."""

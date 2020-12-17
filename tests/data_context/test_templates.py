@@ -72,9 +72,16 @@ stores:
     # https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
     class_name: EvaluationParameterStore
 
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: checkpoints/
+
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store
+checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These

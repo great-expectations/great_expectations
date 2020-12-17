@@ -88,7 +88,7 @@ VALIDATIONS_STORE_STRING = yaml.dump(
 ).replace("\n", "\n  ")[:-2]
 EVALUATION_PARAMETER_STORE_STRING = yaml.dump(
     DataContextConfigDefaults.DEFAULT_STORES.value["evaluation_parameter_store"]
-).replace("\n", "")
+)
 CHECKPOINT_STORE_STRING = yaml.dump(
     {
         "checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value["checkpoint_store"]
@@ -149,7 +149,6 @@ stores:
     # https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
     {EVALUATION_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
-
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store

@@ -1,15 +1,7 @@
 import json
-import os
-from io import StringIO
 from typing import Union
 
-from ruamel.yaml import YAML, YAMLError
-
-from great_expectations.data_context import DataContext
 from great_expectations.data_context.types.base import (
-    # TODO: <Alex>ALEX</Alex>
-    # LegacyCheckpointConfig,
-    # legacyCheckpointConfigSchema,
     CheckpointConfig,
     checkpointConfigSchema,
 )
@@ -19,28 +11,20 @@ from great_expectations.exceptions import CheckpointError
 class LegacyCheckpoint(object):
     def __init__(
         self,
-        data_context: DataContext,
+        data_context,
         name: str,
-        # TODO: <Alex>ALEX</Alex>
-        # checkpoint_config: Union[LegacyCheckpointConfig, dict],
         checkpoint_config: Union[CheckpointConfig, dict],
     ):
         self._data_context = data_context
         self._name = name
 
-        # TODO: <Alex>ALEX</Alex>
-        # if not isinstance(checkpoint_config, (LegacyCheckpointConfig, dict)):
         if not isinstance(checkpoint_config, (CheckpointConfig, dict)):
             raise CheckpointError(
-                # TODO: <Alex>ALEX</Alex>
-                # f"Invalid checkpoint_config type - must be LegacyCheckpointConfig or "
                 f"Invalid checkpoint_config type - must be CheckpointConfig or "
                 f"dict, "
                 f"instead got {type(checkpoint_config)}"
             )
         elif isinstance(checkpoint_config, dict):
-            # TODO: <Alex>ALEX</Alex>
-            # checkpoint_config = legacyCheckpointConfigSchema.load(checkpoint_config)
             checkpoint_config = checkpointConfigSchema.load(checkpoint_config)
         self._checkpoint_config = checkpoint_config
 
@@ -111,7 +95,7 @@ class LegacyCheckpoint(object):
 class Checkpoint(object):
     def __init__(
         self,
-        data_context: DataContext,
+        data_context,
         name: str,
         validation_operator_name: str,
         validators: list,
@@ -125,8 +109,8 @@ class Checkpoint(object):
     def run(self):
         validators = self._get_validators_to_validate(self._validators)
 
-        results = self.data_context.run_validation_operator(
-            self.validation_operator_name, assets_to_validate=validators,
+        results = self._data_context.run_validation_operator(
+            self._validation_operator_name, assets_to_validate=validators,
         )
 
         return results

@@ -1,15 +1,12 @@
 import json
 import os
 import shutil
-from typing import List
 
-import pandas as pd
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
@@ -29,10 +26,10 @@ from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.exceptions import (
     BatchKwargsError,
     CheckpointError,
-    CheckpointNotFoundError,
     ConfigNotFoundError,
     DataContextError,
     InvalidKeyError,
+    InvalidCheckpointConfigError,
 )
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -341,239 +338,238 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
         _ = titanic_data_context.profile_datasource("fakey_mc_fake")
 
 
-# TODO: <Alex>ALEX</Alex>
-# @freeze_time("09/26/2019 13:42:41")
-# @pytest.mark.rendered_output
-# def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
-#
-#     # TODO : Use a standard test fixture
-#     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
-#
-#     base_dir = str(tmp_path_factory.mktemp("project_dir"))
-#     project_dir = os.path.join(base_dir, "project_path")
-#     os.mkdir(project_dir)
-#
-#     os.makedirs(os.path.join(project_dir, "data"))
-#     os.makedirs(os.path.join(project_dir, "data/titanic"))
-#     shutil.copy(
-#         file_relative_path(__file__, "../test_sets/Titanic.csv"),
-#         str(os.path.join(project_dir, "data/titanic/Titanic.csv")),
-#     )
-#
-#     os.makedirs(os.path.join(project_dir, "data/random"))
-#     shutil.copy(
-#         os.path.join(filesystem_csv_3, "f1.csv"),
-#         str(os.path.join(project_dir, "data/random/f1.csv")),
-#     )
-#     shutil.copy(
-#         os.path.join(filesystem_csv_3, "f2.csv"),
-#         str(os.path.join(project_dir, "data/random/f2.csv")),
-#     )
-#
-#     assert (
-#         gen_directory_tree_str(project_dir)
-#         == """\
-# project_path/
-#     data/
-#         random/
-#             f1.csv
-#             f2.csv
-#         titanic/
-#             Titanic.csv
-# """
-#     )
-#
-#     context = DataContext.create(project_dir)
-#     ge_directory = os.path.join(project_dir, "great_expectations")
-#     context.add_datasource(
-#         "titanic",
-#         module_name="great_expectations.datasource",
-#         class_name="PandasDatasource",
-#         batch_kwargs_generators={
-#             "subdir_reader": {
-#                 "class_name": "SubdirReaderBatchKwargsGenerator",
-#                 "base_directory": os.path.join(project_dir, "data/titanic/"),
-#             }
-#         },
-#     )
-#
-#     context.add_datasource(
-#         "random",
-#         module_name="great_expectations.datasource",
-#         class_name="PandasDatasource",
-#         batch_kwargs_generators={
-#             "subdir_reader": {
-#                 "class_name": "SubdirReaderBatchKwargsGenerator",
-#                 "base_directory": os.path.join(project_dir, "data/random/"),
-#             }
-#         },
-#     )
-#
-#     context.profile_datasource("titanic")
-#
-#     # Replicate the batch id of the batch that will be profiled in order to generate the file path of the
-#     # validation result
-#     titanic_profiled_batch_id = PathBatchKwargs(
-#         {
-#             "path": os.path.join(project_dir, "data/titanic/Titanic.csv"),
-#             "datasource": "titanic",
-#             "data_asset_name": "Titanic",
-#         }
-#     ).to_id()
-#
-#     tree_str = gen_directory_tree_str(project_dir)
-#     # print(tree_str)
-#     assert (
-#         tree_str
-#         == """project_path/
-#     data/
-#         random/
-#             f1.csv
-#             f2.csv
-#         titanic/
-#             Titanic.csv
-#     great_expectations/
-#         .gitignore
-#         great_expectations.yml
-#         checkpoints/
-#             .ge_store_backend_id
-#         expectations/
-#             .ge_store_backend_id
-#             titanic/
-#                 subdir_reader/
-#                     Titanic/
-#                         BasicDatasetProfiler.json
-#         notebooks/
-#             pandas/
-#                 validation_playground.ipynb
-#             spark/
-#                 validation_playground.ipynb
-#             sql/
-#                 validation_playground.ipynb
-#         plugins/
-#             custom_data_docs/
-#                 renderers/
-#                 styles/
-#                     data_docs_custom_styles.css
-#                 views/
-#         uncommitted/
-#             config_variables.yml
-#             data_docs/
-#             validations/
-#                 .ge_store_backend_id
-#                 titanic/
-#                     subdir_reader/
-#                         Titanic/
-#                             BasicDatasetProfiler/
-#                                 profiling/
-#                                     20190926T134241.000000Z/
-#                                         {}.json
-# """.format(
-#             titanic_profiled_batch_id
-#         )
-#     )
-#
-#     context.profile_datasource("random")
-#     context.build_data_docs()
-#
-#     f1_profiled_batch_id = PathBatchKwargs(
-#         {
-#             "path": os.path.join(project_dir, "data/random/f1.csv"),
-#             "datasource": "random",
-#             "data_asset_name": "f1",
-#         }
-#     ).to_id()
-#
-#     f2_profiled_batch_id = PathBatchKwargs(
-#         {
-#             "path": os.path.join(project_dir, "data/random/f2.csv"),
-#             "datasource": "random",
-#             "data_asset_name": "f2",
-#         }
-#     ).to_id()
-#
-#     data_docs_dir = os.path.join(
-#         project_dir, "great_expectations/uncommitted/data_docs"
-#     )
-#     observed = gen_directory_tree_str(data_docs_dir)
-#     print(observed)
-#     assert (
-#         observed
-#         == """\
-# data_docs/
-#     local_site/
-#         index.html
-#         expectations/
-#             random/
-#                 subdir_reader/
-#                     f1/
-#                         BasicDatasetProfiler.html
-#                     f2/
-#                         BasicDatasetProfiler.html
-#             titanic/
-#                 subdir_reader/
-#                     Titanic/
-#                         BasicDatasetProfiler.html
-#         static/
-#             fonts/
-#                 HKGrotesk/
-#                     HKGrotesk-Bold.otf
-#                     HKGrotesk-BoldItalic.otf
-#                     HKGrotesk-Italic.otf
-#                     HKGrotesk-Light.otf
-#                     HKGrotesk-LightItalic.otf
-#                     HKGrotesk-Medium.otf
-#                     HKGrotesk-MediumItalic.otf
-#                     HKGrotesk-Regular.otf
-#                     HKGrotesk-SemiBold.otf
-#                     HKGrotesk-SemiBoldItalic.otf
-#             images/
-#                 favicon.ico
-#                 glossary_scroller.gif
-#                 iterative-dev-loop.png
-#                 logo-long-vector.svg
-#                 logo-long.png
-#                 short-logo-vector.svg
-#                 short-logo.png
-#                 validation_failed_unexpected_values.gif
-#             styles/
-#                 data_docs_custom_styles_template.css
-#                 data_docs_default_styles.css
-#         validations/
-#             random/
-#                 subdir_reader/
-#                     f1/
-#                         BasicDatasetProfiler/
-#                             profiling/
-#                                 20190926T134241.000000Z/
-#                                     {:s}.html
-#                     f2/
-#                         BasicDatasetProfiler/
-#                             profiling/
-#                                 20190926T134241.000000Z/
-#                                     {:s}.html
-#             titanic/
-#                 subdir_reader/
-#                     Titanic/
-#                         BasicDatasetProfiler/
-#                             profiling/
-#                                 20190926T134241.000000Z/
-#                                     {:s}.html
-# """.format(
-#             f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id
-#         )
-#     )
-#
-#     # save data_docs locally
-#     os.makedirs("./tests/data_context/output", exist_ok=True)
-#     os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
-#
-#     if os.path.isdir("./tests/data_context/output/data_docs"):
-#         shutil.rmtree("./tests/data_context/output/data_docs")
-#     shutil.copytree(
-#         os.path.join(ge_directory, "uncommitted/data_docs/"),
-#         "./tests/data_context/output/data_docs",
-#     )
+@freeze_time("09/26/2019 13:42:41")
+@pytest.mark.rendered_output
+def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
+
+    # TODO : Use a standard test fixture
+    # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
+
+    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    project_dir = os.path.join(base_dir, "project_path")
+    os.mkdir(project_dir)
+
+    os.makedirs(os.path.join(project_dir, "data"))
+    os.makedirs(os.path.join(project_dir, "data/titanic"))
+    shutil.copy(
+        file_relative_path(__file__, "../test_sets/Titanic.csv"),
+        str(os.path.join(project_dir, "data/titanic/Titanic.csv")),
+    )
+
+    os.makedirs(os.path.join(project_dir, "data/random"))
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f1.csv"),
+        str(os.path.join(project_dir, "data/random/f1.csv")),
+    )
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f2.csv"),
+        str(os.path.join(project_dir, "data/random/f2.csv")),
+    )
+
+    assert (
+        gen_directory_tree_str(project_dir)
+        == """\
+project_path/
+    data/
+        random/
+            f1.csv
+            f2.csv
+        titanic/
+            Titanic.csv
+"""
+    )
+
+    context = DataContext.create(project_dir)
+    ge_directory = os.path.join(project_dir, "great_expectations")
+    context.add_datasource(
+        "titanic",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": os.path.join(project_dir, "data/titanic/"),
+            }
+        },
+    )
+
+    context.add_datasource(
+        "random",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": os.path.join(project_dir, "data/random/"),
+            }
+        },
+    )
+
+    context.profile_datasource("titanic")
+
+    # Replicate the batch id of the batch that will be profiled in order to generate the file path of the
+    # validation result
+    titanic_profiled_batch_id = PathBatchKwargs(
+        {
+            "path": os.path.join(project_dir, "data/titanic/Titanic.csv"),
+            "datasource": "titanic",
+            "data_asset_name": "Titanic",
+        }
+    ).to_id()
+
+    tree_str = gen_directory_tree_str(project_dir)
+    # print(tree_str)
+    assert (
+        tree_str
+        == """project_path/
+    data/
+        random/
+            f1.csv
+            f2.csv
+        titanic/
+            Titanic.csv
+    great_expectations/
+        .gitignore
+        great_expectations.yml
+        checkpoints/
+            .ge_store_backend_id
+        expectations/
+            .ge_store_backend_id
+            titanic/
+                subdir_reader/
+                    Titanic/
+                        BasicDatasetProfiler.json
+        notebooks/
+            pandas/
+                validation_playground.ipynb
+            spark/
+                validation_playground.ipynb
+            sql/
+                validation_playground.ipynb
+        plugins/
+            custom_data_docs/
+                renderers/
+                styles/
+                    data_docs_custom_styles.css
+                views/
+        uncommitted/
+            config_variables.yml
+            data_docs/
+            validations/
+                .ge_store_backend_id
+                titanic/
+                    subdir_reader/
+                        Titanic/
+                            BasicDatasetProfiler/
+                                profiling/
+                                    20190926T134241.000000Z/
+                                        {}.json
+""".format(
+            titanic_profiled_batch_id
+        )
+    )
+
+    context.profile_datasource("random")
+    context.build_data_docs()
+
+    f1_profiled_batch_id = PathBatchKwargs(
+        {
+            "path": os.path.join(project_dir, "data/random/f1.csv"),
+            "datasource": "random",
+            "data_asset_name": "f1",
+        }
+    ).to_id()
+
+    f2_profiled_batch_id = PathBatchKwargs(
+        {
+            "path": os.path.join(project_dir, "data/random/f2.csv"),
+            "datasource": "random",
+            "data_asset_name": "f2",
+        }
+    ).to_id()
+
+    data_docs_dir = os.path.join(
+        project_dir, "great_expectations/uncommitted/data_docs"
+    )
+    observed = gen_directory_tree_str(data_docs_dir)
+    print(observed)
+    assert (
+        observed
+        == """\
+data_docs/
+    local_site/
+        index.html
+        expectations/
+            random/
+                subdir_reader/
+                    f1/
+                        BasicDatasetProfiler.html
+                    f2/
+                        BasicDatasetProfiler.html
+            titanic/
+                subdir_reader/
+                    Titanic/
+                        BasicDatasetProfiler.html
+        static/
+            fonts/
+                HKGrotesk/
+                    HKGrotesk-Bold.otf
+                    HKGrotesk-BoldItalic.otf
+                    HKGrotesk-Italic.otf
+                    HKGrotesk-Light.otf
+                    HKGrotesk-LightItalic.otf
+                    HKGrotesk-Medium.otf
+                    HKGrotesk-MediumItalic.otf
+                    HKGrotesk-Regular.otf
+                    HKGrotesk-SemiBold.otf
+                    HKGrotesk-SemiBoldItalic.otf
+            images/
+                favicon.ico
+                glossary_scroller.gif
+                iterative-dev-loop.png
+                logo-long-vector.svg
+                logo-long.png
+                short-logo-vector.svg
+                short-logo.png
+                validation_failed_unexpected_values.gif
+            styles/
+                data_docs_custom_styles_template.css
+                data_docs_default_styles.css
+        validations/
+            random/
+                subdir_reader/
+                    f1/
+                        BasicDatasetProfiler/
+                            profiling/
+                                20190926T134241.000000Z/
+                                    {:s}.html
+                    f2/
+                        BasicDatasetProfiler/
+                            profiling/
+                                20190926T134241.000000Z/
+                                    {:s}.html
+            titanic/
+                subdir_reader/
+                    Titanic/
+                        BasicDatasetProfiler/
+                            profiling/
+                                20190926T134241.000000Z/
+                                    {:s}.html
+""".format(
+            f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id
+        )
+    )
+
+    # save data_docs locally
+    os.makedirs("./tests/data_context/output", exist_ok=True)
+    os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
+
+    if os.path.isdir("./tests/data_context/output/data_docs"):
+        shutil.rmtree("./tests/data_context/output/data_docs")
+    shutil.copytree(
+        os.path.join(ge_directory, "uncommitted/data_docs/"),
+        "./tests/data_context/output/data_docs",
+    )
 
 
 def test_add_store(empty_data_context):
@@ -956,105 +952,103 @@ def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
     assert "# LOOK I WAS MODIFIED" in obs
 
 
-# TODO: <Alex>ALEX</Alex>
-# def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
-#     tmp_path_factory,
-# ):
-#     project_path = str(tmp_path_factory.mktemp("data_context"))
-#     DataContext.create(project_path)
-#
-#     # mangle the existing setup
-#     ge_dir = os.path.join(project_path, "great_expectations")
-#     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
-#     shutil.rmtree(uncommitted_dir)
-#
-#     with pytest.warns(
-#         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
-#     ):
-#         # re-run create to simulate onboarding
-#         DataContext.create(project_path)
-#     obs = gen_directory_tree_str(ge_dir)
-#
-#     assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
-#     assert (
-#         obs
-#         == """\
-# great_expectations/
-#     .gitignore
-#     great_expectations.yml
-#     checkpoints/
-#         .ge_store_backend_id
-#     expectations/
-#         .ge_store_backend_id
-#     notebooks/
-#         pandas/
-#             validation_playground.ipynb
-#         spark/
-#             validation_playground.ipynb
-#         sql/
-#             validation_playground.ipynb
-#     plugins/
-#         custom_data_docs/
-#             renderers/
-#             styles/
-#                 data_docs_custom_styles.css
-#             views/
-#     uncommitted/
-#         config_variables.yml
-#         data_docs/
-#         validations/
-#             .ge_store_backend_id
-# """
-#     )
+def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
+    tmp_path_factory,
+):
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    DataContext.create(project_path)
+
+    # mangle the existing setup
+    ge_dir = os.path.join(project_path, "great_expectations")
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    shutil.rmtree(uncommitted_dir)
+
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
+        # re-run create to simulate onboarding
+        DataContext.create(project_path)
+    obs = gen_directory_tree_str(ge_dir)
+
+    assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
+    assert (
+        obs
+        == """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    checkpoints/
+        .ge_store_backend_id
+    expectations/
+        .ge_store_backend_id
+    notebooks/
+        pandas/
+            validation_playground.ipynb
+        spark/
+            validation_playground.ipynb
+        sql/
+            validation_playground.ipynb
+    plugins/
+        custom_data_docs/
+            renderers/
+            styles/
+                data_docs_custom_styles.css
+            views/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+        validations/
+            .ge_store_backend_id
+"""
+    )
 
 
-# TODO: <Alex>ALEX</Alex>
-# def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(
-#     tmp_path_factory,
-# ):
-#     expected = """\
-# great_expectations/
-#     .gitignore
-#     great_expectations.yml
-#     checkpoints/
-#         .ge_store_backend_id
-#     expectations/
-#         .ge_store_backend_id
-#     notebooks/
-#         pandas/
-#             validation_playground.ipynb
-#         spark/
-#             validation_playground.ipynb
-#         sql/
-#             validation_playground.ipynb
-#     plugins/
-#         custom_data_docs/
-#             renderers/
-#             styles/
-#                 data_docs_custom_styles.css
-#             views/
-#     uncommitted/
-#         config_variables.yml
-#         data_docs/
-#         validations/
-#             .ge_store_backend_id
-# """
-#     project_path = str(tmp_path_factory.mktemp("stuff"))
-#     ge_dir = os.path.join(project_path, "great_expectations")
-#
-#     DataContext.create(project_path)
-#     fixture = gen_directory_tree_str(ge_dir)
-#
-#     assert fixture == expected
-#
-#     with pytest.warns(
-#         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
-#     ):
-#         # re-run create to simulate onboarding
-#         DataContext.create(project_path)
-#
-#     obs = gen_directory_tree_str(ge_dir)
-#     assert obs == expected
+def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(
+    tmp_path_factory,
+):
+    expected = """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    checkpoints/
+        .ge_store_backend_id
+    expectations/
+        .ge_store_backend_id
+    notebooks/
+        pandas/
+            validation_playground.ipynb
+        spark/
+            validation_playground.ipynb
+        sql/
+            validation_playground.ipynb
+    plugins/
+        custom_data_docs/
+            renderers/
+            styles/
+                data_docs_custom_styles.css
+            views/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+        validations/
+            .ge_store_backend_id
+"""
+    project_path = str(tmp_path_factory.mktemp("stuff"))
+    ge_dir = os.path.join(project_path, "great_expectations")
+
+    DataContext.create(project_path)
+    fixture = gen_directory_tree_str(ge_dir)
+
+    assert fixture == expected
+
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
+        # re-run create to simulate onboarding
+        DataContext.create(project_path)
+
+    obs = gen_directory_tree_str(ge_dir)
+    assert obs == expected
 
 
 def test_data_context_do_all_uncommitted_dirs_exist(tmp_path_factory):
@@ -1395,92 +1389,86 @@ def test_list_checkpoints_on_empty_context_returns_empty_list(empty_data_context
     assert empty_data_context.list_checkpoints() == []
 
 
-# TODO: <Alex>ALEX</Alex>
-# def test_list_checkpoints_on_context_with_checkpoint(empty_context_with_checkpoint):
-#     context = empty_context_with_checkpoint
-#     assert context.list_checkpoints() == ["my_checkpoint"]
+def test_list_checkpoints_on_context_with_checkpoint(empty_context_with_checkpoint):
+    context = empty_context_with_checkpoint
+    assert context.list_checkpoints() == ["my_checkpoint"]
 
 
-# TODO: <Alex>ALEX</Alex>
-# def test_list_checkpoints_on_context_with_twwo_checkpoints(
-#     empty_context_with_checkpoint,
-# ):
-#     context = empty_context_with_checkpoint
-#     checkpoints_file = os.path.join(
-#         context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
-#     )
-#     shutil.copy(
-#         checkpoints_file, os.path.join(os.path.dirname(checkpoints_file), "another.yml")
-#     )
-#     assert set(context.list_checkpoints()) == {"another", "my_checkpoint"}
+def test_list_checkpoints_on_context_with_twwo_checkpoints(
+    empty_context_with_checkpoint,
+):
+    context = empty_context_with_checkpoint
+    checkpoints_file = os.path.join(
+        context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
+    )
+    shutil.copy(
+        checkpoints_file, os.path.join(os.path.dirname(checkpoints_file), "another.yml")
+    )
+    assert set(context.list_checkpoints()) == {"another", "my_checkpoint"}
 
 
-# TODO: <Alex>ALEX</Alex>
-# def test_list_checkpoints_on_context_with_checkpoint_and_other_files_in_checkpoints_dir(
-#     empty_context_with_checkpoint,
-# ):
-#     context = empty_context_with_checkpoint
-#
-#     for extension in [".json", ".txt", "", ".py"]:
-#         path = os.path.join(
-#             context.root_directory, context.CHECKPOINTS_DIR, f"foo{extension}"
-#         )
-#         with open(path, "w") as f:
-#             f.write("foo: bar")
-#         assert os.path.isfile(path)
-#
-#     assert context.list_checkpoints() == ["my_checkpoint"]
+def test_list_checkpoints_on_context_with_checkpoint_and_other_files_in_checkpoints_dir(
+    empty_context_with_checkpoint,
+):
+    context = empty_context_with_checkpoint
+
+    for extension in [".json", ".txt", "", ".py"]:
+        path = os.path.join(
+            context.root_directory, context.CHECKPOINTS_DIR, f"foo{extension}"
+        )
+        with open(path, "w") as f:
+            f.write("foo: bar")
+        assert os.path.isfile(path)
+
+    assert context.list_checkpoints() == ["my_checkpoint"]
 
 
-# TODO: <Alex>ALEX</Alex>
-# def test_get_checkpoint_raises_error_on_not_found_checkpoint(
-#     empty_context_with_checkpoint,
-# ):
-#     context = empty_context_with_checkpoint
-#     with pytest.raises(InvalidKeyError):
-#         context.get_checkpoint("not_a_checkpoint")
+def test_get_checkpoint_raises_error_on_not_found_checkpoint(
+    empty_context_with_checkpoint,
+):
+    context = empty_context_with_checkpoint
+    with pytest.raises(InvalidKeyError):
+        context.get_checkpoint("not_a_checkpoint")
 
 
-# TODO: <Alex>ALEX</Alex>
-# def test_get_checkpoint_raises_error_empty_checkpoint(empty_context_with_checkpoint,):
-#     context = empty_context_with_checkpoint
-#     checkpoint_file_path = os.path.join(
-#         context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
-#     )
-#     with open(checkpoint_file_path, "w") as f:
-#         f.write("# Not a checkpoint file")
-#     assert os.path.isfile(checkpoint_file_path)
-#     assert context.list_checkpoints() == ["my_checkpoint"]
-#
-#     with pytest.raises(CheckpointError):
-#         context.get_checkpoint("my_checkpoint")
+def test_get_checkpoint_raises_error_empty_checkpoint(empty_context_with_checkpoint,):
+    context = empty_context_with_checkpoint
+    checkpoint_file_path = os.path.join(
+        context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
+    )
+    with open(checkpoint_file_path, "w") as f:
+        f.write("# Not a checkpoint file")
+    assert os.path.isfile(checkpoint_file_path)
+    assert context.list_checkpoints() == ["my_checkpoint"]
+
+    with pytest.raises(InvalidCheckpointConfigError):
+        context.get_checkpoint("my_checkpoint")
 
 
-# TODO: <Alex>ALEX</Alex>
-# def test_get_checkpoint(empty_context_with_checkpoint):
-#     context = empty_context_with_checkpoint
-#     obs = context.get_checkpoint("my_checkpoint")
-#     assert isinstance(obs, dict)
-#     assert {
-#         "validation_operator_name": "action_list_operator",
-#         "batches": [
-#             {
-#                 "batch_kwargs": {
-#                     "path": "/Users/me/projects/my_project/data/data.csv",
-#                     "datasource": "my_filesystem_datasource",
-#                     "reader_method": "read_csv",
-#                 },
-#                 "expectation_suite_names": ["suite_one", "suite_two"],
-#             },
-#             {
-#                 "batch_kwargs": {
-#                     "query": "SELECT * FROM users WHERE status = 1",
-#                     "datasource": "my_redshift_datasource",
-#                 },
-#                 "expectation_suite_names": ["suite_three"],
-#             },
-#         ],
-#     }
+def test_get_checkpoint(empty_context_with_checkpoint):
+    context = empty_context_with_checkpoint
+    obs = context.get_checkpoint("my_checkpoint")
+    assert isinstance(obs.to_json_dict(), dict)
+    assert {
+        "validation_operator_name": "action_list_operator",
+        "batches": [
+            {
+                "batch_kwargs": {
+                    "path": "/Users/me/projects/my_project/data/data.csv",
+                    "datasource": "my_filesystem_datasource",
+                    "reader_method": "read_csv",
+                },
+                "expectation_suite_names": ["suite_one", "suite_two"],
+            },
+            {
+                "batch_kwargs": {
+                    "query": "SELECT * FROM users WHERE status = 1",
+                    "datasource": "my_redshift_datasource",
+                },
+                "expectation_suite_names": ["suite_three"],
+            },
+        ],
+    }
 
 
 def test_get_checkpoint_default_validation_operator(empty_data_context):
@@ -1496,12 +1484,15 @@ def test_get_checkpoint_default_validation_operator(empty_data_context):
     assert os.path.isfile(checkpoint_file_path)
 
     obs = context.get_checkpoint("foo")
-    assert isinstance(obs, dict)
+    assert isinstance(obs.to_json_dict(), dict)
     expected = {
+        "class_name": "LegacyCheckpoint",
+        "config_version": 1.0,
+        "name": None,
         "validation_operator_name": "action_list_operator",
         "batches": [],
     }
-    assert expected == obs
+    assert expected == obs.to_json_dict()
 
 
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
@@ -1537,7 +1528,7 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(InvalidCheckpointConfigError) as e:
         context.get_checkpoint("foo")
 
 
