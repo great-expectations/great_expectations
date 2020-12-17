@@ -224,28 +224,28 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
     with open(expected_checkpoint) as f:
         obs_file = f.read()
 
-    # This is snapshot-ish to prove that comments remain in place
-    # TODO: <Alex>ALEX</Alex>
-    #     assert (
-#         """\
-# # This checkpoint was created by the command `great_expectations checkpoint new`.
-# #
-# # A checkpoint is a list of one or more batches paired with one or more
-# # Expectation Suites and a configurable Validation Operator.
-# #
-# # It can be run with the `great_expectations checkpoint run` command.
-# # You can edit this file to add batches of data and expectation suites.
-# #
-# # For more details please see
-# # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
-# validation_operator_name: action_list_operator
-# # Batches are a list of batch_kwargs paired with a list of one or more suite
-# # names. A checkpoint can have one or more batches. This makes deploying
-# # Great Expectations in your pipelines easy!
-# batches:
-#   - batch_kwargs:"""
-#         in obs_file
-#     )
+        # This is snapshot-ish to prove that comments remain in place
+        # TODO: <Alex>ALEX</Alex>
+        #     assert (
+        #         """\
+        # # This checkpoint was created by the command `great_expectations checkpoint new`.
+        # #
+        # # A checkpoint is a list of one or more batches paired with one or more
+        # # Expectation Suites and a configurable Validation Operator.
+        # #
+        # # It can be run with the `great_expectations checkpoint run` command.
+        # # You can edit this file to add batches of data and expectation suites.
+        # #
+        # # For more details please see
+        # # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
+        # validation_operator_name: action_list_operator
+        # # Batches are a list of batch_kwargs paired with a list of one or more suite
+        # # names. A checkpoint can have one or more batches. This makes deploying
+        # # Great Expectations in your pipelines easy!
+        # batches:
+        #   - batch_kwargs:"""
+        #         in obs_file
+        #     )
         assert (
             """\
 batches:
