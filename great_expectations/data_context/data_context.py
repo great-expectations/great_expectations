@@ -2780,13 +2780,21 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     # TODO: <Alex>ALEX/Rob</Alex>
     def run_checkpoint(
         self,
-        checkpoint_name: str,
-        run_id=None,
-        evaluation_parameters=None,
-        run_name=None,
-        run_time=None,
-        result_format=None,
-        **kwargs,
+            checkpoint_name: str,
+            template: Optional[str] = None,
+            run_name_template: Optional[str] = None,
+            expectation_suite_name: Optional[str] = None,
+            batch_request: Optional[Union[BatchRequest, dict]] = None,
+            action_list: Optional[List[dict]] = None,
+            evaluation_parameters: Optional[dict] = None,
+            runtime_configuration: Optional[dict] = None,
+            validations: Optional[List[dict]] = None,
+            profilers: Optional[List[dict]] = None,
+            run_id=None,
+            run_name=None,
+            run_time=None,
+            result_format=None,
+            **kwargs,
     ):
         """
         Validate against a pre-defined checkpoint. (Experimental)
@@ -2807,25 +2815,22 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             checkpoint_name=checkpoint_name, return_config=True,
         )
 
-        batches_to_validate = []
-        for batch in checkpoint["batches"]:
-            batch_kwargs = batch["batch_kwargs"]
-            for suite_name in batch["expectation_suite_names"]:
-                suite = self.get_expectation_suite(suite_name)
-                batch = self.get_batch(batch_kwargs, suite)
-                batches_to_validate.append(batch)
-
-        results = self.run_validation_operator(
-            checkpoint["validation_operator_name"],
-            assets_to_validate=batches_to_validate,
-            run_id=run_id,
+        return checkpoint.run(
+            template=template,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
             evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            run_id=run_id,
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
-            **kwargs,
+            **kwargs
         )
-        return results
 
     def test_yaml_config(
         self,
