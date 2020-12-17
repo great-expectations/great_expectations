@@ -7,6 +7,7 @@ Changelog
 Develop
 -----------------
 * [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() #2169 issue #2164
+* [BUGFIX] Fix black conflict, upgrade black #2183
 
 0.13.3
 -----------------
