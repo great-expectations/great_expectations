@@ -2,6 +2,7 @@ import datetime
 import logging
 import uuid
 import warnings
+from typing import Optional
 
 from great_expectations.types import ClassConfig
 
@@ -135,16 +136,35 @@ class SparkDFDatasource(LegacyDatasource):
             **configuration_with_defaults
         )
 
-        try:
-            builder = SparkSession.builder
-            for k, v in configuration_with_defaults["spark_config"].items():
-                builder.config(k, v)
-            self.spark = builder.getOrCreate()
-        except AttributeError:
-            logger.error(
-                "Unable to load spark context; install optional spark dependency for support."
-            )
-            self.spark = None
+        spark_config = configuration_with_defaults["spark_config"]
+        if len(spark_config) > 0:
+            try:
+                # We need to stop the old session to reconfigure it
+                logger.info("Stopping existing spark context to reconfigure.")
+                spark = SparkSession.builder.getOrCreate()
+                spark.sparkContext.stop()
+                builder = SparkSession.builder
+                app_name: Optional[str] = spark_config.get("spark.app.name")
+                if app_name:
+                    builder.appName(app_name)
+                for k, v in spark_config.items():
+                    if k != "spark.app.name":
+                        builder.config(k, v)
+                self.spark = builder.getOrCreate()
+            except AttributeError:
+                logger.error(
+                    "Unable to load spark context; install optional spark dependency for support."
+                )
+                self.spark = None
+        else:
+            try:
+                # We need to stop the old session to reconfigure it
+                self.spark = SparkSession.builder.getOrCreate()
+            except AttributeError:
+                logger.error(
+                    "Unable to load spark context; install optional spark dependency for support."
+                )
+                self.spark = None
 
         self._build_generators()
 
