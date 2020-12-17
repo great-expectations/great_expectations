@@ -8,7 +8,7 @@ from ruamel.yaml import YAML, YAMLError
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.types.base import (
     LegacyCheckpointConfig,
-    legacyCheckpointConfigSchema,
+    legacyCheckpointConfigSchema, CheckpointConfig,
 )
 from great_expectations.exceptions import CheckpointError
 
@@ -100,13 +100,13 @@ class LegacyCheckpoint(object):
 class Checkpoint(object):
     def __init__(
         self,
-        data_context: DataContext,
         name: str,
-        validation_operator_name: str,
-        validators: list,
+        data_context: DataContext,
+        checkpoint_config: CheckpointConfig
     ):
-        self._data_context = data_context
         self._name = name
+        self._data_context = data_context
+
 
         self._validation_operator_name = validation_operator_name
         self._validators = validators
