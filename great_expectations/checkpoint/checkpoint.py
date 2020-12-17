@@ -1,6 +1,7 @@
 import json
-from typing import Union
+from typing import Union, Optional, List
 
+from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     checkpointConfigSchema,
@@ -23,7 +24,7 @@ class LegacyCheckpoint(object):
             )
         elif isinstance(checkpoint_config, dict):
             checkpoint_config = checkpointConfigSchema.load(checkpoint_config)
-        self._checkpoint_config = checkpoint_config
+        self._config = checkpoint_config
 
     @property
     def data_context(self):
@@ -34,33 +35,47 @@ class LegacyCheckpoint(object):
         return self._name
 
     @property
-    def checkpoint_config(self):
-        return self._checkpoint_config
+    def config(self):
+        return self._config
 
     @property
     def validation_operator_name(self):
-        return self.checkpoint_config.validation_operator_name
+        return self.config.validation_operator_name
 
     @property
     def batches(self):
-        return self.checkpoint_config.batches
+        return self.config.batches
 
-    def run(self):
-
+    def run(
+            self,
+            run_id,
+            evaluation_parameters,
+            run_name,
+            run_time,
+            result_format,
+            **kwargs,
+    ):
         batches_to_validate = self._get_batches_to_validate(self.batches)
 
         results = self.data_context.run_validation_operator(
-            self.validation_operator_name, assets_to_validate=batches_to_validate,
+            self.validation_operator_name,
+            assets_to_validate=batches_to_validate,
+            run_id=run_id,
+            evaluation_parameters=evaluation_parameters,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            **kwargs,
         )
 
         return results
 
     def get_config(self, format="dict"):
         if format == "dict":
-            return self.checkpoint_config.to_json_dict()
+            return self.config.to_json_dict()
 
         elif format == "yaml":
-            return self.checkpoint_config.to_yaml_str()
+            return self.config.to_yaml_str()
 
         else:
             raise ValueError(f"Unknown format {format} in LegacyCheckpoint.get_config.")
@@ -93,17 +108,49 @@ class Checkpoint(object):
     def __init__(
         self,
         name: str,
-        data_context: DataContext,
+        data_context: "DataContext",
         checkpoint_config: CheckpointConfig
     ):
         self._name = name
         self._data_context = data_context
+        self._config = checkpoint_config
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def data_context(self):
+        return self._data_context
+
+    @property
+    def config(self):
+        return self._config
+
+    def run(
+            self,
+            template: Optional[str] = None,
+            run_name_template: Optional[str] = None,
+            expectation_suite_name: Optional[str] = None,
+            batch_request: Optional[Union[BatchRequest, dict]] = None,
+            action_list: Optional[List[dict]] = None,
+            evaluation_parameters: Optional[dict] = None,
+            runtime_configuration: Optional[dict] = None,
+            validations: Optional[List[dict]] = None,
+            profilers: Optional[List[dict]] = None,
+            run_id=None,
+            run_name=None,
+            run_time=None,
+            result_format=None,
+            **kwargs,
+    ):
+        """
 
 
-        self._validation_operator_name = validation_operator_name
-        self._validators = validators
 
-    def run(self):
+        :param kwargs:
+        :return:
+        """
         validators = self._get_validators_to_validate(self._validators)
 
         results = self._data_context.run_validation_operator(
