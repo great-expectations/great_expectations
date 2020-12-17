@@ -10,7 +10,7 @@ attrs==19.3.0
 autoapi==2.0.1
 Babel==2.8.0
 backcall==0.2.0
-black==19.10b0
+black==20.8b1
 bleach==3.1.5
 certifi==2020.6.20
 cffi==1.14.1
