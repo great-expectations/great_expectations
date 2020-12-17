@@ -933,7 +933,11 @@ def _build_sa_validator_with_data(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
     df.to_sql(
-        name=table_name, con=engine, index=False, dtype=sql_dtypes, if_exists="replace",
+        name=table_name,
+        con=engine,
+        index=False,
+        dtype=sql_dtypes,
+        if_exists="replace",
     )
 
     batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
@@ -1392,7 +1396,12 @@ def create_files_in_directory(
 
 
 def create_fake_data_frame():
-    return pd.DataFrame({"x": range(10), "y": list("ABCDEFGHIJ"),})
+    return pd.DataFrame(
+        {
+            "x": range(10),
+            "y": list("ABCDEFGHIJ"),
+        }
+    )
 
 
 def validate_uuid4(uuid_string: str) -> bool:

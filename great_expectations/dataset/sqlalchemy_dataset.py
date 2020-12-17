@@ -376,7 +376,11 @@ class MetaSqlAlchemyDataset(Dataset):
         )
 
         unexpected_count_query: Select = (
-            sa.select([sa.func.sum(sa.column("condition")).label("unexpected_count"),])
+            sa.select(
+                [
+                    sa.func.sum(sa.column("condition")).label("unexpected_count"),
+                ]
+            )
             .select_from(temp_table_obj)
             .alias("UnexpectedCountSubquery")
         )
@@ -1058,7 +1062,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         query = (
             sa.select(case_conditions)
-            .where(sa.column(column) != None,)
+            .where(
+                sa.column(column) != None,
+            )
             .select_from(self._table)
         )
 
@@ -1329,7 +1335,10 @@ WHERE
         return {
             "success": row_count == other_table_row_count,
             "result": {
-                "observed_value": {"self": row_count, "other": other_table_row_count,}
+                "observed_value": {
+                    "self": row_count,
+                    "other": other_table_row_count,
+                }
             },
         }
 

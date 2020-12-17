@@ -280,7 +280,8 @@ class HtmlSiteStore:
         if not isinstance(key, SiteSectionIdentifier):
             raise TypeError(
                 "key: {!r} must a SiteSectionIdentifier, not {!r}".format(
-                    key, type(key),
+                    key,
+                    type(key),
                 )
             )
 
@@ -295,7 +296,9 @@ class HtmlSiteStore:
         # The key's resource_identifier didn't match any known key_class
         raise TypeError(
             "resource_identifier in key: {!r} must one of {}, not {!r}".format(
-                key, set(self.store_backends.keys()), type(key),
+                key,
+                set(self.store_backends.keys()),
+                type(key),
             )
         )
 

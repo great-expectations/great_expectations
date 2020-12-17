@@ -424,8 +424,10 @@ def column_condition_partial(
                 )
                 if partial_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN:
                     if filter_column_isnull:
-                        compute_domain_kwargs = execution_engine.add_column_row_condition(
-                            compute_domain_kwargs, column_name=column_name
+                        compute_domain_kwargs = (
+                            execution_engine.add_column_row_condition(
+                                compute_domain_kwargs, column_name=column_name
+                            )
                         )
                     unexpected_condition = ~expected_condition
                 else:
@@ -518,9 +520,11 @@ def _pandas_column_map_series_and_domain_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
-    (map_series, compute_domain_kwargs_2, accessor_domain_kwargs_2,) = metrics[
-        "metric_partial_fn"
-    ]
+    (
+        map_series,
+        compute_domain_kwargs_2,
+        accessor_domain_kwargs_2,
+    ) = metrics["metric_partial_fn"]
     assert (
         compute_domain_kwargs == compute_domain_kwargs_2
     ), "map_series and condition must have the same compute domain"
@@ -722,7 +726,12 @@ def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
         "unexpected_condition"
     )
     return (
-        sa.func.sum(sa.case([(unexpected_condition, 1)], else_=0,)),
+        sa.func.sum(
+            sa.case(
+                [(unexpected_condition, 1)],
+                else_=0,
+            )
+        ),
         compute_domain_kwargs,
         accessor_domain_kwargs,
     )
@@ -760,7 +769,15 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         temp_table_obj.create(execution_engine.engine, checkfirst=True)
 
         count_case_statement: List[sa.sql.elements.Label] = [
-            sa.case([(unexpected_condition, 1,)], else_=0,).label("condition")
+            sa.case(
+                [
+                    (
+                        unexpected_condition,
+                        1,
+                    )
+                ],
+                else_=0,
+            ).label("condition")
         ]
         inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
             count_case_statement,
@@ -769,13 +786,21 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         execution_engine.engine.execute(inner_case_query)
 
     unexpected_count_query: sa.Select = (
-        sa.select([sa.func.sum(sa.column("condition")).label("unexpected_count"),])
+        sa.select(
+            [
+                sa.func.sum(sa.column("condition")).label("unexpected_count"),
+            ]
+        )
         .select_from(temp_table_obj)
         .alias("UnexpectedCountSubquery")
     )
 
     unexpected_count = execution_engine.engine.execute(
-        sa.select([unexpected_count_query.c.unexpected_count,])
+        sa.select(
+            [
+                unexpected_count_query.c.unexpected_count,
+            ]
+        )
     ).scalar()
 
     return convert_to_json_serializable(unexpected_count)

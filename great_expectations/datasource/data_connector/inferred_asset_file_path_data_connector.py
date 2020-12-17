@@ -70,7 +70,8 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             BatchDefinition
         ] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
-                datasource_name=self.datasource_name, data_connector_name=self.name,
+                datasource_name=self.datasource_name,
+                data_connector_name=self.name,
             )
         )
 

@@ -216,7 +216,10 @@ def _write_checkpoint_to_disk(
     context: DataContext, checkpoint: Dict, checkpoint_name: str
 ) -> str:
     # TODO this should be the responsibility of the DataContext
-    checkpoint_dir = os.path.join(context.root_directory, context.CHECKPOINTS_DIR,)
+    checkpoint_dir = os.path.join(
+        context.root_directory,
+        context.CHECKPOINTS_DIR,
+    )
     checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
     os.makedirs(checkpoint_dir, exist_ok=True)
     with open(checkpoint_file, "w") as f:

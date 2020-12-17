@@ -183,7 +183,9 @@ class ExpectationsStore(Store):
             print(
                 f"Attempting to retrieve the test value associated with key: {test_key}..."
             )
-        test_value = self.get(key=test_key,)
+        test_value = self.get(
+            key=test_key,
+        )
         if pretty_print:
             print("\tTest value successfully retreived.")
             print()

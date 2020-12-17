@@ -118,7 +118,9 @@ data_connectors:
 
 
 @pytest.fixture
-def sample_datasource_with_single_partition_file_data_connector(tmp_path_factory,):
+def sample_datasource_with_single_partition_file_data_connector(
+    tmp_path_factory,
+):
     base_directory: str = str(
         tmp_path_factory.mktemp(
             "basic_pandas_datasource_single_partition_filesystem_data_connector"
@@ -294,7 +296,12 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource):
             datasource_name="my_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="B1",
-            partition_definition=PartitionDefinition({"letter": "B", "number": "1",}),
+            partition_definition=PartitionDefinition(
+                {
+                    "letter": "B",
+                    "number": "1",
+                }
+            ),
         )
     )
 
@@ -305,7 +312,12 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource):
         datasource_name="my_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="B1",
-        partition_definition=PartitionDefinition({"letter": "B", "number": "1",}),
+        partition_definition=PartitionDefinition(
+            {
+                "letter": "B",
+                "number": "1",
+            }
+        ),
     )
 
     batch_list: List[Batch] = basic_pandas_datasource.get_batch_list_from_batch_request(
@@ -314,7 +326,10 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource):
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="B1",
             partition_request={
-                "partition_identifiers": {"letter": "B", "number": "1",}
+                "partition_identifiers": {
+                    "letter": "B",
+                    "number": "1",
+                }
             },
         )
     )
@@ -326,7 +341,10 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource):
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="Titanic",
             partition_request={
-                "partition_identifiers": {"letter": "B", "number": "1",}
+                "partition_identifiers": {
+                    "letter": "B",
+                    "number": "1",
+                }
             },
         )
     )
@@ -410,7 +428,11 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource):
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
         "batch_data": test_df,
-        "partition_request": {"partition_identifiers": {"run_id": 1234567890,}},
+        "partition_request": {
+            "partition_identifiers": {
+                "run_id": 1234567890,
+            }
+        },
         "limit": None,
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
@@ -473,7 +495,11 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
         "batch_data": test_df,
-        "partition_request": {"partition_identifiers": {"run_id": 1234567890,}},
+        "partition_request": {
+            "partition_identifiers": {
+                "run_id": 1234567890,
+            }
+        },
         "limit": None,
     }
     batch_request: BatchRequest = BatchRequest(**batch_request)
@@ -586,7 +612,9 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
         "data_asset_name": data_asset_name,
         "batch_data": test_df,
         "partition_request": {
-            "partition_identifiers": {"run_id": 1234567890,},
+            "partition_identifiers": {
+                "run_id": 1234567890,
+            },
             "limit": None,
         },
     }

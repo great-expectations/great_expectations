@@ -42,7 +42,9 @@ def param_store(request, test_backends):
 
     return instantiate_class_from_config(
         config=request.param,
-        config_defaults={"module_name": "great_expectations.data_context.store",},
+        config_defaults={
+            "module_name": "great_expectations.data_context.store",
+        },
         runtime_environment={},
     )
 
@@ -51,7 +53,9 @@ def param_store(request, test_backends):
     params=[
         {
             "class_name": "EvaluationParameterStore",
-            "store_backend": {"class_name": "InMemoryStoreBackend",},
+            "store_backend": {
+                "class_name": "InMemoryStoreBackend",
+            },
         },
         {
             "class_name": "EvaluationParameterStore",
@@ -65,7 +69,9 @@ def in_memory_param_store(request, test_backends):
 
     return instantiate_class_from_config(
         config=request.param,
-        config_defaults={"module_name": "great_expectations.data_context.store",},
+        config_defaults={
+            "module_name": "great_expectations.data_context.store",
+        },
         runtime_environment={},
     )
 
@@ -83,7 +89,9 @@ def test_evaluation_parameter_store_methods(
             ExpectationValidationResult(
                 expectation_config=ExpectationConfiguration(
                     expectation_type="expect_table_row_count_to_equal",
-                    kwargs={"value": 1024,},
+                    kwargs={
+                        "value": 1024,
+                    },
                 ),
                 success=True,
                 exception_info={

@@ -468,7 +468,8 @@ class SqlAlchemyDatasource(LegacyDatasource):
         self, query_parameters=None, limit=None, dataset_options=None
     ):
         batch_kwargs = super().process_batch_parameters(
-            limit=limit, dataset_options=dataset_options,
+            limit=limit,
+            dataset_options=dataset_options,
         )
         nested_update(batch_kwargs, {"query_parameters": query_parameters})
         return batch_kwargs

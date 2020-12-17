@@ -82,7 +82,8 @@ class FilePathDataConnector(DataConnector):
         return path_list
 
     def get_batch_definition_list_from_batch_request(
-        self, batch_request: BatchRequest,
+        self,
+        batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 

@@ -26,7 +26,12 @@ def test_parse_validation_graph():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
@@ -56,7 +61,12 @@ def test_parse_validation_graph_with_bad_metrics_args():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
     graph = ValidationGraph()
     engine = PandasExecutionEngine()
@@ -67,7 +77,10 @@ def test_parse_validation_graph_with_bad_metrics_args():
         )
         validation_dependencies = expectation_impl(
             configuration
-        ).get_validation_dependencies(configuration, execution_engine=engine,)
+        ).get_validation_dependencies(
+            configuration,
+            execution_engine=engine,
+        )
 
         for metric_configuration in validation_dependencies["metrics"].values():
             validator.build_metric_dependency_graph(
@@ -83,7 +96,12 @@ def test_populate_dependencies():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
@@ -95,7 +113,10 @@ def test_populate_dependencies():
         )
         validation_dependencies = expectation_impl(
             configuration
-        ).get_validation_dependencies(configuration, engine,)
+        ).get_validation_dependencies(
+            configuration,
+            engine,
+        )
 
         for metric_configuration in validation_dependencies["metrics"].values():
             Validator(execution_engine=engine).build_metric_dependency_graph(
@@ -108,7 +129,12 @@ def test_populate_dependencies_with_incorrect_metric_name():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
@@ -120,7 +146,10 @@ def test_populate_dependencies_with_incorrect_metric_name():
         )
         validation_dependencies = expectation_impl(
             configuration
-        ).get_validation_dependencies(configuration, engine,)
+        ).get_validation_dependencies(
+            configuration,
+            engine,
+        )
 
         try:
             Validator(execution_engine=engine).build_metric_dependency_graph(
@@ -139,7 +168,12 @@ def test_graph_validate(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "b", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "b",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
 
     batch = basic_datasource.get_single_batch_from_batch_request(
@@ -286,7 +320,12 @@ def test_validator_default_expectation_args__pandas(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "b", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "b",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
 
     batch = basic_datasource.get_single_batch_from_batch_request(

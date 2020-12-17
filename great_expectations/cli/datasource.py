@@ -724,7 +724,8 @@ def _collect_snowflake_credentials_key_pair():
     credentials = {}
 
     credentials["private_key_path"] = click.prompt(
-        "Path to the private key used for authentication", show_default=False,
+        "Path to the private key used for authentication",
+        show_default=False,
     )
 
     credentials["private_key_passphrase"] = click.prompt(
@@ -1146,7 +1147,9 @@ We could not determine the format of the file. What is it?
         # do not use Click to check if the file exists - the get_batch
         # logic will check this
         path = click.prompt(
-            msg_prompt_file_path, type=click.Path(dir_okay=dir_okay), default=path,
+            msg_prompt_file_path,
+            type=click.Path(dir_okay=dir_okay),
+            default=path,
         )
 
         if not path.startswith("gs:") and not path.startswith("s3"):

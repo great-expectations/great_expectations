@@ -38,7 +38,9 @@ def test_ColumnsExistProfiler():
 
 
 def test_BasicDatasetProfiler():
-    toy_dataset = PandasDataset({"x": [1, 2, 3]},)
+    toy_dataset = PandasDataset(
+        {"x": [1, 2, 3]},
+    )
     assert (
         len(toy_dataset.get_expectation_suite(suppress_warnings=True).expectations) == 0
     )
@@ -374,7 +376,9 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple
         "rad_datasource",
         "second_generator",
         "SubdirReaderBatchKwargsGenerator",
-        **{"base_directory": str(filesystem_csv_2),}
+        **{
+            "base_directory": str(filesystem_csv_2),
+        }
     )
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)

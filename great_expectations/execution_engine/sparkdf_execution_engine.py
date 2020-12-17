@@ -170,7 +170,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
         super().__init__(*args, **kwargs)
 
         self._config.update(
-            {"persist": self._persist, "spark_config": self._spark_config,}
+            {
+                "persist": self._persist,
+                "spark_config": self._spark_config,
+            }
         )
 
     @property
@@ -206,7 +209,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
             try:
                 reader_options = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
-                    reader=reader_options, reader_method=reader_method, path=path,
+                    reader=reader_options,
+                    reader_method=reader_method,
+                    path=path,
                 )
                 batch_data = reader_fn(path)
             except AttributeError:
@@ -481,7 +486,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return new_domain_kwargs
 
     def resolve_metric_bundle(
-        self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
+        self,
+        metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
     ) -> dict:
         """For each metric name in the given metric_fn_bundle, finds the domain of the metric and calculates it using a
         metric function from the given provider class.
@@ -547,12 +553,16 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return self.dataframe.limit(n).toPandas()
 
     @staticmethod
-    def _split_on_whole_table(df,):
+    def _split_on_whole_table(
+        df,
+    ):
         return df
 
     @staticmethod
     def _split_on_column_value(
-        df, column_name: str, partition_definition: dict,
+        df,
+        column_name: str,
+        partition_definition: dict,
     ):
         return df.filter(F.col(column_name) == partition_definition[column_name])
 
@@ -575,7 +585,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
     @staticmethod
     def _split_on_divided_integer(
-        df, column_name: str, divisor: int, partition_definition: dict,
+        df,
+        column_name: str,
+        divisor: int,
+        partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
         matching_divisor = partition_definition[column_name]
@@ -590,7 +603,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
     @staticmethod
     def _split_on_mod_integer(
-        df, column_name: str, mod: int, partition_definition: dict,
+        df,
+        column_name: str,
+        mod: int,
+        partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
         matching_mod_value = partition_definition[column_name]
@@ -603,7 +619,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
     @staticmethod
     def _split_on_multi_column_values(
-        df, column_names: list, partition_definition: dict,
+        df,
+        column_names: list,
+        partition_definition: dict,
     ):
         """Split on the joint values in the named columns"""
         for column_name in column_names:
@@ -662,7 +680,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
     @staticmethod
     def _sample_using_mod(
-        df, column_name: str, mod: int, value: int,
+        df,
+        column_name: str,
+        mod: int,
+        value: int,
     ):
         """Take the mod of named column, and only keep rows that match the given value"""
         res = (
@@ -674,7 +695,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
     @staticmethod
     def _sample_using_a_list(
-        df, column_name: str, value_list: list,
+        df,
+        column_name: str,
+        value_list: list,
     ):
         """Match the values in the named column against value_list, and only keep the matches"""
         return df.where(F.col(column_name).isin(value_list))

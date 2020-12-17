@@ -145,7 +145,9 @@ class ColumnHistogram(ColumnMetricProvider):
 
         query = (
             sa.select(case_conditions)
-            .where(sa.column(column) != None,)
+            .where(
+                sa.column(column) != None,
+            )
             .select_from(selectable)
         )
 

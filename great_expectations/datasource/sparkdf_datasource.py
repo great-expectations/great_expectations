@@ -152,7 +152,8 @@ class SparkDFDatasource(LegacyDatasource):
         self, reader_method=None, reader_options=None, limit=None, dataset_options=None
     ):
         batch_kwargs = super().process_batch_parameters(
-            limit=limit, dataset_options=dataset_options,
+            limit=limit,
+            dataset_options=dataset_options,
         )
 
         # Apply globally-configured reader options first

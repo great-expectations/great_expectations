@@ -64,7 +64,8 @@ class ValidationAction:
 
 class NoOpAction(ValidationAction):
     def __init__(
-        self, data_context,
+        self,
+        data_context,
     ):
         super().__init__(data_context)
 
@@ -99,7 +100,12 @@ class SlackNotificationAction(ValidationAction):
     """
 
     def __init__(
-        self, data_context, renderer, slack_webhook, notify_on="all", notify_with=None,
+        self,
+        data_context,
+        renderer,
+        slack_webhook,
+        notify_on="all",
+        notify_with=None,
     ):
         """Construct a SlackNotificationAction
 
@@ -116,7 +122,9 @@ class SlackNotificationAction(ValidationAction):
         """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
-            config=renderer, runtime_environment={}, config_defaults={},
+            config=renderer,
+            runtime_environment={},
+            config_defaults={},
         )
         module_name = renderer["module_name"]
         if not self.renderer:
@@ -199,7 +207,11 @@ class PagerdutyAlertAction(ValidationAction):
     """
 
     def __init__(
-        self, data_context, api_key, routing_key, notify_on="failure",
+        self,
+        data_context,
+        api_key,
+        routing_key,
+        notify_on="failure",
     ):
         """Construct a PagerdutyAlertAction
 
@@ -308,7 +320,9 @@ class OpsgenieAlertAction(ValidationAction):
         """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
-            config=renderer, runtime_environment={}, config_defaults={},
+            config=renderer,
+            runtime_environment={},
+            config_defaults={},
         )
         module_name = renderer["module_name"]
         if not self.renderer:
@@ -393,7 +407,9 @@ class StoreValidationResultAction(ValidationAction):
     """
 
     def __init__(
-        self, data_context, target_store_name=None,
+        self,
+        data_context,
+        target_store_name=None,
     ):
         """
 

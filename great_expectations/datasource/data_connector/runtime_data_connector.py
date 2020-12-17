@@ -104,7 +104,8 @@ class RuntimeDataConnector(DataConnector):
             BatchDefinition
         ] = self.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
-                datasource_name=self.datasource_name, data_connector_name=self.name,
+                datasource_name=self.datasource_name,
+                data_connector_name=self.name,
             )
         )
 
@@ -115,12 +116,13 @@ class RuntimeDataConnector(DataConnector):
         return list(data_asset_names)
 
     def get_batch_data_and_metadata(
-        self, batch_definition: BatchDefinition, batch_data: Any,
-    ) -> Tuple[
-        Any, BatchSpec, BatchMarkers,
-    ]:  # batch_data
+        self,
+        batch_definition: BatchDefinition,
+        batch_data: Any,
+    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
-            batch_definition=batch_definition, batch_data=batch_data,
+            batch_definition=batch_definition,
+            batch_data=batch_data,
         )
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
@@ -132,7 +134,8 @@ class RuntimeDataConnector(DataConnector):
         )
 
     def get_batch_definition_list_from_batch_request(
-        self, batch_request: BatchRequest,
+        self,
+        batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
@@ -182,7 +185,8 @@ class RuntimeDataConnector(DataConnector):
         ]
 
     def _map_batch_definition_to_data_reference(
-        self, batch_definition: BatchDefinition,
+        self,
+        batch_definition: BatchDefinition,
     ) -> str:
         if not isinstance(batch_definition, BatchDefinition):
             raise TypeError(
@@ -197,7 +201,10 @@ class RuntimeDataConnector(DataConnector):
         return data_reference
 
     def _self_check_fetch_batch(
-        self, pretty_print, example_data_reference, data_asset_name,
+        self,
+        pretty_print,
+        example_data_reference,
+        data_asset_name,
     ):
         return {}
 
@@ -209,7 +216,9 @@ class RuntimeDataConnector(DataConnector):
 
     # This method is currently called called only in tests.
     def build_batch_spec(
-        self, batch_definition: BatchDefinition, batch_data: Any,
+        self,
+        batch_definition: BatchDefinition,
+        batch_data: Any,
     ) -> RuntimeDataBatchSpec:
         batch_spec = super().build_batch_spec(batch_definition=batch_definition)
         batch_spec["batch_data"] = batch_data

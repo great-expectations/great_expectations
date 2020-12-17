@@ -117,7 +117,9 @@ def test_error_checking(basic_datasource):
         )
 
 
-def test_partition_request_and_runtime_keys_success_all_keys_present(basic_datasource,):
+def test_partition_request_and_runtime_keys_success_all_keys_present(
+    basic_datasource,
+):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     partition_request: dict
@@ -154,7 +156,9 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(basic_datas
     assert len(batch_definition_list) == 1
 
 
-def test_partition_request_and_runtime_keys_error_illegal_keys(basic_datasource,):
+def test_partition_request_and_runtime_keys_error_illegal_keys(
+    basic_datasource,
+):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     partition_request: dict
@@ -233,10 +237,16 @@ def test_get_available_data_asset_names(basic_datasource):
     assert available_data_asset_names == expected_available_data_asset_names
 
 
-def test_get_batch_definition_list_from_batch_request_length_one(basic_datasource,):
+def test_get_batch_definition_list_from_batch_request_length_one(
+    basic_datasource,
+):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request: dict = {"partition_identifiers": {"run_id": 1234567890,}}
+    partition_request: dict = {
+        "partition_identifiers": {
+            "run_id": 1234567890,
+        }
+    }
 
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
@@ -272,10 +282,16 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_datasourc
     assert batch_definition_list == expected_batch_definition_list
 
 
-def test_get_batch_definition_list_from_batch_request_length_zero(basic_datasource,):
+def test_get_batch_definition_list_from_batch_request_length_zero(
+    basic_datasource,
+):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request: dict = {"partition_identifiers": {"run_id": 1234567890,}}
+    partition_request: dict = {
+        "partition_identifiers": {
+            "run_id": 1234567890,
+        }
+    }
 
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
@@ -315,9 +331,14 @@ def test__get_data_reference_list(basic_datasource):
     assert data_reference_list == expected_data_reference_list
 
 
-def test__generate_batch_spec_parameters_from_batch_definition(basic_datasource,):
+def test__generate_batch_spec_parameters_from_batch_definition(
+    basic_datasource,
+):
     partition_request: dict = {
-        "partition_identifiers": {"custom_key_0": "staging", "run_id": 1234567890,}
+        "partition_identifiers": {
+            "custom_key_0": "staging",
+            "run_id": 1234567890,
+        }
     }
 
     test_runtime_data_connector: RuntimeDataConnector = (
@@ -343,7 +364,10 @@ def test__generate_batch_spec_parameters_from_batch_definition(basic_datasource,
 
 def test__build_batch_spec(basic_datasource):
     partition_request: dict = {
-        "partition_identifiers": {"custom_key_0": "staging", "run_id": 1234567890,}
+        "partition_identifiers": {
+            "custom_key_0": "staging",
+            "run_id": 1234567890,
+        }
     }
 
     test_runtime_data_connector: RuntimeDataConnector = (

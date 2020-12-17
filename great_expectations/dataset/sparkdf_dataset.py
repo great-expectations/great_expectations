@@ -81,7 +81,12 @@ class MetaSparkDFDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-            self, column, mostly=None, result_format=None, *args, **kwargs,
+            self,
+            column,
+            mostly=None,
+            result_format=None,
+            *args,
+            **kwargs,
         ):
             """
             This whole decorator is pending a re-write. Currently there is are huge performance issues
@@ -306,7 +311,10 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    (row["A_{}".format(eval_col_A)], row["B_{}".format(eval_col_B)],)
+                    (
+                        row["A_{}".format(eval_col_A)],
+                        row["B_{}".format(eval_col_B)],
+                    )
                     for row in unexpected_df.collect()
                 ]
 
@@ -1411,7 +1419,8 @@ class SparkDFDataset(MetaSparkDFDataset):
             "expect_select_column_values_to_be_unique_within_record instead."
         )
         warnings.warn(
-            deprecation_warning, DeprecationWarning,
+            deprecation_warning,
+            DeprecationWarning,
         )
 
         return self.expect_select_column_values_to_be_unique_within_record(

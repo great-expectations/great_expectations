@@ -42,12 +42,16 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return self._data_assets
 
     def add_data_asset(
-        self, name, config,
+        self,
+        name,
+        config,
     ):
         self._data_assets[name] = config
 
     def _get_partition_definition_list_from_data_asset_config(
-        self, data_asset_name, data_asset_config,
+        self,
+        data_asset_name,
+        data_asset_config,
     ):
         if "table_name" in data_asset_config:
             table_name = data_asset_config["table_name"]
@@ -78,8 +82,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         for data_asset_name in self.data_assets:
             data_asset = self.data_assets[data_asset_name]
-            partition_definition_list = self._get_partition_definition_list_from_data_asset_config(
-                data_asset_name, data_asset,
+            partition_definition_list = (
+                self._get_partition_definition_list_from_data_asset_config(
+                    data_asset_name,
+                    data_asset,
+                )
             )
 
             # TODO Abe 20201029 : Apply sorters to partition_definition_list here
@@ -167,7 +174,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     ### Splitter methods for listing partitions ###
 
     def _split_on_whole_table(
-        self, table_name: str,
+        self,
+        table_name: str,
     ):
         """'Split' by returning the whole table
 
@@ -177,7 +185,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return sa.select([sa.true()])
 
     def _split_on_column_value(
-        self, table_name: str, column_name: str,
+        self,
+        table_name: str,
+        column_name: str,
     ):
         """Split using the values in the named column"""
         # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
@@ -187,7 +197,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         )
 
     def _split_on_converted_datetime(
-        self, table_name: str, column_name: str, date_format_string: str = "%Y-%m-%d",
+        self,
+        table_name: str,
+        column_name: str,
+        date_format_string: str = "%Y-%m-%d",
     ):
         """Convert the values in the named column to the given date_format, and split on that"""
         # query = f"SELECT DISTINCT( strftime(\"{date_format_string}\", \"{self.column_name}\")) as my_var FROM {self.table_name}"
@@ -195,7 +208,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return sa.select(
             [
                 sa.func.distinct(
-                    sa.func.strftime(date_format_string, sa.column(column_name),)
+                    sa.func.strftime(
+                        date_format_string,
+                        sa.column(column_name),
+                    )
                 )
             ]
         ).select_from(sa.text(table_name))
@@ -219,7 +235,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         ).select_from(sa.text(table_name))
 
     def _split_on_multi_column_values(
-        self, table_name: str, column_names: List[str],
+        self,
+        table_name: str,
+        column_names: List[str],
     ):
         """Split on the joint values in the named columns"""
         # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
@@ -231,7 +249,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         )
 
     def _split_on_hashed_column(
-        self, table_name: str, column_name: str, hash_digits: int,
+        self,
+        table_name: str,
+        column_name: str,
+        hash_digits: int,
     ):
         """Note: this method is experimental. It does not work with all SQL dialects."""
         # query = f"SELECT MD5(\"{self.column_name}\") = {matching_hash}) AS hashed_var FROM {self.table_name}"

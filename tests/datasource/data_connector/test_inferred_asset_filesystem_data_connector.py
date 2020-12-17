@@ -72,7 +72,13 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
     )
     create_files_in_directory(
         directory=base_directory,
-        file_name_list=["A-100.csv", "A-101.csv", "B-1.csv", "B-2.csv", "CCC.csv",],
+        file_name_list=[
+            "A-100.csv",
+            "A-101.csv",
+            "B-1.csv",
+            "B-2.csv",
+            "CCC.csv",
+        ],
     )
 
     my_data_connector: InferredAssetFilesystemDataConnector = (
@@ -81,7 +87,10 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
             datasource_name="FAKE_DATASOURCE_NAME",
             default_regex={
                 "pattern": r"(.+)-(\d+)\.csv",
-                "group_names": ["data_asset_name", "number",],
+                "group_names": [
+                    "data_asset_name",
+                    "number",
+                ],
             },
             glob_directive="*",
             base_directory=base_directory,
@@ -191,7 +200,8 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
-                    data_connector_name="my_data_connector", data_asset_name="alpha",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="alpha",
                 )
             )
         )
@@ -202,7 +212,8 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
-                    data_connector_name="my_data_connector", data_asset_name="beta",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="beta",
                 )
             )
         )
@@ -215,7 +226,10 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
             partition_request={
-                "partition_identifiers": {"year_dir": "2020", "month_dir": "03",}
+                "partition_identifiers": {
+                    "year_dir": "2020",
+                    "month_dir": "03",
+                }
             },
         )
     ) == [
@@ -223,7 +237,10 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
             datasource_name="FAKE_DATASOURCE_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
-            partition_definition=PartitionDefinition(year_dir="2020", month_dir="03",),
+            partition_definition=PartitionDefinition(
+                year_dir="2020",
+                month_dir="03",
+            ),
         )
     ]
 
@@ -232,7 +249,12 @@ def test_self_check(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_self_check"))
     create_files_in_directory(
         directory=base_directory,
-        file_name_list=["A-100.csv", "A-101.csv", "B-1.csv", "B-2.csv",],
+        file_name_list=[
+            "A-100.csv",
+            "A-101.csv",
+            "B-1.csv",
+            "B-2.csv",
+        ],
     )
 
     my_data_connector: InferredAssetFilesystemDataConnector = (
@@ -705,11 +727,13 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
         )
     )
 
-    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="my_inferred_asset_filesystem_data_connector",
-            data_asset_name="some_bucket",
+    sorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="my_inferred_asset_filesystem_data_connector",
+                data_asset_name="some_bucket",
+            )
         )
     )
 

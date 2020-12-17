@@ -426,12 +426,16 @@ Notes:
 
     ### Splitter methods for partitioning dataframes ###
     @staticmethod
-    def _split_on_whole_table(df,) -> pd.DataFrame:
+    def _split_on_whole_table(
+        df,
+    ) -> pd.DataFrame:
         return df
 
     @staticmethod
     def _split_on_column_value(
-        df, column_name: str, partition_definition: dict,
+        df,
+        column_name: str,
+        partition_definition: dict,
     ) -> pd.DataFrame:
 
         return df[df[column_name] == partition_definition[column_name]]
@@ -452,7 +456,10 @@ Notes:
 
     @staticmethod
     def _split_on_divided_integer(
-        df, column_name: str, divisor: int, partition_definition: dict,
+        df,
+        column_name: str,
+        divisor: int,
+        partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
@@ -465,7 +472,10 @@ Notes:
 
     @staticmethod
     def _split_on_mod_integer(
-        df, column_name: str, mod: int, partition_definition: dict,
+        df,
+        column_name: str,
+        mod: int,
+        partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
@@ -476,7 +486,9 @@ Notes:
 
     @staticmethod
     def _split_on_multi_column_values(
-        df, column_names: List[str], partition_definition: dict,
+        df,
+        column_names: List[str],
+        partition_definition: dict,
     ):
         """Split on the joint values in the named columns"""
 
@@ -520,7 +532,8 @@ Notes:
 
     @staticmethod
     def _sample_using_random(
-        df, p: float = 0.1,
+        df,
+        p: float = 0.1,
     ):
         """Take a random sample of rows, retaining proportion p
 
@@ -530,14 +543,19 @@ Notes:
 
     @staticmethod
     def _sample_using_mod(
-        df, column_name: str, mod: int, value: int,
+        df,
+        column_name: str,
+        mod: int,
+        value: int,
     ):
         """Take the mod of named column, and only keep rows that match the given value"""
         return df[df[column_name].map(lambda x: x % mod == value)]
 
     @staticmethod
     def _sample_using_a_list(
-        df, column_name: str, value_list: list,
+        df,
+        column_name: str,
+        value_list: list,
     ):
         """Match the values in the named column against value_list, and only keep the matches"""
         return df[df[column_name].isin(value_list)]

@@ -225,7 +225,9 @@ class BaseDataContext:
             raise
         return True
 
-    @usage_statistics_enabled_method(event_name="data_context.__init__",)
+    @usage_statistics_enabled_method(
+        event_name="data_context.__init__",
+    )
     def __init__(self, project_config, context_root_dir=None, runtime_environment=None):
         """DataContext constructor
 
@@ -290,7 +292,8 @@ class BaseDataContext:
             validation_operator_config,
         ) in self._project_config.validation_operators.items():
             self.add_validation_operator(
-                validation_operator_name, validation_operator_config,
+                validation_operator_name,
+                validation_operator_config,
             )
 
         self._evaluation_parameter_dependencies_compiled = False
@@ -323,7 +326,9 @@ class BaseDataContext:
 
             new_store = instantiate_class_from_config(
                 config=store_config,
-                runtime_environment={"root_directory": self.root_directory,},
+                runtime_environment={
+                    "root_directory": self.root_directory,
+                },
                 config_defaults={"module_name": module_name, "store_name": store_name},
             )
         except ge_exceptions.DataContextError as e:
@@ -643,7 +648,9 @@ class BaseDataContext:
             )
         return site_builder
 
-    @usage_statistics_enabled_method(event_name="data_context.open_data_docs",)
+    @usage_statistics_enabled_method(
+        event_name="data_context.open_data_docs",
+    )
     def open_data_docs(
         self,
         resource_identifier: Optional[str] = None,
@@ -1581,7 +1588,9 @@ class BaseDataContext:
             config = kwargs
 
         return self._instantiate_datasource_from_config_and_update_project_config(
-            name=name, config=config, initialize=initialize,
+            name=name,
+            config=config,
+            initialize=initialize,
         )
 
     def _instantiate_datasource_from_config_and_update_project_config(
@@ -2158,7 +2167,9 @@ class BaseDataContext:
             logger.debug("Found data_docs_sites. Building sites...")
 
             for site_name, site_config in sites.items():
-                logger.debug("Building Data Docs Site %s" % site_name,)
+                logger.debug(
+                    "Building Data Docs Site %s" % site_name,
+                )
 
                 if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
@@ -2593,7 +2604,8 @@ class BaseDataContext:
 
         # TODO: Add batch_parameters
         batch = self.get_batch(
-            expectation_suite_name=expectation_suite_name, batch_kwargs=batch_kwargs,
+            expectation_suite_name=expectation_suite_name,
+            batch_kwargs=batch_kwargs,
         )
 
         if not profiler.validate(batch):
@@ -2648,7 +2660,12 @@ class BaseDataContext:
             """
 Profiled the data asset, with %d total rows and %d columns in %.2f seconds.
 Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs."""
-            % (total_rows, total_columns, total_duration, total_expectations,)
+            % (
+                total_rows,
+                total_columns,
+                total_duration,
+                total_expectations,
+            )
         )
 
         profiling_results["success"] = True
@@ -2817,7 +2834,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             raise ValueError(f"Unknown return_mode: {return_mode}.")
 
         substituted_config_variables = substitute_all_config_variables(
-            self.config_variables, dict(os.environ),
+            self.config_variables,
+            dict(os.environ),
         )
 
         substitutions = {
@@ -2827,7 +2845,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         }
 
         config_str_with_substituted_variables = substitute_all_config_variables(
-            yaml_config, substitutions,
+            yaml_config,
+            substitutions,
         )
 
         config = yaml.load(config_str_with_substituted_variables)
@@ -2859,8 +2878,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
                 datasource_name = name or "my_temp_datasource"
-                instantiated_class = self._instantiate_datasource_from_config_and_update_project_config(
-                    name=datasource_name, config=config, initialize=True,
+                instantiated_class = (
+                    self._instantiate_datasource_from_config_and_update_project_config(
+                        name=datasource_name,
+                        config=config,
+                        initialize=True,
+                    )
                 )
 
             else:
