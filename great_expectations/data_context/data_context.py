@@ -2676,7 +2676,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         key: ConfigurationIdentifier = ConfigurationIdentifier(
             configuration_key=checkpoint_name,
         )
-        self.checkpoint_store.set(key=key, value=config)
+        self.checkpoint_store.set(key=key, value=checkpoint_config)
 
         return new_checkpoint
 
