@@ -116,8 +116,8 @@ def build_store_from_config(
         new_store = None
         logger.critical(f"Error {e} occurred while attempting to instantiate a store.")
     if not new_store:
-        # class_name: str = store_config.get("class_name")
         class_name: str = store_config["class_name"]
+        module_name = store_config["module_name"]
         raise ge_exceptions.ClassInstantiationError(
             module_name=module_name, package_name=None, class_name=class_name,
         )

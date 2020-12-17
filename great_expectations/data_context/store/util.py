@@ -17,23 +17,17 @@ logger = logging.getLogger(__name__)
 
 
 def build_configuration_store(
-    configuration_class: Any,
+    class_name: str,
     store_name: str,
     store_backend: Union[StoreBackend, dict],
     *,
     module_name: str = "great_expectations.data_context.store",
-    class_name: str = "ConfigurationStore",
     overwrite_existing: bool = False,
     **kwargs,
 ) -> ConfigurationStore:
     logger.debug(
         f"Starting data_context/store/util.py#build_configuration_store for store_name {store_name}"
     )
-
-    if not issubclass(configuration_class, BaseYamlConfig):
-        raise ge_exceptions.DataContextError(
-            "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
-        )
 
     if store_backend is not None and issubclass(type(store_backend), StoreBackend):
         store_backend = store_backend.config
@@ -45,7 +39,6 @@ def build_configuration_store(
     store_backend.update(**kwargs)
 
     store_config: dict = {
-        "configuration_class": configuration_class,
         "store_name": store_name,
         "module_name": module_name,
         "class_name": class_name,
@@ -66,7 +59,8 @@ def build_checkpoint_store_using_store_backend(
     return cast(
         CheckpointStore,
         build_configuration_store(
-            configuration_class=CheckpointConfig,
+            class_name="CheckpointStore",
+            module_name="great_expectations.data_context.store",
             store_name=store_name,
             store_backend=store_backend,
             overwrite_existing=overwrite_existing,
@@ -75,14 +69,16 @@ def build_checkpoint_store_using_store_backend(
 
 
 def save_config_to_store_backend(
-    configuration_class: Any,
+    class_name: str,
+    module_name: str,
     store_name: str,
     store_backend: Union[StoreBackend, dict],
     configuration_key: str,
     configuration: BaseYamlConfig,
 ):
     config_store: ConfigurationStore = build_configuration_store(
-        configuration_class=configuration_class,
+        class_name=class_name,
+        module_name=module_name,
         store_name=store_name,
         store_backend=store_backend,
         overwrite_existing=True,
@@ -94,13 +90,15 @@ def save_config_to_store_backend(
 
 
 def load_config_from_store_backend(
-    configuration_class: Any,
+    class_name: str,
+    module_name: str,
     store_name: str,
     store_backend: Union[StoreBackend, dict],
     configuration_key: str,
 ) -> BaseYamlConfig:
     config_store: ConfigurationStore = build_configuration_store(
-        configuration_class=configuration_class,
+        class_name=class_name,
+        module_name=module_name,
         store_name=store_name,
         store_backend=store_backend,
         overwrite_existing=False,
@@ -112,13 +110,15 @@ def load_config_from_store_backend(
 
 
 def delete_config_from_store_backend(
-    configuration_class: Any,
+    class_name: str,
+    module_name: str,
     store_name: str,
     store_backend: Union[StoreBackend, dict],
     configuration_key: str,
 ):
     config_store: ConfigurationStore = build_configuration_store(
-        configuration_class=configuration_class,
+        class_name=class_name,
+        module_name=module_name,
         store_name=store_name,
         store_backend=store_backend,
         overwrite_existing=True,

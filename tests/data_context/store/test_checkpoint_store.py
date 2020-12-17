@@ -1,23 +1,15 @@
-# TODO: <Alex>ALEX</Alex>
 import logging
 from pathlib import Path
 from typing import Dict, List, Union
 
-# TODO: <Alex>ALEX</Alex>
 import pytest
 
-# TODO: <Alex>ALEX</Alex>
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import CheckpointStore
-
-# from great_expectations.checkpoint.checkpoint import LegacyCheckpoint
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from great_expectations.util import gen_directory_tree_str
+from great_expectations.util import filter_properties_dict, gen_directory_tree_str
 from tests.test_utils import build_checkpoint_store_using_filesystem
 
 logger = logging.getLogger(__name__)
@@ -93,7 +85,10 @@ def test_checkpoint_store(empty_data_context):
     assert len(checkpoint_store.list_keys()) == 1
 
     assert (
-        checkpoint_store.get(key=key_0).to_json_dict()
+        filter_properties_dict(
+            properties=checkpoint_store.get(key=key_0).to_json_dict(),
+            delete_fields=["module_name"],
+        )
         == my_checkpoint_config_0.to_json_dict()
     )
 
@@ -160,7 +155,10 @@ def test_checkpoint_store(empty_data_context):
     assert len(checkpoint_store.list_keys()) == 2
 
     assert (
-        checkpoint_store.get(key=key_1).to_json_dict()
+        filter_properties_dict(
+            properties=checkpoint_store.get(key=key_1).to_json_dict(),
+            delete_fields=["module_name"],
+        )
         == my_checkpoint_config_1.to_json_dict()
     )
 

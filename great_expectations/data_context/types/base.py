@@ -47,6 +47,8 @@ def object_to_yaml_str(obj):
 
 
 class BaseYamlConfig(SerializableDictDot):
+    _config_schema_class = None
+
     def __init__(self, commented_map: CommentedMap = None, **kwargs):
         if commented_map is None:
             commented_map = CommentedMap()
@@ -62,10 +64,10 @@ class BaseYamlConfig(SerializableDictDot):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."
             )
-        if hasattr(cls.get_config_class(), "schema_instance"):
-            schema_instance: Schema = cls.get_config_class().schema_instance
+        if hasattr(cls.get_config_class(), "_schema_instance"):
+            schema_instance: Schema = cls.get_config_class()._schema_instance
             if schema_instance is None:
-                cls.get_config_class().schema_instance = (cls.get_schema_class())()
+                cls.get_config_class()._schema_instance = (cls.get_schema_class())()
             else:
                 return schema_instance
         else:
@@ -1233,6 +1235,9 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
 
 
 class DataContextConfig(BaseYamlConfig):
+    # TODO: <Alex>ALEX (does not work yet)</Alex>
+    # _config_schema_class = DataContextConfigSchema
+
     def __init__(
         self,
         config_version: Optional[float] = None,
@@ -1308,6 +1313,7 @@ class DataContextConfig(BaseYamlConfig):
 
         super().__init__(commented_map=commented_map)
 
+    # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
     def get_config_class(cls):
         return cls  # DataContextConfig
@@ -1321,66 +1327,73 @@ class DataContextConfig(BaseYamlConfig):
         return self._config_version
 
 
-class LegacyCheckpointConfig(BaseYamlConfig):
-    def __init__(
-        self,
-        module_name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        validation_operator_name: Optional[str] = None,
-        batches: Optional[list] = None,
-        commented_map: Optional[CommentedMap] = None,
-    ):
-        super().__init__(commented_map=commented_map)
-        self._module_name = module_name or "great_expectations.checkpoint"
-        self._class_name = class_name or "LegacyCheckpointConfig"
-        self._validation_operator_name = (
-            validation_operator_name or "action_list_operator"
-        )
-        self._batches = batches or []
-
-    @property
-    def module_name(self):
-        return self._module_name
-
-    @property
-    def class_name(self):
-        return self._class_name
-
-    @property
-    def validation_operator_name(self):
-        return self._validation_operator_name
-
-    @property
-    def batches(self):
-        return self._batches
-
-    @classmethod
-    def get_config_class(cls):
-        return cls  # LegacyCheckpointConfig
-
-    @classmethod
-    def get_schema_class(cls):
-        return LegacyCheckpointConfigSchema
-
-
-class LegacyCheckpointConfigSchema(Schema):
+class CheckpointConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
-
-    class_name = fields.Str()
-    module_name = fields.Str()
-    validation_operator_name = fields.Str()
-    batches = fields.List(
-        fields.Dict(
-            keys=fields.Str(validate=OneOf(["batch_kwargs", "expectation_suite_names"]))
+        fields = (
+            "name",
+            "config_version",
+            "template",
+            "module_name",
+            "class_name",
+            "run_name_template",
+            "expectation_suite_name",
+            "batch_request",
+            "action_list",
+            "evaluation_parameters",
+            "runtime_configuration",
+            "validations",
+            "profilers",
+            # Next two fields are for LegacyCheckpoint configuration
+            "validation_operator_name",
+            "batches",
         )
+        ordered = True
+
+    name = fields.String(required=False, allow_none=True)
+    config_version = fields.Number(
+        validate=lambda x: 0 < x < 100,
+        error_messages={"invalid": "config version must " "be a number."},
+    )
+    template = fields.String(required=False, allow_none=True)
+    module_name = fields.String(required=False, missing="great_expectations.checkpoint")
+    class_name = fields.Str(required=False, allow_none=True)
+    run_name_template = fields.String(required=False, allow_none=True)
+    expectation_suite_name = fields.String(required=False, allow_none=True)
+    batch_request = fields.Dict(required=False, allow_none=True)
+    action_list = fields.List(
+        cls_or_instance=fields.Dict(), required=False, allow_none=True
+    )
+    evaluation_parameters = fields.Dict(required=False, allow_none=True)
+    runtime_configuration = fields.Dict(required=False, allow_none=True)
+    validations = fields.List(
+        cls_or_instance=fields.Dict(), required=False, allow_none=True
+    )
+    profilers = fields.List(
+        cls_or_instance=fields.Dict(), required=False, allow_none=True
+    )
+    # Next two fields are for LegacyCheckpoint configuration
+    validation_operator_name = fields.Str(required=False, allow_none=True)
+    batches = fields.List(
+        cls_or_instance=fields.Dict(
+            keys=fields.Str(
+                validate=OneOf(["batch_kwargs", "expectation_suite_names"]),
+                required=False,
+                allow_none=True,
+            )
+        ),
+        required=False,
+        allow_none=True,
     )
 
 
 class CheckpointConfig(BaseYamlConfig):
+    # TODO: <Alex>ALEX (does not work yet)</Alex>
+    # _config_schema_class = CheckpointConfigSchema
+
     def __init__(
         self,
-        name: str,
+        name: Optional[str] = None,
         config_version: Optional[int] = None,
         template: Optional[str] = None,
         module_name: Optional[str] = None,
@@ -1393,26 +1406,46 @@ class CheckpointConfig(BaseYamlConfig):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
     ):
         self._name = name
         if config_version is None:
             config_version = CheckpointConfigDefaults.DEFAULT_CONFIG_VERSION.value
-        self._config_version = config_version
-        self._template = template
-        self._module_name = module_name or "great_expectations.checkpoint"
-        self._class_name = class_name or "Checkpoint"
-        self._run_name_template = run_name_template
-        self._expectation_suite_name = expectation_suite_name
-        self._batch_request = batch_request
-        self._action_list = action_list
-        self._evaluation_parameters = evaluation_parameters
-        self._runtime_configuration = runtime_configuration
-        self._validations = validations or []
-        self._profilers = profilers or []
+            if class_name is None:
+                class_name = "LegacyCheckpoint"
+            if validation_operator_name is None:
+                validation_operator_name = "action_list_operator"
+            self.validation_operator_name = validation_operator_name
+            if batches is not None and isinstance(batches, list):
+                self.batches = batches
+        else:
+            if class_name is None:
+                class_name = "Checkpoint"
+            self._template = template
+            self._module_name = module_name or "great_expectations.checkpoint"
+            if class_name is None:
+                if self.config_version is None:
+                    class_name = "LegacyCheckpoint"
+                else:
+                    class_name = "Checkpoint"
+            self._run_name_template = run_name_template
+            self._expectation_suite_name = expectation_suite_name
+            self._batch_request = batch_request
+            self._action_list = action_list
+            self._evaluation_parameters = evaluation_parameters
+            self._runtime_configuration = runtime_configuration
+            self._validations = validations or []
+            self._profilers = profilers or []
+        if config_version is not None:
+            self._config_version = config_version
+        self._class_name = class_name
 
         super().__init__(commented_map=commented_map)
 
+    # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
     def get_config_class(cls):
         return cls  # CheckpointConfig
@@ -1470,51 +1503,6 @@ class CheckpointConfig(BaseYamlConfig):
         return self._runtime_configuration
 
 
-class CheckpointConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-        fields = (
-            "name",
-            "config_version",
-            "template",
-            "module_name",
-            "class_name",
-            "run_name_template",
-            "expectation_suite_name",
-            "batch_request",
-            "action_list",
-            "evaluation_parameters",
-            "runtime_configuration",
-            "validations",
-            "profilers",
-        )
-        ordered = True
-
-    name = fields.String(required=True)
-    config_version = fields.Number(
-        validate=lambda x: 0 < x < 100,
-        error_messages={"invalid": "config version must " "be a number."},
-    )
-    template = fields.String(allow_none=True)
-    module_name = fields.String(missing="great_expectations.checkpoint")
-    class_name = fields.String(missing="Checkpoint")
-    run_name_template = fields.String(allow_none=True)
-    expectation_suite_name = fields.String(allow_none=True)
-    batch_request = fields.Dict(allow_none=True)
-    action_list = fields.List(cls_or_instance=fields.Dict(), allow_none=True)
-    evaluation_parameters = fields.Dict(allow_none=True)
-    runtime_configuration = fields.Dict(allow_none=True)
-    validations = fields.List(
-        cls_or_instance=fields.Dict(
-            keys=fields.String(validate=OneOf([
-                "batch_request", "expectation_suite_name", "action_list", "evaluation_parameters",
-                "runtime_configuration"
-            ]))
-        )
-    )
-    profilers = fields.List(cls_or_instance=fields.Dict())
-
-
 class CheckpointValidationConfig(DictDot):
     pass
 
@@ -1523,6 +1511,7 @@ class CheckpointValidationConfigSchema(Schema):
     pass
 
 
+# TODO: <Alex>Rob</Alex>
 # class SimpleCheckpointConfig(CheckpointConfig):
 #     def __init__(
 #             self,
@@ -1552,4 +1541,3 @@ sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
-legacyCheckpointConfigSchema = LegacyCheckpointConfigSchema()
