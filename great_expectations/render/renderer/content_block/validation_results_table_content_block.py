@@ -76,7 +76,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             runtime_configuration=None,
             **kwargs,
         ):
-            eval_param_value_dict = kwargs.pop("evaluation_params")
+            eval_param_value_dict = kwargs.get("evaluation_params", None)
             if eval_param_value_dict:
                 runtime_configuration["evaluation_params"] = eval_param_value_dict
 

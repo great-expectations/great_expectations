@@ -440,7 +440,6 @@ class DefaultSiteSectionBuilder:
                     )
 
             try:
-                # <WILL> KEY PLACE FOR ERROR
                 rendered_content = self.renderer_class.render(resource)
                 viewable_content = self.view_class.render(
                     rendered_content,

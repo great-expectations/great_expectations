@@ -9,7 +9,7 @@ def add_evaluation_param_content(render_func):
         app_template_str = "The Expectation was run with evaluation parameter $eval_param with value $eval_param_value at time of Validation."
         runtime_configuration = kwargs.get("runtime_configuration")
         if runtime_configuration:
-            eval_params = runtime_configuration.get("evaluation_params")
+            eval_params = runtime_configuration.get("evaluation_params", {})
             styling = runtime_configuration.get("styling")
             for key, val in eval_params.items():
                 app_params = dict()
