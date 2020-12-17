@@ -20,4 +20,4 @@ pytest-cov>=2.8.1  # all_tests
 pyupgrade==2.7.2  # lint
 requirements-parser>=0.2.0  # all_tests
 s3fs>=0.5.1 # all_tests
-xlrd>=1.1.0  # all_tests
+xlrd>=1.1.0,<2.0.0  # all_tests
