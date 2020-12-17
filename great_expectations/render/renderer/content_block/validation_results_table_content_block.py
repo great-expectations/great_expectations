@@ -76,37 +76,19 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             runtime_configuration=None,
             **kwargs,
         ):
+            eval_param_value_dict = kwargs.pop("evaluation_params")
+            if eval_param_value_dict:
+                runtime_configuration["evaluation_params"] = eval_param_value_dict
+
             expectation = result.expectation_config
             expectation_string_cell = expectation_string_fn(
                 configuration=expectation, runtime_configuration=runtime_configuration
             )
 
-            # <WILL> this logic can be cleaner
-            if isinstance(expectation_string_cell, list):
-                if isinstance(
-                    expectation_string_cell[0], RenderedStringTemplateContent
-                ):
-                    string_template = expectation_string_cell[0].string_template
-                    for key, value in string_template["params"].items():
-                        if isinstance(value, dict):
-                            if value.get("$PARAMETER") is not None:
-                                eval_param_value_dict = kwargs.pop("evaluation_params")
-                                eval_param_name = value["$PARAMETER"]
-                                # this is the problem
-                                string_template["params"][key] = eval_param_name
-                                string_template["params"][
-                                    eval_param_name
-                                ] = eval_param_value_dict[eval_param_name]
-                                fake_value = f"""evaluation parameter ${key}  (value ${eval_param_name} at time of validation)"""
-                                string_template["template"] = string_template[
-                                    "template"
-                                ].replace(f"""${key}""", fake_value)
-                                break
-
-                status_icon_renderer = get_renderer_impl(
-                    object_name=expectation_type,
-                    renderer_type="renderer.diagnostic.status_icon",
-                )
+            status_icon_renderer = get_renderer_impl(
+                object_name=expectation_type,
+                renderer_type="renderer.diagnostic.status_icon",
+            )
             status_cell = (
                 [status_icon_renderer[1](result=result)] if status_icon_renderer else []
             )

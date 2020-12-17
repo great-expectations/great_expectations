@@ -11,6 +11,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.expectations.util import add_evaluation_param_content
 
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
@@ -97,6 +98,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @add_evaluation_param_content
     def _prescriptive_renderer(
         cls,
         configuration=None,

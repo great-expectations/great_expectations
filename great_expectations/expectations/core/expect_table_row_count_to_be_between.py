@@ -6,6 +6,7 @@ import pandas as pd
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.util import add_evaluation_param_content
 
 from ...data_asset.util import parse_result_format
 from ...render.renderer.renderer import renderer
@@ -102,6 +103,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @add_evaluation_param_content
     def _prescriptive_renderer(
         cls,
         configuration=None,
@@ -153,7 +155,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             )
             params.update(conditional_params)
 
-        return [
+        rendered_string_template_content_list = [
             RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
@@ -165,6 +167,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 }
             )
         ]
+        return rendered_string_template_content_list
 
     def _validate(
         self,

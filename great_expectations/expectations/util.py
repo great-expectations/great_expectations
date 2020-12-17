@@ -1,6 +1,35 @@
 import numpy as np
 
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.render.types import RenderedStringTemplateContent
+
+
+def add_evaluation_param_content(render_func):
+    def inner_func(*args, **kwargs):
+        rendered_string_template = render_func(*args, **kwargs)
+        app_template_str = "The Expectation was run with evaluation parameter $eval_param with value $eval_param_value at time of Validation."
+        runtime_configuration = kwargs.get("runtime_configuration")
+        if runtime_configuration:
+            eval_params = runtime_configuration.get("evaluation_params")
+            styling = runtime_configuration.get("styling")
+            for key, val in eval_params.items():
+                app_params = dict()
+                app_params["eval_param"] = key
+                app_params["eval_param_value"] = val
+                to_append = RenderedStringTemplateContent(
+                    **{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": app_template_str,
+                            "params": app_params,
+                            "styling": styling,
+                        },
+                    }
+                )
+                rendered_string_template.append(to_append)
+        return rendered_string_template
+
+    return inner_func
+
 
 legacy_method_parameters = {
     "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than": (

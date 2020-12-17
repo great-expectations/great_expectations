@@ -19,6 +19,7 @@ try:
     import sqlalchemy as sa
 except ImportError:
     pass
+from great_expectations.expectations.util import add_evaluation_param_content
 
 
 class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
@@ -99,6 +100,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @add_evaluation_param_content
     def _prescriptive_renderer(
         cls,
         configuration=None,

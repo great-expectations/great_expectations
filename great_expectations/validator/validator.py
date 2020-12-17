@@ -213,6 +213,11 @@ class Validator:
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
+                # <WILL>
+                print("HELLO HELLO HELLO")
+                print(self._expectation_suite.evaluation_parameters)
+                print(basic_runtime_configuration)
+
                 if not self.interactive_evaluation and not self._active_validation:
                     validation_result = ExpectationValidationResult(
                         expectation_config=copy.deepcopy(expectation.configuration)

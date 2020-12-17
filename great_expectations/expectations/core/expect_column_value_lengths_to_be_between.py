@@ -31,6 +31,8 @@ try:
 except ImportError:
     pass
 
+from great_expectations.expectations.util import add_evaluation_param_content
+
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     """Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).
@@ -145,6 +147,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @add_evaluation_param_content
     def _prescriptive_renderer(
         cls,
         configuration: ExpectationConfiguration = None,

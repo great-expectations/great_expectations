@@ -96,31 +96,6 @@ def test_configuration_driven_site_builder_test(
 ):
 
     context = site_builder_data_context_with_html_store_with_evaluation_parameters
-
-    # context.add_validation_operator(
-    #     "validate_and_store",
-    #     {
-    #         "class_name": "ActionListValidationOperator",
-    #         "action_list": [
-    #             {
-    #                 "name": "store_validation_result",
-    #                 "action": {
-    #                     "class_name": "StoreValidationResultAction",
-    #                     "target_store_name": "validations_store",
-    #                 },
-    #             },
-    #             {
-    #                 "name": "extract_and_store_eval_parameters",
-    #                 "action": {
-    #                     "class_name": "StoreEvaluationParametersAction",
-    #                     "target_store_name": "evaluation_parameter_store",
-    #                 },
-    #             },
-    #         ],
-    #     },
-    # )
-    #
-
     datasource_name = "mydatasource"
     data_asset_name = "f1"
     generator_name = "subdir_reader"
@@ -146,7 +121,10 @@ def test_configuration_driven_site_builder_test(
             "$PARAMETER": "upstream_row_count",
             "$PARAMETER.upstream_row_count": 10000,
         },
-        min_value=1,
+        min_value={
+            "$PARAMETER": "downstream_row_count",
+            "$PARAMETER.downstream_row_count": 1,
+        },
     )
     batch.expect_table_column_count_to_equal(value=2)
     batch.expect_table_columns_to_match_ordered_list(column_list=["index", "foo"])
@@ -164,14 +142,13 @@ def test_configuration_driven_site_builder_test(
     results = context.run_validation_operator(
         "action_list_operator",
         assets_to_validate=[batch],
-        evaluation_parameters={"upstream_row_count": 999},
+        evaluation_parameters={"downstream_row_count": 2, "upstream_row_count": 999},
     )
 
     context.build_data_docs()
     validation_result_identifier = results.list_validation_result_identifiers()[0]
     context.open_data_docs(validation_result_identifier)
     # print(results)
-    print("hello will")
 
 
 @freeze_time("09/26/2019 13:42:41")
