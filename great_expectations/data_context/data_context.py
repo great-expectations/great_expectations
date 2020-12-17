@@ -2657,8 +2657,47 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return profiling_results
 
     def create_checkpoint(
-        self, checkpoint_name: str, checkpoint_config: Union[dict, CheckpointConfig],
+            self,
+            checkpoint_name: str,
+            checkpoint_config: Optional[CheckpointConfig, dict] = None,
+            config_version: Optional[Union[int, float]] = None,
+            template: Optional[str] = None,
+            module_name: Optional[str] = None,
+            class_name: Optional[str] = None,
+            run_name_template: Optional[str] = None,
+            expectation_suite_name: Optional[str] = None,
+            batch_request: Optional[Union[BatchRequest, dict]] = None,
+            action_list: Optional[List[dict]] = None,
+            evaluation_parameters: Optional[dict] = None,
+            runtime_configuration: Optional[dict] = None,
+            validations: Optional[List[dict]] = None,
+            profilers: Optional[List[dict]] = None,
+            # Next two fields are for LegacyCheckpoint configuration
+            validation_operator_name: Optional[str] = None,
+            batches: Optional[List[dict]] = None,
+            commented_map: Optional[CommentedMap] = None,
     ) -> Checkpoint:
+        if not checkpoint_config:
+            checkpoint_config = {
+                "name": checkpoint_name,
+                "config_version": config_version,
+                "template": template,
+                "module_name": module_name,
+                "class_name": class_name,
+                "run_name_template": run_name_template,
+                "expectation_suite_name": expectation_suite_name,
+                "batch_request": batch_request,
+                "action_list": action_list,
+                "evaluation_parameters": evaluation_parameters,
+                "runtime_configuration": runtime_configuration,
+                "validations": validations,
+                "profilers": profilers,
+                # Next two fields are for LegacyCheckpoint configuration
+                "validation_operator_name": validation_operator_name,
+                "batches": batches,
+                "commented_map": commented_map
+            }
+
         if isinstance(checkpoint_config, dict):
             checkpoint_config = CheckpointConfig(**checkpoint_config)
 
@@ -2676,7 +2715,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         key: ConfigurationIdentifier = ConfigurationIdentifier(
             configuration_key=checkpoint_name,
         )
-        self.checkpoint_store.set(key=key, value=config)
+        self.checkpoint_store.set(key=key, value=checkpoint_config)
 
         return new_checkpoint
 
