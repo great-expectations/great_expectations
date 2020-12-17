@@ -1566,7 +1566,8 @@ def delete_checkpoint_config_from_filesystem(
 
 
 def save_config_to_filesystem(
-    configuration_class: Any,
+    configuration_store_class_name: str,
+    configuration_store_module_name: str,
     store_name: str,
     base_directory: str,
     configuration_key: str,
@@ -1577,7 +1578,8 @@ def save_config_to_filesystem(
         **store_config
     )
     save_config_to_store_backend(
-        configuration_class=configuration_class,
+        class_name=configuration_store_class_name,
+        module_name=configuration_store_module_name,
         store_name=store_name,
         store_backend=store_backend_obj,
         configuration_key=configuration_key,
@@ -1586,7 +1588,8 @@ def save_config_to_filesystem(
 
 
 def load_config_from_filesystem(
-    configuration_class: Any,
+    configuration_store_class_name: str,
+    configuration_store_module_name: str,
     store_name: str,
     base_directory: str,
     configuration_key: str,
@@ -1596,7 +1599,8 @@ def load_config_from_filesystem(
         **store_config
     )
     return load_config_from_store_backend(
-        configuration_class=configuration_class,
+        class_name=configuration_store_class_name,
+        module_name=configuration_store_module_name,
         store_name=store_name,
         store_backend=store_backend_obj,
         configuration_key=configuration_key,
@@ -1604,7 +1608,8 @@ def load_config_from_filesystem(
 
 
 def delete_config_from_filesystem(
-    configuration_class: Any,
+    configuration_store_class_name: str,
+    configuration_store_module_name: str,
     store_name: str,
     base_directory: str,
     configuration_key: str,
@@ -1614,7 +1619,8 @@ def delete_config_from_filesystem(
         **store_config
     )
     delete_config_from_store_backend(
-        configuration_class=configuration_class,
+        class_name=configuration_store_class_name,
+        module_name=configuration_store_module_name,
         store_name=store_name,
         store_backend=store_backend_obj,
         configuration_key=configuration_key,

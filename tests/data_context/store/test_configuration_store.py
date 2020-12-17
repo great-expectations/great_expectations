@@ -19,6 +19,7 @@ from great_expectations.marshmallow__shade import (
     fields,
     validates_schema,
 )
+from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import (
     delete_config_from_filesystem,
@@ -31,42 +32,48 @@ yaml = YAML()
 logger = logging.getLogger(__name__)
 
 
-def test_v3_configuration_store(tmp_path_factory):
-    class SampleConfig(BaseYamlConfig):
-        @classmethod
-        def get_config_class(cls):
-            return cls  # SampleConfig
+class SampleConfig(BaseYamlConfig):
+    @classmethod
+    def get_config_class(cls):
+        return cls  # SampleConfig
 
-        @classmethod
-        def get_schema_class(cls):
-            return SampleConfigSchema
+    @classmethod
+    def get_schema_class(cls):
+        return SampleConfigSchema
 
-        def __init__(
+    def __init__(
             self,
             some_param_0: str = None,
             some_param_1: int = None,
             commented_map: CommentedMap = None,
-        ):
-            if some_param_0 is None:
-                some_param_0 = "param_value_0"
-            self.some_param_0 = some_param_0
-            if some_param_1 is None:
-                some_param_1 = 169
-            self.some_param_1 = some_param_1
+    ):
+        if some_param_0 is None:
+            some_param_0 = "param_value_0"
+        self.some_param_0 = some_param_0
+        if some_param_1 is None:
+            some_param_1 = 169
+        self.some_param_1 = some_param_1
 
-            super().__init__(commented_map=commented_map)
+        super().__init__(commented_map=commented_map)
 
-    class SampleConfigSchema(Schema):
-        class Meta:
-            unknown = INCLUDE
 
-        some_param_0 = fields.String()
-        some_param_1 = fields.Integer()
+class SampleConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
 
-        @validates_schema
-        def validate_schema(self, data, **kwargs):
-            pass
+    some_param_0 = fields.String()
+    some_param_1 = fields.Integer()
 
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+
+class SampleConfigurationStore(ConfigurationStore):
+    _configuration_class = SampleConfig
+
+
+def test_v3_configuration_store(tmp_path_factory):
     root_directory_path: str = "test_v3_configuration_store"
     root_directory: str = str(tmp_path_factory.mktemp(root_directory_path))
     base_directory: str = str(Path(root_directory) / "some_store_config_dir")
@@ -75,9 +82,10 @@ def test_v3_configuration_store(tmp_path_factory):
     store_name_0: str = "test_config_store_0"
     configuration_name_0: str = "test_config_name_0"
 
-    with pytest.raises(ge_exceptions.DataContextError):
+    with pytest.raises(FileNotFoundError):
         save_config_to_filesystem(
-            configuration_class=object,
+            configuration_store_class_name="unknown_class",
+            configuration_store_module_name="unknown_module",
             store_name=store_name_0,
             base_directory=base_directory,
             configuration_key=configuration_name_0,
@@ -85,7 +93,8 @@ def test_v3_configuration_store(tmp_path_factory):
         )
 
     save_config_to_filesystem(
-        configuration_class=SampleConfig,
+        configuration_store_class_name="SampleConfigurationStore",
+        configuration_store_module_name=SampleConfigurationStore.__module__,
         store_name=store_name_0,
         base_directory=base_directory,
         configuration_key=configuration_name_0,
@@ -122,7 +131,8 @@ def test_v3_configuration_store(tmp_path_factory):
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         loaded_config: BaseYamlConfig = load_config_from_filesystem(
-            configuration_class=SampleConfig,
+            configuration_store_class_name="SampleConfigurationStore",
+            configuration_store_module_name=SampleConfigurationStore.__module__,
             store_name=store_name_0,
             base_directory="unknown_base_directory",
             configuration_key=configuration_name_0,
@@ -130,14 +140,16 @@ def test_v3_configuration_store(tmp_path_factory):
     with pytest.raises(ge_exceptions.InvalidKeyError):
         # noinspection PyUnusedLocal
         loaded_config: BaseYamlConfig = load_config_from_filesystem(
-            configuration_class=SampleConfig,
+            configuration_store_class_name="SampleConfigurationStore",
+            configuration_store_module_name=SampleConfigurationStore.__module__,
             store_name=store_name_0,
             base_directory=base_directory,
             configuration_key="unknown_configuration",
         )
 
     loaded_config: BaseYamlConfig = load_config_from_filesystem(
-        configuration_class=SampleConfig,
+        configuration_store_class_name="SampleConfigurationStore",
+        configuration_store_module_name=SampleConfigurationStore.__module__,
         store_name=store_name_0,
         base_directory=base_directory,
         configuration_key=configuration_name_0,
@@ -148,7 +160,8 @@ def test_v3_configuration_store(tmp_path_factory):
     store_name_1: str = "test_config_store_1"
     configuration_name_1: str = "test_config_name_1"
     save_config_to_filesystem(
-        configuration_class=SampleConfig,
+        configuration_store_class_name="SampleConfigurationStore",
+        configuration_store_module_name=SampleConfigurationStore.__module__,
         store_name=store_name_1,
         base_directory=base_directory,
         configuration_key=configuration_name_1,
@@ -184,7 +197,8 @@ def test_v3_configuration_store(tmp_path_factory):
         assert config == expected_config
 
     loaded_config: BaseYamlConfig = load_config_from_filesystem(
-        configuration_class=SampleConfig,
+        configuration_store_class_name="SampleConfigurationStore",
+        configuration_store_module_name=SampleConfigurationStore.__module__,
         store_name=store_name_1,
         base_directory=base_directory,
         configuration_key=configuration_name_1,
@@ -192,7 +206,8 @@ def test_v3_configuration_store(tmp_path_factory):
     assert loaded_config.to_json_dict() == config_1.to_json_dict()
 
     delete_config_from_filesystem(
-        configuration_class=SampleConfig,
+        configuration_store_class_name="SampleConfigurationStore",
+        configuration_store_module_name=SampleConfigurationStore.__module__,
         store_name=store_name_0,
         base_directory=base_directory,
         configuration_key=configuration_name_0,
@@ -209,7 +224,8 @@ def test_v3_configuration_store(tmp_path_factory):
     )
 
     delete_config_from_filesystem(
-        configuration_class=SampleConfig,
+        configuration_store_class_name="SampleConfigurationStore",
+        configuration_store_module_name=SampleConfigurationStore.__module__,
         store_name=store_name_1,
         base_directory=base_directory,
         configuration_key=configuration_name_1,

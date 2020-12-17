@@ -7,8 +7,11 @@ from ruamel.yaml import YAML, YAMLError
 
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.types.base import (
-    LegacyCheckpointConfig,
-    legacyCheckpointConfigSchema,
+    # TODO: <Alex>ALEX</Alex>
+    # LegacyCheckpointConfig,
+    # legacyCheckpointConfigSchema,
+    CheckpointConfig,
+    checkpointConfigSchema,
 )
 from great_expectations.exceptions import CheckpointError
 
@@ -18,19 +21,27 @@ class LegacyCheckpoint(object):
         self,
         data_context: DataContext,
         name: str,
-        checkpoint_config: Union[LegacyCheckpointConfig, dict],
+        # TODO: <Alex>ALEX</Alex>
+        # checkpoint_config: Union[LegacyCheckpointConfig, dict],
+        checkpoint_config: Union[CheckpointConfig, dict],
     ):
         self._data_context = data_context
         self._name = name
 
-        if not isinstance(checkpoint_config, (LegacyCheckpointConfig, dict)):
+        # TODO: <Alex>ALEX</Alex>
+        # if not isinstance(checkpoint_config, (LegacyCheckpointConfig, dict)):
+        if not isinstance(checkpoint_config, (CheckpointConfig, dict)):
             raise CheckpointError(
-                f"Invalid checkpoint_config type - must be LegacyCheckpointConfig or "
+                # TODO: <Alex>ALEX</Alex>
+                # f"Invalid checkpoint_config type - must be LegacyCheckpointConfig or "
+                f"Invalid checkpoint_config type - must be CheckpointConfig or "
                 f"dict, "
                 f"instead got {type(checkpoint_config)}"
             )
         elif isinstance(checkpoint_config, dict):
-            checkpoint_config = legacyCheckpointConfigSchema.load(checkpoint_config)
+            # TODO: <Alex>ALEX</Alex>
+            # checkpoint_config = legacyCheckpointConfigSchema.load(checkpoint_config)
+            checkpoint_config = checkpointConfigSchema.load(checkpoint_config)
         self._checkpoint_config = checkpoint_config
 
     @property

@@ -43,6 +43,8 @@ from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
+    LEGACY_CHECKPOINT_VERSION_012_TEMPLATE,
+    CHECKPOINT_VERSION_013_TEMPLATE,
 )
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
@@ -51,14 +53,16 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
-    checkpointConfigSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
-    legacyCheckpointConfigSchema, CheckpointConfig, LegacyCheckpointConfig,
+    CheckpointConfig,
+    # TODO: <Alex>ALEX</Alex>
+    # LegacyCheckpointConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    ValidationResultIdentifier, ConfigurationIdentifier,
+    ValidationResultIdentifier,
+    ConfigurationIdentifier,
 )
 from great_expectations.data_context.util import (
     build_store_from_config,
@@ -3098,7 +3102,9 @@ class DataContext(BaseDataContext):
         commented_map.update(checkpoint_config)
 
         if checkpoint_config.get("class_name") == "LegacyCheckpoint":
-            config_obj = LegacyCheckpointConfig.from_commented_map(commented_map)
+            # TODO: <Alex>ALEX</Alex>
+            # config_obj = LegacyCheckpointConfig.from_commented_map(commented_map)
+            config_obj = CheckpointConfig.from_commented_map(commented_map)
         else:
             config_obj = CheckpointConfig.from_commented_map(commented_map)
 
@@ -3131,7 +3137,9 @@ class DataContext(BaseDataContext):
         if "config_version" in commented_map:
             checkpoint_config = CheckpointConfig.from_commented_map(commented_map)
         else:
-            checkpoint_config = LegacyCheckpointConfig.from_commented_map(commented_map)
+            # TODO: <Alex>ALEX</Alex>
+            # checkpoint_config = LegacyCheckpointConfig.from_commented_map(commented_map)
+            checkpoint_config = CheckpointConfig.from_commented_map(commented_map)
 
         if return_config:
             return checkpoint_config

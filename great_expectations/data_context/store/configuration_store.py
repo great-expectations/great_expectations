@@ -1,6 +1,4 @@
-import copy
 import logging
-from typing import Any, Optional, cast
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -35,20 +33,19 @@ class ConfigurationStore(Store):
 
     _key_class = ConfigurationIdentifier
 
+    _configuration_class = BaseYamlConfig
+
     def __init__(
         self,
-        configuration_class: Any,
         store_name: str,
         store_backend: dict = None,
         overwrite_existing: bool = False,
         runtime_environment: dict = None,
     ):
-        if not issubclass(configuration_class, BaseYamlConfig):
+        if not issubclass(self._configuration_class, BaseYamlConfig):
             raise ge_exceptions.DataContextError(
                 "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
             )
-
-        self._configuration_class = cast(BaseYamlConfig, configuration_class)
 
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
@@ -93,16 +90,12 @@ class ConfigurationStore(Store):
     def deserialize(self, key, value):
         config_commented_map_from_yaml: CommentedMap = yaml.load(value)
         try:
-            return self.configuration_class.from_commented_map(
+            return self._configuration_class.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
         except ge_exceptions.InvalidBaseYamlConfigError:
             # Just to be explicit about what we intended to catch
             raise
-
-    @property
-    def configuration_class(self) -> BaseYamlConfig:
-        return self._configuration_class
 
     @property
     def overwrite_existing(self) -> bool:
