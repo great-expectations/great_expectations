@@ -260,7 +260,6 @@ class RuntimeDataConnector(DataConnector):
             )
 
     def _validate_partition_identifiers(self, partition_identifiers: dict):
-        """"""
         if partition_identifiers is None:
             partition_identifiers = {}
         self._validate_runtime_keys_configuration(
