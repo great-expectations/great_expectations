@@ -15,6 +15,18 @@ logger = logging.getLogger(__name__)
 
 
 class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
+    """
+    Extension of InferredAssetFilePathDataConnector used to connect to data on a filesystem.
+
+    The InferredAssetFilesystemDataConnector is one of two classes (ConfiguredAssetFilesystemDataConnector being the
+    other one) designed for connecting to data on a filesystem. It connects to assets
+    inferred from directory and file name by default_regex and glob_directive.
+
+    InferredAssetFilesystemDataConnector that operates on file paths and determines
+    the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
+
+    """
+
     def __init__(
         self,
         name: str,
@@ -25,6 +37,18 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         glob_directive: str = "*",
         sorters: Optional[list] = None,
     ):
+        """
+       Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
+       and sorters for filtering and sorting data_references.
+
+       Args:
+           name (str): name of InferredAssetFilesystemDataConnector
+           datasource_name (str): Name of datasource that this DataConnector is connected to
+           base_directory(str): base_directory for DataConnector to begin reading files
+           execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
+           default_regex (dict): Optional dict the filter and organize the data_references.
+           sorters (list): Optional list if you want to sort the data_references
+       """
         logger.debug(f'Constructing InferredAssetFilesystemDataConnector "{name}".')
 
         super().__init__(
@@ -41,7 +65,8 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
-        """List objects in the underlying data store to create a list of data_references.
+        """
+        List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
         """
@@ -57,6 +82,10 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
 
     @property
     def base_directory(self):
+        """
+        Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
+        root directory. If it is absolute, then keep as-is.
+        """
         return normalize_directory_path(
             dir_path=self._base_directory,
             root_directory_path=self.data_context_root_directory,
