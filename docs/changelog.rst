@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() #2169 issue #2164
 
 0.13.3
 -----------------
