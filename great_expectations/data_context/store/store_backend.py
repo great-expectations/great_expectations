@@ -186,8 +186,7 @@ class StoreBackend(metaclass=ABCMeta):
 
 
 class InMemoryStoreBackend(StoreBackend):
-    """Uses an in-memory dictionary as a store backend.
-    """
+    """Uses an in-memory dictionary as a store backend."""
 
     # noinspection PyUnusedLocal
     def __init__(

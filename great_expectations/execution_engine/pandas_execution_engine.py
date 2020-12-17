@@ -237,13 +237,13 @@ Notes:
     def guess_reader_method_from_path(path):
         """Helper method for deciding which reader to use to read in a certain path.
 
-               Args:
-                   path (str): the to use to guess
+        Args:
+            path (str): the to use to guess
 
-               Returns:
-                   ReaderMethod to use for the filepath
+        Returns:
+            ReaderMethod to use for the filepath
 
-               """
+        """
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif path.endswith(".parquet"):

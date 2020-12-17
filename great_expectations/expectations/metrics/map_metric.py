@@ -768,9 +768,11 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         )
         execution_engine.engine.execute(inner_case_query)
 
-    unexpected_count_query: sa.Select = sa.select(
-        [sa.func.sum(sa.column("condition")).label("unexpected_count"),]
-    ).select_from(temp_table_obj).alias("UnexpectedCountSubquery")
+    unexpected_count_query: sa.Select = (
+        sa.select([sa.func.sum(sa.column("condition")).label("unexpected_count"),])
+        .select_from(temp_table_obj)
+        .alias("UnexpectedCountSubquery")
+    )
 
     unexpected_count = execution_engine.engine.execute(
         sa.select([unexpected_count_query.c.unexpected_count,])

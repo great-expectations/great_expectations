@@ -43,8 +43,7 @@ missing = _Missing()
 
 
 def is_generator(obj) -> bool:
-    """Return True if ``obj`` is a generator
-    """
+    """Return True if ``obj`` is a generator"""
     return inspect.isgeneratorfunction(obj) or inspect.isgenerator(obj)
 
 
@@ -281,8 +280,7 @@ def set_value(dct: typing.Dict[str, typing.Any], key: str, value: typing.Any):
 
 
 def callable_or_raise(obj):
-    """Check that an object is callable, else raise a :exc:`ValueError`.
-    """
+    """Check that an object is callable, else raise a :exc:`ValueError`."""
     if not callable(obj):
         raise ValueError("Object {!r} is not callable.".format(obj))
     return obj

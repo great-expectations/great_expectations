@@ -1966,7 +1966,7 @@ class ExpectationExplorer:
             expectation_count=expectation_count,
         )
         summary_widget = widgets.HTML(
-            value=summary_widget_content, layout=widgets.Layout(margin="10px",)
+            value=summary_widget_content, layout=widgets.Layout(margin="10px",),
         )
 
         for column_name in column_names:

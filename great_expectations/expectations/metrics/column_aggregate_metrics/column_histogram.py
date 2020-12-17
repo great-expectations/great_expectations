@@ -55,10 +55,10 @@ class ColumnHistogram(ColumnMetricProvider):
     ):
         """return a list of counts corresponding to bins
 
-         Args:
-             column: the name of the column for which to get the histogram
-             bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
-         """
+        Args:
+            column: the name of the column for which to get the histogram
+            bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
+        """
         selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )

@@ -170,7 +170,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self, table_name: str,
     ):
         """'Split' by returning the whole table
-        
+
         Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
         """
 
@@ -233,8 +233,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _split_on_hashed_column(
         self, table_name: str, column_name: str, hash_digits: int,
     ):
-        """Note: this method is experimental. It does not work with all SQL dialects.
-        """
+        """Note: this method is experimental. It does not work with all SQL dialects."""
         # query = f"SELECT MD5(\"{self.column_name}\") = {matching_hash}) AS hashed_var FROM {self.table_name}"
 
         return sa.select([sa.func.md5(sa.column(column_name))]).select_from(

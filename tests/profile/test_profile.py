@@ -346,8 +346,8 @@ def test_context_profiler_with_nonexisting_data_asset_name(filesystem_csv_data_c
 
 def test_context_profiler_with_non_existing_generator(filesystem_csv_data_context):
     """
-    If a non-existing generator name is passed to the profiling method
-in the generator_name argument, the profiling method must raise an exception.
+        If a non-existing generator name is passed to the profiling method
+    in the generator_name argument, the profiling method must raise an exception.
     """
     context = filesystem_csv_data_context
 

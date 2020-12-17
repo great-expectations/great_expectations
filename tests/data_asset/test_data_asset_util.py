@@ -101,13 +101,11 @@ The following Parent and Child classes are used for testing documentation inheri
 
 
 class Parent:
-    """Parent class docstring
-    """
+    """Parent class docstring"""
 
     @classmethod
     def expectation(cls, func):
-        """Manages configuration and running of expectation objects.
-        """
+        """Manages configuration and running of expectation objects."""
 
         @wraps(func)
         def wrapper(*args, **kwargs):

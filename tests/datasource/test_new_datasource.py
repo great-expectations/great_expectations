@@ -269,9 +269,9 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
 
 
 def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource):
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = basic_pandas_datasource.data_connectors[
-        "my_filesystem_data_connector"
-    ]
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        basic_pandas_datasource.data_connectors["my_filesystem_data_connector"]
+    )
     create_files_in_directory(
         my_data_connector.base_directory,
         ["A_1.csv", "A_2.csv", "A_3.csv", "B_1.csv", "B_2.csv", "B_3.csv"],
@@ -487,8 +487,10 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
         "my_filesystem_data_connector": ["Titanic"],
     }
 
-    available_data_asset_names: dict = basic_pandas_datasource.get_available_data_asset_names(
-        data_connector_names=data_connector_names
+    available_data_asset_names: dict = (
+        basic_pandas_datasource.get_available_data_asset_names(
+            data_connector_names=data_connector_names
+        )
     )
 
     assert set(available_data_asset_names.keys()) == set(
@@ -507,8 +509,10 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
         "my_filesystem_data_connector": ["Titanic"],
     }
 
-    available_data_asset_names: dict = basic_pandas_datasource.get_available_data_asset_names(
-        data_connector_names=data_connector_names
+    available_data_asset_names: dict = (
+        basic_pandas_datasource.get_available_data_asset_names(
+            data_connector_names=data_connector_names
+        )
     )
 
     assert set(available_data_asset_names.keys()) == set(
@@ -521,8 +525,10 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
 
     expected_data_asset_names: dict = {"my_filesystem_data_connector": ["Titanic"]}
 
-    available_data_asset_names: dict = basic_pandas_datasource.get_available_data_asset_names(
-        data_connector_names=data_connector_names
+    available_data_asset_names: dict = (
+        basic_pandas_datasource.get_available_data_asset_names(
+            data_connector_names=data_connector_names
+        )
     )
 
     assert set(available_data_asset_names.keys()) == set(
@@ -535,8 +541,10 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
 
     expected_data_asset_names: dict = {"my_filesystem_data_connector": ["Titanic"]}
 
-    available_data_asset_names: dict = basic_pandas_datasource.get_available_data_asset_names(
-        data_connector_names=data_connector_names
+    available_data_asset_names: dict = (
+        basic_pandas_datasource.get_available_data_asset_names(
+            data_connector_names=data_connector_names
+        )
     )
 
     assert set(available_data_asset_names.keys()) == set(
@@ -549,8 +557,10 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
 
     expected_data_asset_names: dict = {"test_runtime_data_connector": [data_asset_name]}
 
-    available_data_asset_names: dict = basic_pandas_datasource.get_available_data_asset_names(
-        data_connector_names=data_connector_names
+    available_data_asset_names: dict = (
+        basic_pandas_datasource.get_available_data_asset_names(
+            data_connector_names=data_connector_names
+        )
     )
 
     assert set(available_data_asset_names.keys()) == set(

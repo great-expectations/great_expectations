@@ -101,8 +101,7 @@ class ExecutionEngine:
 
     @property
     def active_batch_data(self):
-        """The data from the currently-active batch.
-        """
+        """The data from the currently-active batch."""
         if self.active_batch_data_id is None:
             return None
         else:

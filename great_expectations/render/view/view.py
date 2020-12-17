@@ -280,8 +280,7 @@ class DefaultJinjaView:
 
     def render_styling_from_string_template(self, template):
         # NOTE: We should add some kind of type-checking to template
-        """This method is a thin wrapper use to call `render_styling` from within jinja templates.
-        """
+        """This method is a thin wrapper use to call `render_styling` from within jinja templates."""
         if not isinstance(template, (dict, OrderedDict)):
             return template
 

@@ -842,15 +842,17 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_s3_data_connector",
-                "datasource_name": "test_environment",
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+        my_data_connector: ConfiguredAssetS3DataConnector = (
+            instantiate_class_from_config(
+                config=my_data_connector_yaml,
+                runtime_environment={
+                    "name": "general_s3_data_connector",
+                    "datasource_name": "test_environment",
+                },
+                config_defaults={
+                    "module_name": "great_expectations.datasource.data_connector"
+                },
+            )
         )
 
 
@@ -911,15 +913,17 @@ def test_return_all_batch_definitions_too_many_sorters():
     )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_s3_data_connector",
-                "datasource_name": "test_environment",
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+        my_data_connector: ConfiguredAssetS3DataConnector = (
+            instantiate_class_from_config(
+                config=my_data_connector_yaml,
+                runtime_environment={
+                    "name": "general_s3_data_connector",
+                    "datasource_name": "test_environment",
+                },
+                config_defaults={
+                    "module_name": "great_expectations.datasource.data_connector"
+                },
+            )
         )
 
 

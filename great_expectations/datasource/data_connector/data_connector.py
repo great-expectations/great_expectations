@@ -68,8 +68,8 @@ class DataConnector:
     def get_batch_data_and_metadata(
         self, batch_definition: BatchDefinition,
     ) -> Tuple[
-        Any, BatchSpec, BatchMarkers,  # batch_data
-    ]:
+        Any, BatchSpec, BatchMarkers,
+    ]:  # batch_data
         batch_spec: BatchSpec = self.build_batch_spec(batch_definition=batch_definition)
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
@@ -81,8 +81,10 @@ class DataConnector:
         )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
-        batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
-            batch_definition=batch_definition
+        batch_spec_params: dict = (
+            self._generate_batch_spec_parameters_from_batch_definition(
+                batch_definition=batch_definition
+            )
         )
         batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
         if isinstance(batch_spec_passthrough, dict):

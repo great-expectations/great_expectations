@@ -45,8 +45,7 @@ class RuntimeDataConnector(DataConnector):
         self._runtime_keys = runtime_keys
 
     def _refresh_data_references_cache(self):
-        """
-        """
+        """"""
         # Map data_references to batch_definitions
         data_reference: str = self._get_data_reference_list()[0]
         mapped_batch_definition_list: List[
@@ -68,8 +67,7 @@ class RuntimeDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
     ) -> List[str]:
-        """Fetch data_references corresponding to data_asset_name from the cache.
-        """
+        """Fetch data_references corresponding to data_asset_name from the cache."""
         batch_definition_list: List[
             BatchDefinition
         ] = self.get_batch_definition_list_from_batch_request(
@@ -119,8 +117,8 @@ class RuntimeDataConnector(DataConnector):
     def get_batch_data_and_metadata(
         self, batch_definition: BatchDefinition, batch_data: Any,
     ) -> Tuple[
-        Any, BatchSpec, BatchMarkers,  # batch_data
-    ]:
+        Any, BatchSpec, BatchMarkers,
+    ]:  # batch_data
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
             batch_definition=batch_definition, batch_data=batch_data,
         )
@@ -190,7 +188,9 @@ class RuntimeDataConnector(DataConnector):
             raise TypeError(
                 "batch_definition is not of an instance of type BatchDefinition"
             )
-        partition_definition: PartitionDefinition = batch_definition.partition_definition
+        partition_definition: PartitionDefinition = (
+            batch_definition.partition_definition
+        )
         data_reference: str = self._get_data_reference_name(
             partition_identifiers=partition_definition
         )
@@ -251,8 +251,7 @@ class RuntimeDataConnector(DataConnector):
             )
 
     def _validate_partition_identifiers(self, partition_identifiers: dict):
-        """
-        """
+        """"""
         if partition_identifiers is None:
             partition_identifiers = {}
         self._validate_runtime_keys_configuration(

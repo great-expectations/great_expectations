@@ -33,8 +33,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         )
 
     def _refresh_data_references_cache(self):
-        """
-        """
+        """"""
         # Map data_references to batch_definitions
         self._data_references_cache = {}
 

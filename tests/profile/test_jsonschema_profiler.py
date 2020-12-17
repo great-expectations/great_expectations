@@ -48,7 +48,7 @@ def boolean_types_schema():
         "type": "object",
         "properties": {
             "active": {"type": "boolean"},
-            "optional": {"anyOf": [{"type": "boolean",}, {"type": "null",}]},
+            "optional": {"anyOf": [{"type": "boolean",}, {"type": "null",},]},
         },
     }
 
@@ -62,7 +62,7 @@ def enum_types_schema():
         "properties": {
             "shirt-size": {"enum": ["XS", "S", "M", "XL", "XXL"]},
             "optional-color": {
-                "anyOf": [{"enum": ["red", "green", "blue"],}, {"type": "null"}],
+                "anyOf": [{"enum": ["red", "green", "blue"],}, {"type": "null"},],
             },
             "optional-hat": {
                 "type": ["string", "null"],
@@ -94,7 +94,7 @@ def string_lengths_schema():
             "name-no-max": {"type": "string", "minLength": 1},
             "password-max-33": {"type": "string", "maxLength": 33},
             "optional-min-1": {
-                "anyOf": [{"type": "string", "minLength": 1,}, {"type": "null",}]
+                "anyOf": [{"type": "string", "minLength": 1,}, {"type": "null",},]
             },
         },
     }
@@ -125,7 +125,7 @@ def integer_ranges_schema():
                 "exclusiveMaximum": 6,
             },
             "optional-min-1": {
-                "anyOf": [{"type": "integer", "minimum": 1,}, {"type": "null",}]
+                "anyOf": [{"type": "integer", "minimum": 1,}, {"type": "null",},]
             },
         },
     }
@@ -156,7 +156,7 @@ def number_ranges_schema():
                 "exclusiveMaximum": 6.5,
             },
             "optional-min-half": {
-                "anyOf": [{"type": "number", "minimum": 0.5,}, {"type": "null",}]
+                "anyOf": [{"type": "number", "minimum": 0.5,}, {"type": "null",},]
             },
         },
     }

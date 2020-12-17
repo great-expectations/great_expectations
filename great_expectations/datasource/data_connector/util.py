@@ -80,10 +80,12 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     regex_pattern: str,
     group_names: List[str],
 ) -> Optional[List[BatchDefinition]]:
-    batch_request: BatchRequest = convert_data_reference_string_to_batch_request_using_regex(
-        data_reference=data_reference,
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+    batch_request: BatchRequest = (
+        convert_data_reference_string_to_batch_request_using_regex(
+            data_reference=data_reference,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+        )
     )
     if batch_request is None:
         return None

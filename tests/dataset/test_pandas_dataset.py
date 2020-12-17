@@ -898,6 +898,6 @@ def test_expect_values_quantiles_to_be_between():
         df = ge.dataset.PandasDataset({"A": data})
 
         validation = df.expect_column_quantile_values_to_be_between(
-            "A", {"quantiles": quantiles, "value_ranges": value_ranges,}
+            "A", {"quantiles": quantiles, "value_ranges": value_ranges,},
         )
         assert validation.success is success

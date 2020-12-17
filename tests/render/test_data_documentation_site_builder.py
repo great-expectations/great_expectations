@@ -26,7 +26,7 @@ def assert_how_to_buttons(
     show_how_to_buttons=True,
 ):
     """Helper function to assert presence or non-presence of how-to buttons and related content in various
-        Data Docs pages.
+    Data Docs pages.
     """
 
     # these are simple checks for presence of certain page elements

@@ -211,13 +211,17 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "general_filesystem_data_connector",
-            "datasource_name": "test_environment",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_filesystem_data_connector",
+                "datasource_name": "test_environment",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
     )
 
     with pytest.raises(TypeError):
@@ -377,13 +381,17 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
     """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "general_filesystem_data_connector",
-            "datasource_name": "test_environment",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_filesystem_data_connector",
+                "datasource_name": "test_environment",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
     )
 
     self_check_report = my_data_connector.self_check()
@@ -563,13 +571,17 @@ def test_alpha(tmp_path_factory):
             """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "general_filesystem_data_connector",
-            "datasource_name": "BASE",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_filesystem_data_connector",
+                "datasource_name": "BASE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
     )
     self_check_report = my_data_connector.self_check()
     print(json.dumps(self_check_report, indent=2))
@@ -659,13 +671,17 @@ def test_foxtrot(tmp_path_factory):
         """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "general_filesystem_data_connector",
-            "datasource_name": "BASE",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_filesystem_data_connector",
+                "datasource_name": "BASE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
     )
     self_check_report = my_data_connector.self_check()
     assert self_check_report == {
@@ -740,13 +756,17 @@ def test_relative_asset_base_directory_path(tmp_path_factory):
         """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "my_configured_asset_filesystem_data_connector",
-            "datasource_name": "BASE",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "my_configured_asset_filesystem_data_connector",
+                "datasource_name": "BASE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
     )
     my_data_connector.data_context_root_directory = base_directory
 
@@ -824,13 +844,17 @@ def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_facto
         """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
-        config=my_data_connector_yaml,
-        runtime_environment={
-            "name": "my_configured_asset_filesystem_data_connector",
-            "datasource_name": "BASE",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "my_configured_asset_filesystem_data_connector",
+                "datasource_name": "BASE",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
     )
     my_data_connector.data_context_root_directory = base_directory
 
@@ -928,15 +952,17 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_filesystem_data_connector",
-                "datasource_name": "test_environment",
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+        my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+            instantiate_class_from_config(
+                config=my_data_connector_yaml,
+                runtime_environment={
+                    "name": "general_filesystem_data_connector",
+                    "datasource_name": "test_environment",
+                },
+                config_defaults={
+                    "module_name": "great_expectations.datasource.data_connector"
+                },
+            )
         )
 
 
@@ -989,15 +1015,17 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
     )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_filesystem_data_connector",
-                "datasource_name": "test_environment",
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+        my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+            instantiate_class_from_config(
+                config=my_data_connector_yaml,
+                runtime_environment={
+                    "name": "general_filesystem_data_connector",
+                    "datasource_name": "test_environment",
+                },
+                config_defaults={
+                    "module_name": "great_expectations.datasource.data_connector"
+                },
+            )
         )
 
 

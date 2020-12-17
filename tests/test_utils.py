@@ -236,8 +236,7 @@ def get_dataset(
     table_name=None,
     sqlite_db_path=None,
 ):
-    """Utility to create datasets for json-formatted tests.
-    """
+    """Utility to create datasets for json-formatted tests."""
     df = pd.DataFrame(data)
     if dataset_type == "PandasDataset":
         if schemas and "pandas" in schemas:
@@ -628,8 +627,7 @@ def get_test_validator_with_data(
     table_name=None,
     sqlite_db_path=None,
 ):
-    """Utility to create datasets for json-formatted tests.
-    """
+    """Utility to create datasets for json-formatted tests."""
     df = pd.DataFrame(data)
     if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
