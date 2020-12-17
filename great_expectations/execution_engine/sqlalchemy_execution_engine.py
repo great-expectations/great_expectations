@@ -122,7 +122,7 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
-class SqlAlchemyBatchData(object):
+class SqlAlchemyBatchData:
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
 
@@ -628,6 +628,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "*", from_obj=selectable, whereclause=parsed_condition
                 )
 
+            elif condition_parser == "raw_sql":
+                selectable = sa.select(
+                    "*", from_obj=selectable, whereclause=domain_kwargs["row_condition"]
+                )
             else:
                 raise GreatExpectationsError(
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
