@@ -2659,7 +2659,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def create_checkpoint(
             self,
             checkpoint_name: str,
-            checkpoint_config: Optional[CheckpointConfig, dict] = None,
+            checkpoint_config: Optional[Union[CheckpointConfig, dict]] = None,
             config_version: Optional[Union[int, float]] = None,
             template: Optional[str] = None,
             module_name: Optional[str] = None,
