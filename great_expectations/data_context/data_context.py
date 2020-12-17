@@ -3092,15 +3092,49 @@ class DataContext(BaseDataContext):
             raise
 
     def create_checkpoint(
-        self, checkpoint_name: str, checkpoint_config: dict,
+            self,
+            checkpoint_name: str,
+            checkpoint_config: Optional[CheckpointConfig, LegacyCheckpointConfig, dict] = None,
+            config_version: Optional[Union[int, float]] = None,
+            template: Optional[str] = None,
+            module_name: Optional[str] = None,
+            class_name: Optional[str] = None,
+            run_name_template: Optional[str] = None,
+            expectation_suite_name: Optional[str] = None,
+            batch_request: Optional[Union[BatchRequest, dict]] = None,
+            action_list: Optional[List[dict]] = None,
+            evaluation_parameters: Optional[dict] = None,
+            runtime_configuration: Optional[dict] = None,
+            validations: Optional[List[dict]] = None,
+            profilers: Optional[List[dict]] = None
     ):
-        commented_map = self._load_checkpoint_yml_template(checkpoint_config)
-        commented_map.update(checkpoint_config)
+        if not checkpoint_config:
+            checkpoint_config = {
+                "name": checkpoint_name,
+                "config_version": config_version,
+                "template": template,
+                "module_name": module_name,
+                "class_name": class_name,
+                "run_name_template": run_name_template,
+                "expectation_suite_name": expectation_suite_name,
+                "batch_request": batch_request.get_json_dict() if isinstance(batch_request, BatchRequest) else batch_request,
+                "action_list": action_list,
+                "evaluation_parameters": evaluation_parameters,
+                "runtime_configuration": runtime_configuration,
+                "validations": validations,
+                "profilers": profilers
 
-        if checkpoint_config.get("class_name") == "LegacyCheckpoint":
-            config_obj = LegacyCheckpointConfig.from_commented_map(commented_map)
+            }
+        if isinstance(checkpoint_config, dict):
+            commented_map = self._load_checkpoint_yml_template(checkpoint_config)
+            commented_map.update(checkpoint_config)
+
+            if checkpoint_config.get("class_name") == "LegacyCheckpoint":
+                config_obj = LegacyCheckpointConfig.from_commented_map(commented_map)
+            else:
+                config_obj = CheckpointConfig.from_commented_map(commented_map)
         else:
-            config_obj = CheckpointConfig.from_commented_map(commented_map)
+            config_obj = checkpoint_config
 
         new_checkpoint = instantiate_class_from_config(
             config={
