@@ -475,28 +475,26 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
             )
             from great_expectations.expectations.metrics.import_manager import F, sa
 
-            class MyColumnMean(ColumnMetricProvider):
-                """MetricProvider Class for Aggregate Mean MetricProvider"""
+            class ColumnCustomMax(ColumnMetricProvider):
+                """MetricProvider Class for Custom Aggregate Max MetricProvider"""
 
-                metric_name = "column.aggregate.mean"
+                metric_name = "column.aggregate.custom.max"
 
                 @column_aggregate_value(engine=PandasExecutionEngine)
                 def _pandas(cls, column, **kwargs):
-                    """Pandas Mean Implementation"""
-                    return column.mean()
+                    """Pandas Max Implementation"""
+                    return column.max()
 
                 @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
                 def _sqlalchemy(cls, column, **kwargs):
-                    """SqlAlchemy Mean Implementation"""
-                    return sa.func.avg(column)
+                    """SqlAlchemy Max Implementation"""
+                    return sa.func.max(column)
 
                 @column_aggregate_partial(engine=SparkDFExecutionEngine)
                 def _spark(cls, column, _table, _column_name, **kwargs):
-                    """Spark Mean Implementation"""
+                    """Spark Max Implementation"""
                     types = dict(_table.dtypes)
-                    if types[_column_name] not in ("int", "float", "double", "bigint"):
-                        raise TypeError("Expected numeric column type for function mean()")
-                    return F.mean(column)
+                    return F.maxcolumn)
 
 
 
@@ -519,9 +517,9 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
         .. code-block:: python
 
-           class ExpectColumnMaxToBeBetween(ColumnExpectation):
+           class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
               # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
-              metric_dependencies = ("column.aggregate.max",)
+              metric_dependencies = ("column.aggregate.custom.max",)
               success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
               # Default values
@@ -645,6 +643,23 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
            2. It is often helpful to generate examples showing the functionality of your Expectation, which helps verify the Expectation works as intended.
            3. If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the ``tests/test_definitions/name_of_your_expectation`` directory.
 
+        7. **Import**: To use a custom Expectation, you need to ensure it has been imported into the running python interpreter. While including the module in your `plugins/` directory will make it *available* to import, you must still import the Expectation:
+        
+        .. code-block:: python
+            # get a validator 
+            # Note: attempting to run our expectation now would fail, because even though 
+            # our Expectation is in our DataContext plugins/ directory it has not been imported.
+            
+            from custom_module import ExpectColumnMaxToBeBetweenCustom
+            
+            # now we can run our expectation
+            validator.expect_column_max_to_be_between_custom('col', min_value=0, max_value=5)
+
         7. **Optional:** Implement :ref:`Custom Data Docs Renderers <how_to_guides__configuring_data_docs__how_to_create_renderers_for_custom_expectations>`
 
-        We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference (Link to core concepts).
+        We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference the core concepts documentation.
+        
+        Additional Notes:
+        -----------------
+        
+        1. Arguments for Custom Expectations currently **must be provided as keyword arguments**; positional arguments should be avoided.
