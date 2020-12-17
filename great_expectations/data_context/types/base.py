@@ -1361,11 +1361,17 @@ class CheckpointConfigSchema(Schema):
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
-    action_list = fields.List(cls_or_instance=fields.Dict(), required=False, allow_none=True)
+    action_list = fields.List(
+        cls_or_instance=fields.Dict(), required=False, allow_none=True
+    )
     evaluation_parameters = fields.Dict(required=False, allow_none=True)
     runtime_configuration = fields.Dict(required=False, allow_none=True)
-    validations = fields.List(cls_or_instance=fields.Dict(), required=False, allow_none=True)
-    profilers = fields.List(cls_or_instance=fields.Dict(), required=False, allow_none=True)
+    validations = fields.List(
+        cls_or_instance=fields.Dict(), required=False, allow_none=True
+    )
+    profilers = fields.List(
+        cls_or_instance=fields.Dict(), required=False, allow_none=True
+    )
     # Next two fields are for LegacyCheckpoint configuration
     validation_operator_name = fields.Str(required=False, allow_none=True)
     batches = fields.List(

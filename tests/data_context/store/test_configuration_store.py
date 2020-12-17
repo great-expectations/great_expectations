@@ -12,6 +12,7 @@ except ImportError:
 import logging
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -19,7 +20,6 @@ from great_expectations.marshmallow__shade import (
     fields,
     validates_schema,
 )
-from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import (
     delete_config_from_filesystem,
@@ -42,10 +42,10 @@ class SampleConfig(BaseYamlConfig):
         return SampleConfigSchema
 
     def __init__(
-            self,
-            some_param_0: str = None,
-            some_param_1: int = None,
-            commented_map: CommentedMap = None,
+        self,
+        some_param_0: str = None,
+        some_param_1: int = None,
+        commented_map: CommentedMap = None,
     ):
         if some_param_0 is None:
             some_param_0 = "param_value_0"

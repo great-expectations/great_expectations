@@ -1,9 +1,9 @@
 import configparser
 import copy
-import itertools
 import datetime
 import errno
 import glob
+import itertools
 import json
 import logging
 import os
@@ -22,6 +22,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
@@ -37,7 +38,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-
 from great_expectations.data_context.store import TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
@@ -48,20 +48,19 @@ from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
+    CheckpointConfig,
+    CheckpointConfigDefaults,
     DataContextConfig,
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
-    CheckpointConfig,
-    CheckpointConfigDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
-    ConfigurationIdentifier,
 )
-from great_expectations.checkpoint import Checkpoint
 from great_expectations.data_context.util import (
     build_store_from_config,
     file_relative_path,
@@ -1834,10 +1833,7 @@ class BaseDataContext:
         )
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
-        if (
-            self.expectations_store.has_key(key)
-            and not overwrite_existing
-        ):
+        if self.expectations_store.has_key(key) and not overwrite_existing:
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(
@@ -2661,9 +2657,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return profiling_results
 
     def create_checkpoint(
-        self,
-        checkpoint_name: str,
-        checkpoint_config: Union[dict, CheckpointConfig],
+        self, checkpoint_name: str, checkpoint_config: Union[dict, CheckpointConfig],
     ) -> Checkpoint:
         if isinstance(checkpoint_config, dict):
             checkpoint_config = CheckpointConfig(**checkpoint_config)
@@ -2673,10 +2667,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "checkpoint_config": checkpoint_config,
                 "class_name": checkpoint_config.class_name,
             },
-            runtime_environment={
-                "data_context": self,
-                "name": checkpoint_name,
-            },
+            runtime_environment={"data_context": self, "name": checkpoint_name,},
             config_defaults={
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
@@ -2690,9 +2681,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return new_checkpoint
 
     def get_checkpoint(
-        self,
-        checkpoint_name: str,
-        return_config: bool = True
+        self, checkpoint_name: str, return_config: bool = True
     ) -> Union[CheckpointConfig, Checkpoint]:
         key: ConfigurationIdentifier = ConfigurationIdentifier(
             configuration_key=checkpoint_name,
@@ -2704,19 +2693,24 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 message="Invalid checkpoint configuration", validation_error=exc
             )
 
-        if checkpoint_config.config_version == CheckpointConfigDefaults.DEFAULT_CONFIG_VERSION.value:
+        if (
+            checkpoint_config.config_version
+            == CheckpointConfigDefaults.DEFAULT_CONFIG_VERSION.value
+        ):
             if not (
                 "batches" in checkpoint_config.to_json_dict()
                 and (
                     len(checkpoint_config.to_json_dict()["batches"]) == 0
-                    or {
-                        "batch_kwargs",
-                        "expectation_suite_names",
-                    }.issubset(
+                    or {"batch_kwargs", "expectation_suite_names",}.issubset(
                         set(
                             list(
                                 itertools.chain.from_iterable(
-                                    [item.keys() for item in checkpoint_config.to_json_dict()["batches"]]
+                                    [
+                                        item.keys()
+                                        for item in checkpoint_config.to_json_dict()[
+                                            "batches"
+                                        ]
+                                    ]
                                 )
                             )
                         )
@@ -2735,13 +2729,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "checkpoint_config": checkpoint_config,
                 "class_name": checkpoint_config.class_name,
             },
-            runtime_environment={
-                "data_context": self,
-                "name": checkpoint_name,
-            },
-            config_defaults={
-                "module_name": "great_expectations.checkpoint",
-            },
+            runtime_environment={"data_context": self, "name": checkpoint_name,},
+            config_defaults={"module_name": "great_expectations.checkpoint",},
         )
 
         return checkpoint
@@ -2776,8 +2765,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             result_format = {"result_format": "SUMMARY"}
 
         checkpoint: Checkpoint = self.get_checkpoint(
-            checkpoint_name=checkpoint_name,
-            return_config=True,
+            checkpoint_name=checkpoint_name, return_config=True,
         )
 
         batches_to_validate = []
@@ -3178,7 +3166,9 @@ class DataContext(BaseDataContext):
             raise ge_exceptions.ConfigNotFoundError()
 
         try:
-            return DataContextConfig.from_commented_map(commented_map=config_commented_map_from_yaml)
+            return DataContextConfig.from_commented_map(
+                commented_map=config_commented_map_from_yaml
+            )
         except ge_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise

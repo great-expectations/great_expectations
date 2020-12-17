@@ -10,10 +10,7 @@ from great_expectations.exceptions import CheckpointError
 
 class LegacyCheckpoint(object):
     def __init__(
-        self,
-        data_context,
-        name: str,
-        checkpoint_config: Union[CheckpointConfig, dict],
+        self, data_context, name: str, checkpoint_config: Union[CheckpointConfig, dict],
     ):
         self._data_context = data_context
         self._name = name
@@ -94,11 +91,7 @@ class LegacyCheckpoint(object):
 
 class Checkpoint(object):
     def __init__(
-        self,
-        data_context,
-        name: str,
-        validation_operator_name: str,
-        validators: list,
+        self, data_context, name: str, validation_operator_name: str, validators: list,
     ):
         self._data_context = data_context
         self._name = name

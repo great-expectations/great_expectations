@@ -28,8 +28,8 @@ from great_expectations.exceptions import (
     CheckpointError,
     ConfigNotFoundError,
     DataContextError,
-    InvalidKeyError,
     InvalidCheckpointConfigError,
+    InvalidKeyError,
 )
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (

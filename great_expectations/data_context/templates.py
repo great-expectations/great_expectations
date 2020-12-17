@@ -78,12 +78,16 @@ CONFIG_VARIABLES_TEMPLATE = (
 # and remove the inserted final two spaces.
 EXPECTATIONS_STORE_STRING = yaml.dump(
     {
-        "expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value["expectations_store"]
+        "expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
+            "expectations_store"
+        ]
     }
 ).replace("\n", "\n  ")[:-2]
 VALIDATIONS_STORE_STRING = yaml.dump(
     {
-        "validations_store": DataContextConfigDefaults.DEFAULT_STORES.value["validations_store"]
+        "validations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
+            "validations_store"
+        ]
     }
 ).replace("\n", "\n  ")[:-2]
 EVALUATION_PARAMETER_STORE_STRING = yaml.dump(
@@ -91,7 +95,9 @@ EVALUATION_PARAMETER_STORE_STRING = yaml.dump(
 )
 CHECKPOINT_STORE_STRING = yaml.dump(
     {
-        "checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value["checkpoint_store"]
+        "checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value[
+            "checkpoint_store"
+        ]
     }
 ).replace("\n", "\n  ")[:-2]
 
