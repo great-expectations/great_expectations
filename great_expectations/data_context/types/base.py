@@ -1406,6 +1406,7 @@ class CheckpointConfig(BaseYamlConfig):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
+        # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,

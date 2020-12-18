@@ -5,7 +5,6 @@ from typing import List, Optional, Union
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    checkpointConfigSchema,
 )
 from great_expectations.exceptions import CheckpointError
 
@@ -24,7 +23,7 @@ class LegacyCheckpoint(object):
                 f"instead got {type(checkpoint_config)}"
             )
         elif isinstance(checkpoint_config, dict):
-            checkpoint_config = checkpointConfigSchema.load(checkpoint_config)
+            checkpoint_config = CheckpointConfig(**checkpoint_config)
         self._config = checkpoint_config
 
     @property
