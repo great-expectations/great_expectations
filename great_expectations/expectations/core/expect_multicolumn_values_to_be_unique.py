@@ -1,5 +1,5 @@
 from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.expectations.util import add_evaluation_param_content
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -27,7 +27,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
-    @add_evaluation_param_content
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

@@ -2,7 +2,7 @@ import json
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.expectations.util import add_evaluation_param_content
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
@@ -86,7 +86,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
-    @add_evaluation_param_content
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

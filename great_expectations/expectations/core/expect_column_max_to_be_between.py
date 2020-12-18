@@ -10,7 +10,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.util import add_evaluation_param_content
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ...render.types import RenderedStringTemplateContent
@@ -125,7 +125,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
-    @add_evaluation_param_content
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

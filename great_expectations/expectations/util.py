@@ -4,7 +4,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.render.types import RenderedStringTemplateContent
 
 
-def add_evaluation_param_content(render_func):
+def render_evaluation_parameter_string(render_func):
     def inner_func(*args, **kwargs):
         rendered_string_template = render_func(*args, **kwargs)
         current_expectation_params = list()
@@ -18,7 +18,7 @@ def add_evaluation_param_content(render_func):
                         current_expectation_params.append(value["$PARAMETER"])
         runtime_configuration = kwargs.get("runtime_configuration", None)
         if runtime_configuration:
-            eval_params = runtime_configuration.get("evaluation_params", {})
+            eval_params = runtime_configuration.get("evaluation_parameters", {})
             styling = runtime_configuration.get("styling")
             for key, val in eval_params.items():
                 if key in current_expectation_params:

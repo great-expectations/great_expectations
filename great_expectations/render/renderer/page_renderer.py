@@ -79,7 +79,7 @@ class ValidationResultsPageRenderer(Renderer):
     def render(
         self,
         validation_results: ExpectationSuiteValidationResult,
-        evaluation_params=None,
+        evaluation_parameters=None,
     ):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
@@ -200,14 +200,14 @@ class ValidationResultsPageRenderer(Renderer):
             sections += [
                 self._column_section_renderer.render(
                     validation_results=columns["Table-Level Expectations"],
-                    evaluation_params=validation_results.evaluation_parameters,
+                    evaluation_parameters=validation_results.evaluation_parameters,
                 )
             ]
 
         sections += [
             self._column_section_renderer.render(
                 validation_results=columns[column],
-                evaluation_params=validation_results.evaluation_parameters,
+                evaluation_parameters=validation_results.evaluation_parameters,
             )
             for column in ordered_columns
         ]

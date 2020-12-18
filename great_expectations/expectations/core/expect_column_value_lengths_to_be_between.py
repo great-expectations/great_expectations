@@ -31,7 +31,7 @@ try:
 except ImportError:
     pass
 
-from great_expectations.expectations.util import add_evaluation_param_content
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
@@ -147,7 +147,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
-    @add_evaluation_param_content
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: ExpectationConfiguration = None,

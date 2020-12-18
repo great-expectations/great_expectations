@@ -1420,11 +1420,11 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         ),
     )
 
-    # evaluation_params are usually stored at the ExpectationSuiteValidationResult
+    # evaluation_parameters are usually stored at the ExpectationSuiteValidationResult
     # and passed along as a kwarg to the ValidationResultsTableContentBlockRenderer
-    eval_param = {"MIN_VAL_PARAM": 15, "MAX_VAL_PARAM": 20}
+    evaluation_parameter = {"MIN_VAL_PARAM": 15, "MAX_VAL_PARAM": 20}
     result = ValidationResultsTableContentBlockRenderer.render(
-        [evr], evaluation_params=eval_param
+        [evr], evaluation_parameters=evaluation_parameter
     ).to_json_dict()
 
     assert result == {
