@@ -290,7 +290,12 @@ def test_s3_pandas_source_read_parquet(
             "s3_reader": {
                 "class_name": "S3GlobReaderBatchKwargsGenerator",
                 "bucket": test_bucket,
-                "assets": {"test_data": {"prefix": "", "regex_filter": r".*parquet",},},
+                "assets": {
+                    "test_data": {
+                        "prefix": "",
+                        "regex_filter": r".*parquet",
+                    },
+                },
                 "reader_options": {"columns": ["col_1"]},
             }
         },
@@ -301,7 +306,9 @@ def test_s3_pandas_source_read_parquet(
     )
     batch = data_context_parameterized_expectation_suite.get_batch(
         data_context_parameterized_expectation_suite.build_batch_kwargs(
-            "parquet_source", "s3_reader", "test_data",
+            "parquet_source",
+            "s3_reader",
+            "test_data",
         ),
         "test_parquet",
     )

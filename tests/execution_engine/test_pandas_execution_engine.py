@@ -184,7 +184,10 @@ def test_get_compute_domain_with_unmeetable_row_condition():
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"row_condition": "b > 24", "condition_parser": "pandas",},
+        domain_kwargs={
+            "row_condition": "b > 24",
+            "condition_parser": "pandas",
+        },
         domain_type="identity",
     )
     # Ensuring data has been properly queried
@@ -263,7 +266,9 @@ def test_dataframe_property_given_loaded_batch():
 
 def test_get_batch_data(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(batch_data=test_df,)
+        RuntimeDataBatchSpec(
+            batch_data=test_df,
+        )
     )
     assert split_df.shape == (120, 10)
 
@@ -319,7 +324,10 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
     my_data_connector = ConfiguredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
-        default_regex={"pattern": "alpha-(.*)\\.csv", "group_names": ["index"],},
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
         bucket=bucket,
         prefix="",
         assets={"alpha": {}},
@@ -461,7 +469,11 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
             splitter_method="_split_on_multi_column_values",
             splitter_kwargs={
                 "column_names": ["y", "m", "d"],
-                "partition_definition": {"y": 2020, "m": 1, "d": 5,},
+                "partition_definition": {
+                    "y": 2020,
+                    "m": 1,
+                    "d": 5,
+                },
             },
         )
     )
@@ -475,7 +487,11 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
                 splitter_method="_split_on_multi_column_values",
                 splitter_kwargs={
                     "column_names": ["I", "dont", "exist"],
-                    "partition_definition": {"y": 2020, "m": 1, "d": 5,},
+                    "partition_definition": {
+                        "y": 2020,
+                        "m": 1,
+                        "d": 5,
+                    },
                 },
             )
         )
@@ -490,7 +506,9 @@ def test_get_batch_with_split_on_hashed_column(test_df):
                 splitter_kwargs={
                     "column_name": "favorite_color",
                     "hash_digits": 1,
-                    "partition_definition": {"hash_value": "a",},
+                    "partition_definition": {
+                        "hash_value": "a",
+                    },
                     "hash_function_name": "I_am_not_valid",
                 },
             )
@@ -503,7 +521,9 @@ def test_get_batch_with_split_on_hashed_column(test_df):
             splitter_kwargs={
                 "column_name": "favorite_color",
                 "hash_digits": 1,
-                "partition_definition": {"hash_value": "a",},
+                "partition_definition": {
+                    "hash_value": "a",
+                },
                 "hash_function_name": "sha256",
             },
         )
@@ -527,7 +547,11 @@ def test_sample_using_mod(test_df):
         RuntimeDataBatchSpec(
             batch_data=test_df,
             sampling_method="_sample_using_mod",
-            sampling_kwargs={"column_name": "id", "mod": 5, "value": 4,},
+            sampling_kwargs={
+                "column_name": "id",
+                "mod": 5,
+                "value": 4,
+            },
         )
     )
     assert sampled_df.shape == (24, 10)
@@ -538,7 +562,10 @@ def test_sample_using_a_list(test_df):
         RuntimeDataBatchSpec(
             batch_data=test_df,
             sampling_method="_sample_using_a_list",
-            sampling_kwargs={"column_name": "id", "value_list": [3, 5, 7, 11],},
+            sampling_kwargs={
+                "column_name": "id",
+                "value_list": [3, 5, 7, 11],
+            },
         )
     )
     assert sampled_df.shape == (4, 10)
@@ -566,7 +593,10 @@ def test_sample_using_md5(test_df):
     )
     assert sampled_df.shape == (10, 10)
     assert sampled_df.date.isin(
-        [datetime.date(2020, 1, 15), datetime.date(2020, 1, 29),]
+        [
+            datetime.date(2020, 1, 15),
+            datetime.date(2020, 1, 29),
+        ]
     ).all()
 
 
@@ -582,7 +612,11 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
                 "partition_definition": {"id": 5},
             },
             sampling_method="_sample_using_mod",
-            sampling_kwargs={"column_name": "id", "mod": 5, "value": 4,},
+            sampling_kwargs={
+                "column_name": "id",
+                "mod": 5,
+                "value": 4,
+            },
         )
     )
     assert split_df.shape == (2, 10)

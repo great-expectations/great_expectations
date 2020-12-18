@@ -37,7 +37,11 @@ def basic_files_dataconnector_yaml(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("get_previous_partition"))
     create_files_in_directory(
         directory=base_directory,
-        file_name_list=["my_asset/AAA.csv", "my_asset/BBB.csv", "my_asset/CCC.csv",],
+        file_name_list=[
+            "my_asset/AAA.csv",
+            "my_asset/BBB.csv",
+            "my_asset/CCC.csv",
+        ],
     )
 
     # These are all part of `my_asset`
@@ -87,7 +91,9 @@ data_connectors:
             "data_context_root_directory": basic_files_dataconnector_yaml[0],
             "execution_engine": "BASE_ENGINE",
         },
-        config_defaults={"module_name": "great_expectations.exec",},
+        config_defaults={
+            "module_name": "great_expectations.exec",
+        },
     )
 
     return my_datasource
@@ -102,7 +108,8 @@ def test_stub(basic_datasource):
 
     batch_definitions = basic_datasource.get_available_batch_definitions(
         BatchRequest(
-            data_connector_name="my_connector", datasource_name="general_data_source",
+            data_connector_name="my_connector",
+            datasource_name="general_data_source",
         )
     )
     for defin in batch_definitions:

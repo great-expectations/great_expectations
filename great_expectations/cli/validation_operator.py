@@ -80,10 +80,16 @@ def validation_operator_list(directory):
     help="""The path of the validation config file (JSON). """,
 )
 @click.option(
-    "--name", "-n", default=None, help="""The name of the validation operator. """,
+    "--name",
+    "-n",
+    default=None,
+    help="""The name of the validation operator. """,
 )
 @click.option(
-    "--suite", "-s", default=None, help="""The name of the expectation suite. """,
+    "--suite",
+    "-s",
+    default=None,
+    help="""The name of the expectation suite. """,
 )
 @click.option(
     "--run_name",

@@ -206,7 +206,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         ]
 
     def _validate_pandas(
-        self, actual_column_type, expected_types_list,
+        self,
+        actual_column_type,
+        expected_types_list,
     ):
         if expected_types_list is None:
             success = True
@@ -277,7 +279,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         }
 
     def _validate_spark(
-        self, actual_column_type, expected_types_list,
+        self,
+        actual_column_type,
+        expected_types_list,
     ):
         if expected_types_list is None:
             success = True

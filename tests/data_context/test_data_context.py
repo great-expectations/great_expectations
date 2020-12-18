@@ -53,7 +53,9 @@ def parameterized_expectation_suite():
         __file__,
         "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
     )
-    with open(fixture_path,) as suite:
+    with open(
+        fixture_path,
+    ) as suite:
         return json.load(suite)
 
 
@@ -122,7 +124,11 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
     context.add_datasource(
         "first",
         class_name="SqlAlchemyDatasource",
-        batch_kwargs_generators={"foo": {"class_name": "TableBatchKwargsGenerator",}},
+        batch_kwargs_generators={
+            "foo": {
+                "class_name": "TableBatchKwargsGenerator",
+            }
+        },
         **connection_kwargs,
     )
     context.add_datasource(
@@ -131,7 +137,11 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
     context.add_datasource(
         "third",
         class_name="SqlAlchemyDatasource",
-        batch_kwargs_generators={"bar": {"class_name": "TableBatchKwargsGenerator",}},
+        batch_kwargs_generators={
+            "bar": {
+                "class_name": "TableBatchKwargsGenerator",
+            }
+        },
         **connection_kwargs,
     )
 
@@ -153,16 +163,20 @@ def test_list_expectation_suite_keys(data_context_parameterized_expectation_suit
 
 
 def test_get_existing_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "my_dag_node.default"
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "my_dag_node.default"
+        )
     )
     assert expectation_suite.expectation_suite_name == "my_dag_node.default"
     assert len(expectation_suite.expectations) == 2
 
 
 def test_get_new_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = data_context_parameterized_expectation_suite.create_expectation_suite(
-        "this_data_asset_does_not_exist.default"
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.create_expectation_suite(
+            "this_data_asset_does_not_exist.default"
+        )
     )
     assert (
         expectation_suite.expectation_suite_name
@@ -172,8 +186,10 @@ def test_get_new_expectation_suite(data_context_parameterized_expectation_suite)
 
 
 def test_save_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = data_context_parameterized_expectation_suite.create_expectation_suite(
-        "this_data_asset_config_does_not_exist.default"
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.create_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
     )
     expectation_suite.expectations.append(
         ExpectationConfiguration(
@@ -183,8 +199,10 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
     data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite
     )
-    expectation_suite_saved = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "this_data_asset_config_does_not_exist.default"
+    expectation_suite_saved = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
     )
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
@@ -197,23 +215,20 @@ def test_compile_evaluation_parameter_dependencies(
         == {}
     )
     data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
-    assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
-        == {
-            "source_diabetes_data.default": [
-                {
-                    "metric_kwargs_id": {
-                        "column=patient_nbr": [
-                            "expect_column_unique_value_count_to_be_between.result.observed_value"
-                        ]
-                    }
+    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
+        "source_diabetes_data.default": [
+            {
+                "metric_kwargs_id": {
+                    "column=patient_nbr": [
+                        "expect_column_unique_value_count_to_be_between.result.observed_value"
+                    ]
                 }
-            ],
-            "source_patient_data.default": [
-                "expect_table_row_count_to_equal.result.observed_value"
-            ],
-        }
-    )
+            }
+        ],
+        "source_patient_data.default": [
+            "expect_table_row_count_to_equal.result.observed_value"
+        ],
+    }
 
 
 def test_list_datasources(data_context_parameterized_expectation_suite):
@@ -642,7 +657,10 @@ def test_ConfigOnlyDataContext__initialization(
     config_path = str(
         tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
     )
-    context = BaseDataContext(basic_data_context_config, config_path,)
+    context = BaseDataContext(
+        basic_data_context_config,
+        config_path,
+    )
 
     assert (
         context.root_directory.split("/")[-1]
@@ -661,7 +679,10 @@ def test__normalize_absolute_or_relative_path(
     config_path = str(
         tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
     )
-    context = BaseDataContext(basic_data_context_config, config_path,)
+    context = BaseDataContext(
+        basic_data_context_config,
+        config_path,
+    )
 
     assert str(
         os.path.join("test__normalize_absolute_or_relative_path__dir0", "yikes")
@@ -719,8 +740,10 @@ def test_data_context_updates_expectation_suite_names(
 
     # We'll get that expectation suite and then update its name and re-save, then verify that everything
     # has been properly updated
-    expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        expectation_suite_name
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            expectation_suite_name
+        )
     )
 
     # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects
@@ -740,8 +763,10 @@ def test_data_context_updates_expectation_suite_names(
         expectation_suite=expectation_suite, expectation_suite_name="a_new_suite_name"
     )
 
-    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "a_new_suite_name"
+    fetched_expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "a_new_suite_name"
+        )
     )
 
     assert fetched_expectation_suite.expectation_suite_name == "a_new_suite_name"
@@ -752,8 +777,10 @@ def test_data_context_updates_expectation_suite_names(
         expectation_suite_name="a_new_new_suite_name",
     )
 
-    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "a_new_new_suite_name"
+    fetched_expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "a_new_new_suite_name"
+        )
     )
 
     assert fetched_expectation_suite.expectation_suite_name == "a_new_new_suite_name"
@@ -775,8 +802,10 @@ def test_data_context_updates_expectation_suite_names(
         expectation_suite=expectation_suite
     )
 
-    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "a_third_suite_name"
+    fetched_expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "a_third_suite_name"
+        )
     )
     assert fetched_expectation_suite.expectation_suite_name == "a_third_suite_name"
 
@@ -1430,7 +1459,9 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
         context.get_checkpoint("not_a_checkpoint")
 
 
-def test_get_checkpoint_raises_error_empty_checkpoint(empty_context_with_checkpoint,):
+def test_get_checkpoint_raises_error_empty_checkpoint(
+    empty_context_with_checkpoint,
+):
     context = empty_context_with_checkpoint
     checkpoint_file_path = os.path.join(
         context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
@@ -1536,7 +1567,11 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
 
     checkpoint = {
         "validation_operator_name": "action_list_operator",
-        "batches": [{"batch_kwargs": {"foo": 33},}],
+        "batches": [
+            {
+                "batch_kwargs": {"foo": 33},
+            }
+        ],
     }
     checkpoint_file_path = os.path.join(
         context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
@@ -1580,7 +1615,10 @@ def test_get_validator_with_instantiated_expectation_suite(
     )
 
     create_files_in_directory(
-        directory=base_directory, file_name_list=["some_file.csv",],
+        directory=base_directory,
+        file_name_list=[
+            "some_file.csv",
+        ],
     )
 
     yaml_config = f"""
@@ -1603,14 +1641,17 @@ data_connectors:
 
     config = yaml.load(yaml_config)
     context.add_datasource(
-        "my_directory_datasource", **config,
+        "my_directory_datasource",
+        **config,
     )
 
     my_validator = context.get_validator(
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={"alphanumeric": "some_file",},
+        partition_identifiers={
+            "alphanumeric": "some_file",
+        },
         expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     assert my_validator.expectation_suite_name == "my_expectation_suite"
@@ -1626,7 +1667,10 @@ def test_get_validator_with_attach_expectation_suite(
     )
 
     create_files_in_directory(
-        directory=base_directory, file_name_list=["some_file.csv",],
+        directory=base_directory,
+        file_name_list=[
+            "some_file.csv",
+        ],
     )
 
     yaml_config = f"""
@@ -1649,14 +1693,17 @@ data_connectors:
 
     config = yaml.load(yaml_config)
     context.add_datasource(
-        "my_directory_datasource", **config,
+        "my_directory_datasource",
+        **config,
     )
 
     my_validator = context.get_validator(
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={"alphanumeric": "some_file",},
+        partition_identifiers={
+            "alphanumeric": "some_file",
+        },
         create_expectation_suite_with_name="A_expectation_suite",
     )
     assert my_validator.expectation_suite_name == "A_expectation_suite"
