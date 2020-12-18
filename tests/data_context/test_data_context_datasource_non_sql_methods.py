@@ -57,7 +57,8 @@ data_connectors:
     )
 
     context.add_datasource(
-        "my_datasource", **config,
+        "my_datasource",
+        **config,
     )
 
     batch_request: Union[dict, BatchRequest] = {
@@ -138,7 +139,8 @@ data_connectors:
     )
 
     context.add_datasource(
-        "my_datasource", **config,
+        "my_datasource",
+        **config,
     )
 
     batch_request: Union[dict, BatchRequest] = {

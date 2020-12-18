@@ -72,10 +72,9 @@ class DataConnector:
         self._data_context_root_directory = data_context_root_directory
 
     def get_batch_data_and_metadata(
-        self, batch_definition: BatchDefinition,
-    ) -> Tuple[
-        Any, BatchSpec, BatchMarkers,  # batch_data
-    ]:
+        self,
+        batch_definition: BatchDefinition,
+    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
         """
         Uses batch_definition to retrieve batch_data and batch_markers by building a batch_spec from batch_definition,
         then using execution_engine to return batch_data and batch_markers
@@ -104,8 +103,10 @@ class DataConnector:
             BatchSpec object built from BatchDefinition
 
         """
-        batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
-            batch_definition=batch_definition
+        batch_spec_params: dict = (
+            self._generate_batch_spec_parameters_from_batch_definition(
+                batch_definition=batch_definition
+            )
         )
         batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
         if isinstance(batch_spec_passthrough, dict):
@@ -113,7 +114,9 @@ class DataConnector:
         batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
         return batch_spec
 
-    def _refresh_data_references_cache(self,):
+    def _refresh_data_references_cache(
+        self,
+    ):
         raise NotImplementedError
 
     def _get_data_reference_list(
@@ -152,7 +155,8 @@ class DataConnector:
         raise NotImplementedError
 
     def get_batch_definition_list_from_batch_request(
-        self, batch_request: BatchRequest,
+        self,
+        batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         raise NotImplementedError
 
@@ -213,8 +217,10 @@ class DataConnector:
             )
 
         for asset_name in asset_names[:max_examples]:
-            data_reference_list = self._get_data_reference_list_from_cache_by_data_asset_name(
-                data_asset_name=asset_name
+            data_reference_list = (
+                self._get_data_reference_list_from_cache_by_data_asset_name(
+                    data_asset_name=asset_name
+                )
             )
             len_batch_definition_list = len(data_reference_list)
             example_data_references = data_reference_list[:max_examples]
@@ -278,7 +284,10 @@ class DataConnector:
         return report_obj
 
     def _self_check_fetch_batch(
-        self, pretty_print: bool, example_data_reference: Any, data_asset_name: str,
+        self,
+        pretty_print: bool,
+        example_data_reference: Any,
+        data_asset_name: str,
     ):
         """
         Helper function for self_check() to retrieve batch using example_data_reference and data_asset_name,
@@ -294,7 +303,8 @@ class DataConnector:
             print(f"\n\t\tFetching batch data...")
 
         batch_definition_list = self._map_data_reference_to_batch_definition_list(
-            data_reference=example_data_reference, data_asset_name=data_asset_name,
+            data_reference=example_data_reference,
+            data_asset_name=data_asset_name,
         )
         assert len(batch_definition_list) == 1
         batch_definition = batch_definition_list[0]

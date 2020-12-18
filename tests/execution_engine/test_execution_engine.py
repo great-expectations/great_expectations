@@ -81,7 +81,10 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean,},
+        metric_dependencies={
+            "column.standard_deviation": stdev,
+            "column.mean": mean,
+        },
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -155,7 +158,10 @@ def test_resolve_metrics_with_incomplete_metric_input():
         metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean,},
+        metric_dependencies={
+            "column.standard_deviation": stdev,
+            "column.mean": mean,
+        },
     )
 
     # Ensuring that incomplete metrics given raises a GreatExpectationsError
