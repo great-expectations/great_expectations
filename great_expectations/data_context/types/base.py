@@ -352,7 +352,7 @@ class ExecutionEngineConfigSchema(Schema):
             data["class_name"] == "SqlAlchemyExecutionEngine"
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses the "connection_string" key in an execution engine, but only 
+                f"""Your current configuration uses the "connection_string" key in an execution engine, but only
 SqlAlchemyExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
@@ -361,7 +361,7 @@ configuration to continue.
             data["class_name"] == "SparkDFExecutionEngine"
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses the "spark_config" key in an execution engine, but only 
+                f"""Your current configuration uses the "spark_config" key in an execution engine, but only
 SparkDFExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
@@ -824,15 +824,12 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_DATA_DOCS_SITES = {
         DEFAULT_DATA_DOCS_SITE_NAME: {
             "class_name": "SiteBuilder",
+            "show_how_to_buttons": True,
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/local_site/",
             },
-            "site_index_builder": {
-                "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
-            },
-            "show_how_to_buttons": True,
+            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
         }
     }
 
@@ -951,10 +948,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "bucket": data_docs_bucket_name,
                     "prefix": data_docs_prefix,
                 },
-                "site_index_builder": {
-                    "class_name": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
-                },
+                "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
             }
         }
 
@@ -1083,10 +1077,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "bucket": data_docs_bucket_name,
                     "prefix": data_docs_prefix,
                 },
-                "site_index_builder": {
-                    "class_name": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
-                },
+                "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
             }
         }
 
