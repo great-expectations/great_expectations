@@ -149,7 +149,6 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
-        .ge_store_backend_id
         .gitkeep
     expectations/
         .ge_store_backend_id
@@ -257,7 +256,6 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
-        .ge_store_backend_id
         .gitkeep
     expectations/
         .ge_store_backend_id
@@ -363,7 +361,6 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
-        .ge_store_backend_id
         .gitkeep
     expectations/
         .ge_store_backend_id
