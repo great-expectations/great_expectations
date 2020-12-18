@@ -642,7 +642,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
             evaluation_parameters, interactive_evaluation, data_context
         )
         evr = validator.graph_validate(
-            configurations=[configuration], runtime_configuration=runtime_configuration,
+            configurations=[configuration],
+            runtime_configuration=runtime_configuration,
         )[0]
 
         return evr

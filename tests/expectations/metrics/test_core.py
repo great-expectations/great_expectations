@@ -460,7 +460,10 @@ def test_z_score_under_threshold_pd():
         metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean,},
+        metric_dependencies={
+            "column.standard_deviation": stdev,
+            "column.mean": mean,
+        },
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics

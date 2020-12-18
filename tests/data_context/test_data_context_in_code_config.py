@@ -199,7 +199,9 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
 
     # Make sure the store_backend_id from the file is equal to reading from the property
     expectations_store_backend_id_from_s3_file = get_store_backend_id_from_s3(
-        bucket=bucket, prefix=expectations_store_prefix, key=store_backend_id_filename,
+        bucket=bucket,
+        prefix=expectations_store_prefix,
+        key=store_backend_id_filename,
     )
     assert (
         expectations_store_backend_id_from_s3_file == s3_expectations_store_backend_id
@@ -224,9 +226,9 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
     }
 
     # Make sure ids are consistent
-    in_code_data_context_expectations_store_store_backend_id = in_code_data_context.stores[
-        "expectations_S3_store"
-    ].store_backend_id
+    in_code_data_context_expectations_store_store_backend_id = (
+        in_code_data_context.stores["expectations_S3_store"].store_backend_id
+    )
     in_code_data_context_data_context_id = in_code_data_context.data_context_id
     constructed_data_context_id = in_code_data_context._construct_data_context_id()
     assert (

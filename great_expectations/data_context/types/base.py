@@ -44,7 +44,8 @@ def object_to_yaml_str(obj):
 
 class AssetConfig(DictDot):
     def __init__(
-        self, **kwargs,
+        self,
+        **kwargs,
     ):
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -73,7 +74,12 @@ class AssetConfigSchema(Schema):
 
 class SorterConfig(DictDot):
     def __init__(
-        self, name, class_name=None, module_name=None, orderby="asc", **kwargs,
+        self,
+        name,
+        class_name=None,
+        module_name=None,
+        orderby="asc",
+        **kwargs,
     ):
         self._name = name
         self._class_name = class_name
@@ -253,7 +259,10 @@ configuration to continue.
             or "max_keys" in data
         ) and not (
             data["class_name"]
-            in ["InferredAssetS3DataConnector", "ConfiguredAssetS3DataConnector",]
+            in [
+                "InferredAssetS3DataConnector",
+                "ConfiguredAssetS3DataConnector",
+            ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by an
@@ -274,7 +283,10 @@ continue.
             or "skip_inapplicable_tables" in data
         ) and not (
             data["class_name"]
-            in ["InferredAssetSqlDataConnector", "ConfiguredAssetSqlDataConnector",]
+            in [
+                "InferredAssetSqlDataConnector",
+                "ConfiguredAssetSqlDataConnector",
+            ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by an
@@ -489,7 +501,10 @@ class DatasourceConfigSchema(Schema):
             or "tables" in data
         ) and not (
             data["class_name"]
-            in ["SqlAlchemyDatasource", "SimpleSqlalchemyDatasource",]
+            in [
+                "SqlAlchemyDatasource",
+                "SimpleSqlalchemyDatasource",
+            ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data source, that are required only by a

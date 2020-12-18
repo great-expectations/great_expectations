@@ -201,7 +201,12 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 value_count_dict["count"] for value_count_dict in value_count_dicts
             ]
 
-        df = pd.DataFrame({"value": values, "count": counts,})
+        df = pd.DataFrame(
+            {
+                "value": values,
+                "count": counts,
+            }
+        )
 
         if len(values) > 60:
             return None

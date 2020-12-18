@@ -170,7 +170,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             # Attempt to fetch a list of partition_definitions from the table
             try:
                 self._get_partition_definition_list_from_data_asset_config(
-                    data_asset_name, data_asset_config,
+                    data_asset_name,
+                    data_asset_config,
                 )
             except OperationalError as e:
                 # If it doesn't work, then...

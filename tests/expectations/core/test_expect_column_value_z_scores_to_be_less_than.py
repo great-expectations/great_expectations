@@ -23,12 +23,19 @@ def test_expect_column_value_z_scores_to_be_less_than_impl():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     result = expectation.validate(Validator(execution_engine=engine))
-    assert result == ExpectationValidationResult(success=True,)
+    assert result == ExpectationValidationResult(
+        success=True,
+    )
 
 
 def test_sa_expect_column_value_z_scores_to_be_less_than_impl(postgresql_engine):
@@ -36,7 +43,12 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(postgresql_engine)
     df.to_sql("z_score_test_data", postgresql_engine, if_exists="replace")
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch_data = SqlAlchemyBatchData(
@@ -46,7 +58,9 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(postgresql_engine)
         engine=postgresql_engine, batch_data_dict={"my_id": batch_data}
     )
     result = expectation.validate(Validator(execution_engine=engine))
-    assert result == ExpectationValidationResult(success=True,)
+    assert result == ExpectationValidationResult(
+        success=True,
+    )
 
 
 def test_spark_expect_column_value_z_scores_to_be_less_than_impl(spark_session):
@@ -56,9 +70,16 @@ def test_spark_expect_column_value_z_scores_to_be_less_than_impl(spark_session):
 
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     engine = SparkDFExecutionEngine(batch_data_dict={"my_id": df})
     result = expectation.validate(Validator(execution_engine=engine))
-    assert result == ExpectationValidationResult(success=True,)
+    assert result == ExpectationValidationResult(
+        success=True,
+    )

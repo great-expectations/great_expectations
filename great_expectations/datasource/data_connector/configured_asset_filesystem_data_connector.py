@@ -91,7 +91,8 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         if asset is not None:
             if asset.base_directory:
                 base_directory = normalize_directory_path(
-                    dir_path=asset.base_directory, root_directory_path=base_directory,
+                    dir_path=asset.base_directory,
+                    root_directory_path=base_directory,
                 )
         return str(Path(base_directory).joinpath(path))
 

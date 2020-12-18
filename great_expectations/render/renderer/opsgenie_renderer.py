@@ -13,7 +13,10 @@ class OpsgenieRenderer(Renderer):
         super().__init__()
 
     def render(
-        self, validation_result=None, data_docs_pages=None, notify_with=None,
+        self,
+        validation_result=None,
+        data_docs_pages=None,
+        notify_with=None,
     ):
 
         summary_text = (
