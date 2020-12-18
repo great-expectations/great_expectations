@@ -1333,7 +1333,7 @@ class CheckpointConfigSchema(Schema):
         fields = (
             "name",
             "config_version",
-            "template",
+            "template_name",
             "module_name",
             "class_name",
             "run_name_template",
@@ -1355,7 +1355,7 @@ class CheckpointConfigSchema(Schema):
         validate=lambda x: 0 < x < 100,
         error_messages={"invalid": "config version must " "be a number."},
     )
-    template = fields.String(required=False, allow_none=True)
+    template_name = fields.String(required=False, allow_none=True)
     module_name = fields.String(required=False, missing="great_expectations.checkpoint")
     class_name = fields.Str(required=False, allow_none=True)
     run_name_template = fields.String(required=False, allow_none=True)
@@ -1424,7 +1424,7 @@ class CheckpointConfig(BaseYamlConfig):
         else:
             if class_name is None:
                 class_name = "Checkpoint"
-            self._template = template
+            self._template_name = template_name
             self._module_name = module_name or "great_expectations.checkpoint"
             if class_name is None:
                 if self.config_version is None:
@@ -1458,6 +1458,18 @@ class CheckpointConfig(BaseYamlConfig):
     def name(self):
         return self._name
 
+    @name.setter
+    def name(self, value: str):
+        self._name = value
+
+    @property
+    def template_name(self):
+        return
+
+    @template_name.setter
+    def template_name(self, value: str):
+        self._template_name = value
+
     @property
     def config_version(self):
         return self._config_version
@@ -1474,25 +1486,58 @@ class CheckpointConfig(BaseYamlConfig):
     def module_name(self):
         return self._module_name
 
+    @module_name.setter
+    def module_name(self, value: str):
+        self._module_name = value
+
     @property
     def class_name(self):
         return self._class_name
+
+    @class_name.setter
+    def class_name(self, value: str):
+        self._class_name = value
 
     @property
     def run_name_template(self):
         return self._run_name_template
 
+    @run_name_template.setter
+    def run_name_template(self, value: str):
+        self._run_name_template = value
+
     @property
     def batch_request(self):
         return self._batch_request
+
+    @batch_request.setter
+    def batch_request(self, value: Union[BatchRequest, dict]):
+        self._batch_request = value
 
     @property
     def expectation_suite_name(self):
         return self._expectation_suite_name
 
+    @expectation_suite_name.setter
+    def expectation_suite_name(self, value: str):
+        self._expectation_suite_name = value
+
     @property
     def action_list(self):
         return self._action_list
+
+    def update_action_list(self, action_list: list):
+        existing_action_list_dict = {
+            action["name"]: action for action in self.action_list
+        }
+        for action in action_list:
+            action_name = action["name"]
+            if action_name in existing_action_list_dict:
+                nested_update(
+                    existing_action_list_dict[action_name], action
+                )
+            else:
+                self.action_list.append(action)
 
     @property
     def evaluation_parameters(self):
