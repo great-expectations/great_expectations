@@ -1352,8 +1352,9 @@ class CheckpointConfigSchema(Schema):
 
     name = fields.String(required=False, allow_none=True)
     config_version = fields.Number(
-        validate=lambda x: 0 < x < 100,
-        error_messages={"invalid": "config version must " "be a number."},
+        validate=lambda x: (0 < x < 100) or x is None,
+        error_messages={"invalid": "config version must " "be a number or None."},
+        allow_none=True
     )
     template_name = fields.String(required=False, allow_none=True)
     module_name = fields.String(required=False, missing="great_expectations.checkpoint")
@@ -1412,8 +1413,8 @@ class CheckpointConfig(BaseYamlConfig):
         commented_map: Optional[CommentedMap] = None,
     ):
         self._name = name
-        if config_version is None:
-            config_version = CheckpointConfigDefaults.DEFAULT_CONFIG_VERSION.value
+        self._config_version = config_version
+        if self.config_version is None:
             if class_name is None:
                 class_name = "LegacyCheckpoint"
             if validation_operator_name is None:
@@ -1426,11 +1427,6 @@ class CheckpointConfig(BaseYamlConfig):
                 class_name = "Checkpoint"
             self._template_name = template_name
             self._module_name = module_name or "great_expectations.checkpoint"
-            if class_name is None:
-                if self.config_version is None:
-                    class_name = "LegacyCheckpoint"
-                else:
-                    class_name = "Checkpoint"
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
             self._batch_request = batch_request
@@ -1439,8 +1435,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._runtime_configuration = runtime_configuration
             self._validations = validations or []
             self._profilers = profilers or []
-        if config_version is not None:
-            self._config_version = config_version
+
         self._class_name = class_name
 
         super().__init__(commented_map=commented_map)
