@@ -161,9 +161,7 @@ class Checkpoint:
                     checkpoint_name=template_name, return_config=True
                 )
 
-                if float(template_config.config_version) != float(
-                    config.config_version
-                ):
+                if template_config.config_version != config.config_version:
                     raise CheckpointError(
                         f"Invalid template '{template_name}' (ver. {template_config.config_version}) for Checkpoint "
                         f"'{config}' (ver. {config.config_version}. Checkpoints can only use templates with the same config_version."
