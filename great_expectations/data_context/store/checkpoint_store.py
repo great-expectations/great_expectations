@@ -1,10 +1,11 @@
-import random
-
 import logging
+import random
 
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.data_context.types.resource_identifiers import ConfigurationIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +21,12 @@ class CheckpointStore(ConfigurationStore):
         test_checkpoint_name: str = "test-name-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
-        test_checkpoint_configuration: CheckpointConfig = CheckpointConfig(**{"name": test_checkpoint_name})
-        test_key: ConfigurationIdentifier = self._key_class(configuration_key=test_checkpoint_name)
+        test_checkpoint_configuration: CheckpointConfig = CheckpointConfig(
+            **{"name": test_checkpoint_name}
+        )
+        test_key: ConfigurationIdentifier = self._key_class(
+            configuration_key=test_checkpoint_name
+        )
 
         if pretty_print:
             print(f"Attempting to add a new test key {test_key} to Checkpoint store...")

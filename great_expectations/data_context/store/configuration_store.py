@@ -113,9 +113,7 @@ class ConfigurationStore(Store):
         if pretty_print:
             print("Checking for existing keys...")
 
-        return_obj: dict = {
-            "keys": [key.configuration_key for key in self.list_keys()]
-        }
+        return_obj: dict = {"keys": [key.configuration_key for key in self.list_keys()]}
 
         return_obj["len_keys"] = len(return_obj["keys"])
         len_keys: int = return_obj["len_keys"]
