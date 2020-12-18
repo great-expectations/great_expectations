@@ -127,7 +127,11 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(
 ):
     context = empty_data_context
 
-    base_directory = str(tmp_path_factory.mktemp("test_instantiation_from_a_config_regex_does_not_match_paths"))
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_instantiation_from_a_config_regex_does_not_match_paths"
+        )
+    )
     create_files_in_directory(
         directory=base_directory,
         file_name_list=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv",],

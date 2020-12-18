@@ -1,6 +1,5 @@
-from typing import Optional
-
 import logging
+from typing import Optional
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap

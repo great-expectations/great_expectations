@@ -22,7 +22,6 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.store import Store
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -39,7 +38,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import TupleStoreBackend
+from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -2702,7 +2701,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if isinstance(checkpoint_config, dict):
             checkpoint_config = CheckpointConfig(**checkpoint_config)
 
-        new_checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
+        new_checkpoint: Union[
+            Checkpoint, LegacyCheckpoint
+        ] = instantiate_class_from_config(
             config={
                 "checkpoint_config": checkpoint_config,
                 "class_name": checkpoint_config.class_name,
@@ -2885,7 +2886,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if return_mode not in ["instantiated_class", "report_object"]:
             raise ValueError(f"Unknown return_mode: {return_mode}.")
 
-        substituted_config_variables: Union[DataContextConfig, dict] = substitute_all_config_variables(
+        substituted_config_variables: Union[
+            DataContextConfig, dict
+        ] = substitute_all_config_variables(
             self.config_variables, dict(os.environ),
         )
 
@@ -2895,7 +2898,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **self.runtime_environment,
         }
 
-        config_str_with_substituted_variables: Union[DataContextConfig, dict] = substitute_all_config_variables(
+        config_str_with_substituted_variables: Union[
+            DataContextConfig, dict
+        ] = substitute_all_config_variables(
             yaml_config, substitutions,
         )
 
@@ -2907,7 +2912,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         else:
             class_name = None
 
-        instantiated_class: Union[Store, LegacyDatasource, Datasource, LegacyCheckpoint, Checkpoint]
+        instantiated_class: Union[
+            Store, LegacyDatasource, Datasource, LegacyCheckpoint, Checkpoint
+        ]
         try:
             if class_name in [
                 "ExpectationsStore",
