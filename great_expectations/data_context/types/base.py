@@ -1354,7 +1354,7 @@ class CheckpointConfigSchema(Schema):
     config_version = fields.Number(
         validate=lambda x: (0 < x < 100) or x is None,
         error_messages={"invalid": "config version must " "be a number or None."},
-        allow_none=True
+        allow_none=True,
     )
     template_name = fields.String(required=False, allow_none=True)
     module_name = fields.String(required=False, missing="great_expectations.checkpoint")
@@ -1513,7 +1513,9 @@ class CheckpointConfig(BaseYamlConfig):
                 batch_request.update(runtime_batch_request)
                 self.batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:
-                self.update_action_list(other_action_list=runtime_kwargs.get("action_list"))
+                self.update_action_list(
+                    other_action_list=runtime_kwargs.get("action_list")
+                )
             if runtime_kwargs.get("evaluation_parameters") is not None:
                 nested_update(
                     self.evaluation_parameters,
@@ -1624,7 +1626,9 @@ class CheckpointConfig(BaseYamlConfig):
                 if other_action["action"] is None:
                     existing_action_list_dict.pop(other_action_name)
                 else:
-                    nested_update(existing_action_list_dict[other_action_name], other_action)
+                    nested_update(
+                        existing_action_list_dict[other_action_name], other_action
+                    )
             else:
                 existing_action_list_dict[other_action_name] = other_action
         self.action_list = list(existing_action_list_dict.values())

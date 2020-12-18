@@ -201,8 +201,8 @@ class Checkpoint(object):
     ):
         runtime_kwargs = {
             "template_name": template_name,
-            "run_name_template":  run_name_template,
-            "expectation_suite_name":  expectation_suite_name,
+            "run_name_template": run_name_template,
+            "expectation_suite_name": expectation_suite_name,
             "batch_request": batch_request,
             "action_list": action_list,
             "evaluation_parameters": evaluation_parameters,

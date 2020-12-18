@@ -7,7 +7,9 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.data_context.types.resource_identifiers import ConfigurationIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+)
 from great_expectations.data_context.util import instantiate_class_from_config
 
 yaml = YAML()
@@ -57,7 +59,8 @@ def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(
 
 # TODO: Add test case for recusrive template cases (nested templates) and template_name specified at runtime
 def test_newstyle_checkpoint_config_substitution_simple(
-        titanic_pandas_multibatch_data_context_with_013_datasource):
+    titanic_pandas_multibatch_data_context_with_013_datasource,
+):
     context = titanic_pandas_multibatch_data_context_with_013_datasource
 
     # add template config
@@ -88,12 +91,13 @@ def test_newstyle_checkpoint_config_substitution_simple(
         runtime_configuration={
             "result_format": "BASIC",
             "partial_unexpected_count": 20,
-        }
+        },
     )
-    checkpoint_template_config_key = ConfigurationIdentifier(configuration_key=checkpoint_template_config.name)
+    checkpoint_template_config_key = ConfigurationIdentifier(
+        configuration_key=checkpoint_template_config.name
+    )
     context.checkpoint_store.set(
-        key=checkpoint_template_config_key,
-        value=checkpoint_template_config
+        key=checkpoint_template_config_key, value=checkpoint_template_config
     )
 
     # add child config
@@ -108,9 +112,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
-                        "partition_index": -1
-                    }
+                    "partition_request": {"partition_index": -1},
                 }
             },
             {
@@ -118,23 +120,22 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
-                        "partition_index": -2
-                    }
+                    "partition_request": {"partition_index": -2},
                 }
-            }
-        ]
+            },
+        ],
     )
-    simplified_checkpoint_config_key = ConfigurationIdentifier(configuration_key=simplified_checkpoint_config.name)
+    simplified_checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=simplified_checkpoint_config.name
+    )
     context.checkpoint_store.set(
-        key=simplified_checkpoint_config_key,
-        value=simplified_checkpoint_config
+        key=simplified_checkpoint_config_key, value=simplified_checkpoint_config
     )
 
     simplified_checkpoint = Checkpoint(
         name=simplified_checkpoint_config.name,
         data_context=context,
-        checkpoint_config=simplified_checkpoint_config
+        checkpoint_config=simplified_checkpoint_config,
     )
 
     # template only
@@ -148,9 +149,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
-                        "partition_index": -1
-                    }
+                    "partition_request": {"partition_index": -1},
                 }
             },
             {
@@ -158,25 +157,23 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
-                        "partition_index": -2
-                    }
+                    "partition_request": {"partition_index": -2},
                 }
-            }
+            },
         ],
         run_name_template="%Y-%M-foo-bar-template-$VAR",
         action_list=[
             {
                 "name": "store_validation_result",
-                "action": {"class_name": "StoreValidationResultAction", },
+                "action": {"class_name": "StoreValidationResultAction",},
             },
             {
                 "name": "store_evaluation_params",
-                "action": {"class_name": "StoreEvaluationParametersAction", },
+                "action": {"class_name": "StoreEvaluationParametersAction",},
             },
             {
                 "name": "update_data_docs",
-                "action": {"class_name": "UpdateDataDocsAction", },
+                "action": {"class_name": "UpdateDataDocsAction",},
             },
         ],
         evaluation_parameters={
@@ -188,15 +185,20 @@ def test_newstyle_checkpoint_config_substitution_simple(
         runtime_configuration={
             "result_format": "BASIC",
             "partial_unexpected_count": 20,
-        }
+        },
     )
 
     substituted_config_template_only = simplified_checkpoint.get_substituted_config()
-    assert substituted_config_template_only.to_json_dict() == \
-           expected_substituted_checkpoint_config_template_only.to_json_dict()
+    assert (
+        substituted_config_template_only.to_json_dict()
+        == expected_substituted_checkpoint_config_template_only.to_json_dict()
+    )
     # make sure operation is idempotent
     simplified_checkpoint.get_substituted_config()
-    assert substituted_config_template_only.to_json_dict() == expected_substituted_checkpoint_config_template_only.to_json_dict()
+    assert (
+        substituted_config_template_only.to_json_dict()
+        == expected_substituted_checkpoint_config_template_only.to_json_dict()
+    )
 
     # template and runtime kwargs
     expected_substituted_checkpoint_config_template_and_runtime_kwargs = CheckpointConfig(
@@ -209,9 +211,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
-                        "partition_index": -1
-                    }
+                    "partition_request": {"partition_index": -1},
                 }
             },
             {
@@ -219,9 +219,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
-                        "partition_index": -2
-                    }
+                    "partition_request": {"partition_index": -2},
                 }
             },
             {
@@ -229,9 +227,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector_2",
                     "data_asset_name": "users",
-                    "partition_request": {
-                        "partition_index": -3
-                    }
+                    "partition_request": {"partition_index": -3},
                 }
             },
             {
@@ -239,25 +235,23 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector_3",
                     "data_asset_name": "users",
-                    "partition_request": {
-                        "partition_index": -4
-                    }
+                    "partition_request": {"partition_index": -4},
                 }
-            }
+            },
         ],
         run_name_template="runtime_run_template",
         action_list=[
             {
                 "name": "store_validation_result",
-                "action": {"class_name": "StoreValidationResultAction", },
+                "action": {"class_name": "StoreValidationResultAction",},
             },
             {
                 "name": "store_evaluation_params",
-                "action": {"class_name": "MyCustomStoreEvaluationParametersAction", },
+                "action": {"class_name": "MyCustomStoreEvaluationParametersAction",},
             },
             {
                 "name": "update_data_docs_deluxe",
-                "action": {"class_name": "UpdateDataDocsAction", },
+                "action": {"class_name": "UpdateDataDocsAction",},
             },
         ],
         evaluation_parameters={
@@ -265,13 +259,13 @@ def test_newstyle_checkpoint_config_substitution_simple(
             "tolerance": 1.0e-2,
             "aux_param_0": "runtime-$MY_PARAM",
             "aux_param_1": "1 + $MY_PARAM",
-            "new_runtime_eval_param": "bloopy!"
+            "new_runtime_eval_param": "bloopy!",
         },
         runtime_configuration={
             "result_format": "BASIC",
             "partial_unexpected_count": 999,
-            "new_runtime_config_key": "bleepy!"
-        }
+            "new_runtime_config_key": "bleepy!",
+        },
     )
 
     substituted_config_template_and_runtime_kwargs = simplified_checkpoint.get_substituted_config(
@@ -283,9 +277,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_2",
                         "data_asset_name": "users",
-                        "partition_request": {
-                            "partition_index": -3
-                        }
+                        "partition_request": {"partition_index": -3},
                     }
                 },
                 {
@@ -293,29 +285,26 @@ def test_newstyle_checkpoint_config_substitution_simple(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_3",
                         "data_asset_name": "users",
-                        "partition_request": {
-                            "partition_index": -4
-                        }
+                        "partition_request": {"partition_index": -4},
                     }
-                }
+                },
             ],
             "run_name_template": "runtime_run_template",
             "action_list": [
                 {
                     "name": "store_validation_result",
-                    "action": {"class_name": "StoreValidationResultAction", },
+                    "action": {"class_name": "StoreValidationResultAction",},
                 },
                 {
                     "name": "store_evaluation_params",
-                    "action": {"class_name": "MyCustomStoreEvaluationParametersAction", },
+                    "action": {
+                        "class_name": "MyCustomStoreEvaluationParametersAction",
+                    },
                 },
-                {
-                    "name": "update_data_docs",
-                    "action": None,
-                },
+                {"name": "update_data_docs", "action": None,},
                 {
                     "name": "update_data_docs_deluxe",
-                    "action": {"class_name": "UpdateDataDocsAction", },
+                    "action": {"class_name": "UpdateDataDocsAction",},
                 },
             ],
             "evaluation_parameters": {
@@ -323,14 +312,16 @@ def test_newstyle_checkpoint_config_substitution_simple(
                 "tolerance": 1.0e-2,
                 "aux_param_0": "runtime-$MY_PARAM",
                 "aux_param_1": "1 + $MY_PARAM",
-                "new_runtime_eval_param": "bloopy!"
+                "new_runtime_eval_param": "bloopy!",
             },
             "runtime_configuration": {
                 "result_format": "BASIC",
                 "partial_unexpected_count": 999,
-                "new_runtime_config_key": "bleepy!"
-            }
+                "new_runtime_config_key": "bleepy!",
+            },
         }
     )
-    assert substituted_config_template_and_runtime_kwargs.to_json_dict() == \
-           expected_substituted_checkpoint_config_template_and_runtime_kwargs.to_json_dict()
+    assert (
+        substituted_config_template_and_runtime_kwargs.to_json_dict()
+        == expected_substituted_checkpoint_config_template_and_runtime_kwargs.to_json_dict()
+    )
