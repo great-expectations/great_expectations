@@ -1391,15 +1391,25 @@ class CheckpointConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = CheckpointConfigSchema
 
-    def __init__(self, name: Optional[str] = None, config_version: Optional[int] = None,
-                 template_name: Optional[str] = None, module_name: Optional[str] = None,
-                 class_name: Optional[str] = None, run_name_template: Optional[str] = None,
-                 expectation_suite_name: Optional[str] = None,
-                 batch_request: Optional[Union[dict, BatchRequest]] = None, action_list: Optional[List[dict]] = None,
-                 evaluation_parameters: Optional[dict] = None, runtime_configuration: Optional[dict] = None,
-                 validations: Optional[List[dict]] = None, profilers: Optional[List[dict]] = None,
-                 validation_operator_name: Optional[str] = None, batches: Optional[List[dict]] = None,
-                 commented_map: Optional[CommentedMap] = None):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        config_version: Optional[int] = None,
+        template_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[dict, BatchRequest]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+        commented_map: Optional[CommentedMap] = None,
+    ):
         self._name = name
         if config_version is None:
             config_version = CheckpointConfigDefaults.DEFAULT_CONFIG_VERSION.value
@@ -1434,9 +1444,14 @@ class CheckpointConfig(BaseYamlConfig):
 
         super().__init__(commented_map=commented_map)
 
-    def update(self, other_config: Optional["CheckpointConfig"] = None, runtime_kwargs: Optional[dict] = None):
-        assert other_config is not None or runtime_kwargs is not None, "other_config and runtime_kwargs cannot both " \
-                                                                       "be None"
+    def update(
+        self,
+        other_config: Optional["CheckpointConfig"] = None,
+        runtime_kwargs: Optional[dict] = None,
+    ):
+        assert other_config is not None or runtime_kwargs is not None, (
+            "other_config and runtime_kwargs cannot both " "be None"
+        )
 
         if other_config is not None:
             self.name = other_config.name
@@ -1451,20 +1466,29 @@ class CheckpointConfig(BaseYamlConfig):
                 self.expectation_suite_name = other_config.expectation_suite_name
             # update
             if other_config.batch_request is not None:
-                batch_request = self.batch_request.get_json_dict() if isinstance(self.batch_request, BatchRequest) \
+                batch_request = (
+                    self.batch_request.get_json_dict()
+                    if isinstance(self.batch_request, BatchRequest)
                     else self.batch_request
+                )
                 batch_request = batch_request or {}
-                other_batch_request = other_config.batch_request.get_json_dict() if isinstance(other_config.batch_request,
-                                                                                       BatchRequest) \
+                other_batch_request = (
+                    other_config.batch_request.get_json_dict()
+                    if isinstance(other_config.batch_request, BatchRequest)
                     else other_config.batch_request
+                )
                 batch_request.update(other_batch_request)
                 self.batch_request = batch_request
             if other_config.action_list is not None:
                 self.update_action_list(action_list=other_config.action_list)
             if other_config.evaluation_parameters is not None:
-                nested_update(self.evaluation_parameters, other_config.evaluation_parameters)
+                nested_update(
+                    self.evaluation_parameters, other_config.evaluation_parameters
+                )
             if other_config.runtime_configuration is not None:
-                nested_update(self.runtime_configuration, other_config.runtime_configuration)
+                nested_update(
+                    self.runtime_configuration, other_config.runtime_configuration
+                )
             if other_config.validations is not None:
                 self.validations.extend(other_config.validations)
             if other_config.profilers is not None:
@@ -1474,23 +1498,36 @@ class CheckpointConfig(BaseYamlConfig):
             if runtime_kwargs.get("run_name_template") is not None:
                 self.run_name_template = runtime_kwargs.get("run_name_template")
             if runtime_kwargs.get("expectation_suite_name") is not None:
-                self.expectation_suite_name = runtime_kwargs.get("expectation_suite_name")
+                self.expectation_suite_name = runtime_kwargs.get(
+                    "expectation_suite_name"
+                )
             # update
             if runtime_kwargs.get("batch_request") is not None:
-                batch_request = self.batch_request.get_json_dict() if isinstance(self.batch_request, BatchRequest) \
+                batch_request = (
+                    self.batch_request.get_json_dict()
+                    if isinstance(self.batch_request, BatchRequest)
                     else self.batch_request
+                )
                 batch_request = batch_request or {}
-                runtime_batch_request = runtime_kwargs.get("batch_request").get_json_dict() if isinstance(
-                    runtime_kwargs.get("batch_request"), BatchRequest) \
+                runtime_batch_request = (
+                    runtime_kwargs.get("batch_request").get_json_dict()
+                    if isinstance(runtime_kwargs.get("batch_request"), BatchRequest)
                     else runtime_kwargs.get("batch_request")
+                )
                 batch_request.update(runtime_batch_request)
                 self.batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:
                 self.update_action_list(action_list=runtime_kwargs.get("action_list"))
             if runtime_kwargs.get("evaluation_parameters") is not None:
-                nested_update(self.evaluation_parameters, runtime_kwargs.get("evaluation_parameters"))
+                nested_update(
+                    self.evaluation_parameters,
+                    runtime_kwargs.get("evaluation_parameters"),
+                )
             if runtime_kwargs.get("runtime_configuration") is not None:
-                nested_update(self.runtime_configuration, runtime_kwargs.get("runtime_configuration"))
+                nested_update(
+                    self.runtime_configuration,
+                    runtime_kwargs.get("runtime_configuration"),
+                )
             if runtime_kwargs.get("validations") is not None:
                 self.validations.extend(runtime_kwargs.get("validations"))
             if runtime_kwargs.get("profilers") is not None:
@@ -1584,9 +1621,7 @@ class CheckpointConfig(BaseYamlConfig):
         for action in action_list:
             action_name = action["name"]
             if action_name in existing_action_list_dict:
-                nested_update(
-                    existing_action_list_dict[action_name], action
-                )
+                nested_update(existing_action_list_dict[action_name], action)
             else:
                 self.action_list.append(action)
 

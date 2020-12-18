@@ -68,12 +68,14 @@ def test_checkpoint_store(empty_data_context):
         "result_format": "BASIC",
         "partial_unexpected_count": 20,
     }
-    my_checkpoint_config_0: CheckpointConfig = CheckpointConfig(name=checkpoint_name_0,
-                                                                run_name_template=run_name_template_0,
-                                                                expectation_suite_name=expectation_suite_name_0,
-                                                                evaluation_parameters=evaluation_parameters_0,
-                                                                runtime_configuration=runtime_configuration_0,
-                                                                validations=validations_0)
+    my_checkpoint_config_0: CheckpointConfig = CheckpointConfig(
+        name=checkpoint_name_0,
+        run_name_template=run_name_template_0,
+        expectation_suite_name=expectation_suite_name_0,
+        evaluation_parameters=evaluation_parameters_0,
+        runtime_configuration=runtime_configuration_0,
+        validations=validations_0,
+    )
 
     key_0: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=checkpoint_name_0,
@@ -135,13 +137,15 @@ def test_checkpoint_store(empty_data_context):
         "result_format": "BASIC",
         "partial_unexpected_count": 20,
     }
-    my_checkpoint_config_1: CheckpointConfig = CheckpointConfig(name=checkpoint_name_1,
-                                                                run_name_template=run_name_template_1,
-                                                                expectation_suite_name=expectation_suite_name_1,
-                                                                batch_request=batch_request_1,
-                                                                evaluation_parameters=evaluation_parameters_1,
-                                                                runtime_configuration=runtime_configuration_1,
-                                                                validations=validations_1)
+    my_checkpoint_config_1: CheckpointConfig = CheckpointConfig(
+        name=checkpoint_name_1,
+        run_name_template=run_name_template_1,
+        expectation_suite_name=expectation_suite_name_1,
+        batch_request=batch_request_1,
+        evaluation_parameters=evaluation_parameters_1,
+        runtime_configuration=runtime_configuration_1,
+        validations=validations_1,
+    )
 
     key_1: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=checkpoint_name_1,

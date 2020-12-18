@@ -2657,25 +2657,25 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return profiling_results
 
     def create_checkpoint(
-            self,
-            checkpoint_name: str,
-            checkpoint_config: Optional[Union[CheckpointConfig, dict]] = None,
-            config_version: Optional[Union[int, float]] = None,
-            template: Optional[str] = None,
-            module_name: Optional[str] = None,
-            class_name: Optional[str] = None,
-            run_name_template: Optional[str] = None,
-            expectation_suite_name: Optional[str] = None,
-            batch_request: Optional[Union[BatchRequest, dict]] = None,
-            action_list: Optional[List[dict]] = None,
-            evaluation_parameters: Optional[dict] = None,
-            runtime_configuration: Optional[dict] = None,
-            validations: Optional[List[dict]] = None,
-            profilers: Optional[List[dict]] = None,
-            # Next two fields are for LegacyCheckpoint configuration
-            validation_operator_name: Optional[str] = None,
-            batches: Optional[List[dict]] = None,
-            commented_map: Optional[CommentedMap] = None,
+        self,
+        checkpoint_name: str,
+        checkpoint_config: Optional[Union[CheckpointConfig, dict]] = None,
+        config_version: Optional[Union[int, float]] = None,
+        template: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+        commented_map: Optional[CommentedMap] = None,
     ) -> Checkpoint:
         if not checkpoint_config:
             checkpoint_config = {
@@ -2695,7 +2695,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 # Next two fields are for LegacyCheckpoint configuration
                 "validation_operator_name": validation_operator_name,
                 "batches": batches,
-                "commented_map": commented_map
+                "commented_map": commented_map,
             }
 
         if isinstance(checkpoint_config, dict):
@@ -2780,21 +2780,21 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     # TODO: <Alex>ALEX/Rob</Alex>
     def run_checkpoint(
         self,
-            checkpoint_name: str,
-            template_name: Optional[str] = None,
-            run_name_template: Optional[str] = None,
-            expectation_suite_name: Optional[str] = None,
-            batch_request: Optional[Union[BatchRequest, dict]] = None,
-            action_list: Optional[List[dict]] = None,
-            evaluation_parameters: Optional[dict] = None,
-            runtime_configuration: Optional[dict] = None,
-            validations: Optional[List[dict]] = None,
-            profilers: Optional[List[dict]] = None,
-            run_id=None,
-            run_name=None,
-            run_time=None,
-            result_format=None,
-            **kwargs,
+        checkpoint_name: str,
+        template_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        run_id=None,
+        run_name=None,
+        run_time=None,
+        result_format=None,
+        **kwargs,
     ):
         """
         Validate against a pre-defined checkpoint. (Experimental)
@@ -2829,7 +2829,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
-            **kwargs
+            **kwargs,
         )
 
     def test_yaml_config(
