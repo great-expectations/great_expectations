@@ -4,10 +4,7 @@ from great_expectations.datasource import SparkDFDatasource
 from great_expectations.execution_engine import SparkDFExecutionEngine
 
 
-def test_spark_config_datasource(test_backends):
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("Spark has not been enabled, so this test must be skipped.")
-
+def test_spark_config_datasource():
     # The below-commented assertion is not true for all cases,
     # because other parameters may have changed the global spark configuration.
     # source = SparkDFDatasource()
@@ -30,10 +27,7 @@ def test_spark_config_datasource(test_backends):
     assert ("spark.executor.memory", "768m") in conf
 
 
-def test_spark_config_execution_engine(test_backends):
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("Spark has not been enabled, so this test must be skipped.")
-
+def test_spark_config_execution_engine():
     # The below-commented assertion is not true for all cases,
     # because other parameters may have changed the global spark configuration.
     # source = SparkDFExecutionEngine()
