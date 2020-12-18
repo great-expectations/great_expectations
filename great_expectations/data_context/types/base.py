@@ -1481,7 +1481,7 @@ class CheckpointConfig(BaseYamlConfig):
                 batch_request.update(other_batch_request)
                 self.batch_request = batch_request
             if other_config.action_list is not None:
-                self.update_action_list(action_list=other_config.action_list)
+                self.update_action_list(other_action_list=other_config.action_list)
             if other_config.evaluation_parameters is not None:
                 nested_update(
                     self.evaluation_parameters, other_config.evaluation_parameters
@@ -1518,7 +1518,7 @@ class CheckpointConfig(BaseYamlConfig):
                 batch_request.update(runtime_batch_request)
                 self.batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:
-                self.update_action_list(action_list=runtime_kwargs.get("action_list"))
+                self.update_action_list(other_action_list=runtime_kwargs.get("action_list"))
             if runtime_kwargs.get("evaluation_parameters") is not None:
                 nested_update(
                     self.evaluation_parameters,
@@ -1615,16 +1615,24 @@ class CheckpointConfig(BaseYamlConfig):
     def action_list(self):
         return self._action_list
 
-    def update_action_list(self, action_list: list):
+    @action_list.setter
+    def action_list(self, value: List[dict]):
+        self._action_list = value
+
+    def update_action_list(self, other_action_list: list):
         existing_action_list_dict = {
             action["name"]: action for action in self.action_list
         }
-        for action in action_list:
-            action_name = action["name"]
-            if action_name in existing_action_list_dict:
-                nested_update(existing_action_list_dict[action_name], action)
+        for other_action in other_action_list:
+            other_action_name = other_action["name"]
+            if other_action_name in existing_action_list_dict:
+                if other_action["action"] is None:
+                    existing_action_list_dict.pop(other_action_name)
+                else:
+                    nested_update(existing_action_list_dict[other_action_name], other_action)
             else:
-                self.action_list.append(action)
+                existing_action_list_dict[other_action_name] = other_action
+        self.action_list = list(existing_action_list_dict.values())
 
     @property
     def evaluation_parameters(self):
