@@ -6,6 +6,8 @@ from ruamel.yaml import YAML
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.data_context import DataContext
+from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.resource_identifiers import ConfigurationIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 
 yaml = YAML()
@@ -53,10 +55,282 @@ def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     assert len(filesystem_csv_data_context.validations_store.list_keys()) == 1
 
 
-# TODO: <Alex>ALEX -- this does not look like new style -- the datasources in the data_context are still Legacy style.</Alex>
-def test_newstyle_checkpoint(filesystem_csv_data_context):
-    import yaml
+# TODO: Add test case for recusrive template cases (nested templates) and template_name specified at runtime
+def test_newstyle_checkpoint_config_substitution_simple(
+        titanic_pandas_multibatch_data_context_with_013_datasource):
+    context = titanic_pandas_multibatch_data_context_with_013_datasource
 
-    filesystem_csv_data_context.create_expectation_suite(
-        expectation_suite_name="IDs_mapping.warning"
+    # add template config
+    checkpoint_template_config = CheckpointConfig(
+        config_version=1,
+        name="my_template_checkpoint",
+        run_name_template="%Y-%M-foo-bar-template-$VAR",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction",},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction",},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction",},
+            },
+        ],
+        evaluation_parameters={
+            "environment": "$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+        },
+        runtime_configuration={
+            "result_format": "BASIC",
+            "partial_unexpected_count": 20,
+        }
     )
+    checkpoint_template_config_key = ConfigurationIdentifier(configuration_key=checkpoint_template_config.name)
+    context.checkpoint_store.set(
+        key=checkpoint_template_config_key,
+        value=checkpoint_template_config
+    )
+
+    # add child config
+    simplified_checkpoint_config = CheckpointConfig(
+        config_version=1,
+        name="my_simplified_checkpoint",
+        template_name="my_template_checkpoint",
+        expectation_suite_name="users.delivery",
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_special_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {
+                        "partition_index": -1
+                    }
+                }
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_other_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {
+                        "partition_index": -2
+                    }
+                }
+            }
+        ]
+    )
+    simplified_checkpoint_config_key = ConfigurationIdentifier(configuration_key=simplified_checkpoint_config.name)
+    context.checkpoint_store.set(
+        key=simplified_checkpoint_config_key,
+        value=simplified_checkpoint_config
+    )
+
+    simplified_checkpoint = Checkpoint(
+        name=simplified_checkpoint_config.name,
+        data_context=context,
+        checkpoint_config=simplified_checkpoint_config
+    )
+
+    # template only
+    expected_substituted_checkpoint_config_template_only = CheckpointConfig(
+        config_version=1,
+        name="my_simplified_checkpoint",
+        expectation_suite_name="users.delivery",
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_special_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {
+                        "partition_index": -1
+                    }
+                }
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_other_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {
+                        "partition_index": -2
+                    }
+                }
+            }
+        ],
+        run_name_template="%Y-%M-foo-bar-template-$VAR",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction", },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction", },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction", },
+            },
+        ],
+        evaluation_parameters={
+            "environment": "$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+        },
+        runtime_configuration={
+            "result_format": "BASIC",
+            "partial_unexpected_count": 20,
+        }
+    )
+
+    substituted_config_template_only = simplified_checkpoint.get_substituted_config()
+    assert substituted_config_template_only.to_json_dict() == \
+           expected_substituted_checkpoint_config_template_only.to_json_dict()
+    # make sure operation is idempotent
+    simplified_checkpoint.get_substituted_config()
+    assert substituted_config_template_only.to_json_dict() == expected_substituted_checkpoint_config_template_only.to_json_dict()
+
+    # template and runtime kwargs
+    expected_substituted_checkpoint_config_template_and_runtime_kwargs = CheckpointConfig(
+        config_version=1,
+        name="my_simplified_checkpoint",
+        expectation_suite_name="runtime_suite_name",
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_special_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {
+                        "partition_index": -1
+                    }
+                }
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_other_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {
+                        "partition_index": -2
+                    }
+                }
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_other_data_connector_2",
+                    "data_asset_name": "users",
+                    "partition_request": {
+                        "partition_index": -3
+                    }
+                }
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_other_data_connector_3",
+                    "data_asset_name": "users",
+                    "partition_request": {
+                        "partition_index": -4
+                    }
+                }
+            }
+        ],
+        run_name_template="runtime_run_template",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction", },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "MyCustomStoreEvaluationParametersAction", },
+            },
+            {
+                "name": "update_data_docs_deluxe",
+                "action": {"class_name": "UpdateDataDocsAction", },
+            },
+        ],
+        evaluation_parameters={
+            "environment": "runtime-$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "runtime-$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+            "new_runtime_eval_param": "bloopy!"
+        },
+        runtime_configuration={
+            "result_format": "BASIC",
+            "partial_unexpected_count": 999,
+            "new_runtime_config_key": "bleepy!"
+        }
+    )
+
+    substituted_config_template_and_runtime_kwargs = simplified_checkpoint.get_substituted_config(
+        runtime_kwargs={
+            "expectation_suite_name": "runtime_suite_name",
+            "validations": [
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_2",
+                        "data_asset_name": "users",
+                        "partition_request": {
+                            "partition_index": -3
+                        }
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_3",
+                        "data_asset_name": "users",
+                        "partition_request": {
+                            "partition_index": -4
+                        }
+                    }
+                }
+            ],
+            "run_name_template": "runtime_run_template",
+            "action_list": [
+                {
+                    "name": "store_validation_result",
+                    "action": {"class_name": "StoreValidationResultAction", },
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {"class_name": "MyCustomStoreEvaluationParametersAction", },
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": None,
+                },
+                {
+                    "name": "update_data_docs_deluxe",
+                    "action": {"class_name": "UpdateDataDocsAction", },
+                },
+            ],
+            "evaluation_parameters": {
+                "environment": "runtime-$GE_ENVIRONMENT",
+                "tolerance": 1.0e-2,
+                "aux_param_0": "runtime-$MY_PARAM",
+                "aux_param_1": "1 + $MY_PARAM",
+                "new_runtime_eval_param": "bloopy!"
+            },
+            "runtime_configuration": {
+                "result_format": "BASIC",
+                "partial_unexpected_count": 999,
+                "new_runtime_config_key": "bleepy!"
+            }
+        }
+    )
+    assert substituted_config_template_and_runtime_kwargs.to_json_dict() == \
+           expected_substituted_checkpoint_config_template_and_runtime_kwargs.to_json_dict()
