@@ -2781,7 +2781,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def run_checkpoint(
         self,
             checkpoint_name: str,
-            template: Optional[str] = None,
+            template_name: Optional[str] = None,
             run_name_template: Optional[str] = None,
             expectation_suite_name: Optional[str] = None,
             batch_request: Optional[Union[BatchRequest, dict]] = None,
@@ -2816,7 +2816,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
         return checkpoint.run(
-            template=template,
+            template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
