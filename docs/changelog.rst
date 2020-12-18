@@ -4,6 +4,10 @@
 Changelog
 #########
 
+Develop
+-----------------
+* [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() #2169 issue #2164
+
 0.13.3
 -----------------
 * [ENHANCEMENT] Updated the BigQuery Integration to create a view instead of a table (thanks @alessandrolacorte!) #2082.

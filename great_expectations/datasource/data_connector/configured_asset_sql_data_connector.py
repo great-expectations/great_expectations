@@ -1,7 +1,4 @@
-import random
 from typing import Dict, List, Optional
-
-import pandas as pd
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -22,6 +19,16 @@ except ImportError:
 
 
 class ConfiguredAssetSqlDataConnector(DataConnector):
+    """
+    A DataConnector that requires explicit listing of SQL tables you want to connect to.
+
+    Args:
+        name (str): The name of this DataConnector
+        datasource_name (str): The name of the Datasource that contains it
+        execution_engine (ExecutionEngine): An ExecutionEngine
+        data_assets (str): data_assets
+    """
+
     def __init__(
         self,
         name: str,
@@ -44,6 +51,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def add_data_asset(
         self, name, config,
     ):
+        """
+        Add data_asset to DataConnector using data_asset name as key, and data_asset configuration as value.
+        """
         self._data_assets[name] = config
 
     def _get_partition_definition_list_from_data_asset_config(
@@ -97,9 +107,22 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return column_names
 
     def get_available_data_asset_names(self):
+        """
+        Return the list of asset names known by this DataConnector.
+
+        Returns:
+            A list of available names
+        """
         return list(self.data_assets.keys())
 
     def get_unmatched_data_references(self) -> List[str]:
+        """
+        Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
+        and returning data_reference that do not have an associated data_asset.
+
+        Returns:
+            list of data_references that are not matched by configuration.
+        """
         if self._data_references_cache is None:
             raise ValueError(
                 "_data_references_cache is None. Have you called _refresh_data_references_cache yet?"
@@ -141,8 +164,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _map_data_reference_to_batch_definition_list(
         self, data_reference, data_asset_name: Optional[str] = None  #: Any,
     ) -> Optional[List[BatchDefinition]]:
-        # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries, allowing us to invoke `PartitionDefinition(data_reference)`
-
+        # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,
+        # allowing us to invoke `PartitionDefinition(data_reference)`
         return [
             BatchDefinition(
                 datasource_name=self.datasource_name,
@@ -153,6 +176,18 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         ]
 
     def build_batch_spec(self, batch_definition: BatchDefinition):
+        """
+        Build BatchSpec from batch_definition with the following components:
+            1. data_asset_name from batch_definition
+            2. partition_definition from batch_definition
+            3. data_asset from data_connector
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
         data_asset_name = batch_definition.data_asset_name
         batch_spec = BatchSpec(
             {
@@ -161,7 +196,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 **self.data_assets[data_asset_name],
             }
         )
-
         return batch_spec
 
     ### Splitter methods for listing partitions ###
@@ -169,8 +203,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _split_on_whole_table(
         self, table_name: str,
     ):
-        """'Split' by returning the whole table
-        
+        """
+        'Split' by returning the whole table
+
         Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
         """
 
