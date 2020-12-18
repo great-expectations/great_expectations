@@ -1,3 +1,5 @@
+from typing import Optional
+
 import logging
 
 from ruamel.yaml import YAML
@@ -38,9 +40,9 @@ class ConfigurationStore(Store):
     def __init__(
         self,
         store_name: str,
-        store_backend: dict = None,
+        store_backend: Optional[dict] = None,
         overwrite_existing: bool = False,
-        runtime_environment: dict = None,
+        runtime_environment: Optional[dict] = None,
     ):
         if not issubclass(self._configuration_class, BaseYamlConfig):
             raise ge_exceptions.DataContextError(

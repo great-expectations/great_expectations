@@ -22,7 +22,8 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.checkpoint import Checkpoint
+from great_expectations.data_context.store import Store
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
@@ -680,7 +681,7 @@ class BaseDataContext:
         )
 
     @property
-    def _project_config_with_variables_substituted(self):
+    def _project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()
 
     @property
@@ -775,7 +776,7 @@ class BaseDataContext:
         else:
             return {}
 
-    def get_config_with_variables_substituted(self, config=None):
+    def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
 
         if not config:
             config = self._project_config
@@ -2658,11 +2659,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
     def create_checkpoint(
         self, checkpoint_name: str, checkpoint_config: Union[dict, CheckpointConfig],
-    ) -> Checkpoint:
+    ) -> Union[Checkpoint, LegacyCheckpoint]:
         if isinstance(checkpoint_config, dict):
             checkpoint_config = CheckpointConfig(**checkpoint_config)
 
-        new_checkpoint: Checkpoint = instantiate_class_from_config(
+        new_checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
             config={
                 "checkpoint_config": checkpoint_config,
                 "class_name": checkpoint_config.class_name,
@@ -2682,7 +2683,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
     def get_checkpoint(
         self, checkpoint_name: str, return_config: bool = True
-    ) -> Union[CheckpointConfig, Checkpoint]:
+    ) -> Union[CheckpointConfig, Checkpoint, LegacyCheckpoint]:
         key: ConfigurationIdentifier = ConfigurationIdentifier(
             configuration_key=checkpoint_name,
         )
@@ -2724,7 +2725,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if return_config:
             return checkpoint_config
 
-        checkpoint: Checkpoint = instantiate_class_from_config(
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
             config={
                 "checkpoint_config": checkpoint_config,
                 "class_name": checkpoint_config.class_name,
@@ -2764,7 +2765,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if result_format is None:
             result_format = {"result_format": "SUMMARY"}
 
-        checkpoint: Checkpoint = self.get_checkpoint(
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
             checkpoint_name=checkpoint_name, return_config=True,
         )
 
@@ -2791,10 +2792,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def test_yaml_config(
         self,
         yaml_config: str,
-        name=None,
-        pretty_print=True,
-        return_mode="instantiated_class",
-        shorten_tracebacks=False,
+        name: Optional[str] = None,
+        pretty_print: bool = True,
+        return_mode: str = "instantiated_class",
+        shorten_tracebacks: bool = False,
     ):
         """ Convenience method for testing yaml configs
 
@@ -2843,27 +2844,29 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if return_mode not in ["instantiated_class", "report_object"]:
             raise ValueError(f"Unknown return_mode: {return_mode}.")
 
-        substituted_config_variables = substitute_all_config_variables(
+        substituted_config_variables: Union[DataContextConfig, dict] = substitute_all_config_variables(
             self.config_variables, dict(os.environ),
         )
 
-        substitutions = {
+        substitutions: dict = {
             **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
         }
 
-        config_str_with_substituted_variables = substitute_all_config_variables(
+        config_str_with_substituted_variables: Union[DataContextConfig, dict] = substitute_all_config_variables(
             yaml_config, substitutions,
         )
 
-        config = yaml.load(config_str_with_substituted_variables)
+        config: CommentedMap = yaml.load(config_str_with_substituted_variables)
 
+        class_name: Optional[str]
         if "class_name" in config:
             class_name = config["class_name"]
         else:
             class_name = None
 
+        instantiated_class: Union[Store, LegacyDatasource, Datasource, LegacyCheckpoint, Checkpoint]
         try:
             if class_name in [
                 "ExpectationsStore",
@@ -2872,12 +2875,16 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "EvaluationParameterStore",
                 "MetricStore",
                 "SqlAlchemyQueryStore",
+                "CheckpointStore",
             ]:
                 print(f"\tInstantiating as a Store, since class_name is {class_name}")
+                store_name: str = "my_temp_store"
                 instantiated_class = self._build_store_from_config(
-                    "my_temp_store", config
+                    store_name=store_name, store_config=config
                 )
-
+                if instantiated_class.store_name:
+                    store_name = instantiated_class.store_name
+                self._project_config["stores"][store_name] = config
             elif class_name in [
                 "Datasource",
                 "SimpleSqlalchemyDatasource",
@@ -2885,11 +2892,16 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 print(
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
-                datasource_name = name or "my_temp_datasource"
+                datasource_name: str = name or "my_temp_datasource"
                 instantiated_class = self._instantiate_datasource_from_config_and_update_project_config(
                     name=datasource_name, config=config, initialize=True,
                 )
-
+            elif class_name in [
+                # TODO: <Alex>ALEX</Alex>
+                "Checkpoint",
+                "LegacyCheckpoint",
+            ]:
+                pass
             else:
                 print(
                     "\tNo matching class found. Attempting to instantiate class from the raw config..."
@@ -2904,13 +2916,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
                 print()
 
-            report_object = instantiated_class.self_check(pretty_print)
+            report_object: dict = instantiated_class.self_check(pretty_print)
 
             if return_mode == "instantiated_class":
                 return instantiated_class
 
-            elif return_mode == "report_object":
-                return report_object
+            return report_object
 
         except Exception as e:
             if shorten_tracebacks:
