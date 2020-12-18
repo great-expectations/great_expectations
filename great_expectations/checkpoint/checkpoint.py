@@ -3,9 +3,7 @@ from copy import deepcopy
 from typing import List, Optional, Union
 
 from great_expectations.core.batch import BatchRequest
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-)
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
 
 
