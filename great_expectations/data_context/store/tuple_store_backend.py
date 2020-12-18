@@ -5,6 +5,7 @@ import random
 import re
 import shutil
 from abc import ABCMeta
+from itertools import chain
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
@@ -527,22 +528,30 @@ class TupleS3StoreBackend(TupleStoreBackend):
         import boto3
 
         s3 = boto3.client("s3", endpoint_url=self.endpoint_url)
+        paginator = s3.get_paginator("list_objects_v2")
 
         if self.prefix:
-            s3_objects = s3.list_objects_v2(Bucket=self.bucket, Prefix=self.prefix)
+            page_iterator = paginator.paginate(Bucket=self.bucket, Prefix=self.prefix)
         else:
-            s3_objects = s3.list_objects_v2(Bucket=self.bucket)
+            page_iterator = paginator.paginate(Bucket=self.bucket)
 
-        if "Contents" in s3_objects:
-            objects = s3_objects["Contents"]
-        elif "CommonPrefixes" in s3_objects:
-            logger.warning(
-                "TupleS3StoreBackend returned CommonPrefixes, but delimiter should not have been set."
-            )
-            objects = []
-        else:
-            # No objects found in store
-            objects = []
+        objects = []
+
+        for page in page_iterator:
+            current_page_contents = page.get("Contents")
+            # On first iteration check for "CommonPrefixes"
+            if (
+                current_page_contents is None
+                and objects == []
+                and "CommonPrefixes" in page
+            ):
+                logger.warning(
+                    "TupleS3StoreBackend returned CommonPrefixes, but delimiter should not have been set."
+                )
+                objects = []
+                break
+            if current_page_contents is not None:
+                objects.extend(current_page_contents)
 
         for s3_object_info in objects:
             s3_object_key = s3_object_info["Key"]

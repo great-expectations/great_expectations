@@ -892,3 +892,66 @@ def test_TupleGCSStoreBackend():
         == "https://storage.googleapis.com/leakybucket"
         + f"/this_is_a_test_prefix/my_suite_name/my_run_id/{run_time_string}/my_batch_id"
     )
+
+
+@mock_s3
+def test_TupleS3StoreBackend_list_over_1000_keys():
+    """
+    What does this test test and why?
+
+    TupleS3StoreBackend.list_keys() should be able to list over 1000 keys
+    which is the current limit for boto3.list_objects and boto3.list_objects_v2 methods.
+    See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/paginators.html
+
+    We will create a bucket with over 1000 keys, list them with TupleS3StoreBackend.list_keys()
+    and make sure all are accounted for.
+    """
+    bucket = "leakybucket"
+    prefix = "my_prefix"
+
+    # create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    # Assert that the bucket is empty before creating store
+    assert (
+        boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix).get("Contents")
+        is None
+    )
+
+    my_store = TupleS3StoreBackend(
+        filepath_template="my_file_{0}", bucket=bucket, prefix=prefix,
+    )
+
+    # We should be able to list keys, even when empty
+    # len(keys) == 1 because of the .ge_store_backend_id
+    keys = my_store.list_keys()
+    assert len(keys) == 1
+
+    # Add more than 1000 keys
+    max_keys_in_a_single_call = 1000
+    num_keys_to_add = int(1.2 * max_keys_in_a_single_call)
+
+    for key_num in range(num_keys_to_add):
+        my_store.set(
+            (f"AAA_{key_num}",),
+            f"aaa_{key_num}",
+            content_type="text/html; charset=utf-8",
+        )
+    assert my_store.get(("AAA_0",)) == "aaa_0"
+    assert my_store.get((f"AAA_{num_keys_to_add-1}",)) == f"aaa_{num_keys_to_add-1}"
+
+    # Without pagination only list max_keys_in_a_single_call
+    # This is belt and suspenders to make sure mocking s3 list_objects_v2 implements
+    # the same limit as the actual s3 api
+    assert (
+        len(
+            boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)["Contents"]
+        )
+        == max_keys_in_a_single_call
+    )
+
+    # With pagination list all keys
+    keys = my_store.list_keys()
+    # len(keys) == num_keys_to_add + 1 because of the .ge_store_backend_id
+    assert len(keys) == num_keys_to_add + 1

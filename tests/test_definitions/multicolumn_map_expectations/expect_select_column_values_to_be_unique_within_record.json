@@ -20,7 +20,7 @@
       }
     },
     "tests" : [{
-      "title": "basic_test__ignore_if_all_are_missing_the_default_behavior",
+      "title": "basic_test_ignore_if_all_are_missing_the_default_behavior",
       "exact_match_out" : false,
       "in": {
         "column_list": ["w", "x"]
@@ -31,7 +31,7 @@
         "success": true
       }
     },{
-      "title": "basic_test__ignore_if_any_are_missing",
+      "title": "basic_test_ignore_if_any_are_missing",
       "exact_match_out" : false,
       "in": {
         "column_list": ["w", "x"],
@@ -54,7 +54,7 @@
         "success": false
       }
     },{
-      "title": "unexpected_values___exact_match_out",
+      "title": "unexpected_values_exact_match_out",
       "exact_match_out" : true,
       "in": {
         "column_list": ["a", "b"]

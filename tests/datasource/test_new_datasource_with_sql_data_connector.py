@@ -100,8 +100,8 @@ data_connectors:
     }
 
 
-def test_SimpleSqlalchemyDatasource(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_SimpleSqlalchemyDatasource(empty_data_context):
+    context = empty_data_context
     # This test mirrors the likely path to configure a SimpleSqlalchemyDatasource
 
     db_file = file_relative_path(
@@ -813,8 +813,8 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
     assert len(batch_definition_list) == 1
 
 
-def test_skip_inapplicable_tables(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_skip_inapplicable_tables(empty_data_context):
+    context = empty_data_context
     # This test mirrors the likely path to configure a SimpleSqlalchemyDatasource
 
     db_file = file_relative_path(

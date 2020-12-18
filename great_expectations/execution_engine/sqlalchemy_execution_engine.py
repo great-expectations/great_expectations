@@ -36,6 +36,7 @@ except ImportError:
 try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.engine.url import URL
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
@@ -513,7 +514,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _get_sqlalchemy_key_pair_auth_url(
         self, drivername: str, credentials: dict
-    ) -> Tuple[str, dict]:
+    ) -> Tuple["sa.engine.url.URL", Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -603,8 +604,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
-            if domain_kwargs["table"] != data_object.record_set_name:
-                raise ValueError("Unrecognized table name.")
+            # TODO: Add logic to handle record_set_name once implemented
+            # (i.e. multiple record sets (tables) in one batch
+            if domain_kwargs["table"] != data_object.selectable.name:
+                selectable = sa.Table(
+                    domain_kwargs["table"],
+                    sa.MetaData(),
+                    schema_name=data_object._schema_name,
+                )
             else:
                 selectable = data_object.selectable
         elif "query" in domain_kwargs:
