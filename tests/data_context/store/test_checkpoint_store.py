@@ -4,6 +4,7 @@ from typing import Dict, List, Union
 
 import pytest
 
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -171,6 +172,14 @@ def test_checkpoint_store(empty_data_context):
     my_checkpoint_1.yml
 """
     )
+
+    self_check_report: dict = convert_to_json_serializable(
+        data=checkpoint_store.self_check()
+    )
+    assert self_check_report == {
+        "keys": ["my_checkpoint_0", "my_checkpoint_1"],
+        "len_keys": 2,
+    }
 
     checkpoint_store.remove_key(key=key_0)
     checkpoint_store.remove_key(key=key_1)
