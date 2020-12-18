@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from typing import Union, Optional, List
 
 from great_expectations.core.batch import BatchRequest
@@ -48,11 +49,11 @@ class LegacyCheckpoint(object):
 
     def run(
             self,
-            run_id,
-            evaluation_parameters,
-            run_name,
-            run_time,
-            result_format,
+            run_id=None,
+            evaluation_parameters=None,
+            run_name=None,
+            run_time=None,
+            result_format=None,
             **kwargs,
     ):
         batches_to_validate = self._get_batches_to_validate(self.batches)
@@ -114,6 +115,7 @@ class Checkpoint(object):
         self._name = name
         self._data_context = data_context
         self._config = checkpoint_config
+        self._substituted_config = None
 
     @property
     def name(self):
@@ -127,9 +129,58 @@ class Checkpoint(object):
     def config(self):
         return self._config
 
+    def get_substituted_config(
+            self,
+            config: Optional[Union[CheckpointConfig, dict]] = None,
+            runtime_kwargs: Optional[dict] = None
+    ):
+        runtime_kwargs = runtime_kwargs or {}
+
+        if self._substituted_config is not None and not runtime_kwargs.get("template_name"):
+            substituted_config = deepcopy(self._substituted_config)
+            if any(runtime_kwargs.values()):
+                substituted_config.update(runtime_kwargs=runtime_kwargs)
+
+            return substituted_config
+        else:
+            if config is None:
+                config = self.config
+            if isinstance(config, dict):
+                config = CheckpointConfig(**config)
+            template_name = runtime_kwargs.get("template_name") or config.template_name
+
+            if not template_name:
+                substituted_config = deepcopy(config)
+                if any(runtime_kwargs.values()):
+                    substituted_config.update(runtime_kwargs=runtime_kwargs)
+
+                self._substituted_config = substituted_config
+                return substituted_config
+            else:
+                template_config = self.data_context.get_checkpoint(
+                    checkpoint_name=template_name,
+                    return_config=True
+                )
+
+                if float(template_config.config_version) != float(config.config_version):
+                    raise CheckpointError(
+                        f"Invalid template '{template_name}' (ver. {template_config.config_version}) for Checkpoint "
+                        f"'{config}' (ver. {config.config_version}. Checkpoints can only use templates with the same config_version."
+                    )
+
+                if template_config.template_name is not None:
+                    substituted_config = self.get_substituted_config(config=template_config)
+                else:
+                    substituted_config = template_config
+
+                # merge template with config
+                substituted_config.update(other_config=config, runtime_kwargs=runtime_kwargs)
+                self._substituted_config = substituted_config
+                return substituted_config
+
     def run(
             self,
-            template: Optional[str] = None,
+            template_name: Optional[str] = None,
             run_name_template: Optional[str] = None,
             expectation_suite_name: Optional[str] = None,
             batch_request: Optional[Union[BatchRequest, dict]] = None,
@@ -144,13 +195,6 @@ class Checkpoint(object):
             result_format=None,
             **kwargs,
     ):
-        """
-
-
-
-        :param kwargs:
-        :return:
-        """
         validators = self._get_validators_to_validate(self._validators)
 
         results = self._data_context.run_validation_operator(
