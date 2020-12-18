@@ -126,6 +126,7 @@ class Checkpoint(object):
     def config(self):
         return self._config
 
+    # TODO: (Rob) should we type the big validation dicts for better validation/prevent duplication
     def get_substituted_config(
         self,
         config: Optional[Union[CheckpointConfig, dict]] = None,
