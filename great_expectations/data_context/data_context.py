@@ -2658,8 +2658,47 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return profiling_results
 
     def create_checkpoint(
-        self, checkpoint_name: str, checkpoint_config: Union[dict, CheckpointConfig],
+        self,
+        checkpoint_name: str,
+        checkpoint_config: Optional[Union[CheckpointConfig, dict]] = None,
+        config_version: Optional[Union[int, float]] = None,
+        template: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+        commented_map: Optional[CommentedMap] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
+        if not checkpoint_config:
+            checkpoint_config = {
+                "name": checkpoint_name,
+                "config_version": config_version,
+                "template": template,
+                "module_name": module_name,
+                "class_name": class_name,
+                "run_name_template": run_name_template,
+                "expectation_suite_name": expectation_suite_name,
+                "batch_request": batch_request,
+                "action_list": action_list,
+                "evaluation_parameters": evaluation_parameters,
+                "runtime_configuration": runtime_configuration,
+                "validations": validations,
+                "profilers": profilers,
+                # Next two fields are for LegacyCheckpoint configuration
+                "validation_operator_name": validation_operator_name,
+                "batches": batches,
+                "commented_map": commented_map,
+            }
+
         if isinstance(checkpoint_config, dict):
             checkpoint_config = CheckpointConfig(**checkpoint_config)
 
@@ -2694,10 +2733,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 message="Invalid checkpoint configuration", validation_error=exc
             )
 
-        if (
-            checkpoint_config.config_version
-            == CheckpointConfigDefaults.DEFAULT_CONFIG_VERSION.value
-        ):
+        if checkpoint_config.config_version is None:
             if not (
                 "batches" in checkpoint_config.to_json_dict()
                 and (
@@ -2743,8 +2779,16 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def run_checkpoint(
         self,
         checkpoint_name: str,
+        template_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
         run_id=None,
-        evaluation_parameters=None,
         run_name=None,
         run_time=None,
         result_format=None,
@@ -2769,25 +2813,22 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             checkpoint_name=checkpoint_name, return_config=True,
         )
 
-        batches_to_validate = []
-        for batch in checkpoint["batches"]:
-            batch_kwargs = batch["batch_kwargs"]
-            for suite_name in batch["expectation_suite_names"]:
-                suite = self.get_expectation_suite(suite_name)
-                batch = self.get_batch(batch_kwargs, suite)
-                batches_to_validate.append(batch)
-
-        results = self.run_validation_operator(
-            checkpoint["validation_operator_name"],
-            assets_to_validate=batches_to_validate,
-            run_id=run_id,
+        return checkpoint.run(
+            template_name=template_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
             evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            run_id=run_id,
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
             **kwargs,
         )
-        return results
 
     def test_yaml_config(
         self,

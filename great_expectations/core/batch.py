@@ -270,12 +270,18 @@ is illegal.
                 partition_request["custom_filter_function"] = partition_request[
                     "custom_filter_function"
                 ].__name__
-        return {
+        json_dict = {
             "datasource_name": self.datasource_name,
             "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
             "partition_request": partition_request,
         }
+        if self.batch_spec_passthrough is not None:
+            json_dict["batch_spec_passthrough"] = self.batch_spec_passthrough
+        if self.limit is not None:
+            json_dict["limit"] = self.limit
+
+        return json_dict
 
     def __str__(self):
         return json.dumps(self.get_json_dict(), indent=2)

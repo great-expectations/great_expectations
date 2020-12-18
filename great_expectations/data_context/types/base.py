@@ -11,7 +11,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -1333,7 +1333,7 @@ class CheckpointConfigSchema(Schema):
         fields = (
             "name",
             "config_version",
-            "template",
+            "template_name",
             "module_name",
             "class_name",
             "run_name_template",
@@ -1352,10 +1352,11 @@ class CheckpointConfigSchema(Schema):
 
     name = fields.String(required=False, allow_none=True)
     config_version = fields.Number(
-        validate=lambda x: 0 < x < 100,
-        error_messages={"invalid": "config version must " "be a number."},
+        validate=lambda x: (0 < x < 100) or x is None,
+        error_messages={"invalid": "config version must " "be a number or None."},
+        allow_none=True,
     )
-    template = fields.String(required=False, allow_none=True)
+    template_name = fields.String(required=False, allow_none=True)
     module_name = fields.String(required=False, missing="great_expectations.checkpoint")
     class_name = fields.Str(required=False, allow_none=True)
     run_name_template = fields.String(required=False, allow_none=True)
@@ -1395,7 +1396,7 @@ class CheckpointConfig(BaseYamlConfig):
         self,
         name: Optional[str] = None,
         config_version: Optional[int] = None,
-        template: Optional[str] = None,
+        template_name: Optional[str] = None,
         module_name: Optional[str] = None,
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
@@ -1412,8 +1413,8 @@ class CheckpointConfig(BaseYamlConfig):
         commented_map: Optional[CommentedMap] = None,
     ):
         self._name = name
-        if config_version is None:
-            config_version = CheckpointConfigDefaults.DEFAULT_CONFIG_VERSION.value
+        self._config_version = config_version
+        if self.config_version is None:
             if class_name is None:
                 class_name = "LegacyCheckpoint"
             if validation_operator_name is None:
@@ -1424,26 +1425,111 @@ class CheckpointConfig(BaseYamlConfig):
         else:
             if class_name is None:
                 class_name = "Checkpoint"
-            self._template = template
+            self._template_name = template_name
             self._module_name = module_name or "great_expectations.checkpoint"
-            if class_name is None:
-                if self.config_version is None:
-                    class_name = "LegacyCheckpoint"
-                else:
-                    class_name = "Checkpoint"
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
             self._batch_request = batch_request
-            self._action_list = action_list
+            self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters
             self._runtime_configuration = runtime_configuration
             self._validations = validations or []
             self._profilers = profilers or []
-        if config_version is not None:
-            self._config_version = config_version
+
         self._class_name = class_name
 
         super().__init__(commented_map=commented_map)
+
+    def update(
+        self,
+        other_config: Optional["CheckpointConfig"] = None,
+        runtime_kwargs: Optional[dict] = None,
+    ):
+        assert other_config is not None or runtime_kwargs is not None, (
+            "other_config and runtime_kwargs cannot both " "be None"
+        )
+
+        if other_config is not None:
+            self.name = other_config.name
+            # replace
+            if other_config.module_name is not None:
+                self.module_name = other_config.module_name
+            if other_config.class_name is not None:
+                self.class_name = other_config.class_name
+            if other_config.run_name_template is not None:
+                self.run_name_template = other_config.run_name_template
+            if other_config.expectation_suite_name is not None:
+                self.expectation_suite_name = other_config.expectation_suite_name
+            # update
+            if other_config.batch_request is not None:
+                batch_request = (
+                    self.batch_request.get_json_dict()
+                    if isinstance(self.batch_request, BatchRequest)
+                    else self.batch_request
+                )
+                batch_request = batch_request or {}
+                other_batch_request = (
+                    other_config.batch_request.get_json_dict()
+                    if isinstance(other_config.batch_request, BatchRequest)
+                    else other_config.batch_request
+                )
+                batch_request.update(other_batch_request)
+                self.batch_request = batch_request
+            if other_config.action_list is not None:
+                self.update_action_list(other_action_list=other_config.action_list)
+            if other_config.evaluation_parameters is not None:
+                nested_update(
+                    self.evaluation_parameters, other_config.evaluation_parameters
+                )
+            if other_config.runtime_configuration is not None:
+                nested_update(
+                    self.runtime_configuration, other_config.runtime_configuration
+                )
+            if other_config.validations is not None:
+                self.validations.extend(other_config.validations)
+            if other_config.profilers is not None:
+                self.profilers.extend(other_config.profilers)
+        if runtime_kwargs is not None and any(runtime_kwargs.values()):
+            # replace
+            if runtime_kwargs.get("run_name_template") is not None:
+                self.run_name_template = runtime_kwargs.get("run_name_template")
+            if runtime_kwargs.get("expectation_suite_name") is not None:
+                self.expectation_suite_name = runtime_kwargs.get(
+                    "expectation_suite_name"
+                )
+            # update
+            if runtime_kwargs.get("batch_request") is not None:
+                batch_request = (
+                    self.batch_request.get_json_dict()
+                    if isinstance(self.batch_request, BatchRequest)
+                    else self.batch_request
+                )
+                batch_request = batch_request or {}
+                runtime_batch_request = (
+                    runtime_kwargs.get("batch_request").get_json_dict()
+                    if isinstance(runtime_kwargs.get("batch_request"), BatchRequest)
+                    else runtime_kwargs.get("batch_request")
+                )
+                batch_request.update(runtime_batch_request)
+                self.batch_request = batch_request
+            if runtime_kwargs.get("action_list") is not None:
+                self.update_action_list(
+                    other_action_list=runtime_kwargs.get("action_list")
+                )
+            if runtime_kwargs.get("evaluation_parameters") is not None:
+                nested_update(
+                    self.evaluation_parameters,
+                    runtime_kwargs.get("evaluation_parameters"),
+                )
+            if runtime_kwargs.get("runtime_configuration") is not None:
+                nested_update(
+                    self.runtime_configuration,
+                    runtime_kwargs.get("runtime_configuration"),
+                )
+            if runtime_kwargs.get("validations") is not None:
+                self.validations.extend(runtime_kwargs.get("validations"))
+            if runtime_kwargs.get("profilers") is not None:
+                self.profilers.extend(runtime_kwargs.get("profilers"))
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
@@ -1457,6 +1543,18 @@ class CheckpointConfig(BaseYamlConfig):
     @property
     def name(self):
         return self._name
+
+    @name.setter
+    def name(self, value: str):
+        self._name = value
+
+    @property
+    def template_name(self):
+        return self._template_name
+
+    @template_name.setter
+    def template_name(self, value: str):
+        self._template_name = value
 
     @property
     def config_version(self):
@@ -1474,25 +1572,66 @@ class CheckpointConfig(BaseYamlConfig):
     def module_name(self):
         return self._module_name
 
+    @module_name.setter
+    def module_name(self, value: str):
+        self._module_name = value
+
     @property
     def class_name(self):
         return self._class_name
+
+    @class_name.setter
+    def class_name(self, value: str):
+        self._class_name = value
 
     @property
     def run_name_template(self):
         return self._run_name_template
 
+    @run_name_template.setter
+    def run_name_template(self, value: str):
+        self._run_name_template = value
+
     @property
     def batch_request(self):
         return self._batch_request
+
+    @batch_request.setter
+    def batch_request(self, value: Union[BatchRequest, dict]):
+        self._batch_request = value
 
     @property
     def expectation_suite_name(self):
         return self._expectation_suite_name
 
+    @expectation_suite_name.setter
+    def expectation_suite_name(self, value: str):
+        self._expectation_suite_name = value
+
     @property
     def action_list(self):
         return self._action_list
+
+    @action_list.setter
+    def action_list(self, value: List[dict]):
+        self._action_list = value
+
+    def update_action_list(self, other_action_list: list):
+        existing_action_list_dict = {
+            action["name"]: action for action in self.action_list
+        }
+        for other_action in other_action_list:
+            other_action_name = other_action["name"]
+            if other_action_name in existing_action_list_dict:
+                if other_action["action"] is None:
+                    existing_action_list_dict.pop(other_action_name)
+                else:
+                    nested_update(
+                        existing_action_list_dict[other_action_name], other_action
+                    )
+            else:
+                existing_action_list_dict[other_action_name] = other_action
+        self.action_list = list(existing_action_list_dict.values())
 
     @property
     def evaluation_parameters(self):
