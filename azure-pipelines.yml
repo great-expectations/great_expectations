@@ -106,7 +106,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=great_expectations --cov-report=xml --cov-report=html
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=great_expectations --cov-report=xml --cov-report=html tests/
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -166,7 +166,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html tests/
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -181,9 +181,55 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
+  - stage: integration
+    pool:
+      vmImage: 'ubuntu-20.04'
+
+    dependsOn: [required]
+
+    jobs:
+      - job: integration
+        variables:
+          GE_pytest_pip_opts: '--requirement requirements-dev.txt'
+          GE_pytest_opts: ''
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - task: Cache@2
+            inputs:
+              key: 'python | "$(Agent.OS)" | requirements.txt | $(pandas.constraint) | requirements-dev.txt'
+              restoreKeys: |
+                python | "$(Agent.OS)" | requirements.txt | $(pandas.constraint)
+                python | "$(Agent.OS)" | requirements.txt
+                python | "$(Agent.OS)"
+                python
+              path: $(PIP_CACHE_DIR)
+            displayName: Cache pip packages
+
+          - script: |
+              python -m pip install --upgrade pip==20.2.4
+              pip install $(GE_pytest_pip_opts)
+              pip install -e .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=great_expectations --cov-report=xml --cov-report=html tests_integration/
+            displayName: 'pytest'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
   - stage: usage_stats_integration
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-20.04'
 
     dependsOn: []
 
@@ -257,7 +303,7 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html tests/
             displayName: 'pytest'
 
       - job: mssql
@@ -287,7 +333,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html tests/
             displayName: 'pytest'
 
   - stage: deploy
@@ -296,7 +342,7 @@ stages:
     pool:
       vmImage: 'ubuntu-20.04'
 
-    dependsOn: [required, lint, db_integration, usage_stats_integration]
+    dependsOn: [required, lint, db_integration, integration, usage_stats_integration]
 
     jobs:
       - job: deploy
