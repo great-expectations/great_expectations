@@ -1553,7 +1553,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def template_name(self):
-        return
+        return self._template_name
 
     @template_name.setter
     def template_name(self, value: str):
