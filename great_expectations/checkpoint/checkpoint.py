@@ -199,19 +199,15 @@ class Checkpoint(object):
         result_format=None,
         **kwargs,
     ):
-        validators = self._get_validators_to_validate(self._validators)
-
-        results = self._data_context.run_validation_operator(
-            self._validation_operator_name, assets_to_validate=validators,
-        )
-
-        return results
-
-    def _get_validators_to_validate(self, validator_config_list):
-        validators = []
-
-        for validator_config in validator_config_list:
-            print(validator_config)
-            validators.append(self._data_context.get_validator(**validator_config))
-
-        return validators
+        runtime_kwargs = {
+            "template_name": template_name,
+            "run_name_template":  run_name_template,
+            "expectation_suite_name":  expectation_suite_name,
+            "batch_request": batch_request,
+            "action_list": action_list,
+            "evaluation_parameters": evaluation_parameters,
+            "runtime_configuration": runtime_configuration,
+            "validations": validations,
+            "profilers": profilers,
+        }
+        substituted_config = self.get_substituted_config(runtime_kwargs=runtime_kwargs)
