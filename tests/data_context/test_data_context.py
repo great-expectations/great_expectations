@@ -1492,7 +1492,7 @@ def test_get_checkpoint_default_validation_operator(empty_data_context):
         "validation_operator_name": "action_list_operator",
         "batches": [],
     }
-    assert expected == obs.to_json_dict()
+    assert obs.to_json_dict() == expected
 
 
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
