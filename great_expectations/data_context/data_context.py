@@ -2732,10 +2732,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 message="Invalid checkpoint configuration", validation_error=exc
             )
 
-        if (
-            checkpoint_config.config_version
-            == CheckpointConfigDefaults.DEFAULT_CONFIG_VERSION.value
-        ):
+        if checkpoint_config.config_version is None:
             if not (
                 "batches" in checkpoint_config.to_json_dict()
                 and (
