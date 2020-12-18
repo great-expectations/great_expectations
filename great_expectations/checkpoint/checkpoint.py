@@ -7,7 +7,7 @@ from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
 
 
-class LegacyCheckpoint(object):
+class LegacyCheckpoint:
     def __init__(
         self, data_context, name: str, checkpoint_config: Union[CheckpointConfig, dict],
     ):
@@ -102,7 +102,7 @@ class LegacyCheckpoint(object):
         return batches_to_validate
 
 
-class Checkpoint(object):
+class Checkpoint:
     def __init__(
         self,
         name: str,
@@ -180,7 +180,10 @@ class Checkpoint(object):
                 substituted_config.update(
                     other_config=config, runtime_kwargs=runtime_kwargs
                 )
-                self._substituted_config = substituted_config
+
+                # don't replace _substituted_config if already exists
+                if self._substituted_config is None:
+                    self._substituted_config = substituted_config
                 return substituted_config
 
     def run(
