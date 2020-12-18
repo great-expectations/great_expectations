@@ -288,7 +288,7 @@ class ConfigurationIdentifier(DataContextKey):
         self._configuration_key = configuration_key
 
     @property
-    def configuration_key(self):
+    def configuration_key(self) -> str:
         return self._configuration_key
 
     def to_tuple(self):
