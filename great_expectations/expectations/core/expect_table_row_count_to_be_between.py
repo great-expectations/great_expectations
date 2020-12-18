@@ -155,7 +155,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             )
             params.update(conditional_params)
 
-        rendered_string_template_content_list = [
+        return [
             RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
@@ -167,7 +167,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 }
             )
         ]
-        return rendered_string_template_content_list
 
     def _validate(
         self,

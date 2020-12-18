@@ -40,7 +40,6 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     @classmethod
     def _process_content_block(cls, content_block, has_failed_evr):
         super()._process_content_block(content_block, has_failed_evr)
-
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
         content_block.header_row_options = {"Status": {"sortable": True}}
 
@@ -77,7 +76,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             **kwargs,
         ):
             eval_param_value_dict = kwargs.get("evaluation_params", None)
-            if eval_param_value_dict:
+            # loading into evaluation params to be passed onto prescriptive renderer
+            if eval_param_value_dict is not None:
                 runtime_configuration["evaluation_params"] = eval_param_value_dict
 
             expectation = result.expectation_config

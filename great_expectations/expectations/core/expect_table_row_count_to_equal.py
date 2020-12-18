@@ -106,6 +106,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @add_evaluation_param_content
     def _prescriptive_renderer(
         cls,
         configuration=None,

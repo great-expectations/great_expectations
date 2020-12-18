@@ -1168,18 +1168,6 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(
     )
 
 
-# def test_ValidationResultsColumnSectionRenderer_render_header_eval_param(
-#     simple_validation_results_with_evaluation_parameters,
-# ):
-#     (
-#         remaining_evrs,
-#         content_block,
-#     ) = ValidationResultsColumnSectionRenderer._render_header(
-#         validation_results=simple_validation_results_with_evaluation_parameters,
-#     )
-#     print(content_block.to_json_dict())
-
-
 def test_ValidationResultsColumnSectionRenderer_render_header(
     titanic_profiled_name_column_evrs,
 ):
@@ -1405,109 +1393,143 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
     }
 
 
-#
-# # noinspection PyPep8Naming
-# def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path_with_eval_parameter():
-#     evr = ExpectationValidationResult(
-#         success=True,
-#         result={
-#             "observed_value": True,
-#             "element_count": 162,
-#             "missing_count": 153,
-#             "missing_percent": 94.44444444444444,
-#         },
-#         exception_info={
-#             "raised_exception": False,
-#             "exception_message": None,
-#             "exception_traceback": None,
-#         },
-#         expectation_config=ExpectationConfiguration(
-#             expectation_type="expect_column_min_to_be_between",
-#             kwargs={
-#                 "column": "live",
-#                 "min_value": {"$PARAMETER": "MIN_VAL_PARAM"},
-#                 "max_value": {"$PARAMETER": "MAX_VAL_PARAM"},
-#                 "result_format": "SUMMARY",
-#             },
-#             meta={"BasicDatasetProfiler": {"confidence": "very low"}},
-#         ),
-#     )
-#     result = ValidationResultsTableContentBlockRenderer.render([evr]).to_json_dict()
-#
-#     print("\n\n\n\n\n\n\n")
-#     print(result)
-#     print("\n\n\n\n\n\n\n")
-#
-#     # Note: A better approach to testing would separate out styling into a separate test.
-#     assert result == {
-#         "content_block_type": "table",
-#         "styling": {
-#             "body": {"classes": ["table"]},
-#             "classes": [
-#                 "ml-2",
-#                 "mr-2",
-#                 "mt-0",
-#                 "mb-0",
-#                 "table-responsive",
-#                 "hide-succeeded-validations-column-section-target-child",
-#             ],
-#         },
-#         "table": [
-#             [
-#                 {
-#                     "content_block_type": "string_template",
-#                     "styling": {
-#                         "parent": {
-#                             "classes": ["hide-succeeded-validation-target-child"]
-#                         }
-#                     },
-#                     "string_template": {
-#                         "template": "$icon",
-#                         "params": {"icon": "", "markdown_status_icon": "✅"},
-#                         "styling": {
-#                             "params": {
-#                                 "icon": {
-#                                     "classes": [
-#                                         "fas",
-#                                         "fa-check-circle",
-#                                         "text-success",
-#                                     ],
-#                                     "tag": "i",
-#                                 }
-#                             }
-#                         },
-#                     },
-#                 },
-#                 {
-#                     "content_block_type": "string_template",
-#                     "string_template": {
-#                         "template": "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
-#                         "params": {
-#                             "column": "live",
-#                             "min_value": {"$PARAMETER": "MIN_VAL_PARAM"},
-#                             "max_value": {"$PARAMETER": "MAX_VAL_PARAM"},
-#                             "result_format": "SUMMARY",
-#                             "parse_strings_as_datetimes": None,
-#                             "row_condition": None,
-#                             "condition_parser": None,
-#                             "strict_max": None,
-#                             "strict_min": None,
-#                         },
-#                         "styling": {
-#                             "default": {"classes": ["badge", "badge-secondary"]},
-#                             "params": {
-#                                 "column": {"classes": ["badge", "badge-primary"]}
-#                             },
-#                         },
-#                     },
-#                 },
-#                 "True",
-#             ]
-#         ],
-#         "header_row": ["Status", "Expectation", "Observed Value"],
-#         "header_row_options": {"Status": {"sortable": True}},
-#         "table_options": {"search": True, "icon-size": "sm"},
-#     }
+# noinspection PyPep8Naming
+def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path_with_eval_parameter():
+    evr = ExpectationValidationResult(
+        success=True,
+        result={
+            "observed_value": True,
+            "element_count": 162,
+            "missing_count": 153,
+            "missing_percent": 94.44444444444444,
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_message": None,
+            "exception_traceback": None,
+        },
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_min_to_be_between",
+            kwargs={
+                "column": "live",
+                "min_value": {"$PARAMETER": "MIN_VAL_PARAM"},
+                "max_value": {"$PARAMETER": "MAX_VAL_PARAM"},
+                "result_format": "SUMMARY",
+            },
+            meta={"BasicDatasetProfiler": {"confidence": "very low"}},
+        ),
+    )
+
+    # evaluation_params are usually stored at the ExpectationSuiteValidationResult
+    # and passed along as a kwarg to the ValidationResultsTableContentBlockRenderer
+    eval_param = {"MIN_VAL_PARAM": 15, "MAX_VAL_PARAM": 20}
+    result = ValidationResultsTableContentBlockRenderer.render(
+        [evr], evaluation_params=eval_param
+    ).to_json_dict()
+
+    assert result == {
+        "content_block_type": "table",
+        "styling": {
+            "body": {"classes": ["table"]},
+            "classes": [
+                "ml-2",
+                "mr-2",
+                "mt-0",
+                "mb-0",
+                "table-responsive",
+                "hide-succeeded-validations-column-section-target-child",
+            ],
+        },
+        "table": [
+            [
+                {
+                    "content_block_type": "string_template",
+                    "styling": {
+                        "parent": {
+                            "classes": ["hide-succeeded-validation-target-child"]
+                        }
+                    },
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                },
+                [
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+                            "params": {
+                                "column": "live",
+                                "min_value": {"$PARAMETER": "MIN_VAL_PARAM"},
+                                "max_value": {"$PARAMETER": "MAX_VAL_PARAM"},
+                                "result_format": "SUMMARY",
+                                "parse_strings_as_datetimes": None,
+                                "row_condition": None,
+                                "condition_parser": None,
+                                "strict_min": None,
+                                "strict_max": None,
+                            },
+                            "styling": {
+                                "default": {"classes": ["badge", "badge-secondary"]},
+                                "params": {
+                                    "column": {"classes": ["badge", "badge-primary"]}
+                                },
+                            },
+                        },
+                    },
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "\n - Evaluation parameter $eval_param had value $eval_param_value at time of Validation.",
+                            "params": {
+                                "eval_param": "MIN_VAL_PARAM",
+                                "eval_param_value": 15,
+                            },
+                            "styling": {
+                                "default": {"classes": ["badge", "badge-secondary"]},
+                                "params": {
+                                    "column": {"classes": ["badge", "badge-primary"]}
+                                },
+                            },
+                        },
+                    },
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "\n - Evaluation parameter $eval_param had value $eval_param_value at time of Validation.",
+                            "params": {
+                                "eval_param": "MAX_VAL_PARAM",
+                                "eval_param_value": 20,
+                            },
+                            "styling": {
+                                "default": {"classes": ["badge", "badge-secondary"]},
+                                "params": {
+                                    "column": {"classes": ["badge", "badge-primary"]}
+                                },
+                            },
+                        },
+                    },
+                ],
+                "True",
+            ]
+        ],
+        "header_row": ["Status", "Expectation", "Observed Value"],
+        "header_row_options": {"Status": {"sortable": True}},
+        "table_options": {"search": True, "icon-size": "sm"},
+    }
 
 
 # noinspection PyPep8Naming
