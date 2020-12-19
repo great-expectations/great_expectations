@@ -46,7 +46,9 @@ def build_configuration_store(
         "store_backend": store_backend,
     }
     configuration_store: ConfigurationStore = build_store_from_config(
-        store_config=store_config, module_name=module_name, runtime_environment=None,
+        store_config=store_config,
+        module_name=module_name,
+        runtime_environment=None,
     )
     return configuration_store
 
@@ -136,7 +138,9 @@ def save_checkpoint_config_to_store_backend(
     checkpoint_configuration: CheckpointConfig,
 ):
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
-        store_name=store_name, store_backend=store_backend, overwrite_existing=True,
+        store_name=store_name,
+        store_backend=store_backend,
+        overwrite_existing=True,
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=checkpoint_name,
@@ -145,10 +149,13 @@ def save_checkpoint_config_to_store_backend(
 
 
 def load_checkpoint_config_from_store_backend(
-    store_name: str, store_backend: Union[StoreBackend, dict], checkpoint_name: str,
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    checkpoint_name: str,
 ) -> CheckpointConfig:
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
-        store_name=store_name, store_backend=store_backend,
+        store_name=store_name,
+        store_backend=store_backend,
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=checkpoint_name,
@@ -163,10 +170,13 @@ def load_checkpoint_config_from_store_backend(
 
 
 def delete_checkpoint_config_from_store_backend(
-    store_name: str, store_backend: Union[StoreBackend, dict], checkpoint_name: str,
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    checkpoint_name: str,
 ):
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
-        store_name=store_name, store_backend=store_backend,
+        store_name=store_name,
+        store_backend=store_backend,
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=checkpoint_name,

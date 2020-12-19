@@ -5,11 +5,11 @@ import tempfile
 
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import create_files_in_directory
-import great_expectations.exceptions as ge_exceptions
 
 
 def test_empty_store(empty_data_context):
@@ -63,7 +63,9 @@ store_backend:
     )
 
 
-def test_checkpoint_store_with_filesystem_store_backend(empty_data_context, tmp_path_factory):
+def test_checkpoint_store_with_filesystem_store_backend(
+    empty_data_context, tmp_path_factory
+):
     tmp_dir: str = str(
         tmp_path_factory.mktemp("test_checkpoint_store_with_filesystem_store_backend")
     )

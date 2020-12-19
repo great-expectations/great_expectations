@@ -1404,10 +1404,7 @@ class CheckpointConfigSchema(Schema):
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
-        if not (
-            data.get("name")
-            or data.get("validation_operator_name")
-        ):
+        if not (data.get("name") or data.get("validation_operator_name")):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current Checkpoint configuration is incomplete.  Please update your configuration to continue.
                 """

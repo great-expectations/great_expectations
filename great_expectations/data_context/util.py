@@ -121,7 +121,9 @@ def build_store_from_config(
         class_name: str = store_config["class_name"]
         module_name = store_config["module_name"]
         raise ge_exceptions.ClassInstantiationError(
-            module_name=module_name, package_name=None, class_name=class_name,
+            module_name=module_name,
+            package_name=None,
+            class_name=class_name,
         )
     return new_store
 

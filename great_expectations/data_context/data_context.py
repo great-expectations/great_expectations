@@ -331,7 +331,9 @@ class BaseDataContext:
             store_name=store_name,
             store_config=store_config,
             module_name=module_name,
-            runtime_environment={"root_directory": self.root_directory,},
+            runtime_environment={
+                "root_directory": self.root_directory,
+            },
         )
         self._stores[store_name] = new_store
         return new_store
@@ -2723,7 +2725,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "checkpoint_config": checkpoint_config,
                 "class_name": checkpoint_config.class_name,
             },
-            runtime_environment={"data_context": self, "name": checkpoint_name,},
+            runtime_environment={
+                "data_context": self,
+                "name": checkpoint_name,
+            },
             config_defaults={
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
@@ -2782,8 +2787,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "checkpoint_config": checkpoint_config,
                 "class_name": checkpoint_config.class_name,
             },
-            runtime_environment={"data_context": self, "name": checkpoint_name,},
-            config_defaults={"module_name": "great_expectations.checkpoint",},
+            runtime_environment={
+                "data_context": self,
+                "name": checkpoint_name,
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint",
+            },
         )
 
         return checkpoint
@@ -2826,7 +2836,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             result_format = {"result_format": "SUMMARY"}
 
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
-            checkpoint_name=checkpoint_name, return_config=True,
+            checkpoint_name=checkpoint_name,
+            return_config=True,
         )
 
         return checkpoint.run(
@@ -2904,7 +2915,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         substituted_config_variables: Union[
             DataContextConfig, dict
         ] = substitute_all_config_variables(
-            self.config_variables, dict(os.environ),
+            self.config_variables,
+            dict(os.environ),
         )
 
         substitutions: dict = {
@@ -2916,7 +2928,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         config_str_with_substituted_variables: Union[
             DataContextConfig, dict
         ] = substitute_all_config_variables(
-            yaml_config, substitutions,
+            yaml_config,
+            substitutions,
         )
 
         config: CommentedMap = yaml.load(config_str_with_substituted_variables)
@@ -2945,7 +2958,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     self._build_store_from_config(
                         store_name=store_name,
                         store_config=config,
-                    )
+                    ),
                 )
                 store_name = instantiated_class.store_name or store_name
                 self._project_config["stores"][store_name] = config
@@ -2963,7 +2976,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                         name=datasource_name,
                         config=config,
                         initialize=True,
-                    )
+                    ),
                 )
             elif class_name == "Checkpoint":
                 print(
@@ -2973,9 +2986,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     Checkpoint,
                     instantiate_class_from_config(
                         config=config,
-                        runtime_environment={"root_directory": self.root_directory, },
-                        config_defaults={}
-                    )
+                        runtime_environment={
+                            "root_directory": self.root_directory,
+                        },
+                        config_defaults={},
+                    ),
                 )
             else:
                 print(
@@ -2983,8 +2998,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
                 instantiated_class = instantiate_class_from_config(
                     config=config,
-                    runtime_environment={"root_directory": self.root_directory, },
-                    config_defaults={}
+                    runtime_environment={
+                        "root_directory": self.root_directory,
+                    },
+                    config_defaults={},
                 )
 
             if pretty_print:
@@ -2993,7 +3010,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
                 print()
 
-            report_object: dict = instantiated_class.self_check(pretty_print=pretty_print)
+            report_object: dict = instantiated_class.self_check(
+                pretty_print=pretty_print
+            )
 
             if return_mode == "instantiated_class":
                 return instantiated_class

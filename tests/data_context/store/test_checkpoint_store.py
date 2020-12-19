@@ -21,7 +21,9 @@ def test_checkpoint_store(empty_data_context):
     base_directory: str = str(Path(empty_data_context.root_directory) / "checkpoints")
 
     checkpoint_store: CheckpointStore = build_checkpoint_store_using_filesystem(
-        store_name=store_name, base_directory=base_directory, overwrite_existing=True,
+        store_name=store_name,
+        base_directory=base_directory,
+        overwrite_existing=True,
     )
 
     assert len(checkpoint_store.list_keys()) == 0
@@ -45,15 +47,21 @@ def test_checkpoint_store(empty_data_context):
             "action_list": [
                 {
                     "name": "store_validation_result",
-                    "action": {"class_name": "StoreValidationResultAction",},
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                    },
                 },
                 {
                     "name": "store_evaluation_params",
-                    "action": {"class_name": "StoreEvaluationParametersAction",},
+                    "action": {
+                        "class_name": "StoreEvaluationParametersAction",
+                    },
                 },
                 {
                     "name": "update_data_docs",
-                    "action": {"class_name": "UpdateDataDocsAction",},
+                    "action": {
+                        "class_name": "UpdateDataDocsAction",
+                    },
                 },
             ],
         }
@@ -109,15 +117,21 @@ def test_checkpoint_store(empty_data_context):
             "action_list": [
                 {
                     "name": "store_validation_result",
-                    "action": {"class_name": "StoreValidationResultAction",},
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                    },
                 },
                 {
                     "name": "store_evaluation_params",
-                    "action": {"class_name": "StoreEvaluationParametersAction",},
+                    "action": {
+                        "class_name": "StoreEvaluationParametersAction",
+                    },
                 },
                 {
                     "name": "update_data_docs",
-                    "action": {"class_name": "UpdateDataDocsAction",},
+                    "action": {
+                        "class_name": "UpdateDataDocsAction",
+                    },
                 },
             ]
         }

@@ -292,7 +292,10 @@ def checkpoint_run(checkpoint, directory):
     usage_event = "cli.checkpoint.run"
 
     checkpoint = toolkit.load_checkpoint(
-        context, checkpoint, usage_event, return_config=False,
+        context,
+        checkpoint,
+        usage_event,
+        return_config=False,
     )
 
     try:
