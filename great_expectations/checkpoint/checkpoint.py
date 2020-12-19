@@ -7,9 +7,12 @@ from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
 
 
-class LegacyCheckpoint:
+class Checkpoint:
     def __init__(
-        self, data_context, name: str, checkpoint_config: Union[CheckpointConfig, dict],
+        self,
+        name: str,
+        data_context,
+        checkpoint_config: CheckpointConfig,
     ):
         self._data_context = data_context
         self._name = name
@@ -21,97 +24,9 @@ class LegacyCheckpoint:
                 f"instead got {type(checkpoint_config)}"
             )
         elif isinstance(checkpoint_config, dict):
-            checkpoint_config = CheckpointConfig(**checkpoint_config)
+            checkpoint_config: CheckpointConfig = CheckpointConfig(**checkpoint_config)
         self._config = checkpoint_config
 
-    @property
-    def data_context(self):
-        return self._data_context
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def config(self):
-        return self._config
-
-    @property
-    def validation_operator_name(self):
-        return self.config.validation_operator_name
-
-    @property
-    def batches(self):
-        return self.config.batches
-
-    def run(
-        self,
-        run_id=None,
-        evaluation_parameters=None,
-        run_name=None,
-        run_time=None,
-        result_format=None,
-        **kwargs,
-    ):
-        batches_to_validate = self._get_batches_to_validate(self.batches)
-
-        results = self.data_context.run_validation_operator(
-            self.validation_operator_name,
-            assets_to_validate=batches_to_validate,
-            run_id=run_id,
-            evaluation_parameters=evaluation_parameters,
-            run_name=run_name,
-            run_time=run_time,
-            result_format=result_format,
-            **kwargs,
-        )
-
-        return results
-
-    def get_config(self, format="dict"):
-        if format == "dict":
-            return self.config.to_json_dict()
-
-        elif format == "yaml":
-            return self.config.to_yaml_str()
-
-        else:
-            raise ValueError(f"Unknown format {format} in LegacyCheckpoint.get_config.")
-
-    def _get_batches_to_validate(self, batches):
-        batches_to_validate = []
-        for batch in batches:
-
-            batch_kwargs = batch["batch_kwargs"]
-            suites = batch["expectation_suite_names"]
-
-            if not suites:
-                raise Exception(
-                    f"""A batch has no suites associated with it. At least one suite is required.
-    - Batch: {json.dumps(batch_kwargs)}
-    - Please add at least one suite to checkpoint {self.name}
-"""
-                )
-
-            for suite_name in batch["expectation_suite_names"]:
-                suite = self.data_context.get_expectation_suite(suite_name)
-                batch = self.data_context.get_batch(batch_kwargs, suite)
-
-                batches_to_validate.append(batch)
-
-        return batches_to_validate
-
-
-class Checkpoint:
-    def __init__(
-        self,
-        name: str,
-        data_context: "DataContext",
-        checkpoint_config: CheckpointConfig,
-    ):
-        self._name = name
-        self._data_context = data_context
-        self._config = checkpoint_config
         self._substituted_config = None
 
     @property
@@ -213,3 +128,92 @@ class Checkpoint:
             "profilers": profilers,
         }
         substituted_config = self.get_substituted_config(runtime_kwargs=runtime_kwargs)
+        # TODO: <Alex>Rob to complete</Alex>
+
+    def self_check(self, pretty_print=True) -> dict:
+        # Provide visibility into parameters that Checkpoint was instantiated with.
+        report_object: dict = {"config": self.config.to_json_dict()}
+
+        if pretty_print:
+            print(f"Checkpoint: {self.__class__.__name__}")
+
+        return report_object
+
+
+class LegacyCheckpoint(Checkpoint):
+    def __init__(
+        self,
+        name: str,
+        data_context,
+        checkpoint_config: Union[CheckpointConfig, dict],
+    ):
+        super().__init__(
+            name=name,
+            data_context=data_context,
+            checkpoint_config=checkpoint_config,
+        )
+
+    @property
+    def validation_operator_name(self):
+        return self.config.validation_operator_name
+
+    @property
+    def batches(self):
+        return self.config.batches
+
+    def run(
+        self,
+        run_id=None,
+        evaluation_parameters=None,
+        run_name=None,
+        run_time=None,
+        result_format=None,
+        **kwargs,
+    ):
+        batches_to_validate = self._get_batches_to_validate(self.batches)
+
+        results = self.data_context.run_validation_operator(
+            self.validation_operator_name,
+            assets_to_validate=batches_to_validate,
+            run_id=run_id,
+            evaluation_parameters=evaluation_parameters,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            **kwargs,
+        )
+
+        return results
+
+    def get_config(self, format="dict"):
+        if format == "dict":
+            return self.config.to_json_dict()
+
+        elif format == "yaml":
+            return self.config.to_yaml_str()
+
+        else:
+            raise ValueError(f"Unknown format {format} in LegacyCheckpoint.get_config.")
+
+    def _get_batches_to_validate(self, batches):
+        batches_to_validate = []
+        for batch in batches:
+
+            batch_kwargs = batch["batch_kwargs"]
+            suites = batch["expectation_suite_names"]
+
+            if not suites:
+                raise Exception(
+                    f"""A batch has no suites associated with it. At least one suite is required.
+    - Batch: {json.dumps(batch_kwargs)}
+    - Please add at least one suite to checkpoint {self.name}
+"""
+                )
+
+            for suite_name in batch["expectation_suite_names"]:
+                suite = self.data_context.get_expectation_suite(suite_name)
+                batch = self.data_context.get_batch(batch_kwargs, suite)
+
+                batches_to_validate.append(batch)
+
+        return batches_to_validate

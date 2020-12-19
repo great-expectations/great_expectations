@@ -111,20 +111,23 @@ class ConfigurationStore(Store):
         return self._config
 
     def self_check(self, pretty_print: bool = True) -> dict:
+        # Provide visibility into parameters that ConfigurationStore was instantiated with.
+        report_object: dict = {"config": self.config}
+
         if pretty_print:
             print("Checking for existing keys...")
 
-        return_obj: dict = {"keys": [key.configuration_key for key in self.list_keys()]}
+        report_object["keys"] = [key.configuration_key for key in self.list_keys()]
 
-        return_obj["len_keys"] = len(return_obj["keys"])
-        len_keys: int = return_obj["len_keys"]
+        report_object["len_keys"] = len(report_object["keys"])
+        len_keys: int = report_object["len_keys"]
 
         if pretty_print:
-            if return_obj["len_keys"] == 0:
+            if report_object["len_keys"] == 0:
                 print(f"\t{len_keys} keys found")
             else:
                 print(f"\t{len_keys} keys found:")
-                for key in return_obj["keys"][:10]:
+                for key in report_object["keys"][:10]:
                     print("\t\t" + str(key))
             if len_keys > 10:
                 print("\t\t...")
@@ -132,7 +135,7 @@ class ConfigurationStore(Store):
 
         self.serialization_self_check(pretty_print=pretty_print)
 
-        return return_obj
+        return report_object
 
     def serialization_self_check(self, pretty_print: bool):
         raise NotImplementedError

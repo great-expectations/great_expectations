@@ -2912,9 +2912,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         else:
             class_name = None
 
-        instantiated_class: Union[
-            Store, LegacyDatasource, Datasource, LegacyCheckpoint, Checkpoint
-        ]
+        instantiated_class: Union[Any]
         try:
             if class_name in [
                 "ExpectationsStore",
@@ -2926,12 +2924,15 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "CheckpointStore",
             ]:
                 print(f"\tInstantiating as a Store, since class_name is {class_name}")
-                store_name: str = "my_temp_store"
-                instantiated_class = self._build_store_from_config(
-                    store_name=store_name, store_config=config
+                store_name: str = name or "my_temp_store"
+                instantiated_class = cast(
+                    Store,
+                    self._build_store_from_config(
+                        store_name=store_name,
+                        store_config=config,
+                    )
                 )
-                if instantiated_class.store_name:
-                    store_name = instantiated_class.store_name
+                store_name = instantiated_class.store_name or store_name
                 self._project_config["stores"][store_name] = config
             elif class_name in [
                 "Datasource",
@@ -2941,21 +2942,34 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
                 datasource_name: str = name or "my_temp_datasource"
-                instantiated_class = self._instantiate_datasource_from_config_and_update_project_config(
-                    name=datasource_name, config=config, initialize=True,
+                instantiated_class = cast(
+                    Datasource,
+                    self._instantiate_datasource_from_config_and_update_project_config(
+                        name=datasource_name,
+                        config=config,
+                        initialize=True,
+                    )
                 )
-            elif class_name in [
-                # TODO: <Alex>ALEX</Alex>
-                "Checkpoint",
-                "LegacyCheckpoint",
-            ]:
-                pass
+            elif class_name == "Checkpoint":
+                print(
+                    f"\tInstantiating as a Checkpoint, since class_name is {class_name}"
+                )
+                instantiated_class = cast(
+                    Checkpoint,
+                    instantiate_class_from_config(
+                        config=config,
+                        runtime_environment={"root_directory": self.root_directory, },
+                        config_defaults={}
+                    )
+                )
             else:
                 print(
                     "\tNo matching class found. Attempting to instantiate class from the raw config..."
                 )
                 instantiated_class = instantiate_class_from_config(
-                    config, runtime_environment={}, config_defaults={}
+                    config=config,
+                    runtime_environment={"root_directory": self.root_directory, },
+                    config_defaults={}
                 )
 
             if pretty_print:
@@ -2964,7 +2978,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
                 print()
 
-            report_object: dict = instantiated_class.self_check(pretty_print)
+            report_object: dict = instantiated_class.self_check(pretty_print=pretty_print)
 
             if return_mode == "instantiated_class":
                 return instantiated_class

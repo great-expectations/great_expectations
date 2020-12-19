@@ -5,11 +5,11 @@ import tempfile
 
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import create_files_in_directory
+import great_expectations.exceptions as ge_exceptions
 
 
 def test_empty_store(empty_data_context):
@@ -29,8 +29,8 @@ store_backend:
 
 
 def test_config_with_yaml_error(empty_data_context):
-
     with pytest.raises(Exception):
+        # noinspection PyUnusedLocal
         my_expectation_store = empty_data_context.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
@@ -63,24 +63,32 @@ store_backend:
     )
 
 
-def test_checkpoint_store_with_filesystem_store_backend(
-    empty_data_context, tmp_path_factory
-):
+def test_checkpoint_store_with_filesystem_store_backend(empty_data_context, tmp_path_factory):
     tmp_dir: str = str(
         tmp_path_factory.mktemp("test_checkpoint_store_with_filesystem_store_backend")
     )
 
+    yaml_config: str = f"""
+    store_name: my_checkpoint_store
+    class_name: CheckpointStore
+    module_name: great_expectations.data_context.store
+    store_backend:
+        class_name: TupleFilesystemStoreBackend
+        module_name: "great_expectations.data_context.store"
+        base_directory: {tmp_dir}/checkpoints
+    """
+
     my_checkpoint_store: CheckpointStore = empty_data_context.test_yaml_config(
-        yaml_config=f"""
-store_name: my_checkpoint_store
-class_name: CheckpointStore
-module_name: great_expectations.data_context.store
-store_backend:
-    class_name: TupleFilesystemStoreBackend
-    module_name: "great_expectations.data_context.store"
-    base_directory: {tmp_dir}/checkpoints
-"""
+        yaml_config=yaml_config,
+        return_mode="instantiated_class",
     )
+
+    report_object: dict = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        return_mode="report_object",
+    )
+
+    assert my_checkpoint_store.config == report_object["config"]
 
     expected_checkpoint_store_config: dict
 
