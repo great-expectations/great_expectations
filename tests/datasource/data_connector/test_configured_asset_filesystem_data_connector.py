@@ -1176,8 +1176,11 @@ assets:
         == 5
     )
 
+
 def test_basic_instantiation_with_nested_directories(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation_with_nested_directories"))
+    base_directory = str(
+        tmp_path_factory.mktemp("test_basic_instantiation_with_nested_directories")
+    )
     os.makedirs(os.path.join(base_directory, "foo"))
     create_files_in_directory(
         directory=os.path.join(base_directory, "foo"),
@@ -1228,9 +1231,7 @@ def test_basic_instantiation_with_nested_directories(tmp_path_factory):
             "group_names": ["index"],
         },
         base_directory=base_directory,
-        assets={"alpha": {
-            "base_directory": "foo"
-        }},
+        assets={"alpha": {"base_directory": "foo"}},
     )
 
     assert my_data_connector.self_check() == {
@@ -1281,9 +1282,7 @@ def test_basic_instantiation_with_nested_directories(tmp_path_factory):
                 "batch_definition_count": 3,
             },
         },
-        "example_unmatched_data_references": [
-            "foo"
-        ],
+        "example_unmatched_data_references": ["foo"],
         "unmatched_data_reference_count": 1,
         "example_data_reference": {},
     }
