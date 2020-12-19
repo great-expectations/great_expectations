@@ -235,6 +235,7 @@ CHECKPOINT_VERSION_013_TEMPLATE = f"""
 # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
 
 name: my_checkpoint
+config_version: 1.0
 validations: []
 action_list:
   - name: store_validation_result

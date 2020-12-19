@@ -93,12 +93,11 @@ def test_checkpoint_store(empty_data_context):
 
     assert len(checkpoint_store.list_keys()) == 1
 
-    assert (
-        filter_properties_dict(
-            properties=checkpoint_store.get(key=key_0).to_json_dict(),
-            delete_fields=["module_name"],
-        )
-        == my_checkpoint_config_0.to_json_dict()
+    assert filter_properties_dict(
+        properties=checkpoint_store.get(key=key_0).to_json_dict(),
+        delete_fields=["module_name"],
+    ) == filter_properties_dict(
+        properties=my_checkpoint_config_0.to_json_dict(),
     )
 
     dir_tree: str = gen_directory_tree_str(startpath=base_directory)
@@ -169,12 +168,11 @@ def test_checkpoint_store(empty_data_context):
 
     assert len(checkpoint_store.list_keys()) == 2
 
-    assert (
-        filter_properties_dict(
-            properties=checkpoint_store.get(key=key_1).to_json_dict(),
-            delete_fields=["module_name"],
-        )
-        == my_checkpoint_config_1.to_json_dict()
+    assert filter_properties_dict(
+        properties=checkpoint_store.get(key=key_1).to_json_dict(),
+        delete_fields=["module_name"],
+    ) == filter_properties_dict(
+        properties=my_checkpoint_config_1.to_json_dict(),
     )
 
     dir_tree: str = gen_directory_tree_str(startpath=base_directory)
@@ -193,6 +191,21 @@ def test_checkpoint_store(empty_data_context):
     assert self_check_report == {
         "keys": ["my_checkpoint_0", "my_checkpoint_1"],
         "len_keys": 2,
+        "config": {
+            "store_name": "checkpoint_store",
+            "class_name": "CheckpointStore",
+            "module_name": "great_expectations.data_context.store.configuration_store",
+            "overwrite_existing": True,
+            "store_backend": {
+                "base_directory": f"{empty_data_context.root_directory}/checkpoints",
+                "platform_specific_separator": True,
+                "fixed_length_key": False,
+                "suppress_store_backend_id": False,
+                "module_name": "great_expectations.data_context.store.tuple_store_backend",
+                "class_name": "TupleFilesystemStoreBackend",
+                "filepath_suffix": ".yml",
+            },
+        },
     }
 
     checkpoint_store.remove_key(key=key_0)

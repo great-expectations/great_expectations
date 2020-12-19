@@ -1402,6 +1402,16 @@ class CheckpointConfigSchema(Schema):
         allow_none=True,
     )
 
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        if not (
+            "name" in data or "validation_operator_name" in data or "batches" in data
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current Checkpoint configuration is incomplete.  Please update your configuration to continue.
+                """
+            )
+
 
 class CheckpointConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>

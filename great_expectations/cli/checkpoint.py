@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Dict
 
 import click
 from ruamel.yaml import YAML
@@ -11,7 +12,6 @@ from great_expectations.cli.util import cli_message, cli_message_list
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import DataContextError
 from great_expectations.util import lint_code
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
