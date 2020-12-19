@@ -1,41 +1,51 @@
-import numpy as np
+import logging
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.render.types import RenderedStringTemplateContent
+
+logger = logging.getLogger(__name__)
 
 
 def render_evaluation_parameter_string(render_func):
     def inner_func(*args, **kwargs):
         rendered_string_template = render_func(*args, **kwargs)
         current_expectation_params = list()
-        app_template_str = "\n - Evaluation parameter $eval_param had value $eval_param_value at time of Validation."
+        app_template_str = (
+            "\n - $eval_param = $eval_param_value (at time of validation)."
+        )
         configuration = kwargs.get("configuration", None)
-        if isinstance(configuration, ExpectationConfiguration):
-            kwargs_dict = configuration.kwargs
-            if isinstance(kwargs_dict, dict):
-                for key, value in kwargs_dict.items():
-                    if isinstance(value, dict) and "$PARAMETER" in value.keys():
-                        current_expectation_params.append(value["$PARAMETER"])
-        runtime_configuration = kwargs.get("runtime_configuration", None)
-        if runtime_configuration:
-            eval_params = runtime_configuration.get("evaluation_parameters", {})
-            styling = runtime_configuration.get("styling")
-            for key, val in eval_params.items():
-                if key in current_expectation_params:
-                    app_params = dict()
-                    app_params["eval_param"] = key
-                    app_params["eval_param_value"] = val
-                    to_append = RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": app_template_str,
-                                "params": app_params,
-                                "styling": styling,
-                            },
-                        }
-                    )
-                    rendered_string_template.append(to_append)
+        kwargs_dict = configuration.kwargs
+        for key, value in kwargs_dict.items():
+            if isinstance(value, dict) and "$PARAMETER" in value.keys():
+                current_expectation_params.append(value["$PARAMETER"])
+
+        # if the configuration has no evaluation parameters, then skip this step
+        if len(current_expectation_params) > 0:
+            runtime_configuration = kwargs.get("runtime_configuration", None)
+            if runtime_configuration:
+                eval_params = runtime_configuration.get("evaluation_parameters", {})
+                styling = runtime_configuration.get("styling")
+                for key, val in eval_params.items():
+                    if key in current_expectation_params:
+                        app_params = dict()
+                        app_params["eval_param"] = key
+                        app_params["eval_param_value"] = val
+                        to_append = RenderedStringTemplateContent(
+                            **{
+                                "content_block_type": "string_template",
+                                "string_template": {
+                                    "template": app_template_str,
+                                    "params": app_params,
+                                    "styling": styling,
+                                },
+                            }
+                        )
+                        rendered_string_template.append(to_append)
+            else:
+                raise GreatExpectationsError(
+                    f"""render_evaluation_parameter_string() was not able to render the value of evaluation parameters.
+                        Expectation had evaluation parameters set, but they were not passed in."""
+                )
         return rendered_string_template
 
     return inner_func

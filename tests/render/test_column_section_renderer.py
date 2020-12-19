@@ -1493,7 +1493,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                     {
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "\n - Evaluation parameter $eval_param had value $eval_param_value at time of Validation.",
+                            "template": "\n - $eval_param = $eval_param_value (at time of validation).",
                             "params": {
                                 "eval_param": "MIN_VAL_PARAM",
                                 "eval_param_value": 15,
@@ -1509,7 +1509,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                     {
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "\n - Evaluation parameter $eval_param had value $eval_param_value at time of Validation.",
+                            "template": "\n - $eval_param = $eval_param_value (at time of validation).",
                             "params": {
                                 "eval_param": "MAX_VAL_PARAM",
                                 "eval_param_value": 20,
