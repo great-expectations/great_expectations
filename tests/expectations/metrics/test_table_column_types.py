@@ -7,7 +7,8 @@ from great_expectations.expectations.metrics.import_manager import reflection
 
 def test_table_column_introspection(sa):
     db_file = file_relative_path(
-        __file__, "../../test_sets/test_cases_for_sql_data_connector.db",
+        __file__,
+        "../../test_sets/test_cases_for_sql_data_connector.db",
     )
     engine = sa.create_engine(f"sqlite:///{db_file}")
 

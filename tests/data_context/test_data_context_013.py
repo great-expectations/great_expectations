@@ -75,7 +75,11 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
         data_connector_name="my_runtime_data_connector",
         data_asset_name="IN_MEMORY_DATA_ASSET",
         batch_data=test_df,
-        partition_request={"partition_identifiers": {"run_id": 1234567890,}},
+        partition_request={
+            "partition_identifiers": {
+                "run_id": 1234567890,
+            }
+        },
         limit=None,
     )
     assert my_batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
@@ -94,7 +98,9 @@ def test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas
 
     create_files_in_directory(
         directory=base_directory,
-        file_name_list=["somme_file.csv",],
+        file_name_list=[
+            "somme_file.csv",
+        ],
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
@@ -223,7 +229,8 @@ data_connectors:
                 - number
 """
     my_datasource = context.test_yaml_config(
-        name="my_directory_datasource", yaml_config=yaml_config,
+        name="my_directory_datasource",
+        yaml_config=yaml_config,
     )
     assert (
         my_datasource.data_connectors["my_filesystem_data_connector"].base_directory
@@ -272,7 +279,8 @@ data_connectors:
 """
     # noinspection PyUnusedLocal
     my_datasource = context.test_yaml_config(
-        name="some_datasource_name", yaml_config=yaml_config,
+        name="some_datasource_name",
+        yaml_config=yaml_config,
     )
 
     assert context._get_data_context_version("some_datasource_name", **{}) == "v3"

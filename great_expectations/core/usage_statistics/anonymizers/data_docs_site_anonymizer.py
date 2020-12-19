@@ -20,8 +20,10 @@ class DataDocsSiteAnonymizer(Anonymizer):
                 "module_name"
             ] = "great_expectations.render.renderer.site_builder"
 
-        anonymized_info_dict = self._site_builder_anonymizer.anonymize_site_builder_info(
-            site_builder_config=site_config,
+        anonymized_info_dict = (
+            self._site_builder_anonymizer.anonymize_site_builder_info(
+                site_builder_config=site_config,
+            )
         )
         anonymized_info_dict["anonymized_name"] = self.anonymize(site_name)
 
@@ -32,8 +34,10 @@ class DataDocsSiteAnonymizer(Anonymizer):
             store_backend_object_config=store_backend_config
         )
         site_index_builder_config = site_config.get("site_index_builder")
-        anonymized_site_index_builder = self._site_builder_anonymizer.anonymize_site_builder_info(
-            site_builder_config=site_index_builder_config
+        anonymized_site_index_builder = (
+            self._site_builder_anonymizer.anonymize_site_builder_info(
+                site_builder_config=site_index_builder_config
+            )
         )
         if "show_cta_footer" in site_index_builder_config:
             anonymized_site_index_builder[

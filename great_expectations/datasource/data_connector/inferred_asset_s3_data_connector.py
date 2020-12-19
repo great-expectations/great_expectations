@@ -57,7 +57,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
             boto3_options (dict): optional boto3 options
-      """
+        """
         logger.debug(f'Constructing InferredAssetS3DataConnector "{name}".')
 
         super().__init__(
@@ -110,7 +110,9 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         return path_list
 
     def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None,
+        self,
+        path: str,
+        data_asset_name: Optional[str] = None,
     ) -> str:
         # data_assert_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
