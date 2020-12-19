@@ -45,6 +45,7 @@ anonymized_class_info_schema = {
             },
             "additionalProperties": True,
             # we don't want this to be true, but this is required to allow show_cta_footer
+            # Note AJB-20201218 show_cta_footer was removed in v 0.9.9 via PR #1249
             "required": ["parent_class"],
         }
     ],
