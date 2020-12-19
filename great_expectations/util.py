@@ -824,6 +824,7 @@ def filter_properties_dict(
                 for key, value in properties.items()
                 if not (
                     (keep_fields and key in keep_fields)
+                    or (delete_fields and key in delete_fields)
                     or is_numeric(value=value)
                     or value
                 )
