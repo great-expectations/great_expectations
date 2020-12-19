@@ -251,8 +251,7 @@ def get_dataset(
     table_name=None,
     sqlite_db_path=None,
 ):
-    """Utility to create datasets for json-formatted tests.
-    """
+    """Utility to create datasets for json-formatted tests."""
     df = pd.DataFrame(data)
     if dataset_type == "PandasDataset":
         if schemas and "pandas" in schemas:
@@ -643,8 +642,7 @@ def get_test_validator_with_data(
     table_name=None,
     sqlite_db_path=None,
 ):
-    """Utility to create datasets for json-formatted tests.
-    """
+    """Utility to create datasets for json-formatted tests."""
     df = pd.DataFrame(data)
     if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
@@ -950,7 +948,11 @@ def _build_sa_validator_with_data(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
     df.to_sql(
-        name=table_name, con=engine, index=False, dtype=sql_dtypes, if_exists="replace",
+        name=table_name,
+        con=engine,
+        index=False,
+        dtype=sql_dtypes,
+        if_exists="replace",
     )
 
     batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
@@ -1053,7 +1055,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_values_to_match_regex",
             # "expect_column_values_to_not_match_regex",
             # "expect_column_values_to_match_regex_list",
-            "expect_column_values_to_not_match_regex_list",
+            # "expect_column_values_to_not_match_regex_list",
             # "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
@@ -1409,7 +1411,12 @@ def create_files_in_directory(
 
 
 def create_fake_data_frame():
-    return pd.DataFrame({"x": range(10), "y": list("ABCDEFGHIJ"),})
+    return pd.DataFrame(
+        {
+            "x": range(10),
+            "y": list("ABCDEFGHIJ"),
+        }
+    )
 
 
 def validate_uuid4(uuid_string: str) -> bool:
@@ -1506,7 +1513,9 @@ def build_tuple_s3_store_backend(
 
 
 def build_checkpoint_store_using_filesystem(
-    store_name: str, base_directory: str, overwrite_existing: bool = False,
+    store_name: str,
+    base_directory: str,
+    overwrite_existing: bool = False,
 ) -> CheckpointStore:
     store_config: dict = {"base_directory": base_directory}
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
@@ -1538,7 +1547,9 @@ def save_checkpoint_config_to_filesystem(
 
 
 def load_checkpoint_config_from_filesystem(
-    store_name: str, base_directory: str, checkpoint_name: str,
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
 ) -> CheckpointConfig:
     store_config: dict = {"base_directory": base_directory}
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
@@ -1552,7 +1563,9 @@ def load_checkpoint_config_from_filesystem(
 
 
 def delete_checkpoint_config_from_filesystem(
-    store_name: str, base_directory: str, checkpoint_name: str,
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
 ):
     store_config: dict = {"base_directory": base_directory}
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(

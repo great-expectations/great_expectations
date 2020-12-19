@@ -93,107 +93,107 @@ yaml.default_flow_style = False
 
 class BaseDataContext:
     """
-    This class implements most of the functionality of DataContext, with a few exceptions.
+        This class implements most of the functionality of DataContext, with a few exceptions.
 
-    1. BaseDataContext does not attempt to keep its project_config in sync with a file on disc.
-    2. BaseDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
-        into DataContext class.
+        1. BaseDataContext does not attempt to keep its project_config in sync with a file on disc.
+        2. BaseDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
+            into DataContext class.
 
-    Together, these changes make BaseDataContext class more testable.
+        Together, these changes make BaseDataContext class more testable.
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: os_linux
-    title: OS - Linux
-    icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: Production
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: Complete
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: os_linux
+        title: OS - Linux
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Production
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: Complete
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: os_macos
-    title: OS - MacOS
-    icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: Production
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: Complete (local only)
-        integration_infrastructure_test_coverage: Complete (local only)
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: os_macos
+        title: OS - MacOS
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Production
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: Complete (local only)
+            integration_infrastructure_test_coverage: Complete (local only)
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: os_windows
-    title: OS - Windows
-    icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: Beta
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: Minimal
-        integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Complete
-        bug_risk: Moderate
-------------------------------------------------------------
-    id: workflow_create_edit_expectations_cli_scaffold
-    title: Create and Edit Expectations - suite scaffold
-    icon:
-    short_description: Creating a new Expectation Suite using suite scaffold
-    description: Creating Expectation Suites through an interactive development loop using suite scaffold
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_suite_scaffold.html
-    maturity: Experimental (expect exciting changes to Profiler capability)
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: N/A
-        integration_infrastructure_test_coverage: Partial
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: os_windows
+        title: OS - Windows
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Beta
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: Minimal
+            integration_infrastructure_test_coverage: Minimal
+            documentation_completeness: Complete
+            bug_risk: Moderate
+    ------------------------------------------------------------
+        id: workflow_create_edit_expectations_cli_scaffold
+        title: Create and Edit Expectations - suite scaffold
+        icon:
+        short_description: Creating a new Expectation Suite using suite scaffold
+        description: Creating Expectation Suites through an interactive development loop using suite scaffold
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_suite_scaffold.html
+        maturity: Experimental (expect exciting changes to Profiler capability)
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: N/A
+            integration_infrastructure_test_coverage: Partial
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: workflow_create_edit_expectations_cli_edit
-    title: Create and Edit Expectations - CLI
-    icon:
-    short_description: Creating a new Expectation Suite using the CLI
-    description: Creating a Expectation Suite great_expectations suite new command
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html
-    maturity: Experimental (expect exciting changes to Profiler and Suite Renderer capability)
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: N/A
-        integration_infrastructure_test_coverage: Partial
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: workflow_create_edit_expectations_cli_edit
+        title: Create and Edit Expectations - CLI
+        icon:
+        short_description: Creating a new Expectation Suite using the CLI
+        description: Creating a Expectation Suite great_expectations suite new command
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html
+        maturity: Experimental (expect exciting changes to Profiler and Suite Renderer capability)
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: N/A
+            integration_infrastructure_test_coverage: Partial
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: workflow_create_edit_expectations_json_schema
-    title: Create and Edit Expectations - Json schema
-    icon:
-    short_description: Creating a new Expectation Suite from a json schema file
-    description: Creating a new Expectation Suite using JsonSchemaProfiler function and json schema file
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html
-    maturity: Experimental (expect exciting changes to Profiler capability)
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: N/A
-        integration_infrastructure_test_coverage: Partial
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: workflow_create_edit_expectations_json_schema
+        title: Create and Edit Expectations - Json schema
+        icon:
+        short_description: Creating a new Expectation Suite from a json schema file
+        description: Creating a new Expectation Suite using JsonSchemaProfiler function and json schema file
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html
+        maturity: Experimental (expect exciting changes to Profiler capability)
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: N/A
+            integration_infrastructure_test_coverage: Partial
+            documentation_completeness: Complete
+            bug_risk: Low
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
@@ -231,7 +231,9 @@ class BaseDataContext:
             raise
         return True
 
-    @usage_statistics_enabled_method(event_name="data_context.__init__",)
+    @usage_statistics_enabled_method(
+        event_name="data_context.__init__",
+    )
     def __init__(self, project_config, context_root_dir=None, runtime_environment=None):
         """DataContext constructor
 
@@ -296,7 +298,8 @@ class BaseDataContext:
             validation_operator_config,
         ) in self._project_config.validation_operators.items():
             self.add_validation_operator(
-                validation_operator_name, validation_operator_config,
+                validation_operator_name,
+                validation_operator_config,
             )
 
         self._evaluation_parameter_dependencies_compiled = False
@@ -328,7 +331,9 @@ class BaseDataContext:
             store_name=store_name,
             store_config=store_config,
             module_name=module_name,
-            runtime_environment={"root_directory": self.root_directory,},
+            runtime_environment={
+                "root_directory": self.root_directory,
+            },
         )
         self._stores[store_name] = new_store
         return new_store
@@ -636,7 +641,9 @@ class BaseDataContext:
             )
         return site_builder
 
-    @usage_statistics_enabled_method(event_name="data_context.open_data_docs",)
+    @usage_statistics_enabled_method(
+        event_name="data_context.open_data_docs",
+    )
     def open_data_docs(
         self,
         resource_identifier: Optional[str] = None,
@@ -1585,7 +1592,9 @@ class BaseDataContext:
             config = kwargs
 
         return self._instantiate_datasource_from_config_and_update_project_config(
-            name=name, config=config, initialize=initialize,
+            name=name,
+            config=config,
+            initialize=initialize,
         )
 
     def _instantiate_datasource_from_config_and_update_project_config(
@@ -2160,7 +2169,9 @@ class BaseDataContext:
             logger.debug("Found data_docs_sites. Building sites...")
 
             for site_name, site_config in sites.items():
-                logger.debug("Building Data Docs Site %s" % site_name,)
+                logger.debug(
+                    "Building Data Docs Site %s" % site_name,
+                )
 
                 if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
@@ -2595,7 +2606,8 @@ class BaseDataContext:
 
         # TODO: Add batch_parameters
         batch = self.get_batch(
-            expectation_suite_name=expectation_suite_name, batch_kwargs=batch_kwargs,
+            expectation_suite_name=expectation_suite_name,
+            batch_kwargs=batch_kwargs,
         )
 
         if not profiler.validate(batch):
@@ -2650,7 +2662,12 @@ class BaseDataContext:
             """
 Profiled the data asset, with %d total rows and %d columns in %.2f seconds.
 Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs."""
-            % (total_rows, total_columns, total_duration, total_expectations,)
+            % (
+                total_rows,
+                total_columns,
+                total_duration,
+                total_expectations,
+            )
         )
 
         profiling_results["success"] = True
@@ -2706,7 +2723,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "checkpoint_config": checkpoint_config,
                 "class_name": checkpoint_config.class_name,
             },
-            runtime_environment={"data_context": self, "name": checkpoint_name,},
+            runtime_environment={
+                "data_context": self,
+                "name": checkpoint_name,
+            },
             config_defaults={
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
@@ -2765,8 +2785,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "checkpoint_config": checkpoint_config,
                 "class_name": checkpoint_config.class_name,
             },
-            runtime_environment={"data_context": self, "name": checkpoint_name,},
-            config_defaults={"module_name": "great_expectations.checkpoint",},
+            runtime_environment={
+                "data_context": self,
+                "name": checkpoint_name,
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint",
+            },
         )
 
         return checkpoint
@@ -2809,7 +2834,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             result_format = {"result_format": "SUMMARY"}
 
         checkpoint: Checkpoint = self.get_checkpoint(
-            checkpoint_name=checkpoint_name, return_config=True,
+            checkpoint_name=checkpoint_name,
+            return_config=True,
         )
 
         return checkpoint.run(
@@ -2837,7 +2863,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return_mode="instantiated_class",
         shorten_tracebacks=False,
     ):
-        """ Convenience method for testing yaml configs
+        """Convenience method for testing yaml configs
 
         test_yaml_config is a convenience method for configuring the moving
         parts of a Great Expectations deployment. It allows you to quickly
@@ -2885,7 +2911,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             raise ValueError(f"Unknown return_mode: {return_mode}.")
 
         substituted_config_variables = substitute_all_config_variables(
-            self.config_variables, dict(os.environ),
+            self.config_variables,
+            dict(os.environ),
         )
 
         substitutions = {
@@ -2895,7 +2922,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         }
 
         config_str_with_substituted_variables = substitute_all_config_variables(
-            yaml_config, substitutions,
+            yaml_config,
+            substitutions,
         )
 
         config = yaml.load(config_str_with_substituted_variables)
@@ -2927,8 +2955,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
                 datasource_name = name or "my_temp_datasource"
-                instantiated_class = self._instantiate_datasource_from_config_and_update_project_config(
-                    name=datasource_name, config=config, initialize=True,
+                instantiated_class = (
+                    self._instantiate_datasource_from_config_and_update_project_config(
+                        name=datasource_name,
+                        config=config,
+                        initialize=True,
+                    )
                 )
 
             else:

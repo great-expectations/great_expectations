@@ -13,7 +13,10 @@ class SlackRenderer(Renderer):
         super().__init__()
 
     def render(
-        self, validation_result=None, data_docs_pages=None, notify_with=None,
+        self,
+        validation_result=None,
+        data_docs_pages=None,
+        notify_with=None,
     ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
@@ -22,7 +25,10 @@ class SlackRenderer(Renderer):
 
         title_block = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": default_text,},
+            "text": {
+                "type": "mrkdwn",
+                "text": default_text,
+            },
         }
 
         query = {

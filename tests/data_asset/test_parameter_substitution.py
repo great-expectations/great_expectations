@@ -105,7 +105,13 @@ def test_store_evaluation_parameter_with_validator(validator_with_titanic_1911_a
     )
     assert validator_with_titanic_1911_asset.get_evaluation_parameter(
         "my_second_parameter"
-    ) == [1, 2, "value", None, np.nan,]
+    ) == [
+        1,
+        2,
+        "value",
+        None,
+        np.nan,
+    ]
 
     with pytest.raises(TypeError):
         validator_with_titanic_1911_asset.set_evaluation_parameter(

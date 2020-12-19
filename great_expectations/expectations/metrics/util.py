@@ -63,10 +63,22 @@ except ImportError:
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 
 SCHEMAS = {
-    "api_np": {"NegativeInfinity": -np.inf, "PositiveInfinity": np.inf,},
-    "api_cast": {"NegativeInfinity": -float("inf"), "PositiveInfinity": float("inf"),},
-    "mysql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
-    "mssql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
+    "api_np": {
+        "NegativeInfinity": -np.inf,
+        "PositiveInfinity": np.inf,
+    },
+    "api_cast": {
+        "NegativeInfinity": -float("inf"),
+        "PositiveInfinity": float("inf"),
+    },
+    "mysql": {
+        "NegativeInfinity": -1.79e308,
+        "PositiveInfinity": 1.79e308,
+    },
+    "mssql": {
+        "NegativeInfinity": -1.79e308,
+        "PositiveInfinity": 1.79e308,
+    },
 }
 
 
@@ -123,7 +135,8 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
     try:
         # Snowflake
         if issubclass(
-            dialect.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
+            dialect.dialect,
+            snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
             if positive:
                 return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
@@ -167,7 +180,10 @@ def _get_dialect_type_module(dialect=None):
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
         if (
-            isinstance(dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect,)
+            isinstance(
+                dialect,
+                pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+            )
             and bigquery_types_tuple is not None
         ):
             return bigquery_types_tuple

@@ -147,16 +147,16 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 @click.group(short_help="Checkpoint operations")
 def checkpoint():
     """
-Checkpoint operations
+    Checkpoint operations
 
-A checkpoint is a bundle of one or more batches of data with one or more
-Expectation Suites.
+    A checkpoint is a bundle of one or more batches of data with one or more
+    Expectation Suites.
 
-A checkpoint can be as simple as one batch of data paired with one
-Expectation Suite.
+    A checkpoint can be as simple as one batch of data paired with one
+    Expectation Suite.
 
-A checkpoint can be as complex as many batches of data across different
-datasources paired with one or more Expectation Suites each.
+    A checkpoint can be as complex as many batches of data across different
+    datasources paired with one or more Expectation Suites each.
     """
     pass
 
@@ -224,6 +224,31 @@ def _verify_checkpoint_does_not_exist(
         )
 
 
+def _write_checkpoint_to_disk(
+    context: DataContext, checkpoint: Dict, checkpoint_name: str
+) -> str:
+    # TODO this should be the responsibility of the DataContext
+    checkpoint_dir = os.path.join(
+        context.root_directory,
+        context.CHECKPOINTS_DIR,
+    )
+    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    with open(checkpoint_file, "w") as f:
+        yaml.dump(checkpoint, f)
+    return checkpoint_file
+
+
+def _load_checkpoint_yml_template() -> dict:
+    # TODO this should be the responsibility of the DataContext
+    template_file = file_relative_path(
+        __file__, os.path.join("..", "data_context", "checkpoint_template.yml")
+    )
+    with open(template_file) as f:
+        template = yaml.load(f)
+    return template
+
+
 @checkpoint.command(name="list")
 @click.option(
     "--directory",
@@ -267,7 +292,10 @@ def checkpoint_run(checkpoint, directory):
     usage_event = "cli.checkpoint.run"
 
     checkpoint = toolkit.load_checkpoint(
-        context, checkpoint, usage_event, return_config=False,
+        context,
+        checkpoint,
+        usage_event,
+        return_config=False,
     )
 
     try:

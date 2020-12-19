@@ -273,15 +273,18 @@ class DefaultJinjaView:
             style_str += '" '
 
         styling_string = pTemplate("$classes$attributes$style").substitute(
-            {"classes": class_str, "attributes": attribute_str, "style": style_str,}
+            {
+                "classes": class_str,
+                "attributes": attribute_str,
+                "style": style_str,
+            }
         )
 
         return styling_string
 
     def render_styling_from_string_template(self, template):
         # NOTE: We should add some kind of type-checking to template
-        """This method is a thin wrapper use to call `render_styling` from within jinja templates.
-        """
+        """This method is a thin wrapper use to call `render_styling` from within jinja templates."""
         if not isinstance(template, (dict, OrderedDict)):
             return template
 
@@ -362,8 +365,10 @@ class DefaultJinjaView:
             if "default" in template["styling"]:
                 default_parameter_styling = template["styling"]["default"]
                 default_param_tag = default_parameter_styling.get("tag", "span")
-                base_param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(
-                    param_tag=default_param_tag
+                base_param_template_string = (
+                    "<{param_tag} $styling>$content</{param_tag}>".format(
+                        param_tag=default_param_tag
+                    )
                 )
 
                 for parameter in template["params"].keys():
@@ -391,8 +396,10 @@ class DefaultJinjaView:
                     if parameter not in params:
                         continue
                     param_tag = parameter_styling.get("tag", "span")
-                    param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(
-                        param_tag=param_tag
+                    param_template_string = (
+                        "<{param_tag} $styling>$content</{param_tag}>".format(
+                            param_tag=param_tag
+                        )
                     )
                     params[parameter] = pTemplate(
                         param_template_string
@@ -520,7 +527,11 @@ class DefaultMarkdownPageView(DefaultJinjaView):
 
             template["params"][parameter] = pTemplate(
                 base_param_template_string
-            ).safe_substitute({"content": template["params"][parameter],})
+            ).safe_substitute(
+                {
+                    "content": template["params"][parameter],
+                }
+            )
 
         template["template"] = template.get("template", "").replace(
             "$PARAMETER", "$$PARAMETER"

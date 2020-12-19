@@ -73,7 +73,8 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
     with pytest.raises(KeyError):
         context.get_batch(
             batch_request=BatchRequest(
-                datasource_name="my_sqlite_db", data_connector_name="daily",
+                datasource_name="my_sqlite_db",
+                data_connector_name="daily",
             )
         )
 
@@ -109,7 +110,9 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
     # Successful specification using parameters without parameter names for the identifying triple
     # In the case of a data_asset containing a single Batch, we don't even need parameters
     context.get_batch(
-        "my_sqlite_db", "whole_table", "table_partitioned_by_date_column__A",
+        "my_sqlite_db",
+        "whole_table",
+        "table_partitioned_by_date_column__A",
     )
 
     # Successful specification using parameters and partition_request
@@ -194,7 +197,8 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
     with pytest.raises(KeyError):
         context.get_validator(
             batch_request=BatchRequest(
-                datasource_name="my_sqlite_db", data_connector_name="daily",
+                datasource_name="my_sqlite_db",
+                data_connector_name="daily",
             ),
             expectation_suite_name="my_expectations",
         )
