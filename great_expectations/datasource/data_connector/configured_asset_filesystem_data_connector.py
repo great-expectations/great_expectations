@@ -35,7 +35,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         assets: dict,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
-        glob_directive: str = "*",
+        glob_directive: str = "**/*",
         sorters: Optional[list] = None,
     ):
         """
