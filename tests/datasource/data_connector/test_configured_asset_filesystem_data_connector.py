@@ -1,6 +1,6 @@
 import json
-from typing import List
 import os
+from typing import List
 
 import pytest
 from ruamel.yaml import YAML
