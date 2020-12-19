@@ -197,7 +197,9 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
         "s3_site": {
             "class_name": "SiteBuilder",
             "show_how_to_buttons": True,
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+            },
             "store_backend": {
                 "bucket": "my_default_bucket",
                 "class_name": "TupleS3StoreBackend",
@@ -287,7 +289,9 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         "s3_site": {
             "class_name": "SiteBuilder",
             "show_how_to_buttons": True,
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+            },
             "store_backend": {
                 "bucket": "custom_data_docs_store_bucket_name",
                 "class_name": "TupleS3StoreBackend",
@@ -455,7 +459,9 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         "gcs_site": {
             "class_name": "SiteBuilder",
             "show_how_to_buttons": True,
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+            },
             "store_backend": {
                 "bucket": "my_default_bucket",
                 "project": "my_default_project",
@@ -552,7 +558,9 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         "gcs_site": {
             "class_name": "SiteBuilder",
             "show_how_to_buttons": True,
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+            },
             "store_backend": {
                 "bucket": "custom_data_docs_store_bucket_name",
                 "project": "custom_data_docs_store_project_name",
@@ -650,7 +658,9 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
         "local_site": {
             "class_name": "SiteBuilder",
             "show_how_to_buttons": True,
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+            },
             "store_backend": {
                 "base_directory": "uncommitted/data_docs/local_site/",
                 "class_name": "TupleFilesystemStoreBackend",
@@ -768,7 +778,9 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         "local_site": {
             "class_name": "SiteBuilder",
             "show_how_to_buttons": True,
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+            },
             "store_backend": {
                 "base_directory": "uncommitted/data_docs/local_site/",
                 "class_name": "TupleFilesystemStoreBackend",
@@ -873,12 +885,16 @@ def test_override_general_defaults(
                     "class_name": "TupleS3StoreBackend",
                     "bucket": "REPLACE_ME",
                 },
-                "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+                "site_index_builder": {
+                    "class_name": "DefaultSiteIndexBuilder",
+                },
             },
             "local_site": {
                 "class_name": "SiteBuilder",
                 "show_how_to_buttons": True,
-                "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+                "site_index_builder": {
+                    "class_name": "DefaultSiteIndexBuilder",
+                },
                 "store_backend": {
                     "base_directory": "uncommitted/data_docs/local_site/",
                     "class_name": "TupleFilesystemStoreBackend",
@@ -947,7 +963,9 @@ def test_override_general_defaults(
         "local_site": {
             "class_name": "SiteBuilder",
             "show_how_to_buttons": True,
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+            },
             "store_backend": {
                 "base_directory": "uncommitted/data_docs/local_site/",
                 "class_name": "TupleFilesystemStoreBackend",
@@ -955,7 +973,9 @@ def test_override_general_defaults(
         },
         "s3_site": {
             "class_name": "SiteBuilder",
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+            },
             "store_backend": {
                 "bucket": "REPLACE_ME",
                 "class_name": "TupleS3StoreBackend",
@@ -1056,7 +1076,9 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         "s3_site": {
             "class_name": "SiteBuilder",
             "show_how_to_buttons": True,
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+            },
             "store_backend": {
                 "bucket": "my_default_bucket",
                 "class_name": "TupleS3StoreBackend",

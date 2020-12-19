@@ -844,7 +844,9 @@ class DataContextConfigDefaults(enum.Enum):
                 "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/local_site/",
             },
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+            },
         }
     }
 
@@ -963,7 +965,9 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "bucket": data_docs_bucket_name,
                     "prefix": data_docs_prefix,
                 },
-                "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+                "site_index_builder": {
+                    "class_name": "DefaultSiteIndexBuilder",
+                },
             }
         }
 
@@ -1092,7 +1096,9 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "bucket": data_docs_bucket_name,
                     "prefix": data_docs_prefix,
                 },
-                "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+                "site_index_builder": {
+                    "class_name": "DefaultSiteIndexBuilder",
+                },
             }
         }
 

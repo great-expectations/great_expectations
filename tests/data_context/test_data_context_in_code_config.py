@@ -78,7 +78,9 @@ def build_in_code_data_context_project_config(
                     "bucket": bucket,
                     "prefix": data_docs_store_prefix,
                 },
-                "site_index_builder": {"class_name": "DefaultSiteIndexBuilder",},
+                "site_index_builder": {
+                    "class_name": "DefaultSiteIndexBuilder",
+                },
             }
         },
         validation_operators={
