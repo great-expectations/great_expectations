@@ -122,7 +122,8 @@ class ExpectTableRowCountToEqual(TableExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs, ["value", "row_condition", "condition_parser"],
+            configuration.kwargs,
+            ["value", "row_condition", "condition_parser"],
         )
         template_str = "Must have exactly $value rows."
 

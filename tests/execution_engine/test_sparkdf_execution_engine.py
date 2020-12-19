@@ -246,7 +246,10 @@ def test_basic_setup(spark_session):
         pd_df.columns.tolist(),
     )
     batch_data = SparkDFExecutionEngine().get_batch_data(
-        batch_spec=RuntimeDataBatchSpec(batch_data=df, data_asset_name="DATA_ASSET",)
+        batch_spec=RuntimeDataBatchSpec(
+            batch_data=df,
+            data_asset_name="DATA_ASSET",
+        )
     )
     assert batch_data is not None
 
@@ -452,7 +455,11 @@ def test_get_batch_with_split_on_multi_column_values(test_sparkdf):
             splitter_method="_split_on_multi_column_values",
             splitter_kwargs={
                 "column_names": ["y", "m", "d"],
-                "partition_definition": {"y": 2020, "m": 1, "d": 5,},
+                "partition_definition": {
+                    "y": 2020,
+                    "m": 1,
+                    "d": 5,
+                },
             },
         )
     )
@@ -469,7 +476,11 @@ def test_get_batch_with_split_on_multi_column_values(test_sparkdf):
                 splitter_method="_split_on_multi_column_values",
                 splitter_kwargs={
                     "column_names": ["I", "dont", "exist"],
-                    "partition_definition": {"y": 2020, "m": 1, "d": 5,},
+                    "partition_definition": {
+                        "y": 2020,
+                        "m": 1,
+                        "d": 5,
+                    },
                 },
             )
         )
@@ -487,7 +498,9 @@ def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
                     "column_name": "favorite_color",
                     "hash_digits": 1,
                     "hash_function_name": "I_wont_work",
-                    "partition_definition": {"hash_value": "a",},
+                    "partition_definition": {
+                        "hash_value": "a",
+                    },
                 },
             )
         )
@@ -502,7 +515,9 @@ def test_get_batch_with_split_on_hashed_column(test_sparkdf):
                 "column_name": "favorite_color",
                 "hash_digits": 1,
                 "hash_function_name": "sha256",
-                "partition_definition": {"hash_value": "a",},
+                "partition_definition": {
+                    "hash_value": "a",
+                },
             },
         )
     )
@@ -538,7 +553,11 @@ def test_sample_using_mod(test_sparkdf):
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
             sampling_method="_sample_using_mod",
-            sampling_kwargs={"column_name": "id", "mod": 5, "value": 4,},
+            sampling_kwargs={
+                "column_name": "id",
+                "mod": 5,
+                "value": 4,
+            },
         )
     )
     assert sampled_df.count() == 24
@@ -550,7 +569,10 @@ def test_sample_using_a_list(test_sparkdf):
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
             sampling_method="_sample_using_a_list",
-            sampling_kwargs={"column_name": "id", "value_list": [3, 5, 7, 11],},
+            sampling_kwargs={
+                "column_name": "id",
+                "value_list": [3, 5, 7, 11],
+            },
         )
     )
     assert sampled_df.count() == 4
@@ -576,7 +598,10 @@ def test_sample_using_md5(test_sparkdf):
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
             sampling_method="_sample_using_hash",
-            sampling_kwargs={"column_name": "date", "hash_function_name": "md5",},
+            sampling_kwargs={
+                "column_name": "date",
+                "hash_function_name": "md5",
+            },
         )
     )
     assert sampled_df.count() == 10
@@ -594,10 +619,16 @@ def test_split_on_multi_column_values_and_sample_using_random(test_sparkdf):
             splitter_method="_split_on_multi_column_values",
             splitter_kwargs={
                 "column_names": ["y", "m", "d"],
-                "partition_definition": {"y": 2020, "m": 1, "d": 5,},
+                "partition_definition": {
+                    "y": 2020,
+                    "m": 1,
+                    "d": 5,
+                },
             },
             sampling_method="_sample_using_random",
-            sampling_kwargs={"p": 0.5,},
+            sampling_kwargs={
+                "p": 0.5,
+            },
         )
     )
 
@@ -957,7 +988,10 @@ def test_get_compute_domain_with_unmeetable_row_condition():
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"row_condition": "b > 24", "condition_parser": "spark",},
+        domain_kwargs={
+            "row_condition": "b > 24",
+            "condition_parser": "spark",
+        },
         domain_type="identity",
     )
     # Ensuring data has been properly queried
@@ -974,12 +1008,18 @@ def test_get_compute_domain_with_unmeetable_row_condition():
     # Ensuring errors for column and column_ pair domains are caught
     with pytest.raises(GreatExpectationsError) as e:
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-            domain_kwargs={"row_condition": "b > 24", "condition_parser": "spark",},
+            domain_kwargs={
+                "row_condition": "b > 24",
+                "condition_parser": "spark",
+            },
             domain_type="column",
         )
     with pytest.raises(GreatExpectationsError) as g:
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-            domain_kwargs={"row_condition": "b > 24", "condition_parser": "spark",},
+            domain_kwargs={
+                "row_condition": "b > 24",
+                "condition_parser": "spark",
+            },
             domain_type="column_pair",
         )
 

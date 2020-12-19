@@ -234,7 +234,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                     }
                     for value in values
                 ],
-                "styling": {"classes": classes,},
+                "styling": {
+                    "classes": classes,
+                },
             }
         )
 

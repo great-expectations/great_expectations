@@ -347,7 +347,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 "table": table_rows,
                 "styling": {
                     "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
-                    "body": {"classes": ["table", "table-sm", "table-unbordered"],},
+                    "body": {
+                        "classes": ["table", "table-sm", "table-unbordered"],
+                    },
                 },
             }
         )

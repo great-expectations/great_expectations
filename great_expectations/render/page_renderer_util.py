@@ -8,7 +8,8 @@ from great_expectations.validation_operators.types.validation_operator_result im
 
 
 def render_multiple_validation_result_pages_markdown(
-    validation_operator_result: ValidationOperatorResult, run_info_at_end: bool = True,
+    validation_operator_result: ValidationOperatorResult,
+    run_info_at_end: bool = True,
 ) -> str:
     """
     Loop through and render multiple validation results to markdown.
@@ -37,8 +38,10 @@ def render_multiple_validation_result_pages_markdown(
     validation_results_page_renderer = ValidationResultsPageRenderer(
         run_info_at_end=run_info_at_end
     )
-    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
-        validation_operator_result=validation_operator_result
+    rendered_document_content_list = (
+        validation_results_page_renderer.render_validation_operator_result(
+            validation_operator_result=validation_operator_result
+        )
     )
 
     return " ".join(DefaultMarkdownPageView().render(rendered_document_content_list))

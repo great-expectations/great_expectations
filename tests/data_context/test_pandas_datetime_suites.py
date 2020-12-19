@@ -91,7 +91,9 @@ def test_save_expectation_suite_with_datetime_objects(
             "run_time": datetime.datetime.now(),
         }
         reloaded_results = context.run_validation_operator(
-            "action_list_operator", assets_to_validate=[reloaded_batch], run_id=run_id,
+            "action_list_operator",
+            assets_to_validate=[reloaded_batch],
+            run_id=run_id,
         )
 
         assert reloaded_results.success

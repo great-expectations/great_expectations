@@ -115,7 +115,8 @@ def test_setting_config_variables_is_visible_immediately(
         "database": "postgres",
     }
     context.save_config_variable(
-        "escaped_password_dict", dict_to_escape,
+        "escaped_password_dict",
+        dict_to_escape,
     )
 
     context._project_config["datasources"]["mydatasource"]["batch_kwargs_generators"][

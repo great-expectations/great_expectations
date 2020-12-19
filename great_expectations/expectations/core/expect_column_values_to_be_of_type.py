@@ -213,7 +213,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         ]
 
     def _validate_pandas(
-        self, actual_column_type, expected_type,
+        self,
+        actual_column_type,
+        expected_type,
     ):
         if expected_type is None:
             success = True
@@ -281,7 +283,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         }
 
     def _validate_spark(
-        self, actual_column_type, expected_type,
+        self,
+        actual_column_type,
+        expected_type,
     ):
         if expected_type is None:
             success = True
@@ -408,7 +412,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
 
-def _get_dialect_type_module(execution_engine,):
+def _get_dialect_type_module(
+    execution_engine,
+):
     if execution_engine.dialect is None:
         logger.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."

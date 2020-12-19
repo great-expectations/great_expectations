@@ -33,7 +33,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     }
 
     _default_content_block_styling = {
-        "body": {"classes": ["table"],},
+        "body": {
+            "classes": ["table"],
+        },
         "classes": ["ml-2", "mr-2", "mt-0", "mb-0", "table-responsive"],
     }
 

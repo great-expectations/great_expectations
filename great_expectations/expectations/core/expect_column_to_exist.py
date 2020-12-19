@@ -161,7 +161,8 @@ class ExpectColumnToExist(TableExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs, ["column", "column_index"],
+            configuration.kwargs,
+            ["column", "column_index"],
         )
 
         if params["column_index"] is None:
