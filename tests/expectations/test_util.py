@@ -1,6 +1,7 @@
 import pytest
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.types import RenderedStringTemplateContent
 
@@ -38,7 +39,8 @@ def test_prescriptive_renderer_no_decorator(
     ) = expectation_and_runtime_configuration_with_evaluation_parameters
 
     def bare_bones_prescriptive_renderer(
-        configuration=None, runtime_configuration=None,
+        configuration=None,
+        runtime_configuration=None,
     ):
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
@@ -105,10 +107,9 @@ def test_prescriptive_renderer_with_decorator(
 
     @render_evaluation_parameter_string
     def bare_bones_prescriptive_renderer(
-        configuration=None, runtime_configuration=None,
+        configuration=None,
+        runtime_configuration=None,
     ):
-        # bare-bones prescriptive renderer pulled from `expect_column_min_to_be_between`
-        # will be used to test decorator behavior
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
         params = configuration.kwargs
@@ -200,16 +201,11 @@ def test_prescriptive_renderer_with_decorator(
         },
     }
 
-    # with no runtime_configuration, decorator will have no effect
-    res = bare_bones_prescriptive_renderer(
-        configuration=configuration, runtime_configuration={}
-    )
-    assert len(res) == 1
-    # string template should remain constant
-    assert (
-        res[0].string_template["template"]
-        == "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"
-    )
+    # with no runtime_configuration, throw an error
+    with pytest.raises(GreatExpectationsError):
+        res = bare_bones_prescriptive_renderer(
+            configuration=configuration, runtime_configuration={}
+        )
 
     # configuration should always be of ExpectationConfiguration-type
     with pytest.raises(AttributeError):

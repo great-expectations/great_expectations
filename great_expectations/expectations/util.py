@@ -19,7 +19,7 @@ def render_evaluation_parameter_string(render_func):
             if isinstance(value, dict) and "$PARAMETER" in value.keys():
                 current_expectation_params.append(value["$PARAMETER"])
 
-        # if the configuration has no evaluation parameters, then skip this step
+        # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
         if len(current_expectation_params) > 0:
             runtime_configuration = kwargs.get("runtime_configuration", None)
             if runtime_configuration:
@@ -43,8 +43,8 @@ def render_evaluation_parameter_string(render_func):
                         rendered_string_template.append(to_append)
             else:
                 raise GreatExpectationsError(
-                    f"""render_evaluation_parameter_string() was not able to render the value of evaluation parameters.
-                        Expectation had evaluation parameters set, but they were not passed in."""
+                    f"""GE was not able to render the value of evaluation parameters.
+                        Expectation {render_func} had evaluation parameters set, but they were not passed in."""
                 )
         return rendered_string_template
 
