@@ -29,6 +29,9 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
     Args:
         column_list (list of str): \
             The column names, in the correct order.
+        allow_extra (boolean or None): \
+            If True, tables will still pass validation if they have additional columns, as long as the list matches \
+            beginning at index 0 (ie column 1 of the table).
 
     Other Parameters:
         result_format (str or None): \
@@ -44,6 +47,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
             modification. For more detail, see :ref:`meta`.
 
+
     Returns:
         An ExpectationSuiteValidationResult
 
@@ -53,7 +57,8 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
     """
 
     metric_dependencies = ("table.columns",)
-    success_keys = ("column_list",)
+    success_keys = ("column_list",
+                    "allow_extra",)
     domain_keys = (
         "batch_id",
         "table",
@@ -71,6 +76,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
+        "allow_extra": False,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
@@ -88,6 +94,11 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         # Setting up a configuration
         super().validate_configuration(configuration)
 
+        allow_extra = False
+
+        if "allow_extra" in configuration.kwargs:
+            allow_extra = configuration.kwargs["allow_extra"]
+
         # Ensuring that a proper value has been provided
         try:
             assert "column_list" in configuration.kwargs, "column_list is required"
@@ -99,6 +110,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
                 assert (
                     "$PARAMETER" in configuration.kwargs["column_list"]
                 ), 'Evaluation Parameter dict for column_list kwarg must have "$PARAMETER" key.'
+            assert isinstance(allow_extra, bool), "allow_extra must be a boolean"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -120,7 +132,6 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
             include_column_name if include_column_name is not None else True
         )
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
 
         if params["column_list"] is None:
             template_str = "Must have a list of columns in a specific order, but that order is not specified."
@@ -158,10 +169,12 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         # Obtaining columns and ordered list for sake of comparison
         expected_column_list = self.get_success_kwargs(configuration).get("column_list")
         actual_column_list = metrics.get("table.columns")
+        allow_extra = self.get_success_kwargs(configuration).get("allow_extra")
 
         if expected_column_list is None or list(actual_column_list) == list(
             expected_column_list
-        ):
+        ) or (allow_extra and list(actual_column_list)[:len(expected_column_list)] == list(
+            expected_column_list)):
             return {
                 "success": True,
                 "result": {"observed_value": list(actual_column_list)},

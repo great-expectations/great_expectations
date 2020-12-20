@@ -517,6 +517,7 @@ legacy_method_parameters = {
     ),
     "expect_table_columns_to_match_ordered_list": (
         "column_list",
+        "exact_match",
         "result_format",
         "include_config",
         "catch_exceptions",

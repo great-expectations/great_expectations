@@ -24,6 +24,16 @@
         "success":true
       }
     },{
+      "title": "positive_test_additional_columns_allowed",
+      "exact_match_out": false,
+      "in":{
+        "column_list": ["c1", "c2"],
+        "allow_extra": true
+      },
+      "out":{
+        "success":true
+      }
+    },{
       "title": "negative_test_column_is_missing",
       "exact_match_out": false,
       "in":{

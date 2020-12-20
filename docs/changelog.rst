@@ -7,7 +7,8 @@ Changelog
 Develop
 -----------------
 * [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() #2169 issue #2164
-*  [BUGFIX] Fix black conflict, upgrade black, make import optional #2183
+* [BUGFIX] Fix black conflict, upgrade black, make import optional #2183
+* [ENHANCEMENT] Add an 'allow_extra' argument to ignore additional columns in expect_table_columns_to_match_ordered_list
 
 0.13.3
 -----------------

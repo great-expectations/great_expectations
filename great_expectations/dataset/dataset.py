@@ -523,6 +523,7 @@ class Dataset(MetaDataset):
     def expect_table_columns_to_match_ordered_list(
         self,
         column_list,
+        allow_extra: Optional[bool] = False,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -537,6 +538,9 @@ class Dataset(MetaDataset):
         Args:
             column_list (list of str): \
                 The column names, in the correct order.
+            allow_extra (boolean or None): \
+                If True, tables will still pass validation if they have additional columns, as long as the list matches \
+                beginning at index 0 (ie column 1 of the table).
 
         Other Parameters:
             result_format (str or None): \
@@ -560,7 +564,9 @@ class Dataset(MetaDataset):
 
         """
         columns = self.get_table_columns()
-        if column_list is None or list(columns) == list(column_list):
+
+        if column_list is None or list(columns) == list(column_list) or (allow_extra and list(columns)[:len(column_list)] == list(
+            column_list)):
             return {"success": True, "result": {"observed_value": list(columns)}}
         else:
             # In the case of differing column lengths between the defined expectation and the observed column set, the
@@ -4659,7 +4665,7 @@ class Dataset(MetaDataset):
 
         For example::
 
-            A B C            
+            A B C
             1 1 2 Fail
             1 2 3 Pass
             8 2 7 Pass
@@ -4711,7 +4717,7 @@ class Dataset(MetaDataset):
         Note that all instances of any duplicates are considered failed
 
         For example::
-        
+
             A B C
             1 1 2 Fail
             1 2 3 Pass
