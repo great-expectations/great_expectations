@@ -1453,8 +1453,8 @@ class CheckpointConfig(BaseYamlConfig):
             self._expectation_suite_name = expectation_suite_name
             self._batch_request = batch_request
             self._action_list = action_list or []
-            self._evaluation_parameters = evaluation_parameters
-            self._runtime_configuration = runtime_configuration
+            self._evaluation_parameters = evaluation_parameters or {}
+            self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
             self._profilers = profilers or []
 
