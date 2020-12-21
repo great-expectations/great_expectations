@@ -109,7 +109,7 @@ class Checkpoint:
     def _get_runtime_batch_request(
         self,
         substituted_runtime_config: CheckpointConfig,
-        validation_batch_request: Optional[dict, BatchRequest] = None,
+        validation_batch_request: Optional[Union[dict, BatchRequest]] = None,
     ) -> BatchRequest:
         if substituted_runtime_config.batch_request is None:
             return (
@@ -203,7 +203,7 @@ class Checkpoint:
         **kwargs,
     ) -> List[ValidationOperatorResult]:
         runtime_configuration: dict = runtime_configuration or {}
-        result_format: Union[dict, None] = result_format or runtime_configuration.get(
+        result_format: Optional[dict] = result_format or runtime_configuration.get(
             "result_format"
         )
         if result_format is None:
@@ -223,9 +223,7 @@ class Checkpoint:
         substituted_runtime_config: CheckpointConfig = self.get_substituted_config(
             runtime_kwargs=runtime_kwargs
         )
-        run_name_template: Union[
-            str, None
-        ] = substituted_runtime_config.run_name_template
+        run_name_template: Optional[str] = substituted_runtime_config.run_name_template
         validations: list = substituted_runtime_config.validations
         results = []
 
@@ -254,7 +252,7 @@ class Checkpoint:
                     batch_request=batch_request,
                     expectation_suite_name=expectation_suite_name,
                 )
-                action_list_validation_operator = ActionListValidationOperator(
+                action_list_validation_operator: ActionListValidationOperator = ActionListValidationOperator(
                     data_context=self.data_context,
                     action_list=action_list,
                     result_format=result_format,
