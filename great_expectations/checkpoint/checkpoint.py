@@ -252,11 +252,13 @@ class Checkpoint:
                     batch_request=batch_request,
                     expectation_suite_name=expectation_suite_name,
                 )
-                action_list_validation_operator: ActionListValidationOperator = ActionListValidationOperator(
-                    data_context=self.data_context,
-                    action_list=action_list,
-                    result_format=result_format,
-                    name=f"{self.name}-checkpoint-validation[{idx}]",
+                action_list_validation_operator: ActionListValidationOperator = (
+                    ActionListValidationOperator(
+                        data_context=self.data_context,
+                        action_list=action_list,
+                        result_format=result_format,
+                        name=f"{self.name}-checkpoint-validation[{idx}]",
+                    )
                 )
                 run_result: ValidationOperatorResult = (
                     action_list_validation_operator.run(
