@@ -75,7 +75,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             if asset_config is None:
                 asset_config = {}
             new_asset: Asset = self._build_asset_from_config(
-                name=name, config=asset_config,
+                name=name,
+                config=asset_config,
             )
             self.assets[name] = new_asset
 
@@ -120,7 +121,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
                 mapped_batch_definition_list: List[
                     BatchDefinition
                 ] = self._map_data_reference_to_batch_definition_list(
-                    data_reference=data_reference, data_asset_name=data_asset_name,
+                    data_reference=data_reference,
+                    data_asset_name=data_asset_name,
                 )
                 self._data_references_cache[data_asset_name][
                     data_reference

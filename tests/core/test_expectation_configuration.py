@@ -69,7 +69,10 @@ def config6():
 def config7():
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "a", "value_set": [1, 2, 3, 4],},  # differs from others
+        kwargs={
+            "column": "a",
+            "value_set": [1, 2, 3, 4],
+        },  # differs from others
         meta={"notes": "This is another expectation."},
     )
 

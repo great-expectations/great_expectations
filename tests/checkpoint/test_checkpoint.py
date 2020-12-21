@@ -71,15 +71,21 @@ def test_newstyle_checkpoint_config_substitution_simple(
         action_list=[
             {
                 "name": "store_validation_result",
-                "action": {"class_name": "StoreValidationResultAction",},
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
             },
             {
                 "name": "store_evaluation_params",
-                "action": {"class_name": "StoreEvaluationParametersAction",},
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
             },
             {
                 "name": "update_data_docs",
-                "action": {"class_name": "UpdateDataDocsAction",},
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
             },
         ],
         evaluation_parameters={
@@ -165,15 +171,21 @@ def test_newstyle_checkpoint_config_substitution_simple(
         action_list=[
             {
                 "name": "store_validation_result",
-                "action": {"class_name": "StoreValidationResultAction",},
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
             },
             {
                 "name": "store_evaluation_params",
-                "action": {"class_name": "StoreEvaluationParametersAction",},
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
             },
             {
                 "name": "update_data_docs",
-                "action": {"class_name": "UpdateDataDocsAction",},
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
             },
         ],
         evaluation_parameters={
@@ -201,77 +213,28 @@ def test_newstyle_checkpoint_config_substitution_simple(
     )
 
     # template and runtime kwargs
-    expected_substituted_checkpoint_config_template_and_runtime_kwargs = CheckpointConfig(
-        config_version=1,
-        name="my_simplified_checkpoint",
-        expectation_suite_name="runtime_suite_name",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector_2",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -3},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector_3",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -4},
-                }
-            },
-        ],
-        run_name_template="runtime_run_template",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {"class_name": "StoreValidationResultAction",},
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {"class_name": "MyCustomStoreEvaluationParametersAction",},
-            },
-            {
-                "name": "update_data_docs_deluxe",
-                "action": {"class_name": "UpdateDataDocsAction",},
-            },
-        ],
-        evaluation_parameters={
-            "environment": "runtime-$GE_ENVIRONMENT",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "runtime-$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
-            "new_runtime_eval_param": "bloopy!",
-        },
-        runtime_configuration={
-            "result_format": "BASIC",
-            "partial_unexpected_count": 999,
-            "new_runtime_config_key": "bleepy!",
-        },
-    )
-
-    substituted_config_template_and_runtime_kwargs = simplified_checkpoint.get_substituted_config(
-        runtime_kwargs={
-            "expectation_suite_name": "runtime_suite_name",
-            "validations": [
+    expected_substituted_checkpoint_config_template_and_runtime_kwargs = (
+        CheckpointConfig(
+            config_version=1,
+            name="my_simplified_checkpoint",
+            expectation_suite_name="runtime_suite_name",
+            validations=[
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_special_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -1},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -2},
+                    }
+                },
                 {
                     "batch_request": {
                         "datasource_name": "my_datasource",
@@ -289,11 +252,13 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     }
                 },
             ],
-            "run_name_template": "runtime_run_template",
-            "action_list": [
+            run_name_template="runtime_run_template",
+            action_list=[
                 {
                     "name": "store_validation_result",
-                    "action": {"class_name": "StoreValidationResultAction",},
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                    },
                 },
                 {
                     "name": "store_evaluation_params",
@@ -301,25 +266,89 @@ def test_newstyle_checkpoint_config_substitution_simple(
                         "class_name": "MyCustomStoreEvaluationParametersAction",
                     },
                 },
-                {"name": "update_data_docs", "action": None,},
                 {
                     "name": "update_data_docs_deluxe",
-                    "action": {"class_name": "UpdateDataDocsAction",},
+                    "action": {
+                        "class_name": "UpdateDataDocsAction",
+                    },
                 },
             ],
-            "evaluation_parameters": {
+            evaluation_parameters={
                 "environment": "runtime-$GE_ENVIRONMENT",
                 "tolerance": 1.0e-2,
                 "aux_param_0": "runtime-$MY_PARAM",
                 "aux_param_1": "1 + $MY_PARAM",
                 "new_runtime_eval_param": "bloopy!",
             },
-            "runtime_configuration": {
+            runtime_configuration={
                 "result_format": "BASIC",
                 "partial_unexpected_count": 999,
                 "new_runtime_config_key": "bleepy!",
             },
-        }
+        )
+    )
+
+    substituted_config_template_and_runtime_kwargs = (
+        simplified_checkpoint.get_substituted_config(
+            runtime_kwargs={
+                "expectation_suite_name": "runtime_suite_name",
+                "validations": [
+                    {
+                        "batch_request": {
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_other_data_connector_2",
+                            "data_asset_name": "users",
+                            "partition_request": {"partition_index": -3},
+                        }
+                    },
+                    {
+                        "batch_request": {
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_other_data_connector_3",
+                            "data_asset_name": "users",
+                            "partition_request": {"partition_index": -4},
+                        }
+                    },
+                ],
+                "run_name_template": "runtime_run_template",
+                "action_list": [
+                    {
+                        "name": "store_validation_result",
+                        "action": {
+                            "class_name": "StoreValidationResultAction",
+                        },
+                    },
+                    {
+                        "name": "store_evaluation_params",
+                        "action": {
+                            "class_name": "MyCustomStoreEvaluationParametersAction",
+                        },
+                    },
+                    {
+                        "name": "update_data_docs",
+                        "action": None,
+                    },
+                    {
+                        "name": "update_data_docs_deluxe",
+                        "action": {
+                            "class_name": "UpdateDataDocsAction",
+                        },
+                    },
+                ],
+                "evaluation_parameters": {
+                    "environment": "runtime-$GE_ENVIRONMENT",
+                    "tolerance": 1.0e-2,
+                    "aux_param_0": "runtime-$MY_PARAM",
+                    "aux_param_1": "1 + $MY_PARAM",
+                    "new_runtime_eval_param": "bloopy!",
+                },
+                "runtime_configuration": {
+                    "result_format": "BASIC",
+                    "partial_unexpected_count": 999,
+                    "new_runtime_config_key": "bleepy!",
+                },
+            }
+        )
     )
     assert (
         substituted_config_template_and_runtime_kwargs.to_json_dict()

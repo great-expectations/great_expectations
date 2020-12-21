@@ -235,7 +235,9 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             )
         else:
             self.cli_colored_message = colored_template.format(
-                module_snippet, class_snippet, class_snippet,
+                module_snippet,
+                class_snippet,
+                class_snippet,
             )
         super().__init__(self.message)
 
@@ -289,7 +291,8 @@ class BatchSpecError(DataContextError):
 class DatasourceError(DataContextError):
     def __init__(self, datasource_name, message):
         self.message = "Cannot initialize datasource {}, error: {}".format(
-            datasource_name, message,
+            datasource_name,
+            message,
         )
         super().__init__(self.message)
 

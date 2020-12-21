@@ -15,7 +15,9 @@ def test_store_list_with_zero_stores(caplog, empty_data_context):
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
-        cli, "store list -d {}".format(project_dir), catch_exceptions=False,
+        cli,
+        "store list -d {}".format(project_dir),
+        catch_exceptions=False,
     )
     assert result.exit_code == 1
     assert (
@@ -53,7 +55,9 @@ def test_store_list_with_two_stores(caplog, empty_data_context):
      [36mbase_directory:[0m checkpoints/[0m"""
 
     result = runner.invoke(
-        cli, "store list -d {}".format(project_dir), catch_exceptions=False,
+        cli,
+        "store list -d {}".format(project_dir),
+        catch_exceptions=False,
     )
 
     assert result.exit_code == 0
@@ -91,7 +95,9 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
      [36mbase_directory:[0m checkpoints/[0m"""
 
     result = runner.invoke(
-        cli, "store list -d {}".format(project_dir), catch_exceptions=False,
+        cli,
+        "store list -d {}".format(project_dir),
+        catch_exceptions=False,
     )
     print(result.output)
     assert result.exit_code == 0

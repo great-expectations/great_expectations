@@ -14,7 +14,8 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 
 def test_instantiation_with_table_name(sqlite_view_engine):
     batch_data = SqlAlchemyBatchData(
-        engine=sqlite_view_engine, table_name="test_table",
+        engine=sqlite_view_engine,
+        table_name="test_table",
     )
 
     # This is a very hacky type check.
@@ -62,7 +63,8 @@ def test_head(sqlite_view_engine):
     df.to_sql("test_table_2", con=sqlite_view_engine)
 
     batch_data = SqlAlchemyBatchData(
-        engine=sqlite_view_engine, table_name="test_table_2",
+        engine=sqlite_view_engine,
+        table_name="test_table_2",
     )
     df = batch_data.head()
     assert df.shape == (5, 2)
@@ -78,11 +80,13 @@ def test_row_count(sqlite_view_engine):
     df.to_sql("test_table_2", con=sqlite_view_engine)
 
     batch_data = SqlAlchemyBatchData(
-        engine=sqlite_view_engine, table_name="test_table",
+        engine=sqlite_view_engine,
+        table_name="test_table",
     )
     assert batch_data.row_count() == 5
 
     batch_data = SqlAlchemyBatchData(
-        engine=sqlite_view_engine, table_name="test_table_2",
+        engine=sqlite_view_engine,
+        table_name="test_table_2",
     )
     assert batch_data.row_count() == 100

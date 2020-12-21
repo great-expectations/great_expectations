@@ -155,7 +155,8 @@ execution_engine:
     # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
     # Note: a more thorough test could also verify that the traceback is indeed short.
     empty_data_context.test_yaml_config(
-        yaml_config=first_config, shorten_tracebacks=True,
+        yaml_config=first_config,
+        shorten_tracebacks=True,
     )
 
     # For good measure, do it again, with a different config and a different type of error
@@ -262,17 +263,25 @@ introspection:
 """
     # noinspection PyUnusedLocal
     report_object = context.test_yaml_config(
-        name="my_datasource", yaml_config=yaml_config, return_mode="report_object",
+        name="my_datasource",
+        yaml_config=yaml_config,
+        return_mode="report_object",
     )
     print(json.dumps(report_object, indent=2))
     print(context.datasources)
 
-    my_batch = context.get_batch("my_datasource", "whole_table_with_limits", "test_df",)
+    my_batch = context.get_batch(
+        "my_datasource",
+        "whole_table_with_limits",
+        "test_df",
+    )
     # assert len(my_batch.data.fetchall()) == 10
 
     with pytest.raises(KeyError):
         my_batch = context.get_batch(
-            "my_datasource", "whole_table_with_limits", "DOES_NOT_EXIST",
+            "my_datasource",
+            "whole_table_with_limits",
+            "DOES_NOT_EXIST",
         )
 
     my_validator = context.get_validator(
@@ -364,7 +373,9 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={"number": "2",},
+        partition_identifiers={
+            "number": "2",
+        },
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -517,7 +528,9 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={"number": "2",},
+        partition_identifiers={
+            "number": "2",
+        },
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {

@@ -115,7 +115,9 @@ def test_batch_request_instantiation():
     BatchRequest(partition_request={"id": "A"})
 
     BatchRequest(
-        datasource_name="A", data_connector_name="a", data_asset_name="aaa",
+        datasource_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
     )
 
 
@@ -125,8 +127,12 @@ def test_RuntimeDataBatchSpec():
 
     RuntimeDataBatchSpec({"batch_data": pd.DataFrame({"x": range(10)})})
 
-    RuntimeDataBatchSpec(batch_data="we don't check types yet",)
+    RuntimeDataBatchSpec(
+        batch_data="we don't check types yet",
+    )
 
     RuntimeDataBatchSpec(
-        {"batch_data": "we don't check types yet",}
+        {
+            "batch_data": "we don't check types yet",
+        }
     )
