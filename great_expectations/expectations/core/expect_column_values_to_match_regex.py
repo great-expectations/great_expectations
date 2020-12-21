@@ -9,6 +9,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
@@ -143,6 +144,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,
