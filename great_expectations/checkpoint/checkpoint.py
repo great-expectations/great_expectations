@@ -8,6 +8,8 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
 from great_expectations.validation_operators import ActionListValidationOperator
+from great_expectations.validation_operators.types.validation_operator_result import ValidationOperatorResult
+from great_expectations.validator.validator import Validator
 
 
 class Checkpoint:
@@ -197,9 +199,9 @@ class Checkpoint:
         run_time=None,
         result_format=None,
         **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        result_format = result_format or runtime_configuration.get("result_format")
+    ) -> List[ValidationOperatorResult]:
+        runtime_configuration: dict = runtime_configuration or {}
+        result_format: Union[dict, None] = result_format or runtime_configuration.get("result_format")
         if result_format is None:
             result_format = {"result_format": "SUMMARY"}
 
@@ -217,12 +219,12 @@ class Checkpoint:
         substituted_runtime_config: CheckpointConfig = self.get_substituted_config(
             runtime_kwargs=runtime_kwargs
         )
-        run_name_template = substituted_runtime_config.run_name_template
+        run_name_template: Union[str, None] = substituted_runtime_config.run_name_template
         validations: list = substituted_runtime_config.validations
         results = []
 
         if run_name is None and run_name_template is not None:
-            run_name = self.get_run_name_from_template(
+            run_name: str = self.get_run_name_from_template(
                 run_name_template=run_name_template
             )
 
@@ -234,13 +236,13 @@ class Checkpoint:
                         validation_dict=validation_dict,
                     )
                 )
-                batch_request = substituted_validation_dict.get("batch_request")
-                expectation_suite_name = substituted_validation_dict.get(
+                batch_request: BatchRequest = substituted_validation_dict.get("batch_request")
+                expectation_suite_name: str = substituted_validation_dict.get(
                     "expectation_suite_name"
                 )
-                action_list = substituted_validation_dict.get("action_list")
+                action_list: list = substituted_validation_dict.get("action_list")
 
-                validator = self.data_context.get_validator(
+                validator: Validator = self.data_context.get_validator(
                     batch_request=batch_request,
                     expectation_suite_name=expectation_suite_name,
                 )
@@ -250,7 +252,7 @@ class Checkpoint:
                     result_format=result_format,
                     name=f"{self.name}-checkpoint-validation[{idx}]",
                 )
-                run_result = action_list_validation_operator.run(
+                run_result: ValidationOperatorResult = action_list_validation_operator.run(
                     assets_to_validate=[validator],
                     run_id=run_id,
                     evaluation_parameters=substituted_validation_dict.get(
@@ -261,6 +263,10 @@ class Checkpoint:
                     result_format=result_format,
                 )
                 results.append(run_result)
+            except CheckpointError as e:
+                raise CheckpointError(
+                    f"Exception occurred while running validation[{idx}] of checkpoint '{self.name}': {e.message}"
+                )
             except Exception as e:
                 raise e
         return results
