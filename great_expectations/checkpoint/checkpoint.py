@@ -106,10 +106,10 @@ class Checkpoint:
                     self._substituted_config = substituted_config
                 return substituted_config
 
-    def get_runtime_batch_request(
+    def _get_runtime_batch_request(
         self,
         substituted_runtime_config: CheckpointConfig,
-        validation_batch_request: Union[dict, BatchRequest, None],
+        validation_batch_request: Optional[dict, BatchRequest] = None,
     ) -> BatchRequest:
         if substituted_runtime_config.batch_request is None:
             return (
@@ -145,7 +145,7 @@ class Checkpoint:
             runtime_batch_request_dict[key] = base_batch_request_dict[key]
         return BatchRequest(**runtime_batch_request_dict)
 
-    def validate_validation_dict(self, validation_dict):
+    def _validate_validation_dict(self, validation_dict):
         if validation_dict.get("batch_request") is None:
             raise CheckpointError("validation batch_request cannot be None")
         if not validation_dict.get("expectation_suite_name"):
@@ -153,11 +153,11 @@ class Checkpoint:
         if not validation_dict.get("action_list"):
             raise CheckpointError("validation action_list cannot be empty")
 
-    def get_substituted_validation_dict(
+    def _get_substituted_validation_dict(
         self, substituted_runtime_config: CheckpointConfig, validation_dict: dict
     ) -> dict:
         substituted_validation_dict = {
-            "batch_request": self.get_runtime_batch_request(
+            "batch_request": self._get_runtime_batch_request(
                 substituted_runtime_config=substituted_runtime_config,
                 validation_batch_request=validation_dict.get("batch_request"),
             ),
@@ -178,10 +178,10 @@ class Checkpoint:
         }
         if validation_dict.get("name") is not None:
             substituted_validation_dict["name"] = validation_dict["name"]
-        self.validate_validation_dict(substituted_validation_dict)
+        self._validate_validation_dict(substituted_validation_dict)
         return substituted_validation_dict
 
-    def get_run_name_from_template(self, run_name_template):
+    def get_run_name_from_template(self, run_name_template: str):
         now = datetime.now()
         return now.strftime(run_name_template)
 
@@ -237,7 +237,7 @@ class Checkpoint:
         for idx, validation_dict in enumerate(validations):
             try:
                 substituted_validation_dict: dict = (
-                    self.get_substituted_validation_dict(
+                    self._get_substituted_validation_dict(
                         substituted_runtime_config=substituted_runtime_config,
                         validation_dict=validation_dict,
                     )
