@@ -67,7 +67,6 @@ class ProfilerTypeMapping:
         "BIGINT",
         "IntegerType",
         "LongType",
-        "DECIMAL",
     ]
     FLOAT_TYPE_NAMES = [
         "FLOAT",
@@ -83,6 +82,7 @@ class ProfilerTypeMapping:
         "float32",
         "float64",
         "number",
+        "DECIMAL",
     ]
     STRING_TYPE_NAMES = [
         "CHAR",
