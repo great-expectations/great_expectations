@@ -1451,7 +1451,9 @@ class CheckpointConfig(BaseYamlConfig):
             self._module_name = module_name or "great_expectations.checkpoint"
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
-            self._batch_request = batch_request
+            self._batch_request = batch_request if isinstance(batch_request, (BatchRequest, type(None))) else \
+                BatchRequest(
+                **batch_request)
             self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
