@@ -113,7 +113,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
 # TODO: add more test cases
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run(
-  titanic_pandas_multibatch_data_context_with_013_datasource
+    titanic_pandas_multibatch_data_context_with_013_datasource,
 ):
     context = titanic_pandas_multibatch_data_context_with_013_datasource
     # add checkpoint config
@@ -147,17 +147,15 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                 "batch_request": {
                     "datasource_name": "titanic_multi_batch",
                     "data_connector_name": "my_data_connector",
-                    "data_asset_name": "Titanic_1911"
+                    "data_asset_name": "Titanic_1911",
                 }
             }
-        ]
+        ],
     )
     checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=checkpoint_config.name
     )
-    context.checkpoint_store.set(
-        key=checkpoint_config_key, value=checkpoint_config
-    )
+    context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint = context.get_checkpoint(checkpoint_config.name, return_config=False)
 
     with pytest.raises(

@@ -1451,9 +1451,11 @@ class CheckpointConfig(BaseYamlConfig):
             self._module_name = module_name or "great_expectations.checkpoint"
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
-            self._batch_request = batch_request if isinstance(batch_request, (BatchRequest, type(None))) else \
-                BatchRequest(
-                **batch_request)
+            self._batch_request = (
+                batch_request
+                if isinstance(batch_request, (BatchRequest, type(None)))
+                else BatchRequest(**batch_request)
+            )
             self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
@@ -1498,14 +1500,13 @@ class CheckpointConfig(BaseYamlConfig):
                 other_batch_request["batch_data"] = other_config_batch_data
 
                 updated_batch_request = nested_update(
-                    batch_request,
-                    other_batch_request
+                    batch_request, other_batch_request
                 )
                 self.batch_request = BatchRequest(**updated_batch_request)
             if other_config.action_list is not None:
                 self.action_list = self.get_updated_action_list(
                     base_action_list=self.action_list,
-                    other_action_list=other_config.action_list
+                    other_action_list=other_config.action_list,
                 )
             if other_config.evaluation_parameters is not None:
                 nested_update(
@@ -1545,7 +1546,7 @@ class CheckpointConfig(BaseYamlConfig):
             if runtime_kwargs.get("action_list") is not None:
                 self.action_list = self.get_updated_action_list(
                     base_action_list=self.action_list,
-                    other_action_list=runtime_kwargs.get("action_list")
+                    other_action_list=runtime_kwargs.get("action_list"),
                 )
             if runtime_kwargs.get("evaluation_parameters") is not None:
                 nested_update(
@@ -1649,13 +1650,11 @@ class CheckpointConfig(BaseYamlConfig):
 
     @classmethod
     def get_updated_action_list(
-            cls,
-            base_action_list: list,
-            other_action_list: list,
+        cls,
+        base_action_list: list,
+        other_action_list: list,
     ) -> List[dict]:
-        base_action_list_dict = {
-            action["name"]: action for action in base_action_list
-        }
+        base_action_list_dict = {action["name"]: action for action in base_action_list}
         for other_action in other_action_list:
             other_action_name = other_action["name"]
             if other_action_name in base_action_list_dict:
