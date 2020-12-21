@@ -1486,21 +1486,27 @@ class CheckpointConfig(BaseYamlConfig):
                 self.expectation_suite_name = other_config.expectation_suite_name
             # update
             if other_config.batch_request is not None:
-                batch_request = (
-                    self.batch_request.get_json_dict()
-                    if isinstance(self.batch_request, BatchRequest)
-                    else self.batch_request
+                if self.batch_request is not None:
+                    batch_data = self.batch_request.batch_data
+                    batch_request = self.batch_request.get_json_dict()
+                    batch_request["batch_data"] = batch_data
+                else:
+                    batch_request = {}
+
+                other_config_batch_data = other_config.batch_request.batch_data
+                other_batch_request = other_config.batch_request.get_json_dict()
+                other_batch_request["batch_data"] = other_config_batch_data
+
+                updated_batch_request = nested_update(
+                    batch_request,
+                    other_batch_request
                 )
-                batch_request = batch_request or {}
-                other_batch_request = (
-                    other_config.batch_request.get_json_dict()
-                    if isinstance(other_config.batch_request, BatchRequest)
-                    else other_config.batch_request
-                )
-                batch_request.update(other_batch_request)
-                self.batch_request = batch_request
+                self.batch_request = BatchRequest(**updated_batch_request)
             if other_config.action_list is not None:
-                self.update_action_list(other_action_list=other_config.action_list)
+                self.action_list = self.get_updated_action_list(
+                    base_action_list=self.action_list,
+                    other_action_list=other_config.action_list
+                )
             if other_config.evaluation_parameters is not None:
                 nested_update(
                     self.evaluation_parameters, other_config.evaluation_parameters
@@ -1640,22 +1646,27 @@ class CheckpointConfig(BaseYamlConfig):
     def action_list(self, value: List[dict]):
         self._action_list = value
 
-    def update_action_list(self, other_action_list: list):
-        existing_action_list_dict = {
-            action["name"]: action for action in self.action_list
+    @classmethod
+    def get_updated_action_list(
+            cls,
+            base_action_list: list,
+            other_action_list: list,
+    ) -> List[dict]:
+        base_action_list_dict = {
+            action["name"]: action for action in base_action_list
         }
         for other_action in other_action_list:
             other_action_name = other_action["name"]
-            if other_action_name in existing_action_list_dict:
+            if other_action_name in base_action_list_dict:
                 if other_action["action"] is None:
-                    existing_action_list_dict.pop(other_action_name)
+                    base_action_list_dict.pop(other_action_name)
                 else:
                     nested_update(
-                        existing_action_list_dict[other_action_name], other_action
+                        base_action_list_dict[other_action_name], other_action
                     )
             else:
-                existing_action_list_dict[other_action_name] = other_action
-        self.action_list = list(existing_action_list_dict.values())
+                base_action_list_dict[other_action_name] = other_action
+        return list(base_action_list_dict.values())
 
     @property
     def evaluation_parameters(self):
