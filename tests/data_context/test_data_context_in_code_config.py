@@ -80,7 +80,6 @@ def build_in_code_data_context_project_config(
                 },
                 "site_index_builder": {
                     "class_name": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
                 },
             }
         },
