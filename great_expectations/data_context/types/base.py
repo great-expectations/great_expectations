@@ -1543,7 +1543,8 @@ class CheckpointConfig(BaseYamlConfig):
                 batch_request.update(runtime_batch_request)
                 self.batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:
-                self.update_action_list(
+                self.action_list = self.get_updated_action_list(
+                    base_action_list=self.action_list,
                     other_action_list=runtime_kwargs.get("action_list")
                 )
             if runtime_kwargs.get("evaluation_parameters") is not None:
