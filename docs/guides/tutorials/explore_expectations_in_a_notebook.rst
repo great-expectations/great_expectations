@@ -51,7 +51,9 @@ All of these steps take place within your notebook:
 
     If you wish to load data from somewhere else (e.g. from a SQL database or blob store), please fetch a copy of the data locally. Alternatively, you can :ref:`configure a Data Context with Datasources <tutorials__getting_started__connect_to_data>`, which will allow you to take advantage of more of Great Expectations' advanced features.
 
-    As another option, if you have already instantiated a ``pandas.Dataframe``, you can use ``from_pandas``:
+    As alternatives, if you have already instantiated :
+    
+    - a ``pandas.Dataframe``, you can use ``from_pandas``:
 
     .. code-block:: python
 
@@ -60,6 +62,18 @@ All of these steps take place within your notebook:
         )
 
     This method will convert your boring old pandas ``DataFrame`` into a new and exciting great_expectations ``PandasDataset``. The two classes are absolutely identical, except that ``PandasDataset`` has access to Great Expectations' methods.
+    
+    - a ``Spark DataFrame``, you can use ``SparkDFDataset``:
+    
+    .. code-block:: python
+    
+        from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
+    
+        my_df = SparkDFDataset(my_spark_dataframe)
+    
+    This method will convert your ``Spark DataFrame`` into a class with access to Great Expectations' methods, such as ``ProfilingResultsPageRenderer``.
+    
+    
 
 3. **Explore your data and add Expectations.**
 
